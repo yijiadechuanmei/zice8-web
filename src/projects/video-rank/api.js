@@ -1,0 +1,14 @@
+import { request } from '../../shared/api/request'
+
+export const getPublicConfig = (activityKey) => request(`/activities/${activityKey}/public-config`)
+export const getBootstrap = (activityKey) => request(`/video-rank/activities/${activityKey}/bootstrap`)
+export const updateParticipantProfile = (activityKey, data) => request(`/video-rank/activities/${activityKey}/participant-profile`, { method: 'POST', body: JSON.stringify(data) })
+export const getVideos = (activityKey) => request(`/video-rank/activities/${activityKey}/videos`)
+export const getVideoDetail = (activityKey, videoId) => request(`/video-rank/activities/${activityKey}/videos/${videoId}`)
+export const submitWatchSegments = (activityKey, videoId, segments) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/watch-segments`, { method: 'POST', body: JSON.stringify({ segments }) })
+export const submitComment = (activityKey, videoId, content) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/comments`, { method: 'POST', body: JSON.stringify({ content }) })
+export const getComments = (activityKey, videoId, page = 1, pageSize = 20) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/comments?page=${page}&pageSize=${pageSize}`)
+export const getRank = (activityKey, page = 1, pageSize = 50) => request(`/video-rank/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`)
+export const getMyProgress = (activityKey) => request(`/video-rank/activities/${activityKey}/my-progress`)
+export const getMe = () => request('/auth/me')
+export const getJsSdkSignature = (activityKey, url) => request('/wechat/js-sdk-signature', { method: 'POST', body: JSON.stringify({ activityKey, url }) })
