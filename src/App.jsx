@@ -2,7 +2,7 @@ import './App.css'
 import VideoRankApp from './projects/video-rank/index.jsx'
 
 function App() {
-  if (window.location.pathname === '/video-rank') {
+  if (window.location.pathname === '/video-rank' || window.location.pathname.startsWith('/video-rank/detail/')) {
     return <VideoRankApp />
   }
 

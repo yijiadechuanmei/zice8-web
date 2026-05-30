@@ -32,7 +32,7 @@ export default function VideoPlayer({ video, onSubmitProgress }) {
 
   useEffect(() => {
     const el = videoRef.current
-    if (!el) return
+    if (!el || !video.videoUrl) return
     const onPlay = () => {
       segmentStartRef.current = Math.floor(el.currentTime)
       lastTimeRef.current = el.currentTime
@@ -76,8 +76,16 @@ export default function VideoPlayer({ video, onSubmitProgress }) {
     }
   }, [video.id])
 
+  if (!video.videoUrl) {
+    return (
+      <div className="overflow-hidden rounded-3xl bg-black shadow-sm">
+        <div className="flex aspect-video w-full items-center justify-center bg-black px-6 text-center text-sm text-slate-300">暂无视频地址</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="overflow-hidden rounded-3xl bg-black">
+    <div className="overflow-hidden rounded-3xl bg-black shadow-sm">
       <video ref={videoRef} src={video.videoUrl} poster={video.cover || undefined} controls playsInline webkit-playsinline="true" className="aspect-video w-full bg-black" />
       <div className="flex items-center justify-between bg-white p-3 text-sm">
         <span className="text-slate-600">进度 {Math.round((progress.watchRate || 0) * 100)}%</span>
