@@ -23,6 +23,7 @@ export default function VideoRankApp() {
   const [page, setPage] = useState(VIDEO_RANK_PAGE.HOME)
   const [error, setError] = useState('')
   const debugEnabled = getQueryParam('debug') === '1'
+  const [debugVisible, setDebugVisible] = useState(debugEnabled)
   const [debugStatus, setDebugStatus] = useState({
     publicConfigStatus: 'idle',
     authMeStatus: 'idle',
@@ -111,9 +112,11 @@ export default function VideoRankApp() {
     setComments(data.list)
   }
 
-  if (blockedMessage) return <><div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-center text-white">{blockedMessage}</div>{debugEnabled && <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} />}</>
-  if (error) return <><div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-red-600">{error}</div>{debugEnabled && <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} />}</>
-  if (!activityKey || !publicConfig || !authReady || !bootstrap) return <><div className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-500">加载中...</div>{debugEnabled && <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} />}</>
+  const debugPanel = debugVisible ? <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} onClose={() => setDebugVisible(false)} /> : null
+
+  if (blockedMessage) return <><div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-center text-white">{blockedMessage}</div>{debugPanel}</>
+  if (error) return <><div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-red-600">{error}</div>{debugPanel}</>
+  if (!activityKey || !publicConfig || !authReady || !bootstrap) return <><div className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-500">加载中...</div>{debugPanel}</>
 
   return (
     <>
@@ -121,7 +124,7 @@ export default function VideoRankApp() {
       {page === VIDEO_RANK_PAGE.DETAIL && currentVideo && <VideoDetailPage video={currentVideo} comments={comments} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} onOpenRank={openRank} onSubmitProgress={handleSubmitProgress} onSubmitComment={handleSubmitComment} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
       {!bootstrap.profileCompleted && <ProfileModal initialParticipant={bootstrap.participant} onSubmit={handleProfileSubmit} />}
-      {debugEnabled && <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} />}
+      {debugPanel}
     </>
   )
 }

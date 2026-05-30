@@ -1,4 +1,5 @@
-import { API_BASE_URL, getToken } from '../../../shared/api/request'
+import { useState } from 'react'
+import { API_BASE_URL, getToken, removeToken } from '../../../shared/api/request'
 import { isWechatBrowser, removeUrlHashAndToken } from '../../../shared/utils/url'
 
 function formatValue(value) {
@@ -8,8 +9,24 @@ function formatValue(value) {
   return String(value)
 }
 
-export default function DebugPanel({ activityKey, status, bootstrap }) {
+async function clearBrowserCache() {
+  if (!window.caches) return false
+  const keys = await window.caches.keys()
+  await Promise.all(keys.map((key) => window.caches.delete(key)))
+  return true
+}
+
+function clearZice8LocalState() {
+  removeToken()
+  sessionStorage.clear()
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith('zice8_'))
+    .forEach((key) => localStorage.removeItem(key))
+}
+
+export default function DebugPanel({ activityKey, status, bootstrap, onClose }) {
   const token = getToken()
+  const [actionMessage, setActionMessage] = useState('')
   const rows = [
     ['activity_key', activityKey],
     ['微信浏览器', isWechatBrowser()],
@@ -28,12 +45,39 @@ export default function DebugPanel({ activityKey, status, bootstrap }) {
     ['签名 URL', status.signingUrl || removeUrlHashAndToken(window.location.href)],
   ]
 
+  const debugText = rows.map(([label, value]) => `${label}: ${formatValue(value)}`).join('\n')
+
+  async function handleClearCache() {
+    const cleared = await clearBrowserCache()
+    setActionMessage(cleared ? '缓存已清除' : '当前浏览器不支持 CacheStorage')
+  }
+
+  async function handleCopyDebug() {
+    try {
+      await navigator.clipboard.writeText(debugText)
+      setActionMessage('debug 内容已复制')
+    } catch {
+      setActionMessage('复制失败，请手动选择内容')
+    }
+  }
+
+  function handleReset() {
+    clearZice8LocalState()
+    window.location.href = removeUrlHashAndToken(window.location.href)
+  }
+
   return (
     <section className="fixed bottom-3 left-3 right-3 z-40 mx-auto max-h-[45vh] max-w-[720px] overflow-auto rounded-2xl border border-amber-300 bg-amber-50/95 p-3 text-xs text-slate-800 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-black text-slate-950">微信联调 Debug</h2>
-        <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold">debug=1</span>
+        <button onClick={onClose} className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white">关闭debug</button>
       </div>
+      <div className="mb-2 grid grid-cols-3 gap-2">
+        <button onClick={handleClearCache} className="rounded-lg bg-white px-2 py-1 font-semibold text-slate-700">清除缓存</button>
+        <button onClick={handleCopyDebug} className="rounded-lg bg-white px-2 py-1 font-semibold text-slate-700">复制debug</button>
+        <button onClick={handleReset} className="rounded-lg bg-red-100 px-2 py-1 font-semibold text-red-700">重置</button>
+      </div>
+      {actionMessage && <p className="mb-2 rounded-lg bg-white/80 px-2 py-1 text-amber-700">{actionMessage}</p>}
       <div className="space-y-1">
         {rows.map(([label, value]) => (
           <div key={label} className="grid grid-cols-[120px_1fr] gap-2 rounded-lg bg-white/70 px-2 py-1">
