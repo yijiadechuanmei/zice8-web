@@ -7,10 +7,10 @@ const SHARE_IMAGE_URL = 'https://web.zice8.com/share/default-share.jpg'
 
 function getShareData(activity, url) {
   return {
-    title: activity.title,
-    desc: '观看视频，参与留言排名',
+    title: activity.shareTitle || activity.title,
+    desc: activity.shareDesc || '观看视频，参与留言排名',
     link: url,
-    imgUrl: SHARE_IMAGE_URL,
+    imgUrl: activity.shareImage || SHARE_IMAGE_URL,
   }
 }
 
