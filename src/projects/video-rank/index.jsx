@@ -28,6 +28,7 @@ export default function VideoRankApp() {
     authMeStatus: 'idle',
     bootstrapStatus: 'idle',
     signatureStatus: 'idle',
+    wxScriptLoadStatus: 'idle',
     wxExists: Boolean(window.wx),
     wxConfigStatus: 'idle',
     shareConfigured: false,
