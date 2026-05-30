@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
+import { setToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
 import { VIDEO_RANK_PAGE } from './config'
@@ -12,6 +13,17 @@ import RankPage from './pages/RankPage'
 import VideoDetailPage from './pages/VideoDetailPage'
 
 export default function VideoRankApp() {
+  const tokenFromUrl = getTokenFromUrl()
+  if (tokenFromUrl) {
+    setToken(tokenFromUrl)
+    window.location.replace(sanitizeUrlForWechat(window.location.href))
+    return null
+  }
+
+  return <VideoRankMain />
+}
+
+function VideoRankMain() {
   const activityKey = getQueryParam('activity_key')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
@@ -22,7 +34,7 @@ export default function VideoRankApp() {
   const [ranks, setRanks] = useState([])
   const [page, setPage] = useState(VIDEO_RANK_PAGE.HOME)
   const [error, setError] = useState('')
-  const debugEnabled = getQueryParam('debug') === '1'
+  const debugEnabled = ['1', 'wx'].includes(getQueryParam('debug'))
   const [debugVisible, setDebugVisible] = useState(debugEnabled)
   const [debugStatus, setDebugStatus] = useState({
     publicConfigStatus: 'idle',

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { getJsSdkSignature } from '../../projects/video-rank/api'
-import { getQueryParam, removeUrlHashAndToken } from '../utils/url'
+import { getQueryParam, sanitizeUrlForWechat } from '../utils/url'
 import { loadWechatJsSdk } from '../utils/wechat'
 
 const SHARE_IMAGE_URL = 'https://web.zice8.com/share/default-share.jpg'
@@ -34,8 +34,8 @@ export function useWechatShare(activityKey, activity, onStatusChange) {
     if (!activityKey || !activity) return
 
     let cancelled = false
-    const url = removeUrlHashAndToken(window.location.href)
-    const wxDebug = getQueryParam('debug') === '1'
+    const url = sanitizeUrlForWechat(window.location.href)
+    const wxDebug = getQueryParam('debug') === 'wx'
 
     async function initWechatShare() {
       try {

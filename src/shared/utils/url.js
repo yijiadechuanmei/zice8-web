@@ -2,6 +2,10 @@ export function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name)
 }
 
+export function getTokenFromUrl(inputUrl = window.location.href) {
+  return new URL(inputUrl).searchParams.get('token')
+}
+
 export function removeQueryParam(name) {
   const url = new URL(window.location.href)
   url.searchParams.delete(name)
@@ -9,9 +13,15 @@ export function removeQueryParam(name) {
 }
 
 export function removeUrlHashAndToken(url) {
-  const parsed = new URL(url)
+  return sanitizeUrlForWechat(url)
+}
+
+export function sanitizeUrlForWechat(inputUrl) {
+  const parsed = new URL(inputUrl)
   parsed.hash = ''
   parsed.searchParams.delete('token')
+  parsed.searchParams.delete('code')
+  parsed.searchParams.delete('state')
   return parsed.toString()
 }
 

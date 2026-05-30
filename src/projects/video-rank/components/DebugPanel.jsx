@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { API_BASE_URL, getToken, removeToken } from '../../../shared/api/request'
-import { isWechatBrowser, removeUrlHashAndToken } from '../../../shared/utils/url'
+import { isWechatBrowser, sanitizeUrlForWechat } from '../../../shared/utils/url'
 
 function formatValue(value) {
   if (value === true) return '是'
@@ -42,7 +42,7 @@ export default function DebugPanel({ activityKey, status, bootstrap, onClose }) 
     ['wx.config 错误', status.wxConfigError],
     ['分享已设置', status.shareConfigured],
     ['API Base URL', API_BASE_URL],
-    ['签名 URL', status.signingUrl || removeUrlHashAndToken(window.location.href)],
+    ['签名 URL', status.signingUrl || sanitizeUrlForWechat(window.location.href)],
   ]
 
   const debugText = rows.map(([label, value]) => `${label}: ${formatValue(value)}`).join('\n')
@@ -63,7 +63,7 @@ export default function DebugPanel({ activityKey, status, bootstrap, onClose }) 
 
   function handleReset() {
     clearZice8LocalState()
-    window.location.href = removeUrlHashAndToken(window.location.href)
+    window.location.href = sanitizeUrlForWechat(window.location.href)
   }
 
   return (
