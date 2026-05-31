@@ -27,6 +27,7 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
   const lastSubmitTimeRef = useRef(0)
   const serverWatchedSecondsRef = useRef(Math.floor((video.watchRate || 0) * (video.duration || 0)))
   const serverWatchRateRef = useRef(video.watchRate || 0)
+  const maxDisplayWatchRateRef = useRef(video.watchRate || 0)
   const [serverWatchRate, setServerWatchRate] = useState(video.watchRate || 0)
   const [displayWatchRate, setDisplayWatchRate] = useState(video.watchRate || 0)
   const [serverWatchedSeconds, setServerWatchedSeconds] = useState(Math.floor((video.watchRate || 0) * (video.duration || 0)))
@@ -75,8 +76,9 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
       lastSubmitTimeRef.current = Date.now()
       serverWatchRateRef.current = nextWatchRate
       serverWatchedSecondsRef.current = nextWatchedSeconds
+      maxDisplayWatchRateRef.current = Math.max(maxDisplayWatchRateRef.current, nextWatchRate)
       setServerWatchRate(nextWatchRate)
-      setDisplayWatchRate(nextWatchRate)
+      setDisplayWatchRate(maxDisplayWatchRateRef.current)
       setServerWatchedSeconds(nextWatchedSeconds)
       setCompleted(completedRef.current)
       setLastSubmitTime(lastSubmitTimeRef.current)
@@ -105,7 +107,8 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
         const duration = Number(video.duration) || 0
         if (duration > 0) {
           const nextRate = Math.min((serverWatchedSecondsRef.current + currentSegmentSeconds) / duration, 1)
-          setDisplayWatchRate(Math.max(serverWatchRateRef.current, nextRate))
+          maxDisplayWatchRateRef.current = Math.max(maxDisplayWatchRateRef.current, serverWatchRateRef.current, nextRate)
+          setDisplayWatchRate(maxDisplayWatchRateRef.current)
         }
       }
       animationFrame = window.requestAnimationFrame(updateDisplayProgress)

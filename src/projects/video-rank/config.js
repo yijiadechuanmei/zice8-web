@@ -4,4 +4,4 @@ export const VIDEO_RANK_PAGE = {
   RANK: 'rank',
 }
 
-export const VIDEO_RANK_VERSION = 'v0.0.6'
+export const VIDEO_RANK_VERSION = 'v0.0.7'
