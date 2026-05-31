@@ -41,6 +41,7 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
   const lastPositionSaveTimeRef = useRef(0)
   const restorePendingRef = useRef(initialSavedPosition > 0)
   const settingCurrentTimeRef = useRef(false)
+  const suppressSeekHandlerRef = useRef(false)
   const pendingRef = useRef([])
   const submittingRef = useRef(false)
   const flushAgainRef = useRef(false)
@@ -181,25 +182,32 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
       animationFrame = window.requestAnimationFrame(updateDisplayProgress)
     }
 
+    const restorePositionIfNeeded = () => {
+      if (!restorePendingRef.current) return false
+      const restorePosition = completedRef.current ? initialSavedPosition : Math.min(initialSavedPosition, maxAllowedTimeRef.current)
+      restorePendingRef.current = false
+      if (restorePosition <= 0 || restorePosition >= el.duration) return false
+      settingCurrentTimeRef.current = true
+      suppressSeekHandlerRef.current = true
+      el.currentTime = restorePosition
+      lastTimeRef.current = restorePosition
+      setCurrentTime(restorePosition)
+      window.setTimeout(() => {
+        settingCurrentTimeRef.current = false
+        suppressSeekHandlerRef.current = false
+      }, 0)
+      return true
+    }
+
     const startSegment = () => {
       if (completedRef.current) return
+      restorePositionIfNeeded()
       segmentStartRef.current = Math.floor(el.currentTime)
       lastTimeRef.current = el.currentTime
       updateAllowedTime(el.currentTime)
     }
     const onLoadedMetadata = () => {
-      if (!restorePendingRef.current) return
-      const restorePosition = completedRef.current ? initialSavedPosition : Math.min(initialSavedPosition, maxAllowedTimeRef.current)
-      if (restorePosition > 0 && restorePosition < el.duration) {
-        settingCurrentTimeRef.current = true
-        el.currentTime = restorePosition
-        lastTimeRef.current = restorePosition
-        setCurrentTime(restorePosition)
-        window.setTimeout(() => {
-          settingCurrentTimeRef.current = false
-        }, 0)
-      }
-      restorePendingRef.current = false
+      setCurrentTime(el.currentTime)
     }
     const onTimeUpdate = () => {
       setCurrentTime(el.currentTime)
@@ -217,10 +225,12 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
       lastTimeRef.current = el.currentTime
     }
     const onSeeking = () => {
+      if (suppressSeekHandlerRef.current) return
       closeSegment(lastTimeRef.current)
       clampForwardSeek(el)
     }
     const onSeeked = () => {
+      if (suppressSeekHandlerRef.current) return
       const blocked = clampForwardSeek(el)
       if (!el.paused && !completedRef.current) segmentStartRef.current = Math.floor(el.currentTime)
       lastTimeRef.current = el.currentTime
