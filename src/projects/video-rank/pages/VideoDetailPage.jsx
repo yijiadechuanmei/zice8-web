@@ -4,7 +4,7 @@ import VideoPlayer from '../components/VideoPlayer'
 import { getComments, getVideoDetail, submitComment, submitWatchSegments } from '../api'
 import { VIDEO_RANK_VERSION } from '../config'
 
-export default function VideoDetailPage({ activityKey, videoId, debug, onBack, onOpenRank, onProgressSubmitted }) {
+export default function VideoDetailPage({ activityKey, videoId, userId, debug, onBack, onOpenRank, onProgressSubmitted }) {
   const [video, setVideo] = useState(null)
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
@@ -76,7 +76,7 @@ export default function VideoDetailPage({ activityKey, videoId, debug, onBack, o
       {!loading && !error && !video && <div className="rounded-2xl bg-white p-8 text-center text-sm text-slate-500 shadow-sm">视频不存在</div>}
       {!loading && !error && video && (
         <>
-          <VideoPlayer key={video.id} video={video} debug={debug} onSubmitProgress={handleSubmitProgress} />
+          <VideoPlayer key={video.id} activityKey={activityKey} userId={userId} video={video} debug={debug} onSubmitProgress={handleSubmitProgress} />
           <CommentBox comments={comments} loading={commentsLoading} onSubmit={handleSubmitComment} />
         </>
       )}

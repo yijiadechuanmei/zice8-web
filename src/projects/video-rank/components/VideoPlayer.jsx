@@ -14,11 +14,33 @@ function formatSubmitTime(value) {
   return new Date(value).toLocaleTimeString('zh-CN', { hour12: false })
 }
 
-export default function VideoPlayer({ video, debug, onSubmitProgress }) {
+function getPositionStorageKey(activityKey, videoId, userId) {
+  return `zice8_video_position_${activityKey}_${videoId}_${userId || 'anonymous'}`
+}
+
+function readSavedPosition(storageKey, duration) {
+  try {
+    const raw = window.localStorage.getItem(storageKey)
+    if (!raw) return 0
+    const data = JSON.parse(raw)
+    const position = Math.floor(Number(data?.position) || 0)
+    return Math.max(0, Math.min(position, duration || position))
+  } catch {
+    return 0
+  }
+}
+
+export default function VideoPlayer({ activityKey, userId, video, debug, onSubmitProgress }) {
   const submitIntervalSeconds = getSubmitIntervalSeconds(Number(video.duration) || 0)
+  const storageKey = getPositionStorageKey(activityKey, video.id, userId)
+  const initialSavedPosition = readSavedPosition(storageKey, Number(video.duration) || 0)
   const videoRef = useRef(null)
   const segmentStartRef = useRef(null)
   const lastTimeRef = useRef(0)
+  const maxAllowedTimeRef = useRef(Math.max(initialSavedPosition, 0))
+  const lastPositionSaveTimeRef = useRef(0)
+  const restorePendingRef = useRef(initialSavedPosition > 0)
+  const settingCurrentTimeRef = useRef(false)
   const pendingRef = useRef([])
   const submittingRef = useRef(false)
   const flushAgainRef = useRef(false)
@@ -35,9 +57,54 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
   const [pendingCount, setPendingCount] = useState(0)
   const [lastSubmitTime, setLastSubmitTime] = useState(0)
   const [submitStatus, setSubmitStatus] = useState('idle')
+  const [localSavedPosition, setLocalSavedPosition] = useState(initialSavedPosition)
+  const [maxAllowedTime, setMaxAllowedTime] = useState(Math.max(initialSavedPosition, 0))
+  const [currentTime, setCurrentTime] = useState(0)
+  const [toast, setToast] = useState('')
+
+  function showToast(message) {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 1500)
+  }
 
   function updatePendingCount() {
     setPendingCount(pendingRef.current.length)
+  }
+
+  function savePosition(value, force = false) {
+    const duration = Number(video.duration) || 0
+    let position = Math.floor(Number(value) || 0)
+    position = Math.max(0, Math.min(position, duration || position))
+    if (!completedRef.current) position = Math.min(position, Math.floor(maxAllowedTimeRef.current))
+    const now = Date.now()
+    if (!force && now - lastPositionSaveTimeRef.current < 2000) return
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify({ position, updatedAt: now }))
+      lastPositionSaveTimeRef.current = now
+      setLocalSavedPosition(position)
+    } catch {
+      // localStorage can be unavailable in private browsing; playback should continue.
+    }
+  }
+
+  function updateAllowedTime(value) {
+    if (completedRef.current) return
+    const next = Math.max(maxAllowedTimeRef.current, Number(value) || 0)
+    maxAllowedTimeRef.current = next
+    setMaxAllowedTime(next)
+  }
+
+  function clampForwardSeek(el) {
+    if (completedRef.current || settingCurrentTimeRef.current) return false
+    if (el.currentTime <= maxAllowedTimeRef.current + 2) return false
+    settingCurrentTimeRef.current = true
+    el.currentTime = maxAllowedTimeRef.current
+    lastTimeRef.current = maxAllowedTimeRef.current
+    showToast('请按顺序观看，不能快进')
+    window.setTimeout(() => {
+      settingCurrentTimeRef.current = false
+    }, 0)
+    return true
   }
 
   function closeSegment(currentTime) {
@@ -118,8 +185,24 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
       if (completedRef.current) return
       segmentStartRef.current = Math.floor(el.currentTime)
       lastTimeRef.current = el.currentTime
+      updateAllowedTime(el.currentTime)
+    }
+    const onLoadedMetadata = () => {
+      if (!restorePendingRef.current) return
+      const restorePosition = completedRef.current ? initialSavedPosition : Math.min(initialSavedPosition, maxAllowedTimeRef.current)
+      if (restorePosition > 0 && restorePosition < el.duration) {
+        settingCurrentTimeRef.current = true
+        el.currentTime = restorePosition
+        lastTimeRef.current = restorePosition
+        setCurrentTime(restorePosition)
+        window.setTimeout(() => {
+          settingCurrentTimeRef.current = false
+        }, 0)
+      }
+      restorePendingRef.current = false
     }
     const onTimeUpdate = () => {
+      setCurrentTime(el.currentTime)
       if (!el.paused && el.currentTime - lastTimeRef.current > JUMP_THRESHOLD) {
         closeSegment(lastTimeRef.current)
         segmentStartRef.current = completedRef.current ? null : Math.floor(el.currentTime)
@@ -127,32 +210,47 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
       if (!el.paused && segmentStartRef.current === null && !completedRef.current) {
         segmentStartRef.current = Math.floor(el.currentTime)
       }
+      if (!el.paused) {
+        updateAllowedTime(el.currentTime)
+        savePosition(el.currentTime)
+      }
       lastTimeRef.current = el.currentTime
     }
-    const onSeeking = () => closeSegment(lastTimeRef.current)
+    const onSeeking = () => {
+      closeSegment(lastTimeRef.current)
+      clampForwardSeek(el)
+    }
     const onSeeked = () => {
+      const blocked = clampForwardSeek(el)
       if (!el.paused && !completedRef.current) segmentStartRef.current = Math.floor(el.currentTime)
       lastTimeRef.current = el.currentTime
+      setCurrentTime(el.currentTime)
+      if (!blocked) savePosition(el.currentTime, true)
     }
     const onPause = () => {
       closeSegment(el.currentTime)
+      savePosition(el.currentTime, true)
       flush('pause')
     }
     const onEnded = () => {
       closeSegment(el.currentTime)
+      savePosition(el.currentTime, true)
       flush('ended')
     }
     const onVisibilityChange = () => {
       if (document.hidden) {
         closeSegment(el.currentTime)
+        savePosition(el.currentTime, true)
         flush('hidden')
       }
     }
     const onBeforeUnload = () => {
       closeSegment(el.currentTime)
+      savePosition(el.currentTime, true)
       flush('beforeunload')
     }
 
+    el.addEventListener('loadedmetadata', onLoadedMetadata)
     el.addEventListener('play', startSegment)
     el.addEventListener('timeupdate', onTimeUpdate)
     el.addEventListener('seeking', onSeeking)
@@ -161,6 +259,7 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
     el.addEventListener('ended', onEnded)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('beforeunload', onBeforeUnload)
+    if (el.readyState >= 1) onLoadedMetadata()
     animationFrame = window.requestAnimationFrame(updateDisplayProgress)
     const timer = window.setInterval(() => {
       if (el.paused || completedRef.current) return
@@ -171,9 +270,11 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
 
     return () => {
       closeSegment(el.currentTime)
+      savePosition(el.currentTime, true)
       flush('unmount')
       window.cancelAnimationFrame(animationFrame)
       window.clearInterval(timer)
+      el.removeEventListener('loadedmetadata', onLoadedMetadata)
       el.removeEventListener('play', startSegment)
       el.removeEventListener('timeupdate', onTimeUpdate)
       el.removeEventListener('seeking', onSeeking)
@@ -195,7 +296,10 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
 
   return (
     <div className="overflow-hidden rounded-2xl bg-black shadow-sm">
-      <video ref={videoRef} src={video.videoUrl} poster={video.cover || undefined} controls playsInline webkit-playsinline="true" className="aspect-video w-full bg-black" />
+      <div className="relative bg-black">
+        <video ref={videoRef} src={video.videoUrl} poster={video.cover || undefined} controls playsInline webkit-playsinline="true" className="aspect-video w-full bg-black" />
+        {toast && <div className="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/75 px-4 py-2 text-sm font-semibold text-white">{toast}</div>}
+      </div>
       <div className="bg-white p-3 text-sm">
         <h1 className="mb-3 text-xl font-black leading-tight text-slate-950">{video.title}</h1>
         <div className="flex items-center justify-between gap-3">
@@ -213,6 +317,10 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
             <p>serverWatchRate: {(serverWatchRate || 0).toFixed(4)}</p>
             <p>displayWatchRate: {(displayWatchRate || 0).toFixed(4)}</p>
             <p>serverWatchedSeconds: {serverWatchedSeconds}</p>
+            <p>localSavedPosition: {localSavedPosition}</p>
+            <p>maxAllowedTime: {Math.floor(maxAllowedTime)}</p>
+            <p>currentTime: {Math.floor(currentTime)}</p>
+            <p>allowSeek: {String(completed)}</p>
             <p>pendingSegments: {pendingCount}</p>
             <p>lastSubmitTime: {formatSubmitTime(lastSubmitTime)}</p>
             <p>submitStatus: {submitStatus}</p>
