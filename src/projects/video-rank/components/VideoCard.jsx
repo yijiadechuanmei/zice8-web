@@ -25,7 +25,7 @@ export default function VideoCard({ video, onClick, debug }) {
       </div>
       <div className="p-3">
         <h3 className="line-clamp-2 min-h-10 text-sm font-bold leading-5 text-slate-950">{video.title}</h3>
-        <p className="mt-1 truncate text-xs text-slate-500">{video.author || '未填写作者'} · 第 {video.dayIndex} 天</p>
+        <p className="mt-1 truncate text-xs text-slate-500">第 {video.dayIndex} 天</p>
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${video.completed ? 'bg-emerald-100 text-emerald-700' : video.unlocked ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>{status}</span>
           <span className="text-xs text-slate-400">{percent}%</span>

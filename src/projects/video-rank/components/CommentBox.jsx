@@ -32,7 +32,7 @@ export default function CommentBox({ comments, loading, onSubmit }) {
   }
 
   return (
-    <section className="mt-5 rounded-3xl bg-white p-4 shadow-sm">
+    <section className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
       <h3 className="text-lg font-black text-slate-950">留言</h3>
       <label htmlFor="video-rank-comment" className="sr-only">留言内容</label>
       <textarea id="video-rank-comment" className="mt-3 min-h-28 w-full rounded-2xl border border-slate-200 p-3 text-base outline-none transition-colors duration-200 focus:border-rose-500" maxLength={500} value={content} onChange={(e) => setContent(e.target.value)} placeholder="写下你的留言" />
