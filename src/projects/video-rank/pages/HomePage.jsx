@@ -1,6 +1,7 @@
 import VideoCard from '../components/VideoCard'
+import { VIDEO_RANK_VERSION } from '../config'
 
-export default function HomePage({ bootstrap, videos, loading, onOpenVideo, onOpenRank }) {
+export default function HomePage({ bootstrap, videos, loading, debug, onOpenVideo, onOpenRank }) {
   const { activity, user, participant } = bootstrap
   const bannerImage = activity.cover || activity.shareImage
 
@@ -41,10 +42,11 @@ export default function HomePage({ bootstrap, videos, loading, onOpenVideo, onOp
         {!loading && !videos.length && <div className="rounded-2xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm">暂无视频</div>}
         {!loading && Boolean(videos.length) && (
           <div className="grid grid-cols-2 gap-3">
-            {videos.map((video) => <VideoCard key={video.id} video={video} onClick={onOpenVideo} />)}
+            {videos.map((video) => <VideoCard key={video.id} video={video} debug={debug} onClick={onOpenVideo} />)}
           </div>
         )}
       </section>
+      <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
     </main>
   )
 }

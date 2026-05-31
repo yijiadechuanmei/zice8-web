@@ -42,7 +42,7 @@ function VideoRankMain() {
   const [comments, setComments] = useState([])
   const [ranks, setRanks] = useState([])
   const [page, setPage] = useState(getDetailVideoIdFromPath() ? VIDEO_RANK_PAGE.DETAIL : VIDEO_RANK_PAGE.HOME)
-  const [routeVideoId, setRouteVideoId] = useState(getDetailVideoIdFromPath())
+  const [selectedVideoId, setSelectedVideoId] = useState(getDetailVideoIdFromPath())
   const [error, setError] = useState('')
   const [videosLoading, setVideosLoading] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
@@ -102,14 +102,19 @@ function VideoRankMain() {
   }, [bootstrap?.profileCompleted, activityKey])
 
   useEffect(() => {
-    if (!bootstrap?.profileCompleted || !activityKey || !routeVideoId) return
-    loadVideoDetail(routeVideoId)
-  }, [bootstrap?.profileCompleted, activityKey, routeVideoId])
+    const title = bootstrap?.activity?.title || publicConfig?.title
+    if (title) document.title = title
+  }, [bootstrap?.activity?.title, publicConfig?.title])
+
+  useEffect(() => {
+    if (!bootstrap?.profileCompleted || !activityKey || !selectedVideoId) return
+    loadVideoDetail(selectedVideoId)
+  }, [bootstrap?.profileCompleted, activityKey, selectedVideoId])
 
   useEffect(() => {
     const onPopState = () => {
       const detailId = getDetailVideoIdFromPath()
-      setRouteVideoId(detailId)
+      setSelectedVideoId(detailId)
       setPage(detailId ? VIDEO_RANK_PAGE.DETAIL : VIDEO_RANK_PAGE.HOME)
       if (!detailId) {
         setCurrentVideo(null)
@@ -137,8 +142,8 @@ function VideoRankMain() {
 
   function openVideo(video) {
     pushVideoRankPath(`/video-rank/detail/${encodeURIComponent(video.id)}`)
+    setSelectedVideoId(video.id)
     setPage(VIDEO_RANK_PAGE.DETAIL)
-    setRouteVideoId(video.id)
   }
 
   async function loadVideoDetail(videoId) {
@@ -163,7 +168,7 @@ function VideoRankMain() {
 
   function backHome() {
     pushVideoRankPath('/video-rank')
-    setRouteVideoId('')
+    setSelectedVideoId('')
     setCurrentVideo(null)
     setComments([])
     setPage(VIDEO_RANK_PAGE.HOME)
@@ -173,7 +178,7 @@ function VideoRankMain() {
     const data = await getRank(activityKey)
     setRanks(data.list)
     pushVideoRankPath('/video-rank')
-    setRouteVideoId('')
+    setSelectedVideoId('')
     setPage(VIDEO_RANK_PAGE.RANK)
   }
 
@@ -206,7 +211,7 @@ function VideoRankMain() {
 
   return (
     <>
-      {page === VIDEO_RANK_PAGE.HOME && <HomePage bootstrap={bootstrap} videos={videos} loading={videosLoading} onOpenVideo={openVideo} onOpenRank={openRank} />}
+      {page === VIDEO_RANK_PAGE.HOME && <HomePage bootstrap={bootstrap} videos={videos} loading={videosLoading} debug={debugEnabled} onOpenVideo={openVideo} onOpenRank={openRank} />}
       {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage video={currentVideo} comments={comments} loading={detailLoading} error={detailError} commentsLoading={commentsLoading} onBack={backHome} onOpenRank={openRank} onSubmitProgress={handleSubmitProgress} onSubmitComment={handleSubmitComment} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
       {!bootstrap.profileCompleted && <ProfileModal initialParticipant={bootstrap.participant} onSubmit={handleProfileSubmit} />}

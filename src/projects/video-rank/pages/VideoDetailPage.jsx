@@ -1,5 +1,6 @@
 import CommentBox from '../components/CommentBox'
 import VideoPlayer from '../components/VideoPlayer'
+import { VIDEO_RANK_VERSION } from '../config'
 
 export default function VideoDetailPage({ video, comments, loading, error, commentsLoading, onBack, onOpenRank, onSubmitProgress, onSubmitComment }) {
   return (
@@ -21,6 +22,7 @@ export default function VideoDetailPage({ video, comments, loading, error, comme
           <CommentBox comments={comments} loading={commentsLoading} onSubmit={onSubmitComment} />
         </>
       )}
+      <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
     </main>
   )
 }

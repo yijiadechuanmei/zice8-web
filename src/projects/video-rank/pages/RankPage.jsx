@@ -1,4 +1,5 @@
 import RankList from '../components/RankList'
+import { VIDEO_RANK_VERSION } from '../config'
 
 export default function RankPage({ ranks, me, onBack }) {
   return (
@@ -11,6 +12,7 @@ export default function RankPage({ ranks, me, onBack }) {
         <button onClick={onBack} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">返回首页</button>
       </div>
       <RankList ranks={ranks} currentUserId={me?.id} />
+      <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
     </main>
   )
 }

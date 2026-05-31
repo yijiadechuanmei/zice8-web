@@ -3,3 +3,5 @@ export const VIDEO_RANK_PAGE = {
   DETAIL: 'detail',
   RANK: 'rank',
 }
+
+export const VIDEO_RANK_VERSION = 'v0.0.0'
