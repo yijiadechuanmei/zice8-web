@@ -7,19 +7,10 @@ import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shar
 import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
 import { VIDEO_RANK_PAGE } from './config'
-import { getBootstrap, getComments, getMe, getPublicConfig, getRank, getVideoDetail, getVideos, submitComment, submitWatchSegments, updateParticipantProfile } from './api'
+import { getBootstrap, getMe, getPublicConfig, getRank, getVideos, updateParticipantProfile } from './api'
 import HomePage from './pages/HomePage'
 import RankPage from './pages/RankPage'
 import VideoDetailPage from './pages/VideoDetailPage'
-
-function getDetailVideoIdFromPath() {
-  const match = window.location.pathname.match(/^\/video-rank\/detail\/([^/]+)$/)
-  return match ? decodeURIComponent(match[1]) : ''
-}
-
-function pushVideoRankPath(path) {
-  window.history.pushState({}, '', `${path}${window.location.search || ''}`)
-}
 
 export default function VideoRankApp() {
   const tokenFromUrl = getTokenFromUrl()
@@ -38,16 +29,11 @@ function VideoRankMain() {
   const [bootstrap, setBootstrap] = useState(null)
   const [me, setMe] = useState(null)
   const [videos, setVideos] = useState([])
-  const [currentVideo, setCurrentVideo] = useState(null)
-  const [comments, setComments] = useState([])
   const [ranks, setRanks] = useState([])
-  const [page, setPage] = useState(getDetailVideoIdFromPath() ? VIDEO_RANK_PAGE.DETAIL : VIDEO_RANK_PAGE.HOME)
-  const [selectedVideoId, setSelectedVideoId] = useState(getDetailVideoIdFromPath())
+  const [page, setPage] = useState(VIDEO_RANK_PAGE.HOME)
+  const [selectedVideoId, setSelectedVideoId] = useState(null)
   const [error, setError] = useState('')
   const [videosLoading, setVideosLoading] = useState(false)
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [detailError, setDetailError] = useState('')
-  const [commentsLoading, setCommentsLoading] = useState(false)
   const debugEnabled = ['1', 'wx'].includes(getQueryParam('debug'))
   const [debugVisible, setDebugVisible] = useState(debugEnabled)
   const [debugStatus, setDebugStatus] = useState({
@@ -106,25 +92,6 @@ function VideoRankMain() {
     if (title) document.title = title
   }, [bootstrap?.activity?.title, publicConfig?.title])
 
-  useEffect(() => {
-    if (!bootstrap?.profileCompleted || !activityKey || !selectedVideoId) return
-    loadVideoDetail(selectedVideoId)
-  }, [bootstrap?.profileCompleted, activityKey, selectedVideoId])
-
-  useEffect(() => {
-    const onPopState = () => {
-      const detailId = getDetailVideoIdFromPath()
-      setSelectedVideoId(detailId)
-      setPage(detailId ? VIDEO_RANK_PAGE.DETAIL : VIDEO_RANK_PAGE.HOME)
-      if (!detailId) {
-        setCurrentVideo(null)
-        setComments([])
-      }
-    }
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-
   async function loadVideos() {
     setVideosLoading(true)
     try {
@@ -141,66 +108,19 @@ function VideoRankMain() {
   }
 
   function openVideo(video) {
-    pushVideoRankPath(`/video-rank/detail/${encodeURIComponent(video.id)}`)
     setSelectedVideoId(video.id)
     setPage(VIDEO_RANK_PAGE.DETAIL)
   }
 
-  async function loadVideoDetail(videoId) {
-    setPage(VIDEO_RANK_PAGE.DETAIL)
-    setDetailLoading(true)
-    setCommentsLoading(true)
-    setDetailError('')
-    setComments([])
-    try {
-      const detail = await getVideoDetail(activityKey, videoId)
-      setCurrentVideo(detail)
-      const commentData = await getComments(activityKey, videoId)
-      setComments(commentData.list || [])
-    } catch (err) {
-      setCurrentVideo(null)
-      setDetailError(err.message || '视频加载失败')
-    } finally {
-      setDetailLoading(false)
-      setCommentsLoading(false)
-    }
-  }
-
   function backHome() {
-    pushVideoRankPath('/video-rank')
-    setSelectedVideoId('')
-    setCurrentVideo(null)
-    setComments([])
+    setSelectedVideoId(null)
     setPage(VIDEO_RANK_PAGE.HOME)
   }
 
   async function openRank() {
     const data = await getRank(activityKey)
     setRanks(data.list)
-    pushVideoRankPath('/video-rank')
-    setSelectedVideoId('')
     setPage(VIDEO_RANK_PAGE.RANK)
-  }
-
-  async function handleSubmitProgress(segments) {
-    const result = await submitWatchSegments(activityKey, currentVideo.id, segments)
-    setCurrentVideo({ ...currentVideo, completed: result.completed, watchRate: result.watchRate, finishTime: result.finishTime })
-    loadVideos().catch(() => {})
-    return result
-  }
-
-  async function handleSubmitComment(content) {
-    const createdComment = await submitComment(activityKey, currentVideo.id, content)
-    setComments((current) => [createdComment, ...current])
-    setCommentsLoading(true)
-    try {
-      const data = await getComments(activityKey, currentVideo.id)
-      setComments(data.list || [])
-    } catch {
-      // The submitted comment is already shown locally; the next detail load will retry the refresh.
-    } finally {
-      setCommentsLoading(false)
-    }
   }
 
   const debugPanel = debugVisible ? <DebugPanel activityKey={activityKey} status={debugStatus} bootstrap={bootstrap} onClose={() => setDebugVisible(false)} /> : null
@@ -212,7 +132,7 @@ function VideoRankMain() {
   return (
     <>
       {page === VIDEO_RANK_PAGE.HOME && <HomePage bootstrap={bootstrap} videos={videos} loading={videosLoading} debug={debugEnabled} onOpenVideo={openVideo} onOpenRank={openRank} />}
-      {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage video={currentVideo} comments={comments} loading={detailLoading} error={detailError} commentsLoading={commentsLoading} onBack={backHome} onOpenRank={openRank} onSubmitProgress={handleSubmitProgress} onSubmitComment={handleSubmitComment} />}
+      {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage activityKey={activityKey} videoId={selectedVideoId} debug={debugEnabled} onBack={backHome} onOpenRank={openRank} onProgressSubmitted={() => loadVideos().catch(() => {})} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
       {!bootstrap.profileCompleted && <ProfileModal initialParticipant={bootstrap.participant} onSubmit={handleProfileSubmit} />}
       {debugPanel}

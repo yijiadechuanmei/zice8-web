@@ -1,8 +1,70 @@
+import { useEffect, useState } from 'react'
 import CommentBox from '../components/CommentBox'
 import VideoPlayer from '../components/VideoPlayer'
+import { getComments, getVideoDetail, submitComment, submitWatchSegments } from '../api'
 import { VIDEO_RANK_VERSION } from '../config'
 
-export default function VideoDetailPage({ video, comments, loading, error, commentsLoading, onBack, onOpenRank, onSubmitProgress, onSubmitComment }) {
+export default function VideoDetailPage({ activityKey, videoId, debug, onBack, onOpenRank, onProgressSubmitted }) {
+  const [video, setVideo] = useState(null)
+  const [comments, setComments] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [commentsLoading, setCommentsLoading] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadDetail() {
+      if (!activityKey || !videoId) return
+      setLoading(true)
+      setCommentsLoading(true)
+      setError('')
+      setVideo(null)
+      setComments([])
+      try {
+        const detail = await getVideoDetail(activityKey, videoId)
+        const commentData = await getComments(activityKey, videoId)
+        if (!active) return
+        setVideo(detail)
+        setComments(commentData.list || [])
+      } catch (err) {
+        if (!active) return
+        setError(err.message || '视频加载失败')
+      } finally {
+        if (active) {
+          setLoading(false)
+          setCommentsLoading(false)
+        }
+      }
+    }
+
+    loadDetail()
+    return () => {
+      active = false
+    }
+  }, [activityKey, videoId])
+
+  async function handleSubmitProgress(segments) {
+    const result = await submitWatchSegments(activityKey, video.id, segments)
+    setVideo({ ...video, completed: result.completed, watchRate: result.watchRate, finishTime: result.finishTime })
+    onProgressSubmitted?.()
+    return result
+  }
+
+  async function handleSubmitComment(content) {
+    const createdComment = await submitComment(activityKey, video.id, content)
+    setComments((current) => [createdComment, ...current])
+    setCommentsLoading(true)
+    try {
+      const data = await getComments(activityKey, video.id)
+      setComments(data.list || [])
+    } catch {
+      // The submitted comment is already shown locally; the next detail load will retry the refresh.
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-[750px] bg-gradient-to-b from-slate-950 via-slate-100 to-slate-100 px-4 py-5">
       <div className="mb-4 flex items-center justify-between">
@@ -14,12 +76,12 @@ export default function VideoDetailPage({ video, comments, loading, error, comme
       {!loading && !error && !video && <div className="rounded-3xl bg-white p-8 text-center text-sm text-slate-500 shadow-sm">视频不存在</div>}
       {!loading && !error && video && (
         <>
-          <VideoPlayer key={video.id} video={video} onSubmitProgress={onSubmitProgress} />
+          <VideoPlayer key={video.id} video={video} debug={debug} onSubmitProgress={handleSubmitProgress} />
           <section className="mt-5 rounded-3xl bg-white p-4 shadow-sm">
             <h1 className="text-2xl font-black leading-tight text-slate-950">{video.title}</h1>
             <p className="mt-2 text-sm text-slate-500">{video.author || '未填写作者'}</p>
           </section>
-          <CommentBox comments={comments} loading={commentsLoading} onSubmit={onSubmitComment} />
+          <CommentBox comments={comments} loading={commentsLoading} onSubmit={handleSubmitComment} />
         </>
       )}
       <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
