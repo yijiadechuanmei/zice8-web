@@ -1,8 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react'
 
-const SUBMIT_INTERVAL = 10000
 const JUMP_THRESHOLD = 6
+
+function getSubmitIntervalSeconds(duration) {
+  if (!duration || duration <= 0) return 5
+  const interval = Math.floor(duration / 20)
+  return Math.max(2, Math.min(8, interval))
+}
 
 function formatSubmitTime(value) {
   if (!value) return '-'
@@ -10,6 +15,7 @@ function formatSubmitTime(value) {
 }
 
 export default function VideoPlayer({ video, debug, onSubmitProgress }) {
+  const submitIntervalSeconds = getSubmitIntervalSeconds(Number(video.duration) || 0)
   const videoRef = useRef(null)
   const segmentStartRef = useRef(null)
   const lastTimeRef = useRef(0)
@@ -19,7 +25,11 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
   const flushAgainReasonRef = useRef('queued')
   const completedRef = useRef(Boolean(video.completed))
   const lastSubmitTimeRef = useRef(0)
-  const [watchRate, setWatchRate] = useState(video.watchRate || 0)
+  const serverWatchedSecondsRef = useRef(Math.floor((video.watchRate || 0) * (video.duration || 0)))
+  const serverWatchRateRef = useRef(video.watchRate || 0)
+  const [serverWatchRate, setServerWatchRate] = useState(video.watchRate || 0)
+  const [displayWatchRate, setDisplayWatchRate] = useState(video.watchRate || 0)
+  const [serverWatchedSeconds, setServerWatchedSeconds] = useState(Math.floor((video.watchRate || 0) * (video.duration || 0)))
   const [completed, setCompleted] = useState(Boolean(video.completed))
   const [pendingCount, setPendingCount] = useState(0)
   const [lastSubmitTime, setLastSubmitTime] = useState(0)
@@ -59,9 +69,15 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
     setSubmitStatus('submitting')
     try {
       const result = await onSubmitProgress(segments)
+      const nextWatchRate = result.watchRate || 0
+      const nextWatchedSeconds = result.watchedSeconds ?? Math.floor(nextWatchRate * (video.duration || 0))
       completedRef.current = Boolean(result.completed)
       lastSubmitTimeRef.current = Date.now()
-      setWatchRate(result.watchRate || 0)
+      serverWatchRateRef.current = nextWatchRate
+      serverWatchedSecondsRef.current = nextWatchedSeconds
+      setServerWatchRate(nextWatchRate)
+      setDisplayWatchRate(nextWatchRate)
+      setServerWatchedSeconds(nextWatchedSeconds)
       setCompleted(completedRef.current)
       setLastSubmitTime(lastSubmitTimeRef.current)
       setSubmitStatus('success')
@@ -81,6 +97,19 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
   useEffect(() => {
     const el = videoRef.current
     if (!el || !video.videoUrl) return
+    let animationFrame = 0
+
+    const updateDisplayProgress = () => {
+      if (!el.paused && !completedRef.current && segmentStartRef.current !== null) {
+        const currentSegmentSeconds = Math.max(el.currentTime - segmentStartRef.current, 0)
+        const duration = Number(video.duration) || 0
+        if (duration > 0) {
+          const nextRate = Math.min((serverWatchedSecondsRef.current + currentSegmentSeconds) / duration, 1)
+          setDisplayWatchRate(Math.max(serverWatchRateRef.current, nextRate))
+        }
+      }
+      animationFrame = window.requestAnimationFrame(updateDisplayProgress)
+    }
 
     const startSegment = () => {
       if (completedRef.current) return
@@ -129,16 +158,18 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
     el.addEventListener('ended', onEnded)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('beforeunload', onBeforeUnload)
+    animationFrame = window.requestAnimationFrame(updateDisplayProgress)
     const timer = window.setInterval(() => {
       if (el.paused || completedRef.current) return
       closeSegment(el.currentTime)
       if (!completedRef.current) segmentStartRef.current = Math.floor(el.currentTime)
       flush('interval')
-    }, SUBMIT_INTERVAL)
+    }, submitIntervalSeconds * 1000)
 
     return () => {
       closeSegment(el.currentTime)
       flush('unmount')
+      window.cancelAnimationFrame(animationFrame)
       window.clearInterval(timer)
       el.removeEventListener('play', startSegment)
       el.removeEventListener('timeupdate', onTimeUpdate)
@@ -165,18 +196,20 @@ export default function VideoPlayer({ video, debug, onSubmitProgress }) {
       <div className="bg-white p-3 text-sm">
         <h1 className="mb-3 text-xl font-black leading-tight text-slate-950">{video.title}</h1>
         <div className="flex items-center justify-between gap-3">
-          <span className="text-slate-600">已累计观看 {Math.round((watchRate || 0) * 100)}%</span>
+          <span className="text-slate-600">已累计观看 {Math.round((displayWatchRate || 0) * 100)}%</span>
           <span className={completed ? 'font-semibold text-emerald-600' : 'text-slate-500'}>{completed ? '已完成' : '累计观看达到 90% 后完成'}</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-          <div className="h-full bg-rose-600" style={{ width: `${Math.min((watchRate || 0) * 100, 100)}%` }} />
+          <div className="h-full bg-rose-600" style={{ width: `${Math.min((displayWatchRate || 0) * 100, 100)}%` }} />
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">观看进度按实际观看内容累计，快进跳过部分不计入进度，重复观看同一部分不会重复累计。</p>
         {debug && (
           <div className="mt-3 rounded-xl bg-slate-100 p-3 text-xs leading-5 text-slate-600">
             <p>duration: {video.duration}</p>
-            <p>submitInterval: {SUBMIT_INTERVAL}</p>
-            <p>watchRate: {(watchRate || 0).toFixed(4)}</p>
+            <p>submitIntervalSeconds: {submitIntervalSeconds}</p>
+            <p>serverWatchRate: {(serverWatchRate || 0).toFixed(4)}</p>
+            <p>displayWatchRate: {(displayWatchRate || 0).toFixed(4)}</p>
+            <p>serverWatchedSeconds: {serverWatchedSeconds}</p>
             <p>pendingSegments: {pendingCount}</p>
             <p>lastSubmitTime: {formatSubmitTime(lastSubmitTime)}</p>
             <p>submitStatus: {submitStatus}</p>
