@@ -7,10 +7,11 @@ import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shar
 import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
 import SnapshotUserNotice from './components/SnapshotUserNotice'
-import { VIDEO_RANK_PAGE } from './config'
+import { VIDEO_RANK_PAGE, VIDEO_RANK_SPLASH_AUTO_ENTER_MS, VIDEO_RANK_SPLASH_IMAGE_URL } from './config'
 import { getBootstrap, getMe, getPublicConfig, getRank, getVideos, updateParticipantProfile } from './api'
 import HomePage from './pages/HomePage'
 import RankPage from './pages/RankPage'
+import SplashPage from './pages/SplashPage'
 import VideoDetailPage from './pages/VideoDetailPage'
 
 const PENDING_ACTION_KEY = 'zice8_video_rank_pending_action'
@@ -33,7 +34,8 @@ function VideoRankMain() {
   const [me, setMe] = useState(null)
   const [videos, setVideos] = useState([])
   const [ranks, setRanks] = useState([])
-  const [page, setPage] = useState(VIDEO_RANK_PAGE.HOME)
+  const [page, setPage] = useState(VIDEO_RANK_PAGE.SPLASH)
+  const [splashShown, setSplashShown] = useState(true)
   const [selectedVideoId, setSelectedVideoId] = useState(null)
   const [error, setError] = useState('')
   const [profileModalVisible, setProfileModalVisible] = useState(false)
@@ -126,16 +128,18 @@ function VideoRankMain() {
   useEffect(() => {
     if (!bootstrap || !hasToken || snapshotMessage || !pendingAction) return
     if (!bootstrap.profileCompleted) {
+      if (page !== VIDEO_RANK_PAGE.HOME) return
       setProfileModalVisible(true)
       return
     }
     continuePendingAction(pendingAction)
-  }, [bootstrap, hasToken, snapshotMessage, pendingAction])
+  }, [bootstrap, hasToken, snapshotMessage, pendingAction, page])
 
   useEffect(() => {
     if (!bootstrap || !hasToken || snapshotMessage || pendingAction) return
+    if (page !== VIDEO_RANK_PAGE.HOME) return
     if (!bootstrap.profileCompleted) setProfileModalVisible(true)
-  }, [bootstrap, hasToken, snapshotMessage, pendingAction])
+  }, [bootstrap, hasToken, snapshotMessage, pendingAction, page])
 
   useEffect(() => {
     const title = bootstrap?.activity?.title || publicConfig?.title
@@ -237,6 +241,10 @@ function VideoRankMain() {
         autoAuthStarted,
         snapshotUserParam: getQueryParam('snapshot_user') === '1',
         videoListLoadedBeforeAuth,
+        currentPage: page,
+        splashShown,
+        splashAutoEnterMs: VIDEO_RANK_SPLASH_AUTO_ENTER_MS,
+        splashImageUrl: VIDEO_RANK_SPLASH_IMAGE_URL,
       }}
       bootstrap={bootstrap}
       onClose={() => setDebugVisible(false)}
@@ -250,6 +258,7 @@ function VideoRankMain() {
   return (
     <>
       {snapshotMessage && <div className="mx-auto max-w-[750px] bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">{snapshotMessage}</div>}
+      {page === VIDEO_RANK_PAGE.SPLASH && <SplashPage onEnter={() => { setSplashShown(false); setPage(VIDEO_RANK_PAGE.HOME) }} />}
       {page === VIDEO_RANK_PAGE.HOME && <HomePage bootstrap={bootstrap} videos={videos} loading={videosLoading} debug={debugEnabled} onOpenVideo={openVideo} onOpenRank={openRank} />}
       {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage activityKey={activityKey} videoId={selectedVideoId} userId={me?.id} debug={debugEnabled} onBack={backHome} onOpenRank={openRank} onProgressSubmitted={() => loadVideos().catch(() => {})} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
