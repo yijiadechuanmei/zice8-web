@@ -19,10 +19,12 @@ export default function CommentBox({ comments, loading, onSubmit }) {
 
   async function submit() {
     setError('')
-    if (!content.trim()) return setError('请输入留言内容')
+    const trimmedContent = content.trim()
+    if (!trimmedContent) return setError('请输入留言内容')
+    if (trimmedContent.length < 30) return setError('观后感不少于30字')
     setSubmitting(true)
     try {
-      await onSubmit(content.trim())
+      await onSubmit(trimmedContent)
       setContent('')
     } catch (err) {
       setError(err.message || '留言失败')
@@ -33,9 +35,9 @@ export default function CommentBox({ comments, loading, onSubmit }) {
 
   return (
     <section className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
-      <h3 className="text-lg font-black text-slate-950">留言</h3>
+      <h3 className="text-lg font-black text-slate-950">学习观后感</h3>
       <label htmlFor="video-rank-comment" className="sr-only">留言内容</label>
-      <textarea id="video-rank-comment" className="mt-3 min-h-28 w-full rounded-2xl border border-slate-200 p-3 text-base outline-none transition-colors duration-200 focus:border-rose-500" maxLength={500} value={content} onChange={(e) => setContent(e.target.value)} placeholder="写下你的留言" />
+      <textarea id="video-rank-comment" className="mt-3 min-h-28 w-full rounded-2xl border border-slate-200 p-3 text-base outline-none transition-colors duration-200 focus:border-rose-500" maxLength={500} value={content} onChange={(e) => setContent(e.target.value)} placeholder="观后感不少于30字" />
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       <button onClick={submit} disabled={submitting} className="mt-3 min-h-11 w-full rounded-2xl bg-rose-600 px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-rose-500 disabled:opacity-60">{submitting ? '提交中...' : '提交留言'}</button>
       <div className="mt-5 space-y-4">
