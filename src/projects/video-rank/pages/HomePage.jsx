@@ -15,7 +15,7 @@ export default function HomePage({ bootstrap, videos, loading, debug, onOpenVide
             <div className="h-full w-full bg-[radial-gradient(circle_at_20%_20%,#fb7185_0,#be123c_32%,#111827_72%)]" />
           )}
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
-          <div className="absolute bottom-4 right-4">
+          <div className="absolute right-4 top-4">
             <button onClick={onOpenRank} className="min-h-11 rounded-full bg-rose-600 px-5 text-sm font-bold text-white shadow-sm transition-colors duration-200 hover:bg-rose-500">排行榜</button>
           </div>
         </div>
