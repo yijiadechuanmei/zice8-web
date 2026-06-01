@@ -6,6 +6,7 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
+import SnapshotUserNotice from './components/SnapshotUserNotice'
 import { VIDEO_RANK_PAGE } from './config'
 import { getBootstrap, getMe, getPublicConfig, getRank, getVideos, updateParticipantProfile } from './api'
 import HomePage from './pages/HomePage'
@@ -38,6 +39,8 @@ function VideoRankMain() {
   const [profileModalVisible, setProfileModalVisible] = useState(false)
   const [pendingAction, setPendingAction] = useState(() => readPendingAction())
   const [snapshotMessage, setSnapshotMessage] = useState('')
+  const [snapshotNoticeVisible, setSnapshotNoticeVisible] = useState(false)
+  const [videoListLoadedBeforeAuth, setVideoListLoadedBeforeAuth] = useState(false)
   const [hasToken, setHasToken] = useState(Boolean(getToken()))
   const [videosLoading, setVideosLoading] = useState(false)
   const debugEnabled = ['1', 'wx'].includes(getQueryParam('debug'))
@@ -52,7 +55,7 @@ function VideoRankMain() {
     wxConfigStatus: 'idle',
     shareConfigured: false,
   })
-  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+  const { authReady, blockedMessage, autoAuthStarted } = useWechatAuth(activityKey, publicConfig)
   const updateDebugStatus = useCallback((patch) => {
     setDebugStatus((current) => ({ ...current, ...patch }))
   }, [])
@@ -63,11 +66,16 @@ function VideoRankMain() {
     if (!activityKey) return setError('缺少 activity_key')
     if (getQueryParam('snapshot_user') === '1') {
       setSnapshotMessage('当前为微信快照页，仅可浏览部分内容。请点击右下角「使用完整服务」后授权进入完整活动。')
+      setSnapshotNoticeVisible(true)
     }
     updateDebugStatus({ publicConfigStatus: 'loading' })
     getPublicConfig(activityKey)
       .then((config) => {
         setPublicConfig(config)
+        if (config.videos?.length) {
+          setVideos(config.videos)
+          setVideoListLoadedBeforeAuth(!getToken())
+        }
         updateDebugStatus({ publicConfigStatus: 'success' })
       })
       .catch((err) => {
@@ -90,7 +98,9 @@ function VideoRankMain() {
       .then(([meData, boot]) => {
         if (boot?.snapshotUser) {
           setSnapshotMessage('当前为微信快照页，仅可浏览部分内容。请点击右下角「使用完整服务」后授权进入完整活动。')
+          setSnapshotNoticeVisible(true)
           setBootstrap({ activity: publicConfig, participant: null, profileCompleted: false })
+          setMe({ ...meData, snapshotUser: true })
           setHasToken(false)
           updateDebugStatus({ authMeStatus: 'snapshot', bootstrapStatus: 'snapshot' })
           return
@@ -120,6 +130,11 @@ function VideoRankMain() {
       return
     }
     continuePendingAction(pendingAction)
+  }, [bootstrap, hasToken, snapshotMessage, pendingAction])
+
+  useEffect(() => {
+    if (!bootstrap || !hasToken || snapshotMessage || pendingAction) return
+    if (!bootstrap.profileCompleted) setProfileModalVisible(true)
   }, [bootstrap, hasToken, snapshotMessage, pendingAction])
 
   useEffect(() => {
@@ -210,9 +225,18 @@ function VideoRankMain() {
       status={{
         ...debugStatus,
         authRequiredAction: pendingAction?.type || '-',
+        snapshotUser: Boolean(snapshotMessage || me?.snapshotUser || bootstrap?.snapshotUser),
+        rawNickname: me?.rawNickname || bootstrap?.user?.rawNickname || '-',
+        displayName: me?.displayName || bootstrap?.user?.displayName || '-',
         hasToken,
         profileCompleted: Boolean(bootstrap?.profileCompleted),
         pendingAction: pendingAction ? JSON.stringify(pendingAction) : '-',
+        accessMode: publicConfig?.accessMode || '-',
+        oauthScope: publicConfig?.oauthScope || '-',
+        requireUserinfo: Boolean(publicConfig?.requireUserinfo),
+        autoAuthStarted,
+        snapshotUserParam: getQueryParam('snapshot_user') === '1',
+        videoListLoadedBeforeAuth,
       }}
       bootstrap={bootstrap}
       onClose={() => setDebugVisible(false)}
@@ -230,6 +254,7 @@ function VideoRankMain() {
       {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage activityKey={activityKey} videoId={selectedVideoId} userId={me?.id} debug={debugEnabled} onBack={backHome} onOpenRank={openRank} onProgressSubmitted={() => loadVideos().catch(() => {})} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
       {profileModalVisible && <ProfileModal initialParticipant={bootstrap.participant} onSubmit={handleProfileSubmit} />}
+      {snapshotNoticeVisible && <SnapshotUserNotice onClose={() => setSnapshotNoticeVisible(false)} />}
       {debugPanel}
     </>
   )
