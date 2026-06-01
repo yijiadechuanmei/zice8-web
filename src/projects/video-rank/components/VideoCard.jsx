@@ -19,15 +19,14 @@ export default function VideoCard({ video, onClick, debug }) {
     <button
       onClick={handleClick}
       aria-disabled={locked}
-      className={`w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-shadow duration-200 ${locked ? 'cursor-not-allowed border-slate-200 bg-slate-50 opacity-70' : 'cursor-pointer border-slate-100 bg-white hover:shadow-md'}`}
+      className={`w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-shadow duration-200 ${locked ? 'cursor-not-allowed border-slate-100 bg-white opacity-70' : 'cursor-pointer border-slate-100 bg-white hover:shadow-md'}`}
     >
-      <div className={`relative aspect-[4/5] bg-slate-200 ${locked ? 'grayscale' : ''}`}>
+      <div className="aspect-[4/5] bg-slate-200">
         {showCover ? (
           <img src={video.cover} alt={video.title} onError={() => setCoverFailed(true)} className={`h-full w-full object-cover ${locked ? 'opacity-60' : ''}`} />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-200 to-slate-100 px-3 text-center text-sm font-semibold text-slate-400">视频封面</div>
         )}
-        {locked && <div className="absolute inset-0 bg-slate-900/10" />}
       </div>
       <div className="p-3">
         <h3 className={`line-clamp-2 min-h-10 text-sm font-bold leading-5 ${locked ? 'text-slate-500' : 'text-slate-950'}`}>{video.title}</h3>
