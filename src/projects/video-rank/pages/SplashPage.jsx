@@ -22,12 +22,14 @@ export default function SplashPage({ onEnter }) {
       className="fixed inset-0 z-30 flex h-screen w-screen items-center justify-center bg-[#f6b62a] p-0"
       aria-label="进入活动"
     >
-      <img
-        src={VIDEO_RANK_SPLASH_IMAGE_URL}
-        alt=""
-        className="max-h-[86vh] max-w-[86vw] object-contain"
-        draggable="false"
-      />
+      <div className="mx-auto flex h-full w-full max-w-[750px] items-center justify-center">
+        <img
+          src={VIDEO_RANK_SPLASH_IMAGE_URL}
+          alt=""
+          className="block max-h-[100vh] w-full object-contain"
+          draggable="false"
+        />
+      </div>
     </button>
   )
 }
