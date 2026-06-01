@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { getToken } from '../api/request'
-import { isWechatBrowser, sanitizeUrlForWechat } from '../utils/url'
+import { isWechatBrowser } from '../utils/url'
 
 export function useWechatAuth(activityKey, publicConfig) {
   const [authReady, setAuthReady] = useState(false)
@@ -17,14 +17,7 @@ export function useWechatAuth(activityKey, publicConfig) {
       return
     }
 
-    if (inWechat && !getToken()) {
-      const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
-      const oauthUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'}/wechat/oauth/redirect?activity_key=${encodeURIComponent(activityKey)}&redirect_url=${redirectUrl}`
-      window.location.replace(oauthUrl)
-      return
-    }
-
-    setAuthReady(Boolean(getToken()))
+    setAuthReady(true)
   }, [activityKey, publicConfig])
 
   return { authReady, blockedMessage, hasToken: Boolean(getToken()) }
