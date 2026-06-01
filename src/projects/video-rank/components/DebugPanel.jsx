@@ -71,7 +71,7 @@ export default function DebugPanel({ activityKey, status, bootstrap, onClose }) 
   }
 
   return (
-    <section className="fixed bottom-3 left-3 right-3 z-40 mx-auto max-h-[45vh] max-w-[720px] overflow-auto rounded-2xl border border-amber-300 bg-amber-50/95 p-3 text-xs text-slate-800 shadow-2xl">
+    <section className="fixed bottom-3 left-3 right-3 z-[60] mx-auto max-h-[45vh] max-w-[720px] overflow-auto rounded-2xl border border-amber-300 bg-amber-50/95 p-3 text-xs text-slate-800 shadow-2xl">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-black text-slate-950">微信联调 Debug</h2>
         <button onClick={onClose} className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white">关闭debug</button>

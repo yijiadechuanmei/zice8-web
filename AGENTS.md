@@ -433,3 +433,31 @@ style={{
 ```
 
 如果确实需要后端配合，请先说明原因，不要直接修改。
+
+
+## 自动 Git 提交规则
+
+每次完成 zice8-web 修改后，请自动执行：
+
+1. `git status`
+2. `git diff --stat`
+3. 确认无敏感文件、无无关文件
+4. 执行 `pnpm run build`
+5. 只 `git add` 本次相关文件
+6. `git commit -m "YYYYMMDD-web-简短说明"`
+7. `git push origin main`
+
+禁止提交：
+
+- `.env`
+- `.env.*`
+- `node_modules`
+- `dist`
+- 日志文件
+- 临时文件
+- AccessKey
+- AppSecret
+- 数据库密码
+
+不要提交 OSS 构建产物。
+完成后输出 commit hash 和 push 结果。
