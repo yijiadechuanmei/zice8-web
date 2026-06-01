@@ -4,7 +4,6 @@ import { API_BASE_URL, getToken, removeToken, setToken } from '../../shared/api/
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
-import AuthModal from './components/AuthModal'
 import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
 import { VIDEO_RANK_PAGE } from './config'
@@ -36,7 +35,6 @@ function VideoRankMain() {
   const [page, setPage] = useState(VIDEO_RANK_PAGE.HOME)
   const [selectedVideoId, setSelectedVideoId] = useState(null)
   const [error, setError] = useState('')
-  const [authModalVisible, setAuthModalVisible] = useState(false)
   const [profileModalVisible, setProfileModalVisible] = useState(false)
   const [pendingAction, setPendingAction] = useState(() => readPendingAction())
   const [snapshotMessage, setSnapshotMessage] = useState('')
@@ -172,7 +170,7 @@ function VideoRankMain() {
     if (snapshotMessage) return false
     if (!getToken()) {
       setPendingAction(action)
-      setAuthModalVisible(true)
+      startWechatAuthorize(action)
       return false
     }
     if (!bootstrap?.profileCompleted) {
@@ -183,8 +181,8 @@ function VideoRankMain() {
     return true
   }
 
-  function startWechatAuthorize() {
-    if (pendingAction) savePendingAction(pendingAction)
+  function startWechatAuthorize(action) {
+    savePendingAction(action)
     const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
     const oauthUrl = `${API_BASE_URL}/wechat/oauth/redirect?activity_key=${encodeURIComponent(activityKey)}&redirect_url=${redirectUrl}`
     window.location.replace(oauthUrl)
@@ -193,7 +191,6 @@ function VideoRankMain() {
   async function continuePendingAction(action) {
     clearPendingAction()
     setPendingAction(null)
-    setAuthModalVisible(false)
     setProfileModalVisible(false)
     if (action.type === 'openVideo' && action.videoId) {
       setSelectedVideoId(action.videoId)
@@ -212,7 +209,7 @@ function VideoRankMain() {
       activityKey={activityKey}
       status={{
         ...debugStatus,
-        authRequiredAction: authModalVisible ? pendingAction?.type || '-' : '-',
+        authRequiredAction: pendingAction?.type || '-',
         hasToken,
         profileCompleted: Boolean(bootstrap?.profileCompleted),
         pendingAction: pendingAction ? JSON.stringify(pendingAction) : '-',
@@ -232,7 +229,6 @@ function VideoRankMain() {
       {page === VIDEO_RANK_PAGE.HOME && <HomePage bootstrap={bootstrap} videos={videos} loading={videosLoading} debug={debugEnabled} onOpenVideo={openVideo} onOpenRank={openRank} />}
       {page === VIDEO_RANK_PAGE.DETAIL && <VideoDetailPage activityKey={activityKey} videoId={selectedVideoId} userId={me?.id} debug={debugEnabled} onBack={backHome} onOpenRank={openRank} onProgressSubmitted={() => loadVideos().catch(() => {})} />}
       {page === VIDEO_RANK_PAGE.RANK && <RankPage ranks={ranks} me={me} onBack={() => setPage(VIDEO_RANK_PAGE.HOME)} />}
-      {authModalVisible && <AuthModal onAuthorize={startWechatAuthorize} onCancel={() => setAuthModalVisible(false)} />}
       {profileModalVisible && <ProfileModal initialParticipant={bootstrap.participant} onSubmit={handleProfileSubmit} />}
       {debugPanel}
     </>
