@@ -111,7 +111,7 @@ export default function DataViewPage({ activity }) {
               placeholder="输入关键词"
             />
           </label>
-          <button className="admin-btn-primary" disabled={!activeViewKey || exporting} onClick={handleExport}>
+          <button className="admin-btn-primary" disabled={!activeViewKey || !activeView?.canExport || exporting} onClick={handleExport}>
             {exporting ? '导出中...' : '导出 CSV'}
           </button>
         </div>
@@ -173,7 +173,7 @@ export default function DataViewPage({ activity }) {
                 data.rows.map((row, index) => (
                   <tr key={`${activeViewKey}-${index}`}>
                     {visibleColumns.map((column) => (
-                      <td key={column.key}>{formatCell(row[column.key])}</td>
+                      <td key={column.key}>{formatCell(row[column.key], column)}</td>
                     ))}
                   </tr>
                 ))
@@ -196,8 +196,12 @@ export default function DataViewPage({ activity }) {
   )
 }
 
-function formatCell(value) {
+function formatCell(value, column) {
   if (value === null || value === undefined || value === '') return '-'
+  if (column?.type === 'image') {
+    return <img className="admin-table-avatar" src={String(value)} alt="" />
+  }
+  if (column?.type === 'boolean') return value ? '是' : '否'
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) return value.replace('T', ' ').slice(0, 19)
   return String(value)
 }

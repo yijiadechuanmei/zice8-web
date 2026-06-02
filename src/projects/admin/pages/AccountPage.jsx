@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AdminPasswordInput from '../components/AdminPasswordInput'
 import { createAccount, deleteAccount, getAccounts, getAdminMe, updateAccount } from '../api'
 
 const emptyForm = { username: '', password: '', nickname: '', role: 'project_admin' }
@@ -52,6 +53,7 @@ export default function AccountPage() {
     if (!editing) return
     setMessage('')
     try {
+      if (editForm.password && !window.confirm(`确认重置账号 ${editing.username} 的密码？`)) return
       const payload = { nickname: editForm.nickname, role: editForm.role, status: Number(editForm.status) }
       if (editForm.password) payload.password = editForm.password
       await updateAccount(editing.id, payload)
@@ -63,19 +65,21 @@ export default function AccountPage() {
     }
   }
 
-  async function handleDisable(account) {
+  async function handleToggleStatus(account) {
     if (account.id === currentUser?.id) {
       setMessage('不能禁用当前登录账号')
       return
     }
-    if (!window.confirm(`确认禁用账号 ${account.username}？`)) return
+    const nextStatus = account.status === 1 ? 0 : 1
+    if (!window.confirm(`确认${nextStatus === 1 ? '启用' : '禁用'}账号 ${account.username}？`)) return
     setMessage('')
     try {
-      await deleteAccount(account.id)
+      if (nextStatus === 1) await updateAccount(account.id, { status: 1 })
+      else await deleteAccount(account.id)
       await loadAccounts()
-      setMessage('账号已禁用')
+      setMessage(nextStatus === 1 ? '账号已启用' : '账号已禁用')
     } catch (err) {
-      setMessage(err.message || '禁用失败')
+      setMessage(err.message || '操作失败')
     }
   }
 
@@ -90,7 +94,7 @@ export default function AccountPage() {
 
       <form className="admin-form-grid account" onSubmit={handleCreate}>
         <label><span>账号</span><input value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} required /></label>
-        <label><span>初始密码</span><input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required /></label>
+        <label><span>初始密码</span><AdminPasswordInput value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} required /></label>
         <label><span>昵称</span><input value={form.nickname} onChange={(event) => setForm({ ...form, nickname: event.target.value })} /></label>
         <label>
           <span>角色</span>
@@ -129,7 +133,9 @@ export default function AccountPage() {
                 <td>
                   <div className="admin-row-actions">
                     <button onClick={() => startEdit(account)}>修改</button>
-                    <button className="danger" disabled={account.id === currentUser?.id || account.status === 0} onClick={() => handleDisable(account)}>禁用</button>
+                    <button className={account.status === 1 ? 'danger' : ''} disabled={account.id === currentUser?.id} onClick={() => handleToggleStatus(account)}>
+                      {account.status === 1 ? '禁用' : '启用'}
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -163,8 +169,8 @@ export default function AccountPage() {
                 <option value={0}>禁用</option>
               </select>
             </label>
-            <label><span>重置密码</span><input value={editForm.password} onChange={(event) => setEditForm({ ...editForm, password: event.target.value })} type="password" placeholder="留空则不修改" /></label>
-            <button className="admin-btn-primary" type="submit">保存修改</button>
+            <label><span>重置密码</span><AdminPasswordInput value={editForm.password} onChange={(event) => setEditForm({ ...editForm, password: event.target.value })} placeholder="留空则不修改" /></label>
+            <button className="admin-btn-primary" type="submit">{editForm.password ? '确认并重置密码' : '保存修改'}</button>
           </form>
         </div>
       ) : null}

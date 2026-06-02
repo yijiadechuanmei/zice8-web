@@ -101,13 +101,16 @@ export default function AdminLayout({
         <header className="admin-topbar">
           <div>
             <p className="admin-kicker">Activity Workspace</p>
-            <h1>{selectedActivity?.title || '管理后台'}</h1>
+            <div className="admin-title-line">
+              <h1>{selectedActivity?.title || '管理后台'}</h1>
+              {selectedActivity ? <span className="admin-status-pill">{selectedActivity.status === 1 ? '启用' : '禁用'}</span> : null}
+            </div>
             <p>{selectedActivity ? `${selectedActivity.activityKey} / ${selectedActivity.type}` : '请选择活动'}</p>
           </div>
           <div className="admin-userbox">
             <div>
               <span>{adminUser.nickname || adminUser.username}</span>
-              <small>{adminUser.role}</small>
+              <small className={`admin-role ${adminUser.role}`}>{adminUser.role}</small>
             </div>
             <button className="admin-btn-secondary" onClick={onLogout}>退出登录</button>
           </div>

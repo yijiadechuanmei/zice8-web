@@ -88,6 +88,31 @@
   font-size: 14px;
 }
 
+.admin-password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-password-field input {
+  width: 100%;
+  padding-right: 58px;
+}
+
+.admin-password-field button {
+  position: absolute;
+  right: 6px;
+  min-height: 28px;
+  border: 0;
+  border-radius: 5px;
+  padding: 0 8px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 input:focus,
 select:focus,
 button:focus-visible {
@@ -303,6 +328,13 @@ button:disabled {
   color: #64748b;
 }
 
+.admin-title-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .admin-activity-card {
   display: flex;
   align-items: center;
@@ -405,7 +437,7 @@ button:disabled {
 }
 
 .admin-chart-grid.wide {
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .admin-chart-panel {
@@ -432,11 +464,6 @@ button:disabled {
 
 .admin-search input {
   width: 220px;
-}
-
-.admin-line-chart {
-  width: 100%;
-  height: 190px;
 }
 
 .admin-chart-empty {
@@ -683,6 +710,14 @@ button:disabled {
   border: 1px solid #eef2f7;
   border-radius: 6px;
   padding: 8px;
+}
+
+.admin-table-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: #f1f5f9;
 }
 
 .admin-row-actions .danger {

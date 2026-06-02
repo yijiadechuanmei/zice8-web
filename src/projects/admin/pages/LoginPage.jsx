@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import AdminPasswordInput from '../components/AdminPasswordInput'
 import { loginAdmin, setAdminToken } from '../api'
 
 export default function LoginPage({ error, onLoginSuccess }) {
@@ -40,7 +41,7 @@ export default function LoginPage({ error, onLoginSuccess }) {
         </label>
         <label>
           <span>密码</span>
-          <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" placeholder="请输入密码" autoComplete="current-password" />
+          <AdminPasswordInput value={password} onChange={(event) => setPassword(event.target.value)} placeholder="请输入密码" autoComplete="current-password" />
         </label>
         {message ? <div className="admin-error">{message}</div> : null}
         <button type="submit" disabled={submitting}>
