@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
 import { API_BASE_URL, getToken, removeToken, setToken } from '../../shared/api/request'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -63,6 +64,11 @@ function VideoRankMain() {
   }, [])
 
   useWechatShare(activityKey, bootstrap?.activity || publicConfig, updateDebugStatus)
+
+  useEffect(() => {
+    if (!activityKey) return
+    trackPageView(activityKey, '/video-rank')
+  }, [activityKey])
 
   useEffect(() => {
     if (!activityKey) return setError('缺少 activity_key')
@@ -160,6 +166,7 @@ function VideoRankMain() {
     const result = await updateParticipantProfile(activityKey, data)
     setBootstrap({ ...bootstrap, participant: result.participant, profileCompleted: true })
     setProfileModalVisible(false)
+    trackEvent({ activityKey, eventType: 'submit_profile', page: '/video-rank' })
     if (pendingAction) continuePendingAction(pendingAction)
   }
 
@@ -169,6 +176,7 @@ function VideoRankMain() {
       return
     }
     if (!ensureParticipation({ type: 'openVideo', videoId: video.id })) return
+    trackEvent({ activityKey, eventType: 'open_video', page: '/video-rank', extra: { videoId: video.id } })
     setSelectedVideoId(video.id)
     setPage(VIDEO_RANK_PAGE.DETAIL)
   }
@@ -180,6 +188,7 @@ function VideoRankMain() {
 
   async function openRank() {
     if (!ensureParticipation({ type: 'openRank' })) return
+    trackEvent({ activityKey, eventType: 'open_rank', page: '/video-rank' })
     const data = await getRank(activityKey)
     setRanks(data.list)
     setPage(VIDEO_RANK_PAGE.RANK)
@@ -212,11 +221,13 @@ function VideoRankMain() {
     setPendingAction(null)
     setProfileModalVisible(false)
     if (action.type === 'openVideo' && action.videoId) {
+      trackEvent({ activityKey, eventType: 'open_video', page: '/video-rank', extra: { videoId: action.videoId } })
       setSelectedVideoId(action.videoId)
       setPage(VIDEO_RANK_PAGE.DETAIL)
       return
     }
     if (action.type === 'openRank') {
+      trackEvent({ activityKey, eventType: 'open_rank', page: '/video-rank' })
       const data = await getRank(activityKey)
       setRanks(data.list)
       setPage(VIDEO_RANK_PAGE.RANK)

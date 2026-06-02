@@ -37,6 +37,8 @@ export default function ActivityDashboard({ activity, compact = false }) {
     return [
       { label: 'PV', value: overview?.pv ?? '-', hint: overview?.accessStats?.dataAvailable === false ? '暂无埋点' : '' },
       { label: 'UV', value: overview?.uv ?? '-', hint: overview?.accessStats?.dataAvailable === false ? '暂无埋点' : '' },
+      { label: '今日 PV', value: overview?.todayPv ?? 0 },
+      { label: '今日 UV', value: overview?.todayUv ?? 0 },
       { label: '正式参与人数', value: overview?.participantCount || 0 },
       { label: '今日新增参与', value: overview?.todayParticipantCount || 0 },
       { label: '互动次数', value: overview?.submitCount || 0 },
@@ -48,10 +50,6 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const commentTrend = (charts?.videoRank?.commentTrend || []).map((item) => ({ ...item, comments: item.value || 0 }))
-  const videoCompletion = (charts?.videoRank?.videoCompletion || []).map((item) => ({
-    ...item,
-    name: item.title,
-  }))
   const rankTop10 = (charts?.videoRank?.rankTop10 || []).map((item) => ({
     ...item,
     name: item.name || '未填写姓名',
@@ -95,22 +93,12 @@ export default function ActivityDashboard({ activity, compact = false }) {
           </section>
 
           {activity.type === 'video-rank' ? (
-            <section className="admin-chart-grid wide">
-              <ChartPanel title="视频完成率" description="各视频完成率百分比">
-                <LazyChart type="bar" data={videoCompletion} series={[{ key: 'completionRate', name: '完成率', percent: true }]} />
-              </ChartPanel>
-              <ChartPanel title="观看人数 / 完成人数" description="各视频观看和完成对比">
-                <LazyChart
-                  type="bar"
-                  data={videoCompletion}
-                  series={[{ key: 'watchUserCount', name: '观看人数' }, { key: 'completedCount', name: '完成人数' }]}
-                />
-              </ChartPanel>
+            <section className="admin-chart-grid">
               <ChartPanel title="留言数量趋势" description="近 7 天留言提交量">
                 <LazyChart type="line" data={commentTrend} series={[{ key: 'comments', name: '留言数' }]} />
               </ChartPanel>
               <ChartPanel title="排行榜 Top 10" description="完成数优先，越早完成越靠前">
-                <LazyChart type="horizontalBar" data={rankTop10} series={[{ key: 'finishCount', name: '完成数' }]} height={300} />
+                <LazyChart type="horizontalBar" data={rankTop10} series={[{ key: 'finishCount', name: '完成数' }]} height={300} emptyText="暂无完成视频的用户" />
               </ChartPanel>
             </section>
           ) : activity.type === 'lottery' ? (

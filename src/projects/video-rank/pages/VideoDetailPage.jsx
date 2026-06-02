@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import CommentBox from '../components/CommentBox'
 import VideoPlayer from '../components/VideoPlayer'
+import { trackEvent } from '../../../shared/analytics'
 import { getComments, getVideoDetail, submitComment, submitWatchSegments } from '../api'
 import { VIDEO_RANK_VERSION } from '../config'
 
@@ -53,6 +54,7 @@ export default function VideoDetailPage({ activityKey, videoId, userId, debug, o
 
   async function handleSubmitComment(content) {
     const createdComment = await submitComment(activityKey, video.id, content)
+    trackEvent({ activityKey, eventType: 'submit_comment', page: '/video-rank', extra: { videoId: video.id } })
     setComments((current) => [createdComment, ...current])
     setCommentsLoading(true)
     try {
