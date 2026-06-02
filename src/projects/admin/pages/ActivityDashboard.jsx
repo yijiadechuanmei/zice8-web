@@ -69,6 +69,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
           </div>
         ))}
       </section>
+      <p className="admin-muted">PV：页面访问次数，同一访客同一页面 30 秒内重复访问只统计一次。UV：按浏览器匿名访客 ID 去重统计。</p>
 
       {compact ? null : (
         <>

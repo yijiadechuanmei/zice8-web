@@ -1,7 +1,7 @@
 import { API_BASE_URL, getToken } from './api/request'
 
 const VISITOR_ID_KEY = 'zice8_visitor_id'
-const PAGE_VIEW_TTL_MS = 30 * 60 * 1000
+const PAGE_VIEW_DEDUPE_MS = 30 * 1000
 
 export function getVisitorId() {
   try {
@@ -22,7 +22,7 @@ export function shouldTrackPageView(activityKey, page) {
     const key = `zice8_pv_${activityKey}_${page}`
     const lastTrackedAt = Number(localStorage.getItem(key) || 0)
     const now = Date.now()
-    if (lastTrackedAt && now - lastTrackedAt < PAGE_VIEW_TTL_MS) return false
+    if (lastTrackedAt && now - lastTrackedAt < PAGE_VIEW_DEDUPE_MS) return false
     localStorage.setItem(key, String(now))
     return true
   } catch {
