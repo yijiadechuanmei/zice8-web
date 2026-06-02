@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react'
-import { createAccount, getAccounts } from '../api'
+import { createAccount, deleteAccount, getAccounts, getAdminMe, updateAccount } from '../api'
+
+const emptyForm = { username: '', password: '', nickname: '', role: 'project_admin' }
 
 export default function AccountPage() {
   const [accounts, setAccounts] = useState([])
-  const [form, setForm] = useState({ username: '', password: '', nickname: '', role: 'project_admin' })
+  const [currentUser, setCurrentUser] = useState(null)
+  const [form, setForm] = useState(emptyForm)
+  const [editing, setEditing] = useState(null)
+  const [editForm, setEditForm] = useState({ nickname: '', role: 'project_admin', status: 1, password: '' })
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
 
   async function loadAccounts() {
     setLoading(true)
     try {
-      setAccounts(await getAccounts())
+      const [me, list] = await Promise.all([getAdminMe(), getAccounts()])
+      setCurrentUser(me)
+      setAccounts(list)
     } catch (err) {
       setMessage(err.message || '账号加载失败')
     } finally {
@@ -27,10 +34,48 @@ export default function AccountPage() {
     setMessage('')
     try {
       await createAccount(form)
-      setForm({ username: '', password: '', nickname: '', role: 'project_admin' })
+      setForm(emptyForm)
       await loadAccounts()
+      setMessage('账号已创建')
     } catch (err) {
       setMessage(err.message || '创建失败')
+    }
+  }
+
+  function startEdit(account) {
+    setEditing(account)
+    setEditForm({ nickname: account.nickname || '', role: account.role, status: account.status, password: '' })
+  }
+
+  async function handleUpdate(event) {
+    event.preventDefault()
+    if (!editing) return
+    setMessage('')
+    try {
+      const payload = { nickname: editForm.nickname, role: editForm.role, status: Number(editForm.status) }
+      if (editForm.password) payload.password = editForm.password
+      await updateAccount(editing.id, payload)
+      setEditing(null)
+      await loadAccounts()
+      setMessage('账号已更新')
+    } catch (err) {
+      setMessage(err.message || '更新失败')
+    }
+  }
+
+  async function handleDisable(account) {
+    if (account.id === currentUser?.id) {
+      setMessage('不能禁用当前登录账号')
+      return
+    }
+    if (!window.confirm(`确认禁用账号 ${account.username}？`)) return
+    setMessage('')
+    try {
+      await deleteAccount(account.id)
+      await loadAccounts()
+      setMessage('账号已禁用')
+    } catch (err) {
+      setMessage(err.message || '禁用失败')
     }
   }
 
@@ -39,22 +84,25 @@ export default function AccountPage() {
       <div className="admin-section-head">
         <div>
           <h2>账号管理</h2>
-          <p>创建超级管理员或项目子账号</p>
+          <p>新增、修改和禁用后台账号，账号操作会写入操作日志</p>
         </div>
       </div>
 
-      <form className="admin-form-grid" onSubmit={handleCreate}>
-        <input value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} placeholder="账号" />
-        <input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="初始密码" type="password" />
-        <input value={form.nickname} onChange={(event) => setForm({ ...form, nickname: event.target.value })} placeholder="昵称" />
-        <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
-          <option value="project_admin">项目子账号</option>
-          <option value="super_admin">超级管理员</option>
-        </select>
-        <button type="submit">创建账号</button>
+      <form className="admin-form-grid account" onSubmit={handleCreate}>
+        <label><span>账号</span><input value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} required /></label>
+        <label><span>初始密码</span><input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required /></label>
+        <label><span>昵称</span><input value={form.nickname} onChange={(event) => setForm({ ...form, nickname: event.target.value })} /></label>
+        <label>
+          <span>角色</span>
+          <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
+            <option value="project_admin">项目子账号</option>
+            <option value="super_admin">超级管理员</option>
+          </select>
+        </label>
+        <button className="admin-btn-primary" type="submit">新增账号</button>
       </form>
 
-      {message ? <div className="admin-error">{message}</div> : null}
+      {message ? <div className={message.includes('失败') || message.includes('不能') ? 'admin-error' : 'admin-success'}>{message}</div> : null}
       {loading ? <div className="admin-empty">加载中...</div> : null}
       <div className="admin-table-wrap">
         <table className="admin-table">
@@ -65,6 +113,8 @@ export default function AccountPage() {
               <th>角色</th>
               <th>状态</th>
               <th>最近登录</th>
+              <th>创建时间</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
@@ -72,14 +122,57 @@ export default function AccountPage() {
               <tr key={account.id}>
                 <td>{account.username}</td>
                 <td>{account.nickname || '-'}</td>
-                <td>{account.role}</td>
-                <td>{account.status}</td>
-                <td>{account.lastLoginAt ? account.lastLoginAt.replace('T', ' ').slice(0, 19) : '-'}</td>
+                <td><span className={`admin-role ${account.role}`}>{account.role}</span></td>
+                <td><span className={account.status === 1 ? 'admin-status on' : 'admin-status off'}>{account.status === 1 ? '启用' : '禁用'}</span></td>
+                <td>{formatDate(account.lastLoginAt)}</td>
+                <td>{formatDate(account.createdAt)}</td>
+                <td>
+                  <div className="admin-row-actions">
+                    <button onClick={() => startEdit(account)}>修改</button>
+                    <button className="danger" disabled={account.id === currentUser?.id || account.status === 0} onClick={() => handleDisable(account)}>禁用</button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {editing ? (
+        <div className="admin-modal-backdrop">
+          <form className="admin-modal" onSubmit={handleUpdate}>
+            <div className="admin-section-head compact">
+              <div>
+                <h2>修改账号</h2>
+                <p>{editing.username}</p>
+              </div>
+              <button type="button" className="admin-btn-secondary" onClick={() => setEditing(null)}>关闭</button>
+            </div>
+            <label><span>昵称</span><input value={editForm.nickname} onChange={(event) => setEditForm({ ...editForm, nickname: event.target.value })} /></label>
+            <label>
+              <span>角色</span>
+              <select value={editForm.role} onChange={(event) => setEditForm({ ...editForm, role: event.target.value })}>
+                <option value="project_admin">项目子账号</option>
+                <option value="super_admin">超级管理员</option>
+              </select>
+            </label>
+            <label>
+              <span>状态</span>
+              <select value={editForm.status} onChange={(event) => setEditForm({ ...editForm, status: Number(event.target.value) })}>
+                <option value={1}>启用</option>
+                <option value={0}>禁用</option>
+              </select>
+            </label>
+            <label><span>重置密码</span><input value={editForm.password} onChange={(event) => setEditForm({ ...editForm, password: event.target.value })} type="password" placeholder="留空则不修改" /></label>
+            <button className="admin-btn-primary" type="submit">保存修改</button>
+          </form>
+        </div>
+      ) : null}
     </section>
   )
+}
+
+function formatDate(value) {
+  if (!value) return '-'
+  return String(value).replace('T', ' ').slice(0, 19)
 }

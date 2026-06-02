@@ -54,6 +54,14 @@ export function getOverview(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/overview`)
 }
 
+export function getCharts(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/charts`)
+}
+
+export function getDataSchema(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/data-schema`)
+}
+
 export function getDataViews(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/data-views`)
 }
@@ -61,6 +69,16 @@ export function getDataViews(activityKey) {
 export function getDataRows(activityKey, viewKey, params) {
   const search = new URLSearchParams(params)
   return adminRequest(`/admin/activities/${activityKey}/data/${viewKey}?${search.toString()}`)
+}
+
+export function exportDataRows(activityKey, viewKey, params) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/activities/${activityKey}/data/${viewKey}/export?${search.toString()}`)
+}
+
+export function getOperationLogs(params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/operation-logs?${search.toString()}`)
 }
 
 export function getAccounts() {
@@ -82,6 +100,12 @@ export function updateAccount(id, payload) {
   return adminRequest(`/admin/accounts/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
+  })
+}
+
+export function deleteAccount(id) {
+  return adminRequest(`/admin/accounts/${id}`, {
+    method: 'DELETE',
   })
 }
 
