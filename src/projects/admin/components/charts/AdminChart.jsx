@@ -69,7 +69,7 @@ function buildBarOption({ title, data, series, horizontal }) {
     ...baseOption(title),
     tooltip: { ...baseOption(title).tooltip, trigger: 'axis' },
     xAxis: horizontal ? axis('value') : axis('category', categories),
-    yAxis: horizontal ? axis('category', categories) : axis('value'),
+    yAxis: horizontal ? { ...axis('category', categories), inverse: true } : axis('value'),
     series: series.map((item) => ({
       name: item.name,
       type: 'bar',
