@@ -1,22 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Avatar, Button, Card, Checkbox, Dropdown, Empty, Input, Space, Table, Tag, Tooltip, Typography, message } from 'antd'
+import { DownOutlined, ExportOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import { exportDataRows, getDataRows, getDataSchema } from '../api'
+
+const { Text, Title } = Typography
+const pageSize = 20
 
 export default function DataViewPage({ activity }) {
   const [views, setViews] = useState([])
   const [activeViewKey, setActiveViewKey] = useState('')
   const [hiddenColumns, setHiddenColumns] = useState({})
-  const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize: 20, total: 0 } })
+  const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
   const [sortField, setSortField] = useState('')
   const [sortOrder, setSortOrder] = useState('desc')
   const [loading, setLoading] = useState(true)
+  const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let alive = true
-    setLoading(true)
+    setSchemaLoading(true)
     setError('')
     setViews([])
     setActiveViewKey('')
@@ -26,12 +32,13 @@ export default function DataViewPage({ activity }) {
         setViews(schema.views || [])
         setActiveViewKey(schema.views?.[0]?.viewKey || '')
         setHiddenColumns({})
+        setPage(1)
       })
       .catch((err) => {
         if (alive) setError(err.message || '数据视图加载失败')
       })
       .finally(() => {
-        if (alive) setLoading(false)
+        if (alive) setSchemaLoading(false)
       })
     return () => {
       alive = false
@@ -39,13 +46,16 @@ export default function DataViewPage({ activity }) {
   }, [activity.activityKey])
 
   useEffect(() => {
-    if (!activeViewKey) return
+    if (!activeViewKey) {
+      setData({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
+      return
+    }
     let alive = true
     setLoading(true)
     setError('')
     getDataRows(activity.activityKey, activeViewKey, {
       page: String(page),
-      pageSize: '20',
+      pageSize: String(pageSize),
       keyword,
       sortField,
       sortOrder,
@@ -65,63 +75,115 @@ export default function DataViewPage({ activity }) {
   }, [activity.activityKey, activeViewKey, page, keyword, sortField, sortOrder])
 
   const activeView = useMemo(() => views.find((view) => view.viewKey === activeViewKey), [views, activeViewKey])
-  const visibleColumns = data.columns.filter((column) => !hiddenColumns[column.key])
-
-  function toggleSort(column) {
-    if (!column.sortable) return
-    if (sortField === column.key) {
-      setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortField(column.key)
-      setSortOrder('desc')
-    }
-    setPage(1)
-  }
+  const visibleColumns = useMemo(() => data.columns.filter((column) => !hiddenColumns[column.key]), [data.columns, hiddenColumns])
+  const tableColumns = useMemo(
+    () =>
+      visibleColumns.map((column) => ({
+        title: (
+          <Space size={6}>
+            <span>{column.title}</span>
+            {column.sensitive ? <Tag color="orange">敏感</Tag> : null}
+          </Space>
+        ),
+        dataIndex: column.key,
+        key: column.key,
+        sorter: Boolean(column.sortable),
+        sortOrder: sortField === column.key ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
+        render: (value, row) => formatCell(value, column, row),
+      })),
+    [sortField, sortOrder, visibleColumns],
+  )
 
   async function handleExport() {
-    if (!activeViewKey) return
+    if (!activeViewKey || !activeView?.canExport) return
     setExporting(true)
     setError('')
     try {
       const result = await exportDataRows(activity.activityKey, activeViewKey, { keyword, sortField, sortOrder })
       downloadCsv(result.filename || `${activity.activityKey}-${activeViewKey}.csv`, result.csv || '')
+      message.success('CSV 已导出')
     } catch (err) {
-      setError(err.message || '导出失败')
+      const text = err.message || '导出失败'
+      setError(text)
+      message.error(text)
     } finally {
       setExporting(false)
     }
   }
 
+  function handleTableChange(pagination, filters, sorter) {
+    if (pagination?.current !== page) setPage(pagination.current || 1)
+    if (sorter?.field) {
+      setSortField(sorter.order ? sorter.field : '')
+      setSortOrder(sorter.order === 'ascend' ? 'asc' : 'desc')
+      setPage(1)
+    }
+  }
+
+  const columnMenu = {
+    items: [
+      {
+        key: 'columns',
+        label: (
+          <Checkbox.Group
+            className="admin-column-menu"
+            value={data.columns.filter((column) => !hiddenColumns[column.key]).map((column) => column.key)}
+            onChange={(keys) => {
+              const selected = new Set(keys)
+              setHiddenColumns(Object.fromEntries(data.columns.map((column) => [column.key, !selected.has(column.key)])))
+            }}
+            options={data.columns.map((column) => ({ label: column.title, value: column.key }))}
+          />
+        ),
+      },
+    ],
+  }
+
   return (
-    <section className="admin-panel">
-      <div className="admin-section-head">
+    <Card className="admin-card">
+      <div className="admin-page-head">
         <div>
-          <h2>数据表</h2>
-          <p>{activeView?.description || '选择一个授权数据视图'}</p>
+          <Title level={4}>数据表</Title>
+          <Text type="secondary">{activeView?.description || '选择一个授权数据视图'}</Text>
         </div>
-        <div className="admin-toolbar">
-          <label className="admin-search">
-            <span>搜索</span>
-            <input
-              value={keyword}
-              onChange={(event) => {
-                setKeyword(event.target.value)
-                setPage(1)
-              }}
-              placeholder="输入关键词"
-            />
-          </label>
-          <button className="admin-btn-primary" disabled={!activeViewKey || !activeView?.canExport || exporting} onClick={handleExport}>
-            {exporting ? '导出中...' : '导出 CSV'}
-          </button>
-        </div>
+        <Space wrap>
+          <Input.Search
+            allowClear
+            prefix={<SearchOutlined />}
+            placeholder="输入关键词"
+            value={keyword}
+            onChange={(event) => {
+              setKeyword(event.target.value)
+              setPage(1)
+            }}
+            onSearch={(value) => {
+              setKeyword(value)
+              setPage(1)
+            }}
+            style={{ width: 260 }}
+          />
+          <Dropdown menu={columnMenu} trigger={['click']} disabled={!data.columns.length}>
+            <Button icon={<EyeOutlined />}>列显示 <DownOutlined /></Button>
+          </Dropdown>
+          <Tooltip title={!activeView?.canExport ? '当前账号无导出权限' : ''}>
+            <Button
+              type="primary"
+              icon={<ExportOutlined />}
+              disabled={!activeViewKey || !activeView?.canExport}
+              loading={exporting}
+              onClick={handleExport}
+            >
+              导出 CSV
+            </Button>
+          </Tooltip>
+        </Space>
       </div>
 
-      <div className="admin-view-switch">
+      <div className="admin-view-tabs">
         {views.map((view) => (
-          <button
+          <Button
             key={view.viewKey}
-            className={view.viewKey === activeViewKey ? 'active' : ''}
+            type={view.viewKey === activeViewKey ? 'primary' : 'default'}
             onClick={() => {
               setActiveViewKey(view.viewKey)
               setPage(1)
@@ -130,78 +192,41 @@ export default function DataViewPage({ activity }) {
             }}
           >
             {view.label || view.title}
-          </button>
+          </Button>
         ))}
       </div>
 
-      {data.columns.length ? (
-        <div className="admin-column-picker">
-          <span>显示列</span>
-          {data.columns.map((column) => (
-            <label className="admin-check" key={column.key}>
-              <input
-                type="checkbox"
-                checked={!hiddenColumns[column.key]}
-                onChange={(event) => setHiddenColumns((current) => ({ ...current, [column.key]: !event.target.checked }))}
-              />
-              <span>{column.title}</span>
-            </label>
-          ))}
-        </div>
-      ) : null}
+      {error ? <div className="admin-inline-error">{error}</div> : null}
 
-      {error ? <div className="admin-error panel">{error}</div> : null}
-      {loading ? <div className="admin-empty">加载中...</div> : null}
-      {!loading && !error ? (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                {visibleColumns.map((column) => (
-                  <th key={column.key}>
-                    <button className={column.sortable ? 'sortable' : ''} onClick={() => toggleSort(column)}>
-                      {column.title}
-                      {column.sensitive ? <span className="admin-sensitive-dot">敏感</span> : null}
-                      {sortField === column.key ? <span>{sortOrder === 'asc' ? ' ↑' : ' ↓'}</span> : null}
-                    </button>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.rows.length ? (
-                data.rows.map((row, index) => (
-                  <tr key={`${activeViewKey}-${index}`}>
-                    {visibleColumns.map((column) => (
-                      <td key={column.key}>{formatCell(row[column.key], column)}</td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={Math.max(visibleColumns.length, 1)}>暂无数据</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-
-      <div className="admin-pagination">
-        <button disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>上一页</button>
-        <span>第 {data.pagination.page || page} / {data.pagination.totalPages || 1} 页，共 {data.pagination.total || 0} 条</span>
-        <button disabled={page >= (data.pagination.totalPages || 1)} onClick={() => setPage((current) => current + 1)}>下一页</button>
-      </div>
-    </section>
+      <Table
+        rowKey={(row, index) => row.id ?? row.participantId ?? `${activeViewKey}-${index}`}
+        columns={tableColumns}
+        dataSource={data.rows}
+        loading={loading || schemaLoading}
+        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无数据" /> }}
+        scroll={{ x: 'max-content' }}
+        pagination={{
+          current: data.pagination?.page || page,
+          pageSize,
+          total: data.pagination?.total || 0,
+          showSizeChanger: false,
+          showTotal: (total) => `共 ${total} 条`,
+        }}
+        onChange={handleTableChange}
+      />
+    </Card>
   )
 }
 
 function formatCell(value, column) {
-  if (value === null || value === undefined || value === '') return '-'
-  if (column?.type === 'image') {
-    return <img className="admin-table-avatar" src={String(value)} alt="" />
+  if (value === null || value === undefined || value === '') return <Text type="secondary">-</Text>
+  if (column?.key === 'displayAvatar' || column?.key === 'avatar' || column?.type === 'image') {
+    return <Avatar src={String(value)} size={32}>{String(value).slice(0, 1)}</Avatar>
   }
-  if (column?.type === 'boolean') return value ? '是' : '否'
+  if (column?.key === 'profileCompleted') {
+    return value ? <Tag color="green">已完善</Tag> : <Tag color="orange">未完善</Tag>
+  }
+  if (column?.type === 'boolean') return value ? <Tag color="green">是</Tag> : <Tag color="default">否</Tag>
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) return value.replace('T', ' ').slice(0, 19)
   return String(value)
 }

@@ -1,17 +1,45 @@
+import { useMemo, useState } from 'react'
+import {
+  Avatar,
+  Button,
+  Card,
+  Empty,
+  Input,
+  Layout,
+  Select,
+  Space,
+  Tabs,
+  Tag,
+  Tooltip,
+  Typography,
+} from 'antd'
+import {
+  BarChartOutlined,
+  DashboardOutlined,
+  DatabaseOutlined,
+  LogoutOutlined,
+  SearchOutlined,
+  SettingOutlined,
+  TableOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import AccountPage from './AccountPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
 import OperationLogPage from './OperationLogPage'
 import PermissionPage from './PermissionPage'
-import { useMemo, useState } from 'react'
+
+const { Header, Sider, Content } = Layout
+const { Text, Title } = Typography
 
 const tabs = [
-  { key: 'overview', label: '概览' },
-  { key: 'dashboard', label: '数据看板' },
-  { key: 'data', label: '数据表' },
-  { key: 'permissions', label: '权限配置' },
-  { key: 'accounts', label: '账号管理' },
-  { key: 'logs', label: '操作日志' },
+  { key: 'overview', label: '概览', icon: <DashboardOutlined /> },
+  { key: 'dashboard', label: '数据看板', icon: <BarChartOutlined /> },
+  { key: 'data', label: '数据表', icon: <TableOutlined /> },
+  { key: 'permissions', label: '权限配置', icon: <SettingOutlined /> },
+  { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
+  { key: 'logs', label: '操作日志', icon: <DatabaseOutlined /> },
 ]
 
 export default function AdminLayout({
@@ -41,116 +69,118 @@ export default function AdminLayout({
   )
 
   return (
-    <main className="admin-app">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <strong>Zice8</strong>
-          <span>Admin Console</span>
+    <Layout className="admin-shell">
+      <Sider width={304} className="admin-sider">
+        <div className="admin-logo">
+          <strong>Zice8 Admin</strong>
+          <span>活动数据控制台</span>
         </div>
-        <div className="admin-sidebar-title">活动导航</div>
-        <div className="admin-sidebar-filters">
-          <label>
-            <span>搜索活动</span>
-            <input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="名称 / key / 类型" />
-          </label>
-          <div className="admin-filter-row">
-            <label>
-              <span>类型</span>
-              <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-                <option value="">全部</option>
-                {activityTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>状态</span>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="">全部</option>
-                <option value="1">启用</option>
-                <option value="0">禁用</option>
-              </select>
-            </label>
-          </div>
-        </div>
-        <div className="admin-project-list">
+        <Space direction="vertical" size={10} className="admin-sider-filters">
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            placeholder="搜索活动名称 / key / 类型"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+          />
+          <Space.Compact block>
+            <Select
+              value={typeFilter}
+              onChange={setTypeFilter}
+              style={{ width: '50%' }}
+              options={[{ value: '', label: '全部类型' }, ...activityTypes.map((type) => ({ value: type, label: type }))]}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: '50%' }}
+              options={[
+                { value: '', label: '全部状态' },
+                { value: '1', label: '启用' },
+                { value: '0', label: '禁用' },
+              ]}
+            />
+          </Space.Compact>
+        </Space>
+        <div className="admin-activity-list">
           {filteredActivities.length ? (
             filteredActivities.map((activity) => (
               <button
+                type="button"
                 key={activity.activityKey}
-                className={activity.activityKey === selectedActivity?.activityKey ? 'active' : ''}
+                className={`admin-activity-item ${activity.activityKey === selectedActivity?.activityKey ? 'is-active' : ''}`}
                 onClick={() => onSelectActivity(activity.activityKey)}
               >
                 <span>{activity.title}</span>
                 <small>{activity.activityKey}</small>
-                <div className="admin-project-meta">
-                  <b>{activity.type}</b>
-                  <em className={activity.status === 1 ? 'is-on' : 'is-off'}>{activity.status === 1 ? '启用' : '禁用'}</em>
-                </div>
+                <Space size={6}>
+                  <Tag color="blue">{activity.type}</Tag>
+                  <Tag color={activity.status === 1 ? 'green' : 'red'}>{activity.status === 1 ? '启用' : '禁用'}</Tag>
+                </Space>
               </button>
             ))
           ) : (
-            <div className="admin-empty">暂无可访问活动</div>
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无可访问活动" />
           )}
         </div>
-      </aside>
+      </Sider>
 
-      <section className="admin-main">
-        <header className="admin-topbar">
+      <Layout>
+        <Header className="admin-header">
           <div>
-            <p className="admin-kicker">Activity Workspace</p>
-            <div className="admin-title-line">
-              <h1>{selectedActivity?.title || '管理后台'}</h1>
-              {selectedActivity ? <span className="admin-status-pill">{selectedActivity.status === 1 ? '启用' : '禁用'}</span> : null}
+            <Space align="center" size={10}>
+              <Title level={3} style={{ margin: 0 }}>{selectedActivity?.title || '管理后台'}</Title>
+              {selectedActivity ? <Tag color={selectedActivity.status === 1 ? 'green' : 'red'}>{selectedActivity.status === 1 ? '启用' : '禁用'}</Tag> : null}
+            </Space>
+            <div className="admin-header-subtitle">
+              {selectedActivity ? `${selectedActivity.activityKey} / ${selectedActivity.type}` : '请选择左侧活动'}
             </div>
-            <p>{selectedActivity ? `${selectedActivity.activityKey} / ${selectedActivity.type}` : '请选择活动'}</p>
           </div>
-          <div className="admin-userbox">
-            <div>
-              <span>{adminUser.nickname || adminUser.username}</span>
-              <small className={`admin-role ${adminUser.role}`}>{adminUser.role}</small>
+          <Space size={12}>
+            <Avatar icon={<UserOutlined />} />
+            <div className="admin-user-meta">
+              <Text strong>{adminUser.nickname || adminUser.username}</Text>
+              <Tag color={adminUser.role === 'super_admin' ? 'blue' : 'default'}>{adminUser.role}</Tag>
             </div>
-            <button className="admin-btn-secondary" onClick={onLogout}>退出登录</button>
-          </div>
-        </header>
+            <Tooltip title="退出登录">
+              <Button icon={<LogoutOutlined />} onClick={onLogout}>退出</Button>
+            </Tooltip>
+          </Space>
+        </Header>
 
-        {selectedActivity ? (
-          <section className="admin-activity-card">
-            <div>
-              <span className="admin-status-pill">{selectedActivity.status === 1 ? '启用' : '禁用'}</span>
-              <h2>{selectedActivity.title}</h2>
-              <p>{selectedActivity.activityKey}</p>
-            </div>
-            <dl>
-              <div><dt>类型</dt><dd>{selectedActivity.type}</dd></div>
-              <div><dt>开始时间</dt><dd>{formatDate(selectedActivity.startTime)}</dd></div>
-              <div><dt>结束时间</dt><dd>{formatDate(selectedActivity.endTime)}</dd></div>
-              <div><dt>创建时间</dt><dd>{formatDate(selectedActivity.createdAt)}</dd></div>
-            </dl>
-          </section>
-        ) : null}
+        <Content className="admin-content">
+          {selectedActivity ? (
+            <Card className="admin-activity-card" size="small">
+              <div className="admin-activity-summary">
+                <div>
+                  <Text type="secondary">当前活动</Text>
+                  <Title level={4} style={{ margin: '4px 0 0' }}>{selectedActivity.title}</Title>
+                </div>
+                <div><Text type="secondary">Activity Key</Text><strong>{selectedActivity.activityKey}</strong></div>
+                <div><Text type="secondary">类型</Text><strong>{selectedActivity.type}</strong></div>
+                <div><Text type="secondary">开始时间</Text><strong>{formatDate(selectedActivity.startTime)}</strong></div>
+                <div><Text type="secondary">结束时间</Text><strong>{formatDate(selectedActivity.endTime)}</strong></div>
+              </div>
+            </Card>
+          ) : null}
 
-        <nav className="admin-tabs">
-          {visibleTabs.map((tab) => (
-            <button key={tab.key} className={activeTab === tab.key ? 'active' : ''} onClick={() => onChangeTab(tab.key)}>
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+          <Tabs
+            className="admin-tabs"
+            activeKey={activeTab}
+            onChange={onChangeTab}
+            items={visibleTabs.map((tab) => ({ key: tab.key, label: <Space size={6}>{tab.icon}{tab.label}</Space> }))}
+          />
 
-        <div className="admin-content">
-          {!selectedActivity ? <div className="admin-empty panel">请选择左侧项目</div> : null}
+          {!selectedActivity ? <Card><Empty description="请选择左侧活动" /></Card> : null}
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
           {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
           {selectedActivity && activeTab === 'logs' ? <OperationLogPage activity={selectedActivity} /> : null}
-        </div>
-      </section>
-    </main>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
 

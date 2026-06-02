@@ -1,24 +1,31 @@
-import { useState } from 'react'
-import AdminPasswordInput from '../components/AdminPasswordInput'
+import { useEffect, useState } from 'react'
+import { Alert, Button, Card, Form, Input, Typography } from 'antd'
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { loginAdmin, setAdminToken } from '../api'
 
+const { Paragraph, Title } = Typography
+
 export default function LoginPage({ error, onLoginSuccess }) {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState(error || '')
+  const [form] = Form.useForm()
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-    if (!username.trim() || !password) {
+  useEffect(() => {
+    setMessage(error || '')
+  }, [error])
+
+  async function handleSubmit(values) {
+    const username = values.username?.trim()
+    if (!username || !values.password) {
       setMessage('请输入账号和密码')
       return
     }
     setSubmitting(true)
     setMessage('')
     try {
-      const data = await loginAdmin({ username: username.trim(), password })
+      const data = await loginAdmin({ username, password: values.password })
       setAdminToken(data.token)
+      form.setFieldValue('password', '')
       await onLoginSuccess()
     } catch (err) {
       setMessage(err.message || '登录失败')
@@ -29,25 +36,34 @@ export default function LoginPage({ error, onLoginSuccess }) {
 
   return (
     <main className="admin-login">
-      <form className="admin-login-panel" onSubmit={handleSubmit}>
-        <div>
-          <p className="admin-kicker">Zice8 Admin</p>
-          <h1>高级管理后台</h1>
-          <p>多项目、子账号、数据视图与字段权限管理</p>
+      <Card className="admin-login-card" bordered={false}>
+        <div className="admin-login-head">
+          <Title level={2}>Zice8 Admin</Title>
+          <Paragraph>活动数据控制台</Paragraph>
         </div>
-        <label>
-          <span>账号</span>
-          <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="admin" autoComplete="username" />
-        </label>
-        <label>
-          <span>密码</span>
-          <AdminPasswordInput value={password} onChange={(event) => setPassword(event.target.value)} placeholder="请输入密码" autoComplete="current-password" />
-        </label>
-        {message ? <div className="admin-error">{message}</div> : null}
-        <button type="submit" disabled={submitting}>
-          {submitting ? '登录中...' : '登录'}
-        </button>
-      </form>
+
+        {message ? <Alert type="error" showIcon message={message} style={{ marginBottom: 18 }} /> : null}
+
+        <Form form={form} layout="vertical" requiredMark={false} onFinish={handleSubmit}>
+          <Form.Item
+            label="账号"
+            name="username"
+            rules={[{ required: true, message: '请输入账号' }]}
+          >
+            <Input prefix={<UserOutlined />} placeholder="admin" autoComplete="username" size="large" />
+          </Form.Item>
+          <Form.Item
+            label="密码"
+            name="password"
+            rules={[{ required: true, message: '请输入密码' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" autoComplete="current-password" size="large" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={submitting} block size="large">
+            登录
+          </Button>
+        </Form>
+      </Card>
     </main>
   )
 }

@@ -1,7 +1,13 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
+import { InfoCircleOutlined } from '@ant-design/icons'
 import { getCharts, getOverview } from '../api'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
+const { Paragraph, Text, Title } = Typography
+
+const pvHint = '页面访问次数，同一访客同一页面 30 秒内重复访问只统计一次。'
+const uvHint = '按浏览器匿名访客 ID 去重统计。'
 
 export default function ActivityDashboard({ activity, compact = false }) {
   const [overview, setOverview] = useState(null)
@@ -35,15 +41,15 @@ export default function ActivityDashboard({ activity, compact = false }) {
     const completed = videoRank.completedCount || 0
     const watch = videoRank.watchUserCount || 0
     return [
-      { label: 'PV', value: overview?.pv ?? '-', hint: overview?.accessStats?.dataAvailable === false ? '暂无埋点' : '' },
-      { label: 'UV', value: overview?.uv ?? '-', hint: overview?.accessStats?.dataAvailable === false ? '暂无埋点' : '' },
-      { label: '今日 PV', value: overview?.todayPv ?? 0 },
-      { label: '今日 UV', value: overview?.todayUv ?? 0 },
+      { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+      { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+      { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+      { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
       { label: '正式参与人数', value: overview?.participantCount || 0 },
       { label: '今日新增参与', value: overview?.todayParticipantCount || 0 },
       { label: '互动次数', value: overview?.submitCount || 0 },
       { label: '完成数', value: completed },
-      { label: '完成率', value: watch ? `${Math.round((completed / watch) * 100)}%` : '0%' },
+      { label: '完成率', value: watch ? Math.round((completed / watch) * 100) : 0, suffix: '%' },
       { label: '留言数', value: videoRank.commentCount || 0 },
     ]
   }, [overview])
@@ -55,64 +61,105 @@ export default function ActivityDashboard({ activity, compact = false }) {
     name: item.name || '未填写姓名',
   }))
 
-  if (loading) return <div className="admin-panel">概览加载中...</div>
-  if (error) return <div className="admin-error panel">{error}</div>
+  if (loading) {
+    return (
+      <Card className="admin-card">
+        <div className="admin-centered-state"><Spin tip="数据加载中..." /></div>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="admin-card">
+        <Empty description={error} />
+      </Card>
+    )
+  }
 
   return (
     <div className="admin-stack">
-      <section className="admin-card-grid">
+      <Row gutter={[16, 16]}>
         {metrics.map((card) => (
-          <div className="admin-metric" key={card.label}>
-            <span>{card.label}</span>
-            <strong>{formatMetric(card.value)}</strong>
-            {card.hint ? <small>{card.hint}</small> : null}
-          </div>
+          <Col xs={24} sm={12} lg={compact ? 6 : 6} xl={compact ? 6 : 4} key={card.label}>
+            <Card className="admin-kpi-card" size="small">
+              <Statistic
+                title={(
+                  <span>
+                    {card.label}
+                    {card.tooltip ? (
+                      <Tooltip title={card.tooltip}>
+                        <InfoCircleOutlined className="admin-stat-help" />
+                      </Tooltip>
+                    ) : null}
+                  </span>
+                )}
+                value={card.value}
+                suffix={card.suffix}
+                formatter={formatMetric}
+              />
+              {card.hint ? <Text type="secondary" className="admin-kpi-hint">{card.hint}</Text> : null}
+            </Card>
+          </Col>
         ))}
-      </section>
-      <p className="admin-muted">PV：页面访问次数，同一访客同一页面 30 秒内重复访问只统计一次。UV：按浏览器匿名访客 ID 去重统计。</p>
+      </Row>
+
+      <Paragraph className="admin-muted">
+        PV：{pvHint} UV：{uvHint}
+      </Paragraph>
 
       {compact ? null : (
         <>
-          <section className="admin-chart-grid">
-            <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
-              {charts?.access?.dataAvailable ? (
-                <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
-              ) : (
-                <div className="admin-chart-empty">{charts?.access?.message || '暂无访问埋点数据'}</div>
-              )}
-            </ChartPanel>
-            <ChartPanel title="近 7 天参与趋势" description="按参与时间统计">
-              <LazyChart type="bar" data={participantTrend} series={[{ key: 'participants', name: '参与人数' }]} />
-            </ChartPanel>
-            <ChartPanel title="近 7 天互动/完成趋势" description="观看记录更新与完成时间">
-              <LazyChart
-                type="line"
-                data={mergeTrend(charts?.submissions?.trend, charts?.submissions?.completionTrend)}
-                series={[{ key: 'submissions', name: '互动次数' }, { key: 'completed', name: '完成数' }]}
-              />
-            </ChartPanel>
-          </section>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} xl={8}>
+              <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                {charts?.access?.dataAvailable ? (
+                  <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                ) : (
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                )}
+              </ChartPanel>
+            </Col>
+            <Col xs={24} xl={8}>
+              <ChartPanel title="近 7 天参与趋势" description="按参与时间统计">
+                <LazyChart type="bar" data={participantTrend} series={[{ key: 'participants', name: '参与人数' }]} />
+              </ChartPanel>
+            </Col>
+            <Col xs={24} xl={8}>
+              <ChartPanel title="近 7 天互动/完成趋势" description="观看记录更新与完成时间">
+                <LazyChart
+                  type="line"
+                  data={mergeTrend(charts?.submissions?.trend, charts?.submissions?.completionTrend)}
+                  series={[{ key: 'submissions', name: '互动次数' }, { key: 'completed', name: '完成数' }]}
+                />
+              </ChartPanel>
+            </Col>
+          </Row>
 
           {activity.type === 'video-rank' ? (
-            <section className="admin-chart-grid">
-              <ChartPanel title="留言数量趋势" description="近 7 天留言提交量">
-                <LazyChart type="line" data={commentTrend} series={[{ key: 'comments', name: '留言数' }]} />
-              </ChartPanel>
-              <ChartPanel title="排行榜 Top 10" description="完成数优先，越早完成越靠前">
-                <LazyChart type="horizontalBar" data={rankTop10} series={[{ key: 'finishCount', name: '完成数' }]} height={300} emptyText="暂无完成视频的用户" />
-              </ChartPanel>
-            </section>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="留言数量趋势" description="近 7 天留言提交量">
+                  <LazyChart type="line" data={commentTrend} series={[{ key: 'comments', name: '留言数' }]} />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="排行榜 Top 10" description="仅展示完成过视频的用户，完成数越高越靠前">
+                  <LazyChart type="horizontalBar" data={rankTop10} series={[{ key: 'finishCount', name: '完成数' }]} height={300} emptyText="暂无完成视频的用户" />
+                </ChartPanel>
+              </Col>
+            </Row>
           ) : activity.type === 'lottery' ? (
-            <section className="admin-chart-grid">
-              <ChartPanel title="抽奖次数趋势" description="预留图表，等待抽奖数据源接入"><div className="admin-chart-empty">抽奖次数趋势暂未接入数据源</div></ChartPanel>
-              <ChartPanel title="奖品中奖分布" description="预留环图"><div className="admin-chart-empty">奖品中奖分布暂未接入数据源</div></ChartPanel>
-              <ChartPanel title="奖品库存" description="预留柱状图"><div className="admin-chart-empty">奖品库存暂未接入数据源</div></ChartPanel>
-            </section>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={8}><ChartPanel title="抽奖次数趋势" description="预留图表，等待抽奖数据源接入"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="抽奖次数趋势暂未接入数据源" /></ChartPanel></Col>
+              <Col xs={24} xl={8}><ChartPanel title="奖品中奖分布" description="预留环图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品中奖分布暂未接入数据源" /></ChartPanel></Col>
+              <Col xs={24} xl={8}><ChartPanel title="奖品库存" description="预留柱状图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品库存暂未接入数据源" /></ChartPanel></Col>
+            </Row>
           ) : (
-            <section className="admin-panel">
-              <h2>专项统计</h2>
-              <p className="admin-muted">当前活动类型暂未接入专项图表，已展示通用统计。</p>
-            </section>
+            <Card className="admin-card">
+              <Title level={5}>专项统计</Title>
+              <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>
+            </Card>
           )}
         </>
       )}
@@ -122,7 +169,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
 function LazyChart(props) {
   return (
-    <Suspense fallback={<div className="admin-chart-empty">图表加载中...</div>}>
+    <Suspense fallback={<div className="admin-centered-state"><Spin size="small" tip="图表加载中..." /></div>}>
       <AdminChart {...props} />
     </Suspense>
   )
@@ -130,15 +177,9 @@ function LazyChart(props) {
 
 function ChartPanel({ title, description, children }) {
   return (
-    <div className="admin-panel admin-chart-panel">
-      <div className="admin-section-head compact">
-        <div>
-          <h2>{title}</h2>
-          {description ? <p>{description}</p> : null}
-        </div>
-      </div>
+    <Card className="admin-chart-card" title={title} extra={description ? <Text type="secondary">{description}</Text> : null}>
       {children}
-    </div>
+    </Card>
   )
 }
 

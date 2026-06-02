@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Alert, Button, Card, Checkbox, Col, Empty, Row, Select, Space, Spin, Switch, Tag, Typography, message } from 'antd'
+import { SaveOutlined } from '@ant-design/icons'
 import { getAccount, getAccounts, getDataSchema, updateAccountActivities, updateAccountPermissions } from '../api'
 
 const emptyViewPermission = { canView: false, canExport: false, canSort: false, canSearch: false, fields: {} }
@@ -9,6 +11,8 @@ const maskOptions = [
   { value: 'hidden', label: '隐藏' },
 ]
 
+const { Text, Title } = Typography
+
 export default function PermissionPage({ activity, activities }) {
   const [accounts, setAccounts] = useState([])
   const [selectedAccountId, setSelectedAccountId] = useState('')
@@ -16,11 +20,13 @@ export default function PermissionPage({ activity, activities }) {
   const [schema, setSchema] = useState({ views: [] })
   const [selectedActivityIds, setSelectedActivityIds] = useState([])
   const [permissions, setPermissions] = useState({})
-  const [message, setMessage] = useState('')
+  const [selectedViewKey, setSelectedViewKey] = useState('')
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
   const projectAccounts = useMemo(() => accounts.filter((account) => account.role === 'project_admin'), [accounts])
   const schemaActivity = useMemo(() => activities.find((item) => item.activityKey === schemaActivityKey) || activity, [activities, activity, schemaActivityKey])
+  const selectedView = useMemo(() => schema.views.find((view) => view.viewKey === selectedViewKey) || schema.views[0], [schema.views, selectedViewKey])
   const summary = useMemo(() => {
     const selectedViews = schema.views.filter((view) => permissions[view.viewKey]?.canView).length
     const selectedFields = schema.views.reduce((count, view) => {
@@ -39,9 +45,10 @@ export default function PermissionPage({ activity, activities }) {
         if (!alive) return
         setAccounts(accountList)
         setSchema(schemaData)
+        setSelectedViewKey(schemaData.views?.[0]?.viewKey || '')
         setSelectedAccountId((current) => current || accountList.find((account) => account.role === 'project_admin')?.id || '')
       })
-      .catch((err) => setMessage(err.message || '权限数据加载失败'))
+      .catch((err) => message.error(err.message || '权限数据加载失败'))
       .finally(() => {
         if (alive) setLoading(false)
       })
@@ -69,7 +76,7 @@ export default function PermissionPage({ activity, activities }) {
         })
         setPermissions(next)
       })
-      .catch((err) => setMessage(err.message || '账号权限加载失败'))
+      .catch((err) => message.error(err.message || '账号权限加载失败'))
   }, [selectedAccountId])
 
   function updateViewPermission(viewKey, patch) {
@@ -109,7 +116,7 @@ export default function PermissionPage({ activity, activities }) {
 
   async function handleSave() {
     if (!selectedAccountId) return
-    setMessage('')
+    setSaving(true)
     const payload = schema.views.map((view) => {
       const viewPermission = permissions[view.viewKey] || emptyViewPermission
       return {
@@ -132,109 +139,164 @@ export default function PermissionPage({ activity, activities }) {
       await updateAccountPermissions(selectedAccountId, payload)
       const account = await getAccount(selectedAccountId)
       setSelectedActivityIds(account.activities.map((item) => item.id))
-      setMessage('权限已保存')
+      message.success('权限已保存')
     } catch (err) {
-      setMessage(err.message || '保存失败')
+      message.error(err.message || '保存失败')
+    } finally {
+      setSaving(false)
     }
   }
 
-  if (loading) return <div className="admin-panel">权限加载中...</div>
+  if (loading) {
+    return (
+      <Card className="admin-card">
+        <div className="admin-centered-state"><Spin tip="权限加载中..." /></div>
+      </Card>
+    )
+  }
+
+  if (!projectAccounts.length) {
+    return (
+      <Card className="admin-card">
+        <Empty description="暂无可配置的项目子账号" />
+      </Card>
+    )
+  }
+
+  const selectedViewPermission = permissions[selectedView?.viewKey] || emptyViewPermission
 
   return (
-    <section className="admin-panel">
-      <div className="admin-section-head">
-        <div>
-          <h2>权限配置</h2>
-          <p>按活动数据视图配置子账号可见字段、导出、搜索和排序能力</p>
+    <div className="admin-permission-page">
+      <Card className="admin-card">
+        <div className="admin-page-head">
+          <div>
+            <Title level={4}>权限配置</Title>
+            <Text type="secondary">按活动数据视图配置子账号可见字段、导出、搜索和排序能力</Text>
+          </div>
+          <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={handleSave}>保存权限</Button>
         </div>
-        <button className="admin-btn-primary" onClick={handleSave}>保存权限</button>
-      </div>
+        <Alert
+          type="info"
+          showIcon
+          message={`已选择 ${summary.selectedViews} 个数据视图，已开放 ${summary.selectedFields} 个字段，当前 schema 包含 ${summary.sensitiveFields} 个敏感字段。`}
+        />
+      </Card>
 
-      {message ? <div className={message.includes('失败') || message.includes('错误') ? 'admin-error' : 'admin-success'}>{message}</div> : null}
+      <Row gutter={[16, 16]} align="stretch">
+        <Col xs={24} xl={6}>
+          <Card className="admin-card admin-permission-column" title="账号与活动">
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <div>
+                <Text strong>子账号</Text>
+                <Select
+                  value={selectedAccountId}
+                  onChange={setSelectedAccountId}
+                  style={{ width: '100%', marginTop: 8 }}
+                  options={projectAccounts.map((account) => ({ value: account.id, label: account.nickname || account.username }))}
+                />
+              </div>
+              <div>
+                <Text strong>配置活动</Text>
+                <Select
+                  value={schemaActivityKey}
+                  onChange={setSchemaActivityKey}
+                  style={{ width: '100%', marginTop: 8 }}
+                  options={activities.map((item) => ({ value: item.activityKey, label: `${item.title} / ${item.type}` }))}
+                />
+              </div>
+              <div>
+                <Text strong>活动授权</Text>
+                <Checkbox.Group
+                  className="admin-activity-checks"
+                  value={selectedActivityIds}
+                  onChange={(values) => setSelectedActivityIds(values)}
+                >
+                  {activities.map((item) => (
+                    <Checkbox key={item.id} value={item.id}>{item.title}</Checkbox>
+                  ))}
+                </Checkbox.Group>
+              </div>
+            </Space>
+          </Card>
+        </Col>
 
-      <div className="admin-permission-grid">
-        <label>
-          <span>子账号</span>
-          <select value={selectedAccountId} onChange={(event) => setSelectedAccountId(event.target.value)}>
-            {projectAccounts.map((account) => (
-              <option key={account.id} value={account.id}>{account.nickname || account.username}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span>配置活动</span>
-          <select value={schemaActivityKey} onChange={(event) => setSchemaActivityKey(event.target.value)}>
-            {activities.map((item) => (
-              <option key={item.id} value={item.activityKey}>{item.title} / {item.type}</option>
-            ))}
-          </select>
-        </label>
-        <div className="admin-permission-summary">
-          <span>已选择 {summary.selectedViews} 个数据视图</span>
-          <span>已开放 {summary.selectedFields} 个字段</span>
-          <span>{summary.sensitiveFields} 个敏感字段</span>
-        </div>
-      </div>
+        <Col xs={24} xl={6}>
+          <Card className="admin-card admin-permission-column" title="数据视图">
+            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+              {schema.views.map((view) => {
+                const viewPermission = permissions[view.viewKey] || emptyViewPermission
+                return (
+                  <button
+                    type="button"
+                    key={view.viewKey}
+                    className={`admin-view-card ${selectedView?.viewKey === view.viewKey ? 'is-active' : ''}`}
+                    onClick={() => setSelectedViewKey(view.viewKey)}
+                  >
+                    <span>{view.label}</span>
+                    <small>{view.description}</small>
+                    <Space size={4} wrap>
+                      {viewPermission.canView ? <Tag color="blue">可查看</Tag> : <Tag>未开放</Tag>}
+                      {view.fields.some((field) => field.sensitive) ? <Tag color="orange">含敏感字段</Tag> : null}
+                    </Space>
+                  </button>
+                )
+              })}
+            </Space>
+          </Card>
+        </Col>
 
-      <div className="admin-permission-box">
-        <strong>活动授权</strong>
-        <div className="admin-activity-checks">
-          {activities.map((item) => (
-            <label className="admin-check" key={item.id}>
-              <input
-                type="checkbox"
-                checked={selectedActivityIds.includes(item.id)}
-                onChange={(event) => {
-                  setSelectedActivityIds((current) => event.target.checked ? [...new Set([...current, item.id])] : current.filter((id) => id !== item.id))
-                }}
-              />
-              <span>{item.title}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="admin-permission-list">
-        {schema.views.map((view) => {
-          const viewPermission = permissions[view.viewKey] || emptyViewPermission
-          return (
-            <div className="admin-permission-view" key={view.viewKey}>
-              <div className="admin-permission-view-head">
-                <div>
-                  <strong>{view.label}</strong>
-                  <p>{view.description}</p>
+        <Col xs={24} xl={12}>
+          <Card
+            className="admin-card admin-permission-column"
+            title={selectedView?.label || '字段权限'}
+            extra={selectedView ? <Text type="secondary">{selectedView.fields.length} 个字段</Text> : null}
+          >
+            {selectedView ? (
+              <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                <Space wrap>
+                  <Switch checked={Boolean(selectedViewPermission.canView)} onChange={(checked) => updateViewPermission(selectedView.viewKey, { canView: checked })} />
+                  <Text>可查看</Text>
+                  <Checkbox checked={Boolean(selectedViewPermission.canExport)} onChange={(event) => updateViewPermission(selectedView.viewKey, { canExport: event.target.checked })}>可导出</Checkbox>
+                  <Checkbox checked={Boolean(selectedViewPermission.canSearch)} onChange={(event) => updateViewPermission(selectedView.viewKey, { canSearch: event.target.checked })}>可搜索</Checkbox>
+                  <Checkbox checked={Boolean(selectedViewPermission.canSort)} onChange={(event) => updateViewPermission(selectedView.viewKey, { canSort: event.target.checked })}>可排序</Checkbox>
+                </Space>
+                <Space wrap>
+                  <Button size="small" onClick={() => bulkFields(selectedView, 'all')}>全选字段</Button>
+                  <Button size="small" onClick={() => bulkFields(selectedView, 'invert')}>反选字段</Button>
+                  <Button size="small" danger onClick={() => bulkFields(selectedView, 'clear')}>清空字段</Button>
+                </Space>
+                <div className="admin-field-list">
+                  {selectedView.fields.map((field) => {
+                    const fieldPermission = selectedViewPermission.fields?.[field.fieldKey] || {}
+                    return (
+                      <div className="admin-field-card" key={field.fieldKey}>
+                        <Checkbox
+                          checked={Boolean(fieldPermission.canView)}
+                          onChange={(event) => updateFieldPermission(selectedView.viewKey, field.fieldKey, { canView: event.target.checked, canExport: event.target.checked })}
+                        >
+                          <Space size={6}>
+                            <span>{field.label}</span>
+                            <Text type="secondary">{field.fieldKey}</Text>
+                            {field.sensitive ? <Tag color="orange">敏感</Tag> : null}
+                          </Space>
+                        </Checkbox>
+                        <Select
+                          value={fieldPermission.maskType || field.defaultMaskType || 'none'}
+                          onChange={(value) => updateFieldPermission(selectedView.viewKey, field.fieldKey, { maskType: value })}
+                          options={maskOptions}
+                          style={{ width: 132 }}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
-                <label className="admin-check"><input type="checkbox" checked={Boolean(viewPermission.canView)} onChange={(event) => updateViewPermission(view.viewKey, { canView: event.target.checked })} /><span>可查看</span></label>
-                <label className="admin-check"><input type="checkbox" checked={Boolean(viewPermission.canExport)} onChange={(event) => updateViewPermission(view.viewKey, { canExport: event.target.checked })} /><span>可导出</span></label>
-                <label className="admin-check"><input type="checkbox" checked={Boolean(viewPermission.canSearch)} onChange={(event) => updateViewPermission(view.viewKey, { canSearch: event.target.checked })} /><span>可搜索</span></label>
-                <label className="admin-check"><input type="checkbox" checked={Boolean(viewPermission.canSort)} onChange={(event) => updateViewPermission(view.viewKey, { canSort: event.target.checked })} /><span>可排序</span></label>
-              </div>
-              <div className="admin-field-actions">
-                <button onClick={() => bulkFields(view, 'all')}>全选字段</button>
-                <button onClick={() => bulkFields(view, 'invert')}>反选字段</button>
-                <button onClick={() => bulkFields(view, 'clear')}>清空字段</button>
-              </div>
-              <div className="admin-field-grid">
-                {view.fields.map((field) => {
-                  const fieldPermission = viewPermission.fields?.[field.fieldKey] || {}
-                  return (
-                    <div className="admin-field-row" key={field.fieldKey}>
-                      <label className="admin-check">
-                        <input type="checkbox" checked={Boolean(fieldPermission.canView)} onChange={(event) => updateFieldPermission(view.viewKey, field.fieldKey, { canView: event.target.checked, canExport: event.target.checked })} />
-                        <span>{field.label}</span>
-                        {field.sensitive ? <em>敏感</em> : null}
-                      </label>
-                      <select value={fieldPermission.maskType || field.defaultMaskType || 'none'} onChange={(event) => updateFieldPermission(view.viewKey, field.fieldKey, { maskType: event.target.value })}>
-                        {maskOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                      </select>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </section>
+              </Space>
+            ) : (
+              <Empty description="暂无数据视图" />
+            )}
+          </Card>
+        </Col>
+      </Row>
+    </div>
   )
 }
