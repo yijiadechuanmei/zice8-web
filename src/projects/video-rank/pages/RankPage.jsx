@@ -11,6 +11,9 @@ export default function RankPage({ ranks, me, onBack }) {
         </div>
         <button onClick={onBack} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">返回首页</button>
       </div>
+      <p className="mb-3 rounded-2xl bg-white px-4 py-3 text-sm leading-6 text-slate-600 shadow-sm">
+        每个视频需完成观看并提交该视频留言后，才计入完成数量。已在规则生效前完成的视频不受影响。
+      </p>
       <RankList ranks={ranks} currentUserId={me?.id} />
       <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
     </main>

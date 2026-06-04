@@ -47,7 +47,7 @@ export default function VideoDetailPage({ activityKey, videoId, userId, debug, o
 
   async function handleSubmitProgress(segments) {
     const result = await submitWatchSegments(activityKey, video.id, segments)
-    setVideo({ ...video, completed: result.completed, watchRate: result.watchRate, finishTime: result.finishTime })
+    setVideo((current) => ({ ...current, ...pickCompletionFields(result), watchRate: result.watchRate, watchedSeconds: result.watchedSeconds, finishTime: result.finishTime, completedAt: result.completedAt }))
     onProgressSubmitted?.()
     return result
   }
@@ -55,7 +55,9 @@ export default function VideoDetailPage({ activityKey, videoId, userId, debug, o
   async function handleSubmitComment(content) {
     const createdComment = await submitComment(activityKey, video.id, content)
     trackEvent({ activityKey, eventType: 'submit_comment', page: '/video-rank', extra: { videoId: video.id } })
+    setVideo((current) => ({ ...current, ...pickCompletionFields(createdComment) }))
     setComments((current) => [createdComment, ...current])
+    onProgressSubmitted?.()
     setCommentsLoading(true)
     try {
       const data = await getComments(activityKey, video.id)
@@ -79,10 +81,40 @@ export default function VideoDetailPage({ activityKey, videoId, userId, debug, o
       {!loading && !error && video && (
         <>
           <VideoPlayer key={video.id} activityKey={activityKey} userId={userId} video={video} debug={debug} onSubmitProgress={handleSubmitProgress} />
+          <CompletionNotice video={video} />
           <CommentBox comments={comments} loading={commentsLoading} onSubmit={handleSubmitComment} />
         </>
       )}
       <footer className="pt-6 text-center text-xs text-slate-400">{VIDEO_RANK_VERSION}</footer>
     </main>
   )
+}
+
+function pickCompletionFields(result) {
+  return {
+    watchCompleted: Boolean(result.watchCompleted),
+    commentCompleted: Boolean(result.commentCompleted),
+    legacyCompleted: Boolean(result.legacyCompleted),
+    completed: Boolean(result.completed),
+    completionPendingComment: Boolean(result.completionPendingComment),
+    completionPendingWatch: Boolean(result.completionPendingWatch),
+    completedAt: result.completedAt || null,
+  }
+}
+
+function CompletionNotice({ video }) {
+  const message = getCompletionMessage(video)
+  if (!message) return null
+  return (
+    <div className={`mt-3 rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm ${video.completed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+      {message}
+    </div>
+  )
+}
+
+function getCompletionMessage(video) {
+  if (video.completed) return '本视频已完成，已计入排行榜。'
+  if (video.watchCompleted && !video.commentCompleted && !video.legacyCompleted) return '你已看完本视频，请完成留言后计入排行榜。'
+  if (video.commentCompleted && !video.watchCompleted) return '留言已提交，请看完视频后计入排行榜。'
+  return ''
 }

@@ -46,7 +46,7 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
   const submittingRef = useRef(false)
   const flushAgainRef = useRef(false)
   const flushAgainReasonRef = useRef('queued')
-  const completedRef = useRef(Boolean(video.completed))
+  const completedRef = useRef(Boolean(video.watchCompleted || video.completed))
   const lastSubmitTimeRef = useRef(0)
   const serverWatchedSecondsRef = useRef(Math.floor((video.watchRate || 0) * (video.duration || 0)))
   const serverWatchRateRef = useRef(video.watchRate || 0)
@@ -54,7 +54,9 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
   const [serverWatchRate, setServerWatchRate] = useState(video.watchRate || 0)
   const [displayWatchRate, setDisplayWatchRate] = useState(video.watchRate || 0)
   const [serverWatchedSeconds, setServerWatchedSeconds] = useState(Math.floor((video.watchRate || 0) * (video.duration || 0)))
-  const [completed, setCompleted] = useState(Boolean(video.completed))
+  const [watchCompleted, setWatchCompleted] = useState(Boolean(video.watchCompleted || video.completed))
+  const [rankingCompleted, setRankingCompleted] = useState(Boolean(video.completed))
+  const [completionState, setCompletionState] = useState(() => getCompletionState(video))
   const [pendingCount, setPendingCount] = useState(0)
   const [lastSubmitTime, setLastSubmitTime] = useState(0)
   const [submitStatus, setSubmitStatus] = useState('idle')
@@ -67,6 +69,14 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
     setToast(message)
     window.setTimeout(() => setToast(''), 1500)
   }
+
+  useEffect(() => {
+    const nextWatchCompleted = Boolean(video.watchCompleted || video.completed)
+    completedRef.current = nextWatchCompleted
+    setWatchCompleted(nextWatchCompleted)
+    setRankingCompleted(Boolean(video.completed))
+    setCompletionState(getCompletionState(video))
+  }, [video.completed, video.watchCompleted, video.commentCompleted, video.legacyCompleted, video.completionPendingComment, video.completionPendingWatch])
 
   function updatePendingCount() {
     setPendingCount(pendingRef.current.length)
@@ -140,7 +150,8 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
       const result = await onSubmitProgress(segments)
       const nextWatchRate = result.watchRate || 0
       const nextWatchedSeconds = result.watchedSeconds ?? Math.floor(nextWatchRate * (video.duration || 0))
-      completedRef.current = Boolean(result.completed)
+      const nextWatchCompleted = Boolean(result.watchCompleted || result.completed)
+      completedRef.current = nextWatchCompleted
       lastSubmitTimeRef.current = Date.now()
       serverWatchRateRef.current = nextWatchRate
       serverWatchedSecondsRef.current = nextWatchedSeconds
@@ -148,7 +159,9 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
       setServerWatchRate(nextWatchRate)
       setDisplayWatchRate(maxDisplayWatchRateRef.current)
       setServerWatchedSeconds(nextWatchedSeconds)
-      setCompleted(completedRef.current)
+      setWatchCompleted(nextWatchCompleted)
+      setRankingCompleted(Boolean(result.completed))
+      setCompletionState(getCompletionState(result))
       setLastSubmitTime(lastSubmitTimeRef.current)
       setSubmitStatus('success')
     } catch {
@@ -314,7 +327,7 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
         <h1 className="mb-3 text-xl font-black leading-tight text-slate-950">{video.title}</h1>
         <div className="flex items-center justify-between gap-3">
           <span className="text-slate-600">已累计观看 {Math.round((displayWatchRate || 0) * 100)}%</span>
-          <span className={completed ? 'font-semibold text-emerald-600' : 'text-slate-500'}>{completed ? '已完成' : '累计观看达到 90% 后完成'}</span>
+          <span className={rankingCompleted ? 'font-semibold text-emerald-600' : watchCompleted ? 'font-semibold text-amber-600' : 'text-slate-500'}>{completionState.playerLabel}</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full bg-rose-600" style={{ width: `${Math.min((displayWatchRate || 0) * 100, 100)}%` }} />
@@ -330,14 +343,28 @@ export default function VideoPlayer({ activityKey, userId, video, debug, onSubmi
             <p>localSavedPosition: {localSavedPosition}</p>
             <p>maxAllowedTime: {Math.floor(maxAllowedTime)}</p>
             <p>currentTime: {Math.floor(currentTime)}</p>
-            <p>allowSeek: {String(completed)}</p>
+            <p>allowSeek: {String(watchCompleted)}</p>
             <p>pendingSegments: {pendingCount}</p>
             <p>lastSubmitTime: {formatSubmitTime(lastSubmitTime)}</p>
             <p>submitStatus: {submitStatus}</p>
-            <p>completed: {String(completed)}</p>
+            <p>watchCompleted: {String(watchCompleted)}</p>
+            <p>rankingCompleted: {String(rankingCompleted)}</p>
           </div>
         )}
       </div>
     </div>
   )
+}
+
+function getCompletionState(video) {
+  if (video?.completed) {
+    return { playerLabel: '已完成，已计入排行榜' }
+  }
+  if (video?.watchCompleted && !video?.commentCompleted && !video?.legacyCompleted) {
+    return { playerLabel: '已看完，请留言后计入完成' }
+  }
+  if (video?.commentCompleted && !video?.watchCompleted) {
+    return { playerLabel: '已留言，请看完视频后计入完成' }
+  }
+  return { playerLabel: '累计观看达到 90% 后完成' }
 }
