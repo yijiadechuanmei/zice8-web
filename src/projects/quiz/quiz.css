@@ -312,12 +312,6 @@
   font-weight: 800;
 }
 
-.quiz-feedback small {
-  display: block;
-  margin-top: 6px;
-  font-weight: 600;
-}
-
 .quiz-feedback.is-wrong,
 .quiz-feedback.is-timeout,
 .quiz-error,

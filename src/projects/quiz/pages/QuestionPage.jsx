@@ -98,7 +98,6 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
         {feedback ? (
           <div className={`quiz-feedback ${feedback.isTimeout ? 'is-timeout' : feedback.isCorrect ? 'is-correct' : 'is-wrong'}`}>
             {feedback.isTimeout ? '答题超时' : feedback.isCorrect ? '回答正确' : '回答错误'}
-            {feedback.correctOptions?.length ? <small>正确答案：{feedback.correctOptions.join('、')}</small> : null}
           </div>
         ) : null}
       </section>
