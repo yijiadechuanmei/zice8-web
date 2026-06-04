@@ -36,3 +36,9 @@ export const getResult = (activityKey, attemptId) => request(`/quiz/activities/$
 
 export const getRank = (activityKey, page = 1, pageSize = 50) =>
   request(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`)
+
+export const resetDemoActivity = (activityKey) =>
+  request(`/quiz/activities/${activityKey}/dev-reset`, {
+    method: 'POST',
+    body: JSON.stringify({ confirm: 'RESET_QUIZ_DEMO' }),
+  })

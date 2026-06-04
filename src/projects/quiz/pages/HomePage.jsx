@@ -1,6 +1,6 @@
 import QuizButton from '../components/QuizButton'
 
-export default function HomePage({ bootstrap, onOpenRule, onStart, onOpenRank, onResume }) {
+export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpenRank, onResume, onReset }) {
   return (
     <main className="quiz-page quiz-home">
       <section className="quiz-hero">
@@ -27,6 +27,11 @@ export default function HomePage({ bootstrap, onOpenRule, onStart, onOpenRank, o
         <QuizButton onClick={onStart}>开始挑战</QuizButton>
         <QuizButton variant="secondary" onClick={onOpenRule}>活动规则</QuizButton>
         <QuizButton variant="secondary" onClick={onOpenRank}>排行榜</QuizButton>
+        {debug ? (
+          <button className="quiz-reset-button" type="button" onClick={onReset}>
+            重置当前测试活动
+          </button>
+        ) : null}
       </section>
     </main>
   )

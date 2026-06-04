@@ -352,6 +352,17 @@
   font-weight: 700;
 }
 
+.quiz-reset-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px dashed #b54708;
+  border-radius: 8px;
+  background: rgba(255, 247, 237, 0.88);
+  color: #9a3412;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 .quiz-empty {
   background: #f7f4d8;
   color: #66724b;

@@ -8,6 +8,7 @@ import {
   getCurrentAttempt,
   getRank,
   getResult,
+  resetDemoActivity,
   startAttempt,
   submitAnswer,
   submitProfile,
@@ -39,6 +40,7 @@ export default function QuizApp() {
 
 function QuizMain() {
   const activityKey = getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
+  const debug = getQueryParam('debug') === '1'
   const [page, setPage] = useState('home')
   const [bootstrap, setBootstrap] = useState(null)
   const [current, setCurrent] = useState(null)
@@ -250,6 +252,28 @@ function QuizMain() {
     }
   }
 
+  async function handleReset() {
+    if (!debug) return
+    const confirmed = window.confirm('确认重置当前答题活动数据？不会影响其他活动。')
+    if (!confirmed) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await resetDemoActivity(activityKey)
+      localStorage.removeItem(attemptStorageKey)
+      setCurrent(null)
+      setResult(null)
+      setFeedback(null)
+      setPage('home')
+      await loadBootstrap()
+      setError('当前答题活动已重置')
+    } catch (err) {
+      showError(err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   function backHome() {
     setPage('home')
     setFeedback(null)
@@ -269,10 +293,12 @@ function QuizMain() {
       {page === 'home' ? (
         <HomePage
           bootstrap={bootstrap}
+          debug={debug}
           onOpenRule={() => setPage('rule')}
           onStart={handleStart}
           onOpenRank={openRank}
           onResume={() => resumeAttempt(bootstrap.currentAttempt.attemptId).catch(showError)}
+          onReset={handleReset}
         />
       ) : null}
       {page === 'rule' ? <RulePage onBack={backHome} /> : null}

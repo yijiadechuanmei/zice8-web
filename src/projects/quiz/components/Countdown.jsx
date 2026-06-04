@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function Countdown({ seconds, active, onTimeout }) {
   const [remaining, setRemaining] = useState(Math.max(Number(seconds || 0), 0))
+  const timeoutFiredRef = useRef(false)
 
   useEffect(() => {
     setRemaining(Math.max(Number(seconds || 0), 0))
+    timeoutFiredRef.current = false
   }, [seconds])
 
   useEffect(() => {
@@ -14,7 +16,8 @@ export default function Countdown({ seconds, active, onTimeout }) {
   }, [active, remaining])
 
   useEffect(() => {
-    if (!active || remaining !== 0) return
+    if (!active || remaining !== 0 || timeoutFiredRef.current) return
+    timeoutFiredRef.current = true
     onTimeout?.()
   }, [active, remaining, onTimeout])
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Countdown from '../components/Countdown'
 import OptionItem from '../components/OptionItem'
 import QuizButton from '../components/QuizButton'
@@ -6,9 +6,11 @@ import QuizButton from '../components/QuizButton'
 export default function QuestionPage({ current, feedback, submitting, onAnswer, onTimeout }) {
   const question = current?.currentQuestion
   const [selected, setSelected] = useState([])
+  const timeoutTriggeredRef = useRef(false)
 
   useEffect(() => {
     setSelected([])
+    timeoutTriggeredRef.current = false
   }, [question?.questionId])
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 0
@@ -18,7 +20,8 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
   const correctOptions = useMemo(() => new Set(feedback?.correctOptions || []), [feedback])
 
   const handleTimeout = useCallback(() => {
-    if (!question || locked) return
+    if (!question || locked || timeoutTriggeredRef.current) return
+    timeoutTriggeredRef.current = true
     onTimeout(question.questionId)
   }, [locked, onTimeout, question])
 
@@ -33,6 +36,7 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
   }
 
   function toggleOption(option) {
+    if (locked) return
     const value = option.label || option.id
     if (question.type === 'single') {
       setSelected([value])
@@ -58,7 +62,12 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
             <span>{progressText}</span>
             <div className="quiz-progress"><i style={{ width: `${totalQuestions ? (questionSort / totalQuestions) * 100 : 0}%` }} /></div>
           </div>
-          <Countdown seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10} active={!locked} onTimeout={handleTimeout} />
+          <Countdown
+            key={question.questionId}
+            seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
+            active={!locked}
+            onTimeout={handleTimeout}
+          />
         </div>
 
         <h2>{question.title}</h2>
