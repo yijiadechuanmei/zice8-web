@@ -9,7 +9,7 @@ import DebugPanel from './components/DebugPanel'
 import ProfileModal from './components/ProfileModal'
 import SnapshotUserNotice from './components/SnapshotUserNotice'
 import { VIDEO_RANK_PAGE, VIDEO_RANK_SPLASH_AUTO_ENTER_MS, VIDEO_RANK_SPLASH_IMAGE_URL } from './config'
-import { getBootstrap, getMe, getPublicConfig, getRank, getVideos, updateParticipantProfile } from './api'
+import { getBootstrap, getMe, getPublicConfig, getRank, getVideos, trackVideoView, updateParticipantProfile } from './api'
 import HomePage from './pages/HomePage'
 import RankPage from './pages/RankPage'
 import SplashPage from './pages/SplashPage'
@@ -177,8 +177,19 @@ function VideoRankMain() {
     }
     if (!ensureParticipation({ type: 'openVideo', videoId: video.id })) return
     trackEvent({ activityKey, eventType: 'open_video', page: '/video-rank', extra: { videoId: video.id } })
+    recordVideoView(video.id)
     setSelectedVideoId(video.id)
     setPage(VIDEO_RANK_PAGE.DETAIL)
+  }
+
+  function recordVideoView(videoId) {
+    trackVideoView(activityKey, videoId)
+      .then((result) => {
+        setVideos((current) => current.map((video) => (video.id === videoId ? { ...video, viewCount: result?.viewCount || 0 } : video)))
+      })
+      .catch((err) => {
+        console.warn('track video view failed', err)
+      })
   }
 
   function backHome() {
@@ -222,6 +233,7 @@ function VideoRankMain() {
     setProfileModalVisible(false)
     if (action.type === 'openVideo' && action.videoId) {
       trackEvent({ activityKey, eventType: 'open_video', page: '/video-rank', extra: { videoId: action.videoId } })
+      recordVideoView(action.videoId)
       setSelectedVideoId(action.videoId)
       setPage(VIDEO_RANK_PAGE.DETAIL)
       return

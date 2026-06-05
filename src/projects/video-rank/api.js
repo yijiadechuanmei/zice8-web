@@ -5,6 +5,7 @@ export const getBootstrap = (activityKey) => request(`/video-rank/activities/${a
 export const updateParticipantProfile = (activityKey, data) => request(`/video-rank/activities/${activityKey}/participant-profile`, { method: 'POST', body: JSON.stringify(data) })
 export const getVideos = (activityKey) => request(`/video-rank/activities/${activityKey}/videos`)
 export const getVideoDetail = (activityKey, videoId) => request(`/video-rank/activities/${activityKey}/videos/${videoId}`)
+export const trackVideoView = (activityKey, videoId) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/view`, { method: 'POST' })
 export const submitWatchSegments = (activityKey, videoId, segments) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/watch-segments`, { method: 'POST', body: JSON.stringify({ segments }) })
 export const submitComment = (activityKey, videoId, content) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/comments`, { method: 'POST', body: JSON.stringify({ content }) })
 export const getComments = (activityKey, videoId, page = 1, pageSize = 20) => request(`/video-rank/activities/${activityKey}/videos/${videoId}/comments?page=${page}&pageSize=${pageSize}`)

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { EyeOutlined } from '@ant-design/icons'
 
 export default function VideoCard({ video, onClick, debug }) {
   const [coverFailed, setCoverFailed] = useState(false)
@@ -6,6 +7,7 @@ export default function VideoCard({ video, onClick, debug }) {
   const locked = !video.unlocked
   const status = getStatus(video)
   const showCover = video.cover && !coverFailed
+  const viewCount = Number(video.viewCount || 0)
 
   function handleClick() {
     if (!video.unlocked) {
@@ -21,12 +23,16 @@ export default function VideoCard({ video, onClick, debug }) {
       aria-disabled={locked}
       className={`w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-shadow duration-200 ${locked ? 'cursor-not-allowed border-slate-100 bg-white opacity-70' : 'cursor-pointer border-slate-100 bg-white hover:shadow-md'}`}
     >
-      <div className="aspect-[4/5] bg-slate-200">
+      <div className="relative aspect-[4/5] bg-slate-200">
         {showCover ? (
           <img src={video.cover} alt={video.title} onError={() => setCoverFailed(true)} className={`h-full w-full object-cover ${locked ? 'opacity-60' : ''}`} />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-200 to-slate-100 px-3 text-center text-sm font-semibold text-slate-400">视频封面</div>
         )}
+        <span className="absolute bottom-2 right-2 inline-flex min-h-7 items-center gap-1 rounded-full bg-slate-950/70 px-2.5 text-xs font-semibold text-white shadow-sm">
+          <EyeOutlined className="text-sm" />
+          <span>{viewCount}</span>
+        </span>
       </div>
       <div className="p-3">
         <h3 className={`line-clamp-2 min-h-10 text-sm font-bold leading-5 ${locked ? 'text-slate-500' : 'text-slate-950'}`}>{video.title}</h3>
