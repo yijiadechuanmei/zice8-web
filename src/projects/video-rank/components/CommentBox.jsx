@@ -5,20 +5,17 @@ function formatDateTime(value) {
 
   if (typeof value === 'string') {
     const normalized = value.trim()
-    const mysqlDateTime = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/)
-    if (mysqlDateTime) {
-      const [, , month, day, hour, minute] = mysqlDateTime
+    // video-rank 评论 createdAt 当前按业务北京时间展示，后端可能返回带 Z 的 ISO 字符串，
+    // 但这里不做时区转换，只做字符串格式化，避免显示晚 8 小时。
+    const dateTime = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/)
+    if (dateTime) {
+      const [, , month, day, hour, minute] = dateTime
       return `${month}-${day} ${hour}:${minute}`
     }
+    return normalized
   }
 
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
-  return `${month}-${day} ${hour}:${minute}`
+  return String(value)
 }
 
 export default function CommentBox({ comments, loading, onSubmit }) {
