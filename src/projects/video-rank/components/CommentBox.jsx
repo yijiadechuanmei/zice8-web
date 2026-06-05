@@ -1,15 +1,24 @@
 import { useState } from 'react'
 
-function formatCommentTime(value) {
+function formatDateTime(value) {
   if (!value) return ''
+
+  if (typeof value === 'string') {
+    const normalized = value.trim()
+    const mysqlDateTime = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/)
+    if (mysqlDateTime) {
+      const [, , month, day, hour, minute] = mysqlDateTime
+      return `${month}-${day} ${hour}:${minute}`
+    }
+  }
+
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
+  return `${month}-${day} ${hour}:${minute}`
 }
 
 export default function CommentBox({ comments, loading, onSubmit }) {
@@ -48,7 +57,7 @@ export default function CommentBox({ comments, loading, onSubmit }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
                 <p className="min-w-0 truncate text-sm font-semibold text-slate-800">{item.user?.nickname || item.participant?.name || '匿名用户'}</p>
-                <time className="shrink-0 text-xs text-slate-400">{formatCommentTime(item.createdAt)}</time>
+                <time className="shrink-0 text-xs text-slate-400">{formatDateTime(item.createdAt)}</time>
               </div>
               <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-600">{item.content}</p>
             </div>
