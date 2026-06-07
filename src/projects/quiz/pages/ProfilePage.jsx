@@ -105,6 +105,9 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
               showSearch={false}
               optionFilterProp="label"
               popupMatchSelectWidth={false}
+              labelRender={({ label }) => (
+                <span className="quiz-profile-department-selected-label">{label}</span>
+              )}
               variant="borderless"
               className="quiz-profile-department-select h-full w-full"
               popupClassName="quiz-profile-department-popup"
