@@ -35,7 +35,7 @@ export default function OptionItem({ option, selected, locked, state, onClick })
 
   return (
     <button
-      className={`relative min-h-[123px] w-[545px] bg-transparent text-left transition-transform duration-150 ${
+      className={`relative h-[123px] w-[545px] shrink-0 overflow-visible bg-transparent text-left transition-transform duration-150 ${
         locked ? 'cursor-not-allowed opacity-85' : 'cursor-pointer active:scale-[0.995]'
       }`}
       type="button"
@@ -60,13 +60,13 @@ export default function OptionItem({ option, selected, locked, state, onClick })
       </svg>
 
       <span
-        className={`absolute left-[45px] top-1/2 inline-flex h-[92px] w-[92px] -translate-y-1/2 items-center justify-center rounded-full border-[2px] text-[48px] font-black ${theme.badge}`}
+        className={`absolute left-[43px] top-[15px] inline-flex h-[92px] w-[92px] items-center justify-center rounded-full border-[2px] text-[48px] font-black leading-[92px] ${theme.badge}`}
       >
           {option.label}
       </span>
 
-      <span className={`absolute left-[165px] right-[40px] top-1/2 -translate-y-1/2 text-[40px] leading-[1.2] font-bold ${theme.text}`}>
-        <span className="block break-words">
+      <span className={`absolute left-[165px] top-0 flex h-[123px] w-[340px] items-center text-[40px] leading-[1.2] font-bold ${theme.text}`}>
+        <span className="block max-h-[96px] overflow-hidden break-words">
           {option.content}
         </span>
       </span>

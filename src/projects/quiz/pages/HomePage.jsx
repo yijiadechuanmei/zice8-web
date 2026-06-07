@@ -44,7 +44,7 @@ export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpen
               <img className="block h-full w-full" src={assets.ruleButton} alt="" aria-hidden="true" />
             </button>
             <button
-              className="absolute left-[154px] top-[696px] h-[101px] w-[402px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white active:scale-[0.985]"
+              className="absolute left-[154px] top-[696px] h-[105px] w-[427px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white active:scale-[0.985]"
               type="button"
               onClick={onStart}
               aria-label="开始挑战"
@@ -52,7 +52,7 @@ export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpen
               <img className="block h-full w-full" src={assets.startButton} alt="" aria-hidden="true" />
             </button>
             <button
-              className="absolute left-[154px] top-[814px] h-[101px] w-[402px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white active:scale-[0.985]"
+              className="absolute left-[154px] top-[814px] h-[105px] w-[427px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white active:scale-[0.985]"
               type="button"
               onClick={onOpenRank}
               aria-label="排行榜"
