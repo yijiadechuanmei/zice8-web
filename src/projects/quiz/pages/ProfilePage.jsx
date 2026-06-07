@@ -1,19 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import DesignStage from '../components/DesignStage'
 import { quizAssets } from '../assets'
 
-const departments = ['综合部', '市场部', '技术部', '运营部', '财务部', '其他']
+const departments = [
+  "武汉事业部",
+  "华南营运部",
+  "总部派驻各部门",
+  "党群工作部",
+  "办公室",
+  "销售人力部",
+  "销售财务部",
+  "销售管理部",
+  "市场部",
+  "武汉大区",
+  "武汉周边大区",
+  "现代零售大区",
+  "创新发展大区",
+  "湖北夜场大区",
+  "黄石大区",
+  "宜昌大区",
+  "襄阳大区",
+  "随州大区",
+  "荆州大区",
+  "黄冈大区",
+  "岳阳大区",
+  "长沙大区",
+  "湖南夜场大区",
+  "湘西大区",
+  "株洲大区",
+  "娄底大区",
+  "常德大区",
+  "南昌大区",
+  "上饶大区",
+  "九江大区",
+  "赣州大区"
+]
 
 export default function ProfilePage({ participant, submitting, onSubmit, onBack, externalError = '' }) {
   const [name, setName] = useState(participant?.name || '')
   const [department, setDepartment] = useState(participant?.department || '')
-  const [error, setError] = useState('')
+  const [toastMessage, setToastMessage] = useState('')
+  const toastTimerRef = useRef(null)
+
+  function showToast(message) {
+    if (!message) return
+    setToastMessage(message)
+    window.clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage('')
+    }, 1500)
+  }
+
+  useEffect(() => {
+    if (!externalError) return
+    showToast(externalError)
+  }, [externalError])
+
+  useEffect(() => () => {
+    window.clearTimeout(toastTimerRef.current)
+  }, [])
 
   function handleSubmit() {
     const normalizedName = name.trim()
-    if (!normalizedName) return setError('请输入姓名')
-    if (!department) return setError('请选择部门')
-    setError('')
+    if (!normalizedName) return showToast('请输入姓名')
+    if (!department) return showToast('请选择部门')
     onSubmit({ name: normalizedName, department })
   }
 
@@ -32,10 +82,10 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
           <img className="absolute left-[320px] top-[380px] h-[50px] w-[112px] object-contain" src={quizAssets.profile.labelName} alt="" aria-hidden="true" />
           <img className="absolute left-[320px] top-[576px] h-[50px] w-[112px] object-contain" src={quizAssets.profile.labelDepartment} alt="" aria-hidden="true" />
 
-          <label className="absolute left-[176px] top-[501px] w-[402px]">
+          <label className="absolute left-[176px] top-[475px] w-[402px]">
             <span className="sr-only">姓名</span>
             <input
-              className="h-[56px] w-full rounded-full bg-[rgba(255,252,243,0.92)] px-[24px] text-[24px] text-[#173f2a] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)] outline-none"
+              className="h-[56px] w-full rounded-full  px-[24px] text-[32px] text-[#fff7d1] text-center outline-none"
               value={name}
               maxLength={100}
               placeholder="请输入姓名"
@@ -43,10 +93,10 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
             />
           </label>
 
-          <label className="absolute left-[176px] top-[711px] w-[402px]">
+          <label className="absolute left-[176px] top-[685px] w-[402px]">
             <span className="sr-only">部门</span>
             <select
-              className="h-[56px] w-full rounded-full bg-[rgba(255,252,243,0.92)] px-[24px] text-[24px] text-[#173f2a] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)] outline-none"
+              className="h-[56px] w-full rounded-full  px-[24px] text-[32px] text-[#fff7d1] text-center outline-none"
               value={department}
               onChange={(event) => setDepartment(event.target.value)}
             >
@@ -55,12 +105,6 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
             </select>
           </label>
 
-          {error || externalError ? (
-            <div className="absolute left-[132px] top-[856px] w-[486px] rounded-[14px] bg-[rgba(254,226,226,0.95)] px-[18px] py-[12px] text-[22px] leading-[1.5] text-[#9f1d1d]">
-              {error || externalError}
-            </div>
-          ) : null}
-
           <button
             className="absolute left-[390px] top-[834px] h-[109px] w-[221px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-85"
             type="button"
@@ -68,10 +112,7 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
             disabled={submitting}
             aria-label="开始答题"
           >
-            <img className="block h-full w-full" src={quizAssets.profile.buttonStart} alt="" aria-hidden="true" />
-            <span className="absolute inset-0 flex items-center justify-center text-[28px] font-extrabold text-[#fff7d1] [text-shadow:0_2px_8px_rgba(24,40,84,0.35)]">
-              {submitting ? '提交中...' : '开始答题'}
-            </span>
+            <img className="block h-full w-full" src={quizAssets.profile.buttonStart} alt="开始答题" />
           </button>
 
           <button
@@ -83,6 +124,12 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
             <img className="block h-full w-full" src={quizAssets.common.buttonHome} alt="" aria-hidden="true" />
           </button>
         </DesignStage>
+
+        {toastMessage ? (
+          <div className="pointer-events-none fixed left-1/2 top-[18vh] z-50 -translate-x-1/2 rounded-[18px] bg-[rgba(16,24,40,0.82)] px-[24px] py-[16px] text-center text-[24px] leading-[1.4] text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
+            {toastMessage}
+          </div>
+        ) : null}
       </section>
     </main>
   )
