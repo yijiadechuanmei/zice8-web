@@ -76,19 +76,19 @@ export default function QuestionPage({
           <img className="absolute left-0 top-0 h-[1624px] w-[750px] object-cover" src={quizAssets.common.bg} alt="" aria-hidden="true" />
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
-          <img className="absolute left-[45px] top-[250px] h-[1259px] w-[699px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
+          <img className="absolute left-[26px] top-[238px] h-[1259px] w-[699px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
           <img className="absolute left-[575px] top-[255px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
 
-          <div className="absolute left-[150px] top-[300px] h-[70px] w-[420px] text-center text-[42px] font-bold text-[#111111]">
+          <div className="absolute left-[170px] top-[310px] h-[70px] w-[410px] text-center text-[42px] font-bold text-[#111111]">
             {progressText}
           </div>
-          <div className="absolute left-[92px] top-[405px] h-[28px] w-[566px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
+          <div className="absolute left-[92px] top-[430px] h-[28px] w-[566px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
             <div className="h-full w-full overflow-hidden rounded-full">
               <i className="block h-full rounded-r-none bg-[#5a9650]" style={{ width: progressWidth }} />
             </div>
           </div>
 
-          <div className="absolute left-[575px] top-[255px] h-[110px] w-[110px]">
+          <div className="absolute left-[575px] top-[270px] h-[110px] w-[110px]">
             <Countdown
               key={question.questionId}
               seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
@@ -100,13 +100,13 @@ export default function QuestionPage({
             />
           </div>
 
-          <div className="absolute left-[92px] top-[500px] min-h-[190px] w-[566px] text-[#3f7f3f]">
+          <div className="absolute left-[92px] top-[525px] min-h-[170px] w-[566px] text-[#3f7f3f]">
             <h2 className="text-[34px] leading-[1.45] font-bold text-[#3f7f3f]">
               {`【${question.type === 'multiple' ? '多选题' : '单选题'}】${question.title}`}
             </h2>
           </div>
 
-          <div className="absolute left-[105px] top-[770px] flex w-[545px] flex-col gap-[22px]">
+          <div className="absolute left-[102px] top-[760px] flex w-[545px] flex-col gap-[36px]">
             {(question.options || []).map((option, index) => {
               const value = option.label || option.id
               const label = option.label || String.fromCharCode(65 + index)

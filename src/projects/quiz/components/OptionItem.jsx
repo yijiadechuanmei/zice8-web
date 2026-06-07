@@ -42,9 +42,9 @@ export default function OptionItem({ option, selected, locked, state, onClick })
       disabled={locked}
       onClick={onClick}
     >
-      <svg className={`absolute inset-0 h-full w-full ${theme.shadow}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
+      <svg className={`absolute left-0 top-0 h-[123px] w-[545px] ${theme.shadow}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
         <path
-          d="M 26 1 H 519 V 1 A 25 25 0 0 0 544 26 V 97 A 25 25 0 0 0 519 122 H 26 A 25 25 0 0 0 1 97 V 26 A 25 25 0 0 0 26 1 Z"
+          d="M 14 1 H 531 A 13 13 0 0 0 544 14 V 109 A 13 13 0 0 0 531 122 H 14 A 13 13 0 0 0 1 109 V 14 A 13 13 0 0 0 14 1 Z"
           fill={theme.fill}
           stroke={theme.stroke}
           strokeWidth="2"
