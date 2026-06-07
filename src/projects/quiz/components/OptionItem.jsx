@@ -27,7 +27,7 @@ export default function OptionItem({ option, selected, locked, state, onClick })
 
   return (
     <button
-      className={`relative w-full overflow-hidden rounded-[24px] border bg-transparent text-left transition-transform duration-150 ${
+      className={`relative h-[92px] w-full overflow-hidden rounded-[24px] border bg-transparent text-left transition-transform duration-150 ${
         locked ? 'cursor-not-allowed opacity-95' : 'cursor-pointer active:scale-[0.99]'
       } ${theme.shell}`}
       type="button"
@@ -36,13 +36,13 @@ export default function OptionItem({ option, selected, locked, state, onClick })
     >
       <span className={`absolute inset-0 rounded-[24px] ${theme.panel}`} aria-hidden="true" />
       <span className="absolute inset-x-0 top-0 h-1/2 rounded-t-[24px] bg-white/35" aria-hidden="true" />
-      <span className="relative flex min-h-[72px] items-center gap-4 px-4 py-3 sm:min-h-[88px] sm:px-5 sm:py-4">
+      <span className="relative flex h-full items-center gap-[22px] px-[22px]">
         <span
-          className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border text-lg font-black sm:h-14 sm:w-14 sm:text-[22px] ${theme.badge}`}
+          className={`inline-flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full border text-[28px] font-black ${theme.badge}`}
         >
           {option.label}
         </span>
-        <span className="min-w-0 flex-1 break-words pr-2 text-[14px] leading-6 text-[#173f2a] sm:text-[16px] sm:leading-7">
+        <span className="min-w-0 flex-1 break-words pr-[12px] text-[24px] leading-[1.35] text-[#173f2a]">
           {option.content}
         </span>
       </span>
