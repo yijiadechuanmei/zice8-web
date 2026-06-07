@@ -69,47 +69,79 @@
 
 .quiz-profile-department-select .ant-select-selector {
   height: 100% !important;
+  width: 100% !important;
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  padding: 0 24px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .quiz-profile-department-select .ant-select-selection-wrap,
 .quiz-profile-department-select .ant-select-selection-search {
   width: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .quiz-profile-department-select .ant-select-selection-item,
 .quiz-profile-department-select .ant-select-selection-placeholder,
 .quiz-profile-department-select .ant-select-selection-search-input {
   width: 100%;
-  text-align: center;
-  color: #fff7d1 !important;
-  font-size: 32px !important;
+  text-align: center !important;
+  color: #e8f0d6 !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
 }
 
 .quiz-profile-department-select .ant-select-selection-item,
 .quiz-profile-department-select .ant-select-selection-placeholder {
+  padding-inline-end: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: normal !important;
+  line-height: 1 !important;
 }
 
 .quiz-profile-department-select .ant-select-selection-placeholder {
+  color: rgba(232, 240, 214, 0.72) !important;
   inset-inline-start: 0 !important;
   inset-inline-end: 0 !important;
+}
+
+.quiz-profile-department-select .ant-select-selection-search-input {
+  height: 100% !important;
 }
 
 .quiz-profile-department-select .ant-select-arrow {
   display: none !important;
 }
 
+.quiz-profile-department-popup {
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  padding: 8px 0 !important;
+}
+
+.quiz-profile-department-popup .ant-select-item {
+  min-height: 46px !important;
+  padding: 8px 18px !important;
+  text-align: center !important;
+  font-size: 22px !important;
+}
+
 .quiz-profile-department-popup .ant-select-item-option-content {
-  text-align: center;
+  text-align: center !important;
+}
+
+.quiz-profile-department-popup .ant-select-item-option-selected {
+  background: rgba(90, 150, 80, 0.16) !important;
+}
+
+.quiz-profile-department-popup .ant-select-item-option-active {
+  background: rgba(90, 150, 80, 0.1) !important;
 }
 
 @keyframes quiz-loading-bar-loop {

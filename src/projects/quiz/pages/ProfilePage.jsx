@@ -86,7 +86,7 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
           <label className="absolute left-[176px] top-[475px] w-[402px]">
             <span className="sr-only">姓名</span>
             <input
-              className="h-[56px] w-full rounded-full  px-[24px] text-[32px] text-[#fff7d1] text-center outline-none"
+              className="h-[56px] w-full rounded-full px-[24px] text-center text-[34px] font-bold text-[#e8f0d6] placeholder:text-[#e8f0d6]/70 outline-none"
               value={name}
               maxLength={100}
               placeholder="请输入姓名"
