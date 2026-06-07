@@ -16,10 +16,10 @@ export default function ResultPage({ result, onOpenRank, onBack }) {
           <img className="absolute left-[318px] top-[382px] h-[50px] w-[110px] object-contain" src={quizAssets.result.labelScore} alt="" aria-hidden="true" />
           <img className="absolute left-[320px] top-[578px] h-[50px] w-[110px] object-contain" src={quizAssets.result.labelTime} alt="" aria-hidden="true" />
 
-          <div className="absolute left-[152px] top-[470px] w-[444px] text-center text-[42px] font-black text-[#fff7d1]">
-            {result?.totalScore ?? 0} 
+          <div className="absolute left-[152px] top-[470px] w-[444px] text-center text-[42px]  text-[#fff7d1]">
+            {result?.totalScore ?? 0} 分
           </div>
-          <div className="absolute left-[152px] top-[682px] w-[444px] text-center text-[42px] font-black text-[#fff7d1]">
+          <div className="absolute left-[152px] top-[682px] w-[444px] text-center text-[42px]  text-[#fff7d1]">
             {formatQuizDuration(result?.totalTimeMs)}
           </div>
 
@@ -33,7 +33,7 @@ export default function ResultPage({ result, onOpenRank, onBack }) {
           </button>
 
           <button
-            className="absolute left-[134px] top-[836px] h-[110px] w-[224px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
+            className="absolute left-[134px] top-[832px] h-[110px] w-[224px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
             type="button"
             onClick={onBack}
             aria-label="返回首页"

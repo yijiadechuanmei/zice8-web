@@ -94,11 +94,11 @@ export default function QuestionPage({
             </div>
 
             <div className="relative z-10 h-full w-full px-[60px] pt-[70px]">
-              <header className="relative h-[170px]">
+              <header className="relative h-[130px]">
                 <div className="mx-auto h-[70px] w-[430px] text-center text-[42px] leading-none font-bold text-[#111111]">
                   {progressText}
                 </div>
-                <div className="absolute bottom-0 left-0 h-[28px] w-[580px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
+                <div className="absolute bottom-0 left-0 h-[28px] w-[580px] rounded-full border-[3px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
                   <div className="h-full w-full overflow-hidden rounded-full">
                     <i className="block h-full rounded-r-none bg-[#5a9650]" style={{ width: progressWidth }} />
                   </div>
