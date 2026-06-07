@@ -86,6 +86,27 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
+.quiz-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.quiz-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.65);
+  border-top-color: rgba(35, 93, 52, 0.95);
+  border-right-color: rgba(35, 93, 52, 0.95);
+  border-radius: 999px;
+  animation: quiz-spin-loading 0.8s linear infinite;
+}
+
 .quiz-profile-department-select {
   height: 100%;
   width: 100%;
@@ -202,5 +223,11 @@
 
   100% {
     width: 18%;
+  }
+}
+
+@keyframes quiz-spin-loading {
+  to {
+    transform: rotate(360deg);
   }
 }

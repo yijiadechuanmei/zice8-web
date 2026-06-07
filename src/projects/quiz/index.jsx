@@ -15,6 +15,7 @@ import {
   submitTimeout,
 } from './api'
 import LoadingState from './components/LoadingState'
+import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
 import LayoutPreview from './dev/LayoutPreview'
 import HomePage from './pages/HomePage'
@@ -146,7 +147,6 @@ function QuizMain() {
 
   async function doStartAttempt() {
     setSubmitting(true)
-    showToast('请耐心等待，不要退出')
     try {
       const timestamp = Date.now()
       const data = await startAttempt(activityKey, {
@@ -169,7 +169,6 @@ function QuizMain() {
 
   async function handleProfileSubmit(profile) {
     setSubmitting(true)
-    showToast('请耐心等待，不要退出')
     try {
       const profileResult = await submitProfile(activityKey, profile)
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
@@ -184,7 +183,6 @@ function QuizMain() {
   async function handleAnswer(questionId, selectedOptions) {
     if (submitting || feedback) return
     setSubmitting(true)
-    showToast('请耐心等待，不要退出')
     try {
       const data = await submitAnswer(activityKey, current.attemptId, {
         questionId,
@@ -203,7 +201,6 @@ function QuizMain() {
   async function handleTimeout(questionId) {
     if (submitting || feedback) return
     setSubmitting(true)
-    showToast('请耐心等待，不要退出')
     try {
       const data = await submitTimeout(activityKey, current.attemptId, {
         questionId,
@@ -242,7 +239,6 @@ function QuizMain() {
 
   async function handleFinish() {
     setSubmitting(true)
-    showToast('请耐心等待，不要退出')
     try {
       const data = await finishAttempt(activityKey, current.attemptId)
       setResult(data)
@@ -333,6 +329,7 @@ function QuizMain() {
       ) : null}
       {page === 'result' ? <ResultPage result={result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
+      <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
     </div>
   )
