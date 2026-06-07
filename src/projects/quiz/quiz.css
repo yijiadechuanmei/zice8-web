@@ -15,6 +15,18 @@
   display: flex;
 }
 
+.quiz-loading-page {
+  min-height: 100vh;
+  width: 100%;
+  background-image: url('/quiz/dragon-boat-2026/quiz-common-bg.png');
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .quiz-design-viewport {
   position: relative;
   width: min(100%, 750px);
@@ -30,20 +42,34 @@
   background: transparent;
 }
 
-.quiz-loading-progress {
-  animation: quiz-loading-progress 1.4s ease-in-out infinite;
+.quiz-loading-only-bar {
+  width: 420px;
+  max-width: calc(100vw - 120px);
+  height: 22px;
+  border-radius: 999px;
+  border: 5px solid #06320f;
+  background: #001905;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 35, 10, 0.25);
 }
 
-@keyframes quiz-loading-progress {
+.quiz-loading-only-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #5a9650;
+  animation: quiz-loading-bar-loop 1.25s ease-in-out infinite;
+}
+
+@keyframes quiz-loading-bar-loop {
   0% {
-    width: 16%;
+    width: 18%;
   }
 
   50% {
-    width: 82%;
+    width: 78%;
   }
 
   100% {
-    width: 16%;
+    width: 18%;
   }
 }
