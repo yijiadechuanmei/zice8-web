@@ -77,11 +77,11 @@ export default function QuestionPage({
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
 
-          <div className="absolute left-[38px] top-[165px] h-[1120px] w-[674px]">
-            <img className="absolute left-0 top-0 h-[1120px] w-[674px] object-fill" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
-            <img className="absolute right-[38px] top-[24px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
+          <div className="absolute left-[24px] top-[118px] h-[1204px] w-[700px]">
+            <img className="absolute inset-0 h-full w-full object-fill" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
+            <img className="absolute right-[60px] top-[40px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
 
-            <div className="absolute right-[38px] top-[24px] h-[110px] w-[110px]">
+            <div className="absolute right-[60px] top-[40px] h-[110px] w-[110px]">
               <Countdown
                 key={question.questionId}
                 seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
@@ -93,25 +93,25 @@ export default function QuestionPage({
               />
             </div>
 
-            <div className="absolute left-[54px] top-[58px] w-[566px]">
-              <header className="relative h-[165px]">
-                <div className="absolute left-[78px] top-[6px] h-[70px] w-[410px] text-center text-[42px] font-bold text-[#111111]">
+            <div className="relative z-10 h-full w-full px-[60px] pt-[70px]">
+              <header className="relative h-[170px]">
+                <div className="mx-auto h-[70px] w-[430px] text-center text-[42px] leading-none font-bold text-[#111111]">
                   {progressText}
                 </div>
-                <div className="absolute left-0 top-[122px] h-[28px] w-[566px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
+                <div className="absolute bottom-0 left-0 h-[28px] w-[580px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
                   <div className="h-full w-full overflow-hidden rounded-full">
                     <i className="block h-full rounded-r-none bg-[#5a9650]" style={{ width: progressWidth }} />
                   </div>
                 </div>
               </header>
 
-              <section className="mt-[34px] w-[566px] text-[#3f7f3f]">
+              <section className="mt-[48px] min-h-[120px] w-full text-[#3f7f3f]">
                 <h2 className="text-[34px] leading-[1.45] font-bold text-[#3f7f3f]">
                   {`【${question.type === 'multiple' ? '多选题' : '单选题'}】${question.title}`}
                 </h2>
               </section>
 
-              <section className="mx-auto mt-[38px] flex w-[545px] flex-col gap-[32px]">
+              <section className="mt-[42px] flex w-full flex-col items-center gap-[30px]">
                 {(question.options || []).map((option, index) => {
                   const value = option.label || option.id
                   const label = option.label || String.fromCharCode(65 + index)
