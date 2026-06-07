@@ -4,15 +4,15 @@ import OptionItem from '../components/OptionItem'
 import QuizButton from '../components/QuizButton'
 import { quizAssets } from '../assets'
 
-export default function QuestionPage({ current, feedback, submitting, onAnswer, onTimeout }) {
+export default function QuestionPage({ current, feedback, submitting, onAnswer, onTimeout, previewMode = false, previewSelectedOptions = [] }) {
   const question = current?.currentQuestion
   const [selected, setSelected] = useState([])
   const timeoutTriggeredRef = useRef(false)
 
   useEffect(() => {
-    setSelected([])
+    setSelected(previewMode ? previewSelectedOptions : [])
     timeoutTriggeredRef.current = false
-  }, [question?.questionId])
+  }, [previewMode, previewSelectedOptions, question?.questionId])
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 0
   const questionSort = question?.questionSort || current?.currentQuestionSort || 1
@@ -42,6 +42,7 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
     const value = option.label || option.id
     if (question.type === 'single') {
       setSelected([value])
+      if (previewMode) return
       onAnswer(question.questionId, [value])
       return
     }
@@ -114,7 +115,14 @@ export default function QuestionPage({ current, feedback, submitting, onAnswer, 
 
           {question.type === 'multiple' && !feedback ? (
             <div className="absolute left-[13.3333%] top-[76.5%] w-[72.8%]">
-              <QuizButton className="min-h-[clamp(48px,8vw,72px)]" disabled={submitting || selected.length === 0} onClick={() => onAnswer(question.questionId, selected)}>
+              <QuizButton
+                className="min-h-[clamp(48px,8vw,72px)]"
+                disabled={submitting || selected.length === 0}
+                onClick={() => {
+                  if (previewMode) return
+                  onAnswer(question.questionId, selected)
+                }}
+              >
                 {submitting ? '提交中...' : '提交答案'}
               </QuizButton>
             </div>

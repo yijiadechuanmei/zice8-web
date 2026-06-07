@@ -1,19 +1,5 @@
 import { quizAssets } from '../assets'
 
-const rules = [
-  '每人每天 2 次答题机会。',
-  '连续答题 3 天。',
-  '每次 6 道题。',
-  '每题 10 秒倒计时。',
-  '答对 1 题得 10 分。',
-  '答错或超时不得分。',
-  '每次满分 60 分。',
-  '每天满分 120 分。',
-  '排名按三日累计总积分排序。',
-  '同分时，总用时少者靠前。',
-  '总用时仍相同，最后一次完成时间早者靠前。',
-]
-
 export default function RulePage({ onBack }) {
   return (
     <main className="quiz-page flex min-h-screen w-full justify-center bg-[#143978] pb-7">
@@ -24,12 +10,6 @@ export default function RulePage({ onBack }) {
           <img className="absolute left-[67.7333%] top-[1.3547%] h-[6.1576%] w-[25.6%] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
           <img className="absolute left-[3.2%] top-[7.3892%] h-[74.0764%] w-[93.2%] object-contain" src={quizAssets.common.panelMask} alt="" aria-hidden="true" />
           <img className="absolute left-[7.2%] top-[8.8669%] h-[69.5197%] w-[88%] object-contain" src={quizAssets.rule.content} alt="" aria-hidden="true" />
-
-          <div className="absolute left-[12.8%] top-[15.7%] w-[74%] text-[#143870]">
-            <ol className="m-0 pl-5 text-[clamp(13px,2.35vw,24px)] leading-[1.8] text-[#21406f]">
-              {rules.map((rule) => <li key={rule}>{rule}</li>)}
-            </ol>
-          </div>
 
           <button
             className="absolute left-[36.2667%] top-[81.7734%] h-[6.2808%] w-[27.2%] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"

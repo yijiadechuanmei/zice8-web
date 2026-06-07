@@ -15,6 +15,7 @@ import {
   submitTimeout,
 } from './api'
 import LoadingState from './components/LoadingState'
+import LayoutPreview from './dev/LayoutPreview'
 import HomePage from './pages/HomePage'
 import ProfilePage from './pages/ProfilePage'
 import QuestionPage from './pages/QuestionPage'
@@ -28,6 +29,9 @@ const ATTEMPT_KEY_PREFIX = 'quiz_attempt_'
 const FEEDBACK_DELAY_MS = 1500
 
 export default function QuizApp() {
+  const layoutPreview = getQueryParam('layout') === '1'
+  if (layoutPreview) return <LayoutPreview />
+
   const tokenFromUrl = getTokenFromUrl()
   if (tokenFromUrl) {
     setToken(tokenFromUrl)

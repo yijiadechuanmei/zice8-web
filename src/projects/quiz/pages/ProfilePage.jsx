@@ -3,7 +3,7 @@ import { quizAssets } from '../assets'
 
 const departments = ['综合部', '市场部', '技术部', '运营部', '财务部', '其他']
 
-export default function ProfilePage({ participant, submitting, onSubmit, onBack }) {
+export default function ProfilePage({ participant, submitting, onSubmit, onBack, externalError = '' }) {
   const [name, setName] = useState(participant?.name || '')
   const [department, setDepartment] = useState(participant?.department || '')
   const [error, setError] = useState('')
@@ -54,9 +54,9 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack 
             </select>
           </label>
 
-          {error ? (
+          {error || externalError ? (
             <div className="absolute left-[17.6%] top-[52.7%] w-[64.8%] rounded-[14px] bg-[rgba(254,226,226,0.95)] px-[14px] py-[10px] text-[clamp(13px,2.1vw,20px)] leading-[1.5] text-[#9f1d1d]">
-              {error}
+              {error || externalError}
             </div>
           ) : null}
 
