@@ -29,7 +29,7 @@ export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpen
             <img className="absolute left-[96px] top-[436px] h-[50px] w-[596px] object-contain" src={assets.subtitle} alt="活动副标题" />
             <img className="absolute left-[182px] top-[512px] h-[50px] w-[386px] object-contain" src={assets.countTip} alt="答题数量提示" />
             <div
-              className="absolute left-[346px] top-[514px] h-[42px] w-[60px] text-center text-[32px] font-black leading-none text-[#fff7d1] [text-shadow:0_2px_8px_rgba(24,40,84,0.45)]"
+              className="absolute left-[474px] top-[518px] h-[42px] w-[60px] text-center text-[38px] font-black leading-none text-[#fff7d1] [text-shadow:0_2px_8px_rgba(24,40,84,0.45)]"
               aria-label={`今日剩余 ${remainingTodayAttempts} 次`}
             >
               {remainingTodayAttempts}

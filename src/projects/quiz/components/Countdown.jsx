@@ -23,7 +23,7 @@ export default function Countdown({ seconds, active, onTimeout, className = '', 
 
   return (
     <div
-      className={`inline-flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[#177245] text-white transition-colors ${
+      className={`inline-flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[#177245] text-[#177245] transition-colors ${
         remaining <= 3 ? 'bg-[#b42318]' : ''
       } ${className}`}
     >
