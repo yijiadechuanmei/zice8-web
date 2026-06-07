@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function Countdown({ seconds, active, onTimeout }) {
+export default function Countdown({ seconds, active, onTimeout, className = '', numberClassName = '', labelClassName = '' }) {
   const [remaining, setRemaining] = useState(Math.max(Number(seconds || 0), 0))
   const timeoutFiredRef = useRef(false)
 
@@ -22,9 +22,13 @@ export default function Countdown({ seconds, active, onTimeout }) {
   }, [active, remaining, onTimeout])
 
   return (
-    <div className={`quiz-countdown ${remaining <= 3 ? 'is-danger' : ''}`}>
-      <span>{remaining}</span>
-      <small>秒</small>
+    <div
+      className={`inline-flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[#177245] text-white transition-colors ${
+        remaining <= 3 ? 'bg-[#b42318]' : ''
+      } ${className}`}
+    >
+      <span className={`text-[26px] font-black leading-none ${numberClassName}`}>{remaining}</span>
+      <small className={`ml-0.5 text-xs ${labelClassName}`}>秒</small>
     </div>
   )
 }

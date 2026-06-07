@@ -27,9 +27,6 @@ export const quizAssets = {
     countdownBg: `${QUIZ_ASSET_PREFIX}/quiz-question-countdown-bg.png`,
     countdownNumber: `${QUIZ_ASSET_PREFIX}/quiz-question-countdown-number.png`,
     cardTitle: `${QUIZ_ASSET_PREFIX}/quiz-question-card-title.png`,
-    optionBg: `${QUIZ_ASSET_PREFIX}/quiz-question-option-bg.png`,
-    optionBadge: `${QUIZ_ASSET_PREFIX}/quiz-question-option-badge.png`,
-    optionLabelA: `${QUIZ_ASSET_PREFIX}/quiz-question-option-label-a.png`,
   },
   result: {
     titleScore: `${QUIZ_ASSET_PREFIX}/quiz-result-title-score.png`,

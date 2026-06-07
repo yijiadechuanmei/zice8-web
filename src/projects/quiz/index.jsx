@@ -284,10 +284,10 @@ function QuizMain() {
   return (
     <div className="quiz-app">
       {error ? (
-        <div className="quiz-error-bar">
+        <div className="fixed left-3 right-3 top-3 z-20 flex items-center justify-between gap-2 rounded-lg bg-[#fee2e2] px-3 py-3 text-[#9f1d1d] shadow-[0_12px_30px_rgba(127,29,29,0.16)]">
           <span>{error}</span>
-          {!getToken() ? <button type="button" onClick={startAuthorize}>去授权</button> : null}
-          <button type="button" onClick={() => setError('')}>关闭</button>
+          {!getToken() ? <button className="rounded-md bg-white px-2.5 py-1.5 font-bold text-[#9f1d1d]" type="button" onClick={startAuthorize}>去授权</button> : null}
+          <button className="rounded-md bg-white px-2.5 py-1.5 font-bold text-[#9f1d1d]" type="button" onClick={() => setError('')}>关闭</button>
         </div>
       ) : null}
       {page === 'home' ? (

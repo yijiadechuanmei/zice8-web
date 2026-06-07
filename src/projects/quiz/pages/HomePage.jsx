@@ -36,13 +36,21 @@ export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpen
 
         <div className="quiz-home-meta">
           {hasInProgressAttempt ? (
-            <button className="quiz-button quiz-button-primary quiz-home-resume-button" type="button" onClick={onResume}>
+            <button
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#177245] px-4 text-base font-extrabold text-white transition-colors hover:bg-[#145f39]"
+              type="button"
+              onClick={onResume}
+            >
               继续答题
             </button>
           ) : null}
 
           {debug ? (
-            <button className="quiz-reset-button quiz-home-reset-button" type="button" onClick={onReset}>
+            <button
+              className="min-h-11 w-full rounded-lg border border-dashed border-[#b54708] bg-[rgba(255,247,237,0.88)] px-4 text-sm font-bold text-[#9a3412]"
+              type="button"
+              onClick={onReset}
+            >
               重置当前测试活动
             </button>
           ) : null}
