@@ -85,11 +85,16 @@ export default function QuestionPage({
           <div className="absolute left-0 top-[170px] w-[750px] text-center text-[38px]  text-[#000000]">
             {progressText}
           </div>
-          <div className="absolute left-[92px] top-[301px] h-[16px] w-[550px] overflow-hidden rounded-full bg-white/20">
-            <i className="block h-full rounded-full bg-gradient-to-r from-[#f7e26d] to-[#ffd657]" style={{ width: progressWidth }} />
-          </div>
+          <div className="absolute left-[92px] top-[301px] h-[28px] w-[550px] rounded-full border-[5px] border-[#06320f] shadow-[0_0_0_2px_#2f6b32]">
+  <div className="h-full w-full overflow-hidden rounded-full ">
+    <i
+      className="block h-full rounded-r-none bg-[#5a9650]"
+      style={{ width: progressWidth }}
+    />
+  </div>
+</div>
 
-          <div className="absolute left-[604px] top-[162px] h-[64px] w-[54px]">
+          <div className="absolute left-[602px] top-[165px] h-[64px] w-[54px]">
             <Countdown
               key={question.questionId}
               seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
@@ -101,9 +106,10 @@ export default function QuestionPage({
             />
           </div>
 
-          <div className="absolute left-[105px] top-[400px] w-[540px] text-[#173f2a]">
-            <div className="text-[20px] font-extrabold text-[#7b5a0a]">{question.type === 'multiple' ? '多选题' : '单选题'}</div>
-            <h2 className="mt-[10px] text-[30px] leading-[1.45] font-bold text-[#173f2a]">{question.title}</h2>
+          <div className="absolute left-[105px] top-[400px] w-[540px] text-[#177245]">
+            <h2 className="text-[30px] leading-[1.45] font-bold text-[#177245]">
+              {`【${question.type === 'multiple' ? '多选题' : '单选题'}】${question.title}`}
+            </h2>
           </div>
 
           <div className="absolute left-[100px] top-[622px] flex w-[546px] flex-col gap-[16px]">
