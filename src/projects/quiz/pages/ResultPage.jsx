@@ -23,13 +23,6 @@ export default function ResultPage({ result, onOpenRank, onBack }) {
             {formatQuizDuration(result?.totalTimeMs)}
           </div>
 
-          <div className="absolute left-[100px] top-[1010px] grid w-[550px] grid-cols-2 gap-[18px]">
-            <div className="rounded-[18px] bg-[rgba(255,251,239,0.9)] p-[18px] text-center"><strong className="block text-[32px] text-[#173f2a]">{result?.correctCount ?? 0}</strong><span className="text-[18px] text-[#687345]">答对</span></div>
-            <div className="rounded-[18px] bg-[rgba(255,251,239,0.9)] p-[18px] text-center"><strong className="block text-[32px] text-[#173f2a]">{result?.wrongCount ?? 0}</strong><span className="text-[18px] text-[#687345]">答错</span></div>
-            <div className="rounded-[18px] bg-[rgba(255,251,239,0.9)] p-[18px] text-center"><strong className="block text-[32px] text-[#173f2a]">{result?.timeoutCount ?? 0}</strong><span className="text-[18px] text-[#687345]">超时</span></div>
-            <div className="rounded-[18px] bg-[rgba(255,251,239,0.9)] p-[18px] text-center"><strong className="block text-[32px] text-[#173f2a]">{result?.rankInfo?.rank ?? '-'}</strong><span className="text-[18px] text-[#687345]">排名</span></div>
-          </div>
-
           <button
             className="absolute left-[388px] top-[832px] h-[110px] w-[224px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
             type="button"
