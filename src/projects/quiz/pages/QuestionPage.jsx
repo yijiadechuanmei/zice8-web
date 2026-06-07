@@ -28,7 +28,7 @@ export default function QuestionPage({
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 0
   const questionSort = question?.questionSort || current?.currentQuestionSort || 1
-  const progressText = `第 ${questionSort} / ${totalQuestions || '-'} 题`
+  const progressText = `第 ${questionSort} 题 / 共${totalQuestions || '-'} 题`
   const locked = submitting || Boolean(feedback)
   const correctOptions = useMemo(() => new Set(feedback?.correctOptions || []), [feedback])
   const progressWidth = `${totalQuestions ? (questionSort / totalQuestions) * 100 : 0}%`
@@ -77,12 +77,12 @@ export default function QuestionPage({
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
           <img className="absolute left-[24px] top-[124px] h-[1260px] w-[700px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
-          <img className="absolute left-[70px] top-[292px] h-[25px] w-[585px] object-contain" src={quizAssets.question.progressBg} alt="" aria-hidden="true" />
-          <img className="absolute left-[-4px] top-[174px] h-[50px] w-[748px] object-contain" src={quizAssets.question.titleOrder} alt="" aria-hidden="true" />
+          {/* <img className="absolute left-[70px] top-[292px] h-[25px] w-[585px] object-contain" src={quizAssets.question.progressBg} alt="" aria-hidden="true" /> */}
+          {/* <img className="absolute left-[-4px] top-[174px] h-[50px] w-[748px] object-contain" src={quizAssets.question.titleOrder} alt="" aria-hidden="true" /> */}
           <img className="absolute left-[582px] top-[140px] h-[114px] w-[98px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
           <img className="absolute left-[88px] top-[376px] h-[166px] w-[576px] object-contain" src={quizAssets.question.cardTitle} alt="" aria-hidden="true" />
 
-          <div className="absolute left-0 top-[185px] w-[750px] text-center text-[24px] font-extrabold text-[#fff7d1]">
+          <div className="absolute left-0 top-[170px] w-[750px] text-center text-[38px]  text-[#000000]">
             {progressText}
           </div>
           <div className="absolute left-[92px] top-[301px] h-[16px] w-[550px] overflow-hidden rounded-full bg-white/20">
@@ -90,13 +90,12 @@ export default function QuestionPage({
           </div>
 
           <div className="absolute left-[604px] top-[162px] h-[64px] w-[54px]">
-            <img className="absolute left-0 top-0 h-[64px] w-[54px]" src={quizAssets.question.countdownNumber} alt="" aria-hidden="true" />
             <Countdown
               key={question.questionId}
               seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
               active={!locked}
               onTimeout={handleTimeout}
-              className={`absolute left-0 top-0 h-[64px] w-[54px] rounded-none bg-transparent text-[#fff9d9] ${current.remainingSeconds <= 3 ? 'text-[#ffe3e3]' : ''}`}
+              className="absolute left-0 top-0 h-[64px] w-[54px] rounded-none bg-transparent text-[#177245]"
               numberClassName="text-[34px] leading-none"
               labelClassName="hidden"
             />
