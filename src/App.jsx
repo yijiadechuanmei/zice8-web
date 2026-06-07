@@ -1,6 +1,7 @@
 import './App.css'
 import { Suspense } from 'react'
 import { projectRoutes } from './projects/index.jsx'
+import QuizLoadingState from './projects/quiz/components/LoadingState.jsx'
 
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
@@ -33,7 +34,8 @@ function App() {
   if (!matchedProject) return <NotFound />
 
   const ProjectComponent = matchedProject.Component
-  return <Suspense fallback={<Loading />}><ProjectComponent /></Suspense>
+  const fallback = matchedProject.path === '/quiz' ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
+  return <Suspense fallback={fallback}><ProjectComponent /></Suspense>
 }
 
 export default App
