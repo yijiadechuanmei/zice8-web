@@ -10,143 +10,17 @@
   display: flex;
 }
 
-.quiz-home {
-  align-items: center;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 18px;
-  padding: 0 0 28px;
-  background: #143978;
-}
-
-.quiz-home-page {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.quiz-home-scale-wrap {
-  width: 100%;
-  max-width: 750px;
-}
-
-.quiz-home-design-stage {
+.quiz-design-viewport {
   position: relative;
-  width: 100%;
-  aspect-ratio: 750 / 1624;
+  width: min(100%, 750px);
+  overflow: hidden;
+}
+
+.quiz-design-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
   overflow: hidden;
   background: #143978;
-}
-
-.quiz-home-bg,
-.quiz-home-logo,
-.quiz-home-title,
-.quiz-home-subtitle,
-.quiz-home-count-tip,
-.quiz-home-image-button {
-  position: absolute;
-}
-
-.quiz-home-bg {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.quiz-home-logo {
-  left: 5.6%;
-  top: 0.985%;
-  width: 21.2%;
-  height: 6.8966%;
-  object-fit: contain;
-}
-
-.quiz-home-title {
-  left: 12.2667%;
-  top: 6.404%;
-  width: 78%;
-  height: 19.2118%;
-  object-fit: contain;
-}
-
-.quiz-home-subtitle {
-  left: 12.8%;
-  top: 26.8473%;
-  width: 79.4667%;
-  height: 3.0788%;
-  object-fit: contain;
-}
-
-.quiz-home-count-tip {
-  left: 24.2667%;
-  top: 31.5271%;
-  width: 51.4667%;
-  height: 3.0788%;
-  object-fit: contain;
-}
-
-.quiz-home-image-button {
-  appearance: none;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.quiz-home-image-button img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.quiz-home-image-button:active {
-  transform: scale(0.985);
-  transform-origin: center;
-}
-
-.quiz-home-image-button:focus-visible {
-  outline: 3px solid rgba(255, 255, 255, 0.92);
-  outline-offset: 4px;
-}
-
-.quiz-home-rule-button {
-  left: 20.5333%;
-  top: 35.7143%;
-  width: 56.9333%;
-  height: 6.4655%;
-}
-
-.quiz-home-start-button {
-  left: 20.5333%;
-  top: 42.8571%;
-  width: 56.9333%;
-  height: 6.4655%;
-}
-
-.quiz-home-rank-button {
-  left: 20.5333%;
-  top: 50.1232%;
-  width: 56.9333%;
-  height: 6.4655%;
-}
-
-.quiz-home-meta {
-  width: min(100%, 750px);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0 12px;
-}
-
-@media (max-width: 380px) {
-  .quiz-home-page {
-    gap: 12px;
-  }
-
-  .quiz-home-meta {
-    padding: 0 8px;
-  }
 }
