@@ -6,6 +6,7 @@ import QuizButton from '../components/QuizButton'
 import { quizAssets } from '../assets'
 
 const EMPTY_PREVIEW_SELECTED_OPTIONS = []
+const NOOP = () => {}
 
 export default function QuestionPage({
   current,
@@ -13,6 +14,7 @@ export default function QuestionPage({
   submitting,
   onAnswer,
   onTimeout,
+  showToast = NOOP,
   previewMode = false,
   previewSelectedOptions = EMPTY_PREVIEW_SELECTED_OPTIONS,
 }) {
@@ -25,6 +27,15 @@ export default function QuestionPage({
     setSelected(previewMode ? previewSelectedOptions : [])
     timeoutTriggeredRef.current = false
   }, [previewMode, previewSelectedKey, question?.questionId])
+
+  useEffect(() => {
+    if (!feedback) return
+    if (feedback.isTimeout) {
+      showToast('时间到')
+      return
+    }
+    showToast(feedback.isCorrect ? '回答正确' : '回答错误')
+  }, [feedback, showToast])
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 0
   const questionSort = question?.questionSort || current?.currentQuestionSort || 1
@@ -141,15 +152,6 @@ export default function QuestionPage({
                   </QuizButton>
                 ) : null}
 
-                {feedback ? (
-                  <div
-                    className={`mt-[4px] w-[545px] rounded-lg px-[18px] py-[18px] text-center text-[24px] font-extrabold ${
-                    feedback.isTimeout || !feedback.isCorrect ? 'bg-[#fee2e2] text-[#9f1d1d]' : 'bg-[#eef8cf] text-[#255332]'
-                  }`}
-                  >
-                    {feedback.isTimeout ? '答题超时' : feedback.isCorrect ? '回答正确' : '回答错误'}
-                  </div>
-                ) : null}
               </section>
             </div>
           </div>

@@ -62,6 +62,30 @@
   animation: quiz-loading-bar-loop 1.25s ease-in-out infinite;
 }
 
+.quiz-toast-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.quiz-toast-box {
+  max-width: min(560px, calc(100vw - 120px));
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #ffffff;
+  padding: 18px 28px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+}
+
 .quiz-profile-department-select {
   height: 100%;
   width: 100%;

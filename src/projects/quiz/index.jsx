@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
@@ -15,6 +15,7 @@ import {
   submitTimeout,
 } from './api'
 import LoadingState from './components/LoadingState'
+import QuizToast from './components/QuizToast'
 import LayoutPreview from './dev/LayoutPreview'
 import HomePage from './pages/HomePage'
 import ProfilePage from './pages/ProfilePage'
@@ -54,17 +55,30 @@ function QuizMain() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState(null)
-  const [error, setError] = useState('')
+  const [toast, setToast] = useState('')
+  const toastTimerRef = useRef(null)
 
   const attemptStorageKey = `${ATTEMPT_KEY_PREFIX}${activityKey}`
 
-  const showError = useCallback((err) => {
-    setError(err?.message || '请求失败')
+  const showToast = useCallback((message, duration = 1500) => {
+    if (!message) return
+    setToast(message)
+    window.clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast('')
+    }, duration)
   }, [])
+
+  useEffect(() => {
+    return () => window.clearTimeout(toastTimerRef.current)
+  }, [])
+
+  const showError = useCallback((err) => {
+    showToast(err?.message || '请求失败')
+  }, [showToast])
 
   const loadBootstrap = useCallback(async () => {
     setLoading(true)
-    setError('')
     try {
       const data = await getBootstrap(activityKey)
       setBootstrap(data)
@@ -85,11 +99,11 @@ function QuizMain() {
   useEffect(() => {
     if (!getToken()) {
       setLoading(false)
-      setError('请先通过微信授权进入活动')
+      showToast('请先通过微信授权进入活动')
       return
     }
     loadBootstrap()
-  }, [loadBootstrap])
+  }, [loadBootstrap, showToast])
 
   async function tryResumeStoredAttempt(attemptId) {
     try {
@@ -125,7 +139,6 @@ function QuizMain() {
   }
 
   async function handleStart() {
-    setError('')
     if (!getToken()) return startAuthorize()
     if (!bootstrap?.profileCompleted) return setPage('profile')
     await doStartAttempt()
@@ -133,6 +146,7 @@ function QuizMain() {
 
   async function doStartAttempt() {
     setSubmitting(true)
+    showToast('请耐心等待，不要退出')
     try {
       const timestamp = Date.now()
       const data = await startAttempt(activityKey, {
@@ -155,7 +169,7 @@ function QuizMain() {
 
   async function handleProfileSubmit(profile) {
     setSubmitting(true)
-    setError('')
+    showToast('请耐心等待，不要退出')
     try {
       const profileResult = await submitProfile(activityKey, profile)
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
@@ -170,7 +184,7 @@ function QuizMain() {
   async function handleAnswer(questionId, selectedOptions) {
     if (submitting || feedback) return
     setSubmitting(true)
-    setError('')
+    showToast('请耐心等待，不要退出')
     try {
       const data = await submitAnswer(activityKey, current.attemptId, {
         questionId,
@@ -189,7 +203,7 @@ function QuizMain() {
   async function handleTimeout(questionId) {
     if (submitting || feedback) return
     setSubmitting(true)
-    setError('')
+    showToast('请耐心等待，不要退出')
     try {
       const data = await submitTimeout(activityKey, current.attemptId, {
         questionId,
@@ -228,6 +242,7 @@ function QuizMain() {
 
   async function handleFinish() {
     setSubmitting(true)
+    showToast('请耐心等待，不要退出')
     try {
       const data = await finishAttempt(activityKey, current.attemptId)
       setResult(data)
@@ -244,7 +259,6 @@ function QuizMain() {
 
   async function openRank() {
     setRankLoading(true)
-    setError('')
     try {
       const data = await getRank(activityKey)
       setRanks(data?.list || [])
@@ -261,7 +275,6 @@ function QuizMain() {
     const confirmed = window.confirm('确认重置当前答题活动数据？不会影响其他活动。')
     if (!confirmed) return
     setSubmitting(true)
-    setError('')
     try {
       await resetDemoActivity(activityKey)
       localStorage.removeItem(attemptStorageKey)
@@ -270,7 +283,7 @@ function QuizMain() {
       setFeedback(null)
       setPage('home')
       await loadBootstrap()
-      setError('当前答题活动已重置')
+      showToast('当前答题活动已重置')
     } catch (err) {
       showError(err)
     } finally {
@@ -287,13 +300,6 @@ function QuizMain() {
 
   return (
     <div className="quiz-app">
-      {error ? (
-        <div className="fixed left-3 right-3 top-3 z-20 flex items-center justify-between gap-2 rounded-lg bg-[#fee2e2] px-3 py-3 text-[#9f1d1d] shadow-[0_12px_30px_rgba(127,29,29,0.16)]">
-          <span>{error}</span>
-          {!getToken() ? <button className="rounded-md bg-white px-2.5 py-1.5 font-bold text-[#9f1d1d]" type="button" onClick={startAuthorize}>去授权</button> : null}
-          <button className="rounded-md bg-white px-2.5 py-1.5 font-bold text-[#9f1d1d]" type="button" onClick={() => setError('')}>关闭</button>
-        </div>
-      ) : null}
       {page === 'home' ? (
         <HomePage
           bootstrap={bootstrap}
@@ -307,13 +313,27 @@ function QuizMain() {
       ) : null}
       {page === 'rule' ? <RulePage onBack={backHome} /> : null}
       {page === 'profile' ? (
-        <ProfilePage participant={bootstrap?.participant} submitting={submitting} onSubmit={handleProfileSubmit} onBack={backHome} />
+        <ProfilePage
+          participant={bootstrap?.participant}
+          submitting={submitting}
+          onSubmit={handleProfileSubmit}
+          onBack={backHome}
+          showToast={showToast}
+        />
       ) : null}
       {page === 'question' ? (
-        <QuestionPage current={current} feedback={feedback} submitting={submitting} onAnswer={handleAnswer} onTimeout={handleTimeout} />
+        <QuestionPage
+          current={current}
+          feedback={feedback}
+          submitting={submitting}
+          onAnswer={handleAnswer}
+          onTimeout={handleTimeout}
+          showToast={showToast}
+        />
       ) : null}
       {page === 'result' ? <ResultPage result={result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
+      <QuizToast visible={Boolean(toast)} message={toast} />
     </div>
   )
 }

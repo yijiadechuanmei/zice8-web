@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Select } from 'antd'
 import DesignStage from '../components/DesignStage'
 import { quizAssets } from '../assets'
@@ -37,29 +37,16 @@ const departments = [
   "赣州大区"
 ]
 
-export default function ProfilePage({ participant, submitting, onSubmit, onBack, externalError = '' }) {
+const NOOP = () => {}
+
+export default function ProfilePage({ participant, submitting, onSubmit, onBack, externalError = '', showToast = NOOP }) {
   const [name, setName] = useState(participant?.name || '')
   const [department, setDepartment] = useState(participant?.department || '')
-  const [toastMessage, setToastMessage] = useState('')
-  const toastTimerRef = useRef(null)
-
-  function showToast(message) {
-    if (!message) return
-    setToastMessage(message)
-    window.clearTimeout(toastTimerRef.current)
-    toastTimerRef.current = window.setTimeout(() => {
-      setToastMessage('')
-    }, 1500)
-  }
 
   useEffect(() => {
     if (!externalError) return
     showToast(externalError)
-  }, [externalError])
-
-  useEffect(() => () => {
-    window.clearTimeout(toastTimerRef.current)
-  }, [])
+  }, [externalError, showToast])
 
   function handleSubmit() {
     const normalizedName = name.trim()
@@ -142,11 +129,6 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
           </button>
         </DesignStage>
 
-        {toastMessage ? (
-          <div className="pointer-events-none fixed left-1/2 top-[18vh] z-50 -translate-x-1/2 rounded-[18px] bg-[rgba(16,24,40,0.82)] px-[24px] py-[16px] text-center text-[24px] leading-[1.4] text-white shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
-            {toastMessage}
-          </div>
-        ) : null}
       </section>
     </main>
   )
