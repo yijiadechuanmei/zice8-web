@@ -44,17 +44,10 @@ export default function OptionItem({ option, selected, locked, state, onClick })
     >
       <svg className={`absolute inset-0 h-full w-full ${theme.shadow}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
         <path
-          d="M 35 1 H 510 C 525 1 536 12 536 27 V 33 C 536 40 541 44 544 48 V 75 C 541 79 536 83 536 90 V 96 C 536 111 525 122 510 122 H 35 C 20 122 9 111 9 96 V 90 C 9 83 4 79 1 75 V 48 C 4 44 9 40 9 33 V 27 C 9 12 20 1 35 1 Z"
+          d="M 26 1 H 519 V 1 A 25 25 0 0 0 544 26 V 97 A 25 25 0 0 0 519 122 H 26 A 25 25 0 0 0 1 97 V 26 A 25 25 0 0 0 26 1 Z"
           fill={theme.fill}
           stroke={theme.stroke}
           strokeWidth="2"
-          vectorEffect="non-scaling-stroke"
-        />
-        <path
-          d="M 48 9 H 497 C 512 9 524 21 524 36 V 40 C 524 45 530 49 532 52 V 71 C 530 74 524 78 524 83 V 87 C 524 102 512 114 497 114 H 48 C 33 114 21 102 21 87 V 83 C 21 78 15 74 13 71 V 52 C 15 49 21 45 21 40 V 36 C 21 21 33 9 48 9 Z"
-          fill="none"
-          stroke="rgba(255,255,255,0.45)"
-          strokeWidth="1"
           vectorEffect="non-scaling-stroke"
         />
       </svg>
