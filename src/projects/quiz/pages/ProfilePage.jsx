@@ -96,23 +96,30 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
 
           <label className="absolute left-[176px] top-[685px] h-[56px] w-[402px]">
             <span className="sr-only">部门</span>
-            <Select
-              value={department || undefined}
-              onChange={(value) => setDepartment(value)}
-              placeholder="请选择部门"
-              options={departments.map((item) => ({ label: item, value: item }))}
-              suffixIcon={null}
-              showSearch={false}
-              optionFilterProp="label"
-              popupMatchSelectWidth={false}
-              labelRender={({ label }) => (
-                <span className="quiz-profile-department-selected-label">{label}</span>
-              )}
-              variant="borderless"
-              className="quiz-profile-department-select h-full w-full"
-              popupClassName="quiz-profile-department-popup"
-              getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
-            />
+            <div className="relative h-full w-full">
+              <Select
+                value={department || undefined}
+                onChange={(value) => setDepartment(value)}
+                placeholder=""
+                options={departments.map((item) => ({ label: item, value: item }))}
+                suffixIcon={null}
+                showSearch={false}
+                optionFilterProp="label"
+                popupMatchSelectWidth={false}
+                labelRender={({ label }) => (
+                  <span className="quiz-profile-department-selected-label">{label}</span>
+                )}
+                variant="borderless"
+                className="quiz-profile-department-select h-full w-full"
+                popupClassName="quiz-profile-department-popup"
+                getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
+              />
+              {!department ? (
+                <span className="quiz-profile-department-placeholder">
+                  请选择部门
+                </span>
+              ) : null}
+            </div>
           </label>
 
           <button
