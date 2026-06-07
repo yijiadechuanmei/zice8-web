@@ -110,7 +110,7 @@ export const mockResult = {
 
 export const mockRankEmpty = []
 
-export const mockRankList = [
+const mockRankSeedList = [
   { userId: '1', rank: 1, participantName: '王小龙', department: '市场部', totalScore: 120, totalTimeMs: 43800 },
   { userId: '2', rank: 2, participantName: '李海波', department: '运营部', totalScore: 110, totalTimeMs: 46200 },
   { userId: '3', rank: 3, participantName: '赵雨晴', department: '技术部', totalScore: 100, totalTimeMs: 53700 },
@@ -122,6 +122,22 @@ export const mockRankList = [
   { userId: '9', rank: 9, participantName: '冯洁', department: '综合部', totalScore: 80, totalTimeMs: 60100 },
   { userId: '10', rank: 10, participantName: '褚一鸣', department: '其他', totalScore: 78, totalTimeMs: 62900 },
 ]
+
+export const mockRankList = Array.from({ length: 50 }, (_, index) => {
+  const seed = mockRankSeedList[index % mockRankSeedList.length]
+  const rank = index + 1
+  const scoreDrop = Math.floor(index / mockRankSeedList.length) * 6
+  const timeOffset = Math.floor(index / mockRankSeedList.length) * 1850
+
+  return {
+    ...seed,
+    userId: `mock-rank-${rank}`,
+    rank,
+    participantName: rank <= 10 ? seed.participantName : `${seed.participantName}${rank}`,
+    totalScore: Math.max(12, seed.totalScore - scoreDrop),
+    totalTimeMs: seed.totalTimeMs + timeOffset,
+  }
+})
 
 export const mockRankLongText = mockRankList.map((item, index) => ({
   ...item,
