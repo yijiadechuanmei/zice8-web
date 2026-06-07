@@ -103,6 +103,8 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
               options={departments.map((item) => ({ label: item, value: item }))}
               suffixIcon={null}
               showSearch={false}
+              optionFilterProp="label"
+              popupMatchSelectWidth={false}
               variant="borderless"
               className="quiz-profile-department-select h-full w-full"
               popupClassName="quiz-profile-department-popup"
