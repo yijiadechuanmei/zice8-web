@@ -80,7 +80,10 @@
 }
 
 .quiz-profile-department-select.ant-select-single .ant-select-selector {
+  position: relative !important;
   padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .quiz-profile-department-select.ant-select-single .ant-select-selector .ant-select-selection-item,
@@ -100,10 +103,12 @@
 }
 
 .quiz-profile-department-select.ant-select-single .ant-select-selector .ant-select-selection-placeholder {
-  color: rgba(232, 240, 214, 0.72) !important;
+  color: rgba(232, 240, 214, 0.7) !important;
   font-size: 34px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
 }
 
 .quiz-profile-department-select.ant-select-single .ant-select-selector .ant-select-selection-search {
