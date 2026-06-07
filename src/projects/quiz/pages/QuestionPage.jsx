@@ -76,7 +76,7 @@ export default function QuestionPage({
           <img className="absolute left-0 top-0 h-[1624px] w-[750px] object-cover" src={quizAssets.common.bg} alt="" aria-hidden="true" />
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
-          <img className="absolute left-[45px] top-[250px] h-[1170px] w-[660px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
+          <img className="absolute left-[45px] top-[250px] h-[1259px] w-[699px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
           <img className="absolute left-[575px] top-[255px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
 
           <div className="absolute left-[150px] top-[300px] h-[70px] w-[420px] text-center text-[42px] font-bold text-[#111111]">

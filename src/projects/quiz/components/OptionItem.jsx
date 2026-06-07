@@ -44,7 +44,7 @@ export default function OptionItem({ option, selected, locked, state, onClick })
     >
       <svg className={`absolute inset-0 h-full w-full ${theme.shadow}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
         <path
-          d="M 44 1 H 501 C 520 1 534 15 534 34 V 39 C 534 45 540 48 544 52 V 71 C 540 75 534 78 534 84 V 89 C 534 108 520 122 501 122 H 44 C 25 122 11 108 11 89 V 84 C 11 78 5 75 1 71 V 52 C 5 48 11 45 11 39 V 34 C 11 15 25 1 44 1 Z"
+          d="M 35 1 H 510 C 525 1 536 12 536 27 V 33 C 536 40 541 44 544 48 V 75 C 541 79 536 83 536 90 V 96 C 536 111 525 122 510 122 H 35 C 20 122 9 111 9 96 V 90 C 9 83 4 79 1 75 V 48 C 4 44 9 40 9 33 V 27 C 9 12 20 1 35 1 Z"
           fill={theme.fill}
           stroke={theme.stroke}
           strokeWidth="2"
