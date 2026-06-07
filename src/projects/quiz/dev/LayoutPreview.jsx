@@ -87,6 +87,8 @@ export default function LayoutPreview() {
   const [questionState, setQuestionState] = useState('normal')
   const [rankState, setRankState] = useState('many')
   const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const [previewSelectedOptions, setPreviewSelectedOptions] = useState(null)
+  const [profileName, setProfileName] = useState(mockProfile.name)
 
   const questionPreview = useMemo(() => getQuestionPreview(questionState), [questionState])
   const rankPreview = useMemo(() => getRankPreview(rankState), [rankState])
@@ -147,12 +149,36 @@ export default function LayoutPreview() {
                 value={questionState}
                 onChange={(event) => {
                   setQuestionState(event.target.value)
+                  setPreviewSelectedOptions(null)
                   setPreviewPage('question')
                 }}
               >
                 {questionStates.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
               </select>
             </label>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
+                type="button"
+                onClick={() => {
+                  setPreviewSelectedOptions([])
+                  setPreviewPage('question')
+                }}
+              >
+                清空选中
+              </button>
+              <button
+                className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
+                type="button"
+                onClick={() => {
+                  setProfileName('')
+                  setPreviewPage('profile')
+                }}
+              >
+                清空姓名
+              </button>
+            </div>
 
             <label className="block text-sm">
               <span className="mb-1 block font-semibold text-slate-300">排行榜状态</span>
@@ -191,7 +217,8 @@ export default function LayoutPreview() {
 
       {previewPage === 'profile' ? (
         <ProfilePage
-          participant={{ name: mockProfile.name, department: mockProfile.department }}
+          key={`profile-${profileName}-${mockProfile.department}`}
+          participant={{ name: profileName, department: mockProfile.department }}
           submitting={false}
           externalError={mockProfile.errorMessage}
           onSubmit={(profile) => {
@@ -208,7 +235,7 @@ export default function LayoutPreview() {
           feedback={questionPreview.feedback}
           submitting={false}
           previewMode
-          previewSelectedOptions={questionPreview.selectedOptions}
+          previewSelectedOptions={previewSelectedOptions ?? questionPreview.selectedOptions}
           onAnswer={() => {}}
           onTimeout={() => {}}
         />
