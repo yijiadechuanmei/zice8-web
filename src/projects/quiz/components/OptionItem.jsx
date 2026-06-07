@@ -44,14 +44,14 @@ export default function OptionItem({ option, selected, locked, state, onClick })
     >
       <svg className={`absolute inset-0 h-full w-full ${theme.shadow}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
         <path
-          d="M 42 1 H 503 C 523 1 536 14 536 34 V 38 C 536 45 542 48 544 52 V 71 C 542 75 536 78 536 85 V 89 C 536 109 523 122 503 122 H 42 C 22 122 9 109 9 89 V 85 C 9 78 3 75 1 71 V 52 C 3 48 9 45 9 38 V 34 C 9 14 22 1 42 1 Z"
+          d="M 44 1 H 501 C 520 1 534 15 534 34 V 39 C 534 45 540 48 544 52 V 71 C 540 75 534 78 534 84 V 89 C 534 108 520 122 501 122 H 44 C 25 122 11 108 11 89 V 84 C 11 78 5 75 1 71 V 52 C 5 48 11 45 11 39 V 34 C 11 15 25 1 44 1 Z"
           fill={theme.fill}
           stroke={theme.stroke}
           strokeWidth="2"
           vectorEffect="non-scaling-stroke"
         />
         <path
-          d="M 46 9 H 499 C 514 9 526 20 526 35 V 39 C 526 44 532 47 534 50 V 73 C 532 76 526 79 526 84 V 88 C 526 103 514 114 499 114 H 46 C 31 114 19 103 19 88 V 84 C 19 79 13 76 11 73 V 50 C 13 47 19 44 19 39 V 35 C 19 20 31 9 46 9 Z"
+          d="M 48 9 H 497 C 512 9 524 21 524 36 V 40 C 524 45 530 49 532 52 V 71 C 530 74 524 78 524 83 V 87 C 524 102 512 114 497 114 H 48 C 33 114 21 102 21 87 V 83 C 21 78 15 74 13 71 V 52 C 15 49 21 45 21 40 V 36 C 21 21 33 9 48 9 Z"
           fill="none"
           stroke="rgba(255,255,255,0.45)"
           strokeWidth="1"
