@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Select } from 'antd'
 import DesignStage from '../components/DesignStage'
 import { quizAssets } from '../assets'
 
@@ -93,16 +94,20 @@ export default function ProfilePage({ participant, submitting, onSubmit, onBack,
             />
           </label>
 
-          <label className="absolute left-[176px] top-[685px] w-[402px]">
+          <label className="absolute left-[176px] top-[685px] h-[56px] w-[402px]">
             <span className="sr-only">部门</span>
-            <select
-              className="h-[56px] w-full rounded-full  px-[24px] text-[32px] text-[#fff7d1] text-center outline-none"
-              value={department}
-              onChange={(event) => setDepartment(event.target.value)}
-            >
-              <option value="">请选择部门</option>
-              {departments.map((item) => <option value={item} key={item}>{item}</option>)}
-            </select>
+            <Select
+              value={department || undefined}
+              onChange={(value) => setDepartment(value)}
+              placeholder="请选择部门"
+              options={departments.map((item) => ({ label: item, value: item }))}
+              suffixIcon={null}
+              showSearch={false}
+              variant="borderless"
+              className="quiz-profile-department-select h-full w-full"
+              popupClassName="quiz-profile-department-popup"
+              getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
+            />
           </label>
 
           <button

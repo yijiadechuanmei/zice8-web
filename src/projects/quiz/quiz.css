@@ -2,7 +2,9 @@
 .quiz-page,
 .quiz-loading {
   min-height: 100vh;
+  height: 100vh;
   width: 100%;
+  overflow: hidden;
   background-image: url('/quiz/dragon-boat-2026/quiz-common-bg.png');
   background-position: top center;
   background-repeat: no-repeat;
@@ -58,6 +60,56 @@
   border-radius: 999px;
   background: #5a9650;
   animation: quiz-loading-bar-loop 1.25s ease-in-out infinite;
+}
+
+.quiz-profile-department-select {
+  height: 100%;
+  width: 100%;
+}
+
+.quiz-profile-department-select .ant-select-selector {
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  padding: 0 24px !important;
+}
+
+.quiz-profile-department-select .ant-select-selection-wrap,
+.quiz-profile-department-select .ant-select-selection-search {
+  width: 100%;
+}
+
+.quiz-profile-department-select .ant-select-selection-item,
+.quiz-profile-department-select .ant-select-selection-placeholder,
+.quiz-profile-department-select .ant-select-selection-search-input {
+  width: 100%;
+  text-align: center;
+  color: #fff7d1 !important;
+  font-size: 32px !important;
+}
+
+.quiz-profile-department-select .ant-select-selection-item,
+.quiz-profile-department-select .ant-select-selection-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal !important;
+}
+
+.quiz-profile-department-select .ant-select-selection-placeholder {
+  inset-inline-start: 0 !important;
+  inset-inline-end: 0 !important;
+}
+
+.quiz-profile-department-select .ant-select-arrow {
+  display: none !important;
+}
+
+.quiz-profile-department-popup .ant-select-item-option-content {
+  text-align: center;
 }
 
 @keyframes quiz-loading-bar-loop {
