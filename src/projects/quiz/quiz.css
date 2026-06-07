@@ -3,6 +3,11 @@
 .quiz-loading {
   min-height: 100vh;
   width: 100%;
+  background-image: url('/quiz/dragon-boat-2026/quiz-common-bg.png');
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: transparent !important;
 }
 
 .quiz-page,
@@ -22,5 +27,23 @@
   top: 0;
   transform-origin: top left;
   overflow: hidden;
-  background: #143978;
+  background: transparent;
+}
+
+.quiz-loading-progress {
+  animation: quiz-loading-progress 1.4s ease-in-out infinite;
+}
+
+@keyframes quiz-loading-progress {
+  0% {
+    width: 16%;
+  }
+
+  50% {
+    width: 82%;
+  }
+
+  100% {
+    width: 16%;
+  }
 }
