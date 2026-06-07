@@ -76,43 +76,37 @@ export default function QuestionPage({
           <img className="absolute left-0 top-0 h-[1624px] w-[750px] object-cover" src={quizAssets.common.bg} alt="" aria-hidden="true" />
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
-          <img className="absolute left-[24px] top-[124px] h-[1260px] w-[700px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
-          {/* <img className="absolute left-[70px] top-[292px] h-[25px] w-[585px] object-contain" src={quizAssets.question.progressBg} alt="" aria-hidden="true" /> */}
-          {/* <img className="absolute left-[-4px] top-[174px] h-[50px] w-[748px] object-contain" src={quizAssets.question.titleOrder} alt="" aria-hidden="true" /> */}
-          <img className="absolute left-[582px] top-[140px] h-[114px] w-[98px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
-          <img className="absolute left-[88px] top-[376px] h-[166px] w-[576px] object-contain" src={quizAssets.question.cardTitle} alt="" aria-hidden="true" />
+          <img className="absolute left-[45px] top-[250px] h-[1170px] w-[660px] object-contain" src={quizAssets.question.panelMask} alt="" aria-hidden="true" />
+          <img className="absolute left-[575px] top-[255px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
 
-          <div className="absolute left-0 top-[170px] w-[750px] text-center text-[38px]  text-[#000000]">
+          <div className="absolute left-[150px] top-[300px] h-[70px] w-[420px] text-center text-[42px] font-bold text-[#111111]">
             {progressText}
           </div>
-          <div className="absolute left-[92px] top-[301px] h-[28px] w-[550px] rounded-full border-[5px] border-[#06320f] shadow-[0_0_0_2px_#2f6b32]">
-  <div className="h-full w-full overflow-hidden rounded-full ">
-    <i
-      className="block h-full rounded-r-none bg-[#5a9650]"
-      style={{ width: progressWidth }}
-    />
-  </div>
-</div>
+          <div className="absolute left-[92px] top-[405px] h-[28px] w-[566px] rounded-full border-[5px] border-[#06320f] bg-[#001905] shadow-[0_0_0_2px_#2f6b32]">
+            <div className="h-full w-full overflow-hidden rounded-full">
+              <i className="block h-full rounded-r-none bg-[#5a9650]" style={{ width: progressWidth }} />
+            </div>
+          </div>
 
-          <div className="absolute left-[602px] top-[165px] h-[64px] w-[54px]">
+          <div className="absolute left-[575px] top-[255px] h-[110px] w-[110px]">
             <Countdown
               key={question.questionId}
               seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
               active={!locked}
               onTimeout={handleTimeout}
-              className="absolute left-0 top-0 h-[64px] w-[54px] rounded-none bg-transparent text-[#177245]"
-              numberClassName="text-[34px] leading-none"
+              className="absolute left-0 top-0 h-[110px] w-[110px] rounded-none bg-transparent text-[#2f7a42]"
+              numberClassName="text-[48px] leading-none"
               labelClassName="hidden"
             />
           </div>
 
-          <div className="absolute left-[105px] top-[400px] w-[540px] text-[#177245]">
-            <h2 className="text-[30px] leading-[1.45] font-bold text-[#177245]">
+          <div className="absolute left-[92px] top-[500px] min-h-[190px] w-[566px] text-[#3f7f3f]">
+            <h2 className="text-[34px] leading-[1.45] font-bold text-[#3f7f3f]">
               {`【${question.type === 'multiple' ? '多选题' : '单选题'}】${question.title}`}
             </h2>
           </div>
 
-          <div className="absolute left-[100px] top-[622px] flex w-[546px] flex-col gap-[16px]">
+          <div className="absolute left-[105px] top-[770px] flex w-[545px] flex-col gap-[22px]">
             {(question.options || []).map((option, index) => {
               const value = option.label || option.id
               const label = option.label || String.fromCharCode(65 + index)
@@ -128,12 +122,10 @@ export default function QuestionPage({
                 />
               )
             })}
-          </div>
 
-          {question.type === 'multiple' && !feedback ? (
-            <div className="absolute left-[100px] top-[1242px] w-[546px]">
+            {question.type === 'multiple' && !feedback ? (
               <QuizButton
-                className="min-h-[72px] text-[26px]"
+                className="mt-[6px] min-h-[72px] text-[26px]"
                 disabled={submitting || selected.length === 0}
                 onClick={() => {
                   if (previewMode) return
@@ -142,18 +134,18 @@ export default function QuestionPage({
               >
                 {submitting ? '提交中...' : '提交答案'}
               </QuizButton>
-            </div>
-          ) : null}
+            ) : null}
 
-          {feedback ? (
-            <div
-              className={`absolute left-[100px] top-[1350px] w-[546px] rounded-lg px-[18px] py-[18px] text-center text-[24px] font-extrabold ${
+            {feedback ? (
+              <div
+                className={`mt-[8px] w-[545px] rounded-lg px-[18px] py-[18px] text-center text-[24px] font-extrabold ${
                 feedback.isTimeout || !feedback.isCorrect ? 'bg-[#fee2e2] text-[#9f1d1d]' : 'bg-[#eef8cf] text-[#255332]'
               }`}
-            >
-              {feedback.isTimeout ? '答题超时' : feedback.isCorrect ? '回答正确' : '回答错误'}
-            </div>
-          ) : null}
+              >
+                {feedback.isTimeout ? '答题超时' : feedback.isCorrect ? '回答正确' : '回答错误'}
+              </div>
+            ) : null}
+          </div>
         </DesignStage>
       </section>
     </main>

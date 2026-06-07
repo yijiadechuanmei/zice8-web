@@ -1,23 +1,23 @@
 const STATE_CLASSES = {
   default: {
-    shell: 'border-white/55 shadow-[0_12px_30px_rgba(14,36,77,0.18)]',
-    panel: 'bg-gradient-to-b from-white via-[#eef5ff] to-[#d9e9ff]',
-    badge: 'border-[#b9d0ff] bg-gradient-to-b from-white to-[#d7e4ff] text-[#5878b4]',
+    shell: 'fill-[#fffef0] stroke-[#8bcfc3] shadow-[0_10px_22px_rgba(22,70,53,0.12)]',
+    badge: 'border-[#8bcfc3] bg-[#f4f2dd] text-[#4f8b55]',
+    text: 'text-[#4f8b55]',
   },
   selected: {
-    shell: 'border-[#f8e38a] shadow-[0_16px_32px_rgba(249,214,87,0.24)]',
-    panel: 'bg-gradient-to-b from-[#fffbe8] via-[#fff2bd] to-[#ffe37a]',
-    badge: 'border-[#f0d26a] bg-gradient-to-b from-[#fff7c8] to-[#ffd55c] text-[#8b5f00]',
+    shell: 'fill-[#eff8ee] stroke-[#57ad9d] shadow-[0_12px_24px_rgba(40,116,90,0.16)]',
+    badge: 'border-[#57ad9d] bg-[#d9efe9] text-[#2c7f61]',
+    text: 'text-[#3d8051]',
   },
   correct: {
-    shell: 'border-[#8ee0aa] shadow-[0_16px_32px_rgba(21,153,71,0.22)]',
-    panel: 'bg-gradient-to-b from-[#f0fff4] via-[#d9fbe5] to-[#b6f0ca]',
-    badge: 'border-[#79d998] bg-gradient-to-b from-[#ecfff3] to-[#a7edc2] text-[#12733a]',
+    shell: 'fill-[#eef9ed] stroke-[#52a767] shadow-[0_12px_24px_rgba(37,103,45,0.18)]',
+    badge: 'border-[#52a767] bg-[#67b478] text-[#ffffff]',
+    text: 'text-[#246032]',
   },
   wrong: {
-    shell: 'border-[#f2a4a4] shadow-[0_16px_32px_rgba(220,38,38,0.18)]',
-    panel: 'bg-gradient-to-b from-[#fff7f7] via-[#ffe0e0] to-[#ffc3c3]',
-    badge: 'border-[#e58d8d] bg-gradient-to-b from-[#fff1f1] to-[#ffbdbd] text-[#b42318]',
+    shell: 'fill-[#fff1e9] stroke-[#d6866d] shadow-[0_12px_24px_rgba(148,72,51,0.15)]',
+    badge: 'border-[#d6866d] bg-[#eba68b] text-[#fff7f1]',
+    text: 'text-[#91503c]',
   },
 }
 
@@ -27,22 +27,34 @@ export default function OptionItem({ option, selected, locked, state, onClick })
 
   return (
     <button
-      className={`relative h-[92px] w-full overflow-hidden rounded-[24px] border bg-transparent text-left transition-transform duration-150 ${
-        locked ? 'cursor-not-allowed opacity-95' : 'cursor-pointer active:scale-[0.99]'
-      } ${theme.shell}`}
+      className={`relative min-h-[123px] w-[545px] bg-transparent text-left transition-transform duration-150 ${
+        locked ? 'cursor-not-allowed opacity-85' : 'cursor-pointer active:scale-[0.995]'
+      }`}
       type="button"
       disabled={locked}
       onClick={onClick}
     >
-      <span className={`absolute inset-0 rounded-[24px] ${theme.panel}`} aria-hidden="true" />
-      <span className="absolute inset-x-0 top-0 h-1/2 rounded-t-[24px] bg-white/35" aria-hidden="true" />
-      <span className="relative flex h-full items-center gap-[22px] px-[22px]">
-        <span
-          className={`inline-flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full border text-[28px] font-black ${theme.badge}`}
-        >
+      <svg className={`absolute inset-0 h-full w-full ${theme.shell}`} viewBox="0 0 545 123" preserveAspectRatio="none" aria-hidden="true">
+        <path
+          d="M40 2H505C520.464 2 533 14.536 533 30V38L543 48V75L533 85V93C533 108.464 520.464 121 505 121H40C24.536 121 12 108.464 12 93V85L2 75V48L12 38V30C12 14.536 24.536 2 40 2Z"
+          strokeWidth="2.5"
+        />
+        <path
+          d="M41 10H504C514.493 10 523 18.507 523 29V33L534 42V80L523 90V94C523 104.493 514.493 113 504 113H41C30.507 113 22 104.493 22 94V90L11 80V42L22 33V29C22 18.507 30.507 10 41 10Z"
+          fill="none"
+          stroke="rgba(255,255,255,0.42)"
+          strokeWidth="1.2"
+        />
+      </svg>
+
+      <span
+        className={`absolute left-[42px] top-1/2 inline-flex h-[92px] w-[92px] -translate-y-1/2 items-center justify-center rounded-full border-[2px] text-[44px] font-black ${theme.badge}`}
+      >
           {option.label}
-        </span>
-        <span className="min-w-0 flex-1 break-words pr-[12px] text-[24px] leading-[1.35] text-[#173f2a]">
+      </span>
+
+      <span className={`absolute left-[165px] right-[40px] top-1/2 -translate-y-1/2 text-[36px] leading-[1.25] font-bold ${theme.text}`}>
+        <span className="block break-words">
           {option.content}
         </span>
       </span>
