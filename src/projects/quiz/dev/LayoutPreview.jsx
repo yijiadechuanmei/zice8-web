@@ -89,6 +89,7 @@ export default function LayoutPreview() {
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const [previewSelectedOptions, setPreviewSelectedOptions] = useState(null)
   const [profileName, setProfileName] = useState(mockProfile.name)
+  const [profileDepartment, setProfileDepartment] = useState(mockProfile.department)
 
   const questionPreview = useMemo(() => getQuestionPreview(questionState), [questionState])
   const rankPreview = useMemo(() => getRankPreview(rankState), [rankState])
@@ -162,11 +163,11 @@ export default function LayoutPreview() {
                 className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
                 type="button"
                 onClick={() => {
-                  setPreviewSelectedOptions([])
-                  setPreviewPage('question')
+                  setProfileDepartment('')
+                  setPreviewPage('profile')
                 }}
               >
-                清空选中
+                清空部门
               </button>
               <button
                 className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
@@ -217,8 +218,8 @@ export default function LayoutPreview() {
 
       {previewPage === 'profile' ? (
         <ProfilePage
-          key={`profile-${profileName}-${mockProfile.department}`}
-          participant={{ name: profileName, department: mockProfile.department }}
+          key={`profile-${profileName}-${profileDepartment}`}
+          participant={{ name: profileName, department: profileDepartment }}
           submitting={false}
           externalError={mockProfile.errorMessage}
           onSubmit={(profile) => {
