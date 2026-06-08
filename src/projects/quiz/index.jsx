@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   finishAttempt,
   getBootstrap,
   getCurrentAttempt,
+  getPublicConfig,
   getRank,
   resetDemoActivity,
   startAttempt,
@@ -48,6 +50,7 @@ function QuizMain() {
   const activityKey = getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
   const debug = getQueryParam('debug') === '1'
   const [page, setPage] = useState('home')
+  const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [current, setCurrent] = useState(null)
   const [result, setResult] = useState(null)
@@ -59,7 +62,9 @@ function QuizMain() {
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState(null)
   const [toast, setToast] = useState('')
+  const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
+  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   const showToast = useCallback((message, duration = 1500) => {
     if (!message) return
@@ -84,16 +89,29 @@ function QuizMain() {
     }
   }, [])
 
-  const shareActivity = bootstrap?.activity
+  const shareActivity = bootstrap?.activity || publicConfig
     ? {
-        ...bootstrap.activity,
-        shareTitle: bootstrap.shareConfig?.title || bootstrap.activity.shareTitle || bootstrap.activity.title || '端午知识竞赛',
-        shareDesc: bootstrap.shareConfig?.desc || bootstrap.activity.shareDesc || '参与端午答题挑战，赢取活动排名',
-        shareImage: bootstrap.shareConfig?.imgUrl || bootstrap.activity.shareImage || quizAssets.common.logoEvent,
+        ...(bootstrap?.activity || publicConfig),
+        shareTitle: bootstrap?.shareConfig?.title || bootstrap?.activity?.shareTitle || publicConfig?.shareTitle || bootstrap?.activity?.title || publicConfig?.title || '端午知识竞赛',
+        shareDesc: bootstrap?.shareConfig?.desc || bootstrap?.activity?.shareDesc || publicConfig?.shareDesc || '参与端午答题挑战，赢取活动排名',
+        shareImage: bootstrap?.shareConfig?.imgUrl || bootstrap?.activity?.shareImage || publicConfig?.shareImage || quizAssets.common.logoEvent,
       }
     : null
 
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
+
+  useEffect(() => {
+    if (!activityKey) return
+    getPublicConfig(activityKey)
+      .then((config) => {
+        setPublicConfig(config)
+        setError('')
+      })
+      .catch((err) => {
+        setError(err.message || '活动加载失败')
+        setLoading(false)
+      })
+  }, [activityKey])
 
   const loadBootstrap = useCallback(async (options = {}) => {
     const { resetPage = true, withLoading = true } = options
@@ -118,13 +136,13 @@ function QuizMain() {
   }, [activityKey, showError])
 
   useEffect(() => {
+    if (!publicConfig || !authReady) return
     if (!getToken()) {
       setLoading(false)
-      showToast('请先通过微信授权进入活动')
       return
     }
     loadBootstrap()
-  }, [loadBootstrap, showToast])
+  }, [authReady, loadBootstrap, publicConfig])
 
   function startAuthorize() {
     const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
@@ -286,7 +304,28 @@ function QuizMain() {
     setFeedback(null)
   }
 
-  if (loading) return <LoadingState text="答题活动加载中..." />
+  if (blockedMessage) {
+    return (
+      <main className="quiz-loading-page" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
+        <div className="px-6 text-center text-white">
+          <div className="text-[24px] font-bold">{blockedMessage}</div>
+          <div className="mt-3 text-[14px] text-white/75">请复制链接到微信后访问</div>
+        </div>
+        <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="quiz-loading-page" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
+        <div className="px-6 text-center text-white">{error}</div>
+        <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
+      </main>
+    )
+  }
+
+  if (loading || !publicConfig || !authReady) return <LoadingState text="答题活动加载中..." />
 
   return (
     <div className="quiz-app" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>

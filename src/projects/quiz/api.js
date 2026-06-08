@@ -1,5 +1,7 @@
 import { request } from '../../shared/api/request'
 
+export const getPublicConfig = (activityKey) => request(`/activities/${activityKey}/public-config`)
+
 export const getBootstrap = (activityKey) => request(`/quiz/activities/${activityKey}/bootstrap`)
 
 export const submitProfile = (activityKey, data) =>
