@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -17,7 +18,6 @@ import {
   submitTimeout,
 } from './api'
 import LoadingState from './components/LoadingState'
-import QuizBgmPlayer from './components/QuizBgmPlayer'
 import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
 import LayoutPreview from './dev/LayoutPreview'
@@ -362,7 +362,7 @@ function QuizMain() {
       ) : null}
       {page === 'result' ? <ResultPage result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
-      <QuizBgmPlayer config={bootstrap?.bgmConfig} />
+      <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
       <div className="quiz-version-badge">v{QUIZ_VERSION}</div>

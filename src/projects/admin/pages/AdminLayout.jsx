@@ -26,6 +26,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons'
 import AccountPage from './AccountPage'
+import ActivityConfigPage from './ActivityConfigPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
 import OperationLogPage from './OperationLogPage'
@@ -37,10 +38,11 @@ const { Text, Title } = Typography
 
 const tabs = [
   { key: 'overview', label: '概览', icon: <DashboardOutlined /> },
+  { key: 'activityConfig', label: '活动配置', icon: <SettingOutlined /> },
   { key: 'dashboard', label: '数据看板', icon: <BarChartOutlined /> },
   { key: 'data', label: '数据表', icon: <TableOutlined /> },
   { key: 'quizImport', label: '题库导入', icon: <UploadOutlined />, activityTypes: ['quiz'] },
-  { key: 'permissions', label: '权限配置', icon: <SettingOutlined /> },
+  { key: 'permissions', label: '权限配置', icon: <TeamOutlined /> },
   { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
   { key: 'logs', label: '操作日志', icon: <DatabaseOutlined /> },
 ]
@@ -171,6 +173,7 @@ export default function AdminLayout({
 
           {!selectedActivity ? <Card><Empty description="请选择左侧活动" /></Card> : null}
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
+          {selectedActivity && activeTab === 'activityConfig' ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' ? <QuizQuestionImportPage activity={selectedActivity} /> : null}

@@ -55,6 +55,17 @@ export function getOverview(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/overview`)
 }
 
+export function getActivityConfig(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/config`)
+}
+
+export function updateActivityBgmConfig(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/mobile-config/bgm`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getCharts(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/charts`)
 }
@@ -138,17 +149,6 @@ export function clearQuizQuestions(activityKey, confirm = 'CLEAR_QUIZ_QUESTIONS'
   return adminRequest(`/quiz/admin/activities/${activityKey}/questions/clear`, {
     method: 'POST',
     body: JSON.stringify({ confirm }),
-  })
-}
-
-export function getQuizAdminBgmConfig(activityKey) {
-  return adminRequest(`/quiz/admin/activities/${activityKey}/bgm-config`)
-}
-
-export function updateQuizAdminBgmConfig(activityKey, payload) {
-  return adminRequest(`/quiz/admin/activities/${activityKey}/bgm-config`, {
-    method: 'POST',
-    body: JSON.stringify(payload),
   })
 }
 

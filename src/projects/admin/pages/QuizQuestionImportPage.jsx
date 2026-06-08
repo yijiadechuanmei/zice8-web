@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Card, Descriptions, Input, Radio, Space, Switch, Table, Typography, Upload, message } from 'antd'
+import { Alert, Button, Card, Descriptions, Input, Radio, Space, Table, Typography, Upload, message } from 'antd'
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
-import { clearQuizQuestions, getQuizAdminBgmConfig, importQuizQuestions, updateQuizAdminBgmConfig } from '../api'
+import { clearQuizQuestions, importQuizQuestions } from '../api'
 
 const { Dragger } = Upload
 const { Text, Title } = Typography
@@ -18,15 +18,6 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
   const [result, setResult] = useState(null)
   const [clearResult, setClearResult] = useState(null)
   const [clearConfirm, setClearConfirm] = useState('')
-  const [bgmConfig, setBgmConfig] = useState({
-    enabled: false,
-    url: '',
-    loop: true,
-    autoplay: true,
-    showControl: true,
-  })
-  const [bgmLoading, setBgmLoading] = useState(false)
-  const [bgmSaving, setBgmSaving] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -36,40 +27,6 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
     setClearConfirm('')
     setError('')
     setFileList([])
-  }, [activity?.activityKey])
-
-  useEffect(() => {
-    if (!activity?.activityKey) return
-    let alive = true
-    setBgmLoading(true)
-    getQuizAdminBgmConfig(activity.activityKey)
-      .then((data) => {
-        if (!alive) return
-        setBgmConfig({
-          enabled: Boolean(data?.bgm?.enabled),
-          url: String(data?.bgm?.url || ''),
-          loop: data?.bgm?.loop !== false,
-          autoplay: data?.bgm?.autoplay !== false,
-          showControl: data?.bgm?.showControl !== false,
-        })
-      })
-      .catch(() => {
-        if (alive) {
-          setBgmConfig({
-            enabled: false,
-            url: '',
-            loop: true,
-            autoplay: true,
-            showControl: true,
-          })
-        }
-      })
-      .finally(() => {
-        if (alive) setBgmLoading(false)
-      })
-    return () => {
-      alive = false
-    }
   }, [activity?.activityKey])
 
   const selectedFile = fileList[0]?.originFileObj || fileList[0] || null
@@ -164,32 +121,6 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
     }
   }
 
-  async function handleSaveBgm() {
-    if (!activityKey.trim()) {
-      setError('缺少 activityKey，无法保存背景音乐配置')
-      return
-    }
-    setBgmSaving(true)
-    setError('')
-    try {
-      const data = await updateQuizAdminBgmConfig(activityKey.trim(), bgmConfig)
-      setBgmConfig({
-        enabled: Boolean(data?.bgm?.enabled),
-        url: String(data?.bgm?.url || ''),
-        loop: data?.bgm?.loop !== false,
-        autoplay: data?.bgm?.autoplay !== false,
-        showControl: data?.bgm?.showControl !== false,
-      })
-      message.success('背景音乐配置已保存')
-    } catch (err) {
-      const text = err?.response?.message || err.message || '背景音乐配置保存失败'
-      setError(text)
-      message.error(text)
-    } finally {
-      setBgmSaving(false)
-    }
-  }
-
   return (
     <Card className="admin-card">
       <div className="admin-page-head">
@@ -260,32 +191,6 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
               <p className="ant-upload-text">点击或拖拽上传 .xlsx / .xls 题库</p>
               <p className="ant-upload-hint">不会上传图片文件；Excel 中“图片”列会作为题目图片 URL 文本导入。</p>
             </Dragger>
-          </Space>
-        </Card>
-
-        <Card size="small" title="背景音乐配置" loading={bgmLoading}>
-          <Space direction="vertical" size={14} style={{ width: '100%' }}>
-            <Space wrap size={18}>
-              <label><Text strong>开启背景音乐</Text><div style={{ marginTop: 8 }}><Switch checked={bgmConfig.enabled} onChange={(checked) => setBgmConfig((value) => ({ ...value, enabled: checked }))} /></div></label>
-              <label><Text strong>循环播放</Text><div style={{ marginTop: 8 }}><Switch checked={bgmConfig.loop} onChange={(checked) => setBgmConfig((value) => ({ ...value, loop: checked }))} /></div></label>
-              <label><Text strong>自动播放</Text><div style={{ marginTop: 8 }}><Switch checked={bgmConfig.autoplay} onChange={(checked) => setBgmConfig((value) => ({ ...value, autoplay: checked }))} /></div></label>
-              <label><Text strong>显示控制按钮</Text><div style={{ marginTop: 8 }}><Switch checked={bgmConfig.showControl} onChange={(checked) => setBgmConfig((value) => ({ ...value, showControl: checked }))} /></div></label>
-            </Space>
-            <div>
-              <Text strong>音乐 URL</Text>
-              <Input
-                value={bgmConfig.url}
-                onChange={(event) => setBgmConfig((value) => ({ ...value, url: event.target.value }))}
-                placeholder="https://assets.zice8.com/quiz/dragon-boat-2026/bgm.mp3"
-                style={{ marginTop: 8, maxWidth: 760 }}
-              />
-            </div>
-            <Space wrap>
-              <Button type="primary" onClick={handleSaveBgm} loading={bgmSaving}>
-                保存背景音乐配置
-              </Button>
-              <Text type="secondary">配置保存在 quiz_config.extra_json.bgm 中，不需要新增数据库字段。</Text>
-            </Space>
           </Space>
         </Card>
 
