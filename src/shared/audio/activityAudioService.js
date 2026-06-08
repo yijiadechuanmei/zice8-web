@@ -123,7 +123,8 @@ class ActivityAudioService {
     this.context = { ...this.context, ...context }
     const nextConfig = normalizeConfig(bgmConfig)
     const previousUrl = this.config.url
-    this.config = nextConfig
+    const hasExplicitConfig = Boolean(nextConfig.url)
+    this.config = hasExplicitConfig ? nextConfig : this.config
     this.reasonAttempts = {}
 
     if (nextConfig.enabled && nextConfig.url && this.context.activityKey) {
@@ -135,12 +136,12 @@ class ActivityAudioService {
     }
 
     this.patchState({
-      enabled: nextConfig.enabled,
-      url: nextConfig.url,
+      enabled: hasExplicitConfig ? nextConfig.enabled : this.config.enabled,
+      url: hasExplicitConfig ? nextConfig.url : this.config.url,
       blocked: false,
       lastError: '',
-      volume: nextConfig.volume,
-      loop: nextConfig.loop,
+      volume: hasExplicitConfig ? nextConfig.volume : this.config.volume,
+      loop: hasExplicitConfig ? nextConfig.loop : this.config.loop,
       activityKey: this.context.activityKey || '',
     })
     debugLog('[ActivityAudio] setConfig', {
@@ -151,14 +152,15 @@ class ActivityAudioService {
       volume: nextConfig.volume,
     })
 
-    if (!nextConfig.enabled || !nextConfig.url) {
+    if (hasExplicitConfig && (!nextConfig.enabled || !nextConfig.url)) {
       this.pause('disabled')
       this.clearAudioSource()
       return
     }
 
-    this.prepareAudio('set-config', { force: previousUrl !== nextConfig.url })
-    if (nextConfig.autoplay && !this.state.userPaused) {
+    const targetUrl = hasExplicitConfig ? nextConfig.url : this.config.url
+    this.prepareAudio('set-config', { force: previousUrl !== targetUrl, url: targetUrl })
+    if ((hasExplicitConfig ? nextConfig.autoplay : this.config.autoplay) && !this.state.userPaused) {
       this.play('set-config')
     }
   }
@@ -455,6 +457,8 @@ class ActivityAudioService {
     this.bindFirstGestureListeners()
 
     if (window.WeixinJSBridge) {
+      this.patchState({ bridgeReady: true })
+      debugLog('[ActivityAudio] bridge existing detected')
       this.scheduleTask(() => this.runBridgeUnlock('wechat-bridge-existing'), 0)
     }
 
@@ -482,12 +486,19 @@ class ActivityAudioService {
   }
 
   runBridgeUnlock(reason) {
+    if (reason.includes('bridge')) {
+      this.patchState({ bridgeReady: true })
+    }
+    debugLog('[ActivityAudio] bridge unlock', { reason })
     this.resumeAudioContext(reason).catch(() => undefined)
 
     const invokeAndPlay = () => {
       this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
       this.prepareAudio(reason, { force: true })
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
+        if (reason.includes('cached-url')) {
+          debugLog('[ActivityAudio] cached url weixin invoke')
+        }
         this.play(`${reason}-invoke`, { forcePrepare: true, ignoreThrottle: true })
       }
     }
@@ -523,18 +534,37 @@ class ActivityAudioService {
 
     if (!cachedUrl) return
 
-    const previousConfig = this.config
     this.config = {
-      ...previousConfig,
+      ...this.config,
       enabled: true,
       url: cachedUrl,
       autoplay: true,
+      loop: true,
+      showControl: true,
+      volume: 0.6,
+      preload: true,
     }
+    this.patchState({
+      enabled: true,
+      url: cachedUrl,
+      volume: this.config.volume,
+      loop: this.config.loop,
+      activityKey: this.context.activityKey || '',
+    })
+    debugLog('[ActivityAudio] cached url loaded', {
+      activityKey: this.context.activityKey || '',
+      url: cachedUrl,
+    })
     this.prepareAudio('cached-url', { force: true, url: cachedUrl })
-    this.config = previousConfig
+
+    if (window.WeixinJSBridge?.invoke && !this.state.userPaused) {
+      this.patchState({ bridgeReady: true })
+      this.runBridgeUnlock('cached-url-wechat-bridge')
+      return
+    }
 
     if (this.state.bridgeReady && !this.state.userPaused) {
-      this.play('cached-url-bridge')
+      this.play('cached-url-bridge', { ignoreThrottle: true })
     }
   }
 
