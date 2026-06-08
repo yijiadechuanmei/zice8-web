@@ -32,6 +32,14 @@ const STATE_CLASSES = {
 export default function OptionItem({ option, selected, locked, state, onClick }) {
   const variant = state || (selected ? 'selected' : 'default')
   const theme = STATE_CLASSES[variant] || STATE_CLASSES.default
+  const optionText = String(option.content || option.text || '')
+  const textLength = optionText.length
+
+  let textSizeClass = 'text-[34px] leading-[49px]'
+  if (textLength > 8) textSizeClass = 'text-[30px] leading-[40px]'
+  if (textLength > 14) textSizeClass = 'text-[26px] leading-[34px]'
+  if (textLength > 22) textSizeClass = 'text-[22px] leading-[28px]'
+  if (textLength > 34) textSizeClass = 'text-[18px] leading-[24px]'
 
   return (
     <button
@@ -58,9 +66,9 @@ export default function OptionItem({ option, selected, locked, state, onClick })
           {option.label}
       </span>
 
-      <span className={`absolute left-[165px] top-0 flex h-[123px] w-[340px] items-center text-[40px] leading-[1.2] font-bold ${theme.text}`}>
-        <span className="block max-h-[96px] overflow-hidden break-words">
-          {option.content}
+      <span className={`absolute left-[165px] top-0 flex h-[123px] w-[340px] items-center ${theme.text}`}>
+        <span className={`flex min-h-[96px] w-full items-center whitespace-normal break-words font-bold ${textSizeClass}`}>
+          {optionText}
         </span>
       </span>
     </button>

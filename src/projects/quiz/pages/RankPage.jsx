@@ -35,7 +35,7 @@ export default function RankPage({ ranks, loading, onBack }) {
             {!loading && !sortedRanks.length ? <p className="rounded-lg bg-[#f7f4d8] px-[18px] py-[18px] text-center text-[22px] text-[#66724b]">暂无排行</p> : null}
             {sortedRanks.length ? (
               <div className="flex h-full flex-col">
-                {/* <div className="grid h-[54px] grid-cols-[84px_150px_150px_92px_120px] items-center gap-[8px] px-[10px] bg-[#47803d]  text-[18px] font-extrabold text-[#fff6d3]">
+                {/* <div className="grid h-[54px] grid-cols-[84px_120px_120px_140px_120px] items-center gap-[8px] px-[10px] bg-[#47803d]  text-[18px] font-extrabold text-[#fff6d3]">
                   <span>排名</span>
                   <span>姓名</span>
                   <span>部门</span>
@@ -45,16 +45,20 @@ export default function RankPage({ ranks, loading, onBack }) {
                 <div className="mt-[14px] flex flex-col gap-[10px] overflow-auto">
                   {sortedRanks.map((item) => (
                     <div
-                      className={`grid h-[58px] grid-cols-[84px_120px_120px_120px_120px] items-center gap-[8px] rounded-2xl px-[10px] text-[22px] ${
+                      className={`grid min-h-[58px] grid-cols-[84px_120px_120px_120px_120px] items-stretch gap-[8px] rounded-2xl px-[10px] py-[8px] text-[22px] ${
                         item.displayRank <= 3 ? 'bg-[rgba(249,242,181,0.96)]' : 'bg-[rgba(255,250,237,0.92)]'
                       }`}
                       key={`${item.displayRank}-${item.userId}`}
                     >
-                      <strong className="text-center text-[28px] text-ce font-black text-[#8a5d00]">{item.displayRank}</strong>
-                      <span className="truncate text-center">{item.participantName || item.name || '未填写'}</span>
-                      <span className="truncate text-center">{item.department || '-'}</span>
-                      <span className="truncate text-center">{item.totalScore || 0}</span>
-                      <span className="truncate text-center">{formatQuizDuration(item.totalTimeMs)}</span>
+                      <strong className="flex items-center justify-center text-center text-[28px] font-black text-[#8a5d00]">{item.displayRank}</strong>
+                      <span className="flex items-center justify-center text-center whitespace-normal break-words leading-[1.2]">
+                        {item.participantName || item.name || '未填写'}
+                      </span>
+                      <span className="flex items-center justify-center text-center whitespace-normal break-words leading-[1.2]">
+                        {item.department || '-'}
+                      </span>
+                      <span className="flex items-center justify-center text-center">{item.totalScore || 0}</span>
+                      <span className="flex items-center justify-center text-center">{formatQuizDuration(item.totalTimeMs)}</span>
                     </div>
                   ))}
                 </div>
