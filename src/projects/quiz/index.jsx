@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   finishAttempt,
@@ -49,6 +50,8 @@ function QuizMain() {
   const [bootstrap, setBootstrap] = useState(null)
   const [current, setCurrent] = useState(null)
   const [result, setResult] = useState(null)
+  const [activeAttemptId, setActiveAttemptId] = useState(null)
+  const [resultAttemptId, setResultAttemptId] = useState(null)
   const [ranks, setRanks] = useState([])
   const [rankLoading, setRankLoading] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -74,19 +77,42 @@ function QuizMain() {
     showToast(err?.message || '请求失败')
   }, [showToast])
 
-  const loadBootstrap = useCallback(async () => {
-    setLoading(true)
+  const handleWechatShareStatus = useCallback((status) => {
+    if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
+      console.warn('[quiz-share] setup failed', status)
+    }
+  }, [])
+
+  const shareActivity = bootstrap?.activity
+    ? {
+        ...bootstrap.activity,
+        shareTitle: bootstrap.shareConfig?.title || bootstrap.activity.shareTitle || bootstrap.activity.title || '端午知识竞赛',
+        shareDesc: bootstrap.shareConfig?.desc || bootstrap.activity.shareDesc || '参与端午答题挑战，赢取活动排名',
+        shareImage: bootstrap.shareConfig?.imgUrl || bootstrap.activity.shareImage || 'https://web.zice8.com/quiz/dragon-boat-2026/quiz-common-logo-event.png',
+      }
+    : null
+
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
+
+  const loadBootstrap = useCallback(async (options = {}) => {
+    const { resetPage = true, withLoading = true } = options
+    if (withLoading) setLoading(true)
     try {
       const data = await getBootstrap(activityKey)
       setBootstrap(data)
       document.title = data?.activity?.title || '端午知识竞赛'
-      setCurrent(null)
-      setFeedback(null)
-      setPage('home')
+      if (resetPage) {
+        setCurrent(null)
+        setResult(null)
+        setActiveAttemptId(null)
+        setResultAttemptId(null)
+        setFeedback(null)
+        setPage('home')
+      }
     } catch (err) {
       showError(err)
     } finally {
-      setLoading(false)
+      if (withLoading) setLoading(false)
     }
   }, [activityKey, showError])
 
@@ -120,6 +146,8 @@ function QuizMain() {
       })
       const attemptId = data.attemptId || data.current?.attemptId || data.currentAttempt?.attemptId
       if (!attemptId) throw new Error('开始答题失败，缺少 attemptId')
+      setActiveAttemptId(attemptId)
+      setResultAttemptId(null)
       const currentData = data.currentQuestion ? data : await getCurrentAttempt(activityKey, attemptId)
       setCurrent(currentData)
       setFeedback(null)
@@ -205,10 +233,12 @@ function QuizMain() {
     setSubmitting(true)
     try {
       const data = await finishAttempt(activityKey, current.attemptId)
+      setResultAttemptId(current.attemptId)
+      setActiveAttemptId(null)
       setResult(data)
       setFeedback(null)
       setPage('result')
-      loadBootstrap().catch(() => {})
+      loadBootstrap({ resetPage: false, withLoading: false }).catch(() => {})
     } catch (err) {
       showError(err)
     } finally {
@@ -250,6 +280,7 @@ function QuizMain() {
   }
 
   function backHome() {
+    setActiveAttemptId(null)
     setPage('home')
     setFeedback(null)
   }
@@ -280,7 +311,7 @@ function QuizMain() {
       ) : null}
       {page === 'question' ? (
         <QuestionPage
-          current={current}
+          current={current ? { ...current, attemptId: activeAttemptId || current.attemptId } : current}
           feedback={feedback}
           submitting={submitting}
           onAnswer={handleAnswer}
@@ -288,7 +319,7 @@ function QuizMain() {
           showToast={showToast}
         />
       ) : null}
-      {page === 'result' ? <ResultPage result={result} onOpenRank={openRank} onBack={backHome} /> : null}
+      {page === 'result' ? <ResultPage result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
