@@ -17,6 +17,7 @@ import {
   submitTimeout,
 } from './api'
 import LoadingState from './components/LoadingState'
+import QuizBgmPlayer from './components/QuizBgmPlayer'
 import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
 import LayoutPreview from './dev/LayoutPreview'
@@ -361,6 +362,7 @@ function QuizMain() {
       ) : null}
       {page === 'result' ? <ResultPage result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
+      <QuizBgmPlayer config={bootstrap?.bgmConfig} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
       <div className="quiz-version-badge">v{QUIZ_VERSION}</div>

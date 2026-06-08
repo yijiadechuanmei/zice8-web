@@ -20,13 +20,21 @@ export default function QuestionPage({
 }) {
   const question = current?.currentQuestion
   const [selected, setSelected] = useState([])
+  const [questionLocked, setQuestionLocked] = useState(false)
   const timeoutTriggeredRef = useRef(false)
   const previewSelectedKey = previewSelectedOptions.join('|')
 
   useEffect(() => {
     setSelected(previewMode ? previewSelectedOptions : [])
+    setQuestionLocked(false)
     timeoutTriggeredRef.current = false
   }, [previewMode, previewSelectedKey, question?.questionId])
+
+  useEffect(() => {
+    if (!submitting && !feedback) {
+      setQuestionLocked(false)
+    }
+  }, [feedback, submitting, question?.questionId])
 
   useEffect(() => {
     if (!feedback) return
@@ -40,13 +48,14 @@ export default function QuestionPage({
   const totalQuestions = current?.totalQuestions || current?.questionCount || 0
   const questionSort = question?.questionSort || current?.currentQuestionSort || 1
   const progressText = `第 ${questionSort} 题 / 共${totalQuestions || '-'} 题`
-  const locked = submitting || Boolean(feedback)
+  const locked = submitting || questionLocked || Boolean(feedback)
   const correctOptions = useMemo(() => new Set(feedback?.correctOptions || []), [feedback])
   const progressWidth = `${totalQuestions ? (questionSort / totalQuestions) * 100 : 0}%`
 
   const handleTimeout = useCallback(() => {
     if (!question || locked || timeoutTriggeredRef.current) return
     timeoutTriggeredRef.current = true
+    setQuestionLocked(true)
     onTimeout(question.questionId)
   }, [locked, onTimeout, question])
 
@@ -66,6 +75,7 @@ export default function QuestionPage({
     if (question.type === 'single') {
       setSelected([value])
       if (previewMode) return
+      setQuestionLocked(true)
       onAnswer(question.questionId, [value])
       return
     }
@@ -93,10 +103,11 @@ export default function QuestionPage({
             <img className="absolute right-[60px] top-[40px] h-[110px] w-[110px] object-contain" src={quizAssets.question.countdownBg} alt="" aria-hidden="true" />
 
             <div className="absolute right-[60px] top-[40px] h-[110px] w-[110px]">
-              <Countdown
+                    <Countdown
                 key={question.questionId}
                 seconds={current.remainingSeconds ?? question.timeLimitSeconds ?? 10}
                 active={!locked}
+                paused={questionLocked || submitting || Boolean(feedback)}
                 onTimeout={handleTimeout}
                 className="absolute left-0 top-0 h-[110px] w-[110px] rounded-none bg-transparent text-[#2f7a42]"
                 numberClassName="text-[48px] leading-none"
@@ -144,7 +155,8 @@ export default function QuestionPage({
                     className="mt-[4px] min-h-[72px] text-[26px]"
                     disabled={submitting || selected.length === 0}
                     onClick={() => {
-                      if (previewMode) return
+                      if (previewMode || locked) return
+                      setQuestionLocked(true)
                       onAnswer(question.questionId, selected)
                     }}
                   >

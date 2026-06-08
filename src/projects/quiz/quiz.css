@@ -41,6 +41,22 @@
   pointer-events: none;
 }
 
+.quiz-bgm-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 60;
+  min-width: 76px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(8, 36, 24, 0.52);
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1;
+  backdrop-filter: blur(6px);
+}
+
 .quiz-design-viewport {
   position: relative;
   width: min(100%, 750px);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function Countdown({ seconds, active, onTimeout, className = '', numberClassName = '', labelClassName = '' }) {
+export default function Countdown({ seconds, active, paused = false, onTimeout, className = '', numberClassName = '', labelClassName = '' }) {
   const [remaining, setRemaining] = useState(Math.max(Number(seconds || 0), 0))
   const timeoutFiredRef = useRef(false)
 
@@ -10,16 +10,16 @@ export default function Countdown({ seconds, active, onTimeout, className = '', 
   }, [seconds])
 
   useEffect(() => {
-    if (!active || remaining <= 0) return
+    if (!active || paused || remaining <= 0) return
     const timer = window.setTimeout(() => setRemaining((value) => Math.max(value - 1, 0)), 1000)
     return () => window.clearTimeout(timer)
-  }, [active, remaining])
+  }, [active, paused, remaining])
 
   useEffect(() => {
-    if (!active || remaining !== 0 || timeoutFiredRef.current) return
+    if (!active || paused || remaining !== 0 || timeoutFiredRef.current) return
     timeoutFiredRef.current = true
     onTimeout?.()
-  }, [active, remaining, onTimeout])
+  }, [active, paused, remaining, onTimeout])
 
   return (
     <div

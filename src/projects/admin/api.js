@@ -141,6 +141,17 @@ export function clearQuizQuestions(activityKey, confirm = 'CLEAR_QUIZ_QUESTIONS'
   })
 }
 
+export function getQuizAdminBgmConfig(activityKey) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/bgm-config`)
+}
+
+export function updateQuizAdminBgmConfig(activityKey, payload) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/bgm-config`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getQuizAdminOverview(activityKey) {
   return adminRequest(`/quiz/admin/activities/${activityKey}/overview`)
 }
