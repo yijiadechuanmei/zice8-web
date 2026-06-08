@@ -11,6 +11,7 @@ export const quizAssets = {
   },
   rule: {
     content: `${QUIZ_ASSET_PREFIX}/quiz-rule-content.png`,
+    gift: `${QUIZ_ASSET_PREFIX}/quiz-rule-gift.png`,
     buttonHome: `${QUIZ_ASSET_PREFIX}/quiz-rule-button-home.png`,
   },
   profile: {

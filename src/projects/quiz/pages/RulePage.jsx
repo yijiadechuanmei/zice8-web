@@ -11,6 +11,7 @@ export default function RulePage({ onBack }) {
           <img className="absolute left-[508px] top-[22px] h-[100px] w-[192px] object-contain" src={quizAssets.common.logoEvent} alt="" aria-hidden="true" />
           <img className="absolute left-[24px] top-[120px] h-[1204px] w-[700px] object-contain" src={quizAssets.common.panelMask} alt="" aria-hidden="true" />
           <img className="absolute left-[54px] top-[144px] h-[1130px] w-[660px] object-contain" src={quizAssets.rule.content} alt="" aria-hidden="true" />
+          <img className="absolute left-[515px] top-[1185px] h-[159px] w-[258px] object-contain" src={quizAssets.rule.gift} alt="" aria-hidden="true" />
 
           <button
             className="absolute left-[272px] top-[1328px] h-[102px] w-[204px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
