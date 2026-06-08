@@ -10,7 +10,6 @@ import {
   getQuizAdminQuestions,
   getQuizAdminRank,
 } from '../api'
-import QuizQuestionImportPage from './QuizQuestionImportPage'
 
 const { Text, Title } = Typography
 const pageSize = 20
@@ -23,7 +22,7 @@ export default function QuizAdminDataPage({ activity }) {
       <div className="admin-page-head">
         <div>
           <Title level={4}>Quiz 数据表</Title>
-          <Text type="secondary">当前活动的参与用户、题库、答题记录和成绩数据。</Text>
+          <Text type="secondary">当前活动的参与用户、题库、答题记录和成绩数据。题库导入请使用上方独立「题库导入」页签。</Text>
         </div>
       </div>
       <Tabs
@@ -31,7 +30,6 @@ export default function QuizAdminDataPage({ activity }) {
         onChange={setActiveKey}
         items={[
           { key: 'participants', label: '参与用户', children: <QuizParticipantsTable activity={activity} active={activeKey === 'participants'} /> },
-          { key: 'import', label: '题库导入', children: <QuizQuestionImportPage activity={activity} lockActivityKey /> },
           { key: 'overview', label: '基础统计', children: <QuizOverviewPanel activity={activity} active={activeKey === 'overview'} /> },
           { key: 'questions', label: '题目列表', children: <QuizQuestionTable activity={activity} active={activeKey === 'questions'} /> },
           { key: 'categories', label: '分类板块', children: <QuizCategoryTable activity={activity} active={activeKey === 'categories'} /> },

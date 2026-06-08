@@ -1,24 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Card, Descriptions, Input, Radio, Space, Table, Typography, Upload, message } from 'antd'
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
-import { importQuizQuestions } from '../api'
+import { clearQuizQuestions, importQuizQuestions } from '../api'
 
 const { Dragger } = Upload
 const { Text, Title } = Typography
 
 const templateHeaders = '题目 / 图片 / 选项A / 选项B / 选项C / 选项D / 正确答案 / 分数 / 题型 / 备注'
+const CLEAR_CONFIRM_TEXT = 'CLEAR_QUIZ_QUESTIONS'
 
 export default function QuizQuestionImportPage({ activity, lockActivityKey = false }) {
   const [activityKey, setActivityKey] = useState(activity?.activityKey || '')
   const [mode, setMode] = useState('replace')
   const [fileList, setFileList] = useState([])
   const [importing, setImporting] = useState(false)
+  const [clearing, setClearing] = useState(false)
   const [result, setResult] = useState(null)
+  const [clearResult, setClearResult] = useState(null)
+  const [clearConfirm, setClearConfirm] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
     setActivityKey(activity?.activityKey || '')
     setResult(null)
+    setClearResult(null)
+    setClearConfirm('')
     setError('')
     setFileList([])
   }, [activity?.activityKey])
@@ -70,6 +76,48 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
       message.error(text)
     } finally {
       setImporting(false)
+    }
+  }
+
+  async function handleClear() {
+    if (!activityKey.trim()) {
+      setError('缺少 activityKey，无法清空题库')
+      return
+    }
+    if (clearConfirm.trim() !== CLEAR_CONFIRM_TEXT) {
+      setError(`请输入 ${CLEAR_CONFIRM_TEXT} 后再清空题库`)
+      return
+    }
+    if (!window.confirm('确认清空当前活动题库数据？仅删除题目、选项、分类，不删除参与用户和答题记录。')) {
+      return
+    }
+
+    setClearing(true)
+    setError('')
+    setClearResult(null)
+    try {
+      const data = await clearQuizQuestions(activityKey.trim(), CLEAR_CONFIRM_TEXT)
+      setClearResult({ success: true, message: '题库清空完成', data })
+      setResult(null)
+      message.success('题库清空完成，可以继续导入 Excel')
+    } catch (err) {
+      const responseBody = err?.response?.data || null
+      const responseMessage = err?.response?.message || ''
+      let text = responseMessage || err.message || '题库清空失败'
+
+      if (responseBody?.errorCode === 'clear_attempt_required') {
+        text = '当前活动已有答题记录，不允许清空题库，请先清空测试答题数据或新建活动。'
+      }
+
+      setClearResult(
+        responseBody
+          ? { success: false, message: responseMessage || text, data: responseBody }
+          : null,
+      )
+      setError(text)
+      message.error(text)
+    } finally {
+      setClearing(false)
     }
   }
 
@@ -143,6 +191,59 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
               <p className="ant-upload-text">点击或拖拽上传 .xlsx / .xls 题库</p>
               <p className="ant-upload-hint">不会上传图片文件；Excel 中“图片”列会作为题目图片 URL 文本导入。</p>
             </Dragger>
+          </Space>
+        </Card>
+
+        <Card size="small" title="清空题库数据">
+          <Space direction="vertical" size={12} style={{ width: '100%' }}>
+            <Alert
+              type="warning"
+              showIcon
+              message="危险操作"
+              description="仅删除当前活动的题目、选项、分类，不删除参与用户和答题记录。若当前活动已有答题记录，系统将拒绝清空。"
+            />
+            <div>
+              <Text strong>请输入确认文本</Text>
+              <Input
+                value={clearConfirm}
+                onChange={(event) => setClearConfirm(event.target.value)}
+                placeholder={CLEAR_CONFIRM_TEXT}
+                style={{ marginTop: 8, maxWidth: 360 }}
+              />
+            </div>
+            <Space wrap>
+              <Button
+                danger
+                onClick={handleClear}
+                loading={clearing}
+                disabled={clearConfirm.trim() !== CLEAR_CONFIRM_TEXT}
+              >
+                清空当前题库
+              </Button>
+              <Text type="secondary">清空成功后可直接继续上传 Excel 导入新题库。</Text>
+            </Space>
+
+            {clearResult ? (
+              clearResult.success ? (
+                <Alert
+                  type="success"
+                  showIcon
+                  message="题库已清空"
+                  description={`已删除选项 ${clearResult.data?.deletedOptions ?? 0} 条，题目 ${clearResult.data?.deletedQuestions ?? 0} 条，分类 ${clearResult.data?.deletedCategories ?? 0} 条。`}
+                />
+              ) : (
+                <Alert
+                  type="error"
+                  showIcon
+                  message={clearResult.message || '题库清空失败'}
+                  description={
+                    clearResult.data?.errorCode === 'clear_attempt_required'
+                      ? `attemptCount=${clearResult.data?.attemptCount ?? 0}，answerRecordCount=${clearResult.data?.answerRecordCount ?? 0}，rankCount=${clearResult.data?.rankCount ?? 0}`
+                      : null
+                  }
+                />
+              )
+            ) : null}
           </Space>
         </Card>
 

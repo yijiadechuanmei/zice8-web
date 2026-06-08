@@ -134,6 +134,13 @@ export function importQuizQuestions(activityKey, file, mode = 'append') {
   })
 }
 
+export function clearQuizQuestions(activityKey, confirm = 'CLEAR_QUIZ_QUESTIONS') {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/questions/clear`, {
+    method: 'POST',
+    body: JSON.stringify({ confirm }),
+  })
+}
+
 export function getQuizAdminOverview(activityKey) {
   return adminRequest(`/quiz/admin/activities/${activityKey}/overview`)
 }
