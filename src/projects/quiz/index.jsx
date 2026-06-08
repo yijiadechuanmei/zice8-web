@@ -18,6 +18,7 @@ import LoadingState from './components/LoadingState'
 import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
 import LayoutPreview from './dev/LayoutPreview'
+import { QUIZ_VERSION, quizAssets } from './assets'
 import HomePage from './pages/HomePage'
 import ProfilePage from './pages/ProfilePage'
 import QuestionPage from './pages/QuestionPage'
@@ -88,7 +89,7 @@ function QuizMain() {
         ...bootstrap.activity,
         shareTitle: bootstrap.shareConfig?.title || bootstrap.activity.shareTitle || bootstrap.activity.title || '端午知识竞赛',
         shareDesc: bootstrap.shareConfig?.desc || bootstrap.activity.shareDesc || '参与端午答题挑战，赢取活动排名',
-        shareImage: bootstrap.shareConfig?.imgUrl || bootstrap.activity.shareImage || 'https://web.zice8.com/quiz/dragon-boat-2026/quiz-common-logo-event.png',
+        shareImage: bootstrap.shareConfig?.imgUrl || bootstrap.activity.shareImage || quizAssets.common.logoEvent,
       }
     : null
 
@@ -288,7 +289,7 @@ function QuizMain() {
   if (loading) return <LoadingState text="答题活动加载中..." />
 
   return (
-    <div className="quiz-app">
+    <div className="quiz-app" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
       {page === 'home' ? (
         <HomePage
           bootstrap={bootstrap}
@@ -323,6 +324,7 @@ function QuizMain() {
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
+      <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
     </div>
   )
 }

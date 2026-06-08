@@ -1,17 +1,9 @@
 import DesignStage from '../components/DesignStage'
+import { quizAssets } from '../assets'
 
 export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpenRank, onReset }) {
   const remainingTodayAttempts = bootstrap?.remainingTodayAttempts ?? '-'
-  const assets = {
-    bg: '/quiz/quiz-home-bg.png',
-    logo: '/quiz/quiz-home-logo.png',
-    title: '/quiz/quiz-home-title.png',
-    subtitle: '/quiz/quiz-home-subtitle.png',
-    countTip: '/quiz/quiz-home-count-tip.png',
-    ruleButton: '/quiz/quiz-home-rule-btn.png',
-    startButton: '/quiz/quiz-home-start-btn.png',
-    rankButton: '/quiz/quiz-home-rank-btn.png',
-  }
+  const assets = quizAssets.home
 
   return (
     <main className="quiz-page flex min-h-screen w-full flex-col items-center justify-start gap-[18px] bg-[#143978] pb-7">

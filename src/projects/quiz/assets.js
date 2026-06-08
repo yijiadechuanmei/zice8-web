@@ -1,43 +1,63 @@
-const QUIZ_ASSET_PREFIX = '/quiz/dragon-boat-2026'
+const DEFAULT_QUIZ_ASSET_BASE_URL = 'https://web.zice8.com/quiz/dragon-boat-2026'
+const QUIZ_ASSET_BASE_URL = (
+  import.meta.env.VITE_QUIZ_ASSET_BASE_URL ||
+  DEFAULT_QUIZ_ASSET_BASE_URL
+).replace(/\/$/, '')
+
+export const QUIZ_VERSION = '20260608-quiz-v2'
+
+export function quizAsset(name) {
+  return `${QUIZ_ASSET_BASE_URL}/${name}`
+}
 
 export const quizAssets = {
   common: {
-    bg: `${QUIZ_ASSET_PREFIX}/quiz-common-bg.png`,
-    logoSnow: `${QUIZ_ASSET_PREFIX}/quiz-common-logo-snow.png`,
-    logoEvent: `${QUIZ_ASSET_PREFIX}/quiz-common-logo-event.png`,
-    panelMask: `${QUIZ_ASSET_PREFIX}/quiz-common-panel-mask.png`,
-    panelCard: `${QUIZ_ASSET_PREFIX}/quiz-common-panel-card.png`,
-    buttonHome: `${QUIZ_ASSET_PREFIX}/quiz-common-button-home.png`,
+    bg: quizAsset('quiz-common-bg.png'),
+    logoSnow: quizAsset('quiz-common-logo-snow.png'),
+    logoEvent: quizAsset('quiz-common-logo-event.png'),
+    panelMask: quizAsset('quiz-common-panel-mask.png'),
+    panelCard: quizAsset('quiz-common-panel-card.png'),
+    buttonHome: quizAsset('quiz-common-button-home.png'),
+  },
+  home: {
+    bg: quizAsset('quiz-home-bg.png'),
+    logo: quizAsset('quiz-home-logo.png'),
+    title: quizAsset('quiz-home-title.png'),
+    subtitle: quizAsset('quiz-home-subtitle.png'),
+    countTip: quizAsset('quiz-home-count-tip.png'),
+    ruleButton: quizAsset('quiz-home-rule-btn.png'),
+    startButton: quizAsset('quiz-home-start-btn.png'),
+    rankButton: quizAsset('quiz-home-rank-btn.png'),
   },
   rule: {
-    content: `${QUIZ_ASSET_PREFIX}/quiz-rule-content.png`,
-    gift: `${QUIZ_ASSET_PREFIX}/quiz-rule-gift.png`,
-    buttonHome: `${QUIZ_ASSET_PREFIX}/quiz-rule-button-home.png`,
+    content: quizAsset('quiz-rule-content.png'),
+    gift: quizAsset('quiz-rule-gift.png'),
+    buttonHome: quizAsset('quiz-rule-button-home.png'),
   },
   profile: {
-    title: `${QUIZ_ASSET_PREFIX}/quiz-profile-title.png`,
-    subtitleTip: `${QUIZ_ASSET_PREFIX}/quiz-profile-subtitle-tip.png`,
-    labelName: `${QUIZ_ASSET_PREFIX}/quiz-profile-label-name.png`,
-    labelDepartment: `${QUIZ_ASSET_PREFIX}/quiz-profile-label-department.png`,
-    buttonStart: `${QUIZ_ASSET_PREFIX}/quiz-profile-button-start.png`,
+    title: quizAsset('quiz-profile-title.png'),
+    subtitleTip: quizAsset('quiz-profile-subtitle-tip.png'),
+    labelName: quizAsset('quiz-profile-label-name.png'),
+    labelDepartment: quizAsset('quiz-profile-label-department.png'),
+    buttonStart: quizAsset('quiz-profile-button-start.png'),
   },
   question: {
-    panelMask: `${QUIZ_ASSET_PREFIX}/quiz-question-panel-mask.png`,
-    progressBg: `${QUIZ_ASSET_PREFIX}/quiz-question-progress-bg.png`,
-    titleOrder: `${QUIZ_ASSET_PREFIX}/quiz-question-title-order.png`,
-    countdownBg: `${QUIZ_ASSET_PREFIX}/quiz-question-countdown-bg.png`,
-    countdownNumber: `${QUIZ_ASSET_PREFIX}/quiz-question-countdown-number.png`,
-    cardTitle: `${QUIZ_ASSET_PREFIX}/quiz-question-card-title.png`,
+    panelMask: quizAsset('quiz-question-panel-mask.png'),
+    progressBg: quizAsset('quiz-question-progress-bg.png'),
+    titleOrder: quizAsset('quiz-question-title-order.png'),
+    countdownBg: quizAsset('quiz-question-countdown-bg.png'),
+    countdownNumber: quizAsset('quiz-question-countdown-number.png'),
+    cardTitle: quizAsset('quiz-question-card-title.png'),
   },
   result: {
-    titleScore: `${QUIZ_ASSET_PREFIX}/quiz-result-title-score.png`,
-    labelScore: `${QUIZ_ASSET_PREFIX}/quiz-result-label-score.png`,
-    labelTime: `${QUIZ_ASSET_PREFIX}/quiz-result-label-time.png`,
-    buttonRank: `${QUIZ_ASSET_PREFIX}/quiz-result-button-rank.png`,
+    titleScore: quizAsset('quiz-result-title-score.png'),
+    labelScore: quizAsset('quiz-result-label-score.png'),
+    labelTime: quizAsset('quiz-result-label-time.png'),
+    buttonRank: quizAsset('quiz-result-button-rank.png'),
   },
   rank: {
-    title: `${QUIZ_ASSET_PREFIX}/quiz-rank-title.png`,
-    tableHeader: `${QUIZ_ASSET_PREFIX}/quiz-rank-panel-table-header.png`,
+    title: quizAsset('quiz-rank-title.png'),
+    tableHeader: quizAsset('quiz-rank-panel-table-header.png'),
   },
 }
 
