@@ -14,15 +14,16 @@ export function removeToken() {
 }
 
 export async function request(path, options = {}) {
+  const { skipAuth, ...fetchOptions } = options
   const token = getToken()
   const headers = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...(fetchOptions.headers || {}),
   }
-  if (token) headers.Authorization = `Bearer ${token}`
+  if (token && !skipAuth) headers.Authorization = `Bearer ${token}`
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers,
   })
   const result = await response.json().catch(() => ({ code: response.status, message: response.statusText, data: null }))

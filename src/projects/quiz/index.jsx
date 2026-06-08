@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
+import { getToken, setToken } from '../../shared/api/request'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { buildBootDebug, buildTokenDebug, debugLog, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
@@ -13,6 +13,7 @@ import {
   getCurrentAttempt,
   getPublicConfig,
   getRank,
+  isUnauthorizedError,
   resetDemoActivity,
   startAttempt,
   submitAnswer,
@@ -68,14 +69,14 @@ function QuizMain() {
   const [toast, setToast] = useState('')
   const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
-  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
     if (!debugAuth) return
     enableMobileDebug()
     debugLog('[QuizAuthDebug] debug mode enabled')
     debugLog('[QuizAuthDebug] boot', buildBootDebug(activityKey))
-    debugLog('[QuizAuthDebug] token', buildTokenDebug())
+    debugLog('[QuizAuthDebug] zice8 token', buildTokenDebug())
     setQuizAuthDebugState({
       ...buildBootDebug(activityKey),
       ...buildTokenDebug(),
@@ -98,6 +99,31 @@ function QuizMain() {
   const showError = useCallback((err) => {
     showToast(err?.message || '请求失败')
   }, [showToast])
+
+  const handleUnauthorized = useCallback((err, reason, options = {}) => {
+    if (!isUnauthorizedError(err)) return false
+
+    const { bootstrapUnauthorized = false } = options
+    if (bootstrapUnauthorized) {
+      debugLog('[QuizAuthDebug] bootstrap unauthorized', {
+        willClearToken: true,
+        willReauth: true,
+      })
+    } else {
+      debugLog('[QuizAuthDebug] protected api unauthorized', {
+        endpoint: reason,
+        willClearToken: true,
+        willReauth: true,
+      })
+    }
+
+    setQuizAuthDebugState({
+      lastAuthStep: `reauth-${reason}`,
+    })
+    showToast('登录已失效，正在重新进入活动', 1800)
+    reauth(reason)
+    return true
+  }, [reauth, showToast])
 
   const handleWechatShareStatus = useCallback((status) => {
     if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
@@ -164,11 +190,12 @@ function QuizMain() {
         setPage('home')
       }
     } catch (err) {
+      if (handleUnauthorized(err, 'bootstrap-401', { bootstrapUnauthorized: true })) return
       showError(err)
     } finally {
       if (withLoading) setLoading(false)
     }
-  }, [activityKey, showError])
+  }, [activityKey, handleUnauthorized, publicConfig, showError])
 
   useEffect(() => {
     if (!publicConfig || !authReady) return
@@ -180,7 +207,6 @@ function QuizMain() {
   }, [authReady, loadBootstrap, publicConfig])
 
   function startAuthorize() {
-    const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
     debugLog('[QuizAuthDebug] oauth redirect', {
       reason: 'start-without-token',
       redirectUrl: sanitizeUrlForWechat(window.location.href),
@@ -189,7 +215,7 @@ function QuizMain() {
       lastAuthStep: 'start-authorize',
       lastOauthRedirectUrl: sanitizeUrlForWechat(window.location.href),
     })
-    window.location.href = `${API_BASE_URL}/wechat/oauth/redirect?activity_key=${encodeURIComponent(activityKey)}&redirect_url=${redirectUrl}`
+    reauth('start-without-token')
   }
 
   async function handleStart() {
@@ -215,6 +241,7 @@ function QuizMain() {
       setFeedback(null)
       setPage('question')
     } catch (err) {
+      if (handleUnauthorized(err, 'start-attempt-401')) return
       showError(err)
     } finally {
       setSubmitting(false)
@@ -228,6 +255,7 @@ function QuizMain() {
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
       await doStartAttempt()
     } catch (err) {
+      if (handleUnauthorized(err, 'participant-profile-401')) return
       showError(err)
     } finally {
       setSubmitting(false)
@@ -246,6 +274,7 @@ function QuizMain() {
       setFeedback(data)
       window.setTimeout(() => advanceAfterFeedback(data), FEEDBACK_DELAY_MS)
     } catch (err) {
+      if (handleUnauthorized(err, 'answer-401')) return
       showError(err)
     } finally {
       setSubmitting(false)
@@ -263,6 +292,7 @@ function QuizMain() {
       setFeedback(data)
       window.setTimeout(() => advanceAfterFeedback(data), FEEDBACK_DELAY_MS)
     } catch (err) {
+      if (handleUnauthorized(err, 'timeout-401')) return
       showError(err)
     } finally {
       setSubmitting(false)
@@ -302,6 +332,7 @@ function QuizMain() {
       setPage('result')
       loadBootstrap({ resetPage: false, withLoading: false }).catch(() => {})
     } catch (err) {
+      if (handleUnauthorized(err, 'finish-401')) return
       showError(err)
     } finally {
       setSubmitting(false)

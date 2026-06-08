@@ -1,15 +1,23 @@
 import { getToken, request } from '../../shared/api/request'
 import { debugLog, debugWarn, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
 
+export function isUnauthorizedError(error) {
+  const response = error?.response || {}
+  const status = Number(response?.code) || Number(response?.status) || 0
+  const message = response?.message || error?.message || ''
+  return status === 401 || /unauthorized/i.test(message)
+}
+
 async function quizRequest(path, options = {}) {
   const method = options.method || 'GET'
   const hasAuth = Boolean(getToken())
+  const debugEndpointType = options.skipAuth ? 'public' : 'protected'
 
   if (isQuizAuthDebugEnabled()) {
     debugLog('[QuizApiDebug] request', {
       method,
       url: path,
-      hasAuth,
+      hasAuth: !options.skipAuth && hasAuth,
     })
   }
 
@@ -28,12 +36,12 @@ async function quizRequest(path, options = {}) {
   } catch (error) {
     const response = error?.response || {}
     const errorCode = response?.data?.errorCode || response?.errorCode || ''
-    const status = Number(response?.code) || 500
+    const status = Number(response?.code) || (isUnauthorizedError(error) ? 401 : 500)
     const debugPayload = {
       path,
       status,
       errorCode,
-      willReauth: status === 401,
+      willReauth: status === 401 && !options.skipAuth,
     }
 
     setQuizAuthDebugState({
@@ -46,7 +54,13 @@ async function quizRequest(path, options = {}) {
       },
     })
 
-    if (status === 401) {
+    if (status === 401 && !options.skipAuth) {
+      debugWarn('[QuizAuthDebug] protected api unauthorized', {
+        endpoint: path,
+        willClearToken: true,
+        willReauth: true,
+      })
+    } else if (status === 401) {
       debugWarn('[QuizAuthDebug] unauthorized', debugPayload)
     }
 
@@ -64,7 +78,7 @@ async function quizRequest(path, options = {}) {
   }
 }
 
-export const getPublicConfig = (activityKey) => quizRequest(`/activities/${activityKey}/public-config`)
+export const getPublicConfig = (activityKey) => quizRequest(`/activities/${activityKey}/public-config`, { skipAuth: true })
 
 export const getBootstrap = (activityKey) => quizRequest(`/quiz/activities/${activityKey}/bootstrap`)
 
@@ -101,7 +115,7 @@ export const finishAttempt = (activityKey, attemptId) =>
 export const getResult = (activityKey, attemptId) => quizRequest(`/quiz/activities/${activityKey}/result/${attemptId}`)
 
 export const getRank = (activityKey, page = 1, pageSize = 50) =>
-  quizRequest(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`)
+  quizRequest(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`, { skipAuth: true })
 
 export const resetDemoActivity = (activityKey) =>
   quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {
