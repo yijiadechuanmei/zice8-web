@@ -1,6 +1,9 @@
 const DEFAULT_STATE = {
+  initialized: false,
   enabled: false,
   url: '',
+  hasAudio: false,
+  audioSrc: '',
   playing: false,
   paused: true,
   blocked: false,
@@ -10,10 +13,34 @@ const DEFAULT_STATE = {
   bridgeReady: false,
   audioContextState: 'unsupported',
   lastError: '',
+  audioPaused: true,
+  audioCurrentTime: 0,
+  audioReadyState: 0,
+  audioNetworkState: 0,
+  volume: 0.6,
+  loop: true,
+  mediaElementSourceEnabled: false,
+  activityKey: '',
 }
 
+const ENABLE_MEDIA_ELEMENT_SOURCE = false
 const reasonAttemptLimit = 3
 const attemptIntervalMs = 200
+
+function isAudioDebugEnabled() {
+  if (typeof window === 'undefined') return false
+  const search = new URLSearchParams(window.location.search)
+  return search.get('debug_auth') === '1' || search.get('debug') === '1'
+}
+
+function debugLog(message, payload) {
+  if (!isAudioDebugEnabled()) return
+  if (payload === undefined) {
+    console.log(message)
+    return
+  }
+  console.log(message, payload)
+}
 
 function normalizeVolume(value) {
   const volume = Number(value)
@@ -79,6 +106,15 @@ class ActivityAudioService {
     this.bindAudioEvents()
     this.bindUnlockEvents()
     this.prepareCachedUrl()
+    this.patchState({
+      initialized: true,
+      activityKey: this.context.activityKey || '',
+      mediaElementSourceEnabled: ENABLE_MEDIA_ELEMENT_SOURCE,
+    })
+    debugLog('[ActivityAudio] init', {
+      activityKey: this.context.activityKey || '',
+      mediaElementSourceEnabled: ENABLE_MEDIA_ELEMENT_SOURCE,
+    })
     this.emit()
   }
 
@@ -103,6 +139,16 @@ class ActivityAudioService {
       url: nextConfig.url,
       blocked: false,
       lastError: '',
+      volume: nextConfig.volume,
+      loop: nextConfig.loop,
+      activityKey: this.context.activityKey || '',
+    })
+    debugLog('[ActivityAudio] setConfig', {
+      activityKey: this.context.activityKey || '',
+      enabled: nextConfig.enabled,
+      url: nextConfig.url,
+      loop: nextConfig.loop,
+      volume: nextConfig.volume,
     })
 
     if (!nextConfig.enabled || !nextConfig.url) {
@@ -118,19 +164,29 @@ class ActivityAudioService {
   }
 
   async play(reason = 'play', options = {}) {
-    const { manual = false, forcePrepare = false } = options
+    const impliedManual = /manual/i.test(String(reason || ''))
+    const { manual = false, forcePrepare = false, ignoreThrottle = false } = options
+    const isManual = manual || impliedManual
 
     if (!this.config.enabled || !this.config.url) return false
-    if (this.state.userPaused && !manual) return false
-    if (!manual && !this.canAttempt(reason)) return false
+    if (this.state.userPaused && !isManual) return false
+    if (!isManual && !ignoreThrottle && !this.canAttempt(reason)) return false
 
     const audio = this.prepareAudio(reason, { force: forcePrepare })
     if (!audio) return false
 
     this.reasonAttempts[reason] = (this.reasonAttempts[reason] || 0) + 1
     this.lastAttemptAt = Date.now()
+    if (isManual) {
+      this.patchState({ userPaused: false })
+    }
+    debugLog('[ActivityAudio] play start', {
+      reason,
+      manual: isManual,
+      forcePrepare,
+    })
 
-    await this.resumeAudioContext(reason)
+    await this.resumeAudioContext(reason).catch(() => undefined)
 
     try {
       await audio.play()
@@ -138,19 +194,27 @@ class ActivityAudioService {
         playing: true,
         paused: false,
         blocked: false,
-        userPaused: manual ? false : this.state.userPaused,
+        userPaused: isManual ? false : this.state.userPaused,
         lastError: '',
       })
       this.clearFirstGestureListeners()
+      debugLog('[ActivityAudio] play success', {
+        reason,
+        src: audio.currentSrc || audio.src || '',
+      })
       return true
     } catch (error) {
       const message = error?.message || 'unknown'
-      console.warn(`[ActivityAudioService] play blocked reason=${reason} error=${message}`)
+      console.warn(`[ActivityAudio] play failed reason=${reason} error=${message}`)
       this.patchState({
         playing: false,
         paused: true,
         blocked: !this.state.userPaused,
         lastError: message,
+      })
+      debugLog('[ActivityAudio] play failed', {
+        reason,
+        error: message,
       })
       return false
     }
@@ -164,6 +228,7 @@ class ActivityAudioService {
       userPaused: reason === 'manual' ? true : this.state.userPaused,
       blocked: false,
     })
+    debugLog('[ActivityAudio] pause', { reason })
   }
 
   toggle(reason = 'manual') {
@@ -212,7 +277,21 @@ class ActivityAudioService {
   }
 
   getState() {
-    return { ...this.state }
+    const audio = this.audio
+    return {
+      ...this.state,
+      initialized: this.initialized,
+      hasAudio: Boolean(audio),
+      audioSrc: audio?.currentSrc || audio?.src || '',
+      audioPaused: audio ? audio.paused : true,
+      audioCurrentTime: audio ? Number(audio.currentTime || 0) : 0,
+      audioReadyState: audio ? Number(audio.readyState || 0) : 0,
+      audioNetworkState: audio ? Number(audio.networkState || 0) : 0,
+      volume: this.config.volume,
+      loop: this.config.loop,
+      mediaElementSourceEnabled: ENABLE_MEDIA_ELEMENT_SOURCE,
+      activityKey: this.context.activityKey || '',
+    }
   }
 
   patchState(patch) {
@@ -234,6 +313,10 @@ class ActivityAudioService {
     this.audio.setAttribute('webkit-playsinline', 'true')
     this.audio.setAttribute('x5-playsinline', 'true')
     this.audio.setAttribute('x5-video-player-type', 'h5')
+    this.patchState({
+      hasAudio: true,
+      audioSrc: '',
+    })
     return this.audio
   }
 
@@ -255,6 +338,7 @@ class ActivityAudioService {
   }
 
   connectAudioContext() {
+    if (!ENABLE_MEDIA_ELEMENT_SOURCE) return
     if (!this.audio || !this.audioContext || this.mediaSource) return
 
     try {
@@ -308,6 +392,12 @@ class ActivityAudioService {
       safeLoadAudio(audio)
     }
 
+    debugLog('[ActivityAudio] prepare', {
+      reason,
+      force,
+      url,
+      src: audio.currentSrc || audio.src || '',
+    })
     this.connectAudioContext()
     return audio
   }
@@ -342,9 +432,9 @@ class ActivityAudioService {
     }
 
     this.handleFirstGesture = () => {
-      this.resumeAudioContext('first-gesture')
+      this.resumeAudioContext('first-gesture').catch(() => undefined)
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
-        this.play('first-gesture')
+        this.play('first-gesture', { forcePrepare: true, ignoreThrottle: true })
       }
     }
 
@@ -392,13 +482,13 @@ class ActivityAudioService {
   }
 
   runBridgeUnlock(reason) {
-    this.resumeAudioContext(reason)
+    this.resumeAudioContext(reason).catch(() => undefined)
 
     const invokeAndPlay = () => {
-      this.resumeAudioContext(`${reason}-invoke`)
+      this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
       this.prepareAudio(reason, { force: true })
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
-        this.play(`${reason}-invoke`, { forcePrepare: true })
+        this.play(`${reason}-invoke`, { forcePrepare: true, ignoreThrottle: true })
       }
     }
 
@@ -413,10 +503,10 @@ class ActivityAudioService {
     }
 
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.play(`${reason}-retry-300`, { forcePrepare: true })
+      if (this.config.autoplay) this.play(`${reason}-retry-300`, { forcePrepare: true, ignoreThrottle: true })
     }, 300)
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.play(`${reason}-retry-800`, { forcePrepare: true })
+      if (this.config.autoplay) this.play(`${reason}-retry-800`, { forcePrepare: true, ignoreThrottle: true })
     }, 800)
   }
 
@@ -469,3 +559,8 @@ class ActivityAudioService {
 }
 
 export const activityAudioService = new ActivityAudioService()
+
+if (typeof window !== 'undefined') {
+  window.__activityAudioService = activityAudioService
+  debugLog('[ActivityAudio] exposed')
+}
