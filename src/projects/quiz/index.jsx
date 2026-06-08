@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getToken, setToken } from '../../shared/api/request'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { buildBootDebug, buildTokenDebug, debugLog, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
@@ -70,6 +71,13 @@ function QuizMain() {
   const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+
+  useEffect(() => {
+    activityAudioService.init({ activityKey })
+    return () => {
+      activityAudioService.destroy()
+    }
+  }, [activityKey])
 
   useEffect(() => {
     if (!debugAuth) return
@@ -435,7 +443,7 @@ function QuizMain() {
       ) : null}
       {page === 'result' ? <ResultPage result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result} onOpenRank={openRank} onBack={backHome} /> : null}
       {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
-      <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} />
+      <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} activityKey={activityKey} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
       <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
