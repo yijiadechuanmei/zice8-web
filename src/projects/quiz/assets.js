@@ -1,10 +1,10 @@
-const DEFAULT_QUIZ_ASSET_BASE_URL = 'https://web.zice8.com/quiz/dragon-boat-2026'
+const DEFAULT_QUIZ_ASSET_BASE_URL = 'https://assets.zice8.com/quiz/dragon-boat-2026'
 const QUIZ_ASSET_BASE_URL = (
   import.meta.env.VITE_QUIZ_ASSET_BASE_URL ||
   DEFAULT_QUIZ_ASSET_BASE_URL
 ).replace(/\/$/, '')
 
-export const QUIZ_VERSION = '20260608-quiz-v2'
+export const QUIZ_VERSION = '20260608-quiz-v3'
 
 export function quizAsset(name) {
   return `${QUIZ_ASSET_BASE_URL}/${name}`
