@@ -51,7 +51,21 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
         message.error(data?.message || '题库导入失败')
       }
     } catch (err) {
-      const text = err.message || '题库导入失败'
+      const responseBody = err?.response?.data || null
+      const responseMessage = err?.response?.message || ''
+      const nextResult = responseBody ? { ...responseBody, message: responseMessage || err.message || '题库导入失败' } : null
+      const errorCode = responseBody?.errorCode
+      let text = responseMessage || err.message || '题库导入失败'
+
+      if (errorCode === 'clear_attempt_required') {
+        text = '当前活动已有答题记录，不允许 replace。请先清空测试答题数据，或改用 append。'
+      } else if (!responseBody && (!err?.response || err?.response?.code >= 500)) {
+        text = '导入失败，请查看服务端日志'
+      }
+
+      if (nextResult) {
+        setResult(nextResult)
+      }
       setError(text)
       message.error(text)
     } finally {
@@ -114,7 +128,7 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
             </div>
 
             <Dragger
-              accept=".xlsx"
+              accept=".xlsx,.xls"
               maxCount={1}
               fileList={fileList}
               beforeUpload={() => false}
@@ -126,7 +140,7 @@ export default function QuizQuestionImportPage({ activity, lockActivityKey = fal
               onRemove={() => setFileList([])}
             >
               <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-              <p className="ant-upload-text">点击或拖拽上传 .xlsx 题库</p>
+              <p className="ant-upload-text">点击或拖拽上传 .xlsx / .xls 题库</p>
               <p className="ant-upload-hint">不会上传图片文件；Excel 中“图片”列会作为题目图片 URL 文本导入。</p>
             </Dragger>
           </Space>
