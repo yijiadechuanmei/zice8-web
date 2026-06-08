@@ -1,7 +1,6 @@
 import DesignStage from '../components/DesignStage'
 
-export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpenRank, onResume, onReset }) {
-  const hasInProgressAttempt = bootstrap?.currentAttempt?.status === 'in_progress'
+export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpenRank, onReset }) {
   const remainingTodayAttempts = bootstrap?.remainingTodayAttempts ?? '-'
   const assets = {
     bg: '/quiz/quiz-home-bg.png',
@@ -63,16 +62,6 @@ export default function HomePage({ bootstrap, debug, onOpenRule, onStart, onOpen
         </div>
 
         <div className="flex w-full max-w-[750px] flex-col gap-3 px-3 max-[380px]:px-2">
-          {hasInProgressAttempt ? (
-            <button
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#177245] px-4 text-base font-extrabold text-white transition-colors hover:bg-[#145f39]"
-              type="button"
-              onClick={onResume}
-            >
-              继续答题
-            </button>
-          ) : null}
-
           {debug ? (
             <button
               className="min-h-11 w-full rounded-lg border border-dashed border-[#b54708] bg-[rgba(255,247,237,0.88)] px-4 text-sm font-bold text-[#9a3412]"

@@ -7,7 +7,6 @@ import {
   getBootstrap,
   getCurrentAttempt,
   getRank,
-  getResult,
   resetDemoActivity,
   startAttempt,
   submitAnswer,
@@ -27,7 +26,6 @@ import RulePage from './pages/RulePage'
 import './quiz.css'
 
 const DEFAULT_ACTIVITY_KEY = 'quiz_demo_dragon_boat'
-const ATTEMPT_KEY_PREFIX = 'quiz_attempt_'
 const FEEDBACK_DELAY_MS = 1500
 
 export default function QuizApp() {
@@ -59,8 +57,6 @@ function QuizMain() {
   const [toast, setToast] = useState('')
   const toastTimerRef = useRef(null)
 
-  const attemptStorageKey = `${ATTEMPT_KEY_PREFIX}${activityKey}`
-
   const showToast = useCallback((message, duration = 1500) => {
     if (!message) return
     setToast(message)
@@ -84,18 +80,15 @@ function QuizMain() {
       const data = await getBootstrap(activityKey)
       setBootstrap(data)
       document.title = data?.activity?.title || '端午知识竞赛'
-      if (data?.currentAttempt?.status === 'in_progress') {
-        await resumeAttempt(data.currentAttempt.attemptId)
-      } else {
-        const storedAttemptId = localStorage.getItem(attemptStorageKey)
-        if (storedAttemptId) await tryResumeStoredAttempt(storedAttemptId)
-      }
+      setCurrent(null)
+      setFeedback(null)
+      setPage('home')
     } catch (err) {
       showError(err)
     } finally {
       setLoading(false)
     }
-  }, [activityKey, attemptStorageKey, showError])
+  }, [activityKey, showError])
 
   useEffect(() => {
     if (!getToken()) {
@@ -105,34 +98,6 @@ function QuizMain() {
     }
     loadBootstrap()
   }, [loadBootstrap, showToast])
-
-  async function tryResumeStoredAttempt(attemptId) {
-    try {
-      const data = await getCurrentAttempt(activityKey, attemptId)
-      if (data.status === 'finished') {
-        localStorage.removeItem(attemptStorageKey)
-        return
-      }
-      setCurrent(data)
-      setPage('question')
-    } catch {
-      localStorage.removeItem(attemptStorageKey)
-    }
-  }
-
-  async function resumeAttempt(attemptId) {
-    const data = await getCurrentAttempt(activityKey, attemptId)
-    if (data.status === 'finished') {
-      const resultData = await getResult(activityKey, attemptId)
-      setResult(resultData)
-      localStorage.removeItem(attemptStorageKey)
-      setPage('result')
-      return
-    }
-    localStorage.setItem(attemptStorageKey, attemptId)
-    setCurrent(data)
-    setPage('question')
-  }
 
   function startAuthorize() {
     const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
@@ -155,7 +120,6 @@ function QuizMain() {
       })
       const attemptId = data.attemptId || data.current?.attemptId || data.currentAttempt?.attemptId
       if (!attemptId) throw new Error('开始答题失败，缺少 attemptId')
-      localStorage.setItem(attemptStorageKey, attemptId)
       const currentData = data.currentQuestion ? data : await getCurrentAttempt(activityKey, attemptId)
       setCurrent(currentData)
       setFeedback(null)
@@ -242,7 +206,6 @@ function QuizMain() {
     try {
       const data = await finishAttempt(activityKey, current.attemptId)
       setResult(data)
-      localStorage.removeItem(attemptStorageKey)
       setFeedback(null)
       setPage('result')
       loadBootstrap().catch(() => {})
@@ -273,7 +236,6 @@ function QuizMain() {
     setSubmitting(true)
     try {
       await resetDemoActivity(activityKey)
-      localStorage.removeItem(attemptStorageKey)
       setCurrent(null)
       setResult(null)
       setFeedback(null)
@@ -303,7 +265,6 @@ function QuizMain() {
           onOpenRule={() => setPage('rule')}
           onStart={handleStart}
           onOpenRank={openRank}
-          onResume={() => resumeAttempt(bootstrap.currentAttempt.attemptId).catch(showError)}
           onReset={handleReset}
         />
       ) : null}
