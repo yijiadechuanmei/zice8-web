@@ -62,7 +62,7 @@ export default function QuestionPage({
 
   function toggleOption(option) {
     if (locked) return
-    const value = option.label || option.id
+    const value = option.id || option.label
     if (question.type === 'single') {
       setSelected([value])
       if (previewMode) return
@@ -74,7 +74,7 @@ export default function QuestionPage({
 
   function optionState(option) {
     if (!feedback) return ''
-    const value = option.label || option.id
+    const value = option.id || option.label
     if (correctOptions.has(value)) return 'correct'
     if ((feedback.selectedOptions || []).includes(value)) return 'wrong'
     return ''
@@ -124,7 +124,7 @@ export default function QuestionPage({
 
               <section className="mt-[42px] flex w-full flex-col items-center gap-[30px]">
                 {(question.options || []).map((option, index) => {
-                  const value = option.label || option.id
+                  const value = option.id || option.label
                   const label = option.label || String.fromCharCode(65 + index)
                   return (
                     <OptionItem
