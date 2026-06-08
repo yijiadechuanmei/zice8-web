@@ -4,7 +4,7 @@ const QUIZ_ASSET_BASE_URL = (
   DEFAULT_QUIZ_ASSET_BASE_URL
 ).replace(/\/$/, '')
 
-export const QUIZ_VERSION = '20260608-quiz-v3'
+export const QUIZ_VERSION = '20260608-quiz-v4'
 
 export function quizAsset(name) {
   return `${QUIZ_ASSET_BASE_URL}/${name}`
