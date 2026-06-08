@@ -37,7 +37,9 @@ const iconStyle = {
 }
 
 const spinAnimationName = 'activity-bgm-spin'
-const attemptIntervalMs = 800
+const pulseAnimationName = 'activity-bgm-pulse'
+const attemptIntervalMs = 200
+const reasonAttemptLimit = 3
 
 function normalizeVolume(value) {
   const volume = Number(value)
@@ -60,16 +62,22 @@ function MusicNoteIcon() {
 
 export default function ActivityBgmPlayer({ bgm }) {
   const audioRef = useRef(null)
+  const tryPlayRef = useRef(async () => false)
   const isPlayingRef = useRef(false)
   const userPausedRef = useRef(false)
-  const playAttemptMapRef = useRef({})
-  const lastPlayAttemptRef = useRef(0)
-  const gestureRecoveryDoneRef = useRef(false)
   const styleInjectedRef = useRef(false)
   const audioUrlRef = useRef('')
-  const tryPlayRef = useRef(async () => false)
+  const audioBlobUrlRef = useRef('')
+  const timersRef = useRef([])
+  const playAttemptMapRef = useRef({})
+  const playAttemptCountRef = useRef({})
+  const warnReasonMapRef = useRef({})
+  const gestureRecoveryDoneRef = useRef(false)
+  const interactionCleanupRef = useRef(() => {})
+  const mountedRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [audioReady, setAudioReady] = useState(false)
+  const [waitingGesture, setWaitingGesture] = useState(false)
 
   const bgmConfig = useMemo(
     () => ({
@@ -79,6 +87,8 @@ export default function ActivityBgmPlayer({ bgm }) {
       autoplay: bgm?.autoplay !== false,
       showControl: bgm?.showControl !== false,
       volume: normalizeVolume(bgm?.volume),
+      preload: bgm?.preload !== false,
+      preloadAsBlob: Boolean(bgm?.preloadAsBlob),
     }),
     [bgm],
   )
@@ -95,6 +105,12 @@ export default function ActivityBgmPlayer({ bgm }) {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
+
+      @keyframes ${pulseAnimationName} {
+        0% { transform: scale(1); opacity: 0.94; }
+        50% { transform: scale(1.08); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.94; }
+      }
     `
     document.head.appendChild(styleElement)
     styleInjectedRef.current = true
@@ -106,30 +122,79 @@ export default function ActivityBgmPlayer({ bgm }) {
   }, [])
 
   useEffect(() => {
-    const shouldEnable = bgmConfig.enabled && bgmConfig.url
+    mountedRef.current = true
 
-    setPlaying(false)
-    setAudioReady(false)
-    isPlayingRef.current = false
-    userPausedRef.current = false
-    playAttemptMapRef.current = {}
-    lastPlayAttemptRef.current = 0
-    gestureRecoveryDoneRef.current = false
-    tryPlayRef.current = async () => false
-
-    if (!shouldEnable) {
-      const previousAudio = audioRef.current
-      if (previousAudio) {
-        previousAudio.pause()
-        previousAudio.src = ''
-        previousAudio.load()
-        audioRef.current = null
-      }
-      audioUrlRef.current = ''
-      return undefined
+    const clearScheduledTimers = () => {
+      timersRef.current.forEach((timerId) => window.clearTimeout(timerId))
+      timersRef.current = []
     }
 
-    function prepareAudio(reason, forceReload = false) {
+    const revokeBlobUrl = () => {
+      if (!audioBlobUrlRef.current) return
+      URL.revokeObjectURL(audioBlobUrlRef.current)
+      audioBlobUrlRef.current = ''
+    }
+
+    const clearGestureListeners = () => {
+      interactionCleanupRef.current()
+      interactionCleanupRef.current = () => {}
+    }
+
+    const stopAndResetAudio = () => {
+      const audio = audioRef.current
+      if (!audio) return
+      audio.pause()
+      audio.removeAttribute('src')
+      try {
+        audio.load()
+      } catch {
+        return
+      }
+    }
+
+    const resetAttemptState = () => {
+      playAttemptMapRef.current = {}
+      playAttemptCountRef.current = {}
+      warnReasonMapRef.current = {}
+      gestureRecoveryDoneRef.current = false
+      tryPlayRef.current = async () => false
+      isPlayingRef.current = false
+      userPausedRef.current = false
+      setPlaying(false)
+      setAudioReady(false)
+      setWaitingGesture(false)
+    }
+
+    const shouldEnable = bgmConfig.enabled && bgmConfig.url
+    clearScheduledTimers()
+    clearGestureListeners()
+    revokeBlobUrl()
+    resetAttemptState()
+
+    if (!shouldEnable) {
+      stopAndResetAudio()
+      audioRef.current = null
+      audioUrlRef.current = ''
+      return () => {
+        mountedRef.current = false
+      }
+    }
+
+    function scheduleTask(callback, delay) {
+      const timerId = window.setTimeout(() => {
+        timersRef.current = timersRef.current.filter((id) => id !== timerId)
+        callback()
+      }, delay)
+      timersRef.current.push(timerId)
+    }
+
+    function getPreferredSource() {
+      return audioBlobUrlRef.current || bgmConfig.url
+    }
+
+    function prepareAudio(reason, options = {}) {
+      const { force = false, useBlobIfReady = true } = options
+
       if (!bgmConfig.enabled || !bgmConfig.url) {
         return null
       }
@@ -140,14 +205,15 @@ export default function ActivityBgmPlayer({ bgm }) {
         audioRef.current = audio
       }
 
-      const shouldResetSource = forceReload || audioUrlRef.current !== bgmConfig.url
+      const preferredSource = useBlobIfReady ? getPreferredSource() : bgmConfig.url
+      const shouldResetSource = force || audioUrlRef.current !== preferredSource
 
       if (shouldResetSource) {
         if (!audio.paused) {
           audio.pause()
         }
-        audio.src = bgmConfig.url
-        audioUrlRef.current = bgmConfig.url
+        audio.src = preferredSource
+        audioUrlRef.current = preferredSource
       }
 
       audio.preload = 'auto'
@@ -159,7 +225,7 @@ export default function ActivityBgmPlayer({ bgm }) {
       audio.setAttribute('x5-playsinline', 'true')
       audio.setAttribute('x5-video-player-type', 'h5')
 
-      if (shouldResetSource || forceReload) {
+      if (shouldResetSource || force || bgmConfig.preload) {
         try {
           audio.load()
         } catch (error) {
@@ -170,9 +236,16 @@ export default function ActivityBgmPlayer({ bgm }) {
       return audio
     }
 
-    const audio = prepareAudio('mount', true)
-    if (!audio) {
-      return undefined
+    function markBlocked(reason) {
+      if (!mountedRef.current || !bgmConfig.showControl || userPausedRef.current || playing) {
+        return
+      }
+      if (!gestureRecoveryDoneRef.current) {
+        setWaitingGesture(true)
+      }
+      if (!warnReasonMapRef.current[reason]) {
+        warnReasonMapRef.current[reason] = true
+      }
     }
 
     const tryPlay = async (reason, options = {}) => {
@@ -181,50 +254,65 @@ export default function ActivityBgmPlayer({ bgm }) {
       if (!bgmConfig.enabled || !bgmConfig.url) {
         return false
       }
-      if (isPlayingRef.current && !forcePrepare) {
-        return true
-      }
       if (userPausedRef.current && !manual) {
         return false
       }
 
-      const now = Date.now()
-      const lastReasonAt = playAttemptMapRef.current[reason] || 0
-      if (!manual && now - lastReasonAt < attemptIntervalMs) {
-        return false
-      }
-      if (!manual && now - lastPlayAttemptRef.current < 250) {
+      const currentAttemptCount = playAttemptCountRef.current[reason] || 0
+      if (!manual && currentAttemptCount >= reasonAttemptLimit) {
         return false
       }
 
-      const targetAudio = forcePrepare ? prepareAudio(reason, true) : audioRef.current || prepareAudio(reason)
+      const now = Date.now()
+      const lastAttemptAt = playAttemptMapRef.current.lastAttemptAt || 0
+      if (!manual && now - lastAttemptAt < attemptIntervalMs) {
+        return false
+      }
+
+      const targetAudio = forcePrepare
+        ? prepareAudio(reason, { force: true })
+        : audioRef.current || prepareAudio(reason)
+
       if (!targetAudio) {
         return false
       }
 
-      playAttemptMapRef.current[reason] = now
-      lastPlayAttemptRef.current = now
+      playAttemptMapRef.current.lastAttemptAt = now
+      playAttemptCountRef.current[reason] = currentAttemptCount + 1
 
       try {
         await targetAudio.play()
-        setPlaying(true)
+        if (!mountedRef.current) {
+          return true
+        }
         isPlayingRef.current = true
         gestureRecoveryDoneRef.current = true
+        setPlaying(true)
+        setWaitingGesture(false)
         if (manual) {
           userPausedRef.current = false
         }
         return true
       } catch (error) {
-        console.warn('[ActivityBgmPlayer] play blocked', reason, error?.message)
+        console.warn(`[ActivityBgmPlayer] play blocked reason=${reason} error=${error?.message || 'unknown'}`)
+        markBlocked(reason)
         return false
       }
     }
 
     tryPlayRef.current = tryPlay
 
+    const audio = prepareAudio('mount', { force: true })
+    if (!audio) {
+      return () => {
+        mountedRef.current = false
+      }
+    }
+
     const handlePlay = () => {
       isPlayingRef.current = true
       setPlaying(true)
+      setWaitingGesture(false)
     }
 
     const handlePause = () => {
@@ -255,15 +343,37 @@ export default function ActivityBgmPlayer({ bgm }) {
       if (!bgmConfig.autoplay || userPausedRef.current) {
         return
       }
-      void tryPlay('visibility')
+      void tryPlay('visible')
+    }
+
+    const handlePageShow = () => {
+      if (!bgmConfig.autoplay || userPausedRef.current) {
+        return
+      }
+      void tryPlay('pageshow')
     }
 
     const handleWechatReady = () => {
       if (!bgmConfig.autoplay || userPausedRef.current) {
         return
       }
-      prepareAudio('wechat-bridge', true)
+      prepareAudio('wechat-bridge', { force: true })
       void tryPlay('wechat-bridge', { forcePrepare: true })
+    }
+
+    const touchOptions = { capture: true, passive: true, once: true }
+    const pointerOptions = { capture: true, once: true }
+    const clickOptions = { capture: true, once: true }
+
+    const bindFirstInteractionRecovery = () => {
+      window.addEventListener('touchstart', tryGestureRecovery, touchOptions)
+      window.addEventListener('pointerdown', tryGestureRecovery, pointerOptions)
+      window.addEventListener('click', tryGestureRecovery, clickOptions)
+      interactionCleanupRef.current = () => {
+        window.removeEventListener('touchstart', tryGestureRecovery, touchOptions)
+        window.removeEventListener('pointerdown', tryGestureRecovery, pointerOptions)
+        window.removeEventListener('click', tryGestureRecovery, clickOptions)
+      }
     }
 
     audio.addEventListener('play', handlePlay)
@@ -272,30 +382,58 @@ export default function ActivityBgmPlayer({ bgm }) {
     audio.addEventListener('canplay', handleCanPlay)
     audio.addEventListener('loadeddata', handleCanPlay)
 
+    if (bgmConfig.preloadAsBlob) {
+      fetch(bgmConfig.url, { cache: 'force-cache' })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`)
+          }
+          return response.blob()
+        })
+        .then((blob) => {
+          if (!mountedRef.current) {
+            return
+          }
+          revokeBlobUrl()
+          const blobUrl = URL.createObjectURL(blob)
+          audioBlobUrlRef.current = blobUrl
+          if (!isPlayingRef.current) {
+            prepareAudio('blob-preload', { force: true })
+          }
+        })
+        .catch((error) => {
+          console.warn('[ActivityBgmPlayer] blob preload failed', error?.message)
+        })
+    }
+
     if (bgmConfig.autoplay) {
       void tryPlay('mount')
-      window.addEventListener('touchstart', tryGestureRecovery, { passive: true })
-      window.addEventListener('click', tryGestureRecovery, { passive: true })
+      bindFirstInteractionRecovery()
       document.addEventListener('visibilitychange', handleVisibilityChange)
+      window.addEventListener('pageshow', handlePageShow)
 
       if (/MicroMessenger/i.test(window.navigator.userAgent)) {
-        document.addEventListener('WeixinJSBridgeReady', handleWechatReady)
+        document.addEventListener('WeixinJSBridgeReady', handleWechatReady, false)
         if (window.WeixinJSBridge) {
-          window.setTimeout(() => {
-            prepareAudio('wechat-bridge-existing', true)
+          scheduleTask(() => {
+            prepareAudio('wechat-bridge-existing', { force: true })
             void tryPlay('wechat-bridge-existing', { forcePrepare: true })
           }, 0)
-          window.setTimeout(() => {
-            prepareAudio('wechat-bridge-existing-retry', true)
-            void tryPlay('wechat-bridge-existing-retry', { forcePrepare: true })
+          scheduleTask(() => {
+            prepareAudio('wechat-bridge-retry-300', { force: true })
+            void tryPlay('wechat-bridge-retry-300', { forcePrepare: true })
           }, 300)
+          scheduleTask(() => {
+            prepareAudio('wechat-bridge-retry-800', { force: true })
+            void tryPlay('wechat-bridge-retry-800', { forcePrepare: true })
+          }, 800)
         }
       }
 
       if (window.wx && typeof window.wx.ready === 'function') {
         window.wx.ready(() => {
           if (!userPausedRef.current) {
-            prepareAudio('wx-ready', true)
+            prepareAudio('wx-ready', { force: true })
             void tryPlay('wx-ready', { forcePrepare: true })
           }
         })
@@ -303,24 +441,26 @@ export default function ActivityBgmPlayer({ bgm }) {
     }
 
     return () => {
-      window.removeEventListener('touchstart', tryGestureRecovery)
-      window.removeEventListener('click', tryGestureRecovery)
+      mountedRef.current = false
+      clearScheduledTimers()
+      clearGestureListeners()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      document.removeEventListener('WeixinJSBridgeReady', handleWechatReady)
+      window.removeEventListener('pageshow', handlePageShow)
+      document.removeEventListener('WeixinJSBridgeReady', handleWechatReady, false)
       audio.removeEventListener('play', handlePlay)
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('loadeddata', handleCanPlay)
-      audio.pause()
-      audio.src = ''
-      audio.load()
+      stopAndResetAudio()
+      revokeBlobUrl()
       audioRef.current = null
       audioUrlRef.current = ''
-      isPlayingRef.current = false
       tryPlayRef.current = async () => false
+      isPlayingRef.current = false
       setPlaying(false)
       setAudioReady(false)
+      setWaitingGesture(false)
     }
   }, [bgmConfig])
 
@@ -334,21 +474,22 @@ export default function ActivityBgmPlayer({ bgm }) {
 
     if (!audio.paused) {
       userPausedRef.current = true
+      setWaitingGesture(false)
       audio.pause()
       return
     }
 
-    try {
-      await tryPlayRef.current('manual', { manual: true, forcePrepare: true })
-    } catch {
-      return
-    }
+    await tryPlayRef.current('manual', { manual: true, forcePrepare: true })
   }
 
   const iconWrapStyle = {
     ...iconWrapBaseStyle,
-    animation: playing ? `${spinAnimationName} 3s linear infinite` : 'none',
-    opacity: audioReady ? 1 : 0.8,
+    animation: playing
+      ? `${spinAnimationName} 3s linear infinite`
+      : waitingGesture
+        ? `${pulseAnimationName} 1.8s ease-in-out infinite`
+        : 'none',
+    opacity: audioReady ? 1 : 0.82,
   }
 
   return (
