@@ -8,7 +8,7 @@ const { Text, Title } = Typography
 
 const templateHeaders = '题目 / 图片 / 选项A / 选项B / 选项C / 选项D / 正确答案 / 分数 / 题型 / 备注'
 
-export default function QuizQuestionImportPage({ activity }) {
+export default function QuizQuestionImportPage({ activity, lockActivityKey = false }) {
   const [activityKey, setActivityKey] = useState(activity?.activityKey || '')
   const [mode, setMode] = useState('replace')
   const [fileList, setFileList] = useState([])
@@ -86,15 +86,17 @@ export default function QuizQuestionImportPage({ activity }) {
 
         <Card size="small">
           <Space direction="vertical" size={14} style={{ width: '100%' }}>
-            <div>
-              <Text strong>Activity Key</Text>
-              <Input
-                value={activityKey}
-                onChange={(event) => setActivityKey(event.target.value)}
-                placeholder="输入 quiz activityKey"
-                style={{ marginTop: 8, maxWidth: 520 }}
-              />
-            </div>
+            {lockActivityKey ? null : (
+              <div>
+                <Text strong>Activity Key</Text>
+                <Input
+                  value={activityKey}
+                  onChange={(event) => setActivityKey(event.target.value)}
+                  placeholder="输入 quiz activityKey"
+                  style={{ marginTop: 8, maxWidth: 520 }}
+                />
+              </div>
+            )}
 
             <div>
               <Text strong>导入模式</Text>

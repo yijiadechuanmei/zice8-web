@@ -133,3 +133,30 @@ export function importQuizQuestions(activityKey, file, mode = 'append') {
     body: formData,
   })
 }
+
+export function getQuizAdminOverview(activityKey) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/overview`)
+}
+
+export function getQuizAdminCategories(activityKey) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/categories`)
+}
+
+export function getQuizAdminQuestions(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/questions?${search.toString()}`)
+}
+
+export function getQuizAdminAttempts(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/attempts?${search.toString()}`)
+}
+
+export function getQuizAdminAttemptAnswers(activityKey, attemptId) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/attempts/${attemptId}/answers`)
+}
+
+export function getQuizAdminRank(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/rank?${search.toString()}`)
+}

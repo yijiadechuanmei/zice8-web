@@ -212,6 +212,18 @@
   margin: 0 0 4px;
 }
 
+.admin-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-quiz-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 12px;
+}
+
 .admin-kpi-card {
   height: 100%;
   border-color: #e5e7eb;

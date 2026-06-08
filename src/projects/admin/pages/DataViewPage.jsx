@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { Avatar, Button, Card, Checkbox, Dropdown, Empty, Input, Space, Table, Tag, Tooltip, Typography, message } from 'antd'
 import { DownOutlined, ExportOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import { exportDataRows, getDataRows, getDataSchema } from '../api'
+import QuizAdminDataPage from './QuizAdminDataPage'
 
 const { Text, Title } = Typography
 const pageSize = 20
 
 export default function DataViewPage({ activity }) {
+  return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} />
+}
+
+function GenericDataViewPage({ activity }) {
   const [views, setViews] = useState([])
   const [activeViewKey, setActiveViewKey] = useState('')
   const [hiddenColumns, setHiddenColumns] = useState({})
