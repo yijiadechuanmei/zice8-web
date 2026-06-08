@@ -23,12 +23,14 @@ import {
   TableOutlined,
   TeamOutlined,
   UserOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import AccountPage from './AccountPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
 import OperationLogPage from './OperationLogPage'
 import PermissionPage from './PermissionPage'
+import QuizQuestionImportPage from './QuizQuestionImportPage'
 
 const { Header, Sider, Content } = Layout
 const { Text, Title } = Typography
@@ -37,6 +39,7 @@ const tabs = [
   { key: 'overview', label: '概览', icon: <DashboardOutlined /> },
   { key: 'dashboard', label: '数据看板', icon: <BarChartOutlined /> },
   { key: 'data', label: '数据表', icon: <TableOutlined /> },
+  { key: 'quizImport', label: '题库导入', icon: <UploadOutlined />, activityTypes: ['quiz'] },
   { key: 'permissions', label: '权限配置', icon: <SettingOutlined /> },
   { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
   { key: 'logs', label: '操作日志', icon: <DatabaseOutlined /> },
@@ -54,7 +57,11 @@ export default function AdminLayout({
   const [keyword, setKeyword] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const visibleTabs = tabs.filter((tab) => adminUser.role === 'super_admin' || !['accounts', 'permissions', 'logs'].includes(tab.key))
+  const visibleTabs = tabs.filter((tab) => {
+    if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs'].includes(tab.key)) return false
+    if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
+    return true
+  })
   const activityTypes = useMemo(() => Array.from(new Set(activities.map((activity) => activity.type))).filter(Boolean), [activities])
   const filteredActivities = useMemo(
     () =>
@@ -166,6 +173,7 @@ export default function AdminLayout({
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
           {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
           {selectedActivity && activeTab === 'logs' ? <OperationLogPage activity={selectedActivity} /> : null}

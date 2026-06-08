@@ -16,8 +16,9 @@ export function removeAdminToken() {
 
 export async function adminRequest(path, options = {}) {
   const token = getAdminToken()
+  const isFormData = options.body instanceof FormData
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {}),
   }
   if (token) headers.Authorization = `Bearer ${token}`
@@ -120,5 +121,15 @@ export function updateAccountPermissions(id, permissions) {
   return adminRequest(`/admin/accounts/${id}/permissions`, {
     method: 'POST',
     body: JSON.stringify({ permissions }),
+  })
+}
+
+export function importQuizQuestions(activityKey, file, mode = 'append') {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('mode', mode)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/questions/import`, {
+    method: 'POST',
+    body: formData,
   })
 }
