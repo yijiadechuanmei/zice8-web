@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken, setToken } from '../../shared/api/request'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
+import { enableMobileDebug } from '../../shared/debug/mobileDebug'
+import { buildBootDebug, buildTokenDebug, debugLog, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -50,6 +52,7 @@ export default function QuizApp() {
 function QuizMain() {
   const activityKey = getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
   const debug = getQueryParam('debug') === '1'
+  const debugAuth = isQuizAuthDebugEnabled()
   const [page, setPage] = useState('home')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
@@ -66,6 +69,18 @@ function QuizMain() {
   const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+
+  useEffect(() => {
+    if (!debugAuth) return
+    enableMobileDebug()
+    debugLog('[QuizAuthDebug] debug mode enabled')
+    debugLog('[QuizAuthDebug] boot', buildBootDebug(activityKey))
+    debugLog('[QuizAuthDebug] token', buildTokenDebug())
+    setQuizAuthDebugState({
+      ...buildBootDebug(activityKey),
+      ...buildTokenDebug(),
+    })
+  }, [activityKey, debugAuth])
 
   const showToast = useCallback((message, duration = 1500) => {
     if (!message) return
@@ -107,6 +122,16 @@ function QuizMain() {
       .then((config) => {
         setPublicConfig(config)
         setError('')
+        debugLog('[QuizAuthDebug] config', {
+          accessMode: config?.accessMode || config?.access_mode || '',
+          oauthScope: config?.oauthScope || config?.oauth_scope || '',
+          requireUserinfo: Boolean(config?.requireUserinfo || config?.require_userinfo),
+        })
+        setQuizAuthDebugState({
+          accessMode: config?.accessMode || config?.access_mode || '',
+          oauthScope: config?.oauthScope || config?.oauth_scope || '',
+          requireUserinfo: Boolean(config?.requireUserinfo || config?.require_userinfo),
+        })
       })
       .catch((err) => {
         setError(err.message || '活动加载失败')
@@ -121,6 +146,15 @@ function QuizMain() {
       const data = await getBootstrap(activityKey)
       setBootstrap(data)
       document.title = data?.activity?.title || '端午知识竞赛'
+      debugLog('[QuizAuthDebug] bootstrap', {
+        activityKey,
+        profileCompleted: Boolean(data?.profileCompleted),
+        accessMode: data?.activity?.accessMode || data?.activity?.access_mode || publicConfig?.accessMode || publicConfig?.access_mode || '',
+      })
+      setQuizAuthDebugState({
+        profileCompleted: Boolean(data?.profileCompleted),
+        bootstrapLoaded: true,
+      })
       if (resetPage) {
         setCurrent(null)
         setResult(null)
@@ -147,6 +181,14 @@ function QuizMain() {
 
   function startAuthorize() {
     const redirectUrl = encodeURIComponent(sanitizeUrlForWechat(window.location.href))
+    debugLog('[QuizAuthDebug] oauth redirect', {
+      reason: 'start-without-token',
+      redirectUrl: sanitizeUrlForWechat(window.location.href),
+    })
+    setQuizAuthDebugState({
+      lastAuthStep: 'start-authorize',
+      lastOauthRedirectUrl: sanitizeUrlForWechat(window.location.href),
+    })
     window.location.href = `${API_BASE_URL}/wechat/oauth/redirect?activity_key=${encodeURIComponent(activityKey)}&redirect_url=${redirectUrl}`
   }
 

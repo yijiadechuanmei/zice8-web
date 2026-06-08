@@ -1,46 +1,110 @@
-import { request } from '../../shared/api/request'
+import { getToken, request } from '../../shared/api/request'
+import { debugLog, debugWarn, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
 
-export const getPublicConfig = (activityKey) => request(`/activities/${activityKey}/public-config`)
+async function quizRequest(path, options = {}) {
+  const method = options.method || 'GET'
+  const hasAuth = Boolean(getToken())
 
-export const getBootstrap = (activityKey) => request(`/quiz/activities/${activityKey}/bootstrap`)
+  if (isQuizAuthDebugEnabled()) {
+    debugLog('[QuizApiDebug] request', {
+      method,
+      url: path,
+      hasAuth,
+    })
+  }
+
+  try {
+    const data = await request(path, options)
+    if (isQuizAuthDebugEnabled()) {
+      debugLog('[QuizApiDebug] response', {
+        url: path,
+        status: 200,
+        code: 200,
+        errorCode: data?.errorCode || data?.data?.errorCode || '',
+        message: 'success',
+      })
+    }
+    return data
+  } catch (error) {
+    const response = error?.response || {}
+    const errorCode = response?.data?.errorCode || response?.errorCode || ''
+    const status = Number(response?.code) || 500
+    const debugPayload = {
+      path,
+      status,
+      errorCode,
+      willReauth: status === 401,
+    }
+
+    setQuizAuthDebugState({
+      lastApiError: {
+        method,
+        path,
+        status,
+        errorCode,
+        message: response?.message || error?.message || '请求失败',
+      },
+    })
+
+    if (status === 401) {
+      debugWarn('[QuizAuthDebug] unauthorized', debugPayload)
+    }
+
+    if (isQuizAuthDebugEnabled()) {
+      debugLog('[QuizApiDebug] response', {
+        url: path,
+        status,
+        code: response?.code || status,
+        errorCode,
+        message: response?.message || error?.message || '请求失败',
+      })
+    }
+
+    throw error
+  }
+}
+
+export const getPublicConfig = (activityKey) => quizRequest(`/activities/${activityKey}/public-config`)
+
+export const getBootstrap = (activityKey) => quizRequest(`/quiz/activities/${activityKey}/bootstrap`)
 
 export const submitProfile = (activityKey, data) =>
-  request(`/quiz/activities/${activityKey}/participant-profile`, {
+  quizRequest(`/quiz/activities/${activityKey}/participant-profile`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
 export const startAttempt = (activityKey, data) =>
-  request(`/quiz/activities/${activityKey}/start-attempt`, {
+  quizRequest(`/quiz/activities/${activityKey}/start-attempt`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
 export const getCurrentAttempt = (activityKey, attemptId) =>
-  request(`/quiz/activities/${activityKey}/attempts/${attemptId}/current`)
+  quizRequest(`/quiz/activities/${activityKey}/attempts/${attemptId}/current`)
 
 export const submitAnswer = (activityKey, attemptId, data) =>
-  request(`/quiz/activities/${activityKey}/attempts/${attemptId}/answer`, {
+  quizRequest(`/quiz/activities/${activityKey}/attempts/${attemptId}/answer`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
 export const submitTimeout = (activityKey, attemptId, data) =>
-  request(`/quiz/activities/${activityKey}/attempts/${attemptId}/timeout`, {
+  quizRequest(`/quiz/activities/${activityKey}/attempts/${attemptId}/timeout`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
 export const finishAttempt = (activityKey, attemptId) =>
-  request(`/quiz/activities/${activityKey}/attempts/${attemptId}/finish`, { method: 'POST' })
+  quizRequest(`/quiz/activities/${activityKey}/attempts/${attemptId}/finish`, { method: 'POST' })
 
-export const getResult = (activityKey, attemptId) => request(`/quiz/activities/${activityKey}/result/${attemptId}`)
+export const getResult = (activityKey, attemptId) => quizRequest(`/quiz/activities/${activityKey}/result/${attemptId}`)
 
 export const getRank = (activityKey, page = 1, pageSize = 50) =>
-  request(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`)
+  quizRequest(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`)
 
 export const resetDemoActivity = (activityKey) =>
-  request(`/quiz/activities/${activityKey}/dev-reset`, {
+  quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {
     method: 'POST',
     body: JSON.stringify({ confirm: 'RESET_QUIZ_DEMO' }),
   })
