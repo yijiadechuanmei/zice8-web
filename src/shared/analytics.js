@@ -51,13 +51,13 @@ export function trackEvent(payload) {
     body: JSON.stringify(body),
     keepalive: true,
   }).catch((err) => {
-    if (import.meta.env.DEV) console.warn('analytics track failed', err)
+    console.warn('analytics track failed', err)
   })
 }
 
-export function trackPageView(activityKey, page) {
+export function trackPageView(activityKey, page, extra) {
   if (!shouldTrackPageView(activityKey, page)) return
-  trackEvent({ activityKey, eventType: 'page_view', page })
+  trackEvent({ activityKey, eventType: 'page_view', page, extra })
 }
 
 function sanitizeExtra(extra) {

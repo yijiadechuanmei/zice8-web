@@ -38,8 +38,6 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
   const metrics = useMemo(() => {
     const videoRank = overview?.videoRank || {}
-    const completed = videoRank.completedCount || 0
-    const watch = videoRank.watchUserCount || 0
     return [
       { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
       { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
@@ -47,10 +45,9 @@ export default function ActivityDashboard({ activity, compact = false }) {
       { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
       { label: '正式参与人数', value: overview?.participantCount || 0 },
       { label: '今日新增参与', value: overview?.todayParticipantCount || 0 },
-      { label: '互动次数', value: overview?.submitCount || 0 },
-      { label: '完成数', value: completed },
-      { label: '完成率', value: watch ? Math.round((completed / watch) * 100) : 0, suffix: '%' },
-      { label: '留言数', value: videoRank.commentCount || 0 },
+      { label: '互动次数', value: overview?.interactionCount ?? overview?.submitCount ?? 0 },
+      { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
+      { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
   }, [overview])
 
@@ -126,7 +123,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
               </ChartPanel>
             </Col>
             <Col xs={24} xl={8}>
-              <ChartPanel title="近 7 天互动/完成趋势" description="观看记录更新与完成时间">
+              <ChartPanel title="近 7 天互动/完成趋势" description={activity.type === 'quiz' ? '按 start_attempt 与 finished attempt 统计' : '观看记录更新与完成时间'}>
                 <LazyChart
                   type="line"
                   data={mergeTrend(charts?.submissions?.trend, charts?.submissions?.completionTrend)}

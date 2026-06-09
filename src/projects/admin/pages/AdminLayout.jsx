@@ -86,13 +86,17 @@ export default function AdminLayout({
     ? quizViewKeysByActivity[selectedActivity.activityKey] || null
     : null
   const canAccessQuizImport = selectedActivity?.type === 'quiz'
-    ? Boolean(currentQuizViewKeys?.has('quiz_import'))
+    ? (currentQuizViewKeys ? currentQuizViewKeys.has('quiz_import') : true)
     : false
+  const canAccessQuizOverview = selectedActivity?.type === 'quiz'
+    ? (currentQuizViewKeys ? currentQuizViewKeys.has('quiz_overview') : true)
+    : true
 
   const visibleTabs = tabs.filter((tab) => {
     if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs'].includes(tab.key)) return false
     if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
     if (tab.key === 'quizImport' && selectedActivity?.type === 'quiz' && !canAccessQuizImport) return false
+    if (selectedActivity?.type === 'quiz' && ['overview', 'dashboard'].includes(tab.key) && !canAccessQuizOverview) return false
     return true
   })
   const activityTypes = useMemo(() => Array.from(new Set(activities.map((activity) => activity.type))).filter(Boolean), [activities])
@@ -113,7 +117,10 @@ export default function AdminLayout({
     if (activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport) {
       onChangeTab('data')
     }
-  }, [activeTab, canAccessQuizImport, onChangeTab, selectedActivity])
+    if (selectedActivity.type === 'quiz' && ['overview', 'dashboard'].includes(activeTab) && !canAccessQuizOverview) {
+      onChangeTab(canAccessQuizImport ? 'data' : 'activityConfig')
+    }
+  }, [activeTab, canAccessQuizImport, canAccessQuizOverview, onChangeTab, selectedActivity])
 
   return (
     <Layout className="admin-shell">

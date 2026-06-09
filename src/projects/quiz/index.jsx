@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getToken, setToken } from '../../shared/api/request'
+import { trackPageView } from '../../shared/analytics'
 import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
@@ -77,6 +78,14 @@ function QuizMain() {
     return () => {
       activityAudioService.destroy()
     }
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!activityKey) return
+    trackPageView(activityKey, '/quiz', {
+      activityType: 'quiz',
+      pageKey: 'home',
+    })
   }, [activityKey])
 
   useEffect(() => {
