@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button, Card, Descriptions, Drawer, Empty, Input, Select, Space, Statistic, Table, Tabs, Tag, Typography, message } from 'antd'
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import {
+  getDataSchema,
   getDataRows,
   getQuizAdminAttemptAnswers,
   getQuizAdminAttempts,
@@ -15,7 +16,67 @@ const { Text, Title } = Typography
 const pageSize = 20
 
 export default function QuizAdminDataPage({ activity }) {
-  const [activeKey, setActiveKey] = useState('participants')
+  const [activeKey, setActiveKey] = useState('')
+  const [views, setViews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    setError('')
+    setViews([])
+    getDataSchema(activity.activityKey)
+      .then((schema) => {
+        if (!alive) return
+        setViews(schema?.views || [])
+      })
+      .catch((err) => {
+        if (!alive) return
+        setError(err.message || '数据视图加载失败')
+      })
+      .finally(() => {
+        if (alive) setLoading(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [activity.activityKey])
+
+  const viewMap = useMemo(() => new Map(views.map((view) => [view.viewKey, view])), [views])
+  const canViewAnswers = viewMap.has('quiz_attempt_answers')
+  const tabs = useMemo(() => {
+    const items = []
+    if (viewMap.has('participants')) {
+      items.push({ key: 'participants', label: viewMap.get('participants')?.label || '参与用户', children: <QuizParticipantsTable activity={activity} active={activeKey === 'participants'} /> })
+    }
+    if (viewMap.has('quiz_overview')) {
+      items.push({ key: 'quiz_overview', label: viewMap.get('quiz_overview')?.label || '基础统计', children: <QuizOverviewPanel activity={activity} active={activeKey === 'quiz_overview'} /> })
+    }
+    if (viewMap.has('quiz_questions')) {
+      items.push({ key: 'quiz_questions', label: viewMap.get('quiz_questions')?.label || '题目列表', children: <QuizQuestionTable activity={activity} active={activeKey === 'quiz_questions'} /> })
+    }
+    if (viewMap.has('quiz_categories')) {
+      items.push({ key: 'quiz_categories', label: viewMap.get('quiz_categories')?.label || '分类板块', children: <QuizCategoryTable activity={activity} active={activeKey === 'quiz_categories'} /> })
+    }
+    if (viewMap.has('quiz_attempts')) {
+      items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} /> })
+    }
+    if (viewMap.has('quiz_rank')) {
+      items.push({ key: 'quiz_rank', label: viewMap.get('quiz_rank')?.label || '排行榜', children: <QuizRankTable activity={activity} active={activeKey === 'quiz_rank'} /> })
+    }
+    return items
+  }, [activity, activeKey, canViewAnswers, viewMap])
+
+  useEffect(() => {
+    if (!tabs.length) {
+      setActiveKey('')
+      return
+    }
+    if (!tabs.some((item) => item.key === activeKey)) {
+      setActiveKey(tabs[0].key)
+    }
+  }, [activeKey, tabs])
 
   return (
     <Card className="admin-card">
@@ -25,18 +86,16 @@ export default function QuizAdminDataPage({ activity }) {
           <Text type="secondary">当前活动的参与用户、题库、答题记录和成绩数据。题库导入请使用上方独立「题库导入」页签。</Text>
         </div>
       </div>
-      <Tabs
-        activeKey={activeKey}
-        onChange={setActiveKey}
-        items={[
-          { key: 'participants', label: '参与用户', children: <QuizParticipantsTable activity={activity} active={activeKey === 'participants'} /> },
-          { key: 'overview', label: '基础统计', children: <QuizOverviewPanel activity={activity} active={activeKey === 'overview'} /> },
-          { key: 'questions', label: '题目列表', children: <QuizQuestionTable activity={activity} active={activeKey === 'questions'} /> },
-          { key: 'categories', label: '分类板块', children: <QuizCategoryTable activity={activity} active={activeKey === 'categories'} /> },
-          { key: 'attempts', label: '答题记录', children: <QuizAttemptTable activity={activity} active={activeKey === 'attempts'} /> },
-          { key: 'rank', label: '排行榜', children: <QuizRankTable activity={activity} active={activeKey === 'rank'} /> },
-        ]}
-      />
+      {error ? <div className="admin-inline-error">{error}</div> : null}
+      {!loading && !tabs.length ? (
+        <Empty description="当前账号没有可查看的数据视图，请联系管理员授权。" />
+      ) : (
+        <Tabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          items={tabs}
+        />
+      )}
     </Card>
   )
 }
@@ -272,7 +331,7 @@ function QuizQuestionTable({ activity, active }) {
   )
 }
 
-function QuizAttemptTable({ activity, active }) {
+function QuizAttemptTable({ activity, active, canViewAnswers }) {
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
@@ -312,6 +371,23 @@ function QuizAttemptTable({ activity, active }) {
     }
   }
 
+  const columns = [
+    { title: 'Attempt ID', dataIndex: 'attemptId', key: 'attemptId', width: 110 },
+    { title: '姓名', dataIndex: 'name', key: 'name', width: 110 },
+    { title: '部门', dataIndex: 'department', key: 'department', width: 150, render: emptyText },
+    { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: attemptStatusTag },
+    { title: '总分', dataIndex: 'totalScore', key: 'totalScore', width: 80 },
+    { title: '正确数', dataIndex: 'correctCount', key: 'correctCount', width: 80 },
+    { title: '错误数', dataIndex: 'wrongCount', key: 'wrongCount', width: 80 },
+    { title: '超时数', dataIndex: 'timeoutCount', key: 'timeoutCount', width: 80 },
+    { title: '总用时', dataIndex: 'totalTimeMs', key: 'totalTimeMs', width: 100, render: formatDuration },
+    { title: '开始时间', dataIndex: 'startedAt', key: 'startedAt', width: 170, render: formatDate },
+    { title: '完成时间', dataIndex: 'finishedAt', key: 'finishedAt', width: 170, render: formatDate },
+    canViewAnswers
+      ? { title: '操作', key: 'action', fixed: 'right', width: 110, render: (_, record) => <Button size="small" icon={<EyeOutlined />} onClick={() => openAnswers(record.attemptId)}>明细</Button> }
+      : null,
+  ].filter(Boolean)
+
   return (
     <>
       <TableBlock
@@ -324,26 +400,13 @@ function QuizAttemptTable({ activity, active }) {
         )}
         tableProps={{
           rowKey: 'attemptId',
-          columns: [
-            { title: 'Attempt ID', dataIndex: 'attemptId', key: 'attemptId', width: 110 },
-            { title: '姓名', dataIndex: 'name', key: 'name', width: 110 },
-            { title: '部门', dataIndex: 'department', key: 'department', width: 150, render: emptyText },
-            { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: attemptStatusTag },
-            { title: '总分', dataIndex: 'totalScore', key: 'totalScore', width: 80 },
-            { title: '正确数', dataIndex: 'correctCount', key: 'correctCount', width: 80 },
-            { title: '错误数', dataIndex: 'wrongCount', key: 'wrongCount', width: 80 },
-            { title: '超时数', dataIndex: 'timeoutCount', key: 'timeoutCount', width: 80 },
-            { title: '总用时', dataIndex: 'totalTimeMs', key: 'totalTimeMs', width: 100, render: formatDuration },
-            { title: '开始时间', dataIndex: 'startedAt', key: 'startedAt', width: 170, render: formatDate },
-            { title: '完成时间', dataIndex: 'finishedAt', key: 'finishedAt', width: 170, render: formatDate },
-            { title: '操作', key: 'action', fixed: 'right', width: 110, render: (_, record) => <Button size="small" icon={<EyeOutlined />} onClick={() => openAnswers(record.attemptId)}>明细</Button> },
-          ],
+          columns,
           dataSource: data.list || [],
           loading,
           pagination: pagination({ page: data.page, pageSize: data.pageSize, total: data.total }, page, setPage),
         }}
       />
-      <Drawer title={`答案明细 #${drawer.attemptId}`} open={drawer.open} width={860} onClose={() => setDrawer({ open: false, attemptId: '', loading: false, list: [] })}>
+      <Drawer title={`答案明细 #${drawer.attemptId}`} open={drawer.open && canViewAnswers} width={860} onClose={() => setDrawer({ open: false, attemptId: '', loading: false, list: [] })}>
         <Table
           rowKey={(row) => row.questionSort}
           size="small"

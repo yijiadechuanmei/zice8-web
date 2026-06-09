@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Button,
@@ -32,6 +32,7 @@ import DataViewPage from './DataViewPage'
 import OperationLogPage from './OperationLogPage'
 import PermissionPage from './PermissionPage'
 import QuizQuestionImportPage from './QuizQuestionImportPage'
+import { getDataSchema } from '../api'
 
 const { Header, Sider, Content } = Layout
 const { Text, Title } = Typography
@@ -59,9 +60,39 @@ export default function AdminLayout({
   const [keyword, setKeyword] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [quizViewKeysByActivity, setQuizViewKeysByActivity] = useState({})
+
+  useEffect(() => {
+    if (!selectedActivity || selectedActivity.type !== 'quiz') return
+    const activityKey = selectedActivity.activityKey
+    if (quizViewKeysByActivity[activityKey]) return
+    let alive = true
+    getDataSchema(activityKey)
+      .then((schema) => {
+        if (!alive) return
+        const viewKeys = new Set((schema?.views || []).map((view) => view.viewKey))
+        setQuizViewKeysByActivity((current) => ({ ...current, [activityKey]: viewKeys }))
+      })
+      .catch(() => {
+        if (!alive) return
+        setQuizViewKeysByActivity((current) => ({ ...current, [activityKey]: new Set() }))
+      })
+    return () => {
+      alive = false
+    }
+  }, [quizViewKeysByActivity, selectedActivity])
+
+  const currentQuizViewKeys = selectedActivity?.type === 'quiz'
+    ? quizViewKeysByActivity[selectedActivity.activityKey] || null
+    : null
+  const canAccessQuizImport = selectedActivity?.type === 'quiz'
+    ? Boolean(currentQuizViewKeys?.has('quiz_import'))
+    : false
+
   const visibleTabs = tabs.filter((tab) => {
     if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs'].includes(tab.key)) return false
     if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
+    if (tab.key === 'quizImport' && selectedActivity?.type === 'quiz' && !canAccessQuizImport) return false
     return true
   })
   const activityTypes = useMemo(() => Array.from(new Set(activities.map((activity) => activity.type))).filter(Boolean), [activities])
@@ -76,6 +107,13 @@ export default function AdminLayout({
       }),
     [activities, keyword, statusFilter, typeFilter],
   )
+
+  useEffect(() => {
+    if (!selectedActivity) return
+    if (activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport) {
+      onChangeTab('data')
+    }
+  }, [activeTab, canAccessQuizImport, onChangeTab, selectedActivity])
 
   return (
     <Layout className="admin-shell">
@@ -176,7 +214,8 @@ export default function AdminLayout({
           {selectedActivity && activeTab === 'activityConfig' ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
-          {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport ? <Card><Empty description="无权访问题库导入，请联系管理员授权。" /></Card> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
           {selectedActivity && activeTab === 'logs' ? <OperationLogPage activity={selectedActivity} /> : null}
