@@ -48,22 +48,22 @@ export default function QuizAdminDataPage({ activity }) {
   const tabs = useMemo(() => {
     const items = []
     if (viewMap.has('participants')) {
-      items.push({ key: 'participants', label: viewMap.get('participants')?.label || '参与用户', children: <QuizParticipantsTable activity={activity} active={activeKey === 'participants'} /> })
+      items.push({ key: 'participants', label: viewMap.get('participants')?.label || '参与用户', children: <QuizParticipantsTable activity={activity} view={viewMap.get('participants')} active={activeKey === 'participants'} /> })
     }
     if (viewMap.has('quiz_overview')) {
-      items.push({ key: 'quiz_overview', label: viewMap.get('quiz_overview')?.label || '基础统计', children: <QuizOverviewPanel activity={activity} active={activeKey === 'quiz_overview'} /> })
+      items.push({ key: 'quiz_overview', label: viewMap.get('quiz_overview')?.label || '基础统计', children: <QuizOverviewPanel activity={activity} view={viewMap.get('quiz_overview')} active={activeKey === 'quiz_overview'} /> })
     }
     if (viewMap.has('quiz_questions')) {
-      items.push({ key: 'quiz_questions', label: viewMap.get('quiz_questions')?.label || '题目列表', children: <QuizQuestionTable activity={activity} active={activeKey === 'quiz_questions'} /> })
+      items.push({ key: 'quiz_questions', label: viewMap.get('quiz_questions')?.label || '题目列表', children: <QuizQuestionTable activity={activity} view={viewMap.get('quiz_questions')} active={activeKey === 'quiz_questions'} /> })
     }
     if (viewMap.has('quiz_categories')) {
-      items.push({ key: 'quiz_categories', label: viewMap.get('quiz_categories')?.label || '分类板块', children: <QuizCategoryTable activity={activity} active={activeKey === 'quiz_categories'} /> })
+      items.push({ key: 'quiz_categories', label: viewMap.get('quiz_categories')?.label || '分类板块', children: <QuizCategoryTable activity={activity} view={viewMap.get('quiz_categories')} active={activeKey === 'quiz_categories'} /> })
     }
     if (viewMap.has('quiz_attempts')) {
-      items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} /> })
+      items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} view={viewMap.get('quiz_attempts')} answerView={viewMap.get('quiz_attempt_answers') || null} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} /> })
     }
     if (viewMap.has('quiz_rank')) {
-      items.push({ key: 'quiz_rank', label: viewMap.get('quiz_rank')?.label || '排行榜', children: <QuizRankTable activity={activity} active={activeKey === 'quiz_rank'} /> })
+      items.push({ key: 'quiz_rank', label: viewMap.get('quiz_rank')?.label || '排行榜', children: <QuizRankTable activity={activity} view={viewMap.get('quiz_rank')} active={activeKey === 'quiz_rank'} /> })
     }
     return items
   }, [activity, activeKey, canViewAnswers, viewMap])
@@ -100,7 +100,7 @@ export default function QuizAdminDataPage({ activity }) {
   )
 }
 
-function QuizOverviewPanel({ activity, active }) {
+function QuizOverviewPanel({ activity, view, active }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -127,39 +127,29 @@ function QuizOverviewPanel({ activity, active }) {
 
   if (error) return <div className="admin-inline-error">{error}</div>
 
+  const stats = (view?.fields || []).map((field) => ({
+    key: field.fieldKey || field.key,
+    label: field.label,
+    value: data?.[field.fieldKey || field.key] ?? 0,
+  }))
+
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div className="admin-quiz-kpis">
-        {[
-          ['题目数', data?.questionCount],
-          ['分类数', data?.categoryCount],
-          ['参与人数', data?.participantCount],
-          ['完成次数', data?.finishedAttemptCount],
-          ['最高分', data?.maxScore],
-          ['平均分', data?.averageScore],
-        ].map(([label, value]) => (
-          <Card key={label} size="small" loading={loading}>
-            <Statistic title={label} value={value ?? 0} />
+        {stats.map((item) => (
+          <Card key={item.key} size="small" loading={loading}>
+            <Statistic title={item.label} value={item.value ?? 0} />
           </Card>
         ))}
       </div>
-      <Descriptions bordered size="small" column={3}>
-        <Descriptions.Item label="选项数">{data?.optionCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="单选题">{data?.singleQuestionCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="多选题">{data?.multipleQuestionCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="答题次数">{data?.attemptCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="未完成次数">{data?.abandonedAttemptCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="排行榜人数">{data?.rankCount ?? 0}</Descriptions.Item>
-        <Descriptions.Item label="平均用时">{formatDuration(data?.averageTimeMs)}</Descriptions.Item>
-      </Descriptions>
     </Space>
   )
 }
 
-function QuizParticipantsTable({ activity, active }) {
+function QuizParticipantsTable({ activity, view, active }) {
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
-  const [data, setData] = useState({ rows: [], pagination: { page: 1, pageSize, total: 0 } })
+  const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -183,22 +173,13 @@ function QuizParticipantsTable({ activity, active }) {
     }
   }, [active, activity.activityKey, keyword, page])
 
-  const columns = [
-    { title: '参与ID', dataIndex: 'participantId', key: 'participantId', width: 100 },
-    { title: '姓名', dataIndex: 'name', key: 'name', width: 120, render: emptyText },
-    { title: '部门', dataIndex: 'department', key: 'department', width: 160, render: emptyText },
-    { title: '微信昵称', dataIndex: 'nickname', key: 'nickname', width: 160, render: emptyText },
-    { title: '资料状态', dataIndex: 'profileCompleted', key: 'profileCompleted', width: 110, render: (value) => (value ? <Tag color="green">已完善</Tag> : <Tag color="orange">未完善</Tag>) },
-    { title: '参与时间', dataIndex: 'createdAt', key: 'createdAt', width: 170, render: formatDate },
-  ]
-
   return (
     <TableBlock
       error={error}
       toolbar={<Input.Search allowClear prefix={<SearchOutlined />} placeholder="搜索姓名 / 部门" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 260 }} />}
       tableProps={{
         rowKey: (row, index) => row.participantId || `participant-${index}`,
-        columns,
+        columns: buildColumnsFromSchema(view, data.columns),
         dataSource: data.rows,
         loading,
         pagination: pagination(data.pagination, page, setPage),
@@ -207,7 +188,7 @@ function QuizParticipantsTable({ activity, active }) {
   )
 }
 
-function QuizCategoryTable({ activity, active }) {
+function QuizCategoryTable({ activity, view, active }) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -237,14 +218,7 @@ function QuizCategoryTable({ activity, active }) {
       error={error}
       tableProps={{
         rowKey: 'id',
-        columns: [
-          { title: '分类ID', dataIndex: 'id', key: 'id', width: 110 },
-          { title: '分类名称', dataIndex: 'name', key: 'name' },
-          { title: '排序', dataIndex: 'sort', key: 'sort', width: 90 },
-          { title: '题目数', dataIndex: 'questionCount', key: 'questionCount', width: 110 },
-          { title: '状态', dataIndex: 'status', key: 'status', width: 90, render: statusTag },
-          { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 170, render: formatDate },
-        ],
+        columns: buildColumnsFromSchema(view),
         dataSource: data,
         loading,
         pagination: false,
@@ -253,7 +227,7 @@ function QuizCategoryTable({ activity, active }) {
   )
 }
 
-function QuizQuestionTable({ activity, active }) {
+function QuizQuestionTable({ activity, view, active }) {
   const [categories, setCategories] = useState([])
   const [keyword, setKeyword] = useState('')
   const [type, setType] = useState('')
@@ -300,17 +274,7 @@ function QuizQuestionTable({ activity, active }) {
       )}
       tableProps={{
         rowKey: 'id',
-        columns: [
-          { title: '题目ID', dataIndex: 'id', key: 'id', width: 100 },
-          { title: '分类', dataIndex: 'categoryName', key: 'categoryName', width: 150 },
-          { title: '题型', dataIndex: 'type', key: 'type', width: 90, render: questionTypeTag },
-          { title: '题目', dataIndex: 'title', key: 'title', width: 360, ellipsis: true },
-          { title: '分数', dataIndex: 'score', key: 'score', width: 80 },
-          { title: '正确答案', dataIndex: 'correctLabels', key: 'correctLabels', width: 120, render: labelsText },
-          { title: '选项数', dataIndex: 'optionsCount', key: 'optionsCount', width: 90 },
-          { title: '状态', dataIndex: 'status', key: 'status', width: 90, render: statusTag },
-          { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 170, render: formatDate },
-        ],
+        columns: buildColumnsFromSchema(view),
         dataSource: data.list || [],
         loading,
         expandable: {
@@ -331,7 +295,7 @@ function QuizQuestionTable({ activity, active }) {
   )
 }
 
-function QuizAttemptTable({ activity, active, canViewAnswers }) {
+function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers }) {
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
@@ -372,17 +336,7 @@ function QuizAttemptTable({ activity, active, canViewAnswers }) {
   }
 
   const columns = [
-    { title: 'Attempt ID', dataIndex: 'attemptId', key: 'attemptId', width: 110 },
-    { title: '姓名', dataIndex: 'name', key: 'name', width: 110 },
-    { title: '部门', dataIndex: 'department', key: 'department', width: 150, render: emptyText },
-    { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: attemptStatusTag },
-    { title: '总分', dataIndex: 'totalScore', key: 'totalScore', width: 80 },
-    { title: '正确数', dataIndex: 'correctCount', key: 'correctCount', width: 80 },
-    { title: '错误数', dataIndex: 'wrongCount', key: 'wrongCount', width: 80 },
-    { title: '超时数', dataIndex: 'timeoutCount', key: 'timeoutCount', width: 80 },
-    { title: '总用时', dataIndex: 'totalTimeMs', key: 'totalTimeMs', width: 100, render: formatDuration },
-    { title: '开始时间', dataIndex: 'startedAt', key: 'startedAt', width: 170, render: formatDate },
-    { title: '完成时间', dataIndex: 'finishedAt', key: 'finishedAt', width: 170, render: formatDate },
+    ...buildColumnsFromSchema(view),
     canViewAnswers
       ? { title: '操作', key: 'action', fixed: 'right', width: 110, render: (_, record) => <Button size="small" icon={<EyeOutlined />} onClick={() => openAnswers(record.attemptId)}>明细</Button> }
       : null,
@@ -411,17 +365,7 @@ function QuizAttemptTable({ activity, active, canViewAnswers }) {
           rowKey={(row) => row.questionSort}
           size="small"
           loading={drawer.loading}
-          columns={[
-            { title: '题号', dataIndex: 'questionSort', key: 'questionSort', width: 70 },
-            { title: '题目', dataIndex: 'questionTitle', key: 'questionTitle', ellipsis: true },
-            { title: '题型', dataIndex: 'questionType', key: 'questionType', width: 90, render: questionTypeTag },
-            { title: '用户选择', dataIndex: 'selectedLabels', key: 'selectedLabels', width: 110, render: labelsText },
-            { title: '正确答案', dataIndex: 'correctLabels', key: 'correctLabels', width: 110, render: labelsText },
-            { title: '结果', dataIndex: 'isCorrect', key: 'isCorrect', width: 90, render: (value) => (value ? <Tag color="green">正确</Tag> : <Tag color="red">错误</Tag>) },
-            { title: '超时', dataIndex: 'isTimeout', key: 'isTimeout', width: 80, render: (value) => (value ? <Tag color="orange">是</Tag> : <Tag>否</Tag>) },
-            { title: '得分', dataIndex: 'score', key: 'score', width: 70 },
-            { title: '用时', dataIndex: 'timeMs', key: 'timeMs', width: 100, render: formatDuration },
-          ]}
+          columns={buildColumnsFromSchema(answerView)}
           dataSource={drawer.list}
           pagination={false}
           locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无答案明细" /> }}
@@ -431,7 +375,7 @@ function QuizAttemptTable({ activity, active, canViewAnswers }) {
   )
 }
 
-function QuizRankTable({ activity, active }) {
+function QuizRankTable({ activity, view, active }) {
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ list: [], total: 0, page, pageSize })
   const [loading, setLoading] = useState(false)
@@ -462,17 +406,7 @@ function QuizRankTable({ activity, active }) {
       error={error}
       tableProps={{
         rowKey: (row) => `${row.rank}-${row.userId}`,
-        columns: [
-          { title: '排名', dataIndex: 'rank', key: 'rank', width: 80 },
-          { title: '姓名', dataIndex: 'name', key: 'name', width: 120 },
-          { title: '部门', dataIndex: 'department', key: 'department', render: emptyText },
-          { title: '积分', dataIndex: 'totalScore', key: 'totalScore', width: 100 },
-          { title: '用时', dataIndex: 'totalTimeMs', key: 'totalTimeMs', width: 120, render: formatDuration },
-          { title: '完成次数', dataIndex: 'finishedAttemptCount', key: 'finishedAttemptCount', width: 110 },
-          { title: '最后完成时间', dataIndex: 'lastFinishedAt', key: 'lastFinishedAt', width: 170, render: formatDate },
-          { title: 'Participant ID', dataIndex: 'participantId', key: 'participantId', width: 130, render: emptyText },
-          { title: 'User ID', dataIndex: 'userId', key: 'userId', width: 110 },
-        ],
+        columns: buildColumnsFromSchema(view),
         dataSource: data.list || [],
         loading,
         pagination: pagination({ page: data.page, pageSize: data.pageSize, total: data.total }, page, setPage),
@@ -540,4 +474,60 @@ function formatDuration(value) {
   const ms = Number(value || 0)
   if (!ms) return '0.0s'
   return `${(ms / 1000).toFixed(1)}s`
+}
+
+function buildColumnsFromSchema(view, fallbackColumns = []) {
+  if (fallbackColumns?.length) {
+    return fallbackColumns.map((column) => ({
+      title: column.title || column.label,
+      dataIndex: column.key,
+      key: column.key,
+      width: column.width || resolveColumnWidth(column),
+      render: (value) => formatFieldValue(column, value),
+    }))
+  }
+
+  return (view?.fields || []).map((field) => ({
+    title: field.label,
+    dataIndex: field.fieldKey || field.key,
+    key: field.fieldKey || field.key,
+    width: resolveColumnWidth(field),
+    ellipsis: field.type === 'image' ? false : undefined,
+    render: (value) => formatFieldValue(field, value),
+  }))
+}
+
+function resolveColumnWidth(field) {
+  const key = String(field?.fieldKey || field?.key || '')
+  const type = String(field?.type || '')
+  if (/^(id|userId|participantId|attemptId|rank|sort|status)$/i.test(key)) return 100
+  if (/time|date|at$/i.test(key) || type === 'datetime') return 180
+  if (/phone/i.test(key)) return 140
+  if (/avatar|image|url/i.test(key) || type === 'image') return 200
+  if (/name|title|department|category|label/i.test(key)) return 140
+  return 140
+}
+
+function formatFieldValue(field, value) {
+  const key = String(field?.fieldKey || field?.key || '')
+  const type = String(field?.type || '')
+  if (value === null || value === undefined || value === '') return <Text type="secondary">-</Text>
+  if (key === 'profileCompleted') return value ? <Tag color="green">已完善</Tag> : <Tag color="orange">未完善</Tag>
+  if (key === 'status') return attemptOrStatusTag(value)
+  if (key === 'type' || key === 'questionType') return questionTypeTag(value)
+  if (key === 'isCorrect') return value ? <Tag color="green">正确</Tag> : <Tag color="red">错误</Tag>
+  if (key === 'isTimeout') return value ? <Tag color="orange">是</Tag> : <Tag>否</Tag>
+  if (type === 'boolean') return value ? <Tag color="green">是</Tag> : <Tag>否</Tag>
+  if (type === 'datetime' || /time|date|at$/i.test(key)) return formatDate(value)
+  if (key === 'totalTimeMs' || key === 'timeMs' || key === 'averageTimeMs') return formatDuration(value)
+  if (Array.isArray(value)) return value.length ? value.join(' / ') : <Text type="secondary">-</Text>
+  return emptyText(value)
+}
+
+function attemptOrStatusTag(value) {
+  if (value === 'finished') return <Tag color="green">已完成</Tag>
+  if (value === 'in_progress') return <Tag color="blue">进行中</Tag>
+  if (value === 1) return <Tag color="green">启用</Tag>
+  if (value === 0) return <Tag color="default">禁用</Tag>
+  return <Tag>{String(value || '-')}</Tag>
 }
