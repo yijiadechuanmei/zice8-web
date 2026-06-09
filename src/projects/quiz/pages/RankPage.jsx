@@ -65,16 +65,16 @@ export default function RankPage({ ranks, loading, onBack }) {
               </div>
             ) : null}
           </div>
+          <button
+            className="quiz-rank-home-button absolute cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
+            type="button"
+            onClick={onBack}
+            aria-label="返回首页"
+          >
+            <img className="block h-full w-full" src={quizAssets.common.buttonHome} alt="" aria-hidden="true" />
+          </button>
         </DesignStage>
       </section>
-      <button
-        className="quiz-rank-home-button cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
-        type="button"
-        onClick={onBack}
-        aria-label="返回首页"
-      >
-        <img className="block h-full w-full" src={quizAssets.common.buttonHome} alt="" aria-hidden="true" />
-      </button>
     </main>
   )
 }
