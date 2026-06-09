@@ -218,6 +218,41 @@
   gap: 10px;
 }
 
+.admin-data-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-data-toolbar__search {
+  display: flex;
+  flex: 1 1 320px;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-data-toolbar__actions {
+  justify-content: flex-end;
+}
+
+.admin-data-table-block .ant-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.admin-data-table-block .ant-table-thead > tr > th {
+  background: #f8fafc;
+}
+
+.admin-data-table-block .ant-table-tbody > tr > td {
+  vertical-align: middle;
+}
+
 .admin-quiz-kpis {
   display: grid;
   grid-template-columns: repeat(6, minmax(120px, 1fr));
@@ -286,6 +321,11 @@
   margin-bottom: 16px;
 }
 
+.admin-view-tabs--pill .ant-btn {
+  border-radius: 999px;
+  padding-inline: 16px;
+}
+
 .admin-column-menu {
   display: grid;
   gap: 8px;
@@ -295,6 +335,19 @@
 
 .admin-table-avatar {
   object-fit: cover;
+}
+
+.admin-data-image-cell {
+  display: flex;
+  align-items: center;
+}
+
+.admin-data-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-inline-error {
