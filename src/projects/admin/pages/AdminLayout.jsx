@@ -85,6 +85,7 @@ export default function AdminLayout({
   const currentQuizViewKeys = selectedActivity?.type === 'quiz'
     ? quizViewKeysByActivity[selectedActivity.activityKey] || null
     : null
+  const canManageActivityConfig = adminUser.role === 'super_admin'
   const canAccessQuizImport = selectedActivity?.type === 'quiz'
     ? (currentQuizViewKeys ? currentQuizViewKeys.has('quiz_import') : true)
     : false
@@ -94,6 +95,7 @@ export default function AdminLayout({
 
   const visibleTabs = tabs.filter((tab) => {
     if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs'].includes(tab.key)) return false
+    if (tab.key === 'activityConfig' && !canManageActivityConfig) return false
     if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
     if (tab.key === 'quizImport' && selectedActivity?.type === 'quiz' && !canAccessQuizImport) return false
     if (selectedActivity?.type === 'quiz' && ['overview', 'dashboard'].includes(tab.key) && !canAccessQuizOverview) return false
@@ -114,13 +116,16 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!selectedActivity) return
+    if (activeTab === 'activityConfig' && !canManageActivityConfig) {
+      onChangeTab('overview')
+    }
     if (activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport) {
       onChangeTab('data')
     }
     if (selectedActivity.type === 'quiz' && ['overview', 'dashboard'].includes(activeTab) && !canAccessQuizOverview) {
-      onChangeTab(canAccessQuizImport ? 'data' : 'activityConfig')
+      onChangeTab('data')
     }
-  }, [activeTab, canAccessQuizImport, canAccessQuizOverview, onChangeTab, selectedActivity])
+  }, [activeTab, canAccessQuizImport, canAccessQuizOverview, canManageActivityConfig, onChangeTab, selectedActivity])
 
   return (
     <Layout className="admin-shell">
@@ -218,7 +223,8 @@ export default function AdminLayout({
 
           {!selectedActivity ? <Card><Empty description="请选择左侧活动" /></Card> : null}
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
-          {selectedActivity && activeTab === 'activityConfig' ? <ActivityConfigPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'activityConfig' && canManageActivityConfig ? <ActivityConfigPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'activityConfig' && !canManageActivityConfig ? <Card><Empty description="无权修改活动配置" /></Card> : null}
           {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}

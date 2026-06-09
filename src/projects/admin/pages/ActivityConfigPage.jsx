@@ -37,7 +37,11 @@ export default function ActivityConfigPage({ activity }) {
         })
       })
       .catch((err) => {
-        if (alive) setError(err.message || '活动配置加载失败')
+        if (!alive) return
+        const text = err?.response?.data?.errorCode === 'activity_config_permission_denied'
+          ? '无权修改活动配置'
+          : (err.message || '活动配置加载失败')
+        setError(text)
       })
       .finally(() => {
         if (alive) setLoading(false)
@@ -63,7 +67,9 @@ export default function ActivityConfigPage({ activity }) {
       })
       message.success('活动背景音乐配置已保存')
     } catch (err) {
-      const text = err.message || '活动配置保存失败'
+      const text = err?.response?.data?.errorCode === 'activity_config_permission_denied'
+        ? '无权修改活动配置'
+        : (err.message || '活动配置保存失败')
       setError(text)
       message.error(text)
     } finally {
