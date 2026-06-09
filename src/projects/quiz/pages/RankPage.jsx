@@ -20,8 +20,8 @@ export default function RankPage({ ranks, loading, onBack }) {
   )
 
   return (
-    <main className="quiz-page flex min-h-screen w-full justify-center bg-[#143978] pb-7">
-      <section className="w-full max-w-[750px]">
+    <main className="quiz-page quiz-rank-page flex min-h-screen w-full justify-center bg-[#143978]">
+      <section className="quiz-rank-shell w-full max-w-[750px]">
         <DesignStage height={1624}>
           <img className="absolute left-0 top-0 h-[1624px] w-[750px] object-cover" src={quizAssets.common.bg} alt="" aria-hidden="true" />
           <img className="absolute left-[42px] top-[16px] h-[112px] w-[159px] object-contain" src={quizAssets.common.logoSnow} alt="雪花Logo" />
@@ -30,7 +30,7 @@ export default function RankPage({ ranks, loading, onBack }) {
           <img className="absolute left-[100px] top-[146px] h-[56px] w-[548px] object-contain" src={quizAssets.rank.title} alt="" aria-hidden="true" />
           <img className="absolute left-[64px] top-[240px] h-[96px] w-[618px] object-contain" src={quizAssets.rank.tableHeader} alt="" aria-hidden="true" />
 
-          <div className="absolute left-[64px] top-[290px] h-[950px] w-[618px] text-[#173f2a]">
+          <div className="quiz-rank-content absolute left-[64px] top-[290px] h-[950px] w-[618px] text-[#173f2a]">
             {loading ? <p className="text-[22px] text-white/80">排行榜加载中...</p> : null}
             {!loading && !sortedRanks.length ? <p className="rounded-lg bg-[#f7f4d8] px-[18px] py-[18px] text-center text-[22px] text-[#66724b]">暂无排行</p> : null}
             {sortedRanks.length ? (
@@ -65,17 +65,16 @@ export default function RankPage({ ranks, loading, onBack }) {
               </div>
             ) : null}
           </div>
-
-          <button
-            className="absolute left-[262px] top-[1330px] h-[110px] w-[224px] cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
-            type="button"
-            onClick={onBack}
-            aria-label="返回首页"
-          >
-            <img className="block h-full w-full" src={quizAssets.common.buttonHome} alt="" aria-hidden="true" />
-          </button>
         </DesignStage>
       </section>
+      <button
+        className="quiz-rank-home-button cursor-pointer bg-transparent p-0 outline-offset-4 focus-visible:outline-3 focus-visible:outline-white"
+        type="button"
+        onClick={onBack}
+        aria-label="返回首页"
+      >
+        <img className="block h-full w-full" src={quizAssets.common.buttonHome} alt="" aria-hidden="true" />
+      </button>
     </main>
   )
 }

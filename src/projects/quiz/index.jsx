@@ -393,7 +393,7 @@ function QuizMain() {
           <div className="text-[24px] font-bold">{blockedMessage}</div>
           <div className="mt-3 text-[14px] text-white/75">请复制链接到微信后访问</div>
         </div>
-        <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
+        {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
       </main>
     )
   }
@@ -402,7 +402,7 @@ function QuizMain() {
     return (
       <main className="quiz-loading-page" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
         <div className="px-6 text-center text-white">{error}</div>
-        <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
+        {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
       </main>
     )
   }
@@ -446,7 +446,7 @@ function QuizMain() {
       <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} activityKey={activityKey} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
-      <div className="quiz-version-badge">v{QUIZ_VERSION}</div>
+      {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
     </div>
   )
 }
