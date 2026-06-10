@@ -86,7 +86,21 @@ export function getDataRows(activityKey, viewKey, params) {
 }
 
 export function exportDataRows(activityKey, viewKey, params) {
-  const search = new URLSearchParams(params)
+  const search = new URLSearchParams()
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    if (Array.isArray(value)) {
+      if (!value.length) {
+        search.append(key, '')
+        return
+      }
+      value.forEach((item) => {
+        if (item !== undefined && item !== null && item !== '') search.append(key, String(item))
+      })
+      return
+    }
+    search.append(key, String(value))
+  })
   return adminRequest(`/admin/activities/${activityKey}/data/${viewKey}/export?${search.toString()}`)
 }
 

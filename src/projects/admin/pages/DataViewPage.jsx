@@ -82,6 +82,12 @@ function GenericDataViewPage({ activity }) {
   const activeView = useMemo(() => views.find((view) => view.viewKey === activeViewKey), [views, activeViewKey])
   const hiddenColumns = hiddenColumnsByView[activeViewKey] || {}
   const visibleColumns = useMemo(() => data.columns.filter((column) => !hiddenColumns[column.key]), [data.columns, hiddenColumns])
+  const visibleFieldKeys = useMemo(
+    () => visibleColumns
+      .map((column) => String(column.key || '').trim())
+      .filter(Boolean),
+    [visibleColumns],
+  )
   const tableColumns = useMemo(() => buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
     visibleColumns.map((column) => [
       column.key,
@@ -96,7 +102,12 @@ function GenericDataViewPage({ activity }) {
     setExporting(true)
     setError('')
     try {
-      const result = await exportDataRows(activity.activityKey, activeViewKey, { keyword, sortField, sortOrder })
+      const result = await exportDataRows(activity.activityKey, activeViewKey, {
+        keyword,
+        sortField,
+        sortOrder,
+        fields: visibleFieldKeys,
+      })
       downloadCsv(result.filename || `${activity.activityKey}-${activeViewKey}.csv`, result.csv || '')
       message.success('CSV 已导出')
     } catch (err) {
