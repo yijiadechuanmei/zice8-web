@@ -129,7 +129,7 @@ export default function PermissionPage({ activity, activities }) {
         fields: view.fields.map((field) => ({
           fieldKey: field.fieldKey,
           canView: Boolean(viewPermission.fields?.[field.fieldKey]?.canView),
-          canExport: Boolean(viewPermission.fields?.[field.fieldKey]?.canExport),
+          canExport: Boolean(viewPermission.fields?.[field.fieldKey]?.canView),
           maskType: viewPermission.fields?.[field.fieldKey]?.maskType || null,
         })),
       }
@@ -260,6 +260,7 @@ export default function PermissionPage({ activity, activities }) {
                   <Checkbox checked={Boolean(selectedViewPermission.canSearch)} onChange={(event) => updateViewPermission(selectedView.viewKey, { canSearch: event.target.checked })}>可搜索</Checkbox>
                   <Checkbox checked={Boolean(selectedViewPermission.canSort)} onChange={(event) => updateViewPermission(selectedView.viewKey, { canSort: event.target.checked })}>可排序</Checkbox>
                 </Space>
+                <Text type="secondary">开启导出后，默认导出当前可见字段；不可见字段不会被导出。</Text>
                 <Space wrap>
                   <Button size="small" onClick={() => bulkFields(selectedView, 'all')}>全选字段</Button>
                   <Button size="small" onClick={() => bulkFields(selectedView, 'invert')}>反选字段</Button>

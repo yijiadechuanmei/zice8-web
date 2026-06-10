@@ -100,7 +100,7 @@ function GenericDataViewPage({ activity }) {
       downloadCsv(result.filename || `${activity.activityKey}-${activeViewKey}.csv`, result.csv || '')
       message.success('CSV 已导出')
     } catch (err) {
-      const text = err.message || '导出失败'
+      const text = getExportErrorMessage(err)
       setError(text)
       message.error(text)
     } finally {
@@ -184,6 +184,14 @@ function GenericDataViewPage({ activity }) {
       />
     </AdminDataViewShell>
   )
+}
+
+function getExportErrorMessage(err) {
+  if (err?.errorCode === 'no_export_fields' || err?.message === '没有可导出的字段，请先配置字段权限') {
+    return '没有可导出的字段，请先配置字段权限'
+  }
+  if (err?.status === 403 || err?.response?.code === 403) return '无导出权限'
+  return err?.message || '导出失败'
 }
 
 function downloadCsv(filename, csv) {

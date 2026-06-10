@@ -31,6 +31,8 @@ export async function adminRequest(path, options = {}) {
   if (!response.ok || result.code >= 400) {
     const error = new Error(result.message || '请求失败')
     error.response = result
+    error.status = response.status || result.code
+    error.errorCode = result.data?.errorCode
     throw error
   }
   return result.data
