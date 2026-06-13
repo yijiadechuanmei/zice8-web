@@ -22,6 +22,7 @@ import {
   SettingOutlined,
   TableOutlined,
   TeamOutlined,
+  ToolOutlined,
   UserOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
@@ -30,6 +31,7 @@ import ActivityConfigPage from './ActivityConfigPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
 import OperationLogPage from './OperationLogPage'
+import PaymentTestPage from './PaymentTestPage'
 import PermissionPage from './PermissionPage'
 import QuizQuestionImportPage from './QuizQuestionImportPage'
 import { getDataSchema } from '../api'
@@ -46,6 +48,7 @@ const tabs = [
   { key: 'permissions', label: '权限配置', icon: <TeamOutlined /> },
   { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
   { key: 'logs', label: '操作日志', icon: <DatabaseOutlined /> },
+  { key: 'paymentTest', label: '支付链路测试', icon: <ToolOutlined /> },
 ]
 
 export default function AdminLayout({
@@ -94,7 +97,7 @@ export default function AdminLayout({
     : true
 
   const visibleTabs = tabs.filter((tab) => {
-    if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs'].includes(tab.key)) return false
+    if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs', 'paymentTest'].includes(tab.key)) return false
     if (tab.key === 'activityConfig' && !canManageActivityConfig) return false
     if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
     if (tab.key === 'quizImport' && selectedActivity?.type === 'quiz' && !canAccessQuizImport) return false
@@ -115,6 +118,10 @@ export default function AdminLayout({
   )
 
   useEffect(() => {
+    if (activeTab === 'paymentTest' && adminUser.role !== 'super_admin') {
+      onChangeTab('overview')
+      return
+    }
     if (!selectedActivity) return
     if (activeTab === 'activityConfig' && !canManageActivityConfig) {
       onChangeTab('overview')
@@ -125,7 +132,7 @@ export default function AdminLayout({
     if (selectedActivity.type === 'quiz' && ['overview', 'dashboard'].includes(activeTab) && !canAccessQuizOverview) {
       onChangeTab('data')
     }
-  }, [activeTab, canAccessQuizImport, canAccessQuizOverview, canManageActivityConfig, onChangeTab, selectedActivity])
+  }, [activeTab, adminUser.role, canAccessQuizImport, canAccessQuizOverview, canManageActivityConfig, onChangeTab, selectedActivity])
 
   return (
     <Layout className="admin-shell">
@@ -199,7 +206,7 @@ export default function AdminLayout({
         </Sider>
 
         <Content className="admin-content">
-          {selectedActivity ? (
+          {selectedActivity && activeTab !== 'paymentTest' ? (
             <Card className="admin-activity-card" size="small">
               <div className="admin-activity-summary">
                 <div>
@@ -221,7 +228,7 @@ export default function AdminLayout({
             items={visibleTabs.map((tab) => ({ key: tab.key, label: <Space size={6}>{tab.icon}{tab.label}</Space> }))}
           />
 
-          {!selectedActivity ? <Card><Empty description="请选择左侧活动" /></Card> : null}
+          {!selectedActivity && activeTab !== 'paymentTest' ? <Card><Empty description="请选择左侧活动" /></Card> : null}
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
           {selectedActivity && activeTab === 'activityConfig' && canManageActivityConfig ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && !canManageActivityConfig ? <Card><Empty description="无权修改活动配置" /></Card> : null}
@@ -232,6 +239,7 @@ export default function AdminLayout({
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
           {selectedActivity && activeTab === 'logs' ? <OperationLogPage activity={selectedActivity} /> : null}
+          {activeTab === 'paymentTest' && adminUser.role === 'super_admin' ? <PaymentTestPage /> : null}
         </Content>
       </Layout>
     </Layout>

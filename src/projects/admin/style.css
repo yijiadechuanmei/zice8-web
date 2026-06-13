@@ -422,6 +422,26 @@
   background: #ffffff;
 }
 
+.admin-payment-test-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.admin-field-block {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.admin-payment-actions {
+  margin-top: 16px;
+}
+
+.admin-payment-order-status .ant-descriptions-item-label {
+  width: 180px;
+}
+
 @media (max-width: 1100px) {
   .admin-shell {
     display: block;
@@ -443,6 +463,10 @@
 
   .admin-activity-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-payment-test-grid {
+    grid-template-columns: 1fr;
   }
 }
 

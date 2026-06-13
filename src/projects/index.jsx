@@ -13,4 +13,8 @@ export const projectRoutes = [
     path: '/admin',
     Component: lazy(() => import('./admin/index.jsx')),
   },
+  {
+    path: '/admin/tools/payment-test',
+    Component: lazy(() => import('./admin/index.jsx')),
+  },
 ]

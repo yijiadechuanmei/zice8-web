@@ -6,6 +6,19 @@ import LoginPage from './pages/LoginPage'
 import AdminLayout from './pages/AdminLayout'
 import './style.css'
 
+const ADMIN_TOOL_PAYMENT_TEST_PATH = '/admin/tools/payment-test'
+
+function resolveAdminTabFromPath(pathname) {
+  return pathname === ADMIN_TOOL_PAYMENT_TEST_PATH ? 'paymentTest' : 'overview'
+}
+
+function syncAdminPath(tabKey) {
+  const targetPath = tabKey === 'paymentTest' ? ADMIN_TOOL_PAYMENT_TEST_PATH : '/admin'
+  if (window.location.pathname !== targetPath) {
+    window.history.pushState({}, document.title, targetPath)
+  }
+}
+
 const adminTheme = {
   token: {
     colorPrimary: '#2563eb',
@@ -28,7 +41,7 @@ export default function AdminProject() {
   const [adminUser, setAdminUser] = useState(null)
   const [activities, setActivities] = useState([])
   const [selectedActivityKey, setSelectedActivityKey] = useState('')
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState(() => resolveAdminTabFromPath(window.location.pathname))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -54,6 +67,14 @@ export default function AdminProject() {
 
   useEffect(() => {
     loadSession()
+  }, [])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTab(resolveAdminTabFromPath(window.location.pathname))
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   const selectedActivity = useMemo(
@@ -83,8 +104,12 @@ export default function AdminProject() {
           onSelectActivity={(activityKey) => {
             setSelectedActivityKey(activityKey)
             setActiveTab('overview')
+            syncAdminPath('overview')
           }}
-          onChangeTab={setActiveTab}
+          onChangeTab={(tabKey) => {
+            setActiveTab(tabKey)
+            syncAdminPath(tabKey)
+          }}
           onLogout={handleLogout}
         />
       )}

@@ -194,3 +194,26 @@ export function getQuizAdminRank(activityKey, params = {}) {
   const search = new URLSearchParams(params)
   return adminRequest(`/quiz/admin/activities/${activityKey}/rank?${search.toString()}`)
 }
+
+export function createPaymentDemoJsapiOrder(payload) {
+  return adminRequest('/pay/demo/jsapi-order', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function getPaymentDemoOrder(orderNo) {
+  return adminRequest(`/pay/demo/orders/${encodeURIComponent(orderNo)}`)
+}
+
+export function syncPaymentDemoOrder(orderNo) {
+  return adminRequest(`/pay/demo/orders/${encodeURIComponent(orderNo)}/sync`, {
+    method: 'POST',
+  })
+}
+
+export function closePaymentDemoOrder(orderNo) {
+  return adminRequest(`/pay/demo/orders/${encodeURIComponent(orderNo)}/close`, {
+    method: 'POST',
+  })
+}
