@@ -8,6 +8,24 @@ function normalizePath(pathname) {
   return pathname
 }
 
+function matchRoute(pathname, routePath) {
+  const pathnameParts = normalizePath(pathname).split('/').filter(Boolean)
+  const routeParts = routePath.split('/').filter(Boolean)
+  if (pathnameParts.length !== routeParts.length) return null
+
+  const params = {}
+  for (let index = 0; index < routeParts.length; index += 1) {
+    const routePart = routeParts[index]
+    const pathnamePart = pathnameParts[index]
+    if (routePart.startsWith(':')) {
+      params[routePart.slice(1)] = decodeURIComponent(pathnamePart || '')
+      continue
+    }
+    if (routePart !== pathnamePart) return null
+  }
+  return params
+}
+
 function Loading() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-slate-500">
@@ -29,13 +47,15 @@ function NotFound() {
 
 function App() {
   const pathname = normalizePath(window.location.pathname)
-  const matchedProject = projectRoutes.find((project) => project.path === pathname)
+  const matchedProject = projectRoutes
+    .map((project) => ({ project, params: matchRoute(pathname, project.path) }))
+    .find((item) => item.params)
 
   if (!matchedProject) return <NotFound />
 
-  const ProjectComponent = matchedProject.Component
-  const fallback = matchedProject.path === '/quiz' ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
-  return <Suspense fallback={fallback}><ProjectComponent /></Suspense>
+  const ProjectComponent = matchedProject.project.Component
+  const fallback = matchedProject.project.path === '/quiz' ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
+  return <Suspense fallback={fallback}><ProjectComponent routeParams={matchedProject.params} /></Suspense>
 }
 
 export default App

@@ -2,6 +2,10 @@ import { lazy } from 'react'
 
 export const projectRoutes = [
   {
+    path: '/appointment/:activityKey',
+    Component: lazy(() => import('./appointment/index.jsx')),
+  },
+  {
     path: '/video-rank',
     Component: lazy(() => import('./video-rank/index.jsx')),
   },
