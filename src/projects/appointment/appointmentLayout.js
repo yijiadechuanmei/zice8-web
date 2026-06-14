@@ -93,15 +93,6 @@ export const APPOINTMENT_LAYOUT = {
         className: 'appointment-intro-time',
         lines: ['2026年6月22日--30日', '共9天', '每天9:30-17:30'],
       },
-      {
-        key: 'qrcode-tip',
-        left: 252,
-        top: 1148,
-        width: 246,
-        height: 90,
-        className: 'appointment-intro-qrcode-tip',
-        lines: ['扫码报名', '（名额有限，报满即止）'],
-      },
     ],
   },
   rule: {
@@ -125,23 +116,13 @@ export const APPOINTMENT_LAYOUT = {
   },
   verify: {
     height: APPOINTMENT_STAGE_HEIGHT,
-    title: {
-      text: '业主身份审核',
-      left: 0,
-      top: 166,
-      width: 750,
+    titleImage: {
+      filename: '96dc1a51c52ae3f09048f24a2bd9ea68_2822_428_65.png',
+      left: 158,
+      top: 225,
+      width: 428,
+      height: 64,
     },
-    labels: [
-      { text: '楼幢号', left: 94, top: 308 },
-      { text: '房号', left: 94, top: 485 },
-      { text: '业主姓名', left: 94, top: 662 },
-      { text: '身份证后四位', left: 94, top: 839 },
-    ],
-    hints: [
-      { text: '（示例“1”）', left: 542, top: 318 },
-      { text: '（示例“101”）', left: 510, top: 495 },
-      { text: '（合同第1人姓名）', left: 468, top: 672 },
-    ],
     fieldImages: [
       {
         filename: 'e87e4ef14dc6a45c2d87adfbb1f9369a_2031_563_141.png',
@@ -181,17 +162,13 @@ export const APPOINTMENT_LAYOUT = {
   },
   booking: {
     height: APPOINTMENT_STAGE_HEIGHT,
-    title: {
-      text: '看房时间段',
-      left: 0,
-      top: 166,
-      width: 750,
+    titleImage: {
+      filename: 'c8eb40ca5aa36215d5a154f07781c3e2_2408_357_64.png',
+      left: 194,
+      top: 220,
+      width: 357,
+      height: 64,
     },
-    labels: [
-      { text: '预约日期', left: 94, top: 347 },
-      { text: '预约时间', left: 94, top: 525 },
-      { text: '联系电话', left: 94, top: 704 },
-    ],
     fieldImages: [
       {
         filename: '9dbfcff82a6689974092bee8d73ef189_1527_563_140.png',
@@ -241,37 +218,28 @@ export const APPOINTMENT_LAYOUT = {
     ],
     textBlocks: [
       {
-        key: 'name-house',
-        left: 65,
-        top: 563,
-        width: 620,
-        height: 84,
+        key: 'house',
+        left: 75,
+        top: 570,
+        width: 600,
+        height: 80,
         className: 'appointment-success-primary',
       },
       {
-        key: 'desc',
-        left: 65,
-        top: 660,
-        width: 620,
-        height: 84,
-        className: 'appointment-success-secondary',
-        lines: ['您的预约时间为'],
-      },
-      {
-        key: 'date-slot',
-        left: 65,
-        top: 758,
-        width: 620,
-        height: 84,
+        key: 'date',
+        left: 110,
+        top: 690,
+        width: 530,
+        height: 120,
         className: 'appointment-success-secondary',
       },
       {
-        key: 'phone',
-        left: 65,
-        top: 852,
-        width: 620,
-        height: 54,
-        className: 'appointment-success-tertiary',
+        key: 'slot',
+        left: 110,
+        top: 840,
+        width: 530,
+        height: 120,
+        className: 'appointment-success-secondary',
       },
     ],
   },
