@@ -1,9 +1,17 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { setToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointment } from './api'
+import {
+  APPOINTMENT_FALLBACK_ASSETS_BASE_URL,
+  APPOINTMENT_LAYOUT,
+  APPOINTMENT_STAGE_HEIGHT,
+  APPOINTMENT_STAGE_WIDTH,
+  APPOINTMENT_SUCCESS_STAGE_HEIGHT,
+} from './appointmentLayout'
+import './appointment.css'
 
 const STEPS = {
   INTRO: 'intro',
@@ -11,6 +19,11 @@ const STEPS = {
   VERIFY: 'verify',
   BOOKING: 'booking',
   SUCCESS: 'success',
+}
+
+const PICKERS = {
+  DATE: 'appointmentDate',
+  SLOT: 'appointmentSlot',
 }
 
 export default function AppointmentApp({ routeParams }) {
@@ -46,7 +59,14 @@ function AppointmentMain({ routeParams }) {
     appointmentSlot: '',
     phone: '',
   })
+  const [activePicker, setActivePicker] = useState('')
+  const [pickerDraftValue, setPickerDraftValue] = useState('')
+  const toastTimerRef = useRef(0)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+
+  useEffect(() => {
+    return () => window.clearTimeout(toastTimerRef.current)
+  }, [])
 
   useEffect(() => {
     if (!activityKey) {
@@ -73,11 +93,7 @@ function AppointmentMain({ routeParams }) {
         setBootstrap(data)
         setConfig(data?.config || null)
         document.title = data?.activity?.title || '预约到访'
-        if (data?.hasBooking) {
-          setStep(STEPS.SUCCESS)
-        } else {
-          setStep(STEPS.INTRO)
-        }
+        setStep(data?.hasBooking ? STEPS.SUCCESS : STEPS.INTRO)
         setError('')
       })
       .catch((err) => {
@@ -93,11 +109,11 @@ function AppointmentMain({ routeParams }) {
   }, [activityKey, authReady, publicConfig, reauth])
 
   const bookingDateOptions = useMemo(() => {
-    const configDates = config?.dateRange?.dates || []
+    const configDates = config?.dateRange?.dates || config?.allowedDates || []
     const allowedDates = verifyResult?.allowedDates || []
     if (!allowedDates.length) return configDates
     return configDates.filter((date) => allowedDates.includes(date))
-  }, [config?.dateRange?.dates, verifyResult?.allowedDates])
+  }, [config?.allowedDates, config?.dateRange?.dates, verifyResult?.allowedDates])
 
   const bookingSlotOptions = useMemo(() => {
     const configSlots = config?.timeSlots || []
@@ -110,7 +126,9 @@ function AppointmentMain({ routeParams }) {
     if (!bookingDateOptions.length) return
     setBookingForm((current) => ({
       ...current,
-      appointmentDate: bookingDateOptions.includes(current.appointmentDate) ? current.appointmentDate : bookingDateOptions[0],
+      appointmentDate: bookingDateOptions.includes(current.appointmentDate)
+        ? current.appointmentDate
+        : bookingDateOptions[0],
     }))
   }, [bookingDateOptions])
 
@@ -118,14 +136,26 @@ function AppointmentMain({ routeParams }) {
     if (!bookingSlotOptions.length) return
     setBookingForm((current) => ({
       ...current,
-      appointmentSlot: bookingSlotOptions.includes(current.appointmentSlot) ? current.appointmentSlot : bookingSlotOptions[0],
+      appointmentSlot: bookingSlotOptions.includes(current.appointmentSlot)
+        ? current.appointmentSlot
+        : bookingSlotOptions[0],
     }))
   }, [bookingSlotOptions])
 
+  const assetsBaseUrl = config?.assetsBaseUrl || APPOINTMENT_FALLBACK_ASSETS_BASE_URL
+  const backgroundUrl = getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.background)
+  const stageHeight = step === STEPS.SUCCESS ? APPOINTMENT_SUCCESS_STAGE_HEIGHT : APPOINTMENT_STAGE_HEIGHT
+  const stageScale = useStageScale()
+  const booking = bootstrap?.booking
+  const displayedNameHouse = [booking?.name || verifyForm.name, booking?.houseKey || verifyHouseKey(verifyForm)].filter(Boolean).join('   ')
+  const displayedDateSlot = [booking?.appointmentDate || bookingForm.appointmentDate, booking?.appointmentSlot || bookingForm.appointmentSlot].filter(Boolean).join('   ')
+  const displayedPhone = maskPhone(booking?.phone || bookingForm.phone)
+
   function showToast(message) {
+    window.clearTimeout(toastTimerRef.current)
     setToast(message || '')
     if (!message) return
-    window.setTimeout(() => setToast(''), 1800)
+    toastTimerRef.current = window.setTimeout(() => setToast(''), 1800)
   }
 
   async function handleVerifySubmit(event) {
@@ -167,6 +197,7 @@ function AppointmentMain({ routeParams }) {
         booking: result.booking,
       }))
       setStep(STEPS.SUCCESS)
+      setActivePicker('')
     } catch (err) {
       if (isUnauthorizedError(err)) {
         reauth('appointment-booking')
@@ -178,259 +209,493 @@ function AppointmentMain({ routeParams }) {
     }
   }
 
-  if (loading) return <CenteredMessage message="活动加载中..." />
-  if (blockedMessage) return <CenteredMessage message={blockedMessage} />
-  if (error) return <CenteredMessage message={error} />
-  if (!config) return <CenteredMessage message="活动配置缺失" />
+  function openPicker(fieldKey) {
+    const options = fieldKey === PICKERS.DATE ? bookingDateOptions : bookingSlotOptions
+    if (!options.length) return
+    setPickerDraftValue(bookingForm[fieldKey] || options[0])
+    setActivePicker(fieldKey)
+  }
 
-  const booking = bootstrap?.booking
-  const headingImage = getAssetUrl(config.assetsBaseUrl, config.assets.topBanner)
-  const backgroundImage = getAssetUrl(config.assetsBaseUrl, config.assets.background)
-  const rulePanelImage = getAssetUrl(config.assetsBaseUrl, config.assets.rulePanel)
-  const successBannerImage = getAssetUrl(config.assetsBaseUrl, config.assets.successBanner)
+  function confirmPicker() {
+    if (!activePicker) return
+    setBookingForm((current) => ({
+      ...current,
+      [activePicker]: pickerDraftValue,
+    }))
+    setActivePicker('')
+  }
+
+  if (loading) return <StateMessage message="活动加载中..." />
+  if (blockedMessage) return <StateMessage message={blockedMessage} />
+  if (error) return <StateMessage message={error} />
+  if (!config) return <StateMessage message="活动配置缺失" />
 
   return (
-    <main
-      className="min-h-screen bg-[linear-gradient(180deg,#f6f0e2_0%,#fff7ef_45%,#fff_100%)] px-3 py-4 text-slate-900"
-      style={{
-        backgroundImage: backgroundImage ? `linear-gradient(180deg,rgba(246,240,226,0.92),rgba(255,255,255,0.96)), url(${backgroundImage})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'top center',
-      }}
-    >
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-[750px] flex-col rounded-[32px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_60px_rgba(139,69,19,0.12)] backdrop-blur">
-        {headingImage ? (
-          <img
-            className="mx-auto mb-5 w-full max-w-[640px] rounded-[24px] object-cover"
-            src={headingImage}
-            alt={bootstrap?.activity?.title || '预约到访'}
-          />
-        ) : (
-          <div className="mb-5 text-center">
-            <p className="text-xs uppercase tracking-[0.35em] text-amber-700">Appointment Visit</p>
-            <h1 className="mt-2 font-serif text-3xl font-semibold text-slate-900">{bootstrap?.activity?.title || '预约到访'}</h1>
-          </div>
-        )}
+    <div className="appointment-page">
+      <div className="appointment-page__center">
+        <div
+          className="appointment-stage-shell"
+          style={{
+            width: APPOINTMENT_STAGE_WIDTH * stageScale,
+            height: stageHeight * stageScale,
+          }}
+        >
+          <div
+            className={`appointment-stage ${step === STEPS.INTRO ? 'appointment-stage--intro' : ''}`}
+            style={{
+              width: APPOINTMENT_STAGE_WIDTH,
+              height: stageHeight,
+              transform: `scale(${stageScale})`,
+              backgroundImage: `url(${backgroundUrl})`,
+            }}
+            onClick={step === STEPS.INTRO ? () => setStep(STEPS.RULE) : undefined}
+            role={step === STEPS.INTRO ? 'button' : undefined}
+            tabIndex={step === STEPS.INTRO ? 0 : undefined}
+            onKeyDown={step === STEPS.INTRO ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') setStep(STEPS.RULE)
+            } : undefined}
+          >
+            <LayerImage
+              className="appointment-stage__banner"
+              src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.topBanner.filename)}
+              box={APPOINTMENT_LAYOUT.common.topBanner}
+              alt=""
+            />
 
-        <StepIndicator step={step} />
-
-        {step === STEPS.INTRO && (
-          <StepCard
-            eyebrow="Step 1"
-            title={bootstrap?.activity?.title || '预约到访活动'}
-            description="先完成身份核验，再选择允许预约的日期和时间段。"
-            imageUrl={headingImage}
-            primaryText="查看规则"
-            onPrimaryClick={() => setStep(STEPS.RULE)}
-          />
-        )}
-
-        {step === STEPS.RULE && (
-          <StepCard
-            eyebrow="Step 2"
-            title="预约规则"
-            description="每个 openid 在同一活动下仅可预约一次；同一房号默认也只可预约一次。预约日期必须命中白名单允许日期。"
-            imageUrl={rulePanelImage}
-            primaryText="开始校验身份"
-            secondaryText="返回首页"
-            onPrimaryClick={() => setStep(STEPS.VERIFY)}
-            onSecondaryClick={() => setStep(STEPS.INTRO)}
-          />
-        )}
-
-        {step === STEPS.VERIFY && (
-          <section className="flex-1 rounded-[28px] bg-white/90 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-            <SectionTitle eyebrow="Step 3" title="身份校验" description="请输入楼号、房号、姓名和身份证后 4 位，后端会按 house_key = 楼号-房号 做白名单校验。" />
-            <form className="mt-5 grid gap-4" onSubmit={handleVerifySubmit}>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="楼号">
-                  <input className={inputClassName} value={verifyForm.building} onChange={(event) => setVerifyForm({ ...verifyForm, building: event.target.value })} placeholder="例如 1" />
-                </Field>
-                <Field label="房号">
-                  <input className={inputClassName} value={verifyForm.room} onChange={(event) => setVerifyForm({ ...verifyForm, room: event.target.value })} placeholder="例如 101" />
-                </Field>
-              </div>
-              <Field label="姓名">
-                <input className={inputClassName} value={verifyForm.name} onChange={(event) => setVerifyForm({ ...verifyForm, name: event.target.value })} placeholder="请输入姓名" />
-              </Field>
-              <Field label="身份证后 4 位">
-                <input className={inputClassName} value={verifyForm.idTail} maxLength={4} onChange={(event) => setVerifyForm({ ...verifyForm, idTail: event.target.value.replace(/\D/g, '') })} placeholder="4 位数字" />
-              </Field>
-              <ActionRow
-                primaryText={submitting ? '校验中...' : '校验并进入预约'}
-                secondaryText="返回规则"
-                onSecondaryClick={() => setStep(STEPS.RULE)}
-                disabled={submitting}
-              />
-            </form>
-          </section>
-        )}
-
-        {step === STEPS.BOOKING && (
-          <section className="flex-1 rounded-[28px] bg-white/90 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-            <SectionTitle eyebrow="Step 4" title="选择预约时间" description={`当前房号 ${verifyResult?.houseKey || ''} 已通过白名单校验。`} />
-            <form className="mt-5 grid gap-4" onSubmit={handleBookingSubmit}>
-              <Field label="预约日期">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {bookingDateOptions.map((date) => (
-                    <button
-                      key={date}
-                      type="button"
-                      className={bookingForm.appointmentDate === date ? selectedChipClassName : chipClassName}
-                      onClick={() => setBookingForm({ ...bookingForm, appointmentDate: date })}
-                    >
-                      {date}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-              <Field label="预约时段">
-                <div className="grid grid-cols-2 gap-2">
-                  {bookingSlotOptions.map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      className={bookingForm.appointmentSlot === slot ? selectedChipClassName : chipClassName}
-                      onClick={() => setBookingForm({ ...bookingForm, appointmentSlot: slot })}
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-              <Field label="手机号">
-                <input
-                  className={inputClassName}
-                  value={bookingForm.phone}
-                  maxLength={11}
-                  onChange={(event) => setBookingForm({ ...bookingForm, phone: event.target.value.replace(/\D/g, '') })}
-                  placeholder="请输入 11 位手机号"
-                />
-              </Field>
-              <ActionRow
-                primaryText={submitting ? '提交中...' : '确认预约'}
-                secondaryText="返回修改"
-                onSecondaryClick={() => setStep(STEPS.VERIFY)}
-                disabled={submitting || !bookingDateOptions.length || !bookingSlotOptions.length}
-              />
-            </form>
-          </section>
-        )}
-
-        {step === STEPS.SUCCESS && (
-          <section className="flex-1 rounded-[28px] bg-white/92 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-            <SectionTitle eyebrow="Step 5" title="预约成功" description="再次进入活动时，如果后端根据 openid 查到预约记录，会直接落到这里。" />
-            {successBannerImage ? (
-              <img className="mt-4 w-full rounded-[24px] object-cover" src={successBannerImage} alt="预约成功" />
+            {step === STEPS.INTRO ? (
+              <IntroStage assetsBaseUrl={assetsBaseUrl} />
             ) : null}
-            <dl className="mt-5 grid gap-3 rounded-[22px] bg-amber-50 p-4 text-sm text-slate-700">
-              <InfoRow label="房号" value={booking?.houseKey || verifyResult?.houseKey || '-'} />
-              <InfoRow label="姓名" value={booking?.name || verifyForm.name || '-'} />
-              <InfoRow label="预约日期" value={booking?.appointmentDate || bookingForm.appointmentDate || '-'} />
-              <InfoRow label="预约时段" value={booking?.appointmentSlot || bookingForm.appointmentSlot || '-'} />
-              <InfoRow label="手机号" value={booking?.phone || bookingForm.phone || '-'} />
-            </dl>
-            <div className="mt-5">
-              <button className={primaryButtonClassName} type="button" onClick={() => window.location.reload()}>
-                重新加载活动
-              </button>
-            </div>
-          </section>
-        )}
+
+            {step === STEPS.RULE ? (
+              <RuleStage assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
+            ) : null}
+
+            {step === STEPS.VERIFY ? (
+              <VerifyStage
+                assetsBaseUrl={assetsBaseUrl}
+                verifyForm={verifyForm}
+                setVerifyForm={setVerifyForm}
+                submitting={submitting}
+                onSubmit={handleVerifySubmit}
+                onPrev={() => setStep(STEPS.RULE)}
+              />
+            ) : null}
+
+            {step === STEPS.BOOKING ? (
+              <BookingStage
+                assetsBaseUrl={assetsBaseUrl}
+                bookingForm={bookingForm}
+                setBookingForm={setBookingForm}
+                bookingDateOptions={bookingDateOptions}
+                bookingSlotOptions={bookingSlotOptions}
+                submitting={submitting}
+                onSubmit={handleBookingSubmit}
+                onPrev={() => setStep(STEPS.VERIFY)}
+                onOpenDatePicker={() => openPicker(PICKERS.DATE)}
+                onOpenSlotPicker={() => openPicker(PICKERS.SLOT)}
+              />
+            ) : null}
+
+            {step === STEPS.SUCCESS ? (
+              <SuccessStage
+                assetsBaseUrl={assetsBaseUrl}
+                nameHouse={displayedNameHouse || '预约信息'}
+                dateSlot={displayedDateSlot || '请以现场安排为准'}
+                phoneText={displayedPhone ? `联系电话：${displayedPhone}` : ''}
+                onConfirm={() => window.location.reload()}
+              />
+            ) : null}
+          </div>
+        </div>
       </div>
 
-      {toast ? (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg">
-          {toast}
+      {toast ? <div className="appointment-toast">{toast}</div> : null}
+
+      {activePicker ? (
+        <PickerSheet
+          title={activePicker === PICKERS.DATE ? '预约日期' : '预约时间'}
+          options={activePicker === PICKERS.DATE ? bookingDateOptions : bookingSlotOptions}
+          value={pickerDraftValue}
+          onSelect={setPickerDraftValue}
+          onCancel={() => setActivePicker('')}
+          onConfirm={confirmPicker}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function IntroStage({ assetsBaseUrl }) {
+  return (
+    <>
+      {APPOINTMENT_LAYOUT.intro.images.map((image) => (
+        <LayerImage
+          key={image.filename}
+          src={getAssetUrl(assetsBaseUrl, image.filename)}
+          box={image}
+          alt=""
+        />
+      ))}
+      {APPOINTMENT_LAYOUT.intro.texts.map((text) => (
+        <div
+          key={text.key}
+          className={text.className}
+          style={toAbsoluteStyle(text)}
+        >
+          {text.lines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </div>
+      ))}
+      <div className="appointment-qrcode-box" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.intro.qrcodeBox)}>
+        <span>二维码占位</span>
+      </div>
+    </>
+  )
+}
+
+function RuleStage({ assetsBaseUrl, onNext }) {
+  return (
+    <>
+      {APPOINTMENT_LAYOUT.rule.images.map((image) => {
+        if (image.filename === '4d08ba00e32fac92c7dd171992244add_1754_221_58.png') {
+          return (
+            <ImageButton
+              key={image.filename}
+              src={getAssetUrl(assetsBaseUrl, image.filename)}
+              box={image}
+              alt="下一步"
+              onClick={onNext}
+            />
+          )
+        }
+        return (
+          <LayerImage
+            key={image.filename}
+            src={getAssetUrl(assetsBaseUrl, image.filename)}
+            box={image}
+            alt=""
+          />
+        )
+      })}
+    </>
+  )
+}
+
+function VerifyStage({
+  assetsBaseUrl,
+  verifyForm,
+  setVerifyForm,
+  submitting,
+  onSubmit,
+  onPrev,
+}) {
+  const layout = APPOINTMENT_LAYOUT.verify
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="appointment-stage-title" style={toAbsoluteStyle(layout.title)}>
+        {layout.title.text}
+      </div>
+
+      {layout.labels.map((item) => (
+        <div key={item.text} className="appointment-stage-label" style={toAbsoluteStyle(item)}>
+          {item.text}
+        </div>
+      ))}
+
+      {layout.hints.map((item) => (
+        <div key={item.text} className="appointment-stage-hint" style={toAbsoluteStyle(item)}>
+          {item.text}
+        </div>
+      ))}
+
+      {layout.fieldImages.map((image) => (
+        <LayerImage
+          key={image.filename}
+          src={getAssetUrl(assetsBaseUrl, image.filename)}
+          box={image}
+          alt=""
+        />
+      ))}
+
+      <input
+        className="appointment-stage-input"
+        style={toAbsoluteStyle(layout.inputs.building)}
+        value={verifyForm.building}
+        onChange={(event) => setVerifyForm((current) => ({ ...current, building: event.target.value.replace(/[^\d-]/g, '') }))}
+        maxLength={layout.inputs.building.maxLength}
+        inputMode={layout.inputs.building.inputMode}
+      />
+      <input
+        className="appointment-stage-input"
+        style={toAbsoluteStyle(layout.inputs.room)}
+        value={verifyForm.room}
+        onChange={(event) => setVerifyForm((current) => ({ ...current, room: event.target.value.replace(/[^\d-]/g, '') }))}
+        maxLength={layout.inputs.room.maxLength}
+        inputMode={layout.inputs.room.inputMode}
+      />
+      <input
+        className="appointment-stage-input"
+        style={toAbsoluteStyle(layout.inputs.name)}
+        value={verifyForm.name}
+        onChange={(event) => setVerifyForm((current) => ({ ...current, name: event.target.value.trimStart() }))}
+        maxLength={layout.inputs.name.maxLength}
+      />
+      <input
+        className="appointment-stage-input"
+        style={toAbsoluteStyle(layout.inputs.idTail)}
+        value={verifyForm.idTail}
+        onChange={(event) => setVerifyForm((current) => ({ ...current, idTail: event.target.value.replace(/\D/g, '') }))}
+        maxLength={layout.inputs.idTail.maxLength}
+        inputMode={layout.inputs.idTail.inputMode}
+      />
+
+      <ImageButton
+        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.prevButton.filename)}
+        box={APPOINTMENT_LAYOUT.common.prevButton}
+        alt="上一步"
+        onClick={onPrev}
+      />
+      <ImageSubmitButton
+        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.nextButton.filename)}
+        box={APPOINTMENT_LAYOUT.common.nextButton}
+        alt={submitting ? '校验中' : '下一步'}
+        disabled={submitting}
+      />
+    </form>
+  )
+}
+
+function BookingStage({
+  assetsBaseUrl,
+  bookingForm,
+  setBookingForm,
+  bookingDateOptions,
+  bookingSlotOptions,
+  submitting,
+  onSubmit,
+  onPrev,
+  onOpenDatePicker,
+  onOpenSlotPicker,
+}) {
+  const layout = APPOINTMENT_LAYOUT.booking
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="appointment-stage-title" style={toAbsoluteStyle(layout.title)}>
+        {layout.title.text}
+      </div>
+
+      {layout.labels.map((item) => (
+        <div key={item.text} className="appointment-stage-label" style={toAbsoluteStyle(item)}>
+          {item.text}
+        </div>
+      ))}
+
+      {layout.fieldImages.map((image) => (
+        <LayerImage
+          key={image.filename}
+          src={getAssetUrl(assetsBaseUrl, image.filename)}
+          box={image}
+          alt=""
+        />
+      ))}
+
+      <button
+        type="button"
+        className={`appointment-picker-trigger ${bookingForm.appointmentDate ? '' : 'is-placeholder'} ${bookingDateOptions.length ? '' : 'is-disabled'}`}
+        style={toAbsoluteStyle(layout.controls.appointmentDate)}
+        onClick={onOpenDatePicker}
+        disabled={!bookingDateOptions.length}
+      >
+        {bookingForm.appointmentDate || '请选择日期'}
+      </button>
+
+      <button
+        type="button"
+        className={`appointment-picker-trigger ${bookingForm.appointmentSlot ? '' : 'is-placeholder'} ${bookingSlotOptions.length ? '' : 'is-disabled'}`}
+        style={toAbsoluteStyle(layout.controls.appointmentSlot)}
+        onClick={onOpenSlotPicker}
+        disabled={!bookingSlotOptions.length}
+      >
+        {bookingForm.appointmentSlot || '请选择时间段'}
+      </button>
+
+      <input
+        className="appointment-stage-input"
+        style={toAbsoluteStyle(layout.controls.phone)}
+        value={bookingForm.phone}
+        onChange={(event) => setBookingForm((current) => ({ ...current, phone: event.target.value.replace(/\D/g, '') }))}
+        maxLength={layout.controls.phone.maxLength}
+        inputMode={layout.controls.phone.inputMode}
+      />
+
+      <ImageButton
+        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.prevButton.filename)}
+        box={APPOINTMENT_LAYOUT.common.prevButton}
+        alt="上一步"
+        onClick={onPrev}
+      />
+      <ImageSubmitButton
+        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.nextButton.filename)}
+        box={APPOINTMENT_LAYOUT.common.nextButton}
+        alt={submitting ? '提交中' : '下一步'}
+        disabled={submitting || !bookingDateOptions.length || !bookingSlotOptions.length}
+      />
+    </form>
+  )
+}
+
+function SuccessStage({ assetsBaseUrl, nameHouse, dateSlot, phoneText, onConfirm }) {
+  return (
+    <>
+      {APPOINTMENT_LAYOUT.success.images.map((image) => {
+        if (image.filename === 'ca5e06af6fe546199c1ce1eac1a4e4b0_6478.webp') {
+          return (
+            <ImageButton
+              key={image.filename}
+              src={getAssetUrl(assetsBaseUrl, image.filename)}
+              box={image}
+              alt="确认"
+              onClick={onConfirm}
+            />
+          )
+        }
+        return (
+          <LayerImage
+            key={image.filename}
+            src={getAssetUrl(assetsBaseUrl, image.filename)}
+            box={image}
+            alt=""
+          />
+        )
+      })}
+
+      <div className="appointment-success-primary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[0])}>
+        {nameHouse || '预约成功'}
+      </div>
+      <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[1])}>
+        {APPOINTMENT_LAYOUT.success.textBlocks[1].lines[0]}
+      </div>
+      <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[2])}>
+        {dateSlot || '请以现场安排为准'}
+      </div>
+      {phoneText ? (
+        <div className="appointment-success-tertiary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[3])}>
+          {phoneText}
         </div>
       ) : null}
-    </main>
+    </>
   )
 }
 
-function CenteredMessage({ message }) {
+function LayerImage({ src, box, alt, className = '' }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-slate-600">
-      {message}
-    </div>
+    <img
+      className={`appointment-layer-image ${className}`.trim()}
+      src={src}
+      alt={alt}
+      style={toAbsoluteStyle(box)}
+    />
   )
 }
 
-function StepIndicator({ step }) {
-  const labels = [
-    ['intro', '首页'],
-    ['rule', '规则'],
-    ['verify', '校验'],
-    ['booking', '预约'],
-    ['success', '成功'],
-  ]
-
+function ImageButton({ src, box, alt, onClick }) {
   return (
-    <div className="mb-5 flex flex-wrap gap-2">
-      {labels.map(([key, label]) => (
-        <span
-          key={key}
-          className={step === key ? 'rounded-full bg-amber-700 px-3 py-1 text-xs font-medium text-white' : 'rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700'}
-        >
-          {label}
-        </span>
-      ))}
-    </div>
+    <button
+      type="button"
+      className="appointment-stage-button"
+      style={toAbsoluteStyle(box)}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick?.()
+      }}
+    >
+      <img src={src} alt={alt} />
+    </button>
   )
 }
 
-function StepCard({ eyebrow, title, description, imageUrl, primaryText, secondaryText, onPrimaryClick, onSecondaryClick }) {
+function ImageSubmitButton({ src, box, alt, disabled }) {
   return (
-    <section className="flex flex-1 flex-col rounded-[28px] bg-white/90 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-      <SectionTitle eyebrow={eyebrow} title={title} description={description} />
-      {imageUrl ? <img className="mt-5 flex-1 rounded-[24px] object-cover" src={imageUrl} alt="" aria-hidden="true" /> : null}
-      <div className="mt-5 flex flex-col gap-3">
-        <button className={primaryButtonClassName} type="button" onClick={onPrimaryClick}>{primaryText}</button>
-        {secondaryText ? <button className={secondaryButtonClassName} type="button" onClick={onSecondaryClick}>{secondaryText}</button> : null}
+    <button
+      type="submit"
+      className="appointment-stage-button"
+      style={{
+        ...toAbsoluteStyle(box),
+        opacity: disabled ? 0.6 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
+      }}
+    >
+      <img src={src} alt={alt} />
+    </button>
+  )
+}
+
+function PickerSheet({ title, options, value, onSelect, onCancel, onConfirm }) {
+  return (
+    <div className="appointment-picker-overlay" onClick={onCancel}>
+      <div className="appointment-picker-sheet" onClick={(event) => event.stopPropagation()}>
+        <div className="appointment-picker-actions">
+          <button type="button" className="appointment-picker-action" onClick={onCancel}>取消</button>
+          <div className="appointment-picker-title">{title}</div>
+          <button type="button" className="appointment-picker-action appointment-picker-action--confirm" onClick={onConfirm}>确定</button>
+        </div>
+        <div className="appointment-picker-options">
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`appointment-picker-option ${option === value ? 'is-active' : ''}`}
+              onClick={() => onSelect(option)}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       </div>
-    </section>
-  )
-}
-
-function SectionTitle({ eyebrow, title, description }) {
-  return (
-    <header>
-      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold text-slate-900">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-    </header>
-  )
-}
-
-function Field({ label, children }) {
-  return (
-    <label className="grid gap-2">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      {children}
-    </label>
-  )
-}
-
-function ActionRow({ primaryText, secondaryText, onSecondaryClick, disabled }) {
-  return (
-    <div className="mt-2 flex flex-col gap-3">
-      <button className={primaryButtonClassName} type="submit" disabled={disabled}>
-        {primaryText}
-      </button>
-      <button className={secondaryButtonClassName} type="button" onClick={onSecondaryClick}>
-        {secondaryText}
-      </button>
     </div>
   )
 }
 
-function InfoRow({ label, value }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <dt className="text-slate-500">{label}</dt>
-      <dd className="font-medium text-slate-900">{value}</dd>
-    </div>
-  )
+function StateMessage({ message }) {
+  return <div className="appointment-state">{message}</div>
+}
+
+function useStageScale() {
+  const [scale, setScale] = useState(() => getStageScale())
+
+  useEffect(() => {
+    const sync = () => setScale(getStageScale())
+    sync()
+    window.addEventListener('resize', sync)
+    return () => window.removeEventListener('resize', sync)
+  }, [])
+
+  return scale
+}
+
+function getStageScale() {
+  if (typeof window === 'undefined') return 1
+  const width = Math.max(window.innerWidth - 24, 320)
+  return Math.min(width / APPOINTMENT_STAGE_WIDTH, 1)
+}
+
+function toAbsoluteStyle(box) {
+  return {
+    left: `${box.left}px`,
+    top: `${box.top}px`,
+    width: `${box.width}px`,
+    height: box.height !== undefined ? `${box.height}px` : undefined,
+  }
+}
+
+function verifyHouseKey(form) {
+  const building = String(form?.building || '').trim()
+  const room = String(form?.room || '').trim()
+  if (!building || !room) return ''
+  return `${building}-${room}`
 }
 
 function getAssetUrl(baseUrl, filename) {
@@ -442,17 +707,8 @@ function isUnauthorizedError(err) {
   return err?.response?.code === 401
 }
 
-const inputClassName =
-  'w-full rounded-2xl border border-amber-200 bg-white px-4 py-3 text-base text-slate-900 outline-none transition focus:border-amber-500'
-
-const chipClassName =
-  'rounded-2xl border border-amber-200 bg-white px-3 py-3 text-sm text-slate-700 transition hover:border-amber-400'
-
-const selectedChipClassName =
-  'rounded-2xl border border-amber-700 bg-amber-700 px-3 py-3 text-sm font-medium text-white shadow'
-
-const primaryButtonClassName =
-  'w-full rounded-full bg-amber-700 px-5 py-3 text-base font-medium text-white shadow-[0_12px_24px_rgba(180,83,9,0.22)] transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60'
-
-const secondaryButtonClassName =
-  'w-full rounded-full border border-amber-300 bg-white px-5 py-3 text-base font-medium text-amber-800 transition hover:border-amber-500 hover:bg-amber-50'
+function maskPhone(phone) {
+  const text = String(phone || '').trim()
+  if (!/^1\d{10}$/.test(text)) return text
+  return text.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2')
+}
