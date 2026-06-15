@@ -9,9 +9,8 @@ import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointm
 import {
   APPOINTMENT_FALLBACK_ASSETS_BASE_URL,
   APPOINTMENT_LAYOUT,
-  APPOINTMENT_STAGE_HEIGHT,
   APPOINTMENT_STAGE_WIDTH,
-  APPOINTMENT_SUCCESS_STAGE_HEIGHT,
+  APPOINTMENT_STAGE_HEIGHT,
 } from './appointmentLayout'
 import './appointment.css'
 
@@ -48,7 +47,6 @@ function AppointmentMain({ routeParams }) {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [toast, setToast] = useState('')
   const [verifyForm, setVerifyForm] = useState({
     building: '',
     room: '',
@@ -61,6 +59,7 @@ function AppointmentMain({ routeParams }) {
     appointmentSlot: '',
     phone: '',
   })
+  const [toastMessage, setToastMessage] = useState('')
   const [activePicker, setActivePicker] = useState('')
   const [pickerDraftValue, setPickerDraftValue] = useState('')
   const toastTimerRef = useRef(0)
@@ -146,8 +145,8 @@ function AppointmentMain({ routeParams }) {
 
   const assetsBaseUrl = config?.assetsBaseUrl || APPOINTMENT_FALLBACK_ASSETS_BASE_URL
   const backgroundUrl = getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.background)
-  const stageHeight = step === STEPS.SUCCESS ? APPOINTMENT_SUCCESS_STAGE_HEIGHT : APPOINTMENT_STAGE_HEIGHT
-  const stageMetrics = useStageMetrics(stageHeight)
+  const stageHeight = APPOINTMENT_STAGE_HEIGHT
+  const stageMetrics = useStageMetrics()
   const booking = bootstrap?.booking
   const displayedHouseKey = booking?.houseKey || verifyHouseKey(verifyForm)
   const displayedDate = booking?.appointmentDate || bookingForm.appointmentDate
@@ -158,9 +157,9 @@ function AppointmentMain({ routeParams }) {
 
   function showToast(message) {
     window.clearTimeout(toastTimerRef.current)
-    setToast(message || '')
+    setToastMessage(message || '')
     if (!message) return
-    toastTimerRef.current = window.setTimeout(() => setToast(''), 1800)
+    toastTimerRef.current = window.setTimeout(() => setToastMessage(''), 2000)
   }
 
   async function handleVerifySubmit(event) {
@@ -180,7 +179,7 @@ function AppointmentMain({ routeParams }) {
         reauth('appointment-verify')
         return
       }
-      showToast(err.message || '身份校验失败')
+      showToast(getFriendlyAppointmentMessage(err, 'verify'))
     } finally {
       setSubmitting(false)
     }
@@ -208,7 +207,7 @@ function AppointmentMain({ routeParams }) {
         reauth('appointment-booking')
         return
       }
-      showToast(err.message || '预约提交失败')
+      showToast(getFriendlyAppointmentMessage(err, 'booking'))
     } finally {
       setSubmitting(false)
     }
@@ -297,9 +296,11 @@ function AppointmentMain({ routeParams }) {
         </div>
       </div>
 
-      {toast ? (
-        <div className="appointment-toast rounded-full px-5 py-3 text-sm font-medium tracking-[0.02em]">
-          {toast}
+      {toastMessage ? (
+        <div className="appointment-toast-mask" onClick={(event) => event.stopPropagation()}>
+          <div className="appointment-toast rounded-xl px-6 py-4 text-[17px] font-medium leading-[1.45] tracking-[0.02em]">
+            {toastMessage}
+          </div>
         </div>
       ) : null}
 
@@ -541,6 +542,8 @@ function BookingStage({
 }
 
 function SuccessStage({ assetsBaseUrl, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
+  const dateSlotText = [appointmentDate, appointmentSlot].filter(Boolean).join('\n')
+
   return (
     <>
       {APPOINTMENT_LAYOUT.success.images.map((image) => {
@@ -569,12 +572,10 @@ function SuccessStage({ assetsBaseUrl, houseKey, appointmentDate, appointmentSlo
         {houseKey || '请以现场安排为准'}
       </div>
       <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[1])}>
-        <span>预约日期</span>
-        <span>{appointmentDate || '请以现场安排为准'}</span>
+        {APPOINTMENT_LAYOUT.success.textBlocks[1].lines?.[0] || '您的预约时间为'}
       </div>
-      <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[2])}>
-        <span>预约时间段</span>
-        <span>{appointmentSlot || '请以现场安排为准'}</span>
+      <div className="appointment-success-tertiary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[2])}>
+        {dateSlotText || '请以现场安排为准'}
       </div>
     </>
   )
@@ -633,20 +634,20 @@ function StateMessage({ message }) {
   )
 }
 
-function useStageMetrics(stageHeight) {
-  const [metrics, setMetrics] = useState(() => getStageMetrics(stageHeight))
+function useStageMetrics() {
+  const [metrics, setMetrics] = useState(() => getStageMetrics())
 
   useEffect(() => {
-    const sync = () => setMetrics(getStageMetrics(stageHeight))
+    const sync = () => setMetrics(getStageMetrics())
     sync()
     window.addEventListener('resize', sync)
     return () => window.removeEventListener('resize', sync)
-  }, [stageHeight])
+  }, [])
 
   return metrics
 }
 
-function getStageMetrics(stageHeight) {
+function getStageMetrics() {
   if (typeof window === 'undefined') {
     return {
       scale: 1,
@@ -680,4 +681,52 @@ function getAssetUrl(baseUrl, filename) {
 
 function isUnauthorizedError(err) {
   return err?.response?.code === 401
+}
+
+function getFriendlyAppointmentMessage(err, scene) {
+  const rawMessage = String(err?.response?.message || err?.message || '').trim()
+  const responseCode = err?.response?.code
+
+  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满')) {
+    return '该时段报名人数已满\n请选择另外时段报名'
+  }
+  if (rawMessage.includes('手机号格式不正确')) {
+    return '请填写正确手机号'
+  }
+  if (rawMessage.includes('预约时间段不合法') || rawMessage.includes('预约日期格式不正确') || rawMessage.includes('请选择')) {
+    return '请选择预约日期和时间段'
+  }
+  if (rawMessage.includes('该房号已预约')) {
+    return '该房号已被预约'
+  }
+  if (
+    rawMessage.includes('楼号、房号、姓名不能为空') ||
+    rawMessage.includes('身份证后四位不能为空') ||
+    rawMessage.includes('身份证后四位必须是4位数字')
+  ) {
+    return '请填写完整信息'
+  }
+  if (
+    rawMessage.includes('身份校验失败') ||
+    rawMessage.includes('白名单') ||
+    rawMessage.includes('信息不匹配')
+  ) {
+    return '身份验证失败\n请核对信息后重试'
+  }
+  if (rawMessage.includes('活动未开始')) {
+    return '活动未开始'
+  }
+  if (rawMessage.includes('活动已截止')) {
+    return '活动已截止'
+  }
+  if (rawMessage.includes('Failed to fetch') || rawMessage.includes('NetworkError')) {
+    return '网络异常，请稍后重试'
+  }
+  if (scene === 'verify') {
+    return '身份验证失败\n请核对信息后重试'
+  }
+  if (scene === 'booking') {
+    return '预约失败，请重试'
+  }
+  return '网络异常，请稍后重试'
 }

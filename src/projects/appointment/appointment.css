@@ -140,7 +140,8 @@
 }
 
 .appointment-success-primary,
-.appointment-success-secondary {
+.appointment-success-secondary,
+.appointment-success-tertiary {
   position: absolute;
   display: flex;
   align-items: center;
@@ -152,34 +153,40 @@
 
 .appointment-success-primary {
   color: #f7e7b8;
-  font-size: 46px;
-  line-height: 1.15;
+  font-size: 55px;
+  line-height: 1.12;
 }
 
 .appointment-success-secondary {
-  flex-direction: column;
-  gap: 12px;
   color: #ffffff;
-  font-size: 28px;
-  line-height: 1.3;
+  font-size: 55px;
+  line-height: 1.12;
 }
 
-.appointment-success-secondary span:last-child {
-  font-size: 36px;
-  color: #f7e7b8;
+.appointment-success-tertiary {
+  color: #ffffff;
+  font-size: 48px;
+  line-height: 1.24;
+  white-space: pre-line;
+}
+
+.appointment-toast-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .appointment-toast {
-  position: fixed;
-  left: 50%;
-  bottom: max(24px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  z-index: 90;
-  max-width: calc(100vw - 48px);
-  background: rgba(26, 18, 18, 0.92);
+  max-width: min(70vw, 520px);
+  background: rgba(0, 0, 0, 0.62);
   color: #ffffff;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+  white-space: pre-line;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
 }
 
 .appointment-state {
