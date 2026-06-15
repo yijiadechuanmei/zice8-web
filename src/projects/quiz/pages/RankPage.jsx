@@ -1,23 +1,13 @@
-import { useCallback } from 'react'
 import { formatQuizDuration, quizAssets } from '../assets'
 import DesignStage from '../components/DesignStage'
 
 export default function RankPage({
   ranks = [],
   loading = false,
-  hasMore = false,
   error = '',
-  onLoadMore,
   onRetry,
   onBack,
 }) {
-  const handleScroll = useCallback((event) => {
-    if (loading || !hasMore || !onLoadMore) return
-    const element = event.currentTarget
-    if (element.scrollTop + element.clientHeight < element.scrollHeight - 80) return
-    onLoadMore()
-  }, [hasMore, loading, onLoadMore])
-
   return (
     <main className="quiz-page quiz-rank-page flex min-h-screen w-full justify-center bg-[#143978]">
       <section className="quiz-rank-shell w-full max-w-[750px]">
@@ -33,7 +23,7 @@ export default function RankPage({
             {!loading && !ranks.length && !error ? <p className="rounded-lg bg-[#f7f4d8] px-[18px] py-[18px] text-center text-[22px] text-[#66724b]">暂无排行</p> : null}
             {(ranks.length || loading || error) ? (
               <div className="flex h-full flex-col">
-                <div className="mt-[14px] flex flex-1 flex-col gap-[10px] overflow-auto pr-[4px]" onScroll={handleScroll}>
+                <div className="mt-[14px] flex flex-1 flex-col gap-[10px] overflow-auto pr-[4px]">
                   {ranks.map((item, index) => (
                     <div
                       className={`grid min-h-[58px] grid-cols-[84px_120px_120px_120px_120px] items-stretch gap-[8px] rounded-2xl px-[10px] py-[8px] text-[22px] ${
@@ -61,9 +51,6 @@ export default function RankPage({
                     >
                       加载失败，点击重试
                     </button>
-                  ) : null}
-                  {!loading && !error && !hasMore && ranks.length ? (
-                    <p className="py-[10px] text-center text-[20px] text-white/80">已显示全部</p>
                   ) : null}
                 </div>
               </div>

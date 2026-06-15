@@ -113,8 +113,8 @@ export const finishAttempt = (activityKey, attemptId) =>
 
 export const getResult = (activityKey, attemptId) => quizRequest(`/quiz/activities/${activityKey}/result/${attemptId}`)
 
-export const getRank = (activityKey, offset = 0, limit = 50) =>
-  quizRequest(`/quiz/activities/${activityKey}/rank?offset=${offset}&limit=${limit}`, { skipAuth: true })
+export const getRank = (activityKey) =>
+  quizRequest(`/quiz/activities/${activityKey}/rank`, { skipAuth: true })
 
 export const resetDemoActivity = (activityKey) =>
   quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {
