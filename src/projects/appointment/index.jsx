@@ -154,10 +154,10 @@ function AppointmentMain({ routeParams }) {
   const backgroundUrl = getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.background)
   const stageHeight = APPOINTMENT_STAGE_HEIGHT
   const stageMetrics = useStageMetrics()
-  const booking = bootstrap?.booking
-  const displayedHouseKey = booking?.houseKey || verifyHouseKey(verifyForm)
-  const displayedDate = booking?.appointmentDate || bookingForm.appointmentDate
-  const displayedSlot = booking?.appointmentSlot || bookingForm.appointmentSlot
+  const successBooking = useMemo(
+    () => normalizeSuccessBooking(bootstrap?.booking),
+    [bootstrap?.booking],
+  )
   const pickerColumns = activePicker === PICKERS.DATE
     ? [bookingDateOptions.map((date) => ({ label: date, value: date }))]
     : [bookingSlotOptions.map((slot) => ({ label: slot, value: slot }))]
@@ -173,8 +173,20 @@ function AppointmentMain({ routeParams }) {
     event.preventDefault()
     setSubmitting(true)
     try {
-      const result = await verifyAppointment(activityKey, verifyForm)
+      const result = await verifyAppointment(activityKey, {
+        ...verifyForm,
+        idTail: normalizeIdTailInput(verifyForm.idTail),
+      })
       setVerifyResult(result)
+      if (result.alreadyBooked && result.booking) {
+        setBootstrap((current) => ({
+          ...(current || {}),
+          hasBooking: true,
+          booking: result.booking,
+        }))
+        setStep(STEPS.SUCCESS)
+        return
+      }
       setBookingForm((current) => ({
         ...current,
         appointmentDate: result.allowedDates?.[0] || '',
@@ -299,9 +311,10 @@ function AppointmentMain({ routeParams }) {
           {step === STEPS.SUCCESS ? (
             <SuccessStage
               assetsBaseUrl={assetsBaseUrl}
-              houseKey={displayedHouseKey || '请以现场安排为准'}
-              appointmentDate={displayedDate || '请以现场安排为准'}
-              appointmentSlot={displayedSlot || '请以现场安排为准'}
+              name={successBooking?.name || verifyForm.name || ''}
+              houseKey={successBooking?.houseKey || verifyHouseKey(verifyForm) || '请以现场安排为准'}
+              appointmentDate={successBooking?.appointmentDate || bookingForm.appointmentDate || '请以现场安排为准'}
+              appointmentSlot={successBooking?.appointmentSlot || bookingForm.appointmentSlot || '请以现场安排为准'}
               onConfirm={() => window.location.reload()}
             />
           ) : null}
@@ -454,9 +467,11 @@ function VerifyStage({
         className="appointment-stage-input"
         style={toAbsoluteStyle(layout.inputs.idTail)}
         value={verifyForm.idTail}
-        onChange={(event) => setVerifyForm((current) => ({ ...current, idTail: event.target.value.replace(/\D/g, '') }))}
+        onChange={(event) => setVerifyForm((current) => ({ ...current, idTail: normalizeIdTailInput(event.target.value) }))}
         maxLength={layout.inputs.idTail.maxLength}
         inputMode={layout.inputs.idTail.inputMode}
+        type="text"
+        autoCapitalize="characters"
       />
 
       <ImageButton
@@ -551,7 +566,7 @@ function BookingStage({
   )
 }
 
-function SuccessStage({ assetsBaseUrl, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
+function SuccessStage({ assetsBaseUrl, name, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
   const dateSlotText = [appointmentDate, appointmentSlot].filter(Boolean).join('\n')
 
   return (
@@ -579,7 +594,8 @@ function SuccessStage({ assetsBaseUrl, houseKey, appointmentDate, appointmentSlo
       })}
 
       <div className="appointment-success-primary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[0])}>
-        {houseKey || '请以现场安排为准'}
+        <span className="appointment-success-name">{name || ''}</span>
+        <span className="appointment-success-house">{houseKey || '请以现场安排为准'}</span>
       </div>
       <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[1])}>
         {APPOINTMENT_LAYOUT.success.textBlocks[1].lines?.[0] || '您的预约时间为'}
@@ -687,6 +703,23 @@ function verifyHouseKey(form) {
   const room = String(form?.room || '').trim()
   if (!building || !room) return ''
   return `${building}-${room}`
+}
+
+function normalizeIdTailInput(value) {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^0-9X]/g, '')
+    .slice(0, 4)
+}
+
+function normalizeSuccessBooking(booking) {
+  if (!booking) return null
+  return {
+    name: String(booking.name || '').trim(),
+    houseKey: String(booking.houseKey || '').trim(),
+    appointmentDate: String(booking.appointmentDate || '').trim(),
+    appointmentSlot: String(booking.appointmentSlot || '').trim(),
+  }
 }
 
 function getAssetUrl(baseUrl, filename) {

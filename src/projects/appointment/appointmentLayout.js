@@ -137,7 +137,7 @@ export const APPOINTMENT_LAYOUT = {
       building: { left: 93, top: 429, width: 558, height: 64, maxLength: 10, inputMode: 'numeric' },
       room: { left: 93, top: 605, width: 558, height: 64, maxLength: 10, inputMode: 'numeric' },
       name: { left: 95, top: 782, width: 558, height: 64, maxLength: 32 },
-      idTail: { left: 93, top: 957, width: 558, height: 64, maxLength: 4, inputMode: 'numeric' },
+      idTail: { left: 93, top: 957, width: 558, height: 64, maxLength: 4, inputMode: 'text' },
     },
   },
   booking: {

@@ -123,6 +123,28 @@
   color: #f7e7b8;
   font-size: 55px;
   line-height: 1.12;
+  justify-content: space-between;
+  padding: 0 22px;
+  box-sizing: border-box;
+  gap: 20px;
+}
+
+.appointment-success-name,
+.appointment-success-house {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-success-name {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.appointment-success-house {
+  flex: 0 0 auto;
+  text-align: right;
 }
 
 .appointment-success-secondary {
