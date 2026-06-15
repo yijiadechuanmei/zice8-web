@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
-import { Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
+import { Component, Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Button, Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
 import { InfoCircleOutlined } from '@ant-design/icons'
 import { getCharts, getOverview } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
@@ -219,9 +219,11 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
 function LazyChart(props) {
   return (
-    <Suspense fallback={<div className="admin-centered-state"><Spin size="small" tip="图表加载中..." /></div>}>
-      <AdminChart {...props} />
-    </Suspense>
+    <ChartErrorBoundary>
+      <Suspense fallback={<div className="admin-centered-state"><Spin size="small" tip="图表加载中..." /></div>}>
+        <AdminChart {...props} />
+      </Suspense>
+    </ChartErrorBoundary>
   )
 }
 
@@ -247,4 +249,40 @@ function mergeTrend(submissions = [], completed = []) {
 function formatMetric(value) {
   if (typeof value === 'number') return value.toLocaleString('zh-CN')
   return value
+}
+
+class ChartErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.children !== this.props.children && this.state.hasError) {
+      this.setState({ hasError: false })
+    }
+  }
+
+  render() {
+    if (!this.state.hasError) {
+      return this.props.children
+    }
+
+    return (
+      <Empty
+        description={(
+          <span>
+            图表资源加载失败，页面主体仍可使用。
+            <Button type="link" size="small" onClick={() => window.location.reload()}>
+              刷新页面
+            </Button>
+          </span>
+        )}
+      />
+    )
+  }
 }
