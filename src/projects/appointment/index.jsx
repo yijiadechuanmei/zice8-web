@@ -4,6 +4,7 @@ import { Picker } from 'antd-mobile'
 import 'antd-mobile/es/global'
 import { QRCodeSVG } from 'qrcode.react'
 import { setToken } from '../../shared/api/request'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointment } from './api'
@@ -66,6 +67,8 @@ function AppointmentMain({ routeParams }) {
   const [pickerDraftValue, setPickerDraftValue] = useState('')
   const toastTimerRef = useRef(0)
   const introTouchRef = useRef({ x: 0, y: 0 })
+  const hasTrackedInitialViewRef = useRef(false)
+  const lastSuccessTrackKeyRef = useRef('')
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -117,6 +120,18 @@ function AppointmentMain({ routeParams }) {
       })
   }, [activityKey, authReady, publicConfig, reauth])
 
+  useEffect(() => {
+    if (!activityKey || !bootstrap || hasTrackedInitialViewRef.current) return
+    hasTrackedInitialViewRef.current = true
+    trackPageView(activityKey, '/appointment', {
+      activityType: 'appointment_visit',
+      pageKey: 'appointment',
+    })
+    trackAppointmentEvent(activityKey, 'appointment_page_view', {
+      pageKey: 'appointment',
+    })
+  }, [activityKey, bootstrap])
+
   const bookingDateOptions = useMemo(() => {
     const configDates = config?.dateRange?.dates || config?.allowedDates || []
     const allowedDates = verifyResult?.allowedDates || []
@@ -151,6 +166,24 @@ function AppointmentMain({ routeParams }) {
     }))
   }, [bookingSlotOptions])
 
+  useEffect(() => {
+    if (step !== STEPS.SUCCESS || !activityKey) return
+    const booking = normalizeSuccessBooking(bootstrap?.booking)
+    const trackKey = [
+      booking?.houseKey || verifyHouseKey(verifyForm),
+      booking?.appointmentDate || bookingForm.appointmentDate,
+      booking?.appointmentSlot || bookingForm.appointmentSlot,
+    ].join('|')
+    if (lastSuccessTrackKeyRef.current === trackKey) return
+    lastSuccessTrackKeyRef.current = trackKey
+    trackAppointmentEvent(activityKey, 'appointment_success_view', {
+      pageKey: 'success',
+      date: booking?.appointmentDate || bookingForm.appointmentDate || '',
+      slot: booking?.appointmentSlot || bookingForm.appointmentSlot || '',
+      result: 'success',
+    })
+  }, [activityKey, bookingForm.appointmentDate, bookingForm.appointmentSlot, bootstrap?.booking, step, verifyForm])
+
   const assetsBaseUrl = config?.assetsBaseUrl || APPOINTMENT_FALLBACK_ASSETS_BASE_URL
   const backgroundUrl = getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.background)
   const stageHeight = APPOINTMENT_STAGE_HEIGHT
@@ -178,6 +211,10 @@ function AppointmentMain({ routeParams }) {
         ...verifyForm,
         idTail: normalizeIdTailInput(verifyForm.idTail),
       })
+      trackAppointmentEvent(activityKey, 'appointment_verify_success', {
+        pageKey: 'verify',
+        result: result.alreadyBooked ? 'already_booked' : 'success',
+      })
       setVerifyResult(result)
       if (result.alreadyBooked && result.booking) {
         setBootstrap((current) => ({
@@ -199,6 +236,11 @@ function AppointmentMain({ routeParams }) {
         reauth('appointment-verify')
         return
       }
+      trackAppointmentEvent(activityKey, 'appointment_verify_failed', {
+        pageKey: 'verify',
+        result: 'failed',
+        reason: classifyAppointmentAnalyticsReason(err, 'verify'),
+      })
       showToast(getFriendlyAppointmentMessage(err, 'verify'))
     } finally {
       setSubmitting(false)
@@ -215,6 +257,12 @@ function AppointmentMain({ routeParams }) {
         appointmentSlot: bookingForm.appointmentSlot,
         phone: bookingForm.phone.trim(),
       })
+      trackAppointmentEvent(activityKey, 'appointment_booking_success', {
+        pageKey: 'booking',
+        date: bookingForm.appointmentDate,
+        slot: bookingForm.appointmentSlot,
+        result: result.alreadyBooked ? 'already_booked' : 'success',
+      })
       setBootstrap((current) => ({
         ...(current || {}),
         hasBooking: true,
@@ -227,6 +275,13 @@ function AppointmentMain({ routeParams }) {
         reauth('appointment-booking')
         return
       }
+      trackAppointmentEvent(activityKey, 'appointment_booking_failed', {
+        pageKey: 'booking',
+        date: bookingForm.appointmentDate,
+        slot: bookingForm.appointmentSlot,
+        result: 'failed',
+        reason: classifyAppointmentAnalyticsReason(err, 'booking'),
+      })
       showToast(getFriendlyAppointmentMessage(err, 'booking'))
     } finally {
       setSubmitting(false)
@@ -821,4 +876,45 @@ function getFriendlyAppointmentMessage(err, scene) {
     return '预约失败，请重试'
   }
   return '网络异常，请稍后重试'
+}
+
+function trackAppointmentEvent(activityKey, eventType, extra = {}) {
+  if (!activityKey || !eventType) return
+  trackEvent({
+    activityKey,
+    eventType,
+    page: '/appointment',
+    extra: {
+      activityKey,
+      activityType: 'appointment_visit',
+      eventName: eventType,
+      ...sanitizeAppointmentAnalyticsExtra(extra),
+    },
+  })
+}
+
+function sanitizeAppointmentAnalyticsExtra(extra = {}) {
+  const next = {}
+  ;['pageKey', 'date', 'slot', 'result', 'reason'].forEach((key) => {
+    const value = extra?.[key]
+    if (value !== undefined && value !== null && value !== '') next[key] = value
+  })
+  return next
+}
+
+function classifyAppointmentAnalyticsReason(err, scene) {
+  const rawMessage = String(err?.response?.message || err?.message || '').trim()
+  const responseCode = String(err?.response?.code || '')
+
+  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满')) return 'slot_full'
+  if (rawMessage.includes('手机号格式不正确')) return 'invalid_phone'
+  if (rawMessage.includes('预约时间段不合法') || rawMessage.includes('预约日期格式不正确') || rawMessage.includes('请选择')) {
+    return scene === 'booking' ? 'invalid_schedule' : 'invalid_input'
+  }
+  if (rawMessage.includes('该房号已预约')) return 'already_booked'
+  if (rawMessage.includes('白名单') || rawMessage.includes('信息不匹配') || rawMessage.includes('身份校验失败')) return 'verify_failed'
+  if (rawMessage.includes('活动未开始')) return 'activity_not_started'
+  if (rawMessage.includes('活动已截止')) return 'activity_ended'
+  if (rawMessage.includes('Failed to fetch') || rawMessage.includes('NetworkError')) return 'network_error'
+  return scene === 'verify' ? 'verify_error' : 'booking_error'
 }

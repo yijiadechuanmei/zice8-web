@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Avatar, Button, Card, Checkbox, Dropdown, Empty, Space, Spin, Table, Tag, Tooltip, Typography } from 'antd'
 import { DownOutlined, ExportOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons'
 
@@ -188,6 +189,7 @@ function formatAdminDuration(value) {
 }
 
 function renderStatusTag(value) {
+  if (value === 'booked') return <Tag color="green">已预约</Tag>
   if (value === 'finished') return <Tag color="green">已完成</Tag>
   if (value === 'in_progress') return <Tag color="blue">进行中</Tag>
   if (value === 1) return <Tag color="green">启用</Tag>

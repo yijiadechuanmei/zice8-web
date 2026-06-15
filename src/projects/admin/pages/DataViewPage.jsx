@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from 'react'
-import { Input, message } from 'antd'
+import { Input, Select, Space, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { exportDataRows, getDataRows, getDataSchema } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
@@ -20,6 +21,9 @@ function GenericDataViewPage({ activity }) {
   const [page, setPage] = useState(1)
   const [sortField, setSortField] = useState('')
   const [sortOrder, setSortOrder] = useState('desc')
+  const [appointmentDate, setAppointmentDate] = useState('')
+  const [appointmentSlot, setAppointmentSlot] = useState('')
+  const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(true)
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
@@ -31,6 +35,9 @@ function GenericDataViewPage({ activity }) {
     setError('')
     setViews([])
     setActiveViewKey('')
+    setAppointmentDate('')
+    setAppointmentSlot('')
+    setStatus('')
     getDataSchema(activity.activityKey)
       .then((schema) => {
         if (!alive) return
@@ -61,10 +68,13 @@ function GenericDataViewPage({ activity }) {
     getDataRows(activity.activityKey, activeViewKey, {
       page: String(page),
       pageSize: String(pageSize),
-      keyword,
-      sortField,
-      sortOrder,
-    })
+        keyword,
+        sortField,
+        sortOrder,
+        date: appointmentDate,
+        slot: appointmentSlot,
+        status,
+      })
       .then((result) => {
         if (alive) setData(result)
       })
@@ -77,10 +87,10 @@ function GenericDataViewPage({ activity }) {
     return () => {
       alive = false
     }
-  }, [activity.activityKey, activeViewKey, page, keyword, sortField, sortOrder])
+  }, [activity.activityKey, activeViewKey, appointmentDate, appointmentSlot, page, keyword, sortField, sortOrder, status])
 
   const activeView = useMemo(() => views.find((view) => view.viewKey === activeViewKey), [views, activeViewKey])
-  const hiddenColumns = hiddenColumnsByView[activeViewKey] || {}
+  const hiddenColumns = useMemo(() => hiddenColumnsByView[activeViewKey] || {}, [activeViewKey, hiddenColumnsByView])
   const visibleColumns = useMemo(() => data.columns.filter((column) => !hiddenColumns[column.key]), [data.columns, hiddenColumns])
   const visibleFieldKeys = useMemo(
     () => visibleColumns
@@ -88,6 +98,10 @@ function GenericDataViewPage({ activity }) {
       .filter(Boolean),
     [visibleColumns],
   )
+  const exportableFieldKeys = useMemo(() => {
+    const exportable = new Set((activeView?.fields || []).filter((field) => field.canExport).map((field) => field.fieldKey || field.key))
+    return visibleFieldKeys.filter((key) => exportable.has(key))
+  }, [activeView?.fields, visibleFieldKeys])
   const tableColumns = useMemo(() => buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
     visibleColumns.map((column) => [
       column.key,
@@ -106,7 +120,10 @@ function GenericDataViewPage({ activity }) {
         keyword,
         sortField,
         sortOrder,
-        fields: visibleFieldKeys,
+        date: appointmentDate,
+        slot: appointmentSlot,
+        status,
+        fields: exportableFieldKeys,
       })
       downloadCsv(result.filename || `${activity.activityKey}-${activeViewKey}.csv`, result.csv || '')
       message.success('CSV 已导出')
@@ -138,6 +155,9 @@ function GenericDataViewPage({ activity }) {
         setActiveViewKey(viewKey)
         setPage(1)
         setSortField('')
+        setAppointmentDate('')
+        setAppointmentSlot('')
+        setStatus('')
       }}
       error={error}
       loading={schemaLoading}
@@ -146,21 +166,56 @@ function GenericDataViewPage({ activity }) {
         toolbar={(
           <AdminDataToolbar
             search={(
-              <Input.Search
-                allowClear
-                prefix={<SearchOutlined />}
-                placeholder="输入关键词"
-                value={keyword}
-                onChange={(event) => {
-                  setKeyword(event.target.value)
-                  setPage(1)
-                }}
-                onSearch={(value) => {
-                  setKeyword(value)
-                  setPage(1)
-                }}
-                style={{ width: 260 }}
-              />
+              <Space wrap>
+                <Input.Search
+                  allowClear
+                  prefix={<SearchOutlined />}
+                  placeholder={getKeywordPlaceholder(activity, activeViewKey)}
+                  value={keyword}
+                  onChange={(event) => {
+                    setKeyword(event.target.value)
+                    setPage(1)
+                  }}
+                  onSearch={(value) => {
+                    setKeyword(value)
+                    setPage(1)
+                  }}
+                  style={{ width: 260 }}
+                />
+                {activity.type === 'appointment_visit' ? (
+                  <>
+                    <Input
+                      allowClear
+                      placeholder={activeViewKey === 'appointment_whitelist' ? '允许日期 YYYY-MM-DD' : '预约日期 YYYY-MM-DD'}
+                      value={appointmentDate}
+                      onChange={(event) => {
+                        setAppointmentDate(event.target.value.trim())
+                        setPage(1)
+                      }}
+                      style={{ width: 180 }}
+                    />
+                    <Input
+                      allowClear
+                      placeholder="时间段"
+                      value={appointmentSlot}
+                      onChange={(event) => {
+                        setAppointmentSlot(event.target.value.trim())
+                        setPage(1)
+                      }}
+                      style={{ width: 180 }}
+                    />
+                    <Select
+                      value={status}
+                      onChange={(value) => {
+                        setStatus(value)
+                        setPage(1)
+                      }}
+                      style={{ width: 140 }}
+                      options={getAppointmentStatusOptions(activeViewKey)}
+                    />
+                  </>
+                ) : null}
+              </Space>
             )}
             showColumns={Boolean(data.columns.length)}
             columnOptions={data.columns.map((column) => ({ label: column.title, value: column.key }))}
@@ -172,10 +227,10 @@ function GenericDataViewPage({ activity }) {
                 [activeViewKey]: Object.fromEntries(data.columns.map((column) => [column.key, !selected.has(column.key)])),
               }))
             }}
-            exportDisabled={!activeViewKey || !activeView?.canExport}
+            exportDisabled={!activeViewKey || !activeView?.canExport || !exportableFieldKeys.length}
             exporting={exporting}
             onExport={handleExport}
-            exportTooltip={!activeView?.canExport ? '当前账号无导出权限' : ''}
+            exportTooltip={!activeView?.canExport ? '当前账号无导出权限' : (!exportableFieldKeys.length ? '当前没有可导出的字段' : '')}
           />
         )}
         tableProps={{
@@ -195,6 +250,29 @@ function GenericDataViewPage({ activity }) {
       />
     </AdminDataViewShell>
   )
+}
+
+function getKeywordPlaceholder(activity, viewKey) {
+  if (activity.type === 'appointment_visit') {
+    return viewKey === 'appointment_bookings'
+      ? '搜索房号 / 姓名 / 手机号'
+      : '搜索房号 / 姓名'
+  }
+  return '输入关键词'
+}
+
+function getAppointmentStatusOptions(viewKey) {
+  if (viewKey === 'appointment_bookings') {
+    return [
+      { value: '', label: '全部状态' },
+      { value: 'booked', label: '已预约' },
+    ]
+  }
+  return [
+    { value: '', label: '全部状态' },
+    { value: '1', label: '启用' },
+    { value: '0', label: '禁用' },
+  ]
 }
 
 function getExportErrorMessage(err) {

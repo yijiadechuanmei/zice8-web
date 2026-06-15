@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Card, Checkbox, Col, Empty, Row, Select, Space, Spin, Switch, Tag, Typography, message } from 'antd'
 import { SaveOutlined } from '@ant-design/icons'
@@ -129,7 +130,7 @@ export default function PermissionPage({ activity, activities }) {
         fields: view.fields.map((field) => ({
           fieldKey: field.fieldKey,
           canView: Boolean(viewPermission.fields?.[field.fieldKey]?.canView),
-          canExport: Boolean(viewPermission.fields?.[field.fieldKey]?.canView),
+          canExport: Boolean(viewPermission.fields?.[field.fieldKey]?.canExport),
           maskType: viewPermission.fields?.[field.fieldKey]?.maskType || null,
         })),
       }
@@ -287,6 +288,13 @@ export default function PermissionPage({ activity, activities }) {
                           options={maskOptions}
                           style={{ width: 132 }}
                         />
+                        <Checkbox
+                          checked={Boolean(fieldPermission.canExport)}
+                          disabled={!fieldPermission.canView}
+                          onChange={(event) => updateFieldPermission(selectedView.viewKey, field.fieldKey, { canExport: event.target.checked })}
+                        >
+                          可导出
+                        </Checkbox>
                       </div>
                     )
                   })}

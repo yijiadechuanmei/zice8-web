@@ -2,6 +2,16 @@ import { API_BASE_URL, getToken } from './api/request'
 
 const VISITOR_ID_KEY = 'zice8_visitor_id'
 const PAGE_VIEW_DEDUPE_MS = 30 * 1000
+const APPOINTMENT_EXTRA_KEYS = new Set([
+  'activityKey',
+  'activityType',
+  'pageKey',
+  'eventName',
+  'date',
+  'slot',
+  'result',
+  'reason',
+])
 
 export function getVisitorId() {
   try {
@@ -39,7 +49,7 @@ export function trackEvent(payload) {
     path: payload.path || `${window.location.pathname}${window.location.search}`,
     referrer: document.referrer || '',
     visitorId: getVisitorId(),
-    extra: sanitizeExtra(payload.extra),
+    extra: sanitizeExtra(payload.extra, payload),
   }
   const headers = { 'Content-Type': 'application/json' }
   const token = getToken()
@@ -60,13 +70,37 @@ export function trackPageView(activityKey, page, extra) {
   trackEvent({ activityKey, eventType: 'page_view', page, extra })
 }
 
-function sanitizeExtra(extra) {
+function sanitizeExtra(extra, payload = {}) {
   if (!extra || typeof extra !== 'object') return {}
+  const appointmentOnly = payload?.eventType?.startsWith?.('appointment_') || extra.activityType === 'appointment_visit'
   return Object.entries(extra).reduce((result, [key, value]) => {
-    if (/openid|token|phone|name|department|secret|password/i.test(key)) return result
+    if (isSensitiveExtraKey(key)) return result
+    if (appointmentOnly && !APPOINTMENT_EXTRA_KEYS.has(key)) return result
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
       result[key] = value
     }
     return result
   }, {})
+}
+
+function isSensitiveExtraKey(key) {
+  const normalized = String(key || '').trim().toLowerCase()
+  if (!normalized) return true
+  return (
+    normalized === 'name' ||
+    normalized.endsWith('_name') ||
+    normalized === 'phone' ||
+    normalized.endsWith('_phone') ||
+    normalized === 'department' ||
+    normalized.endsWith('_department') ||
+    normalized === 'openid' ||
+    normalized.endsWith('_openid') ||
+    normalized === 'token' ||
+    normalized.endsWith('_token') ||
+    normalized.includes('secret') ||
+    normalized.includes('password') ||
+    normalized === 'idtail' ||
+    normalized === 'id_tail' ||
+    normalized.endsWith('_id_tail')
+  )
 }

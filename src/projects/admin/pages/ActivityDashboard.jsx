@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
 import { InfoCircleOutlined } from '@ant-design/icons'
 import { getCharts, getOverview } from '../api'
+import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
 const { Paragraph, Text, Title } = Typography
@@ -37,6 +39,22 @@ export default function ActivityDashboard({ activity, compact = false }) {
   }, [activity.activityKey])
 
   const metrics = useMemo(() => {
+    if (activity.type === 'appointment_visit') {
+      return [
+        { label: '白名单总数', value: overview?.whitelistTotal ?? 0 },
+        { label: '已预约数', value: overview?.bookingTotal ?? 0 },
+        { label: '未预约数', value: overview?.unbookedTotal ?? 0 },
+        { label: '预约率', value: Math.round(Number(overview?.bookingRate ?? 0)), suffix: '%' },
+        { label: `${overview?.currentDate || '当日'}预约数`, value: overview?.currentDateBookingTotal ?? 0 },
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '核验成功', value: overview?.verifySuccessCount ?? 0 },
+        { label: '核验失败', value: overview?.verifyFailedCount ?? 0 },
+        { label: '预约成功', value: overview?.bookingSuccessCount ?? 0 },
+        { label: '预约失败', value: overview?.bookingFailedCount ?? 0 },
+      ]
+    }
+
     const videoRank = overview?.videoRank || {}
     return [
       { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
@@ -49,7 +67,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [overview])
+  }, [activity.type, overview])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const commentTrend = (charts?.videoRank?.commentTrend || []).map((item) => ({ ...item, comments: item.value || 0 }))
@@ -57,6 +75,8 @@ export default function ActivityDashboard({ activity, compact = false }) {
     ...item,
     name: item.name || '未填写姓名',
   }))
+  const appointmentDateTrend = (charts?.appointment?.bookingByDate || []).map((item) => ({ ...item, bookings: item.value || 0 }))
+  const appointmentSlotTrend = (charts?.appointment?.bookingBySlot || []).map((item) => ({ date: item.slot, bookings: item.value || 0 }))
 
   if (loading) {
     return (
@@ -107,31 +127,33 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
       {compact ? null : (
         <>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} xl={8}>
-              <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
-                {charts?.access?.dataAvailable ? (
-                  <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
-                ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
-                )}
-              </ChartPanel>
-            </Col>
-            <Col xs={24} xl={8}>
-              <ChartPanel title="近 7 天参与趋势" description="按参与时间统计">
-                <LazyChart type="bar" data={participantTrend} series={[{ key: 'participants', name: '参与人数' }]} />
-              </ChartPanel>
-            </Col>
-            <Col xs={24} xl={8}>
-              <ChartPanel title="近 7 天互动/完成趋势" description={activity.type === 'quiz' ? '按 start_attempt 与 finished attempt 统计' : '观看记录更新与完成时间'}>
-                <LazyChart
-                  type="line"
-                  data={mergeTrend(charts?.submissions?.trend, charts?.submissions?.completionTrend)}
-                  series={[{ key: 'submissions', name: '互动次数' }, { key: 'completed', name: '完成数' }]}
-                />
-              </ChartPanel>
-            </Col>
-          </Row>
+          {activity.type === 'appointment_visit' ? null : (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天参与趋势" description="按参与时间统计">
+                  <LazyChart type="bar" data={participantTrend} series={[{ key: 'participants', name: '参与人数' }]} />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天互动/完成趋势" description={activity.type === 'quiz' ? '按 start_attempt 与 finished attempt 统计' : '观看记录更新与完成时间'}>
+                  <LazyChart
+                    type="line"
+                    data={mergeTrend(charts?.submissions?.trend, charts?.submissions?.completionTrend)}
+                    series={[{ key: 'submissions', name: '互动次数' }, { key: 'completed', name: '完成数' }]}
+                  />
+                </ChartPanel>
+              </Col>
+            </Row>
+          )}
 
           {activity.type === 'video-rank' ? (
             <Row gutter={[16, 16]}>
@@ -151,6 +173,37 @@ export default function ActivityDashboard({ activity, compact = false }) {
               <Col xs={24} xl={8}><ChartPanel title="抽奖次数趋势" description="预留图表，等待抽奖数据源接入"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="抽奖次数趋势暂未接入数据源" /></ChartPanel></Col>
               <Col xs={24} xl={8}><ChartPanel title="奖品中奖分布" description="预留环图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品中奖分布暂未接入数据源" /></ChartPanel></Col>
               <Col xs={24} xl={8}><ChartPanel title="奖品库存" description="预留柱状图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品库存暂未接入数据源" /></ChartPanel></Col>
+            </Row>
+          ) : activity.type === 'appointment_visit' ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="按日期预约分布" description="基于预约记录统计">
+                  <LazyChart type="bar" data={appointmentDateTrend} series={[{ key: 'bookings', name: '预约数' }]} />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="按时间段预约分布" description="基于预约记录统计">
+                  <LazyChart type="bar" data={appointmentSlotTrend} series={[{ key: 'bookings', name: '预约数' }]} />
+                </ChartPanel>
+              </Col>
+              <Col xs={24}>
+                <ChartPanel title="日期 + 时段预约矩阵" description="按预约日期和预约时段统计">
+                  {charts?.appointment?.bookingMatrix?.rows?.length ? (
+                    <AppointmentBookingMatrix matrix={charts.appointment.bookingMatrix} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无预约矩阵数据" />
+                  )}
+                </ChartPanel>
+              </Col>
             </Row>
           ) : (
             <Card className="admin-card">
