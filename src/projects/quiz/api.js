@@ -11,7 +11,6 @@ export function isUnauthorizedError(error) {
 async function quizRequest(path, options = {}) {
   const method = options.method || 'GET'
   const hasAuth = Boolean(getToken())
-  const debugEndpointType = options.skipAuth ? 'public' : 'protected'
 
   if (isQuizAuthDebugEnabled()) {
     debugLog('[QuizApiDebug] request', {
@@ -114,8 +113,8 @@ export const finishAttempt = (activityKey, attemptId) =>
 
 export const getResult = (activityKey, attemptId) => quizRequest(`/quiz/activities/${activityKey}/result/${attemptId}`)
 
-export const getRank = (activityKey, page = 1, pageSize = 50) =>
-  quizRequest(`/quiz/activities/${activityKey}/rank?page=${page}&pageSize=${pageSize}`, { skipAuth: true })
+export const getRank = (activityKey, offset = 0, limit = 50) =>
+  quizRequest(`/quiz/activities/${activityKey}/rank?offset=${offset}&limit=${limit}`, { skipAuth: true })
 
 export const resetDemoActivity = (activityKey) =>
   quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {

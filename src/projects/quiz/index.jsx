@@ -37,6 +37,7 @@ import './quiz.css'
 
 const DEFAULT_ACTIVITY_KEY = 'quiz_demo_dragon_boat'
 const FEEDBACK_DELAY_MS = 1500
+const QUIZ_RANK_PAGE_SIZE = 50
 
 export default function QuizApp() {
   const layoutPreview = getQueryParam('layout') === '1'
@@ -64,13 +65,17 @@ function QuizMain() {
   const [activeAttemptId, setActiveAttemptId] = useState(null)
   const [resultAttemptId, setResultAttemptId] = useState(null)
   const [ranks, setRanks] = useState([])
+  const [rankOffset, setRankOffset] = useState(0)
+  const [rankHasMore, setRankHasMore] = useState(true)
   const [rankLoading, setRankLoading] = useState(false)
+  const [rankError, setRankError] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState(null)
   const [toast, setToast] = useState('')
   const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
+  const rankRequestRef = useRef(false)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -357,17 +362,61 @@ function QuizMain() {
   }
 
   async function openRank() {
+    setPage('rank')
+    await loadRankPage({ reset: true })
+  }
+
+  const loadRankPage = useCallback(async ({ reset = false } = {}) => {
+    if (rankRequestRef.current) return
+    if (!reset && !rankHasMore) return
+
+    const requestOffset = reset ? 0 : rankOffset
+    rankRequestRef.current = true
     setRankLoading(true)
+    setRankError('')
+
     try {
-      const data = await getRank(activityKey)
-      setRanks(data?.list || [])
-      setPage('rank')
+      const data = await getRank(activityKey, requestOffset, QUIZ_RANK_PAGE_SIZE)
+      const incomingItems = Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.list)
+          ? data.list
+          : []
+
+      setRanks((current) => {
+        if (reset) return incomingItems
+
+        const seen = new Set(
+          current.map((item) => item.userId || item.participantId || `${item.rank}-${item.participantName}-${item.totalScore}-${item.totalTimeMs}`),
+        )
+        const next = [...current]
+        incomingItems.forEach((item) => {
+          const key = item.userId || item.participantId || `${item.rank}-${item.participantName}-${item.totalScore}-${item.totalTimeMs}`
+          if (seen.has(key)) return
+          seen.add(key)
+          next.push(item)
+        })
+        return next
+      })
+
+      const resolvedNextOffset = Number.isFinite(Number(data?.nextOffset))
+        ? Number(data.nextOffset)
+        : requestOffset + incomingItems.length
+      const resolvedTotal = Number.isFinite(Number(data?.total)) ? Number(data.total) : requestOffset + incomingItems.length
+      const resolvedHasMore = typeof data?.hasMore === 'boolean'
+        ? data.hasMore
+        : resolvedNextOffset < resolvedTotal
+
+      setRankOffset(resolvedNextOffset)
+      setRankHasMore(resolvedHasMore)
     } catch (err) {
-      showError(err)
+      setRankError(err?.message || '排行榜加载失败')
+      if (reset) setRanks([])
     } finally {
+      rankRequestRef.current = false
       setRankLoading(false)
     }
-  }
+  }, [activityKey, rankHasMore, rankOffset])
 
   async function handleReset() {
     if (!debug) return
@@ -451,7 +500,17 @@ function QuizMain() {
         />
       ) : null}
       {page === 'result' ? <ResultPage result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result} onOpenRank={openRank} onBack={backHome} /> : null}
-      {page === 'rank' ? <RankPage ranks={ranks} loading={rankLoading} onBack={backHome} /> : null}
+      {page === 'rank' ? (
+        <RankPage
+          ranks={ranks}
+          loading={rankLoading}
+          hasMore={rankHasMore}
+          error={rankError}
+          onLoadMore={() => loadRankPage()}
+          onRetry={() => loadRankPage({ reset: !ranks.length })}
+          onBack={backHome}
+        />
+      ) : null}
       <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} activityKey={activityKey} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />

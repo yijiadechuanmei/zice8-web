@@ -1,23 +1,22 @@
-import { useMemo } from 'react'
+import { useCallback } from 'react'
 import { formatQuizDuration, quizAssets } from '../assets'
 import DesignStage from '../components/DesignStage'
 
-export default function RankPage({ ranks, loading, onBack }) {
-  const sortedRanks = useMemo(
-    () =>
-      [...ranks]
-        .sort((left, right) => {
-          const scoreDelta = Number(right.totalScore || 0) - Number(left.totalScore || 0)
-          if (scoreDelta !== 0) return scoreDelta
-
-          const timeDelta = Number(left.totalTimeMs || 0) - Number(right.totalTimeMs || 0)
-          if (timeDelta !== 0) return timeDelta
-
-          return String(left.userId || '').localeCompare(String(right.userId || ''), 'zh-Hans-CN', { numeric: true })
-        })
-        .map((item, index) => ({ ...item, displayRank: index + 1 })),
-    [ranks],
-  )
+export default function RankPage({
+  ranks = [],
+  loading = false,
+  hasMore = false,
+  error = '',
+  onLoadMore,
+  onRetry,
+  onBack,
+}) {
+  const handleScroll = useCallback((event) => {
+    if (loading || !hasMore || !onLoadMore) return
+    const element = event.currentTarget
+    if (element.scrollTop + element.clientHeight < element.scrollHeight - 80) return
+    onLoadMore()
+  }, [hasMore, loading, onLoadMore])
 
   return (
     <main className="quiz-page quiz-rank-page flex min-h-screen w-full justify-center bg-[#143978]">
@@ -31,26 +30,18 @@ export default function RankPage({ ranks, loading, onBack }) {
           <img className="absolute left-[64px] top-[240px] h-[96px] w-[618px] object-contain" src={quizAssets.rank.tableHeader} alt="" aria-hidden="true" />
 
           <div className="quiz-rank-content absolute left-[64px] top-[290px] h-[950px] w-[618px] text-[#173f2a]">
-            {loading ? <p className="text-[22px] text-white/80">排行榜加载中...</p> : null}
-            {!loading && !sortedRanks.length ? <p className="rounded-lg bg-[#f7f4d8] px-[18px] py-[18px] text-center text-[22px] text-[#66724b]">暂无排行</p> : null}
-            {sortedRanks.length ? (
+            {!loading && !ranks.length && !error ? <p className="rounded-lg bg-[#f7f4d8] px-[18px] py-[18px] text-center text-[22px] text-[#66724b]">暂无排行</p> : null}
+            {(ranks.length || loading || error) ? (
               <div className="flex h-full flex-col">
-                {/* <div className="grid h-[54px] grid-cols-[84px_120px_120px_140px_120px] items-center gap-[8px] px-[10px] bg-[#47803d]  text-[18px] font-extrabold text-[#fff6d3]">
-                  <span>排名</span>
-                  <span>姓名</span>
-                  <span>部门</span>
-                  <span>积分</span>
-                  <span>时间</span>
-                </div> */}
-                <div className="mt-[14px] flex flex-col gap-[10px] overflow-auto">
-                  {sortedRanks.map((item) => (
+                <div className="mt-[14px] flex flex-1 flex-col gap-[10px] overflow-auto pr-[4px]" onScroll={handleScroll}>
+                  {ranks.map((item, index) => (
                     <div
                       className={`grid min-h-[58px] grid-cols-[84px_120px_120px_120px_120px] items-stretch gap-[8px] rounded-2xl px-[10px] py-[8px] text-[22px] ${
-                        item.displayRank <= 3 ? 'bg-[rgba(249,242,181,0.96)]' : 'bg-[rgba(255,250,237,0.92)]'
+                        Number(item.rank || index + 1) <= 3 ? 'bg-[rgba(249,242,181,0.96)]' : 'bg-[rgba(255,250,237,0.92)]'
                       }`}
-                      key={`${item.displayRank}-${item.userId}`}
+                      key={`${item.rank || index + 1}-${item.userId || item.participantId || index}`}
                     >
-                      <strong className="flex items-center justify-center text-center text-[28px] font-black text-[#8a5d00]">{item.displayRank}</strong>
+                      <strong className="flex items-center justify-center text-center text-[28px] font-black text-[#8a5d00]">{Number(item.rank || index + 1)}</strong>
                       <span className="flex items-center justify-center text-center whitespace-normal break-words leading-[1.2]">
                         {item.participantName || item.name || '未填写'}
                       </span>
@@ -61,6 +52,19 @@ export default function RankPage({ ranks, loading, onBack }) {
                       <span className="flex items-center justify-center text-center">{formatQuizDuration(item.totalTimeMs)}</span>
                     </div>
                   ))}
+                  {loading ? <p className="py-[10px] text-center text-[20px] text-white/80">加载中...</p> : null}
+                  {!loading && error ? (
+                    <button
+                      className="rounded-lg bg-[rgba(255,250,237,0.92)] px-[18px] py-[12px] text-[20px] text-[#8a5d00]"
+                      type="button"
+                      onClick={onRetry}
+                    >
+                      加载失败，点击重试
+                    </button>
+                  ) : null}
+                  {!loading && !error && !hasMore && ranks.length ? (
+                    <p className="py-[10px] text-center text-[20px] text-white/80">已显示全部</p>
+                  ) : null}
                 </div>
               </div>
             ) : null}
