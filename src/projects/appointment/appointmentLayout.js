@@ -74,26 +74,6 @@ export const APPOINTMENT_LAYOUT = {
       width: 132,
       height: 132,
     },
-    texts: [
-      {
-        key: 'signup-date',
-        left: 172,
-        top: 645,
-        width: 406,
-        height: 124,
-        className: 'appointment-intro-time',
-        lines: ['2026年6月15日--17日', '10:00--16：00'],
-      },
-      {
-        key: 'event-date',
-        left: 160,
-        top: 890,
-        width: 430,
-        height: 196,
-        className: 'appointment-intro-time',
-        lines: ['2026年6月22日--30日', '共9天', '每天9:30-17:30'],
-      },
-    ],
   },
   rule: {
     height: APPOINTMENT_STAGE_HEIGHT,

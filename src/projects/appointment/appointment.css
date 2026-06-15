@@ -4,8 +4,11 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: #1d0500;
+  background-color: #1d0500;
   color: #ffffff;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
 }
 
 .appointment-stage-shell {
@@ -41,49 +44,14 @@
   -webkit-user-drag: none;
 }
 
-.appointment-intro-time {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  line-height: 1.24;
-  font-size: 33px;
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 4px 16px rgba(72, 12, 0, 0.32);
-}
-
 .appointment-qrcode-box {
   position: absolute;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  color: #4a1807;
-  font-size: 16px;
-  line-height: 1.2;
-}
-
-.appointment-qrcode-box::before,
-.appointment-qrcode-box::after {
-  content: '';
-  position: absolute;
-  inset: 12px;
-  border: 6px solid #111111;
-}
-
-.appointment-qrcode-box::after {
-  inset: 30px;
-  border-width: 4px;
-}
-
-.appointment-qrcode-box span {
-  position: relative;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.88);
-  padding: 4px 8px;
+  padding: 6px;
+  box-sizing: border-box;
 }
 
 .appointment-stage-input,
@@ -196,7 +164,9 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: radial-gradient(circle at top, #e55d24 0%, #842108 46%, #1d0500 100%);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
 }
 
 .appointment-mobile-picker .adm-popup-body {

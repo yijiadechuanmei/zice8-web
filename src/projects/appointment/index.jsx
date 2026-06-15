@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Picker } from 'antd-mobile'
 import 'antd-mobile/es/global'
+import { QRCodeSVG } from 'qrcode.react'
 import { setToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -40,6 +41,7 @@ export default function AppointmentApp({ routeParams }) {
 
 function AppointmentMain({ routeParams }) {
   const activityKey = routeParams?.activityKey || getQueryParam('activity_key') || ''
+  const [pageUrl, setPageUrl] = useState('')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [config, setConfig] = useState(null)
@@ -67,6 +69,11 @@ function AppointmentMain({ routeParams }) {
 
   useEffect(() => {
     return () => window.clearTimeout(toastTimerRef.current)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setPageUrl(window.location.href)
   }, [])
 
   useEffect(() => {
@@ -220,13 +227,18 @@ function AppointmentMain({ routeParams }) {
     setActivePicker(fieldKey)
   }
 
-  if (loading) return <StateMessage message="活动加载中..." />
-  if (blockedMessage) return <StateMessage message={blockedMessage} />
-  if (error) return <StateMessage message={error} />
-  if (!config) return <StateMessage message="活动配置缺失" />
+  if (loading) return <StateMessage message="活动加载中..." backgroundUrl={backgroundUrl} />
+  if (blockedMessage) return <StateMessage message={blockedMessage} backgroundUrl={backgroundUrl} />
+  if (error) return <StateMessage message={error} backgroundUrl={backgroundUrl} />
+  if (!config) return <StateMessage message="活动配置缺失" backgroundUrl={backgroundUrl} />
 
   return (
-    <div className="appointment-page">
+    <div
+      className="appointment-page"
+      style={{
+        backgroundImage: `url(${backgroundUrl})`,
+      }}
+    >
       <div className="appointment-stage-shell">
         <div
           className="appointment-stage"
@@ -251,7 +263,7 @@ function AppointmentMain({ routeParams }) {
           />
 
           {step === STEPS.INTRO ? (
-            <IntroStage assetsBaseUrl={assetsBaseUrl} />
+            <IntroStage assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
           ) : null}
 
           {step === STEPS.RULE ? (
@@ -333,7 +345,7 @@ function AppointmentMain({ routeParams }) {
   )
 }
 
-function IntroStage({ assetsBaseUrl }) {
+function IntroStage({ assetsBaseUrl, pageUrl }) {
   return (
     <>
       {APPOINTMENT_LAYOUT.intro.images.map((image) => (
@@ -344,20 +356,18 @@ function IntroStage({ assetsBaseUrl }) {
           alt=""
         />
       ))}
-      {APPOINTMENT_LAYOUT.intro.texts.map((text) => (
-        <div
-          key={text.key}
-          className={text.className}
-          style={toAbsoluteStyle(text)}
-        >
-          {text.lines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
+      {pageUrl ? (
+        <div className="appointment-qrcode-box" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.intro.qrcodeBox)}>
+          <QRCodeSVG
+            value={pageUrl}
+            size={120}
+            bgColor="#ffffff"
+            fgColor="#000000"
+            includeMargin={false}
+            level="M"
+          />
         </div>
-      ))}
-      <div className="appointment-qrcode-box" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.intro.qrcodeBox)}>
-        <span>二维码占位</span>
-      </div>
+      ) : null}
     </>
   )
 }
@@ -624,9 +634,14 @@ function ImageSubmitButton({ src, box, alt, disabled }) {
   )
 }
 
-function StateMessage({ message }) {
+function StateMessage({ message, backgroundUrl }) {
   return (
-    <div className="appointment-state">
+    <div
+      className="appointment-state"
+      style={{
+        backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : undefined,
+      }}
+    >
       <div className="max-w-xs rounded-[28px] bg-black/20 px-6 py-5 text-center text-lg font-medium tracking-[0.02em] text-white shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
         {message}
       </div>
