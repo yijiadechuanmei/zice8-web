@@ -65,6 +65,7 @@ function AppointmentMain({ routeParams }) {
   const [activePicker, setActivePicker] = useState('')
   const [pickerDraftValue, setPickerDraftValue] = useState('')
   const toastTimerRef = useRef(0)
+  const introTouchRef = useRef({ x: 0, y: 0 })
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -239,7 +240,31 @@ function AppointmentMain({ routeParams }) {
     setActivePicker(fieldKey)
   }
 
-  if (loading) return <StateMessage message="活动加载中..." backgroundUrl={backgroundUrl} />
+  function goToRule() {
+    if (step !== STEPS.INTRO || toastMessage || activePicker || submitting) return
+    setStep(STEPS.RULE)
+  }
+
+  function handleIntroTouchStart(event) {
+    if (step !== STEPS.INTRO || toastMessage || activePicker || submitting) return
+    const touch = event.touches?.[0]
+    if (!touch) return
+    introTouchRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  function handleIntroTouchEnd(event) {
+    if (step !== STEPS.INTRO || toastMessage || activePicker || submitting) return
+    const touch = event.changedTouches?.[0]
+    if (!touch) return
+    const deltaX = touch.clientX - introTouchRef.current.x
+    const deltaY = touch.clientY - introTouchRef.current.y
+    if (Math.abs(deltaX) > 36) return
+    if (deltaY <= -45) {
+      goToRule()
+    }
+  }
+
+  if (loading) return <LoadingScreen backgroundUrl={backgroundUrl} />
   if (blockedMessage) return <StateMessage message={blockedMessage} backgroundUrl={backgroundUrl} />
   if (error) return <StateMessage message={error} backgroundUrl={backgroundUrl} />
   if (!config) return <StateMessage message="活动配置缺失" backgroundUrl={backgroundUrl} />
@@ -260,64 +285,68 @@ function AppointmentMain({ routeParams }) {
             transform: `translate(-50%, -50%) scale(${stageMetrics.scale})`,
             backgroundImage: `url(${backgroundUrl})`,
           }}
-          onClick={step === STEPS.INTRO ? () => setStep(STEPS.RULE) : undefined}
+          onClick={step === STEPS.INTRO ? goToRule : undefined}
           role={step === STEPS.INTRO ? 'button' : undefined}
           tabIndex={step === STEPS.INTRO ? 0 : undefined}
           onKeyDown={step === STEPS.INTRO ? (event) => {
-            if (event.key === 'Enter' || event.key === ' ') setStep(STEPS.RULE)
+            if (event.key === 'Enter' || event.key === ' ') goToRule()
           } : undefined}
+          onTouchStart={step === STEPS.INTRO ? handleIntroTouchStart : undefined}
+          onTouchEnd={step === STEPS.INTRO ? handleIntroTouchEnd : undefined}
         >
-          <LayerImage
-            className="appointment-stage__banner"
-            src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.topBanner.filename)}
-            box={APPOINTMENT_LAYOUT.common.topBanner}
-            alt=""
-          />
-
-          {step === STEPS.INTRO ? (
-            <IntroStage assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
-          ) : null}
-
-          {step === STEPS.RULE ? (
-            <RuleStage assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
-          ) : null}
-
-          {step === STEPS.VERIFY ? (
-            <VerifyStage
-              assetsBaseUrl={assetsBaseUrl}
-              verifyForm={verifyForm}
-              setVerifyForm={setVerifyForm}
-              submitting={submitting}
-              onSubmit={handleVerifySubmit}
-              onPrev={() => setStep(STEPS.RULE)}
+          <div key={step} className="appointment-step-fade">
+            <LayerImage
+              className="appointment-stage__banner"
+              src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.topBanner.filename)}
+              box={APPOINTMENT_LAYOUT.common.topBanner}
+              alt=""
             />
-          ) : null}
 
-          {step === STEPS.BOOKING ? (
-            <BookingStage
-              assetsBaseUrl={assetsBaseUrl}
-              bookingForm={bookingForm}
-              setBookingForm={setBookingForm}
-              bookingDateOptions={bookingDateOptions}
-              bookingSlotOptions={bookingSlotOptions}
-              submitting={submitting}
-              onSubmit={handleBookingSubmit}
-              onPrev={() => setStep(STEPS.VERIFY)}
-              onOpenDatePicker={() => openPicker(PICKERS.DATE)}
-              onOpenSlotPicker={() => openPicker(PICKERS.SLOT)}
-            />
-          ) : null}
+            {step === STEPS.INTRO ? (
+              <IntroStage assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
+            ) : null}
 
-          {step === STEPS.SUCCESS ? (
-            <SuccessStage
-              assetsBaseUrl={assetsBaseUrl}
-              name={successBooking?.name || verifyForm.name || ''}
-              houseKey={successBooking?.houseKey || verifyHouseKey(verifyForm) || '请以现场安排为准'}
-              appointmentDate={successBooking?.appointmentDate || bookingForm.appointmentDate || '请以现场安排为准'}
-              appointmentSlot={successBooking?.appointmentSlot || bookingForm.appointmentSlot || '请以现场安排为准'}
-              onConfirm={() => window.location.reload()}
-            />
-          ) : null}
+            {step === STEPS.RULE ? (
+              <RuleStage assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
+            ) : null}
+
+            {step === STEPS.VERIFY ? (
+              <VerifyStage
+                assetsBaseUrl={assetsBaseUrl}
+                verifyForm={verifyForm}
+                setVerifyForm={setVerifyForm}
+                submitting={submitting}
+                onSubmit={handleVerifySubmit}
+                onPrev={() => setStep(STEPS.RULE)}
+              />
+            ) : null}
+
+            {step === STEPS.BOOKING ? (
+              <BookingStage
+                assetsBaseUrl={assetsBaseUrl}
+                bookingForm={bookingForm}
+                setBookingForm={setBookingForm}
+                bookingDateOptions={bookingDateOptions}
+                bookingSlotOptions={bookingSlotOptions}
+                submitting={submitting}
+                onSubmit={handleBookingSubmit}
+                onPrev={() => setStep(STEPS.VERIFY)}
+                onOpenDatePicker={() => openPicker(PICKERS.DATE)}
+                onOpenSlotPicker={() => openPicker(PICKERS.SLOT)}
+              />
+            ) : null}
+
+            {step === STEPS.SUCCESS ? (
+              <SuccessStage
+                assetsBaseUrl={assetsBaseUrl}
+                name={successBooking?.name || verifyForm.name || ''}
+                houseKey={successBooking?.houseKey || verifyHouseKey(verifyForm) || '请以现场安排为准'}
+                appointmentDate={successBooking?.appointmentDate || bookingForm.appointmentDate || '请以现场安排为准'}
+                appointmentSlot={successBooking?.appointmentSlot || bookingForm.appointmentSlot || '请以现场安排为准'}
+                onConfirm={() => window.location.reload()}
+              />
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -568,6 +597,7 @@ function BookingStage({
 
 function SuccessStage({ assetsBaseUrl, name, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
   const dateSlotText = [appointmentDate, appointmentSlot].filter(Boolean).join('\n')
+  const successTitleLine = [name, houseKey].filter(Boolean).join('    ')
 
   return (
     <>
@@ -594,8 +624,7 @@ function SuccessStage({ assetsBaseUrl, name, houseKey, appointmentDate, appointm
       })}
 
       <div className="appointment-success-primary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[0])}>
-        <span className="appointment-success-name">{name || ''}</span>
-        <span className="appointment-success-house">{houseKey || '请以现场安排为准'}</span>
+        {successTitleLine || houseKey || '请以现场安排为准'}
       </div>
       <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[1])}>
         {APPOINTMENT_LAYOUT.success.textBlocks[1].lines?.[0] || '您的预约时间为'}
@@ -660,6 +689,21 @@ function StateMessage({ message, backgroundUrl }) {
     >
       <div className="max-w-xs rounded-[28px] bg-black/20 px-6 py-5 text-center text-lg font-medium tracking-[0.02em] text-white shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
         {message}
+      </div>
+    </div>
+  )
+}
+
+function LoadingScreen({ backgroundUrl }) {
+  return (
+    <div
+      className="appointment-state"
+      style={{
+        backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : undefined,
+      }}
+    >
+      <div className="appointment-loading-bar" aria-hidden="true">
+        <div className="appointment-loading-bar__fill" />
       </div>
     </div>
   )
