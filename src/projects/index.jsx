@@ -1,6 +1,16 @@
 import { lazy } from 'react'
 
+const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
+
 export const projectRoutes = [
+  {
+    path: '/phase-quiz-lottery/:activityKey',
+    Component: PhaseQuizLotteryProject,
+  },
+  {
+    path: '/phase-quiz-lottery/:activityKey/:page',
+    Component: PhaseQuizLotteryProject,
+  },
   {
     path: '/appointment/:activityKey',
     Component: lazy(() => import('./appointment/index.jsx')),
