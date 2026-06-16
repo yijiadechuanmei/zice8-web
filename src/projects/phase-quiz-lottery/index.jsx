@@ -156,48 +156,62 @@ function resolvePrizeName(model, draw, myPrize) {
 }
 
 const ADDRESS_OPTIONS = [
-  {
-    province: '广东省',
-    cities: [
-      { city: '广州市', districts: ['越秀区', '海珠区', '荔湾区', '天河区', '白云区', '黄埔区', '番禺区'] },
-      { city: '深圳市', districts: ['福田区', '罗湖区', '南山区', '宝安区', '龙岗区', '龙华区'] },
-      { city: '佛山市', districts: ['禅城区', '南海区', '顺德区', '三水区', '高明区'] },
-      { city: '东莞市', districts: ['莞城区', '东城区', '南城区', '万江区'] },
-    ],
-  },
-  {
-    province: '北京市',
-    cities: [{ city: '北京市', districts: ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '通州区'] }],
-  },
-  {
-    province: '上海市',
-    cities: [{ city: '上海市', districts: ['黄浦区', '徐汇区', '静安区', '浦东新区', '闵行区', '宝山区'] }],
-  },
-  {
-    province: '浙江省',
-    cities: [
-      { city: '杭州市', districts: ['上城区', '拱墅区', '西湖区', '滨江区', '萧山区', '余杭区'] },
-      { city: '宁波市', districts: ['海曙区', '江北区', '北仑区', '镇海区', '鄞州区'] },
-    ],
-  },
-  {
-    province: '江苏省',
-    cities: [
-      { city: '南京市', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区', '江宁区'] },
-      { city: '苏州市', districts: ['姑苏区', '虎丘区', '吴中区', '相城区', '吴江区'] },
-    ],
-  },
+  { province: '北京市', cities: [{ city: '北京市', districts: ['东城区', '西城区', '朝阳区', '丰台区', '石景山区', '海淀区', '门头沟区', '房山区', '通州区', '顺义区', '昌平区', '大兴区', '怀柔区', '平谷区', '密云区', '延庆区'] }] },
+  { province: '天津市', cities: [{ city: '天津市', districts: ['和平区', '河东区', '河西区', '南开区', '河北区', '红桥区', '东丽区', '西青区', '津南区', '北辰区', '武清区', '宝坻区', '滨海新区', '宁河区', '静海区', '蓟州区'] }] },
+  { province: '河北省', cities: ['石家庄市', '唐山市', '秦皇岛市', '邯郸市', '邢台市', '保定市', '张家口市', '承德市', '沧州市', '廊坊市', '衡水市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '山西省', cities: ['太原市', '大同市', '阳泉市', '长治市', '晋城市', '朔州市', '晋中市', '运城市', '忻州市', '临汾市', '吕梁市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '内蒙古自治区', cities: ['呼和浩特市', '包头市', '乌海市', '赤峰市', '通辽市', '鄂尔多斯市', '呼伦贝尔市', '巴彦淖尔市', '乌兰察布市', '兴安盟', '锡林郭勒盟', '阿拉善盟'].map((city) => ({ city, districts: ['市辖区', '旗县区'] })) },
+  { province: '辽宁省', cities: ['沈阳市', '大连市', '鞍山市', '抚顺市', '本溪市', '丹东市', '锦州市', '营口市', '阜新市', '辽阳市', '盘锦市', '铁岭市', '朝阳市', '葫芦岛市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '吉林省', cities: ['长春市', '吉林市', '四平市', '辽源市', '通化市', '白山市', '松原市', '白城市', '延边朝鲜族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '黑龙江省', cities: ['哈尔滨市', '齐齐哈尔市', '鸡西市', '鹤岗市', '双鸭山市', '大庆市', '伊春市', '佳木斯市', '七台河市', '牡丹江市', '黑河市', '绥化市', '大兴安岭地区'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '上海市', cities: [{ city: '上海市', districts: ['黄浦区', '徐汇区', '长宁区', '静安区', '普陀区', '虹口区', '杨浦区', '闵行区', '宝山区', '嘉定区', '浦东新区', '金山区', '松江区', '青浦区', '奉贤区', '崇明区'] }] },
+  { province: '江苏省', cities: ['南京市', '无锡市', '徐州市', '常州市', '苏州市', '南通市', '连云港市', '淮安市', '盐城市', '扬州市', '镇江市', '泰州市', '宿迁市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '浙江省', cities: ['杭州市', '宁波市', '温州市', '嘉兴市', '湖州市', '绍兴市', '金华市', '衢州市', '舟山市', '台州市', '丽水市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '安徽省', cities: ['合肥市', '芜湖市', '蚌埠市', '淮南市', '马鞍山市', '淮北市', '铜陵市', '安庆市', '黄山市', '滁州市', '阜阳市', '宿州市', '六安市', '亳州市', '池州市', '宣城市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '福建省', cities: ['福州市', '厦门市', '莆田市', '三明市', '泉州市', '漳州市', '南平市', '龙岩市', '宁德市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '江西省', cities: ['南昌市', '景德镇市', '萍乡市', '九江市', '新余市', '鹰潭市', '赣州市', '吉安市', '宜春市', '抚州市', '上饶市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '山东省', cities: ['济南市', '青岛市', '淄博市', '枣庄市', '东营市', '烟台市', '潍坊市', '济宁市', '泰安市', '威海市', '日照市', '临沂市', '德州市', '聊城市', '滨州市', '菏泽市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '河南省', cities: ['郑州市', '开封市', '洛阳市', '平顶山市', '安阳市', '鹤壁市', '新乡市', '焦作市', '濮阳市', '许昌市', '漯河市', '三门峡市', '南阳市', '商丘市', '信阳市', '周口市', '驻马店市', '济源市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '湖北省', cities: ['武汉市', '黄石市', '十堰市', '宜昌市', '襄阳市', '鄂州市', '荆门市', '孝感市', '荆州市', '黄冈市', '咸宁市', '随州市', '恩施土家族苗族自治州', '仙桃市', '潜江市', '天门市', '神农架林区'].map((city) => ({ city, districts: ['市辖区', '县市区'] })) },
+  { province: '湖南省', cities: ['长沙市', '株洲市', '湘潭市', '衡阳市', '邵阳市', '岳阳市', '常德市', '张家界市', '益阳市', '郴州市', '永州市', '怀化市', '娄底市', '湘西土家族苗族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '广东省', cities: ['广州市', '韶关市', '深圳市', '珠海市', '汕头市', '佛山市', '江门市', '湛江市', '茂名市', '肇庆市', '惠州市', '梅州市', '汕尾市', '河源市', '阳江市', '清远市', '东莞市', '中山市', '潮州市', '揭阳市', '云浮市'].map((city) => ({ city, districts: city === '广州市' ? ['越秀区', '海珠区', '荔湾区', '天河区', '白云区', '黄埔区', '番禺区', '南沙区', '从化区', '增城区'] : city === '深圳市' ? ['福田区', '罗湖区', '南山区', '宝安区', '龙岗区', '盐田区', '龙华区', '坪山区', '光明区'] : ['市辖区', '镇街区'] })) },
+  { province: '广西壮族自治区', cities: ['南宁市', '柳州市', '桂林市', '梧州市', '北海市', '防城港市', '钦州市', '贵港市', '玉林市', '百色市', '贺州市', '河池市', '来宾市', '崇左市'].map((city) => ({ city, districts: ['市辖区', '县', '自治县'] })) },
+  { province: '海南省', cities: ['海口市', '三亚市', '三沙市', '儋州市', '五指山市', '琼海市', '文昌市', '万宁市', '东方市', '定安县', '屯昌县', '澄迈县', '临高县', '白沙黎族自治县', '昌江黎族自治县', '乐东黎族自治县', '陵水黎族自治县', '保亭黎族苗族自治县', '琼中黎族苗族自治县'].map((city) => ({ city, districts: ['市辖区', '县域'] })) },
+  { province: '重庆市', cities: [{ city: '重庆市', districts: ['万州区', '涪陵区', '渝中区', '大渡口区', '江北区', '沙坪坝区', '九龙坡区', '南岸区', '北碚区', '綦江区', '大足区', '渝北区', '巴南区', '黔江区', '长寿区', '江津区', '合川区', '永川区', '南川区', '璧山区', '铜梁区', '潼南区', '荣昌区', '开州区', '梁平区', '武隆区', '县'] }] },
+  { province: '四川省', cities: ['成都市', '自贡市', '攀枝花市', '泸州市', '德阳市', '绵阳市', '广元市', '遂宁市', '内江市', '乐山市', '南充市', '眉山市', '宜宾市', '广安市', '达州市', '雅安市', '巴中市', '资阳市', '阿坝藏族羌族自治州', '甘孜藏族自治州', '凉山彝族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '贵州省', cities: ['贵阳市', '六盘水市', '遵义市', '安顺市', '毕节市', '铜仁市', '黔西南布依族苗族自治州', '黔东南苗族侗族自治州', '黔南布依族苗族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '自治县'] })) },
+  { province: '云南省', cities: ['昆明市', '曲靖市', '玉溪市', '保山市', '昭通市', '丽江市', '普洱市', '临沧市', '楚雄彝族自治州', '红河哈尼族彝族自治州', '文山壮族苗族自治州', '西双版纳傣族自治州', '大理白族自治州', '德宏傣族景颇族自治州', '怒江傈僳族自治州', '迪庆藏族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '自治县'] })) },
+  { province: '西藏自治区', cities: ['拉萨市', '日喀则市', '昌都市', '林芝市', '山南市', '那曲市', '阿里地区'].map((city) => ({ city, districts: ['市辖区', '县'] })) },
+  { province: '陕西省', cities: ['西安市', '铜川市', '宝鸡市', '咸阳市', '渭南市', '延安市', '汉中市', '榆林市', '安康市', '商洛市'].map((city) => ({ city, districts: ['市辖区', '县', '县级市'] })) },
+  { province: '甘肃省', cities: ['兰州市', '嘉峪关市', '金昌市', '白银市', '天水市', '武威市', '张掖市', '平凉市', '酒泉市', '庆阳市', '定西市', '陇南市', '临夏回族自治州', '甘南藏族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '自治县'] })) },
+  { province: '青海省', cities: ['西宁市', '海东市', '海北藏族自治州', '黄南藏族自治州', '海南藏族自治州', '果洛藏族自治州', '玉树藏族自治州', '海西蒙古族藏族自治州'].map((city) => ({ city, districts: ['市辖区', '县', '自治县'] })) },
+  { province: '宁夏回族自治区', cities: ['银川市', '石嘴山市', '吴忠市', '固原市', '中卫市'].map((city) => ({ city, districts: ['市辖区', '县'] })) },
+  { province: '新疆维吾尔自治区', cities: ['乌鲁木齐市', '克拉玛依市', '吐鲁番市', '哈密市', '昌吉回族自治州', '博尔塔拉蒙古自治州', '巴音郭楞蒙古自治州', '阿克苏地区', '克孜勒苏柯尔克孜自治州', '喀什地区', '和田地区', '伊犁哈萨克自治州', '塔城地区', '阿勒泰地区', '石河子市', '阿拉尔市', '图木舒克市', '五家渠市', '北屯市', '铁门关市', '双河市', '可克达拉市', '昆玉市', '胡杨河市', '新星市', '白杨市'].map((city) => ({ city, districts: ['市辖区', '县市区'] })) },
+  { province: '香港特别行政区', cities: [{ city: '香港特别行政区', districts: ['中西区', '湾仔区', '东区', '南区', '油尖旺区', '深水埗区', '九龙城区', '黄大仙区', '观塘区', '荃湾区', '屯门区', '元朗区', '北区', '大埔区', '西贡区', '沙田区', '葵青区', '离岛区'] }] },
+  { province: '澳门特别行政区', cities: [{ city: '澳门特别行政区', districts: ['花地玛堂区', '圣安多尼堂区', '大堂区', '望德堂区', '风顺堂区', '嘉模堂区', '路氹填海区', '圣方济各堂区'] }] },
+  { province: '台湾省', cities: ['台北市', '新北市', '桃园市', '台中市', '台南市', '高雄市', '基隆市', '新竹市', '嘉义市', '新竹县', '苗栗县', '彰化县', '南投县', '云林县', '嘉义县', '屏东县', '宜兰县', '花莲县', '台东县', '澎湖县', '金门县', '连江县'].map((city) => ({ city, districts: ['区', '乡镇市区'] })) },
 ]
 
 function getInitialAddressParts() {
   const province = ADDRESS_OPTIONS[0]
-  const city = province.cities[0]
   return {
     province: province.province,
-    city: city.city,
-    district: city.districts[0],
+    city: '',
+    district: '',
     detailAddress: '',
   }
+}
+
+function getProvinceOption(provinceName) {
+  return ADDRESS_OPTIONS.find((item) => item.province === provinceName) || null
+}
+
+function getCityOptions(provinceName) {
+  return getProvinceOption(provinceName)?.cities || []
+}
+
+function getDistrictOptions(provinceName, cityName) {
+  return getCityOptions(provinceName).find((item) => item.city === cityName)?.districts || []
 }
 
 function composeRecipientAddress(form) {
@@ -352,12 +366,6 @@ function PrizeModalContent({
         </div>
       ) : null}
 
-      {claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? (
-        <div className="flex justify-center">
-          <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">已核销</span>
-        </div>
-      ) : null}
-
       {!claim || claim.status === CLAIM_STATUS.PENDING_METHOD ? (
         <>
           <div className="grid grid-cols-2 gap-2">
@@ -402,42 +410,43 @@ function PrizeModalContent({
                   className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.province}
                   onChange={(event) => {
-                    const province = ADDRESS_OPTIONS.find((item) => item.province === event.target.value) || ADDRESS_OPTIONS[0]
-                    const city = province.cities[0]
                     setMailForm((current) => ({
                       ...current,
-                      province: province.province,
-                      city: city.city,
-                      district: city.districts[0],
+                      province: event.target.value,
+                      city: '',
+                      district: '',
                     }))
                   }}
                   aria-label="省份"
                 >
+                  <option value="">省</option>
                   {ADDRESS_OPTIONS.map((item) => <option key={item.province} value={item.province}>{item.province}</option>)}
                 </select>
                 <select
                   className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.city}
                   onChange={(event) => {
-                    const province = ADDRESS_OPTIONS.find((item) => item.province === mailForm.province) || ADDRESS_OPTIONS[0]
-                    const city = province.cities.find((item) => item.city === event.target.value) || province.cities[0]
                     setMailForm((current) => ({
                       ...current,
-                      city: city.city,
-                      district: city.districts[0],
+                      city: event.target.value,
+                      district: '',
                     }))
                   }}
+                  disabled={!mailForm.province}
                   aria-label="城市"
                 >
-                  {(ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
+                  <option value="">市</option>
+                  {getCityOptions(mailForm.province).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
                 </select>
                 <select
                   className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.district}
                   onChange={(event) => setMailForm((current) => ({ ...current, district: event.target.value }))}
+                  disabled={!mailForm.city}
                   aria-label="区县"
                 >
-                  {((ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).find((item) => item.city === mailForm.city)?.districts || []).map((district) => <option key={district} value={district}>{district}</option>)}
+                  <option value="">区</option>
+                  {getDistrictOptions(mailForm.province, mailForm.city).map((district) => <option key={district} value={district}>{district}</option>)}
                 </select>
               </div>
               <div className="grid gap-2">
@@ -465,9 +474,6 @@ function PrizeModalContent({
 
       {claim?.status === CLAIM_STATUS.PICKUP_PENDING ? (
         <div className="grid gap-3">
-          <div className="flex justify-center">
-            <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">待核销</span>
-          </div>
           <div className="grid gap-2">
             <input
               id="pql-verify"
@@ -903,7 +909,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   async function handleSubmitMailClaim() {
     if (!myPrize?.draw?.id) return
     const recipientAddress = composeRecipientAddress(mailForm)
-    if (!mailForm.recipientName.trim() || !mailForm.recipientPhone.trim() || !mailForm.detailAddress.trim()) {
+    if (!mailForm.recipientName.trim() || !mailForm.recipientPhone.trim() || !mailForm.province || !mailForm.city || !mailForm.district || !mailForm.detailAddress.trim()) {
       showToast('表单不完整')
       return
     }
