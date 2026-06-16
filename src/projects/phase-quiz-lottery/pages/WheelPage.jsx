@@ -26,7 +26,6 @@ export default function WheelPage({
         <section className="rounded-[32px] bg-white px-[32px] py-[36px] text-center shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
           <p className="text-[28px] font-medium text-slate-500">第 {phaseNo || '-'} 期</p>
           <h2 className="mt-[20px] text-[40px] font-extrabold text-slate-900">抽奖结果展示</h2>
-          <p className="mt-[18px] text-[28px] leading-[1.6] text-slate-600">转盘位置由后端结果控制，前端只负责动画与停止展示。</p>
           <Wheel
             segments={segments}
             targetIndex={draw?.wheelStopIndex}

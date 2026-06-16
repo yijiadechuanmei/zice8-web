@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const DEFAULT_SIZE = 520
-const DEFAULT_COLORS = ['#fff8e5', '#f8fbff']
-const WHEEL_SLOT_COUNT = 5
+const DEFAULT_COLORS = ['#EEF6FF', '#F7FAFF']
+const WHEEL_SLOT_COUNT = 4
 
 function getNormalizedTargetRotation(targetIndex, segmentCount) {
   const segmentAngle = 360 / segmentCount
@@ -14,6 +14,17 @@ function normalizeSegments(segments) {
     segments?.[index] || { label: '谢谢参与', background: DEFAULT_COLORS[index % DEFAULT_COLORS.length] }
   ))
   return fixedSegments
+}
+
+function getSegmentFill(context, segment, index) {
+  if (segment?.prize) {
+    const gradient = context.createLinearGradient(0, 0, DEFAULT_SIZE, DEFAULT_SIZE)
+    gradient.addColorStop(0, '#FFE7A3')
+    gradient.addColorStop(0.52, '#D9ECFF')
+    gradient.addColorStop(1, '#2F80FF')
+    return gradient
+  }
+  return segment.background || DEFAULT_COLORS[index % DEFAULT_COLORS.length]
 }
 
 function easeOutCubic(value) {
@@ -77,9 +88,9 @@ export default function Wheel({
       context.moveTo(radius, radius)
       context.arc(radius, radius, radius - 4, startAngle, endAngle)
       context.closePath()
-      context.fillStyle = segment.background || DEFAULT_COLORS[index % DEFAULT_COLORS.length]
+      context.fillStyle = getSegmentFill(context, segment, index)
       context.fill()
-      context.strokeStyle = '#d8dee8'
+      context.strokeStyle = '#D8E7FF'
       context.lineWidth = 2
       context.stroke()
 
@@ -87,8 +98,8 @@ export default function Wheel({
       context.translate(radius, radius)
       context.rotate(startAngle + segmentAngle / 2)
       context.textAlign = 'center'
-      context.fillStyle = '#171717'
-      context.font = '700 26px sans-serif'
+      context.fillStyle = segment.prize ? '#0F172A' : '#2F80FF'
+      context.font = segment.prize ? '800 26px sans-serif' : '700 26px sans-serif'
       String(segment.label || '')
         .split('\n')
         .forEach((line, lineIndex) => {
@@ -125,12 +136,8 @@ export default function Wheel({
     return () => window.cancelAnimationFrame(frameRef.current)
   }, [onFinish, reducedMotion, spinKey, targetIndex])
 
-  const drawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
   return (
     <>
-      <div className="mt-[26px] inline-flex min-h-[64px] items-center justify-center rounded-full bg-slate-100 px-[28px] text-[28px] font-bold text-slate-800">
-        抽奖次数 {drawCount} 次
-      </div>
       <div className="pql-wheel-frame mt-[30px]">
         <img className="pql-wheel-frame__ring" src={assets.wheelRing} alt="" aria-hidden="true" />
         <img className="pql-wheel-frame__pointer" src={assets.wheelPointer} alt="" aria-hidden="true" />

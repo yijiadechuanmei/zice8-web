@@ -95,6 +95,7 @@ function buildAssets() {
   return {
     bannerBackground: `${ASSET_BASE}/banner/banner_bg.png`,
     bannerBook: `${ASSET_BASE}/banner/banner_book.png`,
+    resultTrophy: `${ASSET_BASE}/result/result_trophy.png`,
     prizeBox: `${ASSET_BASE}/prize/prize_box.png`,
     wheelRing: `${ASSET_BASE}/wheel/wheel_ring.png`,
     wheelPointer: `${ASSET_BASE}/wheel/wheel_pointer.png`,
@@ -104,11 +105,10 @@ function buildAssets() {
 
 function buildWheelSegments(prizeName) {
   return [
-    { label: prizeName || '奖品', background: '#fff3d7' },
-    { label: '谢谢参与', background: '#f8fbff' },
-    { label: '谢谢参与', background: '#fff3d7' },
-    { label: '谢谢参与', background: '#f8fbff' },
-    { label: '谢谢参与', background: '#fff3d7' },
+    { label: prizeName || '奖品', prize: true },
+    { label: '谢谢参与' },
+    { label: '谢谢参与' },
+    { label: '谢谢参与' },
   ]
 }
 
@@ -153,6 +153,65 @@ function resolvePrizeName(model, draw, myPrize) {
     myPrize?.prize?.name ||
     ''
   )
+}
+
+const ADDRESS_OPTIONS = [
+  {
+    province: '广东省',
+    cities: [
+      { city: '广州市', districts: ['越秀区', '海珠区', '荔湾区', '天河区', '白云区', '黄埔区', '番禺区'] },
+      { city: '深圳市', districts: ['福田区', '罗湖区', '南山区', '宝安区', '龙岗区', '龙华区'] },
+      { city: '佛山市', districts: ['禅城区', '南海区', '顺德区', '三水区', '高明区'] },
+      { city: '东莞市', districts: ['莞城区', '东城区', '南城区', '万江区'] },
+    ],
+  },
+  {
+    province: '北京市',
+    cities: [{ city: '北京市', districts: ['东城区', '西城区', '朝阳区', '海淀区', '丰台区', '通州区'] }],
+  },
+  {
+    province: '上海市',
+    cities: [{ city: '上海市', districts: ['黄浦区', '徐汇区', '静安区', '浦东新区', '闵行区', '宝山区'] }],
+  },
+  {
+    province: '浙江省',
+    cities: [
+      { city: '杭州市', districts: ['上城区', '拱墅区', '西湖区', '滨江区', '萧山区', '余杭区'] },
+      { city: '宁波市', districts: ['海曙区', '江北区', '北仑区', '镇海区', '鄞州区'] },
+    ],
+  },
+  {
+    province: '江苏省',
+    cities: [
+      { city: '南京市', districts: ['玄武区', '秦淮区', '建邺区', '鼓楼区', '江宁区'] },
+      { city: '苏州市', districts: ['姑苏区', '虎丘区', '吴中区', '相城区', '吴江区'] },
+    ],
+  },
+]
+
+function getInitialAddressParts() {
+  const province = ADDRESS_OPTIONS[0]
+  const city = province.cities[0]
+  return {
+    province: province.province,
+    city: city.city,
+    district: city.districts[0],
+    detailAddress: '',
+  }
+}
+
+function composeRecipientAddress(form) {
+  return [form.province, form.city, form.district, form.detailAddress].filter(Boolean).join(' ')
+}
+
+function buildFallbackDraw() {
+  return {
+    status: DRAW_STATUS.LOST,
+    won: false,
+    soldOut: false,
+    alreadyDrawn: true,
+    wheelStopIndex: 1,
+  }
 }
 
 function DebugPanel({
@@ -277,16 +336,13 @@ function PrizeModalContent({
   return (
     <div className="grid gap-5">
       <div className="grid justify-items-center gap-3 text-center">
-        <img className="h-28 w-28 object-contain" src={prize.prize?.imageUrl || assets.prizeBox} alt="" aria-hidden="true" />
+        <img className="h-28 w-28 object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
         <div className="text-lg font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
         <div className="text-sm leading-6 text-slate-500">中奖时间：{drawTime}</div>
       </div>
 
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
-        <div className="grid gap-4">
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">邮寄信息已提交</span>
-          </div>
+        <div className="grid gap-3">
           <div className="whitespace-pre-line text-sm leading-7 text-slate-500">
             {`收件人：${claim.recipientName || '-'}\n手机号：${claim.recipientPhone || '-'}\n地址：${claim.recipientAddress || '-'}`}
           </div>
@@ -294,11 +350,8 @@ function PrizeModalContent({
       ) : null}
 
       {claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? (
-        <div className="grid gap-4">
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">核销已完成</span>
-          </div>
-          <div className="text-sm leading-7 text-slate-500">该奖品已完成自提核销，可截图留存。</div>
+        <div className="flex justify-center">
+          <span className="inline-flex min-h-9 w-28 items-center justify-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700">已核销</span>
         </div>
       ) : null}
 
@@ -323,34 +376,74 @@ function PrizeModalContent({
 
           {claimMode === 'mail' ? (
             <div className="grid gap-3">
-              <div className="grid gap-2">
-                <label className="text-sm font-bold text-slate-700" htmlFor="pql-name">姓名</label>
+              <div className="grid gap-3">
                 <input
                   id="pql-name"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
                   value={mailForm.recipientName}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientName: event.target.value }))}
-                  placeholder="请输入收件人姓名"
+                  placeholder="收件人姓名"
                 />
-              </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-bold text-slate-700" htmlFor="pql-phone">手机号</label>
                 <input
                   id="pql-phone"
+                  type="tel"
+                  inputMode="numeric"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
                   value={mailForm.recipientPhone}
-                  onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value }))}
-                  placeholder="支持 +86 / 空格 / 短横线"
+                  onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value.replace(/\D/g, '') }))}
+                  placeholder="手机号"
                 />
               </div>
+              <div className="grid grid-cols-3 gap-2">
+                <select
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  value={mailForm.province}
+                  onChange={(event) => {
+                    const province = ADDRESS_OPTIONS.find((item) => item.province === event.target.value) || ADDRESS_OPTIONS[0]
+                    const city = province.cities[0]
+                    setMailForm((current) => ({
+                      ...current,
+                      province: province.province,
+                      city: city.city,
+                      district: city.districts[0],
+                    }))
+                  }}
+                  aria-label="省份"
+                >
+                  {ADDRESS_OPTIONS.map((item) => <option key={item.province} value={item.province}>{item.province}</option>)}
+                </select>
+                <select
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  value={mailForm.city}
+                  onChange={(event) => {
+                    const province = ADDRESS_OPTIONS.find((item) => item.province === mailForm.province) || ADDRESS_OPTIONS[0]
+                    const city = province.cities.find((item) => item.city === event.target.value) || province.cities[0]
+                    setMailForm((current) => ({
+                      ...current,
+                      city: city.city,
+                      district: city.districts[0],
+                    }))
+                  }}
+                  aria-label="城市"
+                >
+                  {(ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
+                </select>
+                <select
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  value={mailForm.district}
+                  onChange={(event) => setMailForm((current) => ({ ...current, district: event.target.value }))}
+                  aria-label="区县"
+                >
+                  {((ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).find((item) => item.city === mailForm.city)?.districts || []).map((district) => <option key={district} value={district}>{district}</option>)}
+                </select>
+              </div>
               <div className="grid gap-2">
-                <label className="text-sm font-bold text-slate-700" htmlFor="pql-address">收货地址</label>
                 <textarea
                   id="pql-address"
                   className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
-                  value={mailForm.recipientAddress}
-                  onChange={(event) => setMailForm((current) => ({ ...current, recipientAddress: event.target.value }))}
-                  placeholder="请输入完整地址"
+                  value={mailForm.detailAddress}
+                  onChange={(event) => setMailForm((current) => ({ ...current, detailAddress: event.target.value }))}
+                  placeholder="详细地址"
                 />
               </div>
               <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
@@ -359,7 +452,6 @@ function PrizeModalContent({
             </div>
           ) : (
             <div className="grid gap-3">
-              <div className="text-sm leading-7 text-slate-500">先创建自提领奖记录，再输入核销密码完成领取。</div>
               <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
                 选择到店自提
               </button>
@@ -370,11 +462,10 @@ function PrizeModalContent({
 
       {claim?.status === CLAIM_STATUS.PICKUP_PENDING ? (
         <div className="grid gap-4">
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">待核销</span>
+          <div className="flex justify-center">
+            <span className="inline-flex min-h-9 w-28 items-center justify-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700">待核销</span>
           </div>
           <div className="grid gap-2">
-            <label className="text-sm font-bold text-slate-700" htmlFor="pql-verify">核销密码</label>
             <input
               id="pql-verify"
               type="password"
@@ -428,12 +519,14 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const [mailForm, setMailForm] = useState({
     recipientName: '',
     recipientPhone: '',
-    recipientAddress: '',
+    ...getInitialAddressParts(),
   })
   const [pickupPassword, setPickupPassword] = useState('')
   const requestCounterRef = useRef(0)
   const toastTimerRef = useRef(0)
   const scoreTimerRef = useRef(0)
+  const drawLockRef = useRef(false)
+  const lastDrawClickRef = useRef(0)
   const assets = useMemo(() => buildAssets(), [])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
@@ -717,6 +810,10 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   async function handleDraw() {
     if (!model?.eligibleForDraw || !model?.attempt?.attemptId) return
+    const now = Date.now()
+    if (drawing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
+    lastDrawClickRef.current = now
+    drawLockRef.current = true
 
     setDrawing(true)
     try {
@@ -727,25 +824,38 @@ function PhaseQuizLotteryMain({ routeParams }) {
           }),
         'phase-quiz-draw',
       )
-      if (!data) return
+      if (!data) {
+        setDrawing(false)
+        return
+      }
 
-      setDraw(data)
-      patchModelWithDraw(data)
-      if (Number.isInteger(data.wheelStopIndex)) {
+      const nextDraw = Number.isInteger(data.wheelStopIndex) && data.wheelStopIndex >= 0 && data.wheelStopIndex < 4
+        ? data
+        : buildFallbackDraw()
+
+      setDraw(nextDraw)
+      patchModelWithDraw(nextDraw)
+      if (Number.isInteger(nextDraw.wheelStopIndex)) {
         setSpinKey((value) => value + 1)
         return
       }
 
       setDrawing(false)
       setStep(STEP.RESULT)
-      if (data.status === DRAW_STATUS.STOCK_EMPTY) {
+      if (nextDraw.status === DRAW_STATUS.STOCK_EMPTY) {
         showToast('本期已抽完')
         return
       }
       showToast('谢谢参与')
     } catch (error) {
-      showToast(normalizeFriendlyMessage(error, '抽奖失败'))
-      setDrawing(false)
+      console.warn('[phase-quiz-lottery draw fallback]', error)
+      const fallbackDraw = buildFallbackDraw()
+      setDraw(fallbackDraw)
+      patchModelWithDraw(fallbackDraw)
+      setSpinKey((value) => value + 1)
+      showToast('谢谢参与')
+    } finally {
+      drawLockRef.current = false
     }
   }
 
@@ -763,7 +873,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
         setMailForm({
           recipientName: data.claim.recipientName || '',
           recipientPhone: data.claim.recipientPhone || '',
-          recipientAddress: data.claim.recipientAddress || '',
+          ...getInitialAddressParts(),
+          detailAddress: data.claim.recipientAddress || '',
         })
       }
     } catch (error) {
@@ -782,7 +893,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   async function handleSubmitMailClaim() {
     if (!myPrize?.draw?.id) return
-    if (!mailForm.recipientName.trim() || !mailForm.recipientPhone.trim() || !mailForm.recipientAddress.trim()) {
+    const recipientAddress = composeRecipientAddress(mailForm)
+    if (!mailForm.recipientName.trim() || !mailForm.recipientPhone.trim() || !mailForm.detailAddress.trim()) {
       showToast('表单不完整')
       return
     }
@@ -796,7 +908,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
             deliveryMethod: 'mail',
             recipientName: mailForm.recipientName,
             recipientPhone: mailForm.recipientPhone,
-            recipientAddress: mailForm.recipientAddress,
+            recipientAddress,
           }),
         'phase-quiz-claim-mail',
       )
