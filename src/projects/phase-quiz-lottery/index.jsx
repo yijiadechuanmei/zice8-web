@@ -78,13 +78,13 @@ function PrizeModal({ open, onClose, children }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/35 px-4 py-5 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
       <div
-        className="relative max-h-[70vh] w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white px-5 py-5 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
+        className="relative max-h-[70vh] w-[min(92vw,360px)] max-w-[360px] overflow-y-auto rounded-[24px] bg-white px-4 py-4 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button className="absolute right-4 top-4 h-9 w-9 cursor-pointer rounded-full bg-slate-100 text-xl text-slate-700" type="button" onClick={onClose} aria-label="关闭弹窗">
           ×
         </button>
-        <div className="pr-10 text-base font-extrabold text-slate-900">我的奖品</div>
+        <div className="pr-10 text-base font-extrabold leading-tight text-slate-900">我的奖品</div>
         <div className="mt-3">{children}</div>
       </div>
     </div>
@@ -336,17 +336,17 @@ function PrizeModalContent({
 
   return (
     <div className="grid gap-3">
-      <div className="grid grid-cols-[72px_1fr_auto] items-center gap-3 rounded-2xl bg-slate-50 px-3 py-3">
-        <img className="h-[72px] w-[72px] object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
+      <div className="grid grid-cols-[56px_1fr_auto] items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2.5">
+        <img className="h-[56px] w-[56px] object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
         <div className="min-w-0">
-          <div className="truncate text-base font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
-          <div className="mt-1 text-sm font-medium text-slate-500">{drawTime}</div>
+          <div className="truncate text-sm font-extrabold leading-[1.2] text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
+          <div className="mt-1 text-xs font-medium leading-[1.2] text-slate-500">{drawTime}</div>
         </div>
-        <span className="inline-flex min-h-8 w-20 items-center justify-center rounded-full bg-white px-2 text-sm font-bold text-slate-700">{claimStatusText}</span>
+        <span className="inline-flex min-h-7 w-16 items-center justify-center rounded-full bg-white px-2 text-xs font-bold text-slate-700">{claimStatusText}</span>
       </div>
 
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
-        <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-500">
+        <div className="rounded-2xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
           <div>{claim.recipientName || '-'} · {claim.recipientPhone || '-'}</div>
           <div className="mt-1">{claim.recipientAddress || '-'}</div>
         </div>
@@ -354,7 +354,7 @@ function PrizeModalContent({
 
       {claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? (
         <div className="flex justify-center">
-          <span className="inline-flex min-h-9 w-28 items-center justify-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700">已核销</span>
+          <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">已核销</span>
         </div>
       ) : null}
 
@@ -379,10 +379,10 @@ function PrizeModalContent({
 
           {claimMode === 'mail' ? (
             <div className="grid gap-2">
-              <div className="grid gap-2">
+              <div className="grid gap-1.5">
                 <input
                   id="pql-name"
-                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
                   value={mailForm.recipientName}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientName: event.target.value }))}
                   placeholder="收件人姓名"
@@ -391,15 +391,15 @@ function PrizeModalContent({
                   id="pql-phone"
                   type="tel"
                   inputMode="numeric"
-                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
                   value={mailForm.recipientPhone}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value.replace(/\D/g, '') }))}
                   placeholder="手机号"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 <select
-                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.province}
                   onChange={(event) => {
                     const province = ADDRESS_OPTIONS.find((item) => item.province === event.target.value) || ADDRESS_OPTIONS[0]
@@ -416,7 +416,7 @@ function PrizeModalContent({
                   {ADDRESS_OPTIONS.map((item) => <option key={item.province} value={item.province}>{item.province}</option>)}
                 </select>
                 <select
-                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.city}
                   onChange={(event) => {
                     const province = ADDRESS_OPTIONS.find((item) => item.province === mailForm.province) || ADDRESS_OPTIONS[0]
@@ -432,7 +432,7 @@ function PrizeModalContent({
                   {(ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
                 </select>
                 <select
-                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
                   value={mailForm.district}
                   onChange={(event) => setMailForm((current) => ({ ...current, district: event.target.value }))}
                   aria-label="区县"
@@ -443,19 +443,19 @@ function PrizeModalContent({
               <div className="grid gap-2">
                 <input
                   id="pql-address"
-                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
                   value={mailForm.detailAddress}
                   onChange={(event) => setMailForm((current) => ({ ...current, detailAddress: event.target.value }))}
                   placeholder="详细地址"
                 />
               </div>
-              <button className="mt-1 min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
+              <button className="sticky bottom-0 mt-1 min-h-11 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
                 提交邮寄信息
               </button>
             </div>
           ) : (
             <div className="grid gap-2">
-              <button className="min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
+              <button className="sticky bottom-0 min-h-11 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
                 选择到店自提
               </button>
             </div>
@@ -466,19 +466,19 @@ function PrizeModalContent({
       {claim?.status === CLAIM_STATUS.PICKUP_PENDING ? (
         <div className="grid gap-3">
           <div className="flex justify-center">
-            <span className="inline-flex min-h-9 w-28 items-center justify-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700">待核销</span>
+            <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">待核销</span>
           </div>
           <div className="grid gap-2">
             <input
               id="pql-verify"
               type="password"
-              className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
+              className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
               value={pickupPassword}
               onChange={(event) => setPickupPassword(event.target.value)}
               placeholder="请输入门店核销密码"
             />
           </div>
-          <button className="min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
+          <button className="sticky bottom-0 min-h-11 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
             提交核销
           </button>
         </div>
@@ -543,6 +543,18 @@ function PhaseQuizLotteryMain({ routeParams }) {
       window.clearInterval(scoreTimerRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (!prizeModalOpen) return undefined
+    const previousBodyOverflow = document.body.style.overflow
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousBodyOverflow
+      document.documentElement.style.overflow = previousHtmlOverflow
+    }
+  }, [prizeModalOpen])
 
   function showToast(message, duration = 2200) {
     window.clearTimeout(toastTimerRef.current)
@@ -1031,7 +1043,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
             {step === STEP.WHEEL ? (
               <WheelPage
-                activityTitle={activityTitle}
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
                 draw={draw}
