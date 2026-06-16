@@ -25,7 +25,6 @@ export default function WheelPage({
       <div className="pql-wheel-stage flex-1 px-[32px] pb-[88px] pt-[28px]">
         <section className="rounded-[32px] bg-white px-[32px] py-[36px] text-center shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
           <p className="text-[28px] font-medium text-slate-500">第 {phaseNo || '-'} 期</p>
-          <h2 className="mt-[20px] text-[40px] font-extrabold text-slate-900">抽奖结果展示</h2>
           <Wheel
             segments={segments}
             targetIndex={draw?.wheelStopIndex}

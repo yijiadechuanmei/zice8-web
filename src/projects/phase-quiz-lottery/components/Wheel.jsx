@@ -44,6 +44,7 @@ export default function Wheel({
   onFinish,
 }) {
   const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
+  const remainingDrawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
   const canvasRef = useRef(null)
   const frameRef = useRef(0)
   const rotationRef = useRef(0)
@@ -138,7 +139,8 @@ export default function Wheel({
 
   return (
     <>
-      <div className="pql-wheel-frame mt-[30px]">
+      <div className="mt-[18px] text-[26px] font-bold text-slate-700">剩余抽奖次数：{remainingDrawCount}</div>
+      <div className="pql-wheel-frame mt-[20px]">
         <img className="pql-wheel-frame__ring" src={assets.wheelRing} alt="" aria-hidden="true" />
         <img className="pql-wheel-frame__pointer" src={assets.wheelPointer} alt="" aria-hidden="true" />
         <div className="pql-wheel-frame__canvas">

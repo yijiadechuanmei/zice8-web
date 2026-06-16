@@ -2,7 +2,7 @@ function ActionButton({ tone = 'dark', disabled = false, children, onClick }) {
   return (
     <button
       className={[
-        'min-h-[92px] w-full rounded-full px-[24px] py-[18px] text-[30px] font-bold transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white',
+        'min-h-[76px] w-full cursor-pointer rounded-full px-[22px] py-[14px] text-[28px] font-bold transition-colors duration-200 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-white',
         tone === 'light' ? 'bg-slate-100 text-slate-800' : 'bg-slate-900 text-white',
       ].join(' ')}
       type="button"
@@ -69,32 +69,35 @@ export default function ResultCard({
   const canStart = model?.state === 'ready_to_start'
   const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)
   const showPrize = Boolean(model?.won || model?.claim)
+  const prizeName = model?.draw?.prize?.name || model?.prize?.name || model?.claim?.prizeName || '我的奖品'
+  const prizeStatus = model?.claim?.status ? '领取状态已更新' : model?.won ? '待领取' : '已记录'
 
   return (
     <>
-      <div className="mt-[18px] grid justify-items-center gap-[18px] text-center">
-        <img className="h-[168px] w-[168px] object-contain" src={assets.resultTrophy} alt="" aria-hidden="true" />
-        <p className="text-[40px] leading-[1.3] font-extrabold text-slate-900">{copy.headline}</p>
+      <div className="mt-[-8px] grid justify-items-center gap-[10px] text-center">
+        <img className="h-[286px] w-[286px] object-contain" src={assets.resultTrophy} alt="" aria-hidden="true" />
+        <p className="text-[38px] leading-[1.25] font-extrabold text-slate-900">{copy.headline}</p>
       </div>
 
-      <div className="mt-[22px] rounded-[28px] bg-slate-50 px-[28px] py-[28px] text-center">
+      <div className="mt-[16px] rounded-[24px] bg-slate-50 px-[22px] py-[20px] text-center">
         <div className="leading-none text-slate-900">
-          <span className="text-[112px] font-extrabold">{score}</span>
-          <span className="text-[44px] font-bold">分</span>
+          <span className="text-[96px] font-extrabold">{score}</span>
+          <span className="text-[38px] font-bold">分</span>
         </div>
-        <div className="mt-[20px] flex justify-center gap-[28px] text-[28px] text-slate-500">
+        <div className="mt-[14px] flex justify-center gap-[24px] text-[24px] text-slate-500">
           <span>答对 {model?.result?.correctCount ?? 0} 题</span>
           <span>答错 {model?.result?.wrongCount ?? 0} 题</span>
         </div>
       </div>
 
       {showPrize ? (
-        <div className="mt-[22px] grid justify-items-center">
-          <img className="h-[112px] w-[112px] object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
+        <div className="mt-[16px] grid gap-[6px] rounded-[20px] bg-slate-50 px-[20px] py-[16px] text-center">
+          <div className="text-[28px] font-extrabold text-slate-900">{prizeName}</div>
+          <div className="text-[22px] font-medium text-slate-500">{prizeStatus}</div>
         </div>
       ) : null}
 
-      <div className="mt-[24px] grid gap-[18px]">
+      <div className="mt-[18px] grid gap-[14px]">
         {canStart ? <ActionButton onClick={onStart}>开始答题</ActionButton> : null}
         {canDraw ? <ActionButton onClick={onGoWheel}>去抽奖</ActionButton> : null}
         {showPrize ? <ActionButton tone="light" onClick={onOpenPrize}>我的奖品</ActionButton> : null}

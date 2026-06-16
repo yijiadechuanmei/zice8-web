@@ -76,16 +76,16 @@ function ToastLayer({ message }) {
 function PrizeModal({ open, onClose, children }) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/35 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/35 px-4 py-5 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
       <div
-        className="relative max-h-[calc(100vh-64px)] w-full max-w-[620px] overflow-auto rounded-[32px] bg-white px-7 py-8 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
+        className="relative max-h-[calc(100vh-40px)] w-full max-w-[620px] overflow-hidden rounded-[28px] bg-white px-5 py-5 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="absolute right-5 top-4 h-11 w-11 cursor-pointer rounded-full bg-slate-100 text-2xl text-slate-700" type="button" onClick={onClose} aria-label="关闭弹窗">
+        <button className="absolute right-4 top-4 h-9 w-9 cursor-pointer rounded-full bg-slate-100 text-xl text-slate-700" type="button" onClick={onClose} aria-label="关闭弹窗">
           ×
         </button>
-        <div className="pr-12 text-lg font-extrabold text-slate-900">我的奖品</div>
-        <div className="mt-5">{children}</div>
+        <div className="pr-10 text-base font-extrabold text-slate-900">我的奖品</div>
+        <div className="mt-3">{children}</div>
       </div>
     </div>
   )
@@ -317,7 +317,6 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
 
 function PrizeModalContent({
   prize,
-  assets,
   claimMode,
   setClaimMode,
   mailForm,
@@ -331,21 +330,19 @@ function PrizeModalContent({
   if (!prize?.hasPrize) return <p className="text-sm leading-7 text-slate-500">当前还没有可领取的奖品。</p>
 
   const claim = prize.claim
-  const drawTime = formatDrawTime(prize.draw?.createdAt)
+  const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
   return (
-    <div className="grid gap-5">
-      <div className="grid justify-items-center gap-3 text-center">
-        <img className="h-28 w-28 object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
-        <div className="text-lg font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
-        <div className="text-sm leading-6 text-slate-500">中奖时间：{drawTime}</div>
+    <div className="grid gap-3">
+      <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+        <div className="min-w-0 truncate text-base font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
+        <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-white px-3 text-sm font-bold text-slate-700">{claimStatusText}</span>
       </div>
 
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
-        <div className="grid gap-3">
-          <div className="whitespace-pre-line text-sm leading-7 text-slate-500">
-            {`收件人：${claim.recipientName || '-'}\n手机号：${claim.recipientPhone || '-'}\n地址：${claim.recipientAddress || '-'}`}
-          </div>
+        <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-500">
+          <div>{claim.recipientName || '-'} · {claim.recipientPhone || '-'}</div>
+          <div className="mt-1">{claim.recipientAddress || '-'}</div>
         </div>
       ) : null}
 
@@ -357,16 +354,16 @@ function PrizeModalContent({
 
       {!claim || claim.status === CLAIM_STATUS.PENDING_METHOD ? (
         <>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <button
-              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'mail' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+              className={`min-h-10 cursor-pointer rounded-2xl text-sm font-bold ${claimMode === 'mail' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
               type="button"
               onClick={() => setClaimMode('mail')}
             >
               邮寄领奖
             </button>
             <button
-              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'pickup' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
+              className={`min-h-10 cursor-pointer rounded-2xl text-sm font-bold ${claimMode === 'pickup' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
               type="button"
               onClick={() => setClaimMode('pickup')}
             >
@@ -375,11 +372,11 @@ function PrizeModalContent({
           </div>
 
           {claimMode === 'mail' ? (
-            <div className="grid gap-3">
-              <div className="grid gap-3">
+            <div className="grid gap-2">
+              <div className="grid gap-2">
                 <input
                   id="pql-name"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
                   value={mailForm.recipientName}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientName: event.target.value }))}
                   placeholder="收件人姓名"
@@ -388,7 +385,7 @@ function PrizeModalContent({
                   id="pql-phone"
                   type="tel"
                   inputMode="numeric"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
                   value={mailForm.recipientPhone}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value.replace(/\D/g, '') }))}
                   placeholder="手机号"
@@ -396,7 +393,7 @@ function PrizeModalContent({
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <select
-                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
                   value={mailForm.province}
                   onChange={(event) => {
                     const province = ADDRESS_OPTIONS.find((item) => item.province === event.target.value) || ADDRESS_OPTIONS[0]
@@ -413,7 +410,7 @@ function PrizeModalContent({
                   {ADDRESS_OPTIONS.map((item) => <option key={item.province} value={item.province}>{item.province}</option>)}
                 </select>
                 <select
-                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
                   value={mailForm.city}
                   onChange={(event) => {
                     const province = ADDRESS_OPTIONS.find((item) => item.province === mailForm.province) || ADDRESS_OPTIONS[0]
@@ -429,7 +426,7 @@ function PrizeModalContent({
                   {(ADDRESS_OPTIONS.find((item) => item.province === mailForm.province)?.cities || []).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
                 </select>
                 <select
-                  className="min-h-12 rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-11 rounded-2xl border border-slate-200 bg-white px-2 text-sm text-slate-900"
                   value={mailForm.district}
                   onChange={(event) => setMailForm((current) => ({ ...current, district: event.target.value }))}
                   aria-label="区县"
@@ -438,21 +435,21 @@ function PrizeModalContent({
                 </select>
               </div>
               <div className="grid gap-2">
-                <textarea
+                <input
                   id="pql-address"
-                  className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
                   value={mailForm.detailAddress}
                   onChange={(event) => setMailForm((current) => ({ ...current, detailAddress: event.target.value }))}
                   placeholder="详细地址"
                 />
               </div>
-              <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
+              <button className="mt-1 min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
                 提交邮寄信息
               </button>
             </div>
           ) : (
-            <div className="grid gap-3">
-              <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
+            <div className="grid gap-2">
+              <button className="min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
                 选择到店自提
               </button>
             </div>
@@ -461,7 +458,7 @@ function PrizeModalContent({
       ) : null}
 
       {claim?.status === CLAIM_STATUS.PICKUP_PENDING ? (
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           <div className="flex justify-center">
             <span className="inline-flex min-h-9 w-28 items-center justify-center rounded-full bg-slate-100 px-4 text-sm font-bold text-slate-700">待核销</span>
           </div>
@@ -469,13 +466,13 @@ function PrizeModalContent({
             <input
               id="pql-verify"
               type="password"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
+              className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900"
               value={pickupPassword}
               onChange={(event) => setPickupPassword(event.target.value)}
               placeholder="请输入门店核销密码"
             />
           </div>
-          <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
+          <button className="min-h-12 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
             提交核销
           </button>
         </div>
@@ -842,18 +839,12 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
       setDrawing(false)
       setStep(STEP.RESULT)
-      if (nextDraw.status === DRAW_STATUS.STOCK_EMPTY) {
-        showToast('本期已抽完')
-        return
-      }
-      showToast('谢谢参与')
     } catch (error) {
       console.warn('[phase-quiz-lottery draw fallback]', error)
       const fallbackDraw = buildFallbackDraw()
       setDraw(fallbackDraw)
       patchModelWithDraw(fallbackDraw)
       setSpinKey((value) => value + 1)
-      showToast('谢谢参与')
     } finally {
       drawLockRef.current = false
     }
@@ -978,13 +969,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     if (!draw) return
     if (draw.status === DRAW_STATUS.WON) {
       openPrizeModal()
-      return
     }
-    if (draw.status === DRAW_STATUS.STOCK_EMPTY) {
-      showToast('本期已抽完')
-      return
-    }
-    showToast('谢谢参与')
   }
 
   const currentPhaseNo = model?.currentPhase?.phaseNo || model?.attempt?.phaseNo || ''

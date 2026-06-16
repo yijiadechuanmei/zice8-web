@@ -67,7 +67,7 @@ body {
 .pql-wheel-frame__pointer {
   position: absolute;
   left: 50%;
-  top: 30px;
+  top: 20px;
   z-index: 3;
   width: 64px;
   height: 64px;
