@@ -1,23 +1,23 @@
 export default function QuestionHeader({ title, bookImageUrl, onBack }) {
   return (
-    <header className="relative z-10 h-[280px] overflow-hidden">
+    <header className="pql-question-header relative z-10 h-[360px] overflow-hidden">
       <button
-        className="absolute left-6 top-[58px] flex h-10 w-10 items-center justify-center rounded-full text-white/95 transition active:scale-95"
+        className="absolute left-[32px] top-[64px] z-30 flex h-[56px] w-[56px] items-center justify-center rounded-full text-white/95 transition active:scale-95"
         type="button"
         onClick={onBack}
         aria-label="返回"
       >
-        <span className="block h-3 w-3 rotate-45 border-l-[3px] border-b-[3px] border-current" />
+        <span className="block h-[18px] w-[18px] rotate-45 border-l-[4px] border-b-[4px] border-current" />
       </button>
 
-      <div className="relative flex h-full items-start justify-center">
-        <div className="pt-[120px] text-center text-white">
-          <h1 className="text-[44px] font-extrabold leading-none tracking-[0.04em] drop-shadow-[0_2px_8px_rgba(19,77,180,0.22)]">
+      <div className="pql-question-header__content absolute inset-0 z-20">
+        <div className="absolute left-0 right-0 top-[126px] text-center text-white">
+          <h1 className="text-[40px] font-extrabold leading-none tracking-normal drop-shadow-[0_2px_8px_rgba(19,77,180,0.22)]">
             {title}
           </h1>
         </div>
 
-        <div className="absolute right-6 top-[84px] h-[132px] w-[216px]">
+        <div className="absolute right-[34px] top-[86px] z-20 h-[154px] w-[244px]">
           <div className="absolute left-0 top-[42px] h-[76px] w-[122px] rounded-[18px] bg-white/92 shadow-[0_12px_28px_rgba(16,78,185,0.14)]" />
           <div className="absolute left-[16px] top-[30px] h-[88px] w-[130px] rounded-[16px] bg-gradient-to-br from-white to-[#f3f8ff] shadow-[0_10px_20px_rgba(16,78,185,0.10)]" />
           <div className="absolute left-[8px] top-[52px] h-[40px] w-[18px] rounded-full bg-[#ffca4f] shadow-[0_0_0_4px_rgba(255,255,255,0.38)]" />
@@ -36,8 +36,6 @@ export default function QuestionHeader({ title, bookImageUrl, onBack }) {
           />
         </div>
       </div>
-
-      <div className="absolute inset-x-0 bottom-0 h-[84px] bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.42)_52%,rgba(255,255,255,0.92)_100%)]" />
     </header>
   )
 }

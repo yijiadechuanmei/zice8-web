@@ -43,6 +43,7 @@ const CLAIM_STATUS = {
 }
 
 const isDebug = new URLSearchParams(window.location.search).get('debug') === '1'
+const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 
 function LoadingLayer({ open = true, text = '加载中...' }) {
@@ -218,6 +219,46 @@ function DebugStage(props) {
           <DebugPanel {...props} />
         </div>
       </StageLayout>
+    </div>
+  )
+}
+
+function DevLayoutDebugPanel({ step }) {
+  const [metrics, setMetrics] = useState(() => ({
+    viewportWidth: typeof window === 'undefined' ? 0 : window.innerWidth,
+    scale: typeof window === 'undefined' ? 1 : window.innerWidth / 750,
+    stageWidth: 750,
+  }))
+
+  useEffect(() => {
+    if (!isDev) return undefined
+    const syncMetrics = () => {
+      const nextMetrics = window.__pqlStageMetrics || {
+        viewportWidth: window.innerWidth,
+        scale: window.innerWidth / 750,
+        stageWidth: 750,
+      }
+      setMetrics(nextMetrics)
+    }
+    syncMetrics()
+    window.addEventListener('resize', syncMetrics)
+    window.addEventListener('orientationchange', syncMetrics)
+    const timer = window.setInterval(syncMetrics, 500)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('resize', syncMetrics)
+      window.removeEventListener('orientationchange', syncMetrics)
+    }
+  }, [])
+
+  if (!isDev) return null
+
+  return (
+    <div className="fixed left-3 bottom-3 z-[12001] rounded-xl bg-slate-950/80 px-3 py-2 text-[14px] leading-5 text-white shadow-lg">
+      <div>vw: {metrics.viewportWidth}</div>
+      <div>scale: {Number(metrics.scale || 0).toFixed(3)}</div>
+      <div>stage: {metrics.stageWidth}</div>
+      <div>step: {step || '-'}</div>
     </div>
   )
 }
@@ -856,6 +897,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
         onGoQuestion={handleDebugGoQuestion}
         onLogState={handleDebugLogState}
       />
+      <DevLayoutDebugPanel step={step} />
 
       {step === STEP.QUESTION ? (
         <QuestionPage
