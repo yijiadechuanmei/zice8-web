@@ -12,8 +12,8 @@ export default function ResultPage({
   assets,
 }) {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(79,158,255,0.18),transparent_40%),linear-gradient(180deg,#edf5ff_0%,#f8fbff_100%)]">
-      <StageLayout className="flex min-h-screen flex-col items-center justify-center bg-cover bg-center px-4 py-6">
+    <main className="h-[100vh] overflow-hidden bg-[radial-gradient(circle_at_top,rgba(79,158,255,0.18),transparent_40%),linear-gradient(180deg,#edf5ff_0%,#f8fbff_100%)]">
+      <StageLayout className="bg-cover bg-center px-0 py-0">
         <div className="pql-stage relative overflow-hidden text-slate-800">
           <img className="absolute inset-0 h-full w-full object-cover" src={assets.bgResult} alt="" aria-hidden="true" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(33,137,255,0.88)_0%,rgba(33,137,255,0.72)_18%,rgba(237,245,255,0)_26%),linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0))]" />

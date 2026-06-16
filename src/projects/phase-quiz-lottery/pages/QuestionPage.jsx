@@ -1,13 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import QuestionCard from '../components/QuestionCard'
 import QuestionHeader from '../components/QuestionHeader'
 import ProgressBar from '../components/ProgressBar'
 import StageLayout from '../components/StageLayout'
-
-function getActivityKeyFromPathname() {
-  const parts = window.location.pathname.split('/').filter(Boolean)
-  return decodeURIComponent(parts[1] || '')
-}
 
 function getDebugAttemptId() {
   return (
@@ -36,6 +31,7 @@ function clearPhaseQuizLotteryCache() {
 }
 
 export default function QuestionPage({
+  activityKey,
   activityTitle,
   phaseNo,
   questions,
@@ -53,7 +49,6 @@ export default function QuestionPage({
   }, [question?.id])
 
   const debugEnabled = import.meta.env.DEV
-  const activityKey = useMemo(() => getActivityKeyFromPathname(), [])
   const [debugAttemptId, setDebugAttemptId] = useState(getDebugAttemptId())
 
   useEffect(() => {
@@ -88,8 +83,8 @@ export default function QuestionPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#eaf3ff]">
-      <StageLayout className="flex min-h-screen flex-col items-center justify-center bg-[#eaf3ff] px-0 py-0">
+    <main className="h-[100vh] overflow-hidden bg-[#eaf3ff]">
+      <StageLayout className="bg-[#eaf3ff] px-0 py-0">
         <div
           className="pql-stage relative overflow-hidden bg-[#eef5ff] text-slate-900"
           style={{ paddingBottom: 'max(80px, env(safe-area-inset-bottom))' }}
