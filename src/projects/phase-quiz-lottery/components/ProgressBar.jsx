@@ -1,19 +1,16 @@
 export default function ProgressBar({ current, total }) {
-  const progress = total > 0 ? Math.min(1, current / total) : 0
+  const safeTotal = total > 0 ? total : 5
+  const progress = Math.min(1, Math.max(0, current / safeTotal))
 
   return (
-    <div className="flex items-center gap-4 px-2">
-      <span className="h-px flex-1 border-t border-dashed border-slate-300/90" />
-      <div className="whitespace-nowrap text-[22px] font-medium text-slate-600">
-        题目 <span className="text-[#2F80FF]">{current}</span>
-        <span className="text-slate-500">/{total}</span>
+    <div className="grid gap-[18px]">
+      <div className="text-center text-[28px] font-bold text-slate-700">
+        题目 <span className="text-slate-900">{current}</span>
+        <span className="text-slate-400">/{safeTotal}</span>
       </div>
-      <span className="h-px flex-1 border-t border-dashed border-slate-300/90" />
-      <div
-        className="absolute left-1/2 top-1/2 hidden h-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#2F80FF]"
-        style={{ width: `${Math.max(0, progress * 100)}%` }}
-        aria-hidden="true"
-      />
+      <div className="h-[14px] overflow-hidden rounded-full bg-slate-100">
+        <div className="h-full rounded-full bg-slate-900 transition-all duration-300" style={{ width: `${progress * 100}%` }} />
+      </div>
     </div>
   )
 }

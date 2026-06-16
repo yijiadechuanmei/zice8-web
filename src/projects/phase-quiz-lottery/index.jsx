@@ -5,7 +5,7 @@ import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
-  buildPhaseQuizLotteryAssetUrl,
+  DEFAULT_OSS_BASE_URL,
   claimPrize,
   drawPrize,
   getBootstrap,
@@ -24,6 +24,7 @@ import WheelPage from './pages/WheelPage'
 import './styles.css'
 
 const STEP = {
+  ENTRY: 'ENTRY',
   QUESTION: 'QUESTION',
   RESULT: 'RESULT',
   WHEEL: 'WHEEL',
@@ -45,6 +46,8 @@ const CLAIM_STATUS = {
 const isDebug = new URLSearchParams(window.location.search).get('debug') === '1'
 const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
+const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
+const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
 
 function LoadingLayer({ open = true, text = '加载中...' }) {
   if (!open) return null
@@ -74,10 +77,10 @@ function PrizeModal({ open, onClose, children }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/35 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
       <div
-        className="relative max-h-[calc(100vh-64px)] w-full max-w-[620px] overflow-auto rounded-[32px] bg-gradient-to-b from-white to-blue-50 px-7 py-8 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
+        className="relative max-h-[calc(100vh-64px)] w-full max-w-[620px] overflow-auto rounded-[32px] bg-white px-7 py-8 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="absolute right-5 top-4 h-11 w-11 cursor-pointer rounded-full bg-blue-100 text-2xl text-blue-500" type="button" onClick={onClose} aria-label="关闭弹窗">
+        <button className="absolute right-5 top-4 h-11 w-11 cursor-pointer rounded-full bg-slate-100 text-2xl text-slate-700" type="button" onClick={onClose} aria-label="关闭弹窗">
           ×
         </button>
         <div className="pr-12 text-lg font-extrabold text-slate-900">我的奖品</div>
@@ -87,64 +90,24 @@ function PrizeModal({ open, onClose, children }) {
   )
 }
 
-function buildAssets(activityKey) {
+function buildAssets() {
   return {
-    bgQuestion: buildPhaseQuizLotteryAssetUrl(activityKey, 'question', 'background'),
-    bgResult: buildPhaseQuizLotteryAssetUrl(activityKey, 'result', 'background'),
-    bgWheel: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'background'),
-    bookHero: buildPhaseQuizLotteryAssetUrl(activityKey, 'question', 'book-hero'),
-    bookHeroBlue: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'book-hero'),
-    trophy: buildPhaseQuizLotteryAssetUrl(activityKey, 'result', 'trophy'),
-    ribbon: buildPhaseQuizLotteryAssetUrl(activityKey, 'result', 'ribbon'),
-    prizeBox: buildPhaseQuizLotteryAssetUrl(activityKey, 'result', 'prize-box'),
-    wheelBaseRing: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'base-ring'),
-    wheelPointer: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'pointer'),
-    wheelCenterGlow: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'center-glow'),
+    bannerBackground: `${ASSET_BASE}/banner/banner_bg.png`,
+    prizeBox: `${ASSET_BASE}/prize/prize_box.png`,
+    wheelPointer: `${ASSET_BASE}/wheel/pointer`,
   }
 }
 
-function buildWheelSegments(activityKey) {
+function buildWheelSegments() {
   return [
-    {
-      label: '一等奖',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'first-prize'),
-      background: '#f9fcff',
-    },
-    {
-      label: '二等奖',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'second-prize'),
-      background: '#edf4ff',
-    },
-    {
-      label: '三等奖',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'third-prize'),
-      background: '#f9fcff',
-    },
-    {
-      label: '谢谢参与',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'thanks-smile'),
-      background: '#edf4ff',
-    },
-    {
-      label: '谢谢参与',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'thanks-gift'),
-      background: '#f9fcff',
-    },
-    {
-      label: '谢谢参与',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'thanks-points'),
-      background: '#edf4ff',
-    },
-    {
-      label: '谢谢参与',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'thanks-coupon'),
-      background: '#f9fcff',
-    },
-    {
-      label: '谢谢参与',
-      imageUrl: buildPhaseQuizLotteryAssetUrl(activityKey, 'wheel', 'thanks-box'),
-      background: '#edf4ff',
-    },
+    { label: '一等奖', background: '#fff8e5' },
+    { label: '二等奖', background: '#f8fbff' },
+    { label: '三等奖', background: '#fff8e5' },
+    { label: '谢谢参与', background: '#f8fbff' },
+    { label: '谢谢参与', background: '#fff8e5' },
+    { label: '谢谢参与', background: '#f8fbff' },
+    { label: '谢谢参与', background: '#fff8e5' },
+    { label: '谢谢参与', background: '#f8fbff' },
   ]
 }
 
@@ -165,7 +128,8 @@ function formatDrawTime(value) {
 
 function resolveInitialStep(model) {
   if (model?.state === 'answering') return STEP.QUESTION
-  return STEP.RESULT
+  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || model?.soldOut) return STEP.RESULT
+  return STEP.ENTRY
 }
 
 function replaceLegacyPath(activityKey) {
@@ -187,9 +151,11 @@ function DebugPanel({
   onGoQuestion,
   onLogState,
 }) {
+  if (!isDebug) return null
+
   return (
-    <div className="absolute right-5 top-[calc(env(safe-area-inset-top,0px)+20px)] z-[12000] w-[250px] rounded-[20px] border border-white/50 bg-white/88 px-4 py-3 text-left text-[20px] leading-7 text-slate-700 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-md">
-      <div className="text-[22px] font-extrabold text-blue-600">DEBUG</div>
+    <div className="absolute right-[24px] top-[calc(env(safe-area-inset-top,0px)+24px)] z-[12000] w-[250px] rounded-[20px] border border-white/60 bg-white/92 px-4 py-3 text-left text-[20px] leading-7 text-slate-700 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-md">
+      <div className="text-[22px] font-extrabold text-slate-900">DEBUG</div>
       <div className="mt-2 break-all text-[18px] leading-6">
         <div>activityKey: {activityKey || '-'}</div>
         <div>step: {step || '-'}</div>
@@ -199,26 +165,13 @@ function DebugPanel({
         <button className="min-h-10 rounded-xl bg-red-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onReset}>
           重置活动
         </button>
-        <button className="min-h-10 rounded-xl bg-blue-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
+        <button className="min-h-10 rounded-xl bg-slate-900 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
           回到答题页
         </button>
-        <button className="min-h-10 rounded-xl bg-slate-800 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={() => onLogState({ activityKey, step, attemptId, model, draw })}>
+        <button className="min-h-10 rounded-xl bg-slate-200 px-3 py-2 text-[18px] font-bold text-slate-800" type="button" onClick={() => onLogState({ activityKey, step, attemptId, model, draw })}>
           console.log 当前状态
         </button>
       </div>
-    </div>
-  )
-}
-
-function DebugStage(props) {
-  if (!isDebug) return null
-  return (
-    <div className="pointer-events-none fixed inset-0 z-[12000]">
-      <StageLayout className="pointer-events-none bg-transparent">
-        <div className="pointer-events-auto relative h-full w-full">
-          <DebugPanel {...props} />
-        </div>
-      </StageLayout>
     </div>
   )
 }
@@ -263,6 +216,31 @@ function DevLayoutDebugPanel({ step }) {
   )
 }
 
+function EntryPage({ activityTitle, model, onStart, disabled }) {
+  const unavailable = model?.state === 'no_open_phase'
+  const title = activityTitle || '分期答题抽奖'
+  const subtitle = unavailable ? '当前暂无开放期次' : '本期答题已开启'
+  const description = unavailable ? '活动未开始或当前期次已结束，请稍后再来。' : '完成本期 5 道判断题后查看结果，满分且具备资格时可进入抽奖。'
+
+  return (
+    <section className="flex h-full flex-col px-[40px] pb-[88px] pt-[420px] text-center text-slate-900">
+      <div className="rounded-[36px] bg-white px-[40px] py-[56px] shadow-[0_24px_64px_rgba(15,23,42,0.08)]">
+        <div className="text-[32px] font-bold text-slate-500">{title}</div>
+        <h2 className="mt-[28px] text-[40px] leading-[1.3] font-extrabold text-slate-900">{subtitle}</h2>
+        <p className="mt-[24px] text-[30px] leading-[1.7] text-slate-600">{description}</p>
+        <button
+          className="mt-[56px] min-h-[92px] w-full rounded-full bg-slate-900 px-[32px] text-[32px] font-bold text-white shadow-[0_20px_40px_rgba(15,23,42,0.16)] disabled:cursor-not-allowed disabled:bg-slate-300"
+          type="button"
+          disabled={disabled || unavailable}
+          onClick={onStart}
+        >
+          开始答题
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function PrizeModalContent({
   prize,
   assets,
@@ -292,7 +270,7 @@ function PrizeModalContent({
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-blue-100 px-3 text-xs font-bold text-blue-500">邮寄信息已提交</span>
+            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">邮寄信息已提交</span>
           </div>
           <div className="whitespace-pre-line text-sm leading-7 text-slate-500">
             {`收件人：${claim.recipientName || '-'}\n手机号：${claim.recipientPhone || '-'}\n地址：${claim.recipientAddress || '-'}`}
@@ -303,7 +281,7 @@ function PrizeModalContent({
       {claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? (
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-blue-100 px-3 text-xs font-bold text-blue-500">核销已完成</span>
+            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">核销已完成</span>
           </div>
           <div className="text-sm leading-7 text-slate-500">该奖品已完成自提核销，可截图留存。</div>
         </div>
@@ -313,14 +291,14 @@ function PrizeModalContent({
         <>
           <div className="grid grid-cols-2 gap-3">
             <button
-              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'mail' ? 'bg-gradient-to-b from-sky-400 to-blue-500 text-white' : 'bg-blue-50 text-blue-500'}`}
+              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'mail' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
               type="button"
               onClick={() => setClaimMode('mail')}
             >
               邮寄领奖
             </button>
             <button
-              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'pickup' ? 'bg-gradient-to-b from-sky-400 to-blue-500 text-white' : 'bg-blue-50 text-blue-500'}`}
+              className={`min-h-12 rounded-2xl text-sm font-bold ${claimMode === 'pickup' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
               type="button"
               onClick={() => setClaimMode('pickup')}
             >
@@ -334,11 +312,9 @@ function PrizeModalContent({
                 <label className="text-sm font-bold text-slate-700" htmlFor="pql-name">姓名</label>
                 <input
                   id="pql-name"
-                  className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
                   value={mailForm.recipientName}
-                  onChange={(event) =>
-                    setMailForm((current) => ({ ...current, recipientName: event.target.value }))
-                  }
+                  onChange={(event) => setMailForm((current) => ({ ...current, recipientName: event.target.value }))}
                   placeholder="请输入收件人姓名"
                 />
               </div>
@@ -346,11 +322,9 @@ function PrizeModalContent({
                 <label className="text-sm font-bold text-slate-700" htmlFor="pql-phone">手机号</label>
                 <input
                   id="pql-phone"
-                  className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
                   value={mailForm.recipientPhone}
-                  onChange={(event) =>
-                    setMailForm((current) => ({ ...current, recipientPhone: event.target.value }))
-                  }
+                  onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value }))}
                   placeholder="支持 +86 / 空格 / 短横线"
                 />
               </div>
@@ -358,22 +332,20 @@ function PrizeModalContent({
                 <label className="text-sm font-bold text-slate-700" htmlFor="pql-address">收货地址</label>
                 <textarea
                   id="pql-address"
-                  className="min-h-28 w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900"
+                  className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
                   value={mailForm.recipientAddress}
-                  onChange={(event) =>
-                    setMailForm((current) => ({ ...current, recipientAddress: event.target.value }))
-                  }
+                  onChange={(event) => setMailForm((current) => ({ ...current, recipientAddress: event.target.value }))}
                   placeholder="请输入完整地址"
                 />
               </div>
-              <button className="min-h-14 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-4 text-sm font-bold text-white shadow-[0_16px_34px_rgba(16,185,129,0.26)]" type="button" onClick={onSubmitMail}>
+              <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitMail}>
                 提交邮寄信息
               </button>
             </div>
           ) : (
             <div className="grid gap-3">
               <div className="text-sm leading-7 text-slate-500">先创建自提领奖记录，再输入核销密码完成领取。</div>
-              <button className="min-h-14 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-4 text-sm font-bold text-white shadow-[0_16px_34px_rgba(16,185,129,0.26)]" type="button" onClick={onSubmitPickupClaim}>
+              <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
                 选择到店自提
               </button>
             </div>
@@ -384,20 +356,20 @@ function PrizeModalContent({
       {claim?.status === CLAIM_STATUS.PICKUP_PENDING ? (
         <div className="grid gap-4">
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex min-h-8 items-center rounded-full bg-blue-100 px-3 text-xs font-bold text-blue-500">待核销</span>
+            <span className="inline-flex min-h-8 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-700">待核销</span>
           </div>
           <div className="grid gap-2">
             <label className="text-sm font-bold text-slate-700" htmlFor="pql-verify">核销密码</label>
             <input
               id="pql-verify"
               type="password"
-              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900"
               value={pickupPassword}
               onChange={(event) => setPickupPassword(event.target.value)}
               placeholder="请输入门店核销密码"
             />
           </div>
-          <button className="min-h-14 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-4 text-sm font-bold text-white shadow-[0_16px_34px_rgba(16,185,129,0.26)]" type="button" onClick={onSubmitPickupVerify}>
+          <button className="min-h-14 rounded-full bg-slate-900 px-6 py-4 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
             提交核销
           </button>
         </div>
@@ -419,7 +391,7 @@ export default function PhaseQuizLotteryApp({ routeParams }) {
 
 function PhaseQuizLotteryMain({ routeParams }) {
   const activityKey = routeParams?.activityKey || getQueryParam('activity_key') || ''
-  const [step, setStep] = useState(STEP.RESULT)
+  const [step, setStep] = useState(STEP.ENTRY)
   const [publicConfig, setPublicConfig] = useState(null)
   const [model, setModel] = useState(null)
   const [attemptId, setAttemptId] = useState('')
@@ -447,8 +419,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const requestCounterRef = useRef(0)
   const toastTimerRef = useRef(0)
   const scoreTimerRef = useRef(0)
-  const assets = useMemo(() => buildAssets(activityKey), [activityKey])
-  const wheelSegments = useMemo(() => buildWheelSegments(activityKey), [activityKey])
+  const assets = useMemo(() => buildAssets(), [])
+  const wheelSegments = useMemo(() => buildWheelSegments(), [])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -476,7 +448,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   function applyResultModel(nextModel) {
     setModel(nextModel)
-    setAttemptId(nextModel?.attempt?.attemptId || attemptId)
+    setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
     setStep(resolveInitialStep(nextModel))
   }
@@ -498,7 +470,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   useEffect(() => {
-    if (!model?.result?.score && model?.result?.score !== 0) return
+    if (model?.result?.score === undefined || model?.result?.score === null) return
     startScoreAnimation(model.result.score)
   }, [model?.result?.score])
 
@@ -569,7 +541,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [blockedMessage])
 
   useEffect(() => {
-    if (!step) setStep(STEP.QUESTION)
+    if (!step) setStep(STEP.ENTRY)
   }, [step])
 
   async function handleDebugReset() {
@@ -587,6 +559,13 @@ function PhaseQuizLotteryMain({ routeParams }) {
       })
       console.log('[phase-quiz-lottery debug reset]', result)
       showToast('测试活动已重置')
+      setQuestions([])
+      setCurrentIndex(0)
+      setAnswers([])
+      setAttemptId('')
+      setDraw(null)
+      setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
+      setStep(STEP.ENTRY)
     } catch (error) {
       showToast(normalizeFriendlyMessage(error, '重置失败'))
     } finally {
@@ -887,59 +866,74 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   return (
     <>
-      <DebugStage
-        activityKey={activityKey}
-        step={step}
-        attemptId={attemptId}
-        model={model}
-        draw={draw}
-        onReset={handleDebugReset}
-        onGoQuestion={handleDebugGoQuestion}
-        onLogState={handleDebugLogState}
-      />
+      <main className="h-[100vh] overflow-hidden bg-[#f5f7fb]">
+        <StageLayout className="bg-[#f5f7fb]">
+          <div className="pql-stage relative overflow-hidden bg-[#f5f7fb] text-slate-900">
+            {step === STEP.ENTRY ? (
+              <div className="absolute inset-x-0 top-0 z-0 h-[420px] bg-white">
+                <div className="pql-banner h-full w-full" style={{ backgroundImage: `url(${assets.bannerBackground})` }} />
+              </div>
+            ) : null}
+
+            <DebugPanel
+              activityKey={activityKey}
+              step={step}
+              attemptId={attemptId}
+              model={model}
+              draw={draw}
+              onReset={handleDebugReset}
+              onGoQuestion={handleDebugGoQuestion}
+              onLogState={handleDebugLogState}
+            />
+
+            {step === STEP.ENTRY ? (
+              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading} />
+            ) : null}
+
+            {step === STEP.QUESTION ? (
+              <QuestionPage
+                activityTitle={activityTitle}
+                questions={questions}
+                currentIndex={currentIndex}
+                submitting={submitting}
+                onAnswer={handleAnswer}
+                assets={assets}
+              />
+            ) : null}
+
+            {step === STEP.RESULT ? (
+              <ResultPage
+                activityTitle={activityTitle}
+                phaseNo={currentPhaseNo}
+                model={model}
+                animatedScore={scoreDisplay}
+                onStart={handleStart}
+                onGoWheel={handleGoWheel}
+                onOpenPrize={openPrizeModal}
+                assets={assets}
+              />
+            ) : null}
+
+            {step === STEP.WHEEL ? (
+              <WheelPage
+                activityTitle={activityTitle}
+                phaseNo={currentPhaseNo}
+                segments={wheelSegments}
+                draw={draw}
+                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)}
+                drawing={drawing}
+                spinKey={spinKey}
+                onDraw={handleDraw}
+                onOpenPrize={openPrizeModal}
+                onWheelFinish={handleWheelFinish}
+                assets={assets}
+              />
+            ) : null}
+          </div>
+        </StageLayout>
+      </main>
+
       <DevLayoutDebugPanel step={step} />
-
-      {step === STEP.QUESTION ? (
-        <QuestionPage
-          activityKey={activityKey}
-          activityTitle={activityTitle}
-          phaseNo={currentPhaseNo}
-          questions={questions}
-          currentIndex={currentIndex}
-          submitting={submitting}
-          onAnswer={handleAnswer}
-          assets={assets}
-        />
-      ) : null}
-
-      {step === STEP.RESULT ? (
-        <ResultPage
-          activityTitle={activityTitle}
-          phaseNo={currentPhaseNo}
-          model={model}
-          animatedScore={scoreDisplay}
-          onStart={handleStart}
-          onGoWheel={handleGoWheel}
-          onOpenPrize={openPrizeModal}
-          assets={assets}
-        />
-      ) : null}
-
-      {step === STEP.WHEEL ? (
-        <WheelPage
-          activityTitle={activityTitle}
-          phaseNo={currentPhaseNo}
-          segments={wheelSegments}
-          draw={draw}
-          canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)}
-          drawing={drawing}
-          spinKey={spinKey}
-          onDraw={handleDraw}
-          onOpenPrize={openPrizeModal}
-          onWheelFinish={handleWheelFinish}
-          assets={assets}
-        />
-      ) : null}
 
       <PrizeModal open={prizeModalOpen} onClose={() => setPrizeModalOpen(false)}>
         <PrizeModalContent

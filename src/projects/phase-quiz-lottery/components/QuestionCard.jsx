@@ -9,14 +9,14 @@ export default function QuestionCard({
   const options = question?.options || []
 
   return (
-    <section className="rounded-[24px] bg-white px-6 py-6 shadow-[0_16px_36px_rgba(55,94,156,0.10)]">
-      <div className="rounded-[18px] border border-[#edf1f7] bg-white px-5 py-6 shadow-[0_8px_18px_rgba(34,73,140,0.05)]">
-        <p className="text-[18px] leading-[1.8] font-medium text-slate-900">
+    <section className="rounded-[28px] bg-white px-[28px] py-[28px] shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
+      <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-[28px] py-[32px]">
+        <p className="text-[32px] leading-[1.7] font-medium text-slate-900">
           {question?.title || '题目加载中...'}
         </p>
       </div>
 
-      <div className="mt-4 grid gap-4">
+      <div className="mt-[24px] grid gap-[18px]" role="radiogroup" aria-label="题目选项">
         {options.map((option, index) => (
           <OptionItem
             key={`${question?.id || 'question'}-${option.label}-${index}`}
