@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
-import { setToken } from '../../shared/api/request'
+import { request, setToken } from '../../shared/api/request'
 import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -17,6 +17,7 @@ import {
   startAttempt,
   submitAttempt,
 } from './api'
+import StageLayout from './components/StageLayout'
 import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import WheelPage from './pages/WheelPage'
@@ -40,6 +41,9 @@ const CLAIM_STATUS = {
   PICKUP_PENDING: 'pickup_pending',
   PICKUP_VERIFIED: 'pickup_verified',
 }
+
+const isDebug = new URLSearchParams(window.location.search).get('debug') === '1'
+const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 
 function LoadingLayer({ open = true, text = '加载中...' }) {
   if (!open) return null
@@ -165,10 +169,57 @@ function resolveInitialStep(model) {
 
 function replaceLegacyPath(activityKey) {
   if (!activityKey) return
-  const target = `/phase-quiz-lottery/${encodeURIComponent(activityKey)}`
-  if (window.location.pathname !== target) {
+  const target = `/phase-quiz-lottery/${encodeURIComponent(activityKey)}${window.location.search || ''}`
+  const current = `${window.location.pathname}${window.location.search || ''}`
+  if (current !== target) {
     window.history.replaceState({}, '', target)
   }
+}
+
+function DebugPanel({
+  activityKey,
+  step,
+  attemptId,
+  model,
+  draw,
+  onReset,
+  onGoQuestion,
+  onLogState,
+}) {
+  return (
+    <div className="absolute right-5 top-[calc(env(safe-area-inset-top,0px)+20px)] z-[12000] w-[250px] rounded-[20px] border border-white/50 bg-white/88 px-4 py-3 text-left text-[20px] leading-7 text-slate-700 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-md">
+      <div className="text-[22px] font-extrabold text-blue-600">DEBUG</div>
+      <div className="mt-2 break-all text-[18px] leading-6">
+        <div>activityKey: {activityKey || '-'}</div>
+        <div>step: {step || '-'}</div>
+        <div>attemptId: {attemptId || model?.attempt?.attemptId || '-'}</div>
+      </div>
+      <div className="mt-3 grid gap-2">
+        <button className="min-h-10 rounded-xl bg-red-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onReset}>
+          重置活动
+        </button>
+        <button className="min-h-10 rounded-xl bg-blue-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
+          回到答题页
+        </button>
+        <button className="min-h-10 rounded-xl bg-slate-800 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={() => onLogState({ activityKey, step, attemptId, model, draw })}>
+          console.log 当前状态
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function DebugStage(props) {
+  if (!isDebug) return null
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[12000]">
+      <StageLayout className="pointer-events-none bg-transparent">
+        <div className="pointer-events-auto relative h-full w-full">
+          <DebugPanel {...props} />
+        </div>
+      </StageLayout>
+    </div>
+  )
 }
 
 function PrizeModalContent({
@@ -476,6 +527,42 @@ function PhaseQuizLotteryMain({ routeParams }) {
     showToast(blockedMessage)
   }, [blockedMessage])
 
+  useEffect(() => {
+    if (!step) setStep(STEP.QUESTION)
+  }, [step])
+
+  async function handleDebugReset() {
+    if (!isDebug) return
+
+    setLoading(true)
+    setLoadingText('正在重置测试活动...')
+    try {
+      const result = await request('/phase-quiz-lottery/dev/reset', {
+        method: 'POST',
+        body: JSON.stringify({
+          activityKey,
+          confirmToken: DEBUG_RESET_TOKEN,
+        }),
+      })
+      console.log('[phase-quiz-lottery debug reset]', result)
+      showToast('测试活动已重置')
+    } catch (error) {
+      showToast(normalizeFriendlyMessage(error, '重置失败'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleDebugGoQuestion() {
+    if (!isDebug) return
+    setStep(STEP.QUESTION)
+  }
+
+  function handleDebugLogState(state) {
+    if (!isDebug) return
+    console.log('[phase-quiz-lottery debug state]', state)
+  }
+
   async function handleStart() {
     if (!model?.currentPhase?.phaseNo) {
       showToast('活动未开始')
@@ -759,6 +846,17 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   return (
     <>
+      <DebugStage
+        activityKey={activityKey}
+        step={step}
+        attemptId={attemptId}
+        model={model}
+        draw={draw}
+        onReset={handleDebugReset}
+        onGoQuestion={handleDebugGoQuestion}
+        onLogState={handleDebugLogState}
+      />
+
       {step === STEP.QUESTION ? (
         <QuestionPage
           activityKey={activityKey}
