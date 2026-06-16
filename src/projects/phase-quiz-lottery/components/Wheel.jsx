@@ -2,10 +2,18 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 const DEFAULT_SIZE = 520
 const DEFAULT_COLORS = ['#fff8e5', '#f8fbff']
+const WHEEL_SLOT_COUNT = 5
 
 function getNormalizedTargetRotation(targetIndex, segmentCount) {
   const segmentAngle = 360 / segmentCount
   return (360 - targetIndex * segmentAngle) % 360
+}
+
+function normalizeSegments(segments) {
+  const fixedSegments = Array.from({ length: WHEEL_SLOT_COUNT }, (_, index) => (
+    segments?.[index] || { label: '谢谢参与', background: DEFAULT_COLORS[index % DEFAULT_COLORS.length] }
+  ))
+  return fixedSegments
 }
 
 function easeOutCubic(value) {
@@ -24,11 +32,12 @@ export default function Wheel({
   onOpenPrize,
   onFinish,
 }) {
+  const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
   const canvasRef = useRef(null)
   const frameRef = useRef(0)
   const rotationRef = useRef(0)
   const [rotation, setRotation] = useState(() =>
-    Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, segments.length) : 0,
+    Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT) : 0,
   )
 
   const reducedMotion = useMemo(
@@ -58,10 +67,10 @@ export default function Wheel({
     context.clearRect(0, 0, DEFAULT_SIZE, DEFAULT_SIZE)
 
     const radius = DEFAULT_SIZE / 2
-    const segmentAngle = (Math.PI * 2) / segments.length
+    const segmentAngle = (Math.PI * 2) / WHEEL_SLOT_COUNT
     const baseStart = -Math.PI / 2 - segmentAngle / 2
 
-    segments.forEach((segment, index) => {
+    wheelSegments.forEach((segment, index) => {
       const startAngle = baseStart + index * segmentAngle
       const endAngle = startAngle + segmentAngle
       context.beginPath()
@@ -79,21 +88,21 @@ export default function Wheel({
       context.rotate(startAngle + segmentAngle / 2)
       context.textAlign = 'center'
       context.fillStyle = '#171717'
-      context.font = '700 24px sans-serif'
+      context.font = '700 26px sans-serif'
       String(segment.label || '')
         .split('\n')
         .forEach((line, lineIndex) => {
-          context.fillText(line, radius * 0.62, -12 + lineIndex * 28)
+          context.fillText(line, radius * 0.58, -12 + lineIndex * 30)
         })
       context.restore()
     })
-  }, [segments])
+  }, [wheelSegments])
 
   useEffect(() => {
-    if (!Number.isInteger(targetIndex) || !spinKey) return
+    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= WHEEL_SLOT_COUNT || !spinKey) return
     const currentRotation = rotationRef.current
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360
-    const normalizedTarget = getNormalizedTargetRotation(targetIndex, segments.length)
+    const normalizedTarget = getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT)
     let delta = normalizedTarget - normalizedCurrent
     if (delta < 0) delta += 360
     const finalRotation = currentRotation + (reducedMotion ? 1 : 6) * 360 + delta
@@ -114,26 +123,16 @@ export default function Wheel({
 
     frameRef.current = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(frameRef.current)
-  }, [onFinish, reducedMotion, segments.length, spinKey, targetIndex])
+  }, [onFinish, reducedMotion, spinKey, targetIndex])
 
   const drawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
-  const buttonLabel = draw?.alreadyDrawn
-    ? draw?.won
-      ? '已开奖'
-      : draw?.soldOut
-        ? '已抽完'
-        : '已完成'
-    : drawing
-      ? '抽奖中...'
-      : '立即抽奖'
-
   return (
     <>
       <div className="mt-[26px] inline-flex min-h-[64px] items-center justify-center rounded-full bg-slate-100 px-[28px] text-[28px] font-bold text-slate-800">
         抽奖次数 {drawCount} 次
       </div>
       <div className="pql-wheel-frame mt-[30px]">
-        <div className="absolute inset-[20px] rounded-full border-[6px] border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]" />
+        <img className="pql-wheel-frame__ring" src={assets.wheelRing} alt="" aria-hidden="true" />
         <img className="pql-wheel-frame__pointer" src={assets.wheelPointer} alt="" aria-hidden="true" />
         <div className="pql-wheel-frame__canvas">
           <div className="relative" style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE }}>
@@ -146,12 +145,13 @@ export default function Wheel({
           </div>
         </div>
         <button
-          className="absolute left-1/2 top-1/2 z-[4] flex h-[150px] w-[150px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-slate-900 text-[28px] leading-[1.3] font-extrabold text-white shadow-[0_20px_44px_rgba(15,23,42,0.24)] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="absolute left-1/2 top-1/2 z-[4] flex h-[156px] w-[156px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
           disabled={!canDraw || drawing || Boolean(draw?.alreadyDrawn)}
           onClick={onDraw}
+          aria-label={drawing ? '抽奖中' : '立即抽奖'}
         >
-          <span className="whitespace-pre-line">{buttonLabel}</span>
+          <img className="h-full w-full object-contain" src={assets.wheelCenterButton} alt="" aria-hidden="true" />
         </button>
       </div>
       <div className="mt-[30px]">

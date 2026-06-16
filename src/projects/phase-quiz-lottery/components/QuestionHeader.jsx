@@ -1,4 +1,4 @@
-export default function QuestionHeader({ title, backgroundImageUrl }) {
+export default function QuestionHeader({ title, backgroundImageUrl, bookImageUrl }) {
   return (
     <header className="pql-question-header relative z-10 h-[360px] overflow-hidden">
       <div
@@ -10,6 +10,14 @@ export default function QuestionHeader({ title, backgroundImageUrl }) {
           {title}
         </h1>
       </div>
+      {bookImageUrl ? (
+        <img
+          className="absolute right-[28px] bottom-[18px] z-30 h-[132px] w-[176px] object-contain"
+          src={bookImageUrl}
+          alt=""
+          aria-hidden="true"
+        />
+      ) : null}
     </header>
   )
 }

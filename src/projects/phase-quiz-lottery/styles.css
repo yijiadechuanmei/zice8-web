@@ -30,12 +30,6 @@ body {
   max-width: none;
 }
 
-.pql-banner {
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .pql-question-header {
   position: relative;
 }
@@ -44,23 +38,6 @@ body {
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
-}
-
-.pql-question-header::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  z-index: 10;
-  height: 116px;
-  background:
-    radial-gradient(160px 70px at 8% 0%, #ffffff 0 68%, transparent 70%),
-    radial-gradient(180px 80px at 32% 0%, #ffffff 0 68%, transparent 70%),
-    radial-gradient(180px 84px at 58% 0%, #ffffff 0 68%, transparent 70%),
-    radial-gradient(180px 80px at 84% 0%, #ffffff 0 68%, transparent 70%),
-    linear-gradient(180deg, transparent 0%, #ffffff 74%, #ffffff 100%);
-  pointer-events: none;
 }
 
 .pql-question-content,
@@ -77,13 +54,23 @@ body {
   margin-right: auto;
 }
 
+.pql-wheel-frame__ring {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .pql-wheel-frame__pointer {
   position: absolute;
   left: 50%;
-  top: -8px;
-  z-index: 5;
-  width: 132px;
-  height: 132px;
+  top: -2px;
+  z-index: 3;
+  width: 128px;
+  height: 128px;
   transform: translateX(-50%);
   object-fit: contain;
   pointer-events: none;

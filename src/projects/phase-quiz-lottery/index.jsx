@@ -18,6 +18,7 @@ import {
   submitAttempt,
 } from './api'
 import StageLayout from './components/StageLayout'
+import QuestionHeader from './components/QuestionHeader'
 import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import WheelPage from './pages/WheelPage'
@@ -93,21 +94,21 @@ function PrizeModal({ open, onClose, children }) {
 function buildAssets() {
   return {
     bannerBackground: `${ASSET_BASE}/banner/banner_bg.png`,
+    bannerBook: `${ASSET_BASE}/banner/banner_book.png`,
     prizeBox: `${ASSET_BASE}/prize/prize_box.png`,
-    wheelPointer: `${ASSET_BASE}/wheel/pointer`,
+    wheelRing: `${ASSET_BASE}/wheel/wheel_ring.png`,
+    wheelPointer: `${ASSET_BASE}/wheel/wheel_pointer.png`,
+    wheelCenterButton: `${ASSET_BASE}/wheel/wheel_center_btn.png`,
   }
 }
 
-function buildWheelSegments() {
+function buildWheelSegments(prizeName) {
   return [
-    { label: '一等奖', background: '#fff8e5' },
-    { label: '二等奖', background: '#f8fbff' },
-    { label: '三等奖', background: '#fff8e5' },
+    { label: prizeName || '奖品', background: '#fff3d7' },
     { label: '谢谢参与', background: '#f8fbff' },
-    { label: '谢谢参与', background: '#fff8e5' },
+    { label: '谢谢参与', background: '#fff3d7' },
     { label: '谢谢参与', background: '#f8fbff' },
-    { label: '谢谢参与', background: '#fff8e5' },
-    { label: '谢谢参与', background: '#f8fbff' },
+    { label: '谢谢参与', background: '#fff3d7' },
   ]
 }
 
@@ -139,6 +140,19 @@ function replaceLegacyPath(activityKey) {
   if (current !== target) {
     window.history.replaceState({}, '', target)
   }
+}
+
+function resolvePrizeName(model, draw, myPrize) {
+  return (
+    draw?.prize?.name ||
+    model?.draw?.prize?.name ||
+    model?.prize?.name ||
+    model?.currentPhase?.prize?.name ||
+    model?.currentPhase?.prizes?.[0]?.name ||
+    model?.prizes?.[0]?.name ||
+    myPrize?.prize?.name ||
+    ''
+  )
 }
 
 function DebugPanel({
@@ -216,20 +230,21 @@ function DevLayoutDebugPanel({ step }) {
   )
 }
 
-function EntryPage({ activityTitle, model, onStart, disabled }) {
+function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   const unavailable = model?.state === 'no_open_phase'
-  const title = activityTitle || '分期答题抽奖'
   const subtitle = unavailable ? '当前暂无开放期次' : '本期答题已开启'
-  const description = unavailable ? '活动未开始或当前期次已结束，请稍后再来。' : '完成本期 5 道判断题后查看结果，满分且具备资格时可进入抽奖。'
 
   return (
-    <section className="flex h-full flex-col px-[40px] pb-[88px] pt-[420px] text-center text-slate-900">
-      <div className="rounded-[36px] bg-white px-[40px] py-[56px] shadow-[0_24px_64px_rgba(15,23,42,0.08)]">
-        <div className="text-[32px] font-bold text-slate-500">{title}</div>
-        <h2 className="mt-[28px] text-[40px] leading-[1.3] font-extrabold text-slate-900">{subtitle}</h2>
-        <p className="mt-[24px] text-[30px] leading-[1.7] text-slate-600">{description}</p>
+    <section className="relative z-10 flex h-full flex-col text-center text-slate-900">
+      <QuestionHeader
+        title={activityTitle}
+        backgroundImageUrl={assets.bannerBackground}
+        bookImageUrl={assets.bannerBook}
+      />
+      <div className="px-[40px] pb-[88px] pt-[64px]">
+        <h2 className="text-[40px] leading-[1.3] font-extrabold text-slate-900">{subtitle}</h2>
         <button
-          className="mt-[56px] min-h-[92px] w-full rounded-full bg-slate-900 px-[32px] text-[32px] font-bold text-white shadow-[0_20px_40px_rgba(15,23,42,0.16)] disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="mt-[56px] min-h-[92px] w-full cursor-pointer rounded-full bg-slate-900 px-[32px] text-[32px] font-bold text-white shadow-[0_20px_40px_rgba(15,23,42,0.16)] transition-colors duration-200 disabled:cursor-not-allowed disabled:bg-slate-300"
           type="button"
           disabled={disabled || unavailable}
           onClick={onStart}
@@ -420,7 +435,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const toastTimerRef = useRef(0)
   const scoreTimerRef = useRef(0)
   const assets = useMemo(() => buildAssets(), [])
-  const wheelSegments = useMemo(() => buildWheelSegments(), [])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -863,18 +877,16 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   const currentPhaseNo = model?.currentPhase?.phaseNo || model?.attempt?.phaseNo || ''
   const activityTitle = model?.activityTitle || '分期答题抽奖'
+  const wheelSegments = useMemo(
+    () => buildWheelSegments(resolvePrizeName(model, draw, myPrize)),
+    [draw, model, myPrize],
+  )
 
   return (
     <>
       <main className="h-[100vh] overflow-hidden bg-[#f5f7fb]">
         <StageLayout className="bg-[#f5f7fb]">
           <div className="pql-stage relative overflow-hidden bg-[#f5f7fb] text-slate-900">
-            {step === STEP.ENTRY ? (
-              <div className="absolute inset-x-0 top-0 z-0 h-[420px] bg-white">
-                <div className="pql-banner h-full w-full" style={{ backgroundImage: `url(${assets.bannerBackground})` }} />
-              </div>
-            ) : null}
-
             <DebugPanel
               activityKey={activityKey}
               step={step}
@@ -887,7 +899,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
             />
 
             {step === STEP.ENTRY ? (
-              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading} />
+              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading} assets={assets} />
             ) : null}
 
             {step === STEP.QUESTION ? (
