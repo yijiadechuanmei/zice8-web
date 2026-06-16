@@ -390,7 +390,7 @@ function PrizeModalContent({
               <div className="grid gap-1.5">
                 <input
                   id="pql-name"
-                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-base text-slate-900"
                   value={mailForm.recipientName}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientName: event.target.value }))}
                   placeholder="收件人姓名"
@@ -399,7 +399,7 @@ function PrizeModalContent({
                   id="pql-phone"
                   type="tel"
                   inputMode="numeric"
-                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-base text-slate-900"
                   value={mailForm.recipientPhone}
                   onChange={(event) => setMailForm((current) => ({ ...current, recipientPhone: event.target.value.replace(/\D/g, '') }))}
                   placeholder="手机号"
@@ -407,7 +407,7 @@ function PrizeModalContent({
               </div>
               <div className="grid grid-cols-3 gap-1.5">
                 <select
-                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-base text-slate-900"
                   value={mailForm.province}
                   onChange={(event) => {
                     setMailForm((current) => ({
@@ -423,7 +423,7 @@ function PrizeModalContent({
                   {ADDRESS_OPTIONS.map((item) => <option key={item.province} value={item.province}>{item.province}</option>)}
                 </select>
                 <select
-                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-base text-slate-900"
                   value={mailForm.city}
                   onChange={(event) => {
                     setMailForm((current) => ({
@@ -439,7 +439,7 @@ function PrizeModalContent({
                   {getCityOptions(mailForm.province).map((item) => <option key={item.city} value={item.city}>{item.city}</option>)}
                 </select>
                 <select
-                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-xs text-slate-900"
+                  className="min-h-10 rounded-2xl border border-slate-200 bg-white px-2 text-base text-slate-900"
                   value={mailForm.district}
                   onChange={(event) => setMailForm((current) => ({ ...current, district: event.target.value }))}
                   disabled={!mailForm.city}
@@ -452,7 +452,7 @@ function PrizeModalContent({
               <div className="grid gap-2">
                 <input
                   id="pql-address"
-                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+                  className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-base text-slate-900"
                   value={mailForm.detailAddress}
                   onChange={(event) => setMailForm((current) => ({ ...current, detailAddress: event.target.value }))}
                   placeholder="详细地址"
@@ -478,7 +478,7 @@ function PrizeModalContent({
             <input
               id="pql-verify"
               type="password"
-              className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-sm text-slate-900"
+              className="min-h-10 w-full rounded-2xl border border-slate-200 bg-white px-3 text-base text-slate-900"
               value={pickupPassword}
               onChange={(event) => setPickupPassword(event.target.value)}
               placeholder="请输入门店核销密码"
@@ -547,6 +547,36 @@ function PhaseQuizLotteryMain({ routeParams }) {
     return () => {
       window.clearTimeout(toastTimerRef.current)
       window.clearInterval(scoreTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    const preventGesture = (event) => {
+      event.preventDefault()
+    }
+    const preventMultiTouchZoom = (event) => {
+      if (event.touches?.length > 1) {
+        event.preventDefault()
+      }
+    }
+    const preventWheelZoom = (event) => {
+      if (event.ctrlKey) {
+        event.preventDefault()
+      }
+    }
+
+    document.addEventListener('gesturestart', preventGesture)
+    document.addEventListener('gesturechange', preventGesture)
+    document.addEventListener('gestureend', preventGesture)
+    document.addEventListener('touchmove', preventMultiTouchZoom, { passive: false })
+    document.addEventListener('wheel', preventWheelZoom, { passive: false })
+
+    return () => {
+      document.removeEventListener('gesturestart', preventGesture)
+      document.removeEventListener('gesturechange', preventGesture)
+      document.removeEventListener('gestureend', preventGesture)
+      document.removeEventListener('touchmove', preventMultiTouchZoom)
+      document.removeEventListener('wheel', preventWheelZoom)
     }
   }, [])
 

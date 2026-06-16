@@ -5,9 +5,21 @@ body,
   height: 100%;
 }
 
+html {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
+  touch-action: manipulation;
+  overscroll-behavior: none;
   overflow-x: hidden;
+}
+
+.pql-stage-layout input,
+.pql-stage-layout textarea,
+.pql-stage-layout select {
+  font-size: 16px;
 }
 
 .pql-stage-layout {
