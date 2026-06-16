@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 const DEFAULT_SIZE = 520
 const DEFAULT_COLORS = ['#EEF6FF', '#F7FAFF']
@@ -46,9 +46,9 @@ export default function Wheel({
   const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
   const remainingDrawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
   const canvasRef = useRef(null)
+  const wheelDiscRef = useRef(null)
   const frameRef = useRef(0)
-  const rotationRef = useRef(0)
-  const [rotation, setRotation] = useState(() =>
+  const rotationRef = useRef(
     Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT) : 0,
   )
 
@@ -59,10 +59,6 @@ export default function Wheel({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   )
-
-  useEffect(() => {
-    rotationRef.current = rotation
-  }, [rotation])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -99,16 +95,22 @@ export default function Wheel({
       context.translate(radius, radius)
       context.rotate(startAngle + segmentAngle / 2)
       context.textAlign = 'center'
+      context.textBaseline = 'middle'
       context.fillStyle = segment.prize ? '#0F172A' : '#2F80FF'
       context.font = segment.prize ? '800 26px sans-serif' : '700 26px sans-serif'
       String(segment.label || '')
         .split('\n')
         .forEach((line, lineIndex) => {
-          context.fillText(line, radius * 0.58, -12 + lineIndex * 30)
+          context.fillText(line, radius * 0.54, lineIndex * 30)
         })
       context.restore()
     })
   }, [wheelSegments])
+
+  useEffect(() => {
+    if (!wheelDiscRef.current) return
+    wheelDiscRef.current.style.transform = `rotate(${rotationRef.current}deg)`
+  }, [])
 
   useEffect(() => {
     if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= WHEEL_SLOT_COUNT || !spinKey) return
@@ -125,7 +127,9 @@ export default function Wheel({
       const progress = Math.min(1, (now - start) / 4600)
       const nextRotation = currentRotation + (finalRotation - currentRotation) * easeOutCubic(progress)
       rotationRef.current = nextRotation
-      setRotation(nextRotation)
+      if (wheelDiscRef.current) {
+        wheelDiscRef.current.style.transform = `rotate(${nextRotation}deg)`
+      }
       if (progress < 1) {
         frameRef.current = window.requestAnimationFrame(tick)
         return
@@ -146,8 +150,9 @@ export default function Wheel({
         <div className="pql-wheel-frame__canvas">
           <div className="relative" style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE }}>
             <div
-              className="overflow-hidden rounded-full"
-              style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE, transform: `rotate(${rotation}deg)` }}
+              ref={wheelDiscRef}
+              className="pql-wheel-frame__disc overflow-hidden rounded-full"
+              style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE, transform: `rotate(${rotationRef.current}deg)` }}
             >
               <canvas ref={canvasRef} className="block rounded-full" />
             </div>

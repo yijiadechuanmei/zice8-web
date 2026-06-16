@@ -78,7 +78,7 @@ function PrizeModal({ open, onClose, children }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/35 px-4 py-5 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
       <div
-        className="relative max-h-[calc(100vh-40px)] w-full max-w-[620px] overflow-hidden rounded-[28px] bg-white px-5 py-5 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
+        className="relative max-h-[70vh] w-full max-w-[520px] overflow-hidden rounded-[28px] bg-white px-5 py-5 shadow-[0_30px_80px_rgba(10,24,58,0.22)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button className="absolute right-4 top-4 h-9 w-9 cursor-pointer rounded-full bg-slate-100 text-xl text-slate-700" type="button" onClick={onClose} aria-label="关闭弹窗">
@@ -317,6 +317,7 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
 
 function PrizeModalContent({
   prize,
+  assets,
   claimMode,
   setClaimMode,
   mailForm,
@@ -330,13 +331,18 @@ function PrizeModalContent({
   if (!prize?.hasPrize) return <p className="text-sm leading-7 text-slate-500">当前还没有可领取的奖品。</p>
 
   const claim = prize.claim
+  const drawTime = formatDrawTime(prize.draw?.createdAt)
   const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
   return (
     <div className="grid gap-3">
-      <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
-        <div className="min-w-0 truncate text-base font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
-        <span className="inline-flex min-h-8 w-24 items-center justify-center rounded-full bg-white px-3 text-sm font-bold text-slate-700">{claimStatusText}</span>
+      <div className="grid grid-cols-[72px_1fr_auto] items-center gap-3 rounded-2xl bg-slate-50 px-3 py-3">
+        <img className="h-[72px] w-[72px] object-contain" src={assets.prizeBox} alt="" aria-hidden="true" />
+        <div className="min-w-0">
+          <div className="truncate text-base font-extrabold text-slate-800">{prize.prize?.name || '奖品待公布'}</div>
+          <div className="mt-1 text-sm font-medium text-slate-500">{drawTime}</div>
+        </div>
+        <span className="inline-flex min-h-8 w-20 items-center justify-center rounded-full bg-white px-2 text-sm font-bold text-slate-700">{claimStatusText}</span>
       </div>
 
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
