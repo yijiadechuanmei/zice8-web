@@ -100,6 +100,26 @@
   color: rgba(255, 255, 255, 0.32);
 }
 
+.appointment-skin-dongfang-zhenyue .appointment-stage-input,
+.appointment-skin-dongfang-zhenyue .appointment-picker-trigger {
+  color: #000000;
+}
+
+.appointment-skin-dongfang-zhenyue .appointment-stage-input::placeholder,
+.appointment-skin-dongfang-zhenyue .appointment-picker-trigger.is-placeholder {
+  color: rgba(0, 0, 0, 0.42);
+}
+
+.appointment-skin-dongfang-zhenyue .appointment-picker-trigger.is-disabled {
+  color: rgba(0, 0, 0, 0.28);
+}
+
+.appointment-skin-dongfang-zhenyue .appointment-stage-input:-webkit-autofill,
+.appointment-skin-dongfang-zhenyue .appointment-stage-input:-webkit-autofill:hover,
+.appointment-skin-dongfang-zhenyue .appointment-stage-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000000;
+}
+
 .appointment-stage-button {
   position: absolute;
   padding: 0;
@@ -136,6 +156,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.appointment-skin-dongfang-zhenyue .appointment-success-primary,
+.appointment-skin-dongfang-zhenyue .appointment-success-secondary,
+.appointment-skin-dongfang-zhenyue .appointment-success-tertiary {
+  color: #000000;
+  font-size: 51px;
+  font-weight: 500;
 }
 
 .appointment-success-secondary {

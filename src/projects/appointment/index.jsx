@@ -10,10 +10,8 @@ import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shar
 import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointment } from './api'
 import {
   APPOINTMENT_FALLBACK_ASSETS_BASE_URL,
-  APPOINTMENT_LAYOUT,
-  APPOINTMENT_STAGE_WIDTH,
-  APPOINTMENT_STAGE_HEIGHT,
 } from './appointmentLayout'
+import { resolveAppointmentSkin } from './appointmentSkins'
 import './appointment.css'
 
 const STEPS = {
@@ -70,6 +68,8 @@ function AppointmentMain({ routeParams }) {
   const hasTrackedInitialViewRef = useRef(false)
   const lastSuccessTrackKeyRef = useRef('')
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+  const appointmentSkin = useMemo(() => resolveAppointmentSkin(activityKey), [activityKey])
+  const appointmentLayout = appointmentSkin.layout
 
   useEffect(() => {
     return () => window.clearTimeout(toastTimerRef.current)
@@ -184,10 +184,16 @@ function AppointmentMain({ routeParams }) {
     })
   }, [activityKey, bookingForm.appointmentDate, bookingForm.appointmentSlot, bootstrap?.booking, step, verifyForm])
 
-  const assetsBaseUrl = config?.assetsBaseUrl || APPOINTMENT_FALLBACK_ASSETS_BASE_URL
-  const backgroundUrl = getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.background)
-  const stageHeight = APPOINTMENT_STAGE_HEIGHT
-  const stageMetrics = useStageMetrics()
+  const configuredAssetsBaseUrl =
+    config?.assetsBaseUrl && config.assetsBaseUrl !== APPOINTMENT_FALLBACK_ASSETS_BASE_URL
+      ? config.assetsBaseUrl
+      : ''
+  const assetsBaseUrl = configuredAssetsBaseUrl || appointmentSkin.assetsBaseUrl || APPOINTMENT_FALLBACK_ASSETS_BASE_URL
+  const stepBackground = appointmentLayout?.[step]?.background || appointmentLayout.common.background
+  const backgroundUrl = getAssetUrl(assetsBaseUrl, stepBackground)
+  const stageWidth = appointmentSkin.stageWidth
+  const stageHeight = appointmentLayout?.[step]?.height || appointmentSkin.stageHeight
+  const stageMetrics = useStageMetrics(stageWidth)
   const successBooking = useMemo(
     () => normalizeSuccessBooking(bootstrap?.booking),
     [bootstrap?.booking],
@@ -326,7 +332,7 @@ function AppointmentMain({ routeParams }) {
 
   return (
     <div
-      className="appointment-page"
+      className={`appointment-page ${appointmentSkin.className || ''}`.trim()}
       style={{
         backgroundImage: `url(${backgroundUrl})`,
       }}
@@ -335,7 +341,7 @@ function AppointmentMain({ routeParams }) {
         <div
           className="appointment-stage"
           style={{
-            width: APPOINTMENT_STAGE_WIDTH,
+            width: stageWidth,
             height: stageHeight,
             transform: `translate(-50%, -50%) scale(${stageMetrics.scale})`,
             backgroundImage: `url(${backgroundUrl})`,
@@ -352,21 +358,22 @@ function AppointmentMain({ routeParams }) {
           <div key={step} className="appointment-step-fade">
             <LayerImage
               className="appointment-stage__banner"
-              src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.topBanner.filename)}
-              box={APPOINTMENT_LAYOUT.common.topBanner}
+              src={getAssetUrl(assetsBaseUrl, appointmentLayout.common.topBanner.filename)}
+              box={appointmentLayout.common.topBanner}
               alt=""
             />
 
             {step === STEPS.INTRO ? (
-              <IntroStage assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
+              <IntroStage layout={appointmentLayout} assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
             ) : null}
 
             {step === STEPS.RULE ? (
-              <RuleStage assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
+              <RuleStage layout={appointmentLayout} assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
             ) : null}
 
             {step === STEPS.VERIFY ? (
               <VerifyStage
+                layout={appointmentLayout}
                 assetsBaseUrl={assetsBaseUrl}
                 verifyForm={verifyForm}
                 setVerifyForm={setVerifyForm}
@@ -378,6 +385,7 @@ function AppointmentMain({ routeParams }) {
 
             {step === STEPS.BOOKING ? (
               <BookingStage
+                layout={appointmentLayout}
                 assetsBaseUrl={assetsBaseUrl}
                 bookingForm={bookingForm}
                 setBookingForm={setBookingForm}
@@ -393,6 +401,7 @@ function AppointmentMain({ routeParams }) {
 
             {step === STEPS.SUCCESS ? (
               <SuccessStage
+                layout={appointmentLayout}
                 assetsBaseUrl={assetsBaseUrl}
                 name={successBooking?.name || verifyForm.name || ''}
                 houseKey={successBooking?.houseKey || verifyHouseKey(verifyForm) || '请以现场安排为准'}
@@ -442,10 +451,10 @@ function AppointmentMain({ routeParams }) {
   )
 }
 
-function IntroStage({ assetsBaseUrl, pageUrl }) {
+function IntroStage({ layout, assetsBaseUrl, pageUrl }) {
   return (
     <>
-      {APPOINTMENT_LAYOUT.intro.images.map((image) => (
+      {layout.intro.images.map((image) => (
         <LayerImage
           key={image.filename}
           src={getAssetUrl(assetsBaseUrl, image.filename)}
@@ -454,7 +463,7 @@ function IntroStage({ assetsBaseUrl, pageUrl }) {
         />
       ))}
       {pageUrl ? (
-        <div className="appointment-qrcode-box" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.intro.qrcodeBox)}>
+        <div className="appointment-qrcode-box" style={toAbsoluteStyle(layout.intro.qrcodeBox)}>
           <QRCodeSVG
             value={pageUrl}
             size={120}
@@ -469,11 +478,11 @@ function IntroStage({ assetsBaseUrl, pageUrl }) {
   )
 }
 
-function RuleStage({ assetsBaseUrl, onNext }) {
+function RuleStage({ layout, assetsBaseUrl, onNext }) {
   return (
     <>
-      {APPOINTMENT_LAYOUT.rule.images.map((image) => {
-        if (image.filename === '4d08ba00e32fac92c7dd171992244add_1754_221_58.png') {
+      {layout.rule.images.map((image) => {
+        if (image.action === 'next' || image.filename === '4d08ba00e32fac92c7dd171992244add_1754_221_58.png') {
           return (
             <ImageButton
               key={image.filename}
@@ -498,6 +507,7 @@ function RuleStage({ assetsBaseUrl, onNext }) {
 }
 
 function VerifyStage({
+  layout,
   assetsBaseUrl,
   verifyForm,
   setVerifyForm,
@@ -505,17 +515,17 @@ function VerifyStage({
   onSubmit,
   onPrev,
 }) {
-  const layout = APPOINTMENT_LAYOUT.verify
+  const verifyLayout = layout.verify
 
   return (
     <form onSubmit={onSubmit}>
       <LayerImage
-        src={getAssetUrl(assetsBaseUrl, layout.titleImage.filename)}
-        box={layout.titleImage}
+        src={getAssetUrl(assetsBaseUrl, verifyLayout.titleImage.filename)}
+        box={verifyLayout.titleImage}
         alt=""
       />
 
-      {layout.fieldImages.map((image) => (
+      {verifyLayout.fieldImages.map((image) => (
         <LayerImage
           key={image.filename}
           src={getAssetUrl(assetsBaseUrl, image.filename)}
@@ -526,47 +536,47 @@ function VerifyStage({
 
       <input
         className="appointment-stage-input"
-        style={toAbsoluteStyle(layout.inputs.building)}
+        style={toAbsoluteStyle(verifyLayout.inputs.building)}
         value={verifyForm.building}
         onChange={(event) => setVerifyForm((current) => ({ ...current, building: event.target.value.replace(/[^\d-]/g, '') }))}
-        maxLength={layout.inputs.building.maxLength}
-        inputMode={layout.inputs.building.inputMode}
+        maxLength={verifyLayout.inputs.building.maxLength}
+        inputMode={verifyLayout.inputs.building.inputMode}
       />
       <input
         className="appointment-stage-input"
-        style={toAbsoluteStyle(layout.inputs.room)}
+        style={toAbsoluteStyle(verifyLayout.inputs.room)}
         value={verifyForm.room}
         onChange={(event) => setVerifyForm((current) => ({ ...current, room: event.target.value.replace(/[^\d-]/g, '') }))}
-        maxLength={layout.inputs.room.maxLength}
-        inputMode={layout.inputs.room.inputMode}
+        maxLength={verifyLayout.inputs.room.maxLength}
+        inputMode={verifyLayout.inputs.room.inputMode}
       />
       <input
         className="appointment-stage-input"
-        style={toAbsoluteStyle(layout.inputs.name)}
+        style={toAbsoluteStyle(verifyLayout.inputs.name)}
         value={verifyForm.name}
         onChange={(event) => setVerifyForm((current) => ({ ...current, name: event.target.value.trimStart() }))}
-        maxLength={layout.inputs.name.maxLength}
+        maxLength={verifyLayout.inputs.name.maxLength}
       />
       <input
         className="appointment-stage-input"
-        style={toAbsoluteStyle(layout.inputs.idTail)}
+        style={toAbsoluteStyle(verifyLayout.inputs.idTail)}
         value={verifyForm.idTail}
         onChange={(event) => setVerifyForm((current) => ({ ...current, idTail: normalizeIdTailInput(event.target.value) }))}
-        maxLength={layout.inputs.idTail.maxLength}
-        inputMode={layout.inputs.idTail.inputMode}
+        maxLength={verifyLayout.inputs.idTail.maxLength}
+        inputMode={verifyLayout.inputs.idTail.inputMode}
         type="text"
         autoCapitalize="characters"
       />
 
       <ImageButton
-        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.prevButton.filename)}
-        box={APPOINTMENT_LAYOUT.common.prevButton}
+        src={getAssetUrl(assetsBaseUrl, layout.common.prevButton.filename)}
+        box={layout.common.prevButton}
         alt="上一步"
         onClick={onPrev}
       />
       <ImageSubmitButton
-        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.nextButton.filename)}
-        box={APPOINTMENT_LAYOUT.common.nextButton}
+        src={getAssetUrl(assetsBaseUrl, layout.common.nextButton.filename)}
+        box={layout.common.nextButton}
         alt={submitting ? '校验中' : '下一步'}
         disabled={submitting}
       />
@@ -575,6 +585,7 @@ function VerifyStage({
 }
 
 function BookingStage({
+  layout,
   assetsBaseUrl,
   bookingForm,
   setBookingForm,
@@ -586,17 +597,17 @@ function BookingStage({
   onOpenDatePicker,
   onOpenSlotPicker,
 }) {
-  const layout = APPOINTMENT_LAYOUT.booking
+  const bookingLayout = layout.booking
 
   return (
     <form onSubmit={onSubmit}>
       <LayerImage
-        src={getAssetUrl(assetsBaseUrl, layout.titleImage.filename)}
-        box={layout.titleImage}
+        src={getAssetUrl(assetsBaseUrl, bookingLayout.titleImage.filename)}
+        box={bookingLayout.titleImage}
         alt=""
       />
 
-      {layout.fieldImages.map((image) => (
+      {bookingLayout.fieldImages.map((image) => (
         <LayerImage
           key={image.filename}
           src={getAssetUrl(assetsBaseUrl, image.filename)}
@@ -608,7 +619,7 @@ function BookingStage({
       <button
         type="button"
         className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentDate ? '' : 'is-placeholder'} ${bookingDateOptions.length ? '' : 'is-disabled'}`}
-        style={toAbsoluteStyle(layout.controls.appointmentDate)}
+        style={toAbsoluteStyle(bookingLayout.controls.appointmentDate)}
         onClick={onOpenDatePicker}
         disabled={!bookingDateOptions.length}
       >
@@ -618,7 +629,7 @@ function BookingStage({
       <button
         type="button"
         className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentSlot ? '' : 'is-placeholder'} ${bookingSlotOptions.length ? '' : 'is-disabled'}`}
-        style={toAbsoluteStyle(layout.controls.appointmentSlot)}
+        style={toAbsoluteStyle(bookingLayout.controls.appointmentSlot)}
         onClick={onOpenSlotPicker}
         disabled={!bookingSlotOptions.length}
       >
@@ -627,22 +638,22 @@ function BookingStage({
 
       <input
         className="appointment-stage-input"
-        style={toAbsoluteStyle(layout.controls.phone)}
+        style={toAbsoluteStyle(bookingLayout.controls.phone)}
         value={bookingForm.phone}
         onChange={(event) => setBookingForm((current) => ({ ...current, phone: event.target.value.replace(/\D/g, '') }))}
-        maxLength={layout.controls.phone.maxLength}
-        inputMode={layout.controls.phone.inputMode}
+        maxLength={bookingLayout.controls.phone.maxLength}
+        inputMode={bookingLayout.controls.phone.inputMode}
       />
 
       <ImageButton
-        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.prevButton.filename)}
-        box={APPOINTMENT_LAYOUT.common.prevButton}
+        src={getAssetUrl(assetsBaseUrl, layout.common.prevButton.filename)}
+        box={layout.common.prevButton}
         alt="上一步"
         onClick={onPrev}
       />
       <ImageSubmitButton
-        src={getAssetUrl(assetsBaseUrl, APPOINTMENT_LAYOUT.common.nextButton.filename)}
-        box={APPOINTMENT_LAYOUT.common.nextButton}
+        src={getAssetUrl(assetsBaseUrl, layout.common.nextButton.filename)}
+        box={layout.common.nextButton}
         alt={submitting ? '提交中' : '下一步'}
         disabled={submitting || !bookingDateOptions.length || !bookingSlotOptions.length}
       />
@@ -650,14 +661,15 @@ function BookingStage({
   )
 }
 
-function SuccessStage({ assetsBaseUrl, name, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
+function SuccessStage({ layout, assetsBaseUrl, name, houseKey, appointmentDate, appointmentSlot, onConfirm }) {
   const dateSlotText = [appointmentDate, appointmentSlot].filter(Boolean).join('\n')
   const successTitleLine = [name, houseKey].filter(Boolean).join('    ')
+  const successLayout = layout.success
 
   return (
     <>
-      {APPOINTMENT_LAYOUT.success.images.map((image) => {
-        if (image.filename === 'ca5e06af6fe546199c1ce1eac1a4e4b0_6478.webp') {
+      {successLayout.images.map((image) => {
+        if (image.action === 'confirm' || image.filename === 'ca5e06af6fe546199c1ce1eac1a4e4b0_6478.webp') {
           return (
             <ImageButton
               key={image.filename}
@@ -678,13 +690,13 @@ function SuccessStage({ assetsBaseUrl, name, houseKey, appointmentDate, appointm
         )
       })}
 
-      <div className="appointment-success-primary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[0])}>
+      <div className="appointment-success-primary" style={toAbsoluteStyle(successLayout.textBlocks[0])}>
         {successTitleLine || houseKey || '请以现场安排为准'}
       </div>
-      <div className="appointment-success-secondary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[1])}>
-        {APPOINTMENT_LAYOUT.success.textBlocks[1].lines?.[0] || '您的预约时间为'}
+      <div className="appointment-success-secondary" style={toAbsoluteStyle(successLayout.textBlocks[1])}>
+        {successLayout.textBlocks[1].lines?.[0] || '您的预约时间为'}
       </div>
-      <div className="appointment-success-tertiary" style={toAbsoluteStyle(APPOINTMENT_LAYOUT.success.textBlocks[2])}>
+      <div className="appointment-success-tertiary" style={toAbsoluteStyle(successLayout.textBlocks[2])}>
         {dateSlotText || '请以现场安排为准'}
       </div>
     </>
@@ -764,27 +776,27 @@ function LoadingScreen({ backgroundUrl }) {
   )
 }
 
-function useStageMetrics() {
-  const [metrics, setMetrics] = useState(() => getStageMetrics())
+function useStageMetrics(stageWidth) {
+  const [metrics, setMetrics] = useState(() => getStageMetrics(stageWidth))
 
   useEffect(() => {
-    const sync = () => setMetrics(getStageMetrics())
+    const sync = () => setMetrics(getStageMetrics(stageWidth))
     sync()
     window.addEventListener('resize', sync)
     return () => window.removeEventListener('resize', sync)
-  }, [])
+  }, [stageWidth])
 
   return metrics
 }
 
-function getStageMetrics() {
+function getStageMetrics(stageWidth) {
   if (typeof window === 'undefined') {
     return {
       scale: 1,
     }
   }
   return {
-    scale: Math.max(window.innerWidth, 320) / APPOINTMENT_STAGE_WIDTH,
+    scale: Math.max(window.innerWidth, 320) / stageWidth,
   }
 }
 
