@@ -3,7 +3,6 @@ import {
   APPOINTMENT_LAYOUT,
   APPOINTMENT_STAGE_HEIGHT,
   APPOINTMENT_STAGE_WIDTH,
-  APPOINTMENT_SUCCESS_STAGE_HEIGHT,
 } from './appointmentLayout'
 
 export const DONGFANG_ZHENYUE_ACTIVITY_KEY = 'baoli-dongfang-zhenyue-delivery-20260621'
@@ -170,7 +169,7 @@ const DONGFANG_ZHENYUE_LAYOUT = {
     controls: APPOINTMENT_LAYOUT.booking.controls,
   },
   success: {
-    height: APPOINTMENT_SUCCESS_STAGE_HEIGHT,
+    height: APPOINTMENT_STAGE_HEIGHT,
     background: '29c81089bf087ef57a859bf3de02262d_1251896.webp',
     images: [
       {

@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Picker } from 'antd-mobile'
 import 'antd-mobile/es/global'
 import { QRCodeSVG } from 'qrcode.react'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointment } from './api'
 import {
@@ -194,6 +195,23 @@ function AppointmentMain({ routeParams }) {
   const stageWidth = appointmentSkin.stageWidth
   const stageHeight = appointmentLayout?.[step]?.height || appointmentSkin.stageHeight
   const stageMetrics = useStageMetrics(stageWidth)
+  const shareActivity = useMemo(() => {
+    const activity = bootstrap?.activity || publicConfig
+    if (!activity) return null
+    return {
+      ...activity,
+      shareTitle: activity.shareTitle || activity.title || '保利·东方瑧悦集中交付活动',
+      shareDesc: activity.shareDesc || '集中交付预约通道',
+      shareImage: activity.shareImage || getAssetUrl(assetsBaseUrl, appointmentLayout.common.background),
+    }
+  }, [appointmentLayout.common.background, assetsBaseUrl, bootstrap?.activity, publicConfig])
+  const handleWechatShareStatus = useCallback((status) => {
+    if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
+      console.warn('[appointment-share] setup failed', status)
+    }
+  }, [])
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
+
   const successBooking = useMemo(
     () => normalizeSuccessBooking(bootstrap?.booking),
     [bootstrap?.booking],
