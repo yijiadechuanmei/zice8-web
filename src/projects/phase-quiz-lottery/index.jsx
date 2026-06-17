@@ -284,16 +284,6 @@ function composeRecipientAddress(form) {
   return [form.province, form.city, form.district, form.detailAddress].filter(Boolean).join(' ')
 }
 
-function buildFallbackDraw() {
-  return {
-    status: DRAW_STATUS.LOST,
-    won: false,
-    soldOut: false,
-    alreadyDrawn: true,
-    wheelStopIndex: 1,
-  }
-}
-
 function toFiniteNumber(value) {
   if (value === null || value === undefined || value === '') return null
   const number = Number(value)
@@ -342,6 +332,37 @@ function resolvePrizeStockInfo(...sources) {
 
 function isPrizeStockExhausted(stockInfo) {
   return Boolean(stockInfo && stockInfo.stockRemaining <= 0)
+}
+
+function normalizeDrawResultValue(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+  if (normalized === 'win' || normalized === 'won') return DRAW_STATUS.WON
+  if (normalized === 'lose' || normalized === 'lost') return DRAW_STATUS.LOST
+  if (normalized === DRAW_STATUS.STOCK_EMPTY) return DRAW_STATUS.STOCK_EMPTY
+  return normalized
+}
+
+function resolveDrawResultStatus(draw) {
+  if (!draw) return ''
+  if (typeof draw.result === 'string') return normalizeDrawResultValue(draw.result)
+  if (draw.result && typeof draw.result === 'object') {
+    return normalizeDrawResultValue(draw.result.status || draw.result.result)
+  }
+  return normalizeDrawResultValue(draw.status)
+}
+
+function isWinningDraw(draw) {
+  const status = resolveDrawResultStatus(draw)
+  if (status) return status === DRAW_STATUS.WON
+  return draw?.won === true
+}
+
+function isStockEmptyDraw(draw) {
+  return resolveDrawResultStatus(draw) === DRAW_STATUS.STOCK_EMPTY || draw?.soldOut === true
+}
+
+function hasValidWheelStopIndex(draw) {
+  return Number.isInteger(draw?.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < 4
 }
 
 function DebugPanel({
@@ -1042,8 +1063,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
         ...current,
         eligibleForDraw: false,
         alreadyDrawn: true,
-        won: nextDraw?.won || false,
-        soldOut: nextDraw?.soldOut || false,
+        won: isWinningDraw(nextDraw),
+        soldOut: isStockEmptyDraw(nextDraw),
         draw: nextDraw,
       }
     })
@@ -1074,13 +1095,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
         return
       }
 
-      const nextDraw = Number.isInteger(data.wheelStopIndex) && data.wheelStopIndex >= 0 && data.wheelStopIndex < 4
-        ? data
-        : buildFallbackDraw()
-
-      setDraw(nextDraw)
-      patchModelWithDraw(nextDraw)
-      if (Number.isInteger(nextDraw.wheelStopIndex)) {
+      setDraw(data)
+      patchModelWithDraw(data)
+      if (hasValidWheelStopIndex(data)) {
         setSpinKey((value) => value + 1)
         return
       }
@@ -1088,11 +1105,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setDrawing(false)
       setStep(STEP.RESULT)
     } catch (error) {
-      console.warn('[phase-quiz-lottery draw fallback]', error)
-      const fallbackDraw = buildFallbackDraw()
-      setDraw(fallbackDraw)
-      patchModelWithDraw(fallbackDraw)
-      setSpinKey((value) => value + 1)
+      console.warn('[phase-quiz-lottery draw failed]', error)
+      setDrawing(false)
+      showToast(normalizeFriendlyMessage(error, '抽奖失败，请稍后重试'))
     } finally {
       drawLockRef.current = false
     }
@@ -1205,7 +1220,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setDrawing(false)
     setStep(STEP.RESULT)
     if (!draw) return
-    if (draw.status === DRAW_STATUS.WON) {
+    if (isWinningDraw(draw)) {
       openPrizeModal()
     }
   }
@@ -1253,6 +1268,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 activityTitle={activityTitle}
                 phaseNo={currentPhaseNo}
                 model={model}
+                draw={draw}
                 stockExhausted={stockExhausted}
                 animatedScore={scoreDisplay}
                 onStart={handleStart}

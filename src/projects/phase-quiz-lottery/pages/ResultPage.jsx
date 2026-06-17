@@ -3,6 +3,7 @@ import ResultCard from '../components/ResultCard'
 
 export default function ResultPage({
   model,
+  draw,
   stockExhausted,
   animatedScore,
   onStart,
@@ -22,6 +23,7 @@ export default function ResultPage({
         <section className="rounded-[32px] bg-white px-[24px] py-[24px] shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
           <ResultCard
             model={model}
+            draw={draw}
             stockExhausted={stockExhausted}
             animatedScore={animatedScore}
             assets={assets}

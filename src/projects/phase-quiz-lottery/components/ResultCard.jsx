@@ -18,7 +18,35 @@ function ActionButton({ tone = 'dark', disabled = false, children, onClick }) {
   )
 }
 
-function buildStatusCopy(model, stockExhausted) {
+function normalizeDrawResultValue(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+  if (normalized === 'win' || normalized === 'won') return 'won'
+  if (normalized === 'lose' || normalized === 'lost') return 'lost'
+  if (normalized === 'stock_empty') return 'stock_empty'
+  return normalized
+}
+
+function resolveDrawResultStatus(draw) {
+  if (!draw) return ''
+  if (typeof draw.result === 'string') return normalizeDrawResultValue(draw.result)
+  if (draw.result && typeof draw.result === 'object') {
+    return normalizeDrawResultValue(draw.result.status || draw.result.result)
+  }
+  return normalizeDrawResultValue(draw.status)
+}
+
+function isWinningDraw(draw) {
+  const status = resolveDrawResultStatus(draw)
+  if (status) return status === 'won'
+  return draw?.won === true
+}
+
+function isResolvedDraw(draw) {
+  const status = resolveDrawResultStatus(draw)
+  return status === 'won' || status === 'lost' || status === 'stock_empty'
+}
+
+function buildStatusCopy(model, draw, stockExhausted) {
   if (!model) {
     return {
       headline: '活动加载中',
@@ -43,9 +71,15 @@ function buildStatusCopy(model, stockExhausted) {
     }
   }
 
-  if (model.won) {
+  if (isWinningDraw(draw || model.draw)) {
     return {
       headline: '抽奖结果已确认',
+    }
+  }
+
+  if (isResolvedDraw(draw || model.draw)) {
+    return {
+      headline: '未中奖',
     }
   }
 
@@ -62,6 +96,7 @@ function buildStatusCopy(model, stockExhausted) {
 
 export default function ResultCard({
   model,
+  draw,
   stockExhausted = false,
   animatedScore,
   assets,
@@ -69,11 +104,12 @@ export default function ResultCard({
   onGoWheel,
   onOpenPrize,
 }) {
-  const copy = buildStatusCopy(model, stockExhausted)
+  const resolvedDraw = draw || model?.draw || null
+  const copy = buildStatusCopy(model, resolvedDraw, stockExhausted)
   const score = Number(animatedScore || model?.result?.score || 0)
   const canStart = model?.state === 'ready_to_start'
   const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn && !stockExhausted)
-  const showPrize = Boolean(model?.won || model?.claim)
+  const showPrize = Boolean(isWinningDraw(resolvedDraw) || model?.claim)
   const showStockExhaustedAction = Boolean(stockExhausted && !showPrize && !canStart)
 
   return (
