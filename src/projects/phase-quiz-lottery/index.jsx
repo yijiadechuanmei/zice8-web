@@ -497,11 +497,12 @@ function DevLayoutDebugPanel({ step }) {
 function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   const unavailable = model?.state === 'no_open_phase'
   const subtitle = unavailable ? '当前暂无开放期次' : '本期答题已开启'
+  const bannerTitle = model?.currentPhase?.title || activityTitle
 
   return (
     <section className="relative z-10 flex h-full flex-col text-center text-slate-900">
       <QuestionHeader
-        title={activityTitle}
+        title={bannerTitle}
         backgroundImageUrl={assets.bannerBackground}
         bookImageUrl={assets.bannerBook}
       />
@@ -1459,7 +1460,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
             {step === STEP.QUESTION ? (
               <QuestionPage
-                activityTitle={activityTitle}
+                activityTitle={model?.currentPhase?.title || activityTitle}
                 questions={questions}
                 currentIndex={currentIndex}
                 submitting={submitting}

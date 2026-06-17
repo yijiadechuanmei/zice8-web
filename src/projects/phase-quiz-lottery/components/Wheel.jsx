@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef } from 'react'
 const DEFAULT_SIZE = 520
 const DEFAULT_COLORS = ['#EEF6FF', '#F7FAFF']
 const WHEEL_SLOT_COUNT = 4
+const SEGMENT_LABEL_MAX_WIDTH_RATIO = 0.56
+const SEGMENT_LABEL_LINE_HEIGHT = 30
 
 function getNormalizedTargetRotation(targetIndex, segmentCount) {
   const segmentAngle = 360 / segmentCount
@@ -29,6 +31,39 @@ function getSegmentFill(context, segment, index) {
 
 function easeOutCubic(value) {
   return 1 - (1 - value) ** 3
+}
+
+function wrapSegmentLabel(context, label, maxWidth) {
+  const rawText = String(label || '').trim()
+  if (!rawText) return []
+
+  const paragraphs = rawText.split('\n')
+  const lines = []
+
+  paragraphs.forEach((paragraph) => {
+    const text = paragraph.trim()
+    if (!text) {
+      lines.push('')
+      return
+    }
+
+    let currentLine = ''
+    for (const char of text) {
+      const nextLine = `${currentLine}${char}`
+      if (currentLine && context.measureText(nextLine).width > maxWidth) {
+        lines.push(currentLine)
+        currentLine = char
+      } else {
+        currentLine = nextLine
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine)
+    }
+  })
+
+  return lines
 }
 
 export default function Wheel({
@@ -101,11 +136,12 @@ export default function Wheel({
       context.textBaseline = 'middle'
       context.fillStyle = segment.prize ? '#0F172A' : '#2F80FF'
       context.font = segment.prize ? '800 26px sans-serif' : '700 26px sans-serif'
-      String(segment.label || '')
-        .split('\n')
-        .forEach((line, lineIndex) => {
-          context.fillText(line, radius * 0.54, lineIndex * 30)
-        })
+      const labelLines = wrapSegmentLabel(context, segment.label, radius * SEGMENT_LABEL_MAX_WIDTH_RATIO)
+      const totalHeight = Math.max(1, labelLines.length) * SEGMENT_LABEL_LINE_HEIGHT
+      labelLines.forEach((line, lineIndex) => {
+        const y = lineIndex * SEGMENT_LABEL_LINE_HEIGHT - (totalHeight - SEGMENT_LABEL_LINE_HEIGHT) / 2
+        context.fillText(line, radius * 0.54, y)
+      })
       context.restore()
     })
   }, [wheelSegments])
