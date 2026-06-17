@@ -23,6 +23,7 @@ import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import WheelPage from './pages/WheelPage'
 import { ADDRESS_OPTIONS } from './address-options'
+import { isPrizeStockExhausted, preDrawGuard, resolvePrizeStockInfo } from './utils/preDrawGuard'
 import { formatTime } from './utils/timeFormatter'
 import './styles.css'
 
@@ -292,60 +293,6 @@ function normalizeAddressSelection(current, next) {
 
 function composeRecipientAddress(form) {
   return [form.province, form.city, form.district, form.detailAddress].filter(Boolean).join(' ')
-}
-
-function toFiniteNumber(value) {
-  if (value === null || value === undefined || value === '') return null
-  const number = Number(value)
-  return Number.isFinite(number) ? number : null
-}
-
-function collectPrizeStockSources(source) {
-  if (!source || typeof source !== 'object') return []
-  return [
-    source.activityConfig?.snapshot?.prize,
-    source.activityConfig?.snapshot,
-    source.activityConfig?.prize,
-    source.activityConfig,
-    source.snapshot?.prize,
-    source.snapshot,
-    source.prize,
-    source.currentPhase?.prize,
-    source.currentPhase?.prizes?.[0],
-    source.prizes?.[0],
-    source,
-  ].filter(Boolean)
-}
-
-function readStockValue(source, keys) {
-  for (const key of keys) {
-    const value = toFiniteNumber(source?.[key])
-    if (value !== null) return value
-  }
-  return null
-}
-
-function resolvePrizeStockInfo(...sources) {
-  for (const source of sources) {
-    const stockSources = collectPrizeStockSources(source)
-    for (const stockSource of stockSources) {
-      const stockTotal = readStockValue(stockSource, ['stock_total', 'stockTotal', 'totalStock'])
-      const stockUsed = readStockValue(stockSource, ['stock_used', 'stockUsed', 'usedStock'])
-      const stockRemaining = readStockValue(stockSource, ['stock_remaining', 'stockRemaining', 'remainingStock'])
-
-      if (stockRemaining !== null) {
-        return { stockRemaining, stockTotal, stockUsed }
-      }
-      if (stockTotal !== null && stockUsed !== null) {
-        return { stockRemaining: stockTotal - stockUsed, stockTotal, stockUsed }
-      }
-    }
-  }
-  return null
-}
-
-function isPrizeStockExhausted(stockInfo) {
-  return Boolean(stockInfo && stockInfo.stockRemaining <= 0)
 }
 
 function resolveHasAttempt(model, myPrize) {
@@ -795,6 +742,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const [spinKey, setSpinKey] = useState(0)
   const [prizeModalOpen, setPrizeModalOpen] = useState(false)
   const [claimMode, setClaimMode] = useState('mail')
+  const [bootstrapStockInfo, setBootstrapStockInfo] = useState(null)
   const [mailForm, setMailForm] = useState({
     recipientName: '',
     recipientPhone: '',
@@ -813,6 +761,10 @@ function PhaseQuizLotteryMain({ routeParams }) {
   )
   const { entryState, hasAttempt, stockInfo } = entryDecision
   const stockExhausted = isPrizeStockExhausted(stockInfo)
+  const preDrawActivityState = useMemo(() => {
+    const snapshotStockInfo = resolvePrizeStockInfo(model, myPrize)
+    return bootstrapStockInfo || snapshotStockInfo || stockInfo
+  }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -905,6 +857,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
+    setBootstrapStockInfo(resolvePrizeStockInfo(nextModel))
     if (nextModel?.state === 'answering') {
       setQuestions(nextModel.questions || [])
       setCurrentIndex(0)
@@ -1154,9 +1107,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleGoWheel() {
-    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
-      setStep(STEP.SOLD_OUT)
-      showToast('本期奖品已发完')
+    const guard = preDrawGuard(preDrawActivityState)
+    if (!guard.allow) {
+      showToast('奖品已发完')
       return
     }
 
@@ -1195,11 +1148,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleDraw() {
-    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
-      setStep(STEP.SOLD_OUT)
-      showToast('本期奖品已发完')
-      return
-    }
     if (!model?.eligibleForDraw || !model?.attempt?.attemptId) return
     const now = Date.now()
     if (drawing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
@@ -1412,8 +1360,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
                 draw={draw}
-                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn && !stockExhausted)}
-                stockExhausted={stockExhausted}
+                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)}
                 drawing={drawing}
                 spinKey={spinKey}
                 onDraw={handleDraw}
