@@ -31,6 +31,7 @@ const STEP = {
   ENTRY: 'ENTRY',
   QUESTION: 'QUESTION',
   RESULT: 'RESULT',
+  WHEEL: 'WHEEL',
   WHEEL_ANIMATING: 'WHEEL_ANIMATING',
   SOLD_OUT: 'SOLD_OUT',
 }
@@ -60,7 +61,7 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-08'
+const PQL_CLIENT_VERSION = 'pql-20260617-09'
 const DRAW_POLL_INTERVAL_MS = 900
 const DRAW_POLL_LIMIT = 4
 const FALLBACK_WIN_WHEEL_STOP_INDEX = 0
@@ -348,15 +349,14 @@ function resolveEntryState({ model, myPrize, publicConfig }) {
 }
 
 function resolveQuestionFlowStep(model, myPrize = null) {
-  if (resolveSnapshotDraw(model, myPrize)) return STEP.WHEEL_ANIMATING
   if (model?.state === 'answering') return STEP.QUESTION
-  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won) return STEP.RESULT
+  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || resolveSnapshotDraw(model, myPrize)) return STEP.RESULT
   if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return STEP.RESULT
   return STEP.ENTRY
 }
 
 function resolveStepFromEntryState(entryState, model, myPrize = null) {
-  if (resolveSnapshotDraw(model, myPrize)) return STEP.WHEEL_ANIMATING
+  if (resolveSnapshotDraw(model, myPrize)) return STEP.RESULT
   if (entryState === ENTRY_STATE.SOLD_OUT) return STEP.SOLD_OUT
   if (entryState === ENTRY_STATE.ENTRY) return STEP.ENTRY
   if (entryState === ENTRY_STATE.QUESTION_FLOW) return resolveQuestionFlowStep(model, myPrize)
@@ -395,17 +395,9 @@ function hasValidWheelStopIndex(draw) {
 }
 
 function resolveWheelAnimationTargetIndex(draw) {
+  if (!draw) return null
   if (hasValidWheelStopIndex(draw)) return draw.wheelStopIndex
   return isWinningDraw(draw) ? FALLBACK_WIN_WHEEL_STOP_INDEX : FALLBACK_LOSE_WHEEL_STOP_INDEX
-}
-
-function resolveDrawAnimationKey(draw) {
-  return [
-    draw?.id || draw?.drawId || draw?.ledgerId || '',
-    resolveDrawResultStatus(draw),
-    resolveWheelAnimationTargetIndex(draw),
-    draw?.prize?.id || draw?.prizeId || '',
-  ].join(':')
 }
 
 function getControlStatus(value) {
@@ -809,7 +801,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const scoreTimerRef = useRef(0)
   const drawLockRef = useRef(false)
   const lastDrawClickRef = useRef(0)
-  const wheelAnimationKeyRef = useRef('')
   const assets = useMemo(() => buildAssets(), [])
   const entryDecision = useMemo(
     () => resolveEntryState({ model, myPrize, publicConfig }),
@@ -899,7 +890,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(snapshotDraw)
     setDrawEntryBlockedReason('')
-    setDrawing(Boolean(snapshotDraw))
+    setDrawing(false)
     setDrawApiPending(false)
     setDrawProcessing(false)
     setStep(resolveInitialStep(nextModel, myPrize, publicConfig))
@@ -925,7 +916,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(snapshotDraw)
     setDrawEntryBlockedReason('')
-    setDrawing(Boolean(snapshotDraw))
+    setDrawing(false)
     setDrawApiPending(false)
     setDrawProcessing(false)
     setBootstrapStockInfo(resolvePrizeStockInfo(nextModel))
@@ -1031,17 +1022,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [step])
 
   useEffect(() => {
-    if (step !== STEP.WHEEL_ANIMATING || !draw) return
-    const animationKey = resolveDrawAnimationKey(draw)
-    if (wheelAnimationKeyRef.current === animationKey) return
-    wheelAnimationKeyRef.current = animationKey
-    setDrawing(true)
-    setDrawApiPending(false)
-    setDrawProcessing(false)
-    setSpinKey((value) => value + 1)
-  }, [draw, step])
-
-  useEffect(() => {
     if (entryState === ENTRY_STATE.UNKNOWN) return
     if (entryState === ENTRY_STATE.SOLD_OUT && step !== STEP.SOLD_OUT) {
       if (resolveSnapshotDraw(model, myPrize)) return
@@ -1076,7 +1056,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setDrawing(false)
       setDrawApiPending(false)
       setDrawProcessing(false)
-      wheelAnimationKeyRef.current = ''
       setMyPrize(null)
       setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
       setStep(STEP.ENTRY)
@@ -1216,8 +1195,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
           setAttemptId(resultData?.attempt?.attemptId || '')
           setDraw(snapshotDraw)
           if (snapshotDraw) {
-            setDrawing(true)
-            setStep(STEP.WHEEL_ANIMATING)
+            setDrawing(false)
+            setStep(STEP.RESULT)
             return
           }
         }
@@ -1227,7 +1206,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
       }
     }
 
-    await handleDraw()
+    setDrawing(false)
+    setStep(STEP.WHEEL)
   }
 
   function patchModelWithDraw(nextDraw) {
@@ -1251,6 +1231,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setDrawProcessing(false)
     setDrawing(true)
     setStep(STEP.WHEEL_ANIMATING)
+    setSpinKey((value) => value + 1)
   }
 
   async function fetchFinalDrawAfterProcessing(nextAttemptId) {
@@ -1503,7 +1484,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
               />
             ) : null}
 
-            {step === STEP.WHEEL_ANIMATING ? (
+            {step === STEP.WHEEL || step === STEP.WHEEL_ANIMATING ? (
               <WheelPage
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
