@@ -18,7 +18,7 @@ function ActionButton({ tone = 'dark', disabled = false, children, onClick }) {
   )
 }
 
-function buildStatusCopy(model) {
+function buildStatusCopy(model, stockExhausted) {
   if (!model) {
     return {
       headline: '活动加载中',
@@ -37,9 +37,9 @@ function buildStatusCopy(model) {
     }
   }
 
-  if (model.soldOut) {
+  if (stockExhausted) {
     return {
-      headline: '本期奖品已抽完',
+      headline: '奖品已发完',
     }
   }
 
@@ -62,17 +62,19 @@ function buildStatusCopy(model) {
 
 export default function ResultCard({
   model,
+  stockExhausted = false,
   animatedScore,
   assets,
   onStart,
   onGoWheel,
   onOpenPrize,
 }) {
-  const copy = buildStatusCopy(model)
+  const copy = buildStatusCopy(model, stockExhausted)
   const score = Number(animatedScore || model?.result?.score || 0)
   const canStart = model?.state === 'ready_to_start'
-  const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)
+  const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn && !stockExhausted)
   const showPrize = Boolean(model?.won || model?.claim)
+  const showStockExhaustedAction = Boolean(stockExhausted && !showPrize && !canStart)
 
   return (
     <>
@@ -96,9 +98,10 @@ export default function ResultCard({
 
       <div className="mt-[18px] grid gap-[14px]">
         {canStart ? <ActionButton onClick={onStart}>开始答题</ActionButton> : null}
-        {canDraw ? <ActionButton onClick={onGoWheel}>去抽奖</ActionButton> : null}
+        {canDraw ? <ActionButton onClick={onGoWheel}>立即抽奖</ActionButton> : null}
+        {showStockExhaustedAction ? <ActionButton disabled>奖品已发完</ActionButton> : null}
         {showPrize ? <ActionButton tone="prize" onClick={onOpenPrize}>我的奖品</ActionButton> : null}
-        {!canStart && !canDraw && !showPrize ? (
+        {!canStart && !canDraw && !showPrize && !showStockExhaustedAction ? (
           <ActionButton disabled>
             当前无可执行操作
           </ActionButton>

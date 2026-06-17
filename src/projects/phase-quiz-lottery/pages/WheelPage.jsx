@@ -6,6 +6,7 @@ export default function WheelPage({
   segments,
   draw,
   canDraw,
+  stockExhausted,
   drawing,
   spinKey,
   onDraw,
@@ -29,6 +30,7 @@ export default function WheelPage({
             drawing={drawing}
             draw={draw}
             canDraw={canDraw}
+            stockExhausted={stockExhausted}
             spinKey={spinKey}
             assets={assets}
             onDraw={onDraw}

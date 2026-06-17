@@ -294,6 +294,56 @@ function buildFallbackDraw() {
   }
 }
 
+function toFiniteNumber(value) {
+  if (value === null || value === undefined || value === '') return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+function collectPrizeStockSources(source) {
+  if (!source || typeof source !== 'object') return []
+  return [
+    source.activityConfig?.snapshot?.prize,
+    source.activityConfig?.prize,
+    source.snapshot?.prize,
+    source.prize,
+    source.currentPhase?.prize,
+    source.currentPhase?.prizes?.[0],
+    source.prizes?.[0],
+  ].filter(Boolean)
+}
+
+function readStockValue(source, keys) {
+  for (const key of keys) {
+    const value = toFiniteNumber(source?.[key])
+    if (value !== null) return value
+  }
+  return null
+}
+
+function resolvePrizeStockInfo(...sources) {
+  for (const source of sources) {
+    const stockSources = collectPrizeStockSources(source)
+    for (const stockSource of stockSources) {
+      const stockTotal = readStockValue(stockSource, ['stock_total', 'stockTotal', 'totalStock'])
+      const stockUsed = readStockValue(stockSource, ['stock_used', 'stockUsed', 'usedStock'])
+      const stockRemaining = readStockValue(stockSource, ['stock_remaining', 'stockRemaining', 'remainingStock'])
+
+      if (stockRemaining !== null) {
+        return { stockRemaining, stockTotal, stockUsed }
+      }
+      if (stockTotal !== null && stockUsed !== null) {
+        return { stockRemaining: stockTotal - stockUsed, stockTotal, stockUsed }
+      }
+    }
+  }
+  return null
+}
+
+function isPrizeStockExhausted(stockInfo) {
+  return Boolean(stockInfo && stockInfo.stockRemaining <= 0)
+}
+
 function DebugPanel({
   activityKey,
   step,
@@ -419,6 +469,7 @@ function PickupInfoCard({ pickupInfo }) {
 
 function PrizeModalContent({
   prize,
+  stockExhausted,
   assets,
   claimMode,
   setClaimMode,
@@ -430,7 +481,9 @@ function PrizeModalContent({
   onSubmitPickupClaim,
   onSubmitPickupVerify,
 }) {
-  if (!prize?.hasPrize) return <p className="text-sm leading-7 text-slate-500">当前还没有可领取的奖品。</p>
+  if (!prize?.hasPrize) {
+    return <p className="text-sm leading-7 text-slate-500">{stockExhausted ? '奖品已发完' : '当前还没有可领取的奖品。'}</p>
+  }
 
   const claim = prize.claim
   const pickupInfo = resolvePickupInfo(prize)
@@ -644,6 +697,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const drawLockRef = useRef(false)
   const lastDrawClickRef = useRef(0)
   const assets = useMemo(() => buildAssets(), [])
+  const stockInfo = useMemo(() => resolvePrizeStockInfo(model, myPrize, publicConfig), [model, myPrize, publicConfig])
+  const stockExhausted = isPrizeStockExhausted(stockInfo)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -955,6 +1010,11 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleGoWheel() {
+    if (stockExhausted) {
+      showToast('本期奖品已发完')
+      return
+    }
+
     if (!attemptId && model?.attempt?.attemptId) {
       try {
         const resultData = await handleProtectedRequest(
@@ -990,6 +1050,10 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleDraw() {
+    if (stockExhausted) {
+      showToast('本期奖品已发完')
+      return
+    }
     if (!model?.eligibleForDraw || !model?.attempt?.attemptId) return
     const now = Date.now()
     if (drawing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
@@ -1189,6 +1253,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 activityTitle={activityTitle}
                 phaseNo={currentPhaseNo}
                 model={model}
+                stockExhausted={stockExhausted}
                 animatedScore={scoreDisplay}
                 onStart={handleStart}
                 onGoWheel={handleGoWheel}
@@ -1202,7 +1267,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
                 draw={draw}
-                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)}
+                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn && !stockExhausted)}
+                stockExhausted={stockExhausted}
                 drawing={drawing}
                 spinKey={spinKey}
                 onDraw={handleDraw}
@@ -1220,6 +1286,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       <PrizeModal open={prizeModalOpen} onClose={() => setPrizeModalOpen(false)}>
         <PrizeModalContent
           prize={myPrize}
+          stockExhausted={stockExhausted}
           assets={assets}
           claimMode={claimMode}
           setClaimMode={setClaimMode}

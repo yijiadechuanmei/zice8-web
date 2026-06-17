@@ -37,6 +37,7 @@ export default function Wheel({
   drawing,
   draw,
   canDraw,
+  stockExhausted = false,
   spinKey,
   assets,
   onDraw,
@@ -44,7 +45,8 @@ export default function Wheel({
   onFinish,
 }) {
   const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
-  const remainingDrawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
+  const remainingDrawCount = draw?.alreadyDrawn || stockExhausted ? 0 : canDraw ? 1 : 0
+  const drawButtonText = stockExhausted ? '奖品已发完' : drawing ? '抽奖中' : '立即抽奖'
   const canvasRef = useRef(null)
   const wheelDiscRef = useRef(null)
   const frameRef = useRef(0)
@@ -159,13 +161,18 @@ export default function Wheel({
           </div>
         </div>
         <button
-          className="absolute left-1/2 top-1/2 z-[4] flex h-[156px] w-[156px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-60"
+          className="absolute left-1/2 top-1/2 z-[4] flex h-[156px] w-[156px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-70"
           type="button"
-          disabled={!canDraw || drawing || Boolean(draw?.alreadyDrawn)}
+          disabled={!canDraw || stockExhausted || drawing || Boolean(draw?.alreadyDrawn)}
           onClick={onDraw}
-          aria-label={drawing ? '抽奖中' : '立即抽奖'}
+          aria-label={drawButtonText}
         >
-          <img className="h-full w-full object-contain" src={assets.wheelCenterButton} alt="" aria-hidden="true" />
+          <img className={`h-full w-full object-contain ${stockExhausted ? 'grayscale' : ''}`} src={assets.wheelCenterButton} alt="" aria-hidden="true" />
+          {stockExhausted ? (
+            <span className="absolute inset-x-5 top-1/2 -translate-y-1/2 text-center text-[24px] font-extrabold leading-tight text-white drop-shadow-[0_2px_6px_rgba(15,23,42,0.45)]">
+              奖品已发完
+            </span>
+          ) : null}
         </button>
       </div>
       <div className="mt-[30px]">
