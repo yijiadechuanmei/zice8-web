@@ -3,6 +3,7 @@ import { startTransition, useCallback, useEffect, useMemo, useRef, useState } fr
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   DEFAULT_OSS_BASE_URL,
@@ -815,6 +816,25 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
   const canDebug = debugAccess?.canDebug === true
+  const shareActivity = useMemo(() => {
+    if (!publicConfig && !model) return null
+    return {
+      ...(publicConfig || {}),
+      title: model?.activityTitle || publicConfig?.title || '分期答题抽奖',
+      shareTitle: publicConfig?.shareTitle || model?.activityTitle || publicConfig?.title || '分期答题抽奖',
+      shareDesc: publicConfig?.shareDesc || '参与分期答题抽奖，赢取活动奖品',
+      shareImage: publicConfig?.shareImage || '',
+    }
+  }, [model, publicConfig])
+
+  const handleWechatShareStatus = useCallback((status) => {
+    if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
+      console.warn('[phase-quiz-lottery-share] setup failed', status)
+    }
+  }, [])
+
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
+
   const trackLotteryResultView = useCallback(() => {
     trackEvent({
       activityKey,
