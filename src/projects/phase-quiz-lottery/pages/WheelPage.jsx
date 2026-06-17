@@ -4,6 +4,7 @@ import Wheel from '../components/Wheel'
 export default function WheelPage({
   phaseNo,
   segments,
+  targetIndex,
   draw,
   drawing,
   loading,
@@ -25,7 +26,7 @@ export default function WheelPage({
         <section className="relative overflow-hidden rounded-[32px] bg-white px-[32px] py-[36px] text-center shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
           <Wheel
             segments={segments}
-            targetIndex={draw?.wheelStopIndex}
+            targetIndex={targetIndex}
             drawing={drawing}
             draw={draw}
             spinKey={spinKey}

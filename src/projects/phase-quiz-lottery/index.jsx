@@ -31,7 +31,7 @@ const STEP = {
   ENTRY: 'ENTRY',
   QUESTION: 'QUESTION',
   RESULT: 'RESULT',
-  WHEEL: 'WHEEL',
+  WHEEL_ANIMATING: 'WHEEL_ANIMATING',
   SOLD_OUT: 'SOLD_OUT',
 }
 
@@ -60,9 +60,11 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-07'
+const PQL_CLIENT_VERSION = 'pql-20260617-08'
 const DRAW_POLL_INTERVAL_MS = 900
 const DRAW_POLL_LIMIT = 4
+const FALLBACK_WIN_WHEEL_STOP_INDEX = 0
+const FALLBACK_LOSE_WHEEL_STOP_INDEX = 1
 const DEFAULT_PICKUP_INFO = {
   pickupType: 'self',
   pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
@@ -265,6 +267,10 @@ function resolvePrizeName(model, draw, myPrize) {
   )
 }
 
+function resolveSnapshotDraw(model, myPrize = null) {
+  return model?.draw || myPrize?.draw || null
+}
+
 function getInitialAddressParts() {
   const province = ADDRESS_OPTIONS[0]
   return {
@@ -342,13 +348,15 @@ function resolveEntryState({ model, myPrize, publicConfig }) {
 }
 
 function resolveQuestionFlowStep(model, myPrize = null) {
+  if (resolveSnapshotDraw(model, myPrize)) return STEP.WHEEL_ANIMATING
   if (model?.state === 'answering') return STEP.QUESTION
-  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || model?.draw) return STEP.RESULT
+  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won) return STEP.RESULT
   if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return STEP.RESULT
   return STEP.ENTRY
 }
 
 function resolveStepFromEntryState(entryState, model, myPrize = null) {
+  if (resolveSnapshotDraw(model, myPrize)) return STEP.WHEEL_ANIMATING
   if (entryState === ENTRY_STATE.SOLD_OUT) return STEP.SOLD_OUT
   if (entryState === ENTRY_STATE.ENTRY) return STEP.ENTRY
   if (entryState === ENTRY_STATE.QUESTION_FLOW) return resolveQuestionFlowStep(model, myPrize)
@@ -384,6 +392,20 @@ function isStockEmptyDraw(draw) {
 
 function hasValidWheelStopIndex(draw) {
   return Number.isInteger(draw?.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < 4
+}
+
+function resolveWheelAnimationTargetIndex(draw) {
+  if (hasValidWheelStopIndex(draw)) return draw.wheelStopIndex
+  return isWinningDraw(draw) ? FALLBACK_WIN_WHEEL_STOP_INDEX : FALLBACK_LOSE_WHEEL_STOP_INDEX
+}
+
+function resolveDrawAnimationKey(draw) {
+  return [
+    draw?.id || draw?.drawId || draw?.ledgerId || '',
+    resolveDrawResultStatus(draw),
+    resolveWheelAnimationTargetIndex(draw),
+    draw?.prize?.id || draw?.prizeId || '',
+  ].join(':')
 }
 
 function getControlStatus(value) {
@@ -787,6 +809,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const scoreTimerRef = useRef(0)
   const drawLockRef = useRef(false)
   const lastDrawClickRef = useRef(0)
+  const wheelAnimationKeyRef = useRef('')
   const assets = useMemo(() => buildAssets(), [])
   const entryDecision = useMemo(
     () => resolveEntryState({ model, myPrize, publicConfig }),
@@ -871,11 +894,12 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function applyResultModel(nextModel) {
+    const snapshotDraw = resolveSnapshotDraw(nextModel, myPrize)
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
-    setDraw(nextModel?.draw || null)
+    setDraw(snapshotDraw)
     setDrawEntryBlockedReason('')
-    setDrawing(false)
+    setDrawing(Boolean(snapshotDraw))
     setDrawApiPending(false)
     setDrawProcessing(false)
     setStep(resolveInitialStep(nextModel, myPrize, publicConfig))
@@ -896,11 +920,12 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function applyHydratedState(nextModel, nextPrize) {
+    const snapshotDraw = resolveSnapshotDraw(nextModel, nextPrize)
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
-    setDraw(nextModel?.draw || null)
+    setDraw(snapshotDraw)
     setDrawEntryBlockedReason('')
-    setDrawing(false)
+    setDrawing(Boolean(snapshotDraw))
     setDrawApiPending(false)
     setDrawProcessing(false)
     setBootstrapStockInfo(resolvePrizeStockInfo(nextModel))
@@ -1006,15 +1031,27 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [step])
 
   useEffect(() => {
+    if (step !== STEP.WHEEL_ANIMATING || !draw) return
+    const animationKey = resolveDrawAnimationKey(draw)
+    if (wheelAnimationKeyRef.current === animationKey) return
+    wheelAnimationKeyRef.current = animationKey
+    setDrawing(true)
+    setDrawApiPending(false)
+    setDrawProcessing(false)
+    setSpinKey((value) => value + 1)
+  }, [draw, step])
+
+  useEffect(() => {
     if (entryState === ENTRY_STATE.UNKNOWN) return
     if (entryState === ENTRY_STATE.SOLD_OUT && step !== STEP.SOLD_OUT) {
+      if (resolveSnapshotDraw(model, myPrize)) return
       setStep(STEP.SOLD_OUT)
       return
     }
     if (entryState === ENTRY_STATE.ENTRY && step !== STEP.ENTRY) {
       setStep(STEP.ENTRY)
     }
-  }, [entryState, step])
+  }, [entryState, model, myPrize, step])
 
   async function handleDebugReset() {
     if (!isDebug) return
@@ -1039,6 +1076,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setDrawing(false)
       setDrawApiPending(false)
       setDrawProcessing(false)
+      wheelAnimationKeyRef.current = ''
       setMyPrize(null)
       setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
       setStep(STEP.ENTRY)
@@ -1173,9 +1211,15 @@ function PhaseQuizLotteryMain({ routeParams }) {
           'phase-quiz-result',
         )
         if (resultData) {
+          const snapshotDraw = resolveSnapshotDraw(resultData, myPrize)
           setModel(resultData)
           setAttemptId(resultData?.attempt?.attemptId || '')
-          setDraw(resultData?.draw || null)
+          setDraw(snapshotDraw)
+          if (snapshotDraw) {
+            setDrawing(true)
+            setStep(STEP.WHEEL_ANIMATING)
+            return
+          }
         }
       } catch (error) {
         showToast(normalizeFriendlyMessage(error, '结果加载失败'))
@@ -1183,7 +1227,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       }
     }
 
-    setStep(STEP.WHEEL)
+    await handleDraw()
   }
 
   function patchModelWithDraw(nextDraw) {
@@ -1198,6 +1242,15 @@ function PhaseQuizLotteryMain({ routeParams }) {
         draw: nextDraw,
       }
     })
+  }
+
+  function queueWheelAnimation(nextDraw) {
+    setDraw(nextDraw)
+    patchModelWithDraw(nextDraw)
+    setDrawApiPending(false)
+    setDrawProcessing(false)
+    setDrawing(true)
+    setStep(STEP.WHEEL_ANIMATING)
   }
 
   async function fetchFinalDrawAfterProcessing(nextAttemptId) {
@@ -1258,22 +1311,14 @@ function PhaseQuizLotteryMain({ routeParams }) {
       }
 
       if (!finalDraw) {
+        setDrawApiPending(false)
+        setDrawProcessing(false)
         setDrawing(false)
         showToast('抽奖处理中，请稍后查看结果')
         return
       }
 
-      setDraw(finalDraw)
-      patchModelWithDraw(finalDraw)
-      if (hasValidWheelStopIndex(finalDraw)) {
-        setDrawApiPending(false)
-        setSpinKey((value) => value + 1)
-        return
-      }
-
-      setDrawApiPending(false)
-      setDrawing(false)
-      setStep(STEP.RESULT)
+      queueWheelAnimation(finalDraw)
     } catch (error) {
       console.warn('[phase-quiz-lottery draw failed]', error)
       setDrawApiPending(false)
@@ -1405,6 +1450,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     () => buildWheelSegments(resolvePrizeName(model, draw, myPrize)),
     [draw, model, myPrize],
   )
+  const wheelTargetIndex = useMemo(() => resolveWheelAnimationTargetIndex(draw), [draw])
 
   return (
     <>
@@ -1457,10 +1503,11 @@ function PhaseQuizLotteryMain({ routeParams }) {
               />
             ) : null}
 
-            {step === STEP.WHEEL ? (
+            {step === STEP.WHEEL_ANIMATING ? (
               <WheelPage
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
+                targetIndex={wheelTargetIndex}
                 draw={draw}
                 drawing={drawing}
                 loading={drawApiPending || drawProcessing}
