@@ -229,6 +229,11 @@ function AppointmentMain({ routeParams }) {
 
   async function handleVerifySubmit(event) {
     event.preventDefault()
+    const validationMessage = validateVerifyForm(verifyForm)
+    if (validationMessage) {
+      showToast(validationMessage)
+      return
+    }
     setSubmitting(true)
     try {
       const result = await verifyAppointment(activityKey, {
@@ -273,6 +278,11 @@ function AppointmentMain({ routeParams }) {
 
   async function handleBookingSubmit(event) {
     event.preventDefault()
+    const validationMessage = validateBookingForm(bookingForm)
+    if (validationMessage) {
+      showToast(validationMessage)
+      return
+    }
     setSubmitting(true)
     try {
       const result = await createAppointmentBooking(activityKey, {
@@ -860,12 +870,31 @@ function isUnauthorizedError(err) {
   return err?.response?.code === 401
 }
 
+function validateVerifyForm(form) {
+  if (!String(form?.building || '').trim()) return '请填写楼号'
+  if (!String(form?.room || '').trim()) return '请填写房号'
+  if (!String(form?.name || '').trim()) return '请填写姓名'
+  const idTail = normalizeIdTailInput(form?.idTail || '')
+  if (!idTail) return '请填写身份证后4位'
+  if (!/^[0-9X]{4}$/.test(idTail)) return '身份证后4位必须为4位数字或X'
+  return ''
+}
+
+function validateBookingForm(form) {
+  if (!String(form?.appointmentDate || '').trim()) return '请选择预约日期'
+  if (!String(form?.appointmentSlot || '').trim()) return '请选择预约时间段'
+  const phone = String(form?.phone || '').trim()
+  if (!phone) return '请填写手机号'
+  if (!/^1\d{10}$/.test(phone)) return '请填写正确手机号'
+  return ''
+}
+
 function getFriendlyAppointmentMessage(err, scene) {
   const rawMessage = String(err?.response?.message || err?.message || '').trim()
   const responseCode = err?.response?.code
 
-  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满')) {
-    return '该时段报名人数已满\n请选择另外时段报名'
+  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满') || rawMessage.includes('预约时段人数已满')) {
+    return '预约时段人数已满\n请选择其他时段'
   }
   if (rawMessage.includes('手机号格式不正确')) {
     return '请填写正确手机号'
@@ -878,10 +907,14 @@ function getFriendlyAppointmentMessage(err, scene) {
   }
   if (
     rawMessage.includes('楼号、房号、姓名不能为空') ||
+    rawMessage.includes('请填写楼号') ||
+    rawMessage.includes('请填写房号') ||
+    rawMessage.includes('请填写姓名') ||
     rawMessage.includes('身份证后四位不能为空') ||
+    rawMessage.includes('身份证后4位必须为4位数字或X') ||
     rawMessage.includes('身份证后四位必须是4位数字')
   ) {
-    return '请填写完整信息'
+    return rawMessage
   }
   if (
     rawMessage.includes('身份校验失败') ||
@@ -936,7 +969,7 @@ function classifyAppointmentAnalyticsReason(err, scene) {
   const rawMessage = String(err?.response?.message || err?.message || '').trim()
   const responseCode = String(err?.response?.code || '')
 
-  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满')) return 'slot_full'
+  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满') || rawMessage.includes('预约时段人数已满')) return 'slot_full'
   if (rawMessage.includes('手机号格式不正确')) return 'invalid_phone'
   if (rawMessage.includes('预约时间段不合法') || rawMessage.includes('预约日期格式不正确') || rawMessage.includes('请选择')) {
     return scene === 'booking' ? 'invalid_schedule' : 'invalid_input'
