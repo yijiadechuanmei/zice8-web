@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { request, setToken } from '../../shared/api/request'
+import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -9,11 +9,13 @@ import {
   claimPrize,
   drawPrize,
   getBootstrap,
+  getDebugAccess,
   getMyPrize,
   getPublicConfig,
   getResult,
   isUnauthorizedError,
   pickupVerify,
+  resetMyDebugData,
   startAttempt,
   submitAttempt,
 } from './api'
@@ -56,12 +58,11 @@ const CLAIM_STATUS = {
   PICKUP_VERIFIED: 'pickup_verified',
 }
 
-const isDebug = new URLSearchParams(window.location.search).get('debug') === '1'
+const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-09'
 const DRAW_POLL_INTERVAL_MS = 900
 const DRAW_POLL_LIMIT = 4
 const FALLBACK_WIN_WHEEL_STOP_INDEX = 0
@@ -92,14 +93,6 @@ function ToastLayer({ message }) {
       <div className="max-w-[80vw] whitespace-pre-line rounded-2xl bg-slate-900/82 px-5 py-4 text-center text-sm font-bold leading-7 text-white shadow-xl">
         {message}
       </div>
-    </div>
-  )
-}
-
-function VersionBadge() {
-  return (
-    <div className="pointer-events-none fixed bottom-2 right-2 z-[12002] rounded-full bg-slate-950/60 px-2.5 py-1 text-[11px] font-bold leading-none text-white/90">
-      {PQL_CLIENT_VERSION}
     </div>
   )
 }
@@ -420,6 +413,7 @@ function wait(ms) {
 }
 
 function DebugPanel({
+  enabled,
   activityKey,
   step,
   attemptId,
@@ -429,7 +423,7 @@ function DebugPanel({
   onGoQuestion,
   onLogState,
 }) {
-  if (!isDebug) return null
+  if (!enabled) return null
 
   return (
     <div className="absolute right-[24px] top-[calc(env(safe-area-inset-top,0px)+24px)] z-[12000] w-[250px] rounded-[20px] border border-white/60 bg-white/92 px-4 py-3 text-left text-[20px] leading-7 text-slate-700 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-md">
@@ -441,7 +435,7 @@ function DebugPanel({
       </div>
       <div className="mt-3 grid gap-2">
         <button className="min-h-10 rounded-xl bg-red-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onReset}>
-          重置活动
+          重置我的测试数据
         </button>
         <button className="min-h-10 rounded-xl bg-slate-900 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
           回到答题页
@@ -791,6 +785,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const [prizeModalOpen, setPrizeModalOpen] = useState(false)
   const [claimMode, setClaimMode] = useState('mail')
   const [bootstrapStockInfo, setBootstrapStockInfo] = useState(null)
+  const [debugAccess, setDebugAccess] = useState(null)
   const [mailForm, setMailForm] = useState({
     recipientName: '',
     recipientPhone: '',
@@ -819,6 +814,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     }
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+  const canDebug = debugAccess?.canDebug === true
   const trackLotteryResultView = useCallback(() => {
     trackEvent({
       activityKey,
@@ -1020,6 +1016,28 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   useEffect(() => {
+    if (!isDebugRequested || !publicConfig || !authReady || !activityKey) return
+
+    let cancelled = false
+    async function loadDebugAccess() {
+      try {
+        const access = await handleProtectedRequest(() => getDebugAccess(activityKey), 'phase-quiz-debug-access')
+        if (!cancelled) setDebugAccess(access || null)
+      } catch (error) {
+        if (!cancelled) {
+          setDebugAccess(null)
+          showToast(normalizeFriendlyMessage(error, '调试权限校验失败'))
+        }
+      }
+    }
+
+    loadDebugAccess()
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey, authReady, publicConfig])
+
+  useEffect(() => {
     if (!publicConfig || !authReady || !activityKey) return
 
     async function hydratePageState() {
@@ -1075,20 +1093,19 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [entryState, model, myPrize, step])
 
   async function handleDebugReset() {
-    if (!isDebug) return
+    if (!canDebug) return
 
     setLoading(true)
-    setLoadingText('正在重置测试活动...')
+    setLoadingText('正在重置我的测试数据...')
     try {
-      const result = await request('/phase-quiz-lottery/dev/reset', {
-        method: 'POST',
-        body: JSON.stringify({
-          activityKey,
-          confirmToken: DEBUG_RESET_TOKEN,
-        }),
-      })
+      const result = await handleProtectedRequest(() => resetMyDebugData(activityKey, {
+        confirmToken: DEBUG_RESET_TOKEN,
+      }), 'phase-quiz-debug-reset')
+      if (!result) {
+        return
+      }
       console.log('[phase-quiz-lottery debug reset]', result)
-      showToast('测试活动已重置')
+      showToast('我的测试数据已重置')
       setQuestions([])
       setCurrentIndex(0)
       setAnswers([])
@@ -1108,7 +1125,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function handleDebugGoQuestion() {
-    if (!isDebug) return
+    if (!canDebug) return
     if (entryState !== ENTRY_STATE.QUESTION_FLOW) {
       showToast(entryState === ENTRY_STATE.SOLD_OUT ? '本期奖品已发完' : '请先开始答题')
       return
@@ -1117,7 +1134,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function handleDebugLogState(state) {
-    if (!isDebug) return
+    if (!canDebug) return
     console.log('[phase-quiz-lottery debug state]', state)
   }
 
@@ -1480,6 +1497,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
         <StageLayout className="bg-[#f5f7fb]">
           <div className="pql-stage relative overflow-hidden bg-[#f5f7fb] text-slate-900">
             <DebugPanel
+              enabled={canDebug}
               activityKey={activityKey}
               step={step}
               attemptId={attemptId}
@@ -1569,7 +1587,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
       <ToastLayer message={toast} />
       <LoadingLayer open={loading} text={loadingText} />
-      <VersionBadge />
     </>
   )
 }

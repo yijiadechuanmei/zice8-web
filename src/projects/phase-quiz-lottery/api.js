@@ -65,6 +65,19 @@ export const drawPrize = (activityKey, attemptId, data) =>
 export const getMyPrize = (activityKey) =>
   phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/my-prize`)
 
+export const getDebugAccess = (activityKey) =>
+  phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/debug-access`)
+
+export const resetMyDebugData = (activityKey, data) =>
+  phaseQuizLotteryRequest('/phase-quiz-lottery/dev/reset', {
+    method: 'POST',
+    body: JSON.stringify({
+      activityKey,
+      scope: 'me',
+      ...data,
+    }),
+  })
+
 export const claimPrize = (activityKey, drawId, data) =>
   phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/draws/${drawId}/claim`, {
     method: 'POST',
