@@ -60,6 +60,7 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
+const PQL_CLIENT_VERSION = 'pql-20260617-04'
 const DEFAULT_PICKUP_INFO = {
   pickupType: 'self',
   pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
@@ -86,6 +87,14 @@ function ToastLayer({ message }) {
       <div className="max-w-[80vw] whitespace-pre-line rounded-2xl bg-slate-900/82 px-5 py-4 text-center text-sm font-bold leading-7 text-white shadow-xl">
         {message}
       </div>
+    </div>
+  )
+}
+
+function VersionBadge() {
+  return (
+    <div className="pointer-events-none fixed bottom-2 right-2 z-[12002] rounded-full bg-slate-950/60 px-2.5 py-1 text-[11px] font-bold leading-none text-white/90">
+      {PQL_CLIENT_VERSION}
     </div>
   )
 }
@@ -767,6 +776,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     return {
       ...(resolvedStockInfo || {}),
       eligibleForDraw: model?.eligibleForDraw === true,
+      soldOut: model?.soldOut === true,
     }
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
@@ -1397,6 +1407,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
       <ToastLayer message={toast} />
       <LoadingLayer open={loading} text={loadingText} />
+      <VersionBadge />
     </>
   )
 }

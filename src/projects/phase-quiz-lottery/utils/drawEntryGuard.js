@@ -60,6 +60,7 @@ export function drawEntryGuard(activityState) {
     }
   }
   if (
+    activityState.soldOut === true ||
     (Number.isFinite(activityState.stockRemaining) && activityState.stockRemaining <= 0) ||
     (
       Number.isFinite(activityState.stockUsed) &&
