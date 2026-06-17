@@ -221,8 +221,17 @@ function resolvePickupInfo(source) {
   }
 }
 
-function shouldShowPickupInfoCard(prize) {
-  return resolvePrizePickupStatus(prize) === 'self_pickup'
+function shouldShowPickupInfoCard(prize, claimMode) {
+  if (prize?.claim?.deliveryMethod === 'mail') return false
+  if (prize?.claim?.status === CLAIM_STATUS.MAIL_SUBMITTED) return false
+  if (prize?.claim?.deliveryMethod === 'pickup') return true
+  if (
+    prize?.claim?.status === CLAIM_STATUS.PICKUP_PENDING ||
+    prize?.claim?.status === CLAIM_STATUS.PICKUP_VERIFIED
+  ) {
+    return true
+  }
+  return resolvePrizePickupStatus(prize) === 'self_pickup' && claimMode === 'pickup'
 }
 
 function resolveInitialStep(model) {
@@ -444,7 +453,7 @@ function PrizeModalContent({
 
   const claim = prize.claim
   const pickupInfo = resolvePickupInfo(prize)
-  const showPickupInfoCard = shouldShowPickupInfoCard(prize)
+  const showPickupInfoCard = shouldShowPickupInfoCard(prize, claimMode)
   const drawTime = formatDrawTime(prize.draw?.createdAt)
   const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
