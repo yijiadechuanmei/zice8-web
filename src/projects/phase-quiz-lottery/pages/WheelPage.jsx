@@ -1,7 +1,10 @@
+import { useEffect, useRef } from 'react'
+import { trackEvent } from '../../../shared/analytics'
 import QuestionHeader from '../components/QuestionHeader'
 import Wheel from '../components/Wheel'
 
 export default function WheelPage({
+  activityKey,
   phaseNo,
   segments,
   targetIndex,
@@ -14,6 +17,47 @@ export default function WheelPage({
   onWheelFinish,
   assets,
 }) {
+  const trackedWheelStartRef = useRef('')
+  const trackedWheelFinishRef = useRef('')
+
+  useEffect(() => {
+    if (!activityKey) return
+    const trackKey = [activityKey, phaseNo || '-', 'wheel_start'].join('|')
+    if (trackedWheelStartRef.current === trackKey) return
+    trackedWheelStartRef.current = trackKey
+    trackEvent({
+      activityKey,
+      eventType: 'lottery_wheel_start',
+      page: '/phase-quiz-lottery',
+      extra: {
+        phaseNo: phaseNo || null,
+        wheelStatus: draw?.status || null,
+      },
+    })
+  }, [activityKey, draw?.status, phaseNo])
+
+  function handleWheelFinish() {
+    if (activityKey) {
+      const trackKey = [activityKey, phaseNo || '-', draw?.drawId || '-', 'wheel_finish'].join('|')
+      if (trackedWheelFinishRef.current !== trackKey) {
+        trackedWheelFinishRef.current = trackKey
+        trackEvent({
+          activityKey,
+          eventType: 'lottery_wheel_finish',
+          page: '/phase-quiz-lottery',
+          extra: {
+            phaseNo: phaseNo || null,
+            drawId: draw?.drawId || null,
+            wheelStatus: draw?.status || null,
+            won: Boolean(draw?.won),
+            soldOut: Boolean(draw?.soldOut),
+          },
+        })
+      }
+    }
+    onWheelFinish?.()
+  }
+
   return (
     <section className="relative z-10 flex h-full flex-col text-slate-900">
       <QuestionHeader
@@ -33,7 +77,7 @@ export default function WheelPage({
             assets={assets}
             onDraw={onDraw}
             onOpenPrize={onOpenPrize}
-            onFinish={onWheelFinish}
+            onFinish={handleWheelFinish}
           />
           {loading ? (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/84 backdrop-blur-[2px]" aria-live="polite" aria-busy="true">

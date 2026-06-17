@@ -103,6 +103,7 @@ export default function ResultCard({
   assets,
   onStart,
   onGoWheel,
+  onTrackDrawClick,
   onOpenPrize,
 }) {
   const resolvedDraw = draw || model?.draw || null
@@ -136,7 +137,16 @@ export default function ResultCard({
 
       <div className="mt-[18px] grid gap-[14px]">
         {canStart ? <ActionButton onClick={onStart}>开始答题</ActionButton> : null}
-        {canDraw ? <ActionButton onClick={onGoWheel}>立即抽奖</ActionButton> : null}
+        {canDraw ? (
+          <ActionButton
+            onClick={() => {
+              onTrackDrawClick?.()
+              onGoWheel?.()
+            }}
+          >
+            立即抽奖
+          </ActionButton>
+        ) : null}
         {showStockExhaustedAction ? <ActionButton disabled>奖品已发完</ActionButton> : null}
         {showPrize ? <ActionButton tone="prize" onClick={onOpenPrize}>我的奖品</ActionButton> : null}
         {!canStart && !canDraw && !showPrize && !showStockExhaustedAction ? (

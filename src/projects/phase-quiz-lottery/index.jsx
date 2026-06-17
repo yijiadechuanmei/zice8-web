@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { request, setToken } from '../../shared/api/request'
-import { trackPageView } from '../../shared/analytics'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
@@ -819,6 +819,46 @@ function PhaseQuizLotteryMain({ routeParams }) {
     }
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+  const trackLotteryResultView = useCallback(() => {
+    trackEvent({
+      activityKey,
+      eventType: 'lottery_result_view',
+      page: '/phase-quiz-lottery',
+      extra: {
+        pageKey: 'result',
+        phaseNo: model?.currentPhase?.phaseNo || model?.attempt?.phaseNo || null,
+        resultStatus: draw?.status || model?.draw?.status || null,
+        won: Boolean(draw?.won || model?.won),
+        soldOut: Boolean(stockExhausted || model?.soldOut),
+      },
+    })
+  }, [activityKey, draw?.status, draw?.won, model?.attempt?.phaseNo, model?.currentPhase?.phaseNo, model?.draw?.status, model?.soldOut, model?.won, stockExhausted])
+
+  const trackLotteryDrawClick = useCallback(() => {
+    trackEvent({
+      activityKey,
+      eventType: 'lottery_draw_click',
+      page: '/phase-quiz-lottery',
+      extra: {
+        pageKey: 'result',
+        phaseNo: model?.currentPhase?.phaseNo || model?.attempt?.phaseNo || null,
+        eligibleForDraw: Boolean(model?.eligibleForDraw),
+      },
+    })
+  }, [activityKey, model?.attempt?.phaseNo, model?.currentPhase?.phaseNo, model?.eligibleForDraw])
+
+  const trackLotteryStockEmpty = useCallback(() => {
+    trackEvent({
+      activityKey,
+      eventType: 'lottery_stock_empty',
+      page: '/phase-quiz-lottery',
+      extra: {
+        pageKey: 'result',
+        phaseNo: model?.currentPhase?.phaseNo || model?.attempt?.phaseNo || null,
+        drawStatus: draw?.status || model?.draw?.status || null,
+      },
+    })
+  }, [activityKey, draw?.status, model?.attempt?.phaseNo, model?.currentPhase?.phaseNo, model?.draw?.status])
 
   useEffect(() => {
     replaceLegacyPath(activityKey)
@@ -1471,7 +1511,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
             {step === STEP.RESULT ? (
               <ResultPage
-                activityTitle={activityTitle}
+                activityKey={activityKey}
                 phaseNo={currentPhaseNo}
                 model={model}
                 draw={draw}
@@ -1481,12 +1521,16 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 onStart={handleStart}
                 onGoWheel={handleGoWheel}
                 onOpenPrize={openPrizeModal}
+                onTrackResultView={trackLotteryResultView}
+                onTrackDrawClick={trackLotteryDrawClick}
+                onTrackStockEmpty={trackLotteryStockEmpty}
                 assets={assets}
               />
             ) : null}
 
             {step === STEP.WHEEL || step === STEP.WHEEL_ANIMATING ? (
               <WheelPage
+                activityKey={activityKey}
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
                 targetIndex={wheelTargetIndex}
