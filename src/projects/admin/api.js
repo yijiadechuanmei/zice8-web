@@ -72,6 +72,18 @@ export function getCharts(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/charts`)
 }
 
+export function getAnalyticsFunnel(activityKey) {
+  return adminRequest(`/admin/analytics/funnel/${activityKey}`)
+}
+
+export function getAnalyticsLottery(activityKey) {
+  return adminRequest(`/admin/analytics/lottery/${activityKey}`)
+}
+
+export function getAnalyticsTrend(activityKey) {
+  return adminRequest(`/admin/analytics/trend/${activityKey}`)
+}
+
 export function getDataSchema(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/data-schema`)
 }
