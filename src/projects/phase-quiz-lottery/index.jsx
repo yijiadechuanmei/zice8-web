@@ -31,6 +31,14 @@ const STEP = {
   QUESTION: 'QUESTION',
   RESULT: 'RESULT',
   WHEEL: 'WHEEL',
+  SOLD_OUT: 'SOLD_OUT',
+}
+
+const ENTRY_STATE = {
+  UNKNOWN: 'UNKNOWN',
+  ENTRY: 'ENTRY',
+  QUESTION_FLOW: 'QUESTION_FLOW',
+  SOLD_OUT: 'SOLD_OUT',
 }
 
 const DRAW_STATUS = {
@@ -215,10 +223,12 @@ function shouldShowPickupInfoCard(prize, claimMode) {
   return resolvePrizePickupStatus(prize) === 'self_pickup' && claimMode === 'pickup'
 }
 
-function resolveInitialStep(model) {
-  if (model?.state === 'answering') return STEP.QUESTION
-  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || model?.soldOut) return STEP.RESULT
-  return STEP.ENTRY
+function resolveInitialStep(model, myPrize = null, publicConfig = null) {
+  return resolveStepFromEntryState(
+    resolveEntryState({ model, myPrize, publicConfig }).entryState,
+    model,
+    myPrize,
+  )
 }
 
 function replaceLegacyPath(activityKey) {
@@ -294,12 +304,16 @@ function collectPrizeStockSources(source) {
   if (!source || typeof source !== 'object') return []
   return [
     source.activityConfig?.snapshot?.prize,
+    source.activityConfig?.snapshot,
     source.activityConfig?.prize,
+    source.activityConfig,
     source.snapshot?.prize,
+    source.snapshot,
     source.prize,
     source.currentPhase?.prize,
     source.currentPhase?.prizes?.[0],
     source.prizes?.[0],
+    source,
   ].filter(Boolean)
 }
 
@@ -332,6 +346,55 @@ function resolvePrizeStockInfo(...sources) {
 
 function isPrizeStockExhausted(stockInfo) {
   return Boolean(stockInfo && stockInfo.stockRemaining <= 0)
+}
+
+function resolveHasAttempt(model, myPrize) {
+  if (model?.attempt?.attemptId || model?.attemptId || model?.result || model?.draw) return true
+  if (model?.state === 'answering' || model?.state === 'result') return true
+  if (model?.eligibleForDraw || model?.alreadyDrawn || model?.won) return true
+  if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return true
+  return false
+}
+
+function resolveEntryState({ model, myPrize, publicConfig }) {
+  const stockInfo = resolvePrizeStockInfo(model, publicConfig, myPrize)
+  const hasAttempt = resolveHasAttempt(model, myPrize)
+
+  if (isPrizeStockExhausted(stockInfo)) {
+    return {
+      entryState: ENTRY_STATE.SOLD_OUT,
+      hasAttempt,
+      stockInfo,
+    }
+  }
+
+  if (!model && !myPrize && !publicConfig) {
+    return {
+      entryState: ENTRY_STATE.UNKNOWN,
+      hasAttempt,
+      stockInfo,
+    }
+  }
+
+  return {
+    entryState: hasAttempt ? ENTRY_STATE.QUESTION_FLOW : ENTRY_STATE.ENTRY,
+    hasAttempt,
+    stockInfo,
+  }
+}
+
+function resolveQuestionFlowStep(model, myPrize = null) {
+  if (model?.state === 'answering') return STEP.QUESTION
+  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || model?.draw) return STEP.RESULT
+  if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return STEP.RESULT
+  return STEP.ENTRY
+}
+
+function resolveStepFromEntryState(entryState, model, myPrize = null) {
+  if (entryState === ENTRY_STATE.SOLD_OUT) return STEP.SOLD_OUT
+  if (entryState === ENTRY_STATE.ENTRY) return STEP.ENTRY
+  if (entryState === ENTRY_STATE.QUESTION_FLOW) return resolveQuestionFlowStep(model, myPrize)
+  return STEP.ENTRY
 }
 
 function normalizeDrawResultValue(value) {
@@ -461,6 +524,32 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
         >
           开始答题
         </button>
+      </div>
+    </section>
+  )
+}
+
+function SoldOutPage({ activityTitle, assets, onOpenPrize }) {
+  return (
+    <section className="relative z-10 flex h-full flex-col text-center text-slate-900">
+      <QuestionHeader
+        title={activityTitle}
+        backgroundImageUrl={assets.bannerBackground}
+        bookImageUrl={assets.bannerBook}
+      />
+      <div className="flex flex-1 flex-col justify-center px-[40px] pb-[96px]">
+        <div className="rounded-[32px] bg-white px-[32px] py-[48px] shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
+          <img className="mx-auto h-[180px] w-[180px] object-contain grayscale" src={assets.prizeBox} alt="" aria-hidden="true" />
+          <h2 className="mt-[28px] text-[40px] font-extrabold leading-[1.25] text-slate-900">本期奖品已发完</h2>
+          <p className="mt-[16px] text-[24px] font-medium leading-[1.5] text-slate-500">感谢关注，请等待下一期活动。</p>
+          <button
+            className="mt-[36px] min-h-[76px] w-full cursor-pointer rounded-full bg-slate-900 px-[28px] text-[28px] font-bold text-white shadow-[0_16px_32px_rgba(15,23,42,0.14)]"
+            type="button"
+            onClick={onOpenPrize}
+          >
+            我的奖品
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -718,7 +807,11 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const drawLockRef = useRef(false)
   const lastDrawClickRef = useRef(0)
   const assets = useMemo(() => buildAssets(), [])
-  const stockInfo = useMemo(() => resolvePrizeStockInfo(model, myPrize, publicConfig), [model, myPrize, publicConfig])
+  const entryDecision = useMemo(
+    () => resolveEntryState({ model, myPrize, publicConfig }),
+    [model, myPrize, publicConfig],
+  )
+  const { entryState, hasAttempt, stockInfo } = entryDecision
   const stockExhausted = isPrizeStockExhausted(stockInfo)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
@@ -791,7 +884,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
-    setStep(resolveInitialStep(nextModel))
+    setStep(resolveInitialStep(nextModel, myPrize, publicConfig))
   }
 
   function applyPrizeState(nextPrize) {
@@ -812,8 +905,14 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
+    if (nextModel?.state === 'answering') {
+      setQuestions(nextModel.questions || [])
+      setCurrentIndex(0)
+      setAnswers([])
+      setAttemptStartedAt(Date.now())
+    }
     applyPrizeState(nextPrize)
-    setStep(resolveInitialStep(nextModel))
+    setStep(resolveInitialStep(nextModel, nextPrize, publicConfig))
   }
 
   function startScoreAnimation(value) {
@@ -907,6 +1006,17 @@ function PhaseQuizLotteryMain({ routeParams }) {
     if (!step) setStep(STEP.ENTRY)
   }, [step])
 
+  useEffect(() => {
+    if (entryState === ENTRY_STATE.UNKNOWN) return
+    if (entryState === ENTRY_STATE.SOLD_OUT && step !== STEP.SOLD_OUT) {
+      setStep(STEP.SOLD_OUT)
+      return
+    }
+    if (entryState === ENTRY_STATE.ENTRY && step !== STEP.ENTRY) {
+      setStep(STEP.ENTRY)
+    }
+  }, [entryState, step])
+
   async function handleDebugReset() {
     if (!isDebug) return
 
@@ -939,6 +1049,10 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   function handleDebugGoQuestion() {
     if (!isDebug) return
+    if (entryState !== ENTRY_STATE.QUESTION_FLOW) {
+      showToast(entryState === ENTRY_STATE.SOLD_OUT ? '本期奖品已发完' : '请先开始答题')
+      return
+    }
     setStep(STEP.QUESTION)
   }
 
@@ -948,6 +1062,15 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleStart() {
+    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
+      setStep(STEP.SOLD_OUT)
+      showToast('本期奖品已发完')
+      return
+    }
+    if (entryState === ENTRY_STATE.QUESTION_FLOW || hasAttempt) {
+      setStep(resolveQuestionFlowStep(model, myPrize))
+      return
+    }
     if (!model?.currentPhase?.phaseNo) {
       showToast('活动未开始')
       return
@@ -1031,7 +1154,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleGoWheel() {
-    if (stockExhausted) {
+    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
+      setStep(STEP.SOLD_OUT)
       showToast('本期奖品已发完')
       return
     }
@@ -1071,7 +1195,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleDraw() {
-    if (stockExhausted) {
+    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
+      setStep(STEP.SOLD_OUT)
       showToast('本期奖品已发完')
       return
     }
@@ -1245,11 +1370,15 @@ function PhaseQuizLotteryMain({ routeParams }) {
               draw={draw}
               onReset={handleDebugReset}
               onGoQuestion={handleDebugGoQuestion}
-              onLogState={handleDebugLogState}
+              onLogState={() => handleDebugLogState({ activityKey, step, entryState, hasAttempt, stockInfo, attemptId, model, draw })}
             />
 
             {step === STEP.ENTRY ? (
-              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading} assets={assets} />
+              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading || stockExhausted} assets={assets} />
+            ) : null}
+
+            {step === STEP.SOLD_OUT ? (
+              <SoldOutPage activityTitle={activityTitle} assets={assets} onOpenPrize={openPrizeModal} />
             ) : null}
 
             {step === STEP.QUESTION ? (
