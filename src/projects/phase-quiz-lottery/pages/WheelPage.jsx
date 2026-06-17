@@ -5,7 +5,6 @@ export default function WheelPage({
   phaseNo,
   segments,
   draw,
-  canDraw,
   drawing,
   spinKey,
   onDraw,
@@ -28,7 +27,6 @@ export default function WheelPage({
             targetIndex={draw?.wheelStopIndex}
             drawing={drawing}
             draw={draw}
-            canDraw={canDraw}
             spinKey={spinKey}
             assets={assets}
             onDraw={onDraw}

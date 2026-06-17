@@ -36,7 +36,6 @@ export default function Wheel({
   targetIndex,
   drawing,
   draw,
-  canDraw,
   spinKey,
   assets,
   onDraw,
@@ -44,7 +43,7 @@ export default function Wheel({
   onFinish,
 }) {
   const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
-  const remainingDrawCount = draw?.alreadyDrawn ? 0 : canDraw ? 1 : 0
+  const remainingDrawCount = draw ? 0 : 1
   const drawButtonText = drawing ? '抽奖中' : '立即抽奖'
   const initialRotation = Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT) : 0
   const canvasRef = useRef(null)
@@ -161,7 +160,7 @@ export default function Wheel({
         <button
           className="absolute left-1/2 top-1/2 z-[4] flex h-[156px] w-[156px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-70"
           type="button"
-          disabled={!canDraw || drawing || Boolean(draw?.alreadyDrawn)}
+          disabled={drawing || Boolean(draw)}
           onClick={onDraw}
           aria-label={drawButtonText}
         >

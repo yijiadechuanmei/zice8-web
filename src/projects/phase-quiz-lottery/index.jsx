@@ -23,7 +23,7 @@ import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import WheelPage from './pages/WheelPage'
 import { ADDRESS_OPTIONS } from './address-options'
-import { isPrizeStockExhausted, preDrawGuard, resolvePrizeStockInfo } from './utils/preDrawGuard'
+import { drawEntryGuard, isPrizeStockExhausted, resolvePrizeStockInfo } from './utils/drawEntryGuard'
 import { formatTime } from './utils/timeFormatter'
 import './styles.css'
 
@@ -761,9 +761,13 @@ function PhaseQuizLotteryMain({ routeParams }) {
   )
   const { entryState, hasAttempt, stockInfo } = entryDecision
   const stockExhausted = isPrizeStockExhausted(stockInfo)
-  const preDrawActivityState = useMemo(() => {
+  const drawEntryActivityState = useMemo(() => {
     const snapshotStockInfo = resolvePrizeStockInfo(model, myPrize)
-    return bootstrapStockInfo || snapshotStockInfo || stockInfo
+    const resolvedStockInfo = bootstrapStockInfo || snapshotStockInfo || stockInfo
+    return {
+      ...(resolvedStockInfo || {}),
+      eligibleForDraw: model?.eligibleForDraw === true,
+    }
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
@@ -1107,9 +1111,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleGoWheel() {
-    const guard = preDrawGuard(preDrawActivityState)
+    const guard = drawEntryGuard(drawEntryActivityState)
     if (!guard.allow) {
-      showToast('奖品已发完')
+      showToast(guard.reason === 'STOCK_EMPTY' ? '奖品已发完' : '暂无抽奖资格')
       return
     }
 
@@ -1148,7 +1152,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleDraw() {
-    if (!model?.eligibleForDraw || !model?.attempt?.attemptId) return
+    if (!model?.attempt?.attemptId || draw) return
     const now = Date.now()
     if (drawing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
     lastDrawClickRef.current = now
@@ -1360,7 +1364,6 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 phaseNo={currentPhaseNo}
                 segments={wheelSegments}
                 draw={draw}
-                canDraw={Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)}
                 drawing={drawing}
                 spinKey={spinKey}
                 onDraw={handleDraw}

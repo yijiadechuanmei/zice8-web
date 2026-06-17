@@ -52,9 +52,12 @@ export function isPrizeStockExhausted(stockInfo) {
   return Boolean(stockInfo && stockInfo.stockRemaining <= 0)
 }
 
-export function preDrawGuard(activityState) {
+export function drawEntryGuard(activityState) {
   if (!activityState) {
-    return { allow: true }
+    return {
+      allow: false,
+      reason: 'NOT_ELIGIBLE',
+    }
   }
   if (
     Number.isFinite(activityState.stockUsed) &&
@@ -64,6 +67,12 @@ export function preDrawGuard(activityState) {
     return {
       allow: false,
       reason: 'STOCK_EMPTY',
+    }
+  }
+  if (activityState.eligibleForDraw !== true) {
+    return {
+      allow: false,
+      reason: 'NOT_ELIGIBLE',
     }
   }
   return { allow: true }
