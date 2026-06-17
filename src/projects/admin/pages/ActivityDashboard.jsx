@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { Component, Suspense, lazy, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Col, Empty, Row, Spin, Statistic, Tag, Tooltip, Typography } from 'antd'
+import { Button, Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
 import { InfoCircleOutlined } from '@ant-design/icons'
-import { getAnalyticsFunnel, getAnalyticsLottery, getAnalyticsTrend, getCharts, getOverview } from '../api'
+import { getCharts, getOverview } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
@@ -14,7 +14,6 @@ const uvHint = '按浏览器匿名访客 ID 去重统计。'
 export default function ActivityDashboard({ activity, compact = false }) {
   const [overview, setOverview] = useState(null)
   const [charts, setCharts] = useState(null)
-  const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -39,40 +38,6 @@ export default function ActivityDashboard({ activity, compact = false }) {
     }
   }, [activity.activityKey])
 
-  useEffect(() => {
-    let alive = true
-    if (compact || activity.type !== 'phase_quiz_lottery') {
-      setAnalytics(null)
-      return () => {
-        alive = false
-      }
-    }
-
-    Promise.allSettled([
-      getAnalyticsFunnel(activity.activityKey),
-      getAnalyticsLottery(activity.activityKey),
-      getAnalyticsTrend(activity.activityKey),
-    ])
-      .then(([funnelResult, lotteryResult, trendResult]) => {
-        if (!alive) return
-        setAnalytics({
-          funnel: funnelResult.status === 'fulfilled' ? funnelResult.value : null,
-          lottery: lotteryResult.status === 'fulfilled' ? lotteryResult.value : null,
-          trend: trendResult.status === 'fulfilled' ? trendResult.value : null,
-          error:
-            funnelResult.status === 'rejected' ||
-            lotteryResult.status === 'rejected' ||
-            trendResult.status === 'rejected'
-              ? '部分分析数据加载失败'
-              : '',
-        })
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [activity.activityKey, activity.type, compact])
-
   const metrics = useMemo(() => {
     if (activity.type === 'appointment_visit') {
       return [
@@ -87,6 +52,24 @@ export default function ActivityDashboard({ activity, compact = false }) {
         { label: '核验失败', value: overview?.verifyFailedCount ?? 0 },
         { label: '预约成功', value: overview?.bookingSuccessCount ?? 0 },
         { label: '预约失败', value: overview?.bookingFailedCount ?? 0 },
+      ]
+    }
+
+    if (activity.type === 'phase_quiz_lottery') {
+      const pql = overview?.phaseQuizLottery || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '参与答题人数', value: pql.attemptUserCount ?? 0 },
+        { label: '完成答题人数', value: pql.finishedAttemptUserCount ?? 0 },
+        { label: '满分人数', value: pql.fullScoreUserCount ?? 0 },
+        { label: '抽奖人数', value: pql.drawUserCount ?? 0 },
+        { label: '中奖人数', value: pql.winUserCount ?? 0 },
+        { label: '中奖率', value: Math.round(Number(pql.winRate ?? 0)), suffix: '%' },
+        { label: '完成率', value: Math.round(Number(pql.completionRate ?? 0)), suffix: '%' },
+        { label: '领奖记录', value: pql.claimCount ?? 0 },
+        { label: '邮寄信息', value: pql.mailClaimCount ?? 0 },
+        { label: '自提信息', value: pql.pickupClaimCount ?? 0 },
       ]
     }
 
@@ -112,20 +95,18 @@ export default function ActivityDashboard({ activity, compact = false }) {
   }))
   const appointmentDateTrend = (charts?.appointment?.bookingByDate || []).map((item) => ({ ...item, bookings: item.value || 0 }))
   const appointmentSlotTrend = (charts?.appointment?.bookingBySlot || []).map((item) => ({ date: item.slot, bookings: item.value || 0 }))
-  const funnelStages = useMemo(() => buildFunnelStages(analytics?.funnel), [analytics?.funnel])
-  const lotteryStats = useMemo(() => buildLotteryStats(analytics?.lottery), [analytics?.lottery])
-  const lotteryTrend = useMemo(() => buildLotteryTrend(analytics?.trend), [analytics?.trend])
-  const maxFunnelDropKey = useMemo(() => {
-    let maxDrop = 0
-    let maxKey = ''
-    funnelStages.forEach((item) => {
-      if (item.dropFromPrev > maxDrop) {
-        maxDrop = item.dropFromPrev
-        maxKey = item.key
-      }
-    })
-    return maxKey
-  }, [funnelStages])
+  const phaseQuizLotteryTrend = mergePhaseQuizLotteryTrend(
+    charts?.submissions?.trend,
+    charts?.submissions?.completionTrend,
+    charts?.phaseQuizLottery?.fullScoreTrend,
+    charts?.phaseQuizLottery?.drawTrend,
+    charts?.phaseQuizLottery?.winTrend,
+  )
+  const phaseStockRows = (charts?.phaseQuizLottery?.phaseStock || []).map((item) => ({
+    ...item,
+    label: `第${item.phaseNo}期`,
+    stockRemaining: Math.max(Number(item.stockTotal || 0) - Number(item.stockUsed || 0), 0),
+  }))
 
   if (loading) {
     return (
@@ -178,97 +159,36 @@ export default function ActivityDashboard({ activity, compact = false }) {
         <>
           {activity.type === 'phase_quiz_lottery' ? (
             <Row gutter={[16, 16]}>
-              <Col xs={24} xl={15}>
-                <ChartPanel title="活动漏斗分析" description="PV → Enter → Quiz → FullScore → Draw → Win → Claim">
-                  {analytics === null ? (
-                    <div className="admin-centered-state"><Spin tip="分析加载中..." /></div>
-                  ) : analytics?.funnel ? (
-                    <div className="grid gap-4">
-                      <LazyChart
-                        type="horizontalBar"
-                        data={funnelStages}
-                        series={[{ key: 'value', name: '人数' }]}
-                        height={320}
-                      />
-                      <div className="grid gap-2">
-                        {funnelStages.map((stage) => (
-                          <div
-                            key={stage.key}
-                            className={[
-                              'grid grid-cols-[92px_1fr_92px_92px] items-center gap-3 rounded-2xl border px-4 py-3 text-sm',
-                              stage.key === maxFunnelDropKey
-                                ? 'border-red-300 bg-red-50'
-                                : 'border-slate-200 bg-white',
-                            ].join(' ')}
-                          >
-                            <div className="font-bold text-slate-900">{stage.label}</div>
-                            <div className="text-slate-600">
-                              数量 <span className="font-bold text-slate-900">{stage.value}</span>
-                            </div>
-                            <div className="text-slate-600">
-                              转化率 <span className="font-bold text-slate-900">{formatRate(stage.conversionRate)}</span>
-                            </div>
-                            <div className="text-right">
-                              {stage.key === maxFunnelDropKey ? <Tag color="red">最大掉点</Tag> : <Text type="secondary">-</Text>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
                   ) : (
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={analytics?.error || '暂无漏斗数据'} />
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
                   )}
                 </ChartPanel>
               </Col>
-              <Col xs={24} xl={9}>
-                <ChartPanel title="抽奖行为分析" description="总抽奖次数、中奖率、库存消耗和异常指标">
-                  {analytics === null ? (
-                    <div className="admin-centered-state"><Spin tip="分析加载中..." /></div>
-                  ) : analytics?.lottery ? (
-                    <div className="grid gap-4">
-                      <Row gutter={[12, 12]}>
-                        {lotteryStats.map((item) => (
-                          <Col xs={12} key={item.label}>
-                            <Card size="small" className={item.highlight ? 'border-red-200 bg-red-50' : 'bg-slate-50'}>
-                              <Statistic
-                                title={item.label}
-                                value={item.value}
-                                suffix={item.suffix}
-                                valueStyle={item.highlight ? { color: '#dc2626' } : undefined}
-                                formatter={formatMetric}
-                              />
-                              {item.hint ? <Text type={item.highlight ? 'danger' : 'secondary'}>{item.hint}</Text> : null}
-                            </Card>
-                          </Col>
-                        ))}
-                      </Row>
-                    </div>
-                  ) : (
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={analytics?.error || '暂无抽奖分析数据'} />
-                  )}
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天答题/抽奖趋势" description="按答题、满分、抽奖、中奖统计">
+                  <LazyChart
+                    type="line"
+                    data={phaseQuizLotteryTrend}
+                    series={[
+                      { key: 'attempts', name: '参与答题' },
+                      { key: 'completed', name: '完成答题' },
+                      { key: 'fullScore', name: '满分' },
+                      { key: 'draws', name: '抽奖' },
+                      { key: 'wins', name: '中奖' },
+                    ]}
+                  />
                 </ChartPanel>
               </Col>
-            </Row>
-          ) : null}
-
-          {activity.type === 'phase_quiz_lottery' ? (
-            <Row gutter={[16, 16]} className="mt-4">
-              <Col xs={24}>
-                <ChartPanel title="用户行为趋势" description="PV、抽奖和中奖趋势">
-                  {analytics === null ? (
-                    <div className="admin-centered-state"><Spin tip="分析加载中..." /></div>
-                  ) : analytics?.trend ? (
-                    <LazyChart
-                      type="line"
-                      data={lotteryTrend}
-                      series={[
-                        { key: 'pv', name: 'PV' },
-                        { key: 'draw', name: '抽奖' },
-                        { key: 'win', name: '中奖' },
-                      ]}
-                    />
+              <Col xs={24} xl={8}>
+                <ChartPanel title="每期库存消耗" description="按 phase_quiz_lottery_prize 库存统计">
+                  {phaseStockRows.length ? (
+                    <LazyChart type="bar" data={phaseStockRows} series={[{ key: 'stockUsed', name: '已用库存' }, { key: 'stockRemaining', name: '剩余库存' }]} />
                   ) : (
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={analytics?.error || '暂无趋势数据'} />
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无库存数据" />
                   )}
                 </ChartPanel>
               </Col>
@@ -394,83 +314,24 @@ function mergeTrend(submissions = [], completed = []) {
   return Array.from(map.values())
 }
 
-function buildFunnelStages(funnel) {
-  const stages = [
-    { key: 'pv', label: 'PV', value: Number(funnel?.pv || 0) },
-    { key: 'enter', label: 'Enter', value: Number(funnel?.enter || 0) },
-    { key: 'quiz_start', label: 'Quiz', value: Number(funnel?.quiz_start || 0) },
-    { key: 'full_score', label: 'FullScore', value: Number(funnel?.full_score || 0) },
-    { key: 'draw_click', label: 'Draw', value: Number(funnel?.draw_click || 0) },
-    { key: 'win', label: 'Win', value: Number(funnel?.win || 0) },
-    { key: 'claim', label: 'Claim', value: Number(funnel?.claim || 0) },
-  ]
-  return stages.map((stage, index) => {
-    const prevValue = index === 0 ? stage.value : stages[index - 1].value
-    const conversionRate = prevValue > 0 ? Number(((stage.value / prevValue) * 100).toFixed(1)) : 0
-    const dropFromPrev = Math.max(prevValue - stage.value, 0)
-    return {
-      ...stage,
-      conversionRate,
-      dropFromPrev,
-    }
-  })
-}
-
-function buildLotteryStats(lottery) {
-  const totalDraws = Number(lottery?.total_draws || 0)
-  const winRate = Number((Number(lottery?.win_rate || 0) * 100).toFixed(1))
-  const loseRate = Number((Number(lottery?.lose_rate || 0) * 100).toFixed(1))
-  const wheelSkipRate = Number((Number(lottery?.wheel_skip_rate || 0) * 100).toFixed(1))
-  return [
-    { label: '抽奖次数', value: totalDraws },
-    { label: '中奖率', value: winRate, suffix: '%', hint: `失败率 ${loseRate}%` },
-    {
-      label: '库存消耗',
-      value: `${Number(lottery?.stock_used || 0)}/${Number(lottery?.stock_total || 0)}`,
-      hint: `空库存事件 ${Number(lottery?.stock_empty_count || 0)} 次`,
-    },
-    {
-      label: 'wheel_skip_rate',
-      value: wheelSkipRate,
-      suffix: '%',
-      highlight: wheelSkipRate > 0,
-      hint: 'result 已存在但 wheel 未完成的比例',
-    },
-    {
-      label: 'draw latency',
-      value: Number(lottery?.draw_latency_avg || 0),
-      suffix: 'ms',
-      hint: '抽奖点击到转盘完成的平均耗时',
-    },
-  ]
-}
-
-function buildLotteryTrend(trend) {
+function mergePhaseQuizLotteryTrend(attempts = [], completed = [], fullScore = [], draws = [], wins = []) {
   const map = new Map()
-  ;(trend?.pv_timeline || []).forEach((item) => {
-    map.set(item.date, { date: item.date, pv: item.value || 0, draw: 0, win: 0 })
-  })
-  ;(trend?.draw_timeline || []).forEach((item) => {
-    const current = map.get(item.date) || { date: item.date, pv: 0, draw: 0, win: 0 }
-    current.draw = item.value || 0
-    map.set(item.date, current)
-  })
-  ;(trend?.win_timeline || []).forEach((item) => {
-    const current = map.get(item.date) || { date: item.date, pv: 0, draw: 0, win: 0 }
-    current.win = item.value || 0
-    map.set(item.date, current)
-  })
+  const ensure = (date) => {
+    const current = map.get(date) || { date, attempts: 0, completed: 0, fullScore: 0, draws: 0, wins: 0 }
+    map.set(date, current)
+    return current
+  }
+  attempts.forEach((item) => { ensure(item.date).attempts = item.value || 0 })
+  completed.forEach((item) => { ensure(item.date).completed = item.value || 0 })
+  fullScore.forEach((item) => { ensure(item.date).fullScore = item.value || 0 })
+  draws.forEach((item) => { ensure(item.date).draws = item.value || 0 })
+  wins.forEach((item) => { ensure(item.date).wins = item.value || 0 })
   return Array.from(map.values()).sort((left, right) => String(left.date).localeCompare(String(right.date)))
 }
 
 function formatMetric(value) {
   if (typeof value === 'number') return value.toLocaleString('zh-CN')
   return value
-}
-
-function formatRate(value) {
-  if (!Number.isFinite(Number(value))) return '0%'
-  return `${Number(value).toFixed(1)}%`
 }
 
 class ChartErrorBoundary extends Component {
