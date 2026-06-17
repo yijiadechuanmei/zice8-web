@@ -50,9 +50,21 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PICKUP_CONTACT_PHONE = '0512-68728820'
-const PICKUP_CONTACT_TEL = '051268728820'
-const PICKUP_ADDRESS = '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室'
+const DEFAULT_PICKUP_INFO = {
+  pickupType: 'pickup',
+  pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
+  pickupPhone: '0512-68728820',
+  pickupStatus: 'enabled',
+}
+const SHANGHAI_DATE_TIME_FORMATTER = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
 
 function LoadingLayer({ open = true, text = '加载中...' }) {
   if (!open) return null
@@ -128,7 +140,25 @@ function formatDrawTime(value) {
   if (!value) return '待开奖'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '待开奖'
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  const parts = SHANGHAI_DATE_TIME_FORMATTER.formatToParts(date).reduce((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value
+    return acc
+  }, {})
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`
+}
+
+function normalizeTel(phone) {
+  return String(phone || '').replace(/[^\d+]/g, '')
+}
+
+function resolvePickupInfo(source) {
+  const snapshot = source?.activityConfig || source || {}
+  return {
+    pickupType: snapshot.pickupType || DEFAULT_PICKUP_INFO.pickupType,
+    pickupAddress: snapshot.pickupAddress || DEFAULT_PICKUP_INFO.pickupAddress,
+    pickupPhone: snapshot.pickupPhone || DEFAULT_PICKUP_INFO.pickupPhone,
+    pickupStatus: snapshot.pickupStatus || DEFAULT_PICKUP_INFO.pickupStatus,
+  }
 }
 
 function resolveInitialStep(model) {
@@ -327,6 +357,8 @@ function PrizeModalContent({
   if (!prize?.hasPrize) return <p className="text-sm leading-7 text-slate-500">当前还没有可领取的奖品。</p>
 
   const claim = prize.claim
+  const pickupInfo = resolvePickupInfo(prize)
+  const pickupTel = normalizeTel(pickupInfo.pickupPhone)
   const drawTime = formatDrawTime(prize.draw?.createdAt)
   const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
@@ -459,12 +491,12 @@ function PrizeModalContent({
                 <div className="mt-2 grid gap-2 text-xs leading-5 text-slate-600">
                   <div>
                     <div className="font-bold text-slate-800">领取地址：</div>
-                    <div>{PICKUP_ADDRESS}</div>
+                    <div>{pickupInfo.pickupAddress}</div>
                   </div>
                   <div>
                     <div className="font-bold text-slate-800">联系方式：</div>
-                    <a className="inline-flex min-h-8 cursor-pointer items-center text-sm font-extrabold text-blue-700 underline-offset-4 active:underline" href={`tel:${PICKUP_CONTACT_TEL}`}>
-                      {PICKUP_CONTACT_PHONE}
+                    <a className="inline-flex min-h-8 cursor-pointer items-center text-sm font-extrabold text-blue-700 underline-offset-4 active:underline" href={`tel:${pickupTel}`}>
+                      {pickupInfo.pickupPhone}
                     </a>
                   </div>
                 </div>
@@ -617,6 +649,28 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setStep(resolveInitialStep(nextModel))
   }
 
+  function applyPrizeState(nextPrize) {
+    setMyPrize(nextPrize || null)
+    if (nextPrize?.claim?.deliveryMethod === 'pickup') setClaimMode('pickup')
+    if (nextPrize?.claim?.deliveryMethod === 'mail') {
+      setClaimMode('mail')
+      setMailForm({
+        recipientName: nextPrize.claim.recipientName || '',
+        recipientPhone: nextPrize.claim.recipientPhone || '',
+        ...getInitialAddressParts(),
+        detailAddress: nextPrize.claim.recipientAddress || '',
+      })
+    }
+  }
+
+  function applyHydratedState(nextModel, nextPrize) {
+    setModel(nextModel)
+    setAttemptId(nextModel?.attempt?.attemptId || '')
+    setDraw(nextModel?.draw || null)
+    applyPrizeState(nextPrize)
+    setStep(resolveInitialStep(nextModel))
+  }
+
   function startScoreAnimation(value) {
     window.clearInterval(scoreTimerRef.current)
     const target = Number(value || 0)
@@ -668,18 +722,18 @@ function PhaseQuizLotteryMain({ routeParams }) {
   useEffect(() => {
     if (!publicConfig || !authReady || !activityKey) return
 
-    async function loadBootstrap() {
+    async function hydratePageState() {
       setLoading(true)
       setLoadingText('活动加载中...')
       try {
-        const data = await handleProtectedRequest(() => getBootstrap(activityKey), 'phase-quiz-bootstrap')
-        if (!data) return
+        const [bootstrapData, prizeData] = await Promise.all([
+          handleProtectedRequest(() => getBootstrap(activityKey), 'phase-quiz-bootstrap'),
+          handleProtectedRequest(() => getMyPrize(activityKey), 'phase-quiz-my-prize'),
+        ])
+        if (!bootstrapData) return
 
-        document.title = data.activityTitle || '分期答题抽奖'
-        setModel(data)
-        setAttemptId(data?.attempt?.attemptId || '')
-        setDraw(data?.draw || null)
-        setStep(resolveInitialStep(data))
+        document.title = bootstrapData.activityTitle || '分期答题抽奖'
+        applyHydratedState(bootstrapData, prizeData)
       } catch (error) {
         showToast(normalizeFriendlyMessage(error, '活动加载失败'))
       } finally {
@@ -687,7 +741,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       }
     }
 
-    loadBootstrap()
+    hydratePageState()
   }, [activityKey, authReady, publicConfig])
 
   useEffect(() => {
@@ -728,6 +782,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setAnswers([])
       setAttemptId('')
       setDraw(null)
+      setMyPrize(null)
       setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
       setStep(STEP.ENTRY)
     } catch (error) {
@@ -916,18 +971,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
     try {
       const data = await handleProtectedRequest(() => getMyPrize(activityKey), 'phase-quiz-my-prize')
       if (!data) return
-      setMyPrize(data)
+      applyPrizeState(data)
       setPrizeModalOpen(true)
-      if (data.claim?.deliveryMethod === 'pickup') setClaimMode('pickup')
-      if (data.claim?.deliveryMethod === 'mail') {
-        setClaimMode('mail')
-        setMailForm({
-          recipientName: data.claim.recipientName || '',
-          recipientPhone: data.claim.recipientPhone || '',
-          ...getInitialAddressParts(),
-          detailAddress: data.claim.recipientAddress || '',
-        })
-      }
     } catch (error) {
       showToast(normalizeFriendlyMessage(error, '奖品加载失败'))
     } finally {
@@ -938,7 +983,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   async function refreshPrizeState() {
     const data = await handleProtectedRequest(() => getMyPrize(activityKey), 'phase-quiz-my-prize')
     if (!data) return null
-    setMyPrize(data)
+    applyPrizeState(data)
     return data
   }
 
