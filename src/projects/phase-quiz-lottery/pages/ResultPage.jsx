@@ -5,6 +5,7 @@ export default function ResultPage({
   model,
   draw,
   stockExhausted,
+  drawEntryBlockedReason,
   animatedScore,
   onStart,
   onGoWheel,
@@ -25,6 +26,7 @@ export default function ResultPage({
             model={model}
             draw={draw}
             stockExhausted={stockExhausted}
+            drawEntryBlockedReason={drawEntryBlockedReason}
             animatedScore={animatedScore}
             assets={assets}
             onStart={onStart}

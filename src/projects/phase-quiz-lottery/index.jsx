@@ -60,7 +60,8 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-04'
+const PQL_CLIENT_VERSION = 'pql-20260617-05'
+const DEFAULT_THANKS_WHEEL_STOP_INDEX = 1
 const DEFAULT_PICKUP_INFO = {
   pickupType: 'self',
   pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
@@ -382,6 +383,18 @@ function isStockEmptyDraw(draw) {
 
 function hasValidWheelStopIndex(draw) {
   return Number.isInteger(draw?.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < 4
+}
+
+function normalizeDrawForWheelDisplay(nextDraw) {
+  if (!isStockEmptyDraw(nextDraw)) return nextDraw
+  return {
+    ...nextDraw,
+    result: DRAW_STATUS.LOST,
+    status: DRAW_STATUS.LOST,
+    soldOut: false,
+    wheelStopType: 'empty',
+    wheelStopIndex: DEFAULT_THANKS_WHEEL_STOP_INDEX,
+  }
 }
 
 function DebugPanel({
@@ -744,6 +757,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const [draw, setDraw] = useState(null)
   const [myPrize, setMyPrize] = useState(null)
   const [toast, setToast] = useState('')
+  const [drawEntryBlockedReason, setDrawEntryBlockedReason] = useState('')
   const [loadingText, setLoadingText] = useState('活动加载中...')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -850,6 +864,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
+    setDrawEntryBlockedReason('')
     setStep(resolveInitialStep(nextModel, myPrize, publicConfig))
   }
 
@@ -871,6 +886,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
+    setDrawEntryBlockedReason('')
     setBootstrapStockInfo(resolvePrizeStockInfo(nextModel))
     if (nextModel?.state === 'answering') {
       setQuestions(nextModel.questions || [])
@@ -1123,9 +1139,11 @@ function PhaseQuizLotteryMain({ routeParams }) {
   async function handleGoWheel() {
     const guard = drawEntryGuard(drawEntryActivityState)
     if (!guard.allow) {
+      setDrawEntryBlockedReason(guard.reason || '')
       showToast(guard.reason === 'STOCK_EMPTY' ? '奖品已发完' : '暂无抽奖资格')
       return
     }
+    setDrawEntryBlockedReason('')
 
     if (!attemptId && model?.attempt?.attemptId) {
       try {
@@ -1182,9 +1200,10 @@ function PhaseQuizLotteryMain({ routeParams }) {
         return
       }
 
-      setDraw(data)
-      patchModelWithDraw(data)
-      if (hasValidWheelStopIndex(data)) {
+      const displayDraw = normalizeDrawForWheelDisplay(data)
+      setDraw(displayDraw)
+      patchModelWithDraw(displayDraw)
+      if (hasValidWheelStopIndex(displayDraw)) {
         setSpinKey((value) => value + 1)
         return
       }
@@ -1361,6 +1380,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 model={model}
                 draw={draw}
                 stockExhausted={stockExhausted}
+                drawEntryBlockedReason={drawEntryBlockedReason}
                 animatedScore={scoreDisplay}
                 onStart={handleStart}
                 onGoWheel={handleGoWheel}

@@ -71,15 +71,15 @@ function buildStatusCopy(model, draw, stockExhausted) {
     }
   }
 
-  if (stockExhausted) {
-    return {
-      headline: '奖品已发完',
-    }
-  }
-
   if (isResolvedDraw(draw || model.draw)) {
     return {
       headline: '未中奖',
+    }
+  }
+
+  if (stockExhausted) {
+    return {
+      headline: '奖品已发完',
     }
   }
 
@@ -98,6 +98,7 @@ export default function ResultCard({
   model,
   draw,
   stockExhausted = false,
+  drawEntryBlockedReason = '',
   animatedScore,
   assets,
   onStart,
@@ -108,9 +109,10 @@ export default function ResultCard({
   const copy = buildStatusCopy(model, resolvedDraw, stockExhausted)
   const score = Number(animatedScore || model?.result?.score || 0)
   const canStart = model?.state === 'ready_to_start'
-  const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn)
+  const drawBlockedByStock = drawEntryBlockedReason === 'STOCK_EMPTY'
+  const canDraw = Boolean(model?.eligibleForDraw && !model?.alreadyDrawn && !drawBlockedByStock)
   const showPrize = Boolean(isWinningDraw(resolvedDraw) || model?.claim)
-  const showStockExhaustedAction = Boolean(stockExhausted && !showPrize && !canStart && !canDraw)
+  const showStockExhaustedAction = Boolean((stockExhausted || drawBlockedByStock) && !showPrize && !canStart && !canDraw)
 
   return (
     <>
