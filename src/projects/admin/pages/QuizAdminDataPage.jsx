@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button, Card, Drawer, Input, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd'
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import {
+  exportDataRows,
   getDataSchema,
   getDataRows,
   getQuizAdminAttemptAnswers,
@@ -15,6 +16,7 @@ import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumn
 
 const { Text } = Typography
 const pageSize = 20
+const QUIZ_RANK_VIEW_KEY = 'quiz_rank'
 
 export default function QuizAdminDataPage({ activity }) {
   const [activeKey, setActiveKey] = useState('')
@@ -30,7 +32,7 @@ export default function QuizAdminDataPage({ activity }) {
     getDataSchema(activity.activityKey)
       .then((schema) => {
         if (!alive) return
-        setViews(schema?.views || [])
+        setViews(normalizeSchemaViews(schema?.views || []))
       })
       .catch((err) => {
         if (!alive) return
@@ -63,8 +65,8 @@ export default function QuizAdminDataPage({ activity }) {
     if (viewMap.has('quiz_attempts')) {
       items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} view={viewMap.get('quiz_attempts')} answerView={viewMap.get('quiz_attempt_answers') || null} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} /> })
     }
-    if (viewMap.has('quiz_rank')) {
-      items.push({ key: 'quiz_rank', label: viewMap.get('quiz_rank')?.label || '排行榜', children: <QuizRankTable activity={activity} view={viewMap.get('quiz_rank')} active={activeKey === 'quiz_rank'} /> })
+    if (viewMap.has(QUIZ_RANK_VIEW_KEY)) {
+      items.push({ key: QUIZ_RANK_VIEW_KEY, label: viewMap.get(QUIZ_RANK_VIEW_KEY)?.label || '排行榜', children: <QuizRankTable activity={activity} view={viewMap.get(QUIZ_RANK_VIEW_KEY)} active={activeKey === QUIZ_RANK_VIEW_KEY} /> })
     }
     return items
   }, [activity, activeKey, canViewAnswers, viewMap])
@@ -430,6 +432,40 @@ function QuizRankTable({ activity, view, active }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [hiddenColumns, setHiddenColumns] = useState({})
+  const [viewMeta, setViewMeta] = useState(null)
+  const [schemaLoading, setSchemaLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+
+  const currentView = viewMeta || view
+  const rankFields = currentView?.fields || []
+  const visibleFields = rankFields.filter((field) => !hiddenColumns[(field.fieldKey || field.key)])
+  const exportableFieldKeys = visibleFields
+    .filter((field) => field.canExport)
+    .map((field) => field.fieldKey || field.key)
+  const exportDisabled = !(viewMeta?.exportable === true)
+
+  useEffect(() => {
+    if (!active) return
+    let alive = true
+    setViewMeta(null)
+    setSchemaLoading(true)
+    getDataSchema(activity.activityKey)
+      .then((schema) => {
+        if (!alive) return
+        const nextView = normalizeSchemaViews(schema?.views || []).find((item) => item.viewKey === QUIZ_RANK_VIEW_KEY) || null
+        console.log('viewMeta', nextView)
+        setViewMeta(nextView)
+      })
+      .catch((err) => {
+        if (alive) setError(err.message || '数据视图加载失败')
+      })
+      .finally(() => {
+        if (alive) setSchemaLoading(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [active, activity.activityKey])
 
   useEffect(() => {
     if (!active) return
@@ -451,27 +487,49 @@ function QuizRankTable({ activity, view, active }) {
     }
   }, [active, activity.activityKey, page])
 
+  async function handleExport() {
+    if (exportDisabled) return
+    setExporting(true)
+    setError('')
+    try {
+      const payload = {
+        fields: exportableFieldKeys.length ? exportableFieldKeys : undefined,
+      }
+      const result = await exportDataRows(activity.activityKey, QUIZ_RANK_VIEW_KEY, payload)
+      downloadCsv(result.filename || `${activity.activityKey}-${QUIZ_RANK_VIEW_KEY}.csv`, result.csv || '')
+      message.success('CSV 已导出')
+    } catch (err) {
+      const text = getExportErrorMessage(err)
+      setError(text)
+      message.error(text)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <AdminTableBlock
       error={error}
       toolbar={(
         <AdminDataToolbar
-          showColumns={Boolean((view?.fields || []).length)}
-          columnOptions={(view?.fields || []).map((field) => ({ label: field.label, value: field.fieldKey || field.key }))}
-          selectedColumnKeys={(view?.fields || []).filter((field) => !hiddenColumns[(field.fieldKey || field.key)]).map((field) => field.fieldKey || field.key)}
+          showColumns={Boolean(rankFields.length)}
+          columnOptions={rankFields.map((field) => ({ label: field.label, value: field.fieldKey || field.key }))}
+          selectedColumnKeys={rankFields.filter((field) => !hiddenColumns[(field.fieldKey || field.key)]).map((field) => field.fieldKey || field.key)}
           onChangeColumns={(keys) => {
             const selected = new Set(keys)
-            setHiddenColumns(Object.fromEntries((view?.fields || []).map((field) => [field.fieldKey || field.key, !selected.has(field.fieldKey || field.key)])))
+            setHiddenColumns(Object.fromEntries(rankFields.map((field) => [field.fieldKey || field.key, !selected.has(field.fieldKey || field.key)])))
           }}
-          exportDisabled
-          exportTooltip="当前视图暂不支持导出"
+          exportDisabled={exportDisabled}
+          exporting={exporting}
+          onExport={handleExport}
+          exportTooltip={exportDisabled ? '当前账号无导出权限' : ''}
         />
       )}
       tableProps={{
         rowKey: (row) => `${row.rank}-${row.userId}`,
-        columns: buildAdminColumnsFromSchema({ ...view, fields: (view?.fields || []).filter((field) => !hiddenColumns[(field.fieldKey || field.key)]) }),
+        columns: buildAdminColumnsFromSchema({ ...currentView, fields: visibleFields }),
         dataSource: data.list || [],
-        loading,
+        loading: loading || schemaLoading,
         pagination: pagination({ page: data.page, pageSize: data.pageSize, total: data.total }, page, setPage),
       }}
     />
@@ -487,4 +545,36 @@ function pagination(data, page, setPage) {
     showTotal: (total) => `共 ${total} 条`,
     onChange: (nextPage) => setPage(nextPage),
   }
+}
+
+function normalizeSchemaViews(views) {
+  return (views || []).map((view) => ({
+    ...view,
+    viewKey: normalizeAdminViewKey(view?.viewKey),
+  }))
+}
+
+function normalizeAdminViewKey(viewKey) {
+  if (viewKey === 'quiz' || viewKey === 'quizRank' || viewKey === 'quiz-rank' || viewKey === 'quiz_rank_v2') {
+    return QUIZ_RANK_VIEW_KEY
+  }
+  return viewKey
+}
+
+function getExportErrorMessage(err) {
+  if (err?.errorCode === 'no_export_fields' || err?.message === '没有可导出的字段，请先配置字段权限') {
+    return '没有可导出的字段，请先配置字段权限'
+  }
+  if (err?.status === 403 || err?.response?.code === 403) return '无导出权限'
+  return err?.message || '导出失败'
+}
+
+function downloadCsv(filename, csv) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
 }
