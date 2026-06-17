@@ -60,9 +60,12 @@ export function drawEntryGuard(activityState) {
     }
   }
   if (
-    Number.isFinite(activityState.stockUsed) &&
-    Number.isFinite(activityState.stockTotal) &&
-    activityState.stockUsed >= activityState.stockTotal
+    (Number.isFinite(activityState.stockRemaining) && activityState.stockRemaining <= 0) ||
+    (
+      Number.isFinite(activityState.stockUsed) &&
+      Number.isFinite(activityState.stockTotal) &&
+      activityState.stockUsed >= activityState.stockTotal
+    )
   ) {
     return {
       allow: false,
