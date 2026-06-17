@@ -51,7 +51,7 @@ const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
 const DEFAULT_PICKUP_INFO = {
-  pickupType: 'pickup',
+  pickupType: 'self',
   pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
   pickupPhone: '0512-68728820',
   pickupStatus: 'enabled',
@@ -151,14 +151,78 @@ function normalizeTel(phone) {
   return String(phone || '').replace(/[^\d+]/g, '')
 }
 
-function resolvePickupInfo(source) {
-  const snapshot = source?.activityConfig || source || {}
-  return {
-    pickupType: snapshot.pickupType || DEFAULT_PICKUP_INFO.pickupType,
-    pickupAddress: snapshot.pickupAddress || DEFAULT_PICKUP_INFO.pickupAddress,
-    pickupPhone: snapshot.pickupPhone || DEFAULT_PICKUP_INFO.pickupPhone,
-    pickupStatus: snapshot.pickupStatus || DEFAULT_PICKUP_INFO.pickupStatus,
+function pickFirstString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
   }
+  return ''
+}
+
+function normalizePickupType(value) {
+  const normalized = String(value || '').trim().toLowerCase()
+  if (!normalized) return ''
+  if (normalized === 'self' || normalized === 'self_pickup' || normalized === 'pickup') return 'self'
+  return normalized
+}
+
+function resolvePrizePickupStatus(prize) {
+  if (prize?.status === 'self_pickup') return 'self_pickup'
+  if (prize?.claim?.deliveryMethod === 'pickup') return 'self_pickup'
+  if (
+    prize?.claim?.status === CLAIM_STATUS.PICKUP_PENDING ||
+    prize?.claim?.status === CLAIM_STATUS.PICKUP_VERIFIED
+  ) {
+    return 'self_pickup'
+  }
+  if (normalizePickupType(prize?.activityConfig?.snapshot?.pickupType) === 'self') return 'self_pickup'
+  if (normalizePickupType(prize?.activityConfig?.pickupType) === 'self') return 'self_pickup'
+  if (normalizePickupType(prize?.prize?.pickup_config?.pickupType) === 'self') return 'self_pickup'
+  if (normalizePickupType(prize?.draw?.result?.pickupType) === 'self') return 'self_pickup'
+  return ''
+}
+
+function resolvePickupInfo(source) {
+  const activitySnapshot = source?.activityConfig?.snapshot || null
+  const activityConfig = source?.activityConfig || null
+  const prizePickupConfig = source?.prize?.pickup_config || null
+  const drawResult = source?.draw?.result || null
+  const pickupType = normalizePickupType(
+    pickFirstString(
+      activitySnapshot?.pickupType,
+      activityConfig?.pickupType,
+      prizePickupConfig?.pickupType,
+      drawResult?.pickupType,
+    ),
+  )
+  const pickupAddress = pickFirstString(
+    activitySnapshot?.pickupAddress,
+    activityConfig?.pickupAddress,
+    prizePickupConfig?.pickupAddress,
+    drawResult?.pickupAddress,
+  )
+  const pickupPhone = pickFirstString(
+    activitySnapshot?.pickupPhone,
+    activityConfig?.pickupPhone,
+    prizePickupConfig?.pickupPhone,
+    drawResult?.pickupPhone,
+  )
+  const pickupStatus = pickFirstString(
+    activitySnapshot?.pickupStatus,
+    activityConfig?.pickupStatus,
+    prizePickupConfig?.pickupStatus,
+    drawResult?.pickupStatus,
+  )
+
+  return {
+    pickupType: pickupType || DEFAULT_PICKUP_INFO.pickupType,
+    pickupAddress: pickupAddress || DEFAULT_PICKUP_INFO.pickupAddress,
+    pickupPhone: pickupPhone || DEFAULT_PICKUP_INFO.pickupPhone,
+    pickupStatus: pickupStatus || DEFAULT_PICKUP_INFO.pickupStatus,
+  }
+}
+
+function shouldShowPickupInfoCard(prize) {
+  return resolvePrizePickupStatus(prize) === 'self_pickup'
 }
 
 function resolveInitialStep(model) {
@@ -341,6 +405,28 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   )
 }
 
+function PickupInfoCard({ pickupInfo }) {
+  const pickupTel = normalizeTel(pickupInfo.pickupPhone)
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-left">
+      <div className="text-xs font-extrabold text-slate-900">自提信息</div>
+      <div className="mt-2 grid gap-2 text-xs leading-5 text-slate-600">
+        <div>
+          <div className="font-bold text-slate-800">领取地址：</div>
+          <div>{pickupInfo.pickupAddress}</div>
+        </div>
+        <div>
+          <div className="font-bold text-slate-800">联系方式：</div>
+          <a className="inline-flex min-h-8 cursor-pointer items-center text-sm font-extrabold text-blue-700 underline-offset-4 active:underline" href={`tel:${pickupTel}`}>
+            {pickupInfo.pickupPhone}
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PrizeModalContent({
   prize,
   assets,
@@ -358,7 +444,7 @@ function PrizeModalContent({
 
   const claim = prize.claim
   const pickupInfo = resolvePickupInfo(prize)
-  const pickupTel = normalizeTel(pickupInfo.pickupPhone)
+  const showPickupInfoCard = shouldShowPickupInfoCard(prize)
   const drawTime = formatDrawTime(prize.draw?.createdAt)
   const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
@@ -372,6 +458,8 @@ function PrizeModalContent({
         </div>
         <span className="inline-flex min-h-7 w-16 items-center justify-center rounded-full bg-white px-2 text-xs font-bold text-slate-700">{claimStatusText}</span>
       </div>
+
+      {showPickupInfoCard ? <PickupInfoCard pickupInfo={pickupInfo} /> : null}
 
       {claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? (
         <div className="rounded-2xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
@@ -486,21 +574,6 @@ function PrizeModalContent({
             </div>
           ) : (
             <div className="grid gap-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-left">
-                <div className="text-xs font-extrabold text-slate-900">自提信息</div>
-                <div className="mt-2 grid gap-2 text-xs leading-5 text-slate-600">
-                  <div>
-                    <div className="font-bold text-slate-800">领取地址：</div>
-                    <div>{pickupInfo.pickupAddress}</div>
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-800">联系方式：</div>
-                    <a className="inline-flex min-h-8 cursor-pointer items-center text-sm font-extrabold text-blue-700 underline-offset-4 active:underline" href={`tel:${pickupTel}`}>
-                      {pickupInfo.pickupPhone}
-                    </a>
-                  </div>
-                </div>
-              </div>
               <button className="sticky bottom-0 min-h-11 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupClaim}>
                 选择自提
               </button>
@@ -525,6 +598,12 @@ function PrizeModalContent({
           <button className="sticky bottom-0 min-h-11 cursor-pointer rounded-full bg-slate-900 px-6 text-sm font-bold text-white" type="button" onClick={onSubmitPickupVerify}>
             提交核销
           </button>
+        </div>
+      ) : null}
+
+      {claim?.status === CLAIM_STATUS.PICKUP_VERIFIED && showPickupInfoCard ? (
+        <div className="rounded-2xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
+          已完成自提核销
         </div>
       ) : null}
     </div>
