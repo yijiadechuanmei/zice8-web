@@ -60,8 +60,9 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-06'
-const DEFAULT_THANKS_WHEEL_STOP_INDEX = 1
+const PQL_CLIENT_VERSION = 'pql-20260617-07'
+const DRAW_POLL_INTERVAL_MS = 900
+const DRAW_POLL_LIMIT = 4
 const DEFAULT_PICKUP_INFO = {
   pickupType: 'self',
   pickupAddress: '姑苏区平川路510号，1号楼1820室，姑苏区国防动员办公室',
@@ -385,16 +386,23 @@ function hasValidWheelStopIndex(draw) {
   return Number.isInteger(draw?.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < 4
 }
 
-function normalizeDrawForWheelDisplay(nextDraw) {
-  if (!isStockEmptyDraw(nextDraw)) return nextDraw
-  return {
-    ...nextDraw,
-    result: DRAW_STATUS.LOST,
-    status: DRAW_STATUS.LOST,
-    soldOut: false,
-    wheelStopType: 'empty',
-    wheelStopIndex: DEFAULT_THANKS_WHEEL_STOP_INDEX,
-  }
+function getControlStatus(value) {
+  return String(value?.status || value?.code || value?.reason || '').toLowerCase()
+}
+
+function isProcessingDrawResponse(value) {
+  return getControlStatus(value) === 'processing'
+}
+
+function isRateLimitedDrawResponse(value) {
+  const status = getControlStatus(value)
+  return status === 'rate_limited' || status === 'ratelimited'
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
 }
 
 function DebugPanel({
@@ -762,6 +770,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [drawing, setDrawing] = useState(false)
+  const [drawApiPending, setDrawApiPending] = useState(false)
+  const [drawProcessing, setDrawProcessing] = useState(false)
   const [spinKey, setSpinKey] = useState(0)
   const [prizeModalOpen, setPrizeModalOpen] = useState(false)
   const [claimMode, setClaimMode] = useState('mail')
@@ -865,6 +875,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
     setDrawEntryBlockedReason('')
+    setDrawing(false)
+    setDrawApiPending(false)
+    setDrawProcessing(false)
     setStep(resolveInitialStep(nextModel, myPrize, publicConfig))
   }
 
@@ -887,6 +900,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(nextModel?.draw || null)
     setDrawEntryBlockedReason('')
+    setDrawing(false)
+    setDrawApiPending(false)
+    setDrawProcessing(false)
     setBootstrapStockInfo(resolvePrizeStockInfo(nextModel))
     if (nextModel?.state === 'answering') {
       setQuestions(nextModel.questions || [])
@@ -1020,6 +1036,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setAnswers([])
       setAttemptId('')
       setDraw(null)
+      setDrawing(false)
+      setDrawApiPending(false)
+      setDrawProcessing(false)
       setMyPrize(null)
       setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
       setStep(STEP.ENTRY)
@@ -1144,6 +1163,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
       return
     }
     setDrawEntryBlockedReason('')
+    setDrawApiPending(false)
+    setDrawProcessing(false)
 
     if (!attemptId && model?.attempt?.attemptId) {
       try {
@@ -1179,39 +1200,84 @@ function PhaseQuizLotteryMain({ routeParams }) {
     })
   }
 
+  async function fetchFinalDrawAfterProcessing(nextAttemptId) {
+    for (let index = 0; index < DRAW_POLL_LIMIT; index += 1) {
+      await wait(DRAW_POLL_INTERVAL_MS)
+      const resultData = await handleProtectedRequest(
+        () => getResult(activityKey, nextAttemptId),
+        'phase-quiz-result',
+      )
+      if (!resultData) return null
+      setModel(resultData)
+      setAttemptId(resultData?.attempt?.attemptId || '')
+      if (resultData?.draw) {
+        return resultData.draw
+      }
+    }
+    return null
+  }
+
   async function handleDraw() {
-    if (!model?.attempt?.attemptId || draw) return
+    const currentAttemptId = model?.attempt?.attemptId || attemptId
+    if (!currentAttemptId || draw) return
     const now = Date.now()
-    if (drawing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
+    if (drawing || drawApiPending || drawProcessing || drawLockRef.current || now - lastDrawClickRef.current < 800) return
     lastDrawClickRef.current = now
     drawLockRef.current = true
 
     setDrawing(true)
+    setDrawApiPending(true)
+    setDrawProcessing(false)
     try {
       const data = await handleProtectedRequest(
         () =>
-          drawPrize(activityKey, model.attempt.attemptId, {
+          drawPrize(activityKey, currentAttemptId, {
             requestId: nextRequestId('phase-draw'),
           }),
         'phase-quiz-draw',
       )
       if (!data) {
+        setDrawApiPending(false)
         setDrawing(false)
         return
       }
 
-      const displayDraw = normalizeDrawForWheelDisplay(data)
-      setDraw(displayDraw)
-      patchModelWithDraw(displayDraw)
-      if (hasValidWheelStopIndex(displayDraw)) {
+      if (isRateLimitedDrawResponse(data)) {
+        setDrawApiPending(false)
+        setDrawing(false)
+        showToast('抽奖请求过于频繁，请稍后再试')
+        return
+      }
+
+      let finalDraw = data
+      if (isProcessingDrawResponse(data)) {
+        setDrawApiPending(false)
+        setDrawProcessing(true)
+        finalDraw = await fetchFinalDrawAfterProcessing(currentAttemptId)
+        setDrawProcessing(false)
+      }
+
+      if (!finalDraw) {
+        setDrawing(false)
+        showToast('抽奖处理中，请稍后查看结果')
+        return
+      }
+
+      setDraw(finalDraw)
+      patchModelWithDraw(finalDraw)
+      if (hasValidWheelStopIndex(finalDraw)) {
+        setDrawApiPending(false)
         setSpinKey((value) => value + 1)
         return
       }
 
+      setDrawApiPending(false)
       setDrawing(false)
       setStep(STEP.RESULT)
     } catch (error) {
       console.warn('[phase-quiz-lottery draw failed]', error)
+      setDrawApiPending(false)
+      setDrawProcessing(false)
       setDrawing(false)
       showToast(normalizeFriendlyMessage(error, '抽奖失败，请稍后重试'))
     } finally {
@@ -1324,6 +1390,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   function handleWheelFinish() {
     setDrawing(false)
+    setDrawApiPending(false)
+    setDrawProcessing(false)
     setStep(STEP.RESULT)
     if (!draw) return
     if (isWinningDraw(draw)) {
@@ -1395,6 +1463,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
                 segments={wheelSegments}
                 draw={draw}
                 drawing={drawing}
+                loading={drawApiPending || drawProcessing}
                 spinKey={spinKey}
                 onDraw={handleDraw}
                 onOpenPrize={openPrizeModal}
