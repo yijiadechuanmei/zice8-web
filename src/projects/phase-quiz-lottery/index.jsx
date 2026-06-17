@@ -60,7 +60,7 @@ const isDev = import.meta.env.DEV
 const DEBUG_RESET_TOKEN = 'RESET_PQL_2026'
 const FIXED_ASSET_ACTIVITY_KEY = 'phase_quiz_lottery_test_001'
 const ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/${FIXED_ASSET_ACTIVITY_KEY}`
-const PQL_CLIENT_VERSION = 'pql-20260617-05'
+const PQL_CLIENT_VERSION = 'pql-20260617-06'
 const DEFAULT_THANKS_WHEEL_STOP_INDEX = 1
 const DEFAULT_PICKUP_INFO = {
   pickupType: 'self',

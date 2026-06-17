@@ -46,10 +46,14 @@ export default function Wheel({
   const remainingDrawCount = draw ? 0 : 1
   const drawButtonText = drawing ? '抽奖中' : '立即抽奖'
   const initialRotation = Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT) : 0
+  const drawClickLockedRef = useRef(false)
+  const drawButtonRef = useRef(null)
   const canvasRef = useRef(null)
   const wheelDiscRef = useRef(null)
   const frameRef = useRef(0)
+  const onFinishRef = useRef(onFinish)
   const rotationRef = useRef(initialRotation)
+  const drawButtonDisabled = drawing || Boolean(draw)
 
   const reducedMotion = useMemo(
     () =>
@@ -112,6 +116,18 @@ export default function Wheel({
   }, [])
 
   useEffect(() => {
+    onFinishRef.current = onFinish
+  }, [onFinish])
+
+  useEffect(() => {
+    if (drawing || draw) return
+    drawClickLockedRef.current = false
+    if (drawButtonRef.current) {
+      drawButtonRef.current.disabled = false
+    }
+  }, [draw, drawing])
+
+  useEffect(() => {
     if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= WHEEL_SLOT_COUNT || !spinKey) return
     const currentRotation = rotationRef.current
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360
@@ -133,12 +149,21 @@ export default function Wheel({
         frameRef.current = window.requestAnimationFrame(tick)
         return
       }
-      onFinish?.()
+      onFinishRef.current?.()
     }
 
     frameRef.current = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(frameRef.current)
-  }, [onFinish, reducedMotion, spinKey, targetIndex])
+  }, [reducedMotion, spinKey, targetIndex])
+
+  function handleDrawClick() {
+    if (drawButtonDisabled || drawClickLockedRef.current) return
+    drawClickLockedRef.current = true
+    if (drawButtonRef.current) {
+      drawButtonRef.current.disabled = true
+    }
+    onDraw?.()
+  }
 
   return (
     <>
@@ -151,17 +176,18 @@ export default function Wheel({
             <div
               ref={wheelDiscRef}
               className="pql-wheel-frame__disc overflow-hidden rounded-full"
-              style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE, transform: `rotate(${initialRotation}deg)` }}
+              style={{ width: DEFAULT_SIZE, height: DEFAULT_SIZE }}
             >
               <canvas ref={canvasRef} className="block rounded-full" />
             </div>
           </div>
         </div>
         <button
+          ref={drawButtonRef}
           className="absolute left-1/2 top-1/2 z-[4] flex h-[156px] w-[156px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full disabled:cursor-not-allowed disabled:opacity-70"
           type="button"
-          disabled={drawing || Boolean(draw)}
-          onClick={onDraw}
+          disabled={drawButtonDisabled}
+          onClick={handleDrawClick}
           aria-label={drawButtonText}
         >
           <img className="h-full w-full object-contain" src={assets.wheelCenterButton} alt="" aria-hidden="true" />
