@@ -23,6 +23,7 @@ import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import WheelPage from './pages/WheelPage'
 import { ADDRESS_OPTIONS } from './address-options'
+import { formatTime } from './utils/timeFormatter'
 import './styles.css'
 
 const STEP = {
@@ -56,15 +57,6 @@ const DEFAULT_PICKUP_INFO = {
   pickupPhone: '0512-68728820',
   pickupStatus: 'enabled',
 }
-const SHANGHAI_DATE_TIME_FORMATTER = new Intl.DateTimeFormat('zh-CN', {
-  timeZone: 'Asia/Shanghai',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-})
 
 function LoadingLayer({ open = true, text = '加载中...' }) {
   if (!open) return null
@@ -134,17 +126,6 @@ function buildRequestId(prefix, counter) {
 
 function normalizeFriendlyMessage(error, fallback = '请求失败') {
   return error?.response?.message || error?.message || fallback
-}
-
-function formatDrawTime(value) {
-  if (!value) return '待开奖'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '待开奖'
-  const parts = SHANGHAI_DATE_TIME_FORMATTER.formatToParts(date).reduce((acc, part) => {
-    if (part.type !== 'literal') acc[part.type] = part.value
-    return acc
-  }, {})
-  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`
 }
 
 function normalizeTel(phone) {
@@ -454,7 +435,7 @@ function PrizeModalContent({
   const claim = prize.claim
   const pickupInfo = resolvePickupInfo(prize)
   const showPickupInfoCard = shouldShowPickupInfoCard(prize, claimMode)
-  const drawTime = formatDrawTime(prize.draw?.createdAt)
+  const drawTime = formatTime(prize.draw?.createdAt)
   const claimStatusText = claim?.status === CLAIM_STATUS.PICKUP_VERIFIED ? '已核销' : claim?.status === CLAIM_STATUS.PICKUP_PENDING ? '待核销' : claim?.status === CLAIM_STATUS.MAIL_SUBMITTED ? '已提交' : '待领取'
 
   return (
