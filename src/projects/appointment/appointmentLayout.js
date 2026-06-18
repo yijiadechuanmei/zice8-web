@@ -1,6 +1,5 @@
 export const APPOINTMENT_STAGE_WIDTH = 750
 export const APPOINTMENT_STAGE_HEIGHT = 1448
-export const APPOINTMENT_SUCCESS_STAGE_HEIGHT = 1206
 export const APPOINTMENT_FALLBACK_ASSETS_BASE_URL =
   'https://assets.zice8.com/appointment/baoli-mingzhou-zhenyue-delivery-20260622'
 
@@ -179,7 +178,7 @@ export const APPOINTMENT_LAYOUT = {
     },
   },
   success: {
-    height: APPOINTMENT_SUCCESS_STAGE_HEIGHT,
+    height: APPOINTMENT_STAGE_HEIGHT,
     images: [
       {
         filename: '132a93c3426e01c133c93fc578695a19_6422.webp',
