@@ -994,6 +994,11 @@ function getFriendlyAppointmentMessage(err, scene) {
 }
 
 function getAppointmentActivityWindowState(activity) {
+  const serverStatus = activity?.activityWindow?.status
+  if (serverStatus === 'not_started' || serverStatus === 'ended' || serverStatus === 'active') {
+    return serverStatus
+  }
+
   const now = Date.now()
   const startTime = parseOptionalTimestamp(activity?.startTime)
   const endTime = parseOptionalTimestamp(activity?.endTime)
