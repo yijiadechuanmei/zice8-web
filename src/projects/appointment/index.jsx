@@ -354,6 +354,19 @@ function AppointmentMain({ routeParams }) {
     setStep(STEPS.RULE)
   }
 
+  function handleRuleNext() {
+    const activityWindowState = getAppointmentActivityWindowState(bootstrap?.activity || publicConfig)
+    if (activityWindowState === 'not_started') {
+      showToast('活动未开始')
+      return
+    }
+    if (activityWindowState === 'ended') {
+      showToast('活动已结束')
+      return
+    }
+    setStep(STEPS.VERIFY)
+  }
+
   function handleIntroTouchStart(event) {
     if (step !== STEPS.INTRO || toastMessage || activePicker || submitting) return
     const touch = event.touches?.[0]
@@ -416,7 +429,7 @@ function AppointmentMain({ routeParams }) {
             ) : null}
 
             {step === STEPS.RULE ? (
-              <RuleStage layout={appointmentLayout} assetsBaseUrl={assetsBaseUrl} onNext={() => setStep(STEPS.VERIFY)} />
+              <RuleStage layout={appointmentLayout} assetsBaseUrl={assetsBaseUrl} onNext={handleRuleNext} />
             ) : null}
 
             {step === STEPS.VERIFY ? (
@@ -978,6 +991,21 @@ function getFriendlyAppointmentMessage(err, scene) {
     return '预约失败，请重试'
   }
   return '网络异常，请稍后重试'
+}
+
+function getAppointmentActivityWindowState(activity) {
+  const now = Date.now()
+  const startTime = parseOptionalTimestamp(activity?.startTime)
+  const endTime = parseOptionalTimestamp(activity?.endTime)
+  if (startTime !== null && now < startTime) return 'not_started'
+  if (endTime !== null && now > endTime) return 'ended'
+  return 'active'
+}
+
+function parseOptionalTimestamp(value) {
+  if (!value) return null
+  const timestamp = Date.parse(value)
+  return Number.isNaN(timestamp) ? null : timestamp
 }
 
 function trackAppointmentEvent(activityKey, eventType, extra = {}) {
