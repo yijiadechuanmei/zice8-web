@@ -198,6 +198,59 @@
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
 }
 
+.appointment-debug-panel {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 130;
+  width: min(260px, calc(100vw - 24px));
+  border-radius: 16px;
+  border: 1px solid rgba(120, 76, 15, 0.28);
+  background: rgba(255, 248, 237, 0.96);
+  padding: 12px;
+  color: #4b2f10;
+  box-shadow: 0 14px 36px rgba(42, 19, 0, 0.18);
+}
+
+.appointment-debug-panel__title {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.appointment-debug-panel__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.appointment-debug-panel__danger {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: #c2410c;
+  color: #ffffff;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.appointment-debug-panel__danger:disabled {
+  opacity: 0.6;
+}
+
+.appointment-debug-panel__message {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #7c2d12;
+  word-break: break-all;
+}
+
 .appointment-state {
   min-height: 100vh;
   min-height: 100dvh;

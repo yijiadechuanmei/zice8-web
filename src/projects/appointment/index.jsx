@@ -8,7 +8,7 @@ import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
-import { createAppointmentBooking, getBootstrap, getPublicConfig, verifyAppointment } from './api'
+import { createAppointmentBooking, getBootstrap, getPublicConfig, resetAppointmentDebugData, verifyAppointment } from './api'
 import {
   APPOINTMENT_FALLBACK_ASSETS_BASE_URL,
 } from './appointmentLayout'
@@ -27,6 +27,8 @@ const PICKERS = {
   DATE: 'appointmentDate',
   SLOT: 'appointmentSlot',
 }
+
+const APPOINTMENT_DEBUG_RESET_TOKEN = 'RESET_APPOINTMENT_2026'
 
 export default function AppointmentApp({ routeParams }) {
   const tokenFromUrl = getTokenFromUrl()
@@ -62,6 +64,7 @@ function AppointmentMain({ routeParams }) {
     phone: '',
   })
   const [toastMessage, setToastMessage] = useState('')
+  const [debugMessage, setDebugMessage] = useState('')
   const [activePicker, setActivePicker] = useState('')
   const [pickerDraftValue, setPickerDraftValue] = useState('')
   const toastTimerRef = useRef(0)
@@ -71,6 +74,7 @@ function AppointmentMain({ routeParams }) {
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
   const appointmentSkin = useMemo(() => resolveAppointmentSkin(activityKey), [activityKey])
   const appointmentLayout = appointmentSkin.layout
+  const isDebugMode = useMemo(() => getQueryParam('debug') === '1', [])
 
   useEffect(() => {
     return () => window.clearTimeout(toastTimerRef.current)
@@ -225,6 +229,22 @@ function AppointmentMain({ routeParams }) {
     setToastMessage(message || '')
     if (!message) return
     toastTimerRef.current = window.setTimeout(() => setToastMessage(''), 2000)
+  }
+
+  async function handleDebugReset() {
+    if (!window.confirm('将删除该活动的所有预约和参与数据，仅恢复预约名额，不修改活动配置。确认继续吗？')) {
+      return
+    }
+    try {
+      await resetAppointmentDebugData({
+        activityKey,
+        confirmToken: APPOINTMENT_DEBUG_RESET_TOKEN,
+      })
+      setDebugMessage('已重置预约数据')
+      window.location.reload()
+    } catch (err) {
+      setDebugMessage(getFriendlyAppointmentMessage(err, 'booking') || err?.message || '重置失败')
+    }
   }
 
   async function handleVerifySubmit(event) {
@@ -447,6 +467,25 @@ function AppointmentMain({ routeParams }) {
           <div className="appointment-toast rounded-xl px-6 py-4 text-[17px] font-medium leading-[1.45] tracking-[0.02em]">
             {toastMessage}
           </div>
+        </div>
+      ) : null}
+
+      {isDebugMode ? (
+        <div className="appointment-debug-panel">
+          <div className="appointment-debug-panel__title">调试</div>
+          <div className="appointment-debug-panel__row">
+            <span>活动</span>
+            <span>{activityKey || '-'}</span>
+          </div>
+          <button
+            type="button"
+            className="appointment-debug-panel__danger"
+            onClick={handleDebugReset}
+            disabled={loading || submitting}
+          >
+            重置所有数据
+          </button>
+          {debugMessage ? <div className="appointment-debug-panel__message">{debugMessage}</div> : null}
         </div>
       ) : null}
 

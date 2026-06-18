@@ -15,3 +15,9 @@ export const createAppointmentBooking = (activityKey, data) =>
     method: 'POST',
     body: JSON.stringify(data),
   })
+
+export const resetAppointmentDebugData = (data) =>
+  request('/appointment/dev/reset', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
