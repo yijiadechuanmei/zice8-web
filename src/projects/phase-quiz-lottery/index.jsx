@@ -16,6 +16,7 @@ import {
   getResult,
   isUnauthorizedError,
   pickupVerify,
+  resetDebugData,
   resetMyDebugData,
   startAttempt,
   submitAttempt,
@@ -420,7 +421,9 @@ function DebugPanel({
   attemptId,
   model,
   draw,
+  allowActivityReset,
   onReset,
+  onResetAll,
   onGoQuestion,
   onLogState,
 }) {
@@ -438,6 +441,11 @@ function DebugPanel({
         <button className="min-h-10 rounded-xl bg-red-500 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onReset}>
           重置我的测试数据
         </button>
+        {allowActivityReset ? (
+          <button className="min-h-10 rounded-xl bg-red-700 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onResetAll}>
+            重置所有测试数据
+          </button>
+        ) : null}
         <button className="min-h-10 rounded-xl bg-slate-900 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
           回到答题页
         </button>
@@ -816,6 +824,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }, [bootstrapStockInfo, model, myPrize, stockInfo])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
   const canDebug = debugAccess?.canDebug === true
+  const canResetAllDebugData = debugAccess?.allowActivityReset === true
   const shareActivity = useMemo(() => {
     if (!publicConfig && !model) return null
     return {
@@ -1139,6 +1148,42 @@ function PhaseQuizLotteryMain({ routeParams }) {
       setStep(STEP.ENTRY)
     } catch (error) {
       showToast(normalizeFriendlyMessage(error, '重置失败'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDebugResetAll() {
+    if (!canDebug || !canResetAllDebugData) return
+    const confirmed = window.confirm('确认重置该活动所有测试数据？会清空所有用户的答题、抽奖、兑奖记录，并恢复奖品库存。')
+    if (!confirmed) return
+
+    setLoading(true)
+    setLoadingText('正在重置所有测试数据...')
+    try {
+      const result = await handleProtectedRequest(() => resetDebugData(activityKey, {
+        confirmToken: DEBUG_RESET_TOKEN,
+        scope: 'activity',
+      }), 'phase-quiz-debug-reset-all')
+      if (!result) {
+        return
+      }
+      console.log('[phase-quiz-lottery debug reset all]', result)
+      showToast('所有测试数据已重置')
+      setQuestions([])
+      setCurrentIndex(0)
+      setAnswers([])
+      setAttemptId('')
+      setDraw(null)
+      setDrawing(false)
+      setDrawApiPending(false)
+      setDrawProcessing(false)
+      setMyPrize(null)
+      setBootstrapStockInfo(null)
+      setModel((current) => (current ? { ...current, state: 'ready_to_start', result: null, eligibleForDraw: false, alreadyDrawn: false, won: false, soldOut: false, draw: null, attempt: null } : current))
+      setStep(STEP.ENTRY)
+    } catch (error) {
+      showToast(normalizeFriendlyMessage(error, '重置所有数据失败'))
     } finally {
       setLoading(false)
     }
@@ -1523,7 +1568,9 @@ function PhaseQuizLotteryMain({ routeParams }) {
               attemptId={attemptId}
               model={model}
               draw={draw}
+              allowActivityReset={canResetAllDebugData}
               onReset={handleDebugReset}
+              onResetAll={handleDebugResetAll}
               onGoQuestion={handleDebugGoQuestion}
               onLogState={() => handleDebugLogState({ activityKey, step, entryState, hasAttempt, stockInfo, attemptId, model, draw })}
             />

@@ -68,7 +68,7 @@ export const getMyPrize = (activityKey) =>
 export const getDebugAccess = (activityKey) =>
   phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/debug-access`)
 
-export const resetMyDebugData = (activityKey, data) =>
+export const resetDebugData = (activityKey, data) =>
   phaseQuizLotteryRequest('/phase-quiz-lottery/dev/reset', {
     method: 'POST',
     body: JSON.stringify({
@@ -77,6 +77,8 @@ export const resetMyDebugData = (activityKey, data) =>
       ...data,
     }),
   })
+
+export const resetMyDebugData = resetDebugData
 
 export const claimPrize = (activityKey, drawId, data) =>
   phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/draws/${drawId}/claim`, {
