@@ -831,7 +831,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
       ...(publicConfig || {}),
       title: model?.activityTitle || publicConfig?.title || '分期答题抽奖',
       shareTitle: publicConfig?.shareTitle || model?.activityTitle || publicConfig?.title || '分期答题抽奖',
-      shareDesc: publicConfig?.shareDesc || '参与分期答题抽奖，赢取活动奖品',
+      shareDesc: publicConfig?.shareDesc ?? '',
       shareImage: publicConfig?.shareImage || '',
     }
   }, [model, publicConfig])

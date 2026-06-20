@@ -205,7 +205,7 @@ function AppointmentMain({ routeParams }) {
     return {
       ...activity,
       shareTitle: activity.shareTitle || activity.title || '保利·东方瑧悦集中交付活动',
-      shareDesc: activity.shareDesc || '集中交付预约通道',
+      shareDesc: activity.shareDesc ?? '',
       shareImage: activity.shareImage || getAssetUrl(assetsBaseUrl, appointmentLayout.common.background),
     }
   }, [appointmentLayout.common.background, assetsBaseUrl, bootstrap?.activity, publicConfig])

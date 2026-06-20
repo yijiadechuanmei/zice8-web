@@ -157,7 +157,7 @@ function QuizMain() {
     ? {
         ...(bootstrap?.activity || publicConfig),
         shareTitle: bootstrap?.shareConfig?.title || bootstrap?.activity?.shareTitle || publicConfig?.shareTitle || bootstrap?.activity?.title || publicConfig?.title || '端午知识竞赛',
-        shareDesc: bootstrap?.shareConfig?.desc || bootstrap?.activity?.shareDesc || publicConfig?.shareDesc || '参与端午答题挑战，赢取活动排名',
+        shareDesc: bootstrap?.shareConfig?.desc ?? bootstrap?.activity?.shareDesc ?? publicConfig?.shareDesc ?? '',
         shareImage: bootstrap?.shareConfig?.imgUrl || bootstrap?.activity?.shareImage || publicConfig?.shareImage || quizAssets.common.logoEvent,
       }
     : null

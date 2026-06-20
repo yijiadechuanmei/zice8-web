@@ -33,7 +33,6 @@ const LEGACY_MATERIAL_REGISTRATION_ACTIVITY_KEYS = new Set([
 
 const MATERIAL_REGISTRATION_SHARE_DEFAULTS = {
   title: '“真材实料筑基强国”育人共同体成立大会',
-  desc: '资料审阅、同意确认与参会信息提交',
 }
 
 const DEFAULT_FORM_OPTIONS = {
@@ -132,7 +131,7 @@ function MaterialRegistrationMain({ routeParams }) {
         publicConfig.shareTitle ||
         publicConfig.title ||
         MATERIAL_REGISTRATION_SHARE_DEFAULTS.title,
-      shareDesc: publicConfig.shareDesc || MATERIAL_REGISTRATION_SHARE_DEFAULTS.desc,
+      shareDesc: publicConfig.shareDesc ?? '',
       shareImage:
         publicConfig.shareImage ||
         assetUrl(shareAssetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.homeTitle),
