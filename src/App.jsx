@@ -27,11 +27,7 @@ function matchRoute(pathname, routePath) {
 }
 
 function Loading() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-slate-500">
-      加载中...
-    </div>
-  )
+  return <div className="min-h-screen bg-white" aria-label="页面加载中" />
 }
 
 function NotFound() {

@@ -414,7 +414,7 @@
   padding: 0;
   background: transparent;
   box-shadow: none;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .material-registration-loading-spinner {
@@ -428,6 +428,7 @@
 }
 
 .material-registration-entry-loading {
+  position: fixed;
   inset: 0;
   left: 0;
   z-index: 40;
@@ -484,6 +485,36 @@
   background: rgba(19, 31, 110, 0.9);
   color: #ffffff;
   font-size: 14px;
+}
+
+.material-registration-wechat-only {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #ffffff;
+  color: #131f6e;
+  text-align: center;
+}
+
+.material-registration-wechat-only-card {
+  width: min(100%, 320px);
+  padding: 24px 18px;
+}
+
+.material-registration-wechat-only h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.material-registration-wechat-only p {
+  margin: 10px 0 0;
+  color: rgba(19, 31, 110, 0.68);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 @keyframes material-registration-loading-slide {
