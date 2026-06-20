@@ -17,6 +17,10 @@ export const projectRoutes = [
     Component: lazy(() => import('./appointment/index.jsx')),
   },
   {
+    path: '/material_review_registration/:activityKey',
+    Component: MaterialRegistrationProject,
+  },
+  {
     path: '/material-registration/:activityKey',
     Component: MaterialRegistrationProject,
   },
