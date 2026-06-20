@@ -1,0 +1,43 @@
+name: Sync to Codeup
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "project/**"
+      - "feature/**"
+      - "hotfix/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-codeup-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Configure Codeup Remote
+        run: |
+          git remote remove codeup || true
+
+          git remote add codeup \
+          "https://${{ secrets.CODEUP_USERNAME }}:${{ secrets.CODEUP_TOKEN }}@${{ secrets.CODEUP_REPO_URL }}"
+
+      - name: Mirror To Codeup
+        run: |
+          git push codeup --prune --force "+refs/heads/*:refs/heads/*"
+          git push codeup --force "+refs/tags/*:refs/tags/*"
