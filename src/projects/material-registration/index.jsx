@@ -368,6 +368,8 @@ function MaterialRegistrationMain({ routeParams }) {
   }
 
   const pageClass = `material-registration-app material-registration-page-${page}`
+  const showEntryLoading = loading && !bootstrap && !error && !blockedMessage
+  const showTopLoading = loading && !showEntryLoading
 
   return (
     <main
@@ -375,13 +377,18 @@ function MaterialRegistrationMain({ routeParams }) {
       style={{ backgroundImage: `url("${assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.background)}")` }}
     >
       <div className="material-registration-stage">
-        {loading && (
-          <div className="material-registration-loading" aria-label="加载中">
+        {showEntryLoading && (
+          <div className="material-registration-entry-loading" aria-label="加载中">
             <div className="material-registration-loading-panel">
               <div className="material-registration-loading-track">
                 <span className="material-registration-loading-bar" />
               </div>
             </div>
+          </div>
+        )}
+        {showTopLoading && (
+          <div className="material-registration-loading" aria-label="加载中">
+            <span className="material-registration-loading-spinner" />
           </div>
         )}
         {(activityKeyMissing || error || blockedMessage) && <div className="material-registration-error">{activityKeyMissing ? '缺少活动路径参数' : (error || blockedMessage)}</div>}
