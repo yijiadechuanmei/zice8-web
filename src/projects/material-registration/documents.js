@@ -3,7 +3,7 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
     id: 'charter',
     title: '“真材实料 筑基强国”育人共同体章程',
     html: `
-      <p class="ql-align-center" style="font-size: 14pt;">“真材实料 筑基强国”育人共同体章程</p>
+      <p class="ql-align-center"><strong style="font-size: 14pt;">“真材实料 筑基强国”育人共同体章程</strong></p>
       <p class="ql-align-center" style="font-size: 10.5pt;">（审议稿）</p>
       <p class="ql-align-center" style="font-size: 10.5pt;">第一章&nbsp;总&nbsp;则</p>
       <p><strong style="font-size: 10.5pt;">第一条&nbsp;</strong><span style="font-size: 10.5pt;">本组织名称为“真材实料 筑基强国”育人共同体（以下简称“共同体”）。</span></p>
@@ -66,21 +66,21 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
       <p><strong style="font-size: 10.5pt;">第十六条&nbsp;</strong><span style="font-size: 10.5pt;">理事会和成员大会每年同步召开，至少召开1次。结合共同体工作任务开展的系列活动，由成员单位自主申报承办。</span></p>
       <p><strong style="font-size: 10.5pt;">第十七条&nbsp;</strong><span style="font-size: 10.5pt;">共同体不收取会员费，日常办公费用由秘书处承担，举办共同体活动费用由承办单位承担，差旅费由参与单位自行承担。其他可能产生的相关费用由各成员单位协商分担。</span></p>
       <p class="ql-align-center" style="font-size: 10.5pt;">第五章&nbsp;附&nbsp;则</p>
-      <p><strong style="font-size: 10.5pt;">第十八条&nbsp;</strong><span style="font-size: 10.5pt;">本章程自共同体成员大会通过之日起生效。</span></p>
-      <p><strong style="font-size: 10.5pt;">第十九条&nbsp;</strong><span style="font-size: 10.5pt;">本章程解释权归“真材实料 筑基强国”育人共同体理事会。</span></p>
-      <p class="ql-align-center"><strong style="font-size: 10.5pt;">第二十条&nbsp;</strong><span style="font-size: 10.5pt;">本章程未尽事宜，由理事会另行制定补充规定或实施细则，经成员大会审议通过后执行。</span></p>
+      <p><strong style="font-size: 10.5pt;">第十八条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程自共同体成员大会通过之日起生效。</span></p>
+      <p><strong style="font-size: 10.5pt;">第十九条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程解释权归“真材实料 筑基强国”育人共同体理事会。</span></p>
+      <p class="ql-align-center"><strong style="font-size: 10.5pt;">第二十条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程未尽事宜，由理事会另行制定补充规定或实施细则，经成员大会审议通过后执行。</span></p>
     `,
   },
   {
     id: 'action-framework',
     title: '“真材实料 筑基强国”行动框架',
     html: `
-      <p class="ql-align-center" style="font-size: 14pt; color: #333333;">“真材实料&nbsp;筑基强国”行动框架</p>
+      <p class="ql-align-center"><strong style="font-size: 14pt; color: #333333;">“真材实料&nbsp;筑基强国”行动框架</strong></p>
       <p style="font-size: 11pt; line-height: 28pt; color: #333333;">立足办学基础与行业资源禀赋，我校搭建“同学共悟、同研共创、同讲共育、同行共进”四大板块、八项行动，构建价值引领、能力锻造、文化凝聚、实践落地层层递进的协同育人体系，系统推进行业育人共同体建设。</p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>一是同学共悟，筑牢思想根基。</strong>组织全体成员深学细悟教育科技人才、制造强国重要论述，统一思想共识、锚定育人方向；下设“实业兴国”学思践悟、“新时代伟大变革”学习转化行动，将行业发展实践转化为特色育人资源。</p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>二是同研共创，锻造核心能力。</strong>推动理论认知转化为课程资源、创新方案与科研成果，为思政教育、产业实践提供内容与技术支撑；配套开展新质思政能力培育、创新素养进阶攀登行动，夯实育人核心载体。</p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>三是同讲共育，厚植行业精神。</strong>依托行业宣讲、科普活动、大国工匠进校园等载体，挖掘行业文脉、科创故事与工匠精神；通过文脉传承、科普筑梦两项行动，对内凝聚精神内核，对外彰显行业实干形象。</p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>四是同行共进，推动成果落地。</strong>依托实践育人与工匠精神传承基地搭建阶梯式平台，设置强师巧匠实践研学、强国有我青春建功行动，组织师生深入产业一线历练，形成“知—研—讲—行”完整育人闭环。</p>
+      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>一是同学共悟，筑牢思想根基。</strong><span>组织全体成员深学细悟教育科技人才、制造强国重要论述，统一思想共识、锚定育人方向；下设“实业兴国”学思践悟、“新时代伟大变革”学习转化行动，将行业发展实践转化为特色育人资源。</span></p>
+      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>二是同研共创，锻造核心能力。</strong><span>推动理论认知转化为课程资源、创新方案与科研成果，为思政教育、产业实践提供内容与技术支撑；配套开展新质思政能力培育、创新素养进阶攀登行动，夯实育人核心载体。</span></p>
+      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>三是同讲共育，厚植行业精神。</strong><span>依托行业宣讲、科普活动、大国工匠进校园等载体，挖掘行业文脉、科创故事与工匠精神；通过文脉传承、科普筑梦两项行动，对内凝聚精神内核，对外彰显行业实干形象。</span></p>
+      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>四是同行共进，推动成果落地。</strong><span>依托实践育人与工匠精神传承基地搭建阶梯式平台，设置强师巧匠实践研学、强国有我青春建功行动，组织师生深入产业一线历练，形成“知—研—讲—行”完整育人闭环。</span></p>
       <p style="font-size: 11pt; line-height: 28pt; color: #333333;">四大板块环环相扣、层层递进，从思想铸魂到实践落地全链条贯通，实现理论内化与实干外化有机统一。</p>
     `,
   },
@@ -88,28 +88,28 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
     id: 'council-list',
     title: '理事长单位、副理事长单位建议名单',
     html: `
-      <p class="ql-align-center" style="font-size: 12pt; line-height: 28pt;">理事长单位、副理事长单位建议名单</p>
-      <p style="font-size: 11pt; line-height: 28pt;">一、理事长单位</p>
+      <p class="ql-align-center"><strong style="font-size: 12pt; line-height: 28pt;">理事长单位、副理事长单位建议名单</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>一、理事长单位</strong></p>
       <p style="font-size: 11pt; line-height: 28pt;">武汉理工大学</p>
-      <p style="font-size: 11pt; line-height: 28pt;">二、副理事长单位（32家）</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高校（6所）：</strong>清华大学、上海交通大学、武汉大学、华中科技大学、东南大学、西安电子科技大学</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.科研院所（4所）：</strong>苏州国家实验室、中国科学院上海硅酸盐研究所、交通运输部公路科学研究院、国家数字化学习工程技术研究中心</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.龙头企业<span style="background: #ffff00;">（15家）</span>：</strong>东风汽车集团有限公司、中国船舶集团有限公司、中国建材集团有限公司、中国交通建设集团有限公司、中国信息通信科技集团有限公司、招商局工业集团有限公司、<span style="color: #ff0000;">国投新疆罗布泊钾盐有限责任公司、</span>山东省港口集团有限公司、上汽通用五菱汽车股份有限公司、湖北交通投资集团有限公司、安徽海螺集团有限责任公司、华为技术有限公司、比亚迪股份有限公司、科大讯飞股份有限公司、<span style="color: #ff0000;">海康威视数字技术股份有限公司</span></p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业协会（4家）：</strong>中国建筑材料联合会、中国航海学会、中国汽车工程学会、中国教育技术协会</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（3个）：</strong>武汉市人民政府、三亚市人民政府、芜湖市人民政府</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>二、副理事长单位（32家）</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高校（6所）：</strong><span>清华大学、上海交通大学、武汉大学、华中科技大学、东南大学、西安电子科技大学</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.科研院所（4所）：</strong><span>苏州国家实验室、中国科学院上海硅酸盐研究所、交通运输部公路科学研究院、国家数字化学习工程技术研究中心</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.龙头企业（15家）：</strong><span>东风汽车集团有限公司、中国船舶集团有限公司、中国建材集团有限公司、中国交通建设集团有限公司、中国信息通信科技集团有限公司、招商局工业集团有限公司、国投新疆罗布泊钾盐有限责任公司、山东省港口集团有限公司、上汽通用五菱汽车股份有限公司、湖北交通投资集团有限公司、安徽海螺集团有限责任公司、华为技术有限公司、比亚迪股份有限公司、科大讯飞股份有限公司、海康威视数字技术股份有限公司</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业协会（4家）：</strong><span>中国建筑材料联合会、中国航海学会、中国汽车工程学会、中国教育技术协会</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（3个）：</strong><span>武汉市人民政府、三亚市人民政府、芜湖市人民政府</span></p>
     `,
   },
   {
     id: 'member-list',
     title: '成员单位建议名单',
     html: `
-      <p class="ql-align-center" style="font-size: 12pt; line-height: 28pt;">成员单位建议名单</p>
-      <p style="font-size: 11pt; line-height: 28pt;">成员单位（64家）</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高校（21所）：</strong>北京大学、哈尔滨工业大学、北京航空航天大学、同济大学、华南理工大学、西北工业大学、北京理工大学、中南大学、湖南大学、重庆大学、南京航空航天大学、西南交通大学、北京交通大学、合肥工业大学、南京邮电大学、长安大学、大连海事大学、北京化工大学、华中师范大学、中南财经政法大学、武汉职业技术大学</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.中小学（7所）：</strong>华中师范大学第一附属中学、湖北省武昌实验中学、黄冈中学、武汉市第一中学、武汉中学、广东省佛山南海实验学校、陕西省安康市石泉县中心镇中心小学</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.科研院所（9所）：</strong>中国科学院宁波材料技术与工程研究所、交通运输部水运科学研究院、崖州湾国家实验室、佛山仙湖实验室、湖北隆中实验室、广东韩江实验室，武汉理工大学青岛研究院、深圳研究院、绍兴研究院</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业企业（22家）：</strong>中国第一汽车集团有限公司、中国机械工业集团有限公司、中国远洋海运集团有限公司、中国五矿集团有限公司、中国建筑集团有限公司、中国机械科学研究总院集团有限公司、中国能源建设集团有限公司、中国汽车技术研究中心有限公司、中国航天科技集团公司第八研究院、中国航发成都发动机有限公司、奇瑞汽车股份有限公司、长飞光纤光缆股份有限公司、华工科技产业股份有限公司、东软集团股份有限公司、上海保隆汽车科技股份有限公司、岚图汽车科技有限公司、中复神鹰碳纤维股份有限公司、中国长江航运集团有限公司、矿冶科技集团有限公司、湖北三环集团有限公司、中国航天三江集团有限公司、中国青年报</p>
-      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（5个）：</strong>襄阳市人民政府、黄石市人民政府、随州市人民政府、佛山市人民政府、铜陵市人民政府</p>
+      <p class="ql-align-center"><strong style="font-size: 12pt; line-height: 28pt;">成员单位建议名单</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>成员单位（64家）</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高校（21所）：</strong><span>北京大学、哈尔滨工业大学、北京航空航天大学、同济大学、华南理工大学、西北工业大学、北京理工大学、中南大学、湖南大学、重庆大学、南京航空航天大学、西南交通大学、北京交通大学、合肥工业大学、南京邮电大学、长安大学、大连海事大学、北京化工大学、华中师范大学、中南财经政法大学、武汉职业技术大学</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.中小学（7所）：</strong><span>华中师范大学第一附属中学、湖北省武昌实验中学、黄冈中学、武汉市第一中学、武汉中学、广东省佛山南海实验学校、陕西省安康市石泉县中心镇中心小学</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.科研院所（9所）：</strong><span>中国科学院宁波材料技术与工程研究所、交通运输部水运科学研究院、崖州湾国家实验室、佛山仙湖实验室、湖北隆中实验室、广东韩江实验室，武汉理工大学青岛研究院、深圳研究院、绍兴研究院</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业企业（22家）：</strong><span>中国第一汽车集团有限公司、中国机械工业集团有限公司、中国远洋海运集团有限公司、中国五矿集团有限公司、中国建筑集团有限公司、中国机械科学研究总院集团有限公司、中国能源建设集团有限公司、中国汽车技术研究中心有限公司、中国航天科技集团公司第八研究院、中国航发成都发动机有限公司、奇瑞汽车股份有限公司、长飞光纤光缆股份有限公司、华工科技产业股份有限公司、东软集团股份有限公司、上海保隆汽车科技股份有限公司、岚图汽车科技有限公司、中复神鹰碳纤维股份有限公司、中国长江航运集团有限公司、矿冶科技集团有限公司、湖北三环集团有限公司、中国航天三江集团有限公司、中国青年报</span></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（5个）：</strong><span>襄阳市人民政府、黄石市人民政府、随州市人民政府、佛山市人民政府、铜陵市人民政府</span></p>
     `,
   },
 ]
