@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   createMaterialRegistrationSubmission,
   getMaterialRegistrationBootstrap,
+  getMaterialRegistrationPublicConfig,
+  isUnauthorizedError,
   MATERIAL_REGISTRATION_FALLBACK_ASSETS_BASE_URL,
 } from './api'
 import { findMaterialDocument, MATERIAL_REGISTRATION_DOCUMENTS } from './documents'
@@ -66,6 +70,7 @@ function MaterialRegistrationMain({ routeParams }) {
     MATERIAL_REGISTRATION_ACTIVITY_KEY
   const [page, setPage] = useState(PAGES.HOME)
   const [activeDocumentId, setActiveDocumentId] = useState('')
+  const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -74,6 +79,8 @@ function MaterialRegistrationMain({ routeParams }) {
   const [agreeChecked, setAgreeChecked] = useState(false)
   const [disagreeChecked, setDisagreeChecked] = useState(false)
   const [form, setForm] = useState(initialForm)
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+  const activityKeyMissing = !activityKey
 
   const assetsBaseUrl = bootstrap?.assetsBaseUrl || MATERIAL_REGISTRATION_FALLBACK_ASSETS_BASE_URL
   const apiDocuments = Array.isArray(bootstrap?.documents) ? bootstrap.documents : []
@@ -85,19 +92,60 @@ function MaterialRegistrationMain({ routeParams }) {
     : MATERIAL_REGISTRATION_DOCUMENTS
   const formOptions = bootstrap?.formOptions || DEFAULT_FORM_OPTIONS
   const activeDocument = findMaterialDocument(activeDocumentId)
+  const shareActivity = publicConfig || null
+
+  const handleWechatShareStatus = useCallback((status) => {
+    if (
+      status?.wxConfigStatus === 'failed' ||
+      status?.signatureStatus === 'failed' ||
+      status?.wxScriptLoadStatus === 'failed'
+    ) {
+      console.warn('[material-registration-share] setup failed', status)
+    }
+  }, [])
+
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
   useEffect(() => {
+    if (!activityKey) return
+
+    let cancelled = false
+    getMaterialRegistrationPublicConfig(activityKey)
+      .then((data) => {
+        if (cancelled) return
+        setPublicConfig(data)
+        document.title = data?.title || '参会信息提交'
+        setError('')
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err?.message || '活动加载失败')
+        setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!publicConfig || !authReady) return
+
     let cancelled = false
     getMaterialRegistrationBootstrap(activityKey)
       .then((data) => {
         if (cancelled) return
         setBootstrap(data)
-        document.title = data?.activityName || '参会信息提交'
+        document.title = data?.activityName || publicConfig?.title || '参会信息提交'
         setPage(data?.hasSubmitted ? PAGES.SUCCESS : PAGES.HOME)
         setError('')
       })
       .catch((err) => {
         if (cancelled) return
+        if (isUnauthorizedError(err)) {
+          reauth('material-registration-bootstrap')
+          return
+        }
         setError(err?.message || '活动加载失败')
       })
       .finally(() => {
@@ -107,7 +155,7 @@ function MaterialRegistrationMain({ routeParams }) {
     return () => {
       cancelled = true
     }
-  }, [activityKey])
+  }, [activityKey, authReady, publicConfig, reauth])
 
   useEffect(() => {
     if (!activityKey) return
@@ -238,7 +286,7 @@ function MaterialRegistrationMain({ routeParams }) {
     >
       <div className="material-registration-stage">
         {loading && <div className="material-registration-loading">加载中...</div>}
-        {error && <div className="material-registration-error">{error}</div>}
+        {(activityKeyMissing || error || blockedMessage) && <div className="material-registration-error">{activityKeyMissing ? '缺少活动路径参数' : (error || blockedMessage)}</div>}
         {message && <div className="material-registration-toast">{message}</div>}
 
         {page === PAGES.HOME && (
