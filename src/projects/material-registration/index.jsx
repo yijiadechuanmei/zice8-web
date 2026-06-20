@@ -374,7 +374,10 @@ function MaterialRegistrationMain({ routeParams }) {
   return (
     <main
       className={pageClass}
-      style={{ backgroundImage: `url("${assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.background)}")` }}
+      style={{
+        '--material-registration-bg': `url("${assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.background)}")`,
+        backgroundImage: `url("${assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.background)}")`,
+      }}
     >
       <div className="material-registration-stage">
         {showEntryLoading && (

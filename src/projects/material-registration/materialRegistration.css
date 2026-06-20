@@ -402,23 +402,28 @@
 }
 
 .material-registration-loading {
-  top: 14px;
+  inset: 0;
+  left: 0;
+  z-index: 35;
+  transform: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: auto;
+  height: auto;
   padding: 0;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 8px 20px rgba(19, 31, 110, 0.14);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
 }
 
 .material-registration-loading-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid rgba(39, 78, 196, 0.2);
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.72);
   border-top-color: #274ec4;
   border-radius: 50%;
+  filter: drop-shadow(0 6px 14px rgba(19, 31, 110, 0.24));
   animation: material-registration-loading-spin 0.8s linear infinite;
 }
 
@@ -434,25 +439,21 @@
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
-  background-image: inherit;
+  background-image: var(--material-registration-bg);
 }
 
 .material-registration-loading-panel {
-  width: min(240px, calc(100vw - 72px));
-  padding: 18px 18px 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 12px 30px rgba(19, 31, 110, 0.18);
-  backdrop-filter: blur(8px);
+  width: min(220px, calc(100vw - 96px));
 }
 
 .material-registration-loading-track {
   position: relative;
   width: 100%;
-  height: 10px;
+  height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(39, 78, 196, 0.14);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 10px 30px rgba(19, 31, 110, 0.2);
 }
 
 .material-registration-loading-bar {
@@ -500,6 +501,13 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .material-registration-loading-bar,
+  .material-registration-loading-spinner {
+    animation-duration: 2.4s;
   }
 }
 
