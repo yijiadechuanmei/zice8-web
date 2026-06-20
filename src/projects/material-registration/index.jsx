@@ -36,7 +36,7 @@ const DEFAULT_FORM_OPTIONS = {
 
 const initialForm = {
   unitName: '',
-  unitType: '',
+  unitType: '其他',
   attendees: [{ name: '' }],
   contactUnitName: '',
   position: '',
@@ -146,7 +146,7 @@ function MaterialRegistrationMain({ routeParams }) {
 
   function updateForm(field, value) {
     setForm((current) => {
-      if (field === 'unitName' && !current.contactUnitName) {
+      if (field === 'unitName') {
         return { ...current, unitName: value, contactUnitName: value }
       }
       return { ...current, [field]: value }
@@ -200,6 +200,8 @@ function MaterialRegistrationMain({ routeParams }) {
     try {
       const payload = {
         ...form,
+        unitType: form.unitType || '其他',
+        contactUnitName: form.contactUnitName || form.unitName,
         needAccommodation: form.needAccommodation === '是',
         accommodationDates: form.needAccommodation === '是' ? form.accommodationDates : [],
         hotel: form.needAccommodation === '是' ? '雄楚国际大酒店' : '',
@@ -374,15 +376,6 @@ function FormPage({
         填写参会信息
       </h1>
       <form className="material-registration-card material-registration-form-card" onSubmit={onSubmit}>
-        <Field label="单位名称">
-          <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
-        </Field>
-        <Field label="类型">
-          <select value={form.unitType} onChange={(event) => onUpdate('unitType', event.target.value)}>
-            <option value="">请选择</option>
-            {formOptions.unitTypes.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-        </Field>
         <div className="material-registration-field">
           <label>参会人姓名</label>
           <div className="material-registration-attendees">
@@ -409,8 +402,8 @@ function FormPage({
             + 添加参会人
           </button>
         </div>
-        <Field label="报名单位名称">
-          <input value={form.contactUnitName} onChange={(event) => onUpdate('contactUnitName', event.target.value)} />
+        <Field label="单位名称">
+          <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
         </Field>
         <Field label="职务">
           <input value={form.position} onChange={(event) => onUpdate('position', event.target.value)} />
@@ -520,7 +513,6 @@ function SuccessPage({ assetsBaseUrl }) {
 
 function validateForm(form) {
   if (!form.unitName.trim()) return '请填写单位名称'
-  if (!form.unitType) return '请选择类型'
   if (!form.attendees.some((attendee) => attendee.name.trim())) return '请至少填写一位参会人姓名'
   if (!form.phone.trim()) return '请填写联系方式'
   if (!/^1\d{10}$/.test(form.phone.trim()) && !/^0\d{2,3}-?\d{7,8}(-\d{1,6})?$/.test(form.phone.trim())) {

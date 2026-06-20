@@ -86,10 +86,13 @@
   flex: 1 1 auto;
   min-width: 0;
   padding-left: 10px;
+  overflow: hidden;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
   text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .material-registration-arrow-icon {
@@ -105,7 +108,7 @@
 .material-registration-agreement {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   min-height: 30px;
   margin: 0 0 10px;
