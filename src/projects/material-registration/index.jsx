@@ -49,7 +49,7 @@ const DEFAULT_FORM_OPTIONS = {
     { label: '6月29日', value: '2026-06-29' },
     { label: '6月30日', value: '2026-06-30' },
   ],
-  hotels: ['雄楚国际大酒店'],
+  hotels: ['武汉雄楚国际大酒店'],
   halalMeal: ['是', '否'],
 }
 
@@ -63,7 +63,7 @@ const initialForm = {
   gender: '',
   needAccommodation: '',
   accommodationDates: [],
-  hotel: '雄楚国际大酒店',
+  hotel: '武汉雄楚国际大酒店',
   halalMeal: '',
 }
 
@@ -350,7 +350,7 @@ function MaterialRegistrationWechatMain({ routeParams }) {
         contactUnitName: form.contactUnitName || form.unitName,
         needAccommodation: form.needAccommodation === '是',
         accommodationDates: form.needAccommodation === '是' ? form.accommodationDates : [],
-        hotel: form.needAccommodation === '是' ? '雄楚国际大酒店' : '',
+        hotel: form.needAccommodation === '是' ? '武汉雄楚国际大酒店' : '',
         attendees: form.attendees
           .map((attendee) => ({ name: attendee.name.trim() }))
           .filter((attendee) => attendee.name),

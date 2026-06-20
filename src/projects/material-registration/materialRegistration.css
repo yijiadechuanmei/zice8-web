@@ -479,12 +479,13 @@
 }
 
 .material-registration-toast {
-  top: 48px;
+  top: 50%;
   max-width: 330px;
   padding: 9px 14px;
   background: rgba(19, 31, 110, 0.9);
   color: #ffffff;
   font-size: 14px;
+  transform: translate(-50%, -50%);
 }
 
 .material-registration-wechat-only {
