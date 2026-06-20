@@ -1,7 +1,7 @@
 import { request } from '../../shared/api/request'
 
 export const MATERIAL_REGISTRATION_FALLBACK_ASSETS_BASE_URL =
-  'https://assets.zice8.com/material-review/material-community-registration-20260630'
+  'https://assets.zice8.com/material_review_registration/material_community_registration_20260630'
 
 export const getMaterialRegistrationBootstrap = (activityKey) =>
   request(`/material-registration/activities/${activityKey}/bootstrap`)
