@@ -1,0 +1,401 @@
+.material-registration-app {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #ffffff;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  color: #131f6e;
+}
+
+.material-registration-stage {
+  position: relative;
+  width: min(100vw, 375px);
+  min-height: max(100vh, 724px);
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.material-registration-home-title {
+  position: absolute;
+  left: 12px;
+  top: 55px;
+  width: calc(100% - 24px);
+  max-width: 350px;
+  height: 136px;
+  object-fit: contain;
+}
+
+.material-registration-document-list {
+  position: absolute;
+  left: 19px;
+  right: 19px;
+  top: 226px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.material-registration-document-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 53px;
+  margin: 0 0 20px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #131f6e;
+  cursor: pointer;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.material-registration-document-button:hover,
+.material-registration-document-button:focus-visible {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 18px rgba(19, 31, 110, 0.18);
+  outline: none;
+}
+
+.material-registration-document-icon {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-image: linear-gradient(180deg, #3899ec 0%, #274ec4 100%);
+}
+
+.material-registration-mask-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.material-registration-mask-icon-white {
+  background: #ffffff;
+}
+
+.material-registration-document-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.material-registration-arrow-icon {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+  background: #131f6e;
+}
+
+.material-registration-agreement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 30px;
+  margin: 0 0 10px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: #131f6e;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.material-registration-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border: 1px solid #131f6e;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #131f6e;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.material-registration-back-button {
+  position: fixed;
+  left: max(9px, calc((100vw - 375px) / 2 + 9px));
+  top: 7px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.material-registration-page-title {
+  position: absolute;
+  left: 30px;
+  top: 40px;
+  width: calc(100% - 60px);
+  min-height: 30px;
+  margin: 0;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.material-registration-form-heading {
+  text-align: center;
+}
+
+.material-registration-card {
+  position: absolute;
+  left: 7px;
+  right: 8px;
+  top: 82px;
+  height: 610px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-overflow-scrolling: touch;
+}
+
+.material-registration-rich-card {
+  padding: 10px;
+}
+
+.material-registration-rich-text {
+  min-height: 100%;
+  padding: 10px;
+  color: #1f2a44;
+  font-size: 15px;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.material-registration-rich-text p {
+  margin: 0 0 12px;
+  text-indent: 2em;
+}
+
+.material-registration-rich-text .ql-align-center {
+  text-align: center;
+  text-indent: 0;
+}
+
+.material-registration-rich-text strong {
+  font-weight: 700;
+}
+
+.material-registration-form-card {
+  padding: 18px 18px 28px;
+}
+
+.material-registration-field {
+  margin-bottom: 14px;
+}
+
+.material-registration-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #131f6e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.material-registration-field input,
+.material-registration-field select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(19, 31, 110, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #172554;
+  font-size: 16px;
+  outline: none;
+}
+
+.material-registration-field input {
+  padding: 0 12px;
+}
+
+.material-registration-field select {
+  padding: 0 10px;
+}
+
+.material-registration-field input:focus,
+.material-registration-field select:focus {
+  border-color: #274ec4;
+  box-shadow: 0 0 0 3px rgba(39, 78, 196, 0.12);
+}
+
+.material-registration-attendees {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.material-registration-attendee-row {
+  display: flex;
+  gap: 8px;
+}
+
+.material-registration-icon-button {
+  flex: 0 0 42px;
+  width: 42px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 8px;
+  background: #eef3ff;
+  color: #131f6e;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.material-registration-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.material-registration-add-button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 8px;
+  border: 1px dashed rgba(19, 31, 110, 0.45);
+  border-radius: 8px;
+  background: rgba(238, 243, 255, 0.75);
+  color: #131f6e;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.material-registration-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.material-registration-choice {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  margin: 0 !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+}
+
+.material-registration-choice input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.material-registration-hotel {
+  margin-top: 8px;
+  color: #1f2a44;
+  font-size: 14px;
+}
+
+.material-registration-submit-button {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 100px;
+  background-image: linear-gradient(180deg, #3899ec 0%, #274ec4 100%);
+  color: #ffffff;
+  font-size: 21px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 200ms ease;
+}
+
+.material-registration-submit-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+  opacity: 0.72;
+}
+
+.material-registration-success-image {
+  position: absolute;
+  left: 74px;
+  top: 276px;
+  width: 225px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.material-registration-loading,
+.material-registration-error,
+.material-registration-toast {
+  position: fixed;
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  text-align: center;
+}
+
+.material-registration-loading {
+  top: 14px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #131f6e;
+  font-size: 14px;
+}
+
+.material-registration-error {
+  bottom: 18px;
+  max-width: 340px;
+  padding: 9px 14px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.material-registration-toast {
+  top: 48px;
+  max-width: 330px;
+  padding: 9px 14px;
+  background: rgba(19, 31, 110, 0.9);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+@media (max-width: 374px) {
+  .material-registration-home-title {
+    height: auto;
+  }
+
+  .material-registration-document-list {
+    left: 16px;
+    right: 16px;
+  }
+
+  .material-registration-card {
+    left: 7px;
+    right: 7px;
+  }
+
+  .material-registration-success-image {
+    left: calc(50% - 112.5px);
+  }
+}

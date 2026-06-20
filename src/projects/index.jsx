@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
+const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
 
 export const projectRoutes = [
   {
@@ -14,6 +15,10 @@ export const projectRoutes = [
   {
     path: '/appointment/:activityKey',
     Component: lazy(() => import('./appointment/index.jsx')),
+  },
+  {
+    path: '/material-registration/:activityKey',
+    Component: MaterialRegistrationProject,
   },
   {
     path: '/video-rank',
