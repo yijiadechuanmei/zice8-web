@@ -410,6 +410,7 @@ function FormPage({
         </Field>
         <Field label="联系方式">
           <input
+            type="tel"
             value={form.phone}
             onChange={(event) => onUpdate('phone', event.target.value)}
             inputMode="tel"

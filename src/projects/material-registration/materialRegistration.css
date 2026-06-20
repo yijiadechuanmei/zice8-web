@@ -161,12 +161,13 @@
   width: calc(100% - 60px);
   min-height: 30px;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
   color: #ffffff;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
-  text-overflow: ellipsis;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .material-registration-form-heading {
