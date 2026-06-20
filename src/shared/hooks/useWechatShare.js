@@ -68,6 +68,7 @@ export function useWechatShare(activityKey, activity, onStatusChange) {
             'updateTimelineShareData',
             'onMenuShareAppMessage',
             'onMenuShareTimeline',
+            'openLocation',
           ],
         })
 

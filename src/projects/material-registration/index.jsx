@@ -35,6 +35,13 @@ const MATERIAL_REGISTRATION_SHARE_DEFAULTS = {
   title: '“真材实料筑基强国”育人共同体成立大会',
 }
 
+const MATERIAL_REGISTRATION_HOTEL = {
+  name: '武汉雄楚国际大酒店',
+  latitude: 30.510226,
+  longitude: 114.361409,
+  address: '湖北省武汉市洪山区雄楚大道335号',
+}
+
 const DEFAULT_FORM_OPTIONS = {
   unitTypes: ['高等学校', '中小学校', '科研院所', '行业企业', '行业协会', '地方政府', '其他'],
   genders: ['男', '女'],
@@ -280,6 +287,44 @@ function MaterialRegistrationMain({ routeParams }) {
     })
   }
 
+  function openHotelLocation() {
+    const openTencentMap = () => {
+      const { latitude, longitude, name, address } = MATERIAL_REGISTRATION_HOTEL
+      const marker = [
+        `coord:${latitude},${longitude}`,
+        `title:${encodeURIComponent(name)}`,
+        `addr:${encodeURIComponent(address)}`,
+      ].join(';')
+      window.location.href = `https://apis.map.qq.com/uri/v1/marker?marker=${marker}&referer=zice8`
+    }
+
+    const wx = window.wx
+    if (wx && typeof wx.ready === 'function' && typeof wx.openLocation === 'function') {
+      let handledByWechat = false
+      const fallbackTimer = window.setTimeout(() => {
+        if (!handledByWechat) openTencentMap()
+      }, 1200)
+      wx.ready(() => {
+        handledByWechat = true
+        window.clearTimeout(fallbackTimer)
+        try {
+          wx.openLocation({
+            latitude: MATERIAL_REGISTRATION_HOTEL.latitude,
+            longitude: MATERIAL_REGISTRATION_HOTEL.longitude,
+            name: MATERIAL_REGISTRATION_HOTEL.name,
+            address: MATERIAL_REGISTRATION_HOTEL.address,
+            scale: 16,
+          })
+        } catch {
+          openTencentMap()
+        }
+      })
+      return
+    }
+
+    openTencentMap()
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     const validationMessage = validateForm(form)
@@ -363,6 +408,7 @@ function MaterialRegistrationMain({ routeParams }) {
             onAddAttendee={addAttendee}
             onRemoveAttendee={removeAttendee}
             onToggleAccommodationDate={toggleAccommodationDate}
+            onOpenHotelLocation={openHotelLocation}
             onSubmit={handleSubmit}
           />
         )}
@@ -459,6 +505,7 @@ function FormPage({
   onAddAttendee,
   onRemoveAttendee,
   onToggleAccommodationDate,
+  onOpenHotelLocation,
   onSubmit,
 }) {
   return (
@@ -535,7 +582,15 @@ function FormPage({
                 </label>
               ))}
             </div>
-            <div className="material-registration-hotel">酒店：雄楚国际大酒店</div>
+            <button
+              type="button"
+              className="material-registration-hotel-button"
+              onClick={onOpenHotelLocation}
+              aria-label={`${MATERIAL_REGISTRATION_HOTEL.name}导航`}
+            >
+              <span>{MATERIAL_REGISTRATION_HOTEL.name}</span>
+              <NavigationIcon />
+            </button>
           </div>
         )}
         <RadioGroup
@@ -601,6 +656,19 @@ function SuccessPage({ assetsBaseUrl }) {
       src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.successTitle)}
       alt="报名成功"
     />
+  )
+}
+
+function NavigationIcon() {
+  return (
+    <svg
+      className="material-registration-navigation-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12.6 21.2c-.8 0-1.2-.6-1.3-1.2l-1.1-6.3-6.1-2.1c-.6-.2-1-.7-1-1.4s.4-1.2 1-1.4L19.4 3c.6-.2 1.2-.1 1.6.4.4.4.5 1 .3 1.6l-5.8 15.3c-.2.6-.7.9-1.3.9-.5 0-.9-.2-1.2-.6l-2.8-3.3-3.1 2.7c-.1.1-.3.2-.5.2Zm-6.3-11 5.3 1.8c.5.2.8.6.9 1.1l.9 5 4.9-13-12 5.1Z" />
+    </svg>
   )
 }
 
