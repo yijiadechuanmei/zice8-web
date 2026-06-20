@@ -258,6 +258,9 @@ function getKeywordPlaceholder(activity, viewKey) {
       ? '搜索房号 / 姓名 / 手机号'
       : '搜索房号 / 姓名'
   }
+  if (activity.type === 'material_review_registration') {
+    return '搜索单位 / 姓名 / 联系方式'
+  }
   return '输入关键词'
 }
 

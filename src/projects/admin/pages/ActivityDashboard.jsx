@@ -73,6 +73,18 @@ export default function ActivityDashboard({ activity, compact = false }) {
       ]
     }
 
+    if (activity.type === 'material_review_registration') {
+      const materialRegistration = overview?.materialRegistration || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '报名人数', value: materialRegistration.registrationTotal ?? overview?.registrationTotal ?? 0 },
+        { label: '今日报名人数', value: materialRegistration.todayRegistrationTotal ?? overview?.todayRegistrationTotal ?? 0 },
+      ]
+    }
+
     const videoRank = overview?.videoRank || {}
     return [
       { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
@@ -88,6 +100,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
   }, [activity.type, overview])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
+  const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))
   const commentTrend = (charts?.videoRank?.commentTrend || []).map((item) => ({ ...item, comments: item.value || 0 }))
   const rankTop10 = (charts?.videoRank?.rankTop10 || []).map((item) => ({
     ...item,
@@ -195,7 +208,26 @@ export default function ActivityDashboard({ activity, compact = false }) {
             </Row>
           ) : null}
 
-          {activity.type === 'appointment_visit' || activity.type === 'phase_quiz_lottery' ? null : (
+          {activity.type === 'material_review_registration' ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天报名趋势" description="按报名提交时间统计">
+                  <LazyChart type="bar" data={materialRegistrationTrend} series={[{ key: 'registrations', name: '报名人数' }]} />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
+          {activity.type === 'appointment_visit' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
