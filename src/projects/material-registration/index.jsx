@@ -375,7 +375,15 @@ function MaterialRegistrationMain({ routeParams }) {
       style={{ backgroundImage: `url("${assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.background)}")` }}
     >
       <div className="material-registration-stage">
-        {loading && <div className="material-registration-loading">加载中...</div>}
+        {loading && (
+          <div className="material-registration-loading" aria-label="加载中">
+            <div className="material-registration-loading-panel">
+              <div className="material-registration-loading-track">
+                <span className="material-registration-loading-bar" />
+              </div>
+            </div>
+          </div>
+        )}
         {(activityKeyMissing || error || blockedMessage) && <div className="material-registration-error">{activityKeyMissing ? '缺少活动路径参数' : (error || blockedMessage)}</div>}
         {message && <div className="material-registration-toast">{message}</div>}
 
