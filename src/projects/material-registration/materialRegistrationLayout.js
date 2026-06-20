@@ -1,5 +1,5 @@
 export const MATERIAL_REGISTRATION_ACTIVITY_KEY =
-  'material_community_registration_20260630'
+  'material_community_registration_20260620'
 
 export const MATERIAL_REGISTRATION_ACTIVITY_TYPE =
   'material_review_registration'
