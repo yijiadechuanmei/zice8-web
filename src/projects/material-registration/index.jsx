@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
@@ -27,6 +27,15 @@ const PAGES = {
   SUCCESS: 'success',
 }
 
+const LEGACY_MATERIAL_REGISTRATION_ACTIVITY_KEYS = new Set([
+  'material_community_registration_20260630',
+])
+
+const MATERIAL_REGISTRATION_SHARE_DEFAULTS = {
+  title: '“真材实料筑基强国”育人共同体成立大会',
+  desc: '资料审阅、同意确认与参会信息提交',
+}
+
 const DEFAULT_FORM_OPTIONS = {
   unitTypes: ['高等学校', '中小学校', '科研院所', '行业企业', '行业协会', '地方政府', '其他'],
   genders: ['男', '女'],
@@ -53,9 +62,27 @@ const initialForm = {
 }
 
 export default function MaterialRegistrationApp({ routeParams }) {
+  const requestedActivityKey = routeParams?.activityKey || getQueryParam('activity_key')
+  const shouldRedirectToCanonical =
+    LEGACY_MATERIAL_REGISTRATION_ACTIVITY_KEYS.has(requestedActivityKey) ||
+    window.location.pathname.startsWith('/material-registration/')
   const tokenFromUrl = getTokenFromUrl()
   if (tokenFromUrl) {
     setToken(tokenFromUrl)
+  }
+
+  if (shouldRedirectToCanonical) {
+    const canonicalUrl = new URL(window.location.href)
+    canonicalUrl.pathname = `/${MATERIAL_REGISTRATION_ACTIVITY_TYPE}/${MATERIAL_REGISTRATION_ACTIVITY_KEY}`
+    canonicalUrl.searchParams.delete('activity_key')
+    canonicalUrl.searchParams.delete('token')
+    canonicalUrl.searchParams.delete('code')
+    canonicalUrl.searchParams.delete('state')
+    window.location.replace(canonicalUrl.toString())
+    return null
+  }
+
+  if (tokenFromUrl) {
     window.location.replace(sanitizeUrlForWechat(window.location.href))
     return null
   }
@@ -92,7 +119,25 @@ function MaterialRegistrationMain({ routeParams }) {
     : MATERIAL_REGISTRATION_DOCUMENTS
   const formOptions = bootstrap?.formOptions || DEFAULT_FORM_OPTIONS
   const activeDocument = findMaterialDocument(activeDocumentId)
-  const shareActivity = publicConfig || null
+  const shareActivity = useMemo(() => {
+    if (!publicConfig) return null
+    const shareAssetsBaseUrl =
+      publicConfig?.mobileConfig?.assetsBaseUrl ||
+      bootstrap?.assetsBaseUrl ||
+      MATERIAL_REGISTRATION_FALLBACK_ASSETS_BASE_URL
+
+    return {
+      ...publicConfig,
+      shareTitle:
+        publicConfig.shareTitle ||
+        publicConfig.title ||
+        MATERIAL_REGISTRATION_SHARE_DEFAULTS.title,
+      shareDesc: publicConfig.shareDesc || MATERIAL_REGISTRATION_SHARE_DEFAULTS.desc,
+      shareImage:
+        publicConfig.shareImage ||
+        assetUrl(shareAssetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.homeTitle),
+    }
+  }, [bootstrap?.assetsBaseUrl, publicConfig])
 
   const handleWechatShareStatus = useCallback((status) => {
     if (
