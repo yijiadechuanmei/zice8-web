@@ -68,7 +68,7 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
       <p class="ql-align-center" style="font-size: 10.5pt;">第五章&nbsp;附&nbsp;则</p>
       <p><strong style="font-size: 10.5pt;">第十八条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程自共同体成员大会通过之日起生效。</span></p>
       <p><strong style="font-size: 10.5pt;">第十九条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程解释权归“真材实料 筑基强国”育人共同体理事会。</span></p>
-      <p class="ql-align-center"><strong style="font-size: 10.5pt;">第二十条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程未尽事宜，由理事会另行制定补充规定或实施细则，经成员大会审议通过后执行。</span></p>
+      <p><strong style="font-size: 10.5pt;">第二十条&nbsp;&nbsp;</strong><span style="font-size: 10.5pt;">本章程未尽事宜，由理事会另行制定补充规定或实施细则，经成员大会审议通过后执行。</span></p>
     `,
   },
   {
@@ -77,10 +77,7 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
     html: `
       <p class="ql-align-center"><strong style="font-size: 14pt; color: #333333;">“真材实料&nbsp;筑基强国”行动框架</strong></p>
       <p style="font-size: 11pt; line-height: 28pt; color: #333333;">立足办学基础与行业资源禀赋，我校搭建“同学共悟、同研共创、同讲共育、同行共进”四大板块、八项行动，构建价值引领、能力锻造、文化凝聚、实践落地层层递进的协同育人体系，系统推进行业育人共同体建设。</p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>一是同学共悟，筑牢思想根基。</strong><span>组织全体成员深学细悟教育科技人才、制造强国重要论述，统一思想共识、锚定育人方向；下设“实业兴国”学思践悟、“新时代伟大变革”学习转化行动，将行业发展实践转化为特色育人资源。</span></p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>二是同研共创，锻造核心能力。</strong><span>推动理论认知转化为课程资源、创新方案与科研成果，为思政教育、产业实践提供内容与技术支撑；配套开展新质思政能力培育、创新素养进阶攀登行动，夯实育人核心载体。</span></p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>三是同讲共育，厚植行业精神。</strong><span>依托行业宣讲、科普活动、大国工匠进校园等载体，挖掘行业文脉、科创故事与工匠精神；通过文脉传承、科普筑梦两项行动，对内凝聚精神内核，对外彰显行业实干形象。</span></p>
-      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>四是同行共进，推动成果落地。</strong><span>依托实践育人与工匠精神传承基地搭建阶梯式平台，设置强师巧匠实践研学、强国有我青春建功行动，组织师生深入产业一线历练，形成“知—研—讲—行”完整育人闭环。</span></p>
+      <p style="font-size: 11pt; line-height: 28pt; color: #333333;"><strong>一是同学共悟，筑牢思想根基。</strong><span>组织全体成员深学细悟教育科技人才、制造强国重要论述，统一思想共识、锚定育人方向；下设“实业兴国”学思践悟、“新时代伟大变革”学习转化行动，将行业发展实践转化为特色育人资源。</span><strong>二是同研共创，锻造核心能力。</strong><span>推动理论认知转化为课程资源、创新方案与科研成果，为思政教育、产业实践提供内容与技术支撑；配套开展新质思政能力培育、创新素养进阶攀登行动，夯实育人核心载体。</span><strong>三是同讲共育，厚植行业精神。</strong><span>依托行业宣讲、科普活动、大国工匠进校园等载体，挖掘行业文脉、科创故事与工匠精神；通过文脉传承、科普筑梦两项行动，对内凝聚精神内核，对外彰显行业实干形象。</span><strong>四是同行共进，推动成果落地。</strong><span>依托实践育人与工匠精神传承基地搭建阶梯式平台，设置强师巧匠实践研学、强国有我青春建功行动，组织师生深入产业一线历练，形成“知—研—讲—行”完整育人闭环。</span></p>
       <p style="font-size: 11pt; line-height: 28pt; color: #333333;">四大板块环环相扣、层层递进，从思想铸魂到实践落地全链条贯通，实现理论内化与实干外化有机统一。</p>
     `,
   },
