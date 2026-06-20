@@ -303,15 +303,19 @@ function HomePage({
             onClick={() => onOpenDocument(document.id)}
           >
             <span className="material-registration-document-icon">
-              <span
-                className="material-registration-mask-icon material-registration-mask-icon-white"
-                style={maskStyle(assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.documentIcons[index]))}
+              <img
+                className="material-registration-svg-icon material-registration-svg-icon-white"
+                src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.documentIcons[index])}
+                alt=""
+                aria-hidden="true"
               />
             </span>
             <span className="material-registration-document-title">{document.title}</span>
-            <span
+            <img
               className="material-registration-arrow-icon"
-              style={maskStyle(assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.checkIcon))}
+              src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.checkIcon)}
+              alt=""
+              aria-hidden="true"
             />
           </button>
         ))}
@@ -494,9 +498,11 @@ function RadioGroup({ label, value, options, onChange }) {
 function BackButton({ assetsBaseUrl, onClick }) {
   return (
     <button type="button" className="material-registration-back-button" onClick={onClick} aria-label="返回">
-      <span
-        className="material-registration-mask-icon material-registration-mask-icon-white"
-        style={maskStyle(assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.backIcon))}
+      <img
+        className="material-registration-svg-icon material-registration-svg-icon-white"
+        src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.backIcon)}
+        alt=""
+        aria-hidden="true"
       />
     </button>
   )
@@ -525,11 +531,4 @@ function validateForm(form) {
   if (form.needAccommodation === '是' && !form.accommodationDates.length) return '请选择住宿时间'
   if (!form.halalMeal) return '请选择清真餐是/否'
   return ''
-}
-
-function maskStyle(url) {
-  return {
-    WebkitMask: `url("${url}") center center / contain no-repeat`,
-    mask: `url("${url}") center center / contain no-repeat`,
-  }
 }

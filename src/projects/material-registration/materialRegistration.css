@@ -70,14 +70,16 @@
   background-image: linear-gradient(180deg, #3899ec 0%, #274ec4 100%);
 }
 
-.material-registration-mask-icon {
+.material-registration-svg-icon {
   display: block;
   width: 28px;
   height: 28px;
+  object-fit: contain;
+  pointer-events: none;
 }
 
-.material-registration-mask-icon-white {
-  background: #ffffff;
+.material-registration-svg-icon-white {
+  filter: brightness(0) invert(1);
 }
 
 .material-registration-document-title {
@@ -95,7 +97,9 @@
   width: 20px;
   height: 20px;
   margin-left: 5px;
-  background: #131f6e;
+  object-fit: contain;
+  pointer-events: none;
+  filter: brightness(0) saturate(100%) invert(12%) sepia(76%) saturate(2301%) hue-rotate(226deg) brightness(80%) contrast(102%);
 }
 
 .material-registration-agreement {
