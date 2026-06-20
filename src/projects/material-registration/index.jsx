@@ -294,6 +294,7 @@ function MaterialRegistrationMain({ routeParams }) {
         `coord:${latitude},${longitude}`,
         `title:${encodeURIComponent(name)}`,
         `addr:${encodeURIComponent(address)}`,
+        'zoom:18',
       ].join(';')
       window.location.href = `https://apis.map.qq.com/uri/v1/marker?marker=${marker}&referer=zice8`
     }
@@ -313,7 +314,7 @@ function MaterialRegistrationMain({ routeParams }) {
             longitude: MATERIAL_REGISTRATION_HOTEL.longitude,
             name: MATERIAL_REGISTRATION_HOTEL.name,
             address: MATERIAL_REGISTRATION_HOTEL.address,
-            scale: 16,
+            scale: 28,
           })
         } catch {
           openTencentMap()
@@ -429,6 +430,12 @@ function HomePage({
 }) {
   return (
     <>
+      <img
+        className="material-registration-home-logo"
+        src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.homeLogo)}
+        alt=""
+        aria-hidden="true"
+      />
       <img
         className="material-registration-home-title"
         src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.homeTitle)}

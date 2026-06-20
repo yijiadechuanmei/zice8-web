@@ -6,6 +6,7 @@ export const MATERIAL_REGISTRATION_ACTIVITY_TYPE =
 
 export const MATERIAL_REGISTRATION_ASSETS = {
   background: '87bbe600f0195a271dceaea0cbd40e99_1377921_853_1844.png',
+  homeLogo: '73603d6d3051f84cbffd5e29a9f4006d_23330_356_78.png',
   homeTitle: 'cd01fc01e58bd1f3597586c1b97ec3da_31915_715_278.png',
   successTitle: '02ebaf25c38011a851dbb81f6bffa2ed_11098_455_91.png',
   documentIcons: [

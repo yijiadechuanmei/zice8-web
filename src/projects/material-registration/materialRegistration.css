@@ -17,10 +17,21 @@
   overflow: visible;
 }
 
+.material-registration-home-logo {
+  position: absolute;
+  left: 50%;
+  top: 42px;
+  width: 178px;
+  height: 39px;
+  transform: translateX(-50%);
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+}
+
 .material-registration-home-title {
   position: absolute;
   left: 12px;
-  top: 55px;
+  top: 111px;
   width: calc(100% - 24px);
   max-width: 350px;
   height: 136px;
@@ -30,7 +41,7 @@
 .material-registration-document-list {
   position: absolute;
   left: 50%;
-  top: 226px;
+  top: 282px;
   width: calc(100% - 24px);
   max-width: 350px;
   transform: translateX(-50%);
