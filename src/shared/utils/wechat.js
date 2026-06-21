@@ -1,5 +1,6 @@
 const WECHAT_JS_SDK_SRC = 'https://res.wx.qq.com/open/js/jweixin-1.6.0.js'
 let wechatJsSdkPromise = null
+let wechatFontSizeLocked = false
 
 export function loadWechatJsSdk() {
   if (window.wx) {
@@ -35,4 +36,28 @@ export function loadWechatJsSdk() {
   })
 
   return wechatJsSdkPromise
+}
+
+export function lockWechatFontSize() {
+  if (wechatFontSizeLocked || typeof window === 'undefined' || typeof document === 'undefined') {
+    return
+  }
+  wechatFontSizeLocked = true
+
+  const handleFontSize = () => {
+    const bridge = window.WeixinJSBridge
+    if (!bridge?.invoke) return
+
+    bridge.invoke('setFontSizeCallback', { fontSize: 0 })
+    bridge.on?.('menu:setfont', () => {
+      bridge.invoke('setFontSizeCallback', { fontSize: 0 })
+    })
+  }
+
+  if (window.WeixinJSBridge?.invoke) {
+    handleFontSize()
+    return
+  }
+
+  document.addEventListener('WeixinJSBridgeReady', handleFontSize, false)
 }

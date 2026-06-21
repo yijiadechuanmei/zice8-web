@@ -416,7 +416,6 @@ function MaterialRegistrationMain({ routeParams }) {
         )}
         {page === PAGES.DOCUMENT && (
           <DocumentPage
-            assetsBaseUrl={assetsBaseUrl}
             document={activeDocument}
             onBack={() => setPage(PAGES.HOME)}
           />
@@ -518,10 +517,9 @@ function AgreementButton({ checked, label, onClick }) {
   )
 }
 
-function DocumentPage({ assetsBaseUrl, document, onBack }) {
+function DocumentPage({ document, onBack }) {
   return (
     <>
-      <BackButton assetsBaseUrl={assetsBaseUrl} onClick={onBack} />
       <h1 className="material-registration-page-title material-registration-document-heading">
         {document?.title || '会议材料'}
       </h1>
@@ -531,6 +529,9 @@ function DocumentPage({ assetsBaseUrl, document, onBack }) {
           dangerouslySetInnerHTML={{ __html: document?.html || '' }}
         />
       </article>
+      <button type="button" className="material-registration-document-back-button" onClick={onBack}>
+        返回
+      </button>
     </>
   )
 }
