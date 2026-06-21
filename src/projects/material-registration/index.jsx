@@ -195,7 +195,8 @@ function MaterialRegistrationMain({ routeParams }) {
       .catch((err) => {
         if (cancelled) return
         if (isUnauthorizedError(err)) {
-          reauth('material-registration-bootstrap')
+          if (reauth('material-registration-bootstrap')) return
+          setError(err?.message || '活动加载失败')
           return
         }
         setError(err?.message || '活动加载失败')

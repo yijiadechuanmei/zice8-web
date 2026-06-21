@@ -40,15 +40,18 @@ export function useWechatAuth(activityKey, publicConfig) {
   const [blockedMessage, setBlockedMessage] = useState('')
   const [autoAuthStarted, setAutoAuthStarted] = useState(false)
   const [authStatus, setAuthStatus] = useState('checking')
+  const requiresWechatBrowser = getAccessMode(publicConfig) === 'wechat_required'
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
 
     const inWechat = isWechatBrowser()
     if (!inWechat) {
-      setBlockedMessage('请在微信中打开')
-      setAuthReady(false)
-      setAuthStatus('error')
+      if (requiresWechatBrowser) {
+        setBlockedMessage('请在微信中打开')
+        setAuthReady(false)
+        setAuthStatus('error')
+      }
       return false
     }
 
@@ -85,7 +88,7 @@ export function useWechatAuth(activityKey, publicConfig) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey])
+  }, [activityKey, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
@@ -117,6 +120,8 @@ export function useWechatAuth(activityKey, publicConfig) {
       })
       return
     }
+
+    setBlockedMessage('')
 
     if (getQueryParam('snapshot_user') === '1') {
       setAuthReady(true)
