@@ -125,6 +125,7 @@ function MaterialRegistrationMain({ routeParams }) {
     : MATERIAL_REGISTRATION_DOCUMENTS
   const formOptions = bootstrap?.formOptions || DEFAULT_FORM_OPTIONS
   const activeDocument = findMaterialDocument(activeDocumentId)
+  const showBlockedState = Boolean(blockedMessage)
   const shareActivity = useMemo(() => {
     if (!publicConfig) return null
     const shareAssetsBaseUrl =
@@ -368,8 +369,12 @@ function MaterialRegistrationMain({ routeParams }) {
   }
 
   const pageClass = `material-registration-app material-registration-page-${page}`
-  const showEntryLoading = loading && !bootstrap && !error && !blockedMessage
-  const showTopLoading = loading && !showEntryLoading
+  const showEntryLoading = loading && !bootstrap && !error && !showBlockedState
+  const showTopLoading = loading && !showEntryLoading && !showBlockedState
+
+  if (showBlockedState) {
+    return <MaterialRegistrationBlocked message={blockedMessage} />
+  }
 
   return (
     <main
@@ -432,6 +437,16 @@ function MaterialRegistrationMain({ routeParams }) {
           />
         )}
         {page === PAGES.SUCCESS && <SuccessPage assetsBaseUrl={assetsBaseUrl} />}
+      </div>
+    </main>
+  )
+}
+
+function MaterialRegistrationBlocked({ message }) {
+  return (
+    <main className="material-registration-blocked" aria-label={message || '访问受限'}>
+      <div className="material-registration-blocked-card">
+        <h1>{message || '访问受限'}</h1>
       </div>
     </main>
   )

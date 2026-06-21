@@ -489,6 +489,29 @@
   transform: translate(-50%, -50%);
 }
 
+.material-registration-blocked {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #ffffff;
+  color: #131f6e;
+  text-align: center;
+}
+
+.material-registration-blocked-card {
+  width: min(100%, 320px);
+  padding: 24px 18px;
+}
+
+.material-registration-blocked-card h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 @keyframes material-registration-loading-slide {
   0% {
     left: -38%;
