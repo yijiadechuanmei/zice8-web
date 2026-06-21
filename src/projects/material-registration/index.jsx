@@ -3,7 +3,7 @@ import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam, getTokenFromUrl, isWechatBrowser, sanitizeUrlForWechat } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   createMaterialRegistrationSubmission,
   getMaterialRegistrationBootstrap,
@@ -97,14 +97,6 @@ export default function MaterialRegistrationApp({ routeParams }) {
 }
 
 function MaterialRegistrationMain({ routeParams }) {
-  if (!isWechatBrowser()) {
-    return <MaterialRegistrationWechatOnly />
-  }
-
-  return <MaterialRegistrationWechatMain routeParams={routeParams} />
-}
-
-function MaterialRegistrationWechatMain({ routeParams }) {
   const activityKey =
     routeParams?.activityKey ||
     getQueryParam('activity_key') ||
@@ -440,17 +432,6 @@ function MaterialRegistrationWechatMain({ routeParams }) {
           />
         )}
         {page === PAGES.SUCCESS && <SuccessPage assetsBaseUrl={assetsBaseUrl} />}
-      </div>
-    </main>
-  )
-}
-
-function MaterialRegistrationWechatOnly() {
-  return (
-    <main className="material-registration-wechat-only" aria-label="请在微信中打开">
-      <div className="material-registration-wechat-only-card">
-        <h1>请在微信中打开</h1>
-        <p>当前活动仅支持微信内访问</p>
       </div>
     </main>
   )
