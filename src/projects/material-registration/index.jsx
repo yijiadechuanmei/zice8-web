@@ -5,6 +5,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
+  createMaterialRegistrationDisagreement,
   createMaterialRegistrationSubmission,
   getMaterialRegistrationBootstrap,
   getMaterialRegistrationPublicConfig,
@@ -44,7 +45,6 @@ const MATERIAL_REGISTRATION_HOTEL = {
 
 const DEFAULT_FORM_OPTIONS = {
   unitTypes: ['高等学校', '中小学校', '科研院所', '行业企业', '行业协会', '地方政府', '其他'],
-  genders: ['男', '女'],
   accommodationDates: [
     { label: '6月29日', value: '2026-06-29' },
     { label: '6月30日', value: '2026-06-30' },
@@ -56,15 +56,13 @@ const DEFAULT_FORM_OPTIONS = {
 const initialForm = {
   unitName: '',
   unitType: '其他',
-  attendees: [{ name: '' }],
+  attendees: [{ name: '', position: '', phone: '' }],
   contactUnitName: '',
-  position: '',
-  phone: '',
-  gender: '',
   needAccommodation: '',
   accommodationDates: [],
   hotel: '武汉雄楚国际大酒店',
   halalMeal: '',
+  materialOpinion: '',
 }
 
 export default function MaterialRegistrationApp({ routeParams }) {
@@ -112,6 +110,9 @@ function MaterialRegistrationMain({ routeParams }) {
   const [agreeChecked, setAgreeChecked] = useState(false)
   const [disagreeChecked, setDisagreeChecked] = useState(false)
   const [form, setForm] = useState(initialForm)
+  const [showDisagreeDialog, setShowDisagreeDialog] = useState(false)
+  const [disagreeRecommendation, setDisagreeRecommendation] = useState('')
+  const [disagreeSubmitting, setDisagreeSubmitting] = useState(false)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
   const activityKeyMissing = !activityKey
 
@@ -243,6 +244,7 @@ function MaterialRegistrationMain({ routeParams }) {
   function handleDisagree() {
     setAgreeChecked(false)
     setDisagreeChecked(true)
+    setShowDisagreeDialog(true)
   }
 
   function updateForm(field, value) {
@@ -254,11 +256,11 @@ function MaterialRegistrationMain({ routeParams }) {
     })
   }
 
-  function updateAttendee(index, value) {
+  function updateAttendee(index, field, value) {
     setForm((current) => ({
       ...current,
       attendees: current.attendees.map((attendee, attendeeIndex) =>
-        attendeeIndex === index ? { ...attendee, name: value } : attendee,
+        attendeeIndex === index ? { ...attendee, [field]: value } : attendee,
       ),
     }))
   }
@@ -266,7 +268,7 @@ function MaterialRegistrationMain({ routeParams }) {
   function addAttendee() {
     setForm((current) => ({
       ...current,
-      attendees: [...current.attendees, { name: '' }],
+      attendees: [...current.attendees, { name: '', position: '', phone: '' }],
     }))
   }
 
@@ -278,6 +280,38 @@ function MaterialRegistrationMain({ routeParams }) {
         attendees: current.attendees.filter((_, attendeeIndex) => attendeeIndex !== index),
       }
     })
+  }
+
+  function closeDisagreeDialog() {
+    if (disagreeSubmitting) return
+    setShowDisagreeDialog(false)
+  }
+
+  async function handleDisagreeSubmit(event) {
+    event.preventDefault()
+    const recommendedUnitName = disagreeRecommendation.trim()
+    if (!recommendedUnitName) {
+      showMessage('请填写推荐单位')
+      return
+    }
+
+    setDisagreeSubmitting(true)
+    try {
+      await createMaterialRegistrationDisagreement(activityKey, { recommendedUnitName })
+      setDisagreeRecommendation('')
+      setShowDisagreeDialog(false)
+      showMessage('提交成功')
+      trackEvent({
+        activityKey,
+        eventType: 'material_registration_disagree_submit',
+        page: '/material-registration',
+        extra: { activityType: MATERIAL_REGISTRATION_ACTIVITY_TYPE },
+      })
+    } catch (err) {
+      showMessage(err?.message || '提交失败，请稍后重试')
+    } finally {
+      setDisagreeSubmitting(false)
+    }
   }
 
   function toggleAccommodationDate(value) {
@@ -346,8 +380,13 @@ function MaterialRegistrationMain({ routeParams }) {
         accommodationDates: form.needAccommodation === '是' ? form.accommodationDates : [],
         hotel: form.needAccommodation === '是' ? '武汉雄楚国际大酒店' : '',
         attendees: form.attendees
-          .map((attendee) => ({ name: attendee.name.trim() }))
-          .filter((attendee) => attendee.name),
+          .map((attendee) => ({
+            name: attendee.name.trim(),
+            position: attendee.position.trim(),
+            phone: attendee.phone.trim(),
+          }))
+          .filter((attendee) => attendee.name || attendee.position || attendee.phone),
+        materialOpinion: form.materialOpinion.trim(),
       }
       const result = await createMaterialRegistrationSubmission(activityKey, payload)
       setBootstrap((current) => ({
@@ -437,6 +476,15 @@ function MaterialRegistrationMain({ routeParams }) {
           />
         )}
         {page === PAGES.SUCCESS && <SuccessPage assetsBaseUrl={assetsBaseUrl} />}
+        {showDisagreeDialog && (
+          <DisagreeDialog
+            value={disagreeRecommendation}
+            submitting={disagreeSubmitting}
+            onChange={setDisagreeRecommendation}
+            onClose={closeDisagreeDialog}
+            onSubmit={handleDisagreeSubmit}
+          />
+        )}
       </div>
     </main>
   )
@@ -558,15 +606,29 @@ function FormPage({
       </h1>
       <form className="material-registration-card material-registration-form-card" onSubmit={onSubmit}>
         <div className="material-registration-field">
-          <label>参会人姓名</label>
+          <label>参会人</label>
           <div className="material-registration-attendees">
             {form.attendees.map((attendee, index) => (
               <div className="material-registration-attendee-row" key={`attendee-${index}`}>
-                <input
-                  value={attendee.name}
-                  onChange={(event) => onUpdateAttendee(index, event.target.value)}
-                  placeholder={`参会人 ${index + 1}`}
-                />
+                <div className="material-registration-attendee-fields">
+                  <input
+                    value={attendee.name}
+                    onChange={(event) => onUpdateAttendee(index, 'name', event.target.value)}
+                    placeholder={`参会人 ${index + 1} 姓名`}
+                  />
+                  <input
+                    value={attendee.position}
+                    onChange={(event) => onUpdateAttendee(index, 'position', event.target.value)}
+                    placeholder="职务"
+                  />
+                  <input
+                    type="tel"
+                    value={attendee.phone}
+                    onChange={(event) => onUpdateAttendee(index, 'phone', event.target.value)}
+                    inputMode="tel"
+                    placeholder="联系方式"
+                  />
+                </div>
                 <button
                   type="button"
                   className="material-registration-icon-button"
@@ -585,23 +647,6 @@ function FormPage({
         </div>
         <Field label="单位名称">
           <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
-        </Field>
-        <Field label="职务">
-          <input value={form.position} onChange={(event) => onUpdate('position', event.target.value)} />
-        </Field>
-        <Field label="联系方式">
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={(event) => onUpdate('phone', event.target.value)}
-            inputMode="tel"
-          />
-        </Field>
-        <Field label="性别">
-          <select value={form.gender} onChange={(event) => onUpdate('gender', event.target.value)}>
-            <option value="">请选择</option>
-            {formOptions.genders.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
         </Field>
         <RadioGroup
           label="是否需要安排住宿"
@@ -641,11 +686,47 @@ function FormPage({
           options={formOptions.halalMeal}
           onChange={(value) => onUpdate('halalMeal', value)}
         />
+        <Field label="对上述会议材料的相关意见（选填）">
+          <textarea
+            value={form.materialOpinion}
+            onChange={(event) => onUpdate('materialOpinion', event.target.value)}
+            rows={4}
+            placeholder="如有意见或建议，请填写"
+          />
+        </Field>
         <button type="submit" className="material-registration-submit-button" disabled={submitting}>
           {submitting ? '提交中...' : '提交报名'}
         </button>
       </form>
     </>
+  )
+}
+
+function DisagreeDialog({ value, submitting, onChange, onClose, onSubmit }) {
+  return (
+    <div className="material-registration-modal" role="dialog" aria-modal="true" aria-label="推荐其他单位">
+      <form className="material-registration-modal-card" onSubmit={onSubmit}>
+        <button
+          type="button"
+          className="material-registration-modal-close"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label="关闭"
+        >
+          ×
+        </button>
+        <h2>请推荐其他单位</h2>
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="请输入推荐单位名称"
+          autoFocus
+        />
+        <button type="submit" className="material-registration-modal-submit" disabled={submitting}>
+          {submitting ? '提交中...' : '提交'}
+        </button>
+      </form>
+    </div>
   )
 }
 
@@ -716,12 +797,25 @@ function NavigationIcon() {
 
 function validateForm(form) {
   if (!form.unitName.trim()) return '请填写单位名称'
-  if (!form.attendees.some((attendee) => attendee.name.trim())) return '请至少填写一位参会人姓名'
-  if (!form.phone.trim()) return '请填写联系方式'
-  if (!/^1\d{10}$/.test(form.phone.trim()) && !/^0\d{2,3}-?\d{7,8}(-\d{1,6})?$/.test(form.phone.trim())) {
-    return '联系方式格式不合法'
+  const attendees = form.attendees.map((attendee) => ({
+    name: attendee.name.trim(),
+    position: attendee.position.trim(),
+    phone: attendee.phone.trim(),
+  }))
+  const filledAttendees = attendees.filter((attendee) => attendee.name || attendee.position || attendee.phone)
+  if (!filledAttendees.length) return '请至少填写一位参会人的姓名、职务、联系方式'
+  const incompleteIndex = attendees.findIndex((attendee) => {
+    if (!attendee.name && !attendee.position && !attendee.phone) return false
+    return !attendee.name || !attendee.position || !attendee.phone
+  })
+  if (incompleteIndex >= 0) return `请完整填写第 ${incompleteIndex + 1} 位参会人的姓名、职务、联系方式`
+  const invalidPhoneIndex = filledAttendees.findIndex((attendee) => (
+    !/^1\d{10}$/.test(attendee.phone) &&
+    !/^0\d{2,3}-?\d{7,8}(-\d{1,6})?$/.test(attendee.phone)
+  ))
+  if (invalidPhoneIndex >= 0) {
+    return `第 ${invalidPhoneIndex + 1} 位参会人的联系方式格式不合法`
   }
-  if (!form.gender) return '请选择性别'
   if (!form.needAccommodation) return '请选择是否需要安排住宿'
   if (form.needAccommodation === '是' && !form.accommodationDates.length) return '请选择住宿时间'
   if (!form.halalMeal) return '请选择清真餐是/否'
