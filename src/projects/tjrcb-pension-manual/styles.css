@@ -37,10 +37,11 @@
 
 .tjrcb-pension-manual-carousel {
   position: absolute;
-  left: 0;
+  left: 50%;
   top: 242px;
-  width: 375px;
+  width: 100vw;
   height: 190px;
+  transform: translateX(-50%);
   overflow: hidden;
   background: #ffffff;
 }
@@ -104,10 +105,16 @@
   left: 320px;
 }
 
-.tjrcb-pension-manual-icon-button img {
+.tjrcb-pension-manual-chevron {
   width: 18px;
   height: 18px;
-  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  fill: none;
+  stroke: #f05a23;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .tjrcb-pension-manual-category-row {

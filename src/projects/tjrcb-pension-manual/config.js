@@ -1,6 +1,3 @@
-import nextIconUrl from './assets/next.svg?url'
-import prevIconUrl from './assets/prev.svg?url'
-
 export const TJRCB_PENSION_MANUAL_ACTIVITY_TYPE = 'tjrcb_pension_manual'
 export const TJRCB_PENSION_MANUAL_ACTIVITY_KEY = 'tjrcb_pension_manual_20260622'
 
@@ -40,12 +37,6 @@ export function mergeManualConfig(publicConfig) {
 
 export function manualAssetUrl(baseUrl, filename) {
   if (!filename) return ''
-  const normalizedFilename = String(filename).replace(/^\//, '')
-  const localAssets = {
-    'prev.svg': prevIconUrl,
-    'next.svg': nextIconUrl,
-  }
-  if (localAssets[normalizedFilename]) return localAssets[normalizedFilename]
   if (/^(https?:)?\/\//i.test(filename) || filename.startsWith('/') || filename.startsWith('data:')) return filename
   return `${String(baseUrl || '').replace(/\/$/, '')}/${filename.replace(/^\//, '')}`
 }

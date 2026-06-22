@@ -14,6 +14,16 @@ import {
 } from './config'
 import './styles.css'
 
+function ChevronIcon({ direction }) {
+  const points = direction === 'prev' ? '15.5 4.5 8 12 15.5 19.5' : '8.5 4.5 16 12 8.5 19.5'
+
+  return (
+    <svg className="tjrcb-pension-manual-chevron" viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points={points} />
+    </svg>
+  )
+}
+
 function clampPageIndex(index, pageCount) {
   return Math.min(Math.max(Number(index) || 0, 0), Math.max(pageCount - 1, 0))
 }
@@ -161,8 +171,6 @@ export default function TjrcbPensionManualApp({ routeParams }) {
   const backgroundUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.backgroundImage)
   const logoUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.logoImage)
   const titleUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.titleImage)
-  const prevIconUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.prevIcon)
-  const nextIconUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.nextIcon)
   const showLoading = loading || (publicConfig && !authReady && !blockedMessage)
 
   if (blockedMessage) {
@@ -215,7 +223,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onClick={() => goToIndex(safeCurrentIndex - 1, 'prev')}
           aria-label="上一页"
         >
-          <img src={prevIconUrl} alt="" aria-hidden="true" />
+          <ChevronIcon direction="prev" />
         </button>
         <button
           type="button"
@@ -223,7 +231,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onClick={() => goToIndex(safeCurrentIndex + 1, 'next')}
           aria-label="下一页"
         >
-          <img src={nextIconUrl} alt="" aria-hidden="true" />
+          <ChevronIcon direction="next" />
         </button>
 
         <nav className="tjrcb-pension-manual-category-row" aria-label="画册分类">
