@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
@@ -84,6 +85,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
         manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.logoImage),
     }
   }, [manualConfig, publicConfig])
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
 
   useWechatShare(activityKey, shareActivity)
 
@@ -117,6 +119,11 @@ export default function TjrcbPensionManualApp({ routeParams }) {
       activityType: TJRCB_PENSION_MANUAL_ACTIVITY_TYPE,
     })
   }, [activityKey])
+
+  useEffect(() => {
+    if (!bgmConfig?.enabled || !bgmConfig?.url) return
+    activityAudioService.setConfig(bgmConfig, { activityKey })
+  }, [activityKey, bgmConfig])
 
   const playAudioAt = useCallback(
     async (index) => {
@@ -254,7 +261,9 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onEnded={() => setAudioPlaying(false)}
         />
       </div>
-      <ActivityBgmPlayer bgm={publicConfig?.bgmConfig} activityKey={activityKey} />
+      {bgmConfig?.showControl !== false ? (
+        <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+      ) : null}
     </main>
   )
 }
