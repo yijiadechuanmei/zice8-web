@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/[name]-[hash]-v20260622b.js',
+        entryFileNames: 'assets/[name]-[hash]-v20260622c.js',
         manualChunks(id) {
           if (id.includes('/src/projects/video-rank/')) return 'project-video-rank'
         },

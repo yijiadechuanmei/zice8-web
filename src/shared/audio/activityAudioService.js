@@ -177,7 +177,11 @@ class ActivityAudioService {
     const targetUrl = hasExplicitConfig ? nextConfig.url : this.config.url
     this.prepareAudio('set-config', { force: previousUrl !== targetUrl, url: targetUrl })
     if ((hasExplicitConfig ? nextConfig.autoplay : this.config.autoplay) && !this.state.userPaused) {
-      this.play('set-config')
+      if (isWechatBrowser() && window.WeixinJSBridge?.invoke) {
+        this.runBridgeUnlock('set-config-wechat-bridge')
+      } else {
+        this.play('set-config')
+      }
     }
   }
 
@@ -283,6 +287,82 @@ class ActivityAudioService {
       })
       return false
     }
+  }
+
+  playNativeImmediately(reason, options = {}) {
+    const { forcePrepare = false } = options
+    if (!this.config.enabled || !this.config.url || this.state.userPaused) return false
+
+    const audio = this.prepareAudio(reason, { force: forcePrepare })
+    if (!audio) return false
+
+    audio.muted = false
+    audio.volume = this.config.volume
+    audio.loop = this.config.loop
+
+    let playPromise
+    try {
+      playPromise = audio.play()
+    } catch (error) {
+      const message = error?.message || 'unknown'
+      this.patchState({
+        playing: false,
+        paused: true,
+        blocked: true,
+        lastError: message,
+      })
+      debugLog('[ActivityAudio] native immediate play threw', {
+        reason,
+        error: message,
+      })
+      return false
+    }
+
+    if (playPromise?.then) {
+      playPromise
+        .then(() => {
+          this.patchState({
+            playing: true,
+            paused: false,
+            blocked: false,
+            mutedAutoplay: false,
+            lastError: '',
+          })
+          this.clearFirstGestureListeners()
+          debugLog('[ActivityAudio] native immediate play success', {
+            reason,
+            src: audio.currentSrc || audio.src || '',
+          })
+        })
+        .catch((error) => {
+          const message = error?.message || 'unknown'
+          this.patchState({
+            playing: false,
+            paused: true,
+            blocked: true,
+            lastError: message,
+          })
+          debugLog('[ActivityAudio] native immediate play failed', {
+            reason,
+            error: message,
+          })
+        })
+    } else {
+      this.patchState({
+        playing: true,
+        paused: false,
+        blocked: false,
+        mutedAutoplay: false,
+        lastError: '',
+      })
+      this.clearFirstGestureListeners()
+      debugLog('[ActivityAudio] native immediate play called', {
+        reason,
+        src: audio.currentSrc || audio.src || '',
+      })
+    }
+
+    return true
   }
 
   async restoreAudibleElementState(reason = 'restore-audible') {
@@ -596,7 +676,9 @@ class ActivityAudioService {
 
     if (window.wx && typeof window.wx.ready === 'function') {
       window.wx.ready(() => {
-        if (this.config.autoplay && !this.state.userPaused) this.play('wx-ready', { forcePrepare: true })
+        if (this.config.autoplay && !this.state.userPaused) {
+          this.playNativeImmediately('wx-ready-native', { forcePrepare: true })
+        }
       })
     }
   }
@@ -625,14 +707,12 @@ class ActivityAudioService {
     this.resumeAudioContext(reason).catch(() => undefined)
 
     const invokeAndPlay = () => {
-      this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
-      this.prepareAudio(reason, { force: true })
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
         if (reason.includes('cached-url')) {
           debugLog('[ActivityAudio] cached url weixin invoke')
         }
-        this.restoreAudibleElementState(`${reason}-invoke-restore`)
-        this.play(`${reason}-invoke`, { forcePrepare: true, ignoreThrottle: true })
+        this.playNativeImmediately(`${reason}-invoke-native`, { forcePrepare: true })
+        this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
       }
     }
 
