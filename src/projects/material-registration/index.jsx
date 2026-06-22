@@ -54,7 +54,6 @@ const DEFAULT_FORM_OPTIONS = {
 const initialForm = {
   unitName: '',
   attendees: [{ name: '', position: '', phone: '' }],
-  contactUnitName: '',
   needAccommodation: '',
   accommodationDates: [],
   hotel: '武汉雄楚国际大酒店',
@@ -241,12 +240,7 @@ function MaterialRegistrationMain({ routeParams }) {
   }
 
   function updateForm(field, value) {
-    setForm((current) => {
-      if (field === 'unitName') {
-        return { ...current, unitName: value, contactUnitName: value }
-      }
-      return { ...current, [field]: value }
-    })
+    setForm((current) => ({ ...current, [field]: value }))
   }
 
   function updateAttendee(index, field, value) {
@@ -335,7 +329,6 @@ function MaterialRegistrationMain({ routeParams }) {
     try {
       const payload = {
         ...form,
-        contactUnitName: form.contactUnitName || form.unitName,
         needAccommodation: form.needAccommodation === '是',
         accommodationDates: form.needAccommodation === '是' ? form.accommodationDates : [],
         hotel: form.needAccommodation === '是' ? '武汉雄楚国际大酒店' : '',
