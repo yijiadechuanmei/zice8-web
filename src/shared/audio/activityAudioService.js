@@ -75,6 +75,10 @@ function safeLoadAudio(audio) {
   return true
 }
 
+function isAudioActivelyPlaying(audio) {
+  return Boolean(audio && !audio.paused && !audio.ended)
+}
+
 class ActivityAudioService {
   constructor() {
     this.audio = null
@@ -172,6 +176,15 @@ class ActivityAudioService {
 
     if (!this.config.enabled || !this.config.url) return false
     if (this.state.userPaused && !isManual) return false
+    if (!isManual && isAudioActivelyPlaying(this.audio) && this.lastPreparedUrl === this.config.url) {
+      this.patchState({
+        playing: true,
+        paused: false,
+        blocked: false,
+        lastError: '',
+      })
+      return true
+    }
     if (!isManual && !ignoreThrottle && !this.canAttempt(reason)) return false
 
     const audio = this.prepareAudio(reason, { force: forcePrepare })
@@ -373,7 +386,9 @@ class ActivityAudioService {
     if (!url) return null
 
     const audio = this.createAudio()
-    const shouldReset = force || this.lastPreparedUrl !== url
+    const preparedSrc = audio.currentSrc || audio.src || ''
+    const hasPreparedSameUrl = this.lastPreparedUrl === url && Boolean(preparedSrc)
+    const shouldReset = this.lastPreparedUrl !== url || (force && !hasPreparedSameUrl)
 
     if (shouldReset) {
       if (!audio.paused) audio.pause()
@@ -389,7 +404,7 @@ class ActivityAudioService {
     audio.setAttribute('x5-playsinline', 'true')
     audio.setAttribute('x5-video-player-type', 'h5')
 
-    if (shouldReset || force || this.config.preload) {
+    if (shouldReset || (!preparedSrc && this.config.preload)) {
       this.patchState({ loading: true })
       safeLoadAudio(audio)
     }
@@ -525,11 +540,11 @@ class ActivityAudioService {
     if (!this.context.activityKey || this.cachedPrepared) return
     this.cachedPrepared = true
 
-    let cachedUrl = ''
+    let cachedUrl
     try {
       cachedUrl = localStorage.getItem(getCacheKey(this.context.activityKey)) || ''
     } catch {
-      cachedUrl = ''
+      return
     }
 
     if (!cachedUrl) return
