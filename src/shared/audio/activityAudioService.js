@@ -330,6 +330,7 @@ class ActivityAudioService {
       this.audio.removeEventListener('loadeddata', this.handleAudioReady)
       this.audio.pause()
       this.clearAudioSource()
+      this.audio.remove()
       this.audio = null
     }
 
@@ -383,11 +384,25 @@ class ActivityAudioService {
     if (this.audio) return this.audio
 
     this.audio = document.createElement('audio')
+    this.audio.autoplay = true
+    this.audio.muted = false
     this.audio.preload = 'auto'
     this.audio.setAttribute('playsinline', 'true')
     this.audio.setAttribute('webkit-playsinline', 'true')
     this.audio.setAttribute('x5-playsinline', 'true')
     this.audio.setAttribute('x5-video-player-type', 'h5')
+    this.audio.setAttribute('aria-hidden', 'true')
+    this.audio.setAttribute('data-zice8-activity-bgm', 'true')
+    this.audio.style.position = 'fixed'
+    this.audio.style.left = '-9999px'
+    this.audio.style.top = '-9999px'
+    this.audio.style.width = '1px'
+    this.audio.style.height = '1px'
+    this.audio.style.opacity = '0'
+    this.audio.style.pointerEvents = 'none'
+    if (document.body && !this.audio.parentNode) {
+      document.body.appendChild(this.audio)
+    }
     this.patchState({
       hasAudio: true,
       audioSrc: '',
@@ -457,6 +472,7 @@ class ActivityAudioService {
     }
 
     audio.preload = 'auto'
+    audio.autoplay = true
     audio.loop = this.config.loop
     audio.volume = this.config.volume
     audio.setAttribute('playsinline', 'true')
