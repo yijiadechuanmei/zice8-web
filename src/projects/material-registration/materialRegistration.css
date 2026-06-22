@@ -410,13 +410,8 @@
   margin-bottom: 0;
 }
 
-.material-registration-attendee-input-label {
+.material-registration-attendee-input {
   margin: 0 !important;
-}
-
-.material-registration-attendee-input-label input {
-  display: block;
-  margin-top: 7px;
 }
 
 .material-registration-icon-button {

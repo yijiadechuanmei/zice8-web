@@ -707,32 +707,32 @@ function AttendeeForm({
         </button>
       </div>
       <div className="material-registration-attendee-fields">
-        <label className="material-registration-attendee-input-label">
-          姓名
+        <div className="material-registration-field material-registration-attendee-input">
           <input
+            aria-label={`第 ${index + 1} 位参会人姓名`}
             value={attendee.name}
             onChange={(event) => onUpdate(index, 'name', event.target.value)}
             placeholder="请输入姓名"
           />
-        </label>
-        <label className="material-registration-attendee-input-label">
-          职务
+        </div>
+        <div className="material-registration-field material-registration-attendee-input">
           <input
+            aria-label={`第 ${index + 1} 位参会人职务`}
             value={attendee.position}
             onChange={(event) => onUpdate(index, 'position', event.target.value)}
             placeholder="请输入职务"
           />
-        </label>
-        <label className="material-registration-attendee-input-label">
-          联系方式
+        </div>
+        <div className="material-registration-field material-registration-attendee-input">
           <input
             type="tel"
+            aria-label={`第 ${index + 1} 位参会人联系方式`}
             value={attendee.phone}
             onChange={(event) => onUpdate(index, 'phone', event.target.value)}
             inputMode="tel"
             placeholder="请输入联系方式"
           />
-        </label>
+        </div>
         <RadioGroup
           name={`${attendee.clientId}-accommodation`}
           label="是否需要安排住宿"
