@@ -384,7 +384,6 @@ function MaterialRegistrationMain({ routeParams }) {
         needAccommodation,
         accommodationDates,
         hotel: needAccommodation ? MATERIAL_REGISTRATION_HOTEL.name : '',
-        halalMeal: attendees.some((attendee) => attendee.halalMeal === '是') ? '是' : '否',
         materialOpinion: form.materialOpinion.trim(),
       }
       const result = await createMaterialRegistrationSubmission(activityKey, payload)
