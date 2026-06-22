@@ -17,6 +17,7 @@ export const MATERIAL_REGISTRATION_ASSETS = {
   ],
   checkIcon: '9409243b9cd1afee07f51193dadad173_273.svg',
   backIcon: 'c11b584b4606a0f848853d9ce80c342e_270.svg',
+  mapButton: 'map.png',
 }
 
 export function assetUrl(assetsBaseUrl, filename) {

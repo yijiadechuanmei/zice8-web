@@ -619,8 +619,11 @@ function FormPage({
               onClick={onOpenHotelLocation}
               aria-label={`${MATERIAL_REGISTRATION_HOTEL.name}导航`}
             >
-              <span>{MATERIAL_REGISTRATION_HOTEL.name}</span>
-              <NavigationIcon />
+              <img
+                className="material-registration-hotel-map"
+                src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.mapButton)}
+                alt={`${MATERIAL_REGISTRATION_HOTEL.name}导航`}
+              />
             </button>
           </div>
         )}
@@ -695,19 +698,6 @@ function SuccessPage({ assetsBaseUrl }) {
       src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.successTitle)}
       alt="报名成功"
     />
-  )
-}
-
-function NavigationIcon() {
-  return (
-    <svg
-      className="material-registration-navigation-icon"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M12.6 21.2c-.8 0-1.2-.6-1.3-1.2l-1.1-6.3-6.1-2.1c-.6-.2-1-.7-1-1.4s.4-1.2 1-1.4L19.4 3c.6-.2 1.2-.1 1.6.4.4.4.5 1 .3 1.6l-5.8 15.3c-.2.6-.7.9-1.3.9-.5 0-.9-.2-1.2-.6l-2.8-3.3-3.1 2.7c-.1.1-.3.2-.5.2Zm-6.3-11 5.3 1.8c.5.2.8.6.9 1.1l.9 5 4.9-13-12 5.1Z" />
-    </svg>
   )
 }
 
