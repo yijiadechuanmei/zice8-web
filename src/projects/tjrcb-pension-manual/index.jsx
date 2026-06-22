@@ -37,6 +37,28 @@ function hasNarrationAudio(index) {
   return index >= 2
 }
 
+function isWechatBrowser() {
+  if (typeof navigator === 'undefined') return false
+  return /MicroMessenger/i.test(navigator.userAgent || '')
+}
+
+function playWithWechatBridge(audio) {
+  if (!isWechatBrowser() || !window.WeixinJSBridge?.invoke) {
+    return audio.play()
+  }
+
+  return new Promise((resolve, reject) => {
+    const play = () => {
+      audio.play().then(resolve).catch(reject)
+    }
+    try {
+      window.WeixinJSBridge.invoke('getNetworkType', {}, play)
+    } catch {
+      play()
+    }
+  })
+}
+
 export default function TjrcbPensionManualApp({ routeParams }) {
   const activityKey =
     routeParams?.activityKey ||
@@ -143,7 +165,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
       audio.currentTime = 0
 
       try {
-        await audio.play()
+        await playWithWechatBridge(audio)
         setAudioPlaying(true)
         return true
       } catch {
@@ -314,7 +336,11 @@ export default function TjrcbPensionManualApp({ routeParams }) {
 
         <audio
           ref={audioRef}
-          preload="none"
+          preload="auto"
+          playsInline
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
           onPlay={() => setAudioPlaying(true)}
           onPause={() => setAudioPlaying(false)}
           onEnded={handleNarrationEnded}
