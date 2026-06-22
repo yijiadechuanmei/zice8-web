@@ -21,6 +21,7 @@ const DEFAULT_STATE = {
   loop: true,
   mediaElementSourceEnabled: false,
   activityKey: '',
+  mutedAutoplay: false,
 }
 
 const ENABLE_MEDIA_ELEMENT_SOURCE = false
@@ -77,6 +78,12 @@ function safeLoadAudio(audio) {
 
 function isAudioActivelyPlaying(audio) {
   return Boolean(audio && !audio.paused && !audio.ended)
+}
+
+function isAutoplayBlockedError(error) {
+  const name = String(error?.name || '')
+  const message = String(error?.message || '')
+  return name === 'NotAllowedError' || /user didn't interact|play\(\) failed|not allowed|gesture/i.test(message)
 }
 
 class ActivityAudioService {
@@ -202,6 +209,8 @@ class ActivityAudioService {
     })
 
     await this.resumeAudioContext(reason).catch(() => undefined)
+    audio.muted = false
+    audio.volume = this.config.volume
 
     try {
       await audio.play()
@@ -209,6 +218,7 @@ class ActivityAudioService {
         playing: true,
         paused: false,
         blocked: false,
+        mutedAutoplay: false,
         userPaused: isManual ? false : this.state.userPaused,
         lastError: '',
       })
@@ -221,6 +231,10 @@ class ActivityAudioService {
     } catch (error) {
       const message = error?.message || 'unknown'
       console.warn(`[ActivityAudio] play failed reason=${reason} error=${message}`)
+      if (!isManual && this.config.autoplay && isAutoplayBlockedError(error)) {
+        const mutedPlayed = await this.playMutedAutoplay(`${reason}-muted-fallback`, audio, message)
+        if (mutedPlayed) return true
+      }
       this.patchState({
         playing: false,
         paused: true,
@@ -233,6 +247,52 @@ class ActivityAudioService {
       })
       return false
     }
+  }
+
+  async playMutedAutoplay(reason, audio, originalError = '') {
+    if (!audio || this.state.userPaused || !this.config.enabled || !this.config.url) return false
+
+    try {
+      audio.muted = true
+      audio.volume = this.config.volume
+      await audio.play()
+      this.patchState({
+        playing: true,
+        paused: false,
+        blocked: true,
+        mutedAutoplay: true,
+        lastError: originalError,
+      })
+      debugLog('[ActivityAudio] muted autoplay success', {
+        reason,
+        src: audio.currentSrc || audio.src || '',
+      })
+      this.scheduleTask(() => this.restoreAudibleElementState(`${reason}-restore`), 300)
+      return true
+    } catch (error) {
+      debugLog('[ActivityAudio] muted autoplay failed', {
+        reason,
+        error: error?.message || 'unknown',
+      })
+      return false
+    }
+  }
+
+  restoreAudibleElementState(reason = 'restore-audible') {
+    const audio = this.audio
+    if (!audio || this.state.userPaused || !this.config.enabled) return false
+
+    audio.muted = false
+    audio.volume = this.config.volume
+    this.patchState({
+      mutedAutoplay: false,
+    })
+    debugLog('[ActivityAudio] restore audible element state', {
+      reason,
+      playing: !audio.paused,
+      muted: audio.muted,
+    })
+    return true
   }
 
   pause(reason = 'pause') {
@@ -450,6 +510,7 @@ class ActivityAudioService {
 
     this.handleFirstGesture = () => {
       this.resumeAudioContext('first-gesture').catch(() => undefined)
+      this.restoreAudibleElementState('first-gesture')
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
         this.play('first-gesture', { forcePrepare: true, ignoreThrottle: true })
       }
@@ -458,11 +519,13 @@ class ActivityAudioService {
     this.handleVisibilityChange = () => {
       if (document.visibilityState !== 'visible') return
       if (!this.config.autoplay || this.state.userPaused) return
+      this.restoreAudibleElementState('visible')
       this.play('visible')
     }
 
     this.handlePageShow = () => {
       if (!this.config.autoplay || this.state.userPaused) return
+      this.restoreAudibleElementState('pageshow')
       this.play('pageshow')
     }
 
