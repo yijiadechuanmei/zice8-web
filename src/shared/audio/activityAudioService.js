@@ -264,6 +264,7 @@ class ActivityAudioService {
   }
 
   async playMutedAutoplay(reason, audio, originalError = '') {
+    if (isWechatBrowser()) return false
     if (!audio || this.state.userPaused || !this.config.enabled || !this.config.url) return false
 
     try {
@@ -517,6 +518,9 @@ class ActivityAudioService {
       return false
     }
     this.patchState({ userPaused: false })
+    if (isWechatBrowser()) {
+      return this.runBridgeUnlock(`${reason}-wechat-manual`)
+    }
     return this.play(reason, { manual: true, forcePrepare: true })
   }
 
@@ -589,8 +593,9 @@ class ActivityAudioService {
   createAudio() {
     if (this.audio) return this.audio
 
+    const isWechat = isWechatBrowser()
     this.audio = document.createElement('audio')
-    this.audio.autoplay = true
+    this.audio.autoplay = !isWechat
     this.audio.muted = false
     this.audio.preload = 'auto'
     this.audio.setAttribute('playsinline', 'true')
@@ -599,14 +604,16 @@ class ActivityAudioService {
     this.audio.setAttribute('x5-video-player-type', 'h5')
     this.audio.setAttribute('aria-hidden', 'true')
     this.audio.setAttribute('data-zice8-activity-bgm', 'true')
-    this.audio.style.position = 'fixed'
-    this.audio.style.left = '-9999px'
-    this.audio.style.top = '-9999px'
-    this.audio.style.width = '1px'
-    this.audio.style.height = '1px'
-    this.audio.style.opacity = '0'
-    this.audio.style.pointerEvents = 'none'
-    if (document.body && !this.audio.parentNode) {
+    if (!isWechat) {
+      this.audio.style.position = 'fixed'
+      this.audio.style.left = '-9999px'
+      this.audio.style.top = '-9999px'
+      this.audio.style.width = '1px'
+      this.audio.style.height = '1px'
+      this.audio.style.opacity = '0'
+      this.audio.style.pointerEvents = 'none'
+    }
+    if (!isWechat && document.body && !this.audio.parentNode) {
       document.body.appendChild(this.audio)
     }
     this.patchState({
@@ -678,7 +685,7 @@ class ActivityAudioService {
     }
 
     audio.preload = 'auto'
-    audio.autoplay = true
+    audio.autoplay = !isWechatBrowser()
     audio.loop = this.config.loop
     audio.volume = this.config.volume
     audio.setAttribute('playsinline', 'true')
@@ -732,12 +739,12 @@ class ActivityAudioService {
 
     this.handleFirstGesture = () => {
       this.resumeAudioContext('first-gesture').catch(() => undefined)
-      this.restoreAudibleElementState('first-gesture')
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
         if (isWechatBrowser()) {
           this.runBridgeUnlock('first-gesture-wechat')
           return
         }
+        this.restoreAudibleElementState('first-gesture')
         this.play('first-gesture', { forcePrepare: true, ignoreThrottle: true })
       }
     }
@@ -816,7 +823,9 @@ class ActivityAudioService {
     debugLog('[ActivityAudio] bridge unlock', { reason })
     this.resumeAudioContext(reason).catch(() => undefined)
 
-    if (this.config.autoplay && this.config.url && !this.state.userPaused) {
+    const shouldPlay = (this.config.autoplay || /manual/i.test(reason)) && this.config.url && !this.state.userPaused
+
+    if (shouldPlay) {
       if (reason.includes('cached-url')) {
         debugLog('[ActivityAudio] cached url weixin invoke')
       }
@@ -825,14 +834,15 @@ class ActivityAudioService {
     }
 
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-300`)
+      if (shouldPlay) this.playWechatAudible(`${reason}-retry-300`)
     }, 300)
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-800`)
+      if (shouldPlay) this.playWechatAudible(`${reason}-retry-800`)
     }, 800)
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-1500`)
+      if (shouldPlay) this.playWechatAudible(`${reason}-retry-1500`)
     }, 1500)
+    return true
   }
 
   prepareCachedUrl() {
@@ -874,6 +884,11 @@ class ActivityAudioService {
     if (window.WeixinJSBridge?.invoke && !this.state.userPaused) {
       this.patchState({ bridgeReady: true })
       this.runBridgeUnlock('cached-url-wechat-bridge')
+      return
+    }
+
+    if (isWechatBrowser() && this.state.bridgeReady && !this.state.userPaused) {
+      this.runBridgeUnlock('cached-url-bridge-ready')
       return
     }
 
