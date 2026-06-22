@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { lazy } from 'react'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
@@ -23,6 +24,14 @@ export const projectRoutes = [
   {
     path: '/material-registration/:activityKey',
     Component: MaterialRegistrationProject,
+  },
+  {
+    path: '/tjrcb-pension-manual/:activityKey',
+    Component: lazy(() => import('./tjrcb-pension-manual/index.jsx')),
+  },
+  {
+    path: '/tjrcb_pension_manual/:activityKey',
+    Component: lazy(() => import('./tjrcb-pension-manual/index.jsx')),
   },
   {
     path: '/video-rank',

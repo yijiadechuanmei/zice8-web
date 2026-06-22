@@ -1,0 +1,171 @@
+.tjrcb-pension-manual-app {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #ffdeb9;
+  background-image: var(--tjrcb-manual-bg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #f05a23;
+}
+
+.tjrcb-pension-manual-stage {
+  position: relative;
+  width: min(100vw, 375px);
+  min-height: max(100vh, 724px);
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.tjrcb-pension-manual-logo {
+  position: absolute;
+  left: 24px;
+  top: 22px;
+  width: 193px;
+  height: 37px;
+  object-fit: contain;
+}
+
+.tjrcb-pension-manual-title {
+  position: absolute;
+  left: 40px;
+  top: 112px;
+  width: 310px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.tjrcb-pension-manual-carousel {
+  position: absolute;
+  left: 0;
+  top: 242px;
+  width: 375px;
+  height: 190px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.tjrcb-pension-manual-carousel__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 420ms ease;
+  will-change: transform;
+}
+
+.tjrcb-pension-manual-carousel__item {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.tjrcb-pension-manual-carousel__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tjrcb-pension-manual-audio-button,
+.tjrcb-pension-manual-category-row button,
+.tjrcb-pension-manual-icon-button {
+  border: 0;
+  border-radius: 2px;
+  background: #ffffff;
+  color: #f05a23;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(171, 72, 13, 0.12);
+}
+
+.tjrcb-pension-manual-audio-button {
+  position: absolute;
+  left: 179px;
+  top: 463px;
+  width: 66px;
+  height: 34px;
+  padding: 0;
+  font-size: 12px;
+}
+
+.tjrcb-pension-manual-icon-button {
+  position: absolute;
+  top: 462px;
+  width: 37px;
+  height: 36px;
+  padding: 0;
+}
+
+.tjrcb-pension-manual-icon-button--prev {
+  left: 268px;
+}
+
+.tjrcb-pension-manual-icon-button--next {
+  left: 320px;
+}
+
+.tjrcb-pension-manual-icon-button img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.tjrcb-pension-manual-category-row {
+  position: absolute;
+  left: 0;
+  top: 521px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 375px;
+  height: 41px;
+}
+
+.tjrcb-pension-manual-category-row button {
+  width: 57px;
+  height: 28px;
+  margin: 5px;
+  padding: 0;
+  font-size: 12px;
+}
+
+.tjrcb-pension-manual-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: transparent;
+}
+
+.tjrcb-pension-manual-error {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 320px;
+  z-index: 6;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 16px;
+  color: #b83216;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.tjrcb-pension-manual-state {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.tjrcb-pension-manual-state__card {
+  border-radius: 16px;
+  background: #fff7ed;
+  padding: 24px 28px;
+  color: #c2410c;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
