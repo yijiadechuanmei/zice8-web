@@ -86,6 +86,11 @@ function isAutoplayBlockedError(error) {
   return name === 'NotAllowedError' || /user didn't interact|play\(\) failed|not allowed|gesture/i.test(message)
 }
 
+function isWechatBrowser() {
+  if (typeof navigator === 'undefined') return false
+  return /MicroMessenger/i.test(navigator.userAgent || '')
+}
+
 class ActivityAudioService {
   constructor() {
     this.audio = null
@@ -184,11 +189,14 @@ class ActivityAudioService {
     if (!this.config.enabled || !this.config.url) return false
     if (this.state.userPaused && !isManual) return false
     if (!isManual && isAudioActivelyPlaying(this.audio) && this.lastPreparedUrl === this.config.url) {
+      if (this.state.mutedAutoplay) {
+        return this.restoreAudibleElementState(`${reason}-active-restore`)
+      }
       this.patchState({
         playing: true,
         paused: false,
-        blocked: this.state.mutedAutoplay ? true : false,
-        lastError: this.state.mutedAutoplay ? this.state.lastError : '',
+        blocked: false,
+        lastError: '',
       })
       return true
     }
@@ -231,7 +239,7 @@ class ActivityAudioService {
     } catch (error) {
       const message = error?.message || 'unknown'
       console.warn(`[ActivityAudio] play failed reason=${reason} error=${message}`)
-      if (!isManual && this.config.autoplay && isAutoplayBlockedError(error)) {
+      if (!isManual && this.config.autoplay && !isWechatBrowser() && isAutoplayBlockedError(error)) {
         const mutedPlayed = await this.playMutedAutoplay(`${reason}-muted-fallback`, audio, message)
         if (mutedPlayed) return true
       }
@@ -623,6 +631,7 @@ class ActivityAudioService {
         if (reason.includes('cached-url')) {
           debugLog('[ActivityAudio] cached url weixin invoke')
         }
+        this.restoreAudibleElementState(`${reason}-invoke-restore`)
         this.play(`${reason}-invoke`, { forcePrepare: true, ignoreThrottle: true })
       }
     }
