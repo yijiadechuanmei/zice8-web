@@ -3,6 +3,7 @@ import { lazy } from 'react'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
+const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 
 export const projectRoutes = [
   {
@@ -32,6 +33,18 @@ export const projectRoutes = [
   {
     path: '/tjrcb_pension_manual/:activityKey',
     Component: lazy(() => import('./tjrcb-pension-manual/index.jsx')),
+  },
+  {
+    path: '/tjrcb-pension-manual/:activityKey/debug',
+    Component: AudioDebugProject,
+  },
+  {
+    path: '/tjrcb_pension_manual/:activityKey/debug',
+    Component: AudioDebugProject,
+  },
+  {
+    path: '/audio-debug/:activityKey',
+    Component: AudioDebugProject,
   },
   {
     path: '/video-rank',
