@@ -22,6 +22,8 @@ const DEFAULT_STATE = {
   mediaElementSourceEnabled: false,
   activityKey: '',
   mutedAutoplay: false,
+  playbackVerified: false,
+  playbackRecoveries: 0,
 }
 
 const ENABLE_MEDIA_ELEMENT_SOURCE = false
@@ -105,8 +107,10 @@ class ActivityAudioService {
     this.lastAttemptAt = 0
     this.reasonAttempts = {}
     this.timers = []
+    this.playbackCheckTimers = []
     this.firstGestureBound = false
     this.cachedPrepared = false
+    this.wechatRecoveryCount = 0
   }
 
   init(options = {}) {
@@ -408,8 +412,10 @@ class ActivityAudioService {
               paused: false,
               blocked: false,
               mutedAutoplay: false,
+              playbackVerified: false,
               lastError: '',
             })
+            this.scheduleWechatPlaybackVerification(reason)
             this.clearFirstGestureListeners()
             debugLog('[ActivityAudio] wechat audible play success', {
               reason,
@@ -437,8 +443,10 @@ class ActivityAudioService {
         paused: false,
         blocked: false,
         mutedAutoplay: false,
+        playbackVerified: false,
         lastError: '',
       })
+      this.scheduleWechatPlaybackVerification(reason)
       this.clearFirstGestureListeners()
       debugLog('[ActivityAudio] wechat audible play called', {
         reason,
@@ -526,6 +534,7 @@ class ActivityAudioService {
 
   destroy() {
     this.clearTimers()
+    this.clearPlaybackCheckTimers()
     this.clearFirstGestureListeners()
     document.removeEventListener('WeixinJSBridgeReady', this.handleBridgeReady, false)
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
@@ -553,6 +562,7 @@ class ActivityAudioService {
     this.initialized = false
     this.lastPreparedUrl = ''
     this.cachedPrepared = false
+    this.wechatRecoveryCount = 0
     this.patchState({ ...DEFAULT_STATE })
   }
 
@@ -593,9 +603,8 @@ class ActivityAudioService {
   createAudio() {
     if (this.audio) return this.audio
 
-    const isWechat = isWechatBrowser()
     this.audio = document.createElement('audio')
-    this.audio.autoplay = !isWechat
+    this.audio.autoplay = !isWechatBrowser()
     this.audio.muted = false
     this.audio.preload = 'auto'
     this.audio.setAttribute('playsinline', 'true')
@@ -604,16 +613,14 @@ class ActivityAudioService {
     this.audio.setAttribute('x5-video-player-type', 'h5')
     this.audio.setAttribute('aria-hidden', 'true')
     this.audio.setAttribute('data-zice8-activity-bgm', 'true')
-    if (!isWechat) {
-      this.audio.style.position = 'fixed'
-      this.audio.style.left = '-9999px'
-      this.audio.style.top = '-9999px'
-      this.audio.style.width = '1px'
-      this.audio.style.height = '1px'
-      this.audio.style.opacity = '0'
-      this.audio.style.pointerEvents = 'none'
-    }
-    if (!isWechat && document.body && !this.audio.parentNode) {
+    this.audio.style.position = 'fixed'
+    this.audio.style.left = '-9999px'
+    this.audio.style.top = '-9999px'
+    this.audio.style.width = '1px'
+    this.audio.style.height = '1px'
+    this.audio.style.opacity = '0'
+    this.audio.style.pointerEvents = 'none'
+    if (document.body && !this.audio.parentNode) {
       document.body.appendChild(this.audio)
     }
     this.patchState({
@@ -719,7 +726,10 @@ class ActivityAudioService {
   bindAudioEvents() {
     if (!this.audio) return
 
-    this.handleAudioPlay = () => this.patchState({ playing: true, paused: false, blocked: false })
+    this.handleAudioPlay = () => {
+      this.patchState({ playing: true, paused: false, blocked: false })
+      this.scheduleWechatPlaybackVerification('audio-play-event')
+    }
     this.handleAudioPause = () => this.patchState({ playing: false, paused: true })
     this.handleAudioEnded = () => this.patchState({ playing: false, paused: true })
     this.handleAudioReady = () => this.patchState({ ready: true, loading: false })
@@ -914,6 +924,100 @@ class ActivityAudioService {
   clearTimers() {
     this.timers.forEach((timerId) => window.clearTimeout(timerId))
     this.timers = []
+  }
+
+  scheduleWechatPlaybackVerification(reason) {
+    if (!isWechatBrowser() || !this.audio || this.state.userPaused) return
+
+    this.clearPlaybackCheckTimers()
+    const audio = this.audio
+    const startTime = Number(audio.currentTime || 0)
+    const verify = (delay) => {
+      if (!this.audio || this.audio !== audio || this.state.userPaused || !this.config.enabled) return
+
+      const currentTime = Number(audio.currentTime || 0)
+      const advanced = !audio.paused && currentTime > startTime + 0.05
+      if (advanced) {
+        this.wechatRecoveryCount = 0
+        this.patchState({
+          playbackVerified: true,
+          playbackRecoveries: this.wechatRecoveryCount,
+          lastError: '',
+        })
+        debugLog('[ActivityAudio] wechat playback verified', {
+          reason,
+          delay,
+          startTime,
+          currentTime,
+          readyState: audio.readyState,
+          networkState: audio.networkState,
+        })
+        return
+      }
+
+      if (this.wechatRecoveryCount >= 3) {
+        this.patchState({
+          playbackVerified: false,
+          playbackRecoveries: this.wechatRecoveryCount,
+          lastError: `微信播放未推进 currentTime delay=${delay}`,
+        })
+        return
+      }
+
+      this.wechatRecoveryCount += 1
+      this.patchState({
+        playbackVerified: false,
+        playbackRecoveries: this.wechatRecoveryCount,
+      })
+      debugLog('[ActivityAudio] wechat playback stalled, rebuilding audio', {
+        reason,
+        delay,
+        startTime,
+        currentTime,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+        recovery: this.wechatRecoveryCount,
+      })
+      this.rebuildAudioForWechat(`${reason}-recover-${this.wechatRecoveryCount}`)
+      this.runBridgeUnlock(`${reason}-recover-${this.wechatRecoveryCount}`)
+    }
+
+    ;[700, 1800].forEach((delay) => {
+      const timerId = window.setTimeout(() => {
+        this.playbackCheckTimers = this.playbackCheckTimers.filter((id) => id !== timerId)
+        verify(delay)
+      }, delay)
+      this.playbackCheckTimers.push(timerId)
+    })
+  }
+
+  rebuildAudioForWechat(reason) {
+    if (!isWechatBrowser() || !this.audio) return
+
+    const previousAudio = this.audio
+    previousAudio.removeEventListener('play', this.handleAudioPlay)
+    previousAudio.removeEventListener('pause', this.handleAudioPause)
+    previousAudio.removeEventListener('ended', this.handleAudioEnded)
+    previousAudio.removeEventListener('canplay', this.handleAudioReady)
+    previousAudio.removeEventListener('loadeddata', this.handleAudioReady)
+    try {
+      previousAudio.pause()
+      previousAudio.removeAttribute('src')
+      safeLoadAudio(previousAudio)
+      previousAudio.remove()
+    } catch {
+      // Rebuild is best effort; the next bridge attempt will report state.
+    }
+    this.audio = null
+    this.lastPreparedUrl = ''
+    this.createAudio()
+    this.bindAudioEvents()
+    this.prepareAudio(reason, { force: true })
+  }
+
+  clearPlaybackCheckTimers() {
+    this.playbackCheckTimers.forEach((timerId) => window.clearTimeout(timerId))
+    this.playbackCheckTimers = []
   }
 }
 
