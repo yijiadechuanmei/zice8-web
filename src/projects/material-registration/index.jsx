@@ -236,7 +236,8 @@ function MaterialRegistrationMain({ routeParams }) {
   }
 
   function handleDisagree() {
-    // Per activity requirement, "不同意" is intentionally inert.
+    setAgreeChecked(false)
+    setDisagreeChecked(true)
   }
 
   function updateForm(field, value) {
