@@ -150,15 +150,15 @@
 }
 
 .material-registration-back-button {
-  position: fixed;
-  left: max(9px, calc((100vw - 375px) / 2 + 9px));
-  top: 7px;
+  position: relative;
   z-index: 8;
   display: flex;
+  flex: 0 0 30px;
   align-items: center;
   justify-content: center;
   width: 30px;
   height: 30px;
+  margin: 7px 0 0 9px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -193,7 +193,7 @@
 .material-registration-form-flow {
   display: flex;
   width: 100%;
-  padding: 40px 7px 32px;
+  padding: 0 7px 32px;
   flex-direction: column;
   align-items: stretch;
 }
