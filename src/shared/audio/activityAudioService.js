@@ -187,8 +187,8 @@ class ActivityAudioService {
       this.patchState({
         playing: true,
         paused: false,
-        blocked: false,
-        lastError: '',
+        blocked: this.state.mutedAutoplay ? true : false,
+        lastError: this.state.mutedAutoplay ? this.state.lastError : '',
       })
       return true
     }
@@ -267,7 +267,6 @@ class ActivityAudioService {
         reason,
         src: audio.currentSrc || audio.src || '',
       })
-      this.scheduleTask(() => this.restoreAudibleElementState(`${reason}-restore`), 300)
       return true
     } catch (error) {
       debugLog('[ActivityAudio] muted autoplay failed', {
@@ -278,21 +277,45 @@ class ActivityAudioService {
     }
   }
 
-  restoreAudibleElementState(reason = 'restore-audible') {
+  async restoreAudibleElementState(reason = 'restore-audible') {
     const audio = this.audio
     if (!audio || this.state.userPaused || !this.config.enabled) return false
 
-    audio.muted = false
-    audio.volume = this.config.volume
-    this.patchState({
-      mutedAutoplay: false,
-    })
-    debugLog('[ActivityAudio] restore audible element state', {
-      reason,
-      playing: !audio.paused,
-      muted: audio.muted,
-    })
-    return true
+    try {
+      audio.muted = false
+      audio.volume = this.config.volume
+      await audio.play()
+      this.patchState({
+        blocked: false,
+        mutedAutoplay: false,
+        playing: true,
+        paused: false,
+        lastError: '',
+      })
+      debugLog('[ActivityAudio] restore audible element state', {
+        reason,
+        playing: !audio.paused,
+        muted: audio.muted,
+      })
+      return true
+    } catch (error) {
+      debugLog('[ActivityAudio] restore audible failed', {
+        reason,
+        error: error?.message || 'unknown',
+      })
+      if (this.state.mutedAutoplay && this.config.autoplay) {
+        audio.muted = true
+        await audio.play().catch(() => undefined)
+        this.patchState({
+          blocked: true,
+          mutedAutoplay: true,
+          playing: !audio.paused,
+          paused: audio.paused,
+          lastError: error?.message || '',
+        })
+      }
+      return false
+    }
   }
 
   pause(reason = 'pause') {
@@ -321,6 +344,7 @@ class ActivityAudioService {
     document.removeEventListener('WeixinJSBridgeReady', this.handleBridgeReady, false)
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
     window.removeEventListener('pageshow', this.handlePageShow)
+    window.removeEventListener('focus', this.handleWindowFocus)
 
     if (this.audio) {
       this.audio.removeEventListener('play', this.handleAudioPlay)
@@ -545,9 +569,15 @@ class ActivityAudioService {
       this.play('pageshow')
     }
 
+    this.handleWindowFocus = () => {
+      if (!this.config.autoplay || this.state.userPaused || !this.state.mutedAutoplay) return
+      this.restoreAudibleElementState('focus')
+    }
+
     document.addEventListener('WeixinJSBridgeReady', this.handleBridgeReady, false)
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
     window.addEventListener('pageshow', this.handlePageShow)
+    window.addEventListener('focus', this.handleWindowFocus)
     this.bindFirstGestureListeners()
 
     if (window.WeixinJSBridge) {
