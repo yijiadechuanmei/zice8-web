@@ -550,15 +550,24 @@ function FormPage({
           <h1 id="meeting-schedule-title">会议安排</h1>
           <dl>
             <div>
-              <dt>时间：</dt>
+              <dt>
+                <span>时间</span>
+                <span>：</span>
+              </dt>
               <dd>2026年6月30日14:30</dd>
             </div>
             <div>
-              <dt>地点：</dt>
+              <dt>
+                <span>地点</span>
+                <span>：</span>
+              </dt>
               <dd>武汉理工大学南湖校区体育馆</dd>
             </div>
             <div>
-              <dt>入住酒店：</dt>
+              <dt>
+                <span>入住酒店</span>
+                <span>：</span>
+              </dt>
               <dd>雄楚国际大酒店</dd>
             </div>
           </dl>

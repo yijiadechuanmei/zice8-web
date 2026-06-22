@@ -211,15 +211,17 @@
 }
 
 .material-registration-meeting-schedule dl {
-  width: calc(100% - 14px);
+  width: fit-content;
+  max-width: 100%;
   margin: 0 auto;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .material-registration-meeting-schedule dl > div {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: 80px minmax(0, 1fr);
 }
 
 .material-registration-meeting-schedule dt,
@@ -228,8 +230,20 @@
 }
 
 .material-registration-meeting-schedule dt {
-  font-weight: 500;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  font-weight: 400;
   white-space: nowrap;
+}
+
+.material-registration-meeting-schedule dt span:first-child {
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.material-registration-meeting-schedule dd {
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .material-registration-page-form .material-registration-form-heading {
