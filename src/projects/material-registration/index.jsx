@@ -5,7 +5,6 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
-  createMaterialRegistrationDisagreement,
   createMaterialRegistrationSubmission,
   getMaterialRegistrationBootstrap,
   getMaterialRegistrationPublicConfig,
@@ -44,7 +43,6 @@ const MATERIAL_REGISTRATION_HOTEL = {
 }
 
 const DEFAULT_FORM_OPTIONS = {
-  unitTypes: ['高等学校', '中小学校', '科研院所', '行业企业', '行业协会', '地方政府', '其他'],
   accommodationDates: [
     { label: '6月29日', value: '2026-06-29' },
     { label: '6月30日', value: '2026-06-30' },
@@ -55,7 +53,6 @@ const DEFAULT_FORM_OPTIONS = {
 
 const initialForm = {
   unitName: '',
-  unitType: '其他',
   attendees: [{ name: '', position: '', phone: '' }],
   contactUnitName: '',
   needAccommodation: '',
@@ -110,9 +107,6 @@ function MaterialRegistrationMain({ routeParams }) {
   const [agreeChecked, setAgreeChecked] = useState(false)
   const [disagreeChecked, setDisagreeChecked] = useState(false)
   const [form, setForm] = useState(initialForm)
-  const [showDisagreeDialog, setShowDisagreeDialog] = useState(false)
-  const [disagreeRecommendation, setDisagreeRecommendation] = useState('')
-  const [disagreeSubmitting, setDisagreeSubmitting] = useState(false)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
   const activityKeyMissing = !activityKey
 
@@ -242,9 +236,7 @@ function MaterialRegistrationMain({ routeParams }) {
   }
 
   function handleDisagree() {
-    setAgreeChecked(false)
-    setDisagreeChecked(true)
-    setShowDisagreeDialog(true)
+    // Per activity requirement, "不同意" is intentionally inert.
   }
 
   function updateForm(field, value) {
@@ -280,38 +272,6 @@ function MaterialRegistrationMain({ routeParams }) {
         attendees: current.attendees.filter((_, attendeeIndex) => attendeeIndex !== index),
       }
     })
-  }
-
-  function closeDisagreeDialog() {
-    if (disagreeSubmitting) return
-    setShowDisagreeDialog(false)
-  }
-
-  async function handleDisagreeSubmit(event) {
-    event.preventDefault()
-    const recommendedUnitName = disagreeRecommendation.trim()
-    if (!recommendedUnitName) {
-      showMessage('请填写推荐单位')
-      return
-    }
-
-    setDisagreeSubmitting(true)
-    try {
-      await createMaterialRegistrationDisagreement(activityKey, { recommendedUnitName })
-      setDisagreeRecommendation('')
-      setShowDisagreeDialog(false)
-      showMessage('提交成功')
-      trackEvent({
-        activityKey,
-        eventType: 'material_registration_disagree_submit',
-        page: '/material-registration',
-        extra: { activityType: MATERIAL_REGISTRATION_ACTIVITY_TYPE },
-      })
-    } catch (err) {
-      showMessage(err?.message || '提交失败，请稍后重试')
-    } finally {
-      setDisagreeSubmitting(false)
-    }
   }
 
   function toggleAccommodationDate(value) {
@@ -374,7 +334,6 @@ function MaterialRegistrationMain({ routeParams }) {
     try {
       const payload = {
         ...form,
-        unitType: form.unitType || '其他',
         contactUnitName: form.contactUnitName || form.unitName,
         needAccommodation: form.needAccommodation === '是',
         accommodationDates: form.needAccommodation === '是' ? form.accommodationDates : [],
@@ -476,15 +435,6 @@ function MaterialRegistrationMain({ routeParams }) {
           />
         )}
         {page === PAGES.SUCCESS && <SuccessPage assetsBaseUrl={assetsBaseUrl} />}
-        {showDisagreeDialog && (
-          <DisagreeDialog
-            value={disagreeRecommendation}
-            submitting={disagreeSubmitting}
-            onChange={setDisagreeRecommendation}
-            onClose={closeDisagreeDialog}
-            onSubmit={handleDisagreeSubmit}
-          />
-        )}
       </div>
     </main>
   )
@@ -602,9 +552,12 @@ function FormPage({
     <>
       <BackButton assetsBaseUrl={assetsBaseUrl} onClick={onBack} />
       <h1 className="material-registration-page-title material-registration-form-heading">
-        填写参会信息
+        参会信息
       </h1>
       <form className="material-registration-card material-registration-form-card" onSubmit={onSubmit}>
+        <Field label="单位名称">
+          <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
+        </Field>
         <div className="material-registration-field">
           <label>参会人</label>
           <div className="material-registration-attendees">
@@ -645,9 +598,6 @@ function FormPage({
             + 添加参会人
           </button>
         </div>
-        <Field label="单位名称">
-          <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
-        </Field>
         <RadioGroup
           label="是否需要安排住宿"
           value={form.needAccommodation}
@@ -699,34 +649,6 @@ function FormPage({
         </button>
       </form>
     </>
-  )
-}
-
-function DisagreeDialog({ value, submitting, onChange, onClose, onSubmit }) {
-  return (
-    <div className="material-registration-modal" role="dialog" aria-modal="true" aria-label="推荐其他单位">
-      <form className="material-registration-modal-card" onSubmit={onSubmit}>
-        <button
-          type="button"
-          className="material-registration-modal-close"
-          onClick={onClose}
-          disabled={submitting}
-          aria-label="关闭"
-        >
-          ×
-        </button>
-        <h2>请推荐其他单位</h2>
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="请输入推荐单位名称"
-          autoFocus
-        />
-        <button type="submit" className="material-registration-modal-submit" disabled={submitting}>
-          {submitting ? '提交中...' : '提交'}
-        </button>
-      </form>
-    </div>
   )
 }
 

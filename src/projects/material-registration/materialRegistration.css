@@ -34,14 +34,15 @@
   top: 111px;
   width: calc(100% - 24px);
   max-width: 350px;
-  height: 136px;
+  height: auto;
+  aspect-ratio: 715 / 278;
   object-fit: contain;
 }
 
 .material-registration-document-list {
   position: absolute;
   left: 50%;
-  top: 282px;
+  top: 292px;
   width: calc(100% - 24px);
   max-width: 350px;
   transform: translateX(-50%);
@@ -552,91 +553,6 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1.35;
-}
-
-.material-registration-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 45;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(9, 19, 73, 0.46);
-}
-
-.material-registration-modal-card {
-  position: relative;
-  width: min(100%, 320px);
-  padding: 28px 20px 22px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 18px 50px rgba(9, 19, 73, 0.24);
-}
-
-.material-registration-modal-card h2 {
-  margin: 0 0 16px;
-  color: #131f6e;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.35;
-  text-align: center;
-}
-
-.material-registration-modal-card input {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid rgba(19, 31, 110, 0.22);
-  border-radius: 9px;
-  background: #ffffff;
-  color: #172554;
-  font-size: 16px;
-  outline: none;
-}
-
-.material-registration-modal-card input:focus {
-  border-color: #274ec4;
-  box-shadow: 0 0 0 3px rgba(39, 78, 196, 0.12);
-}
-
-.material-registration-modal-close {
-  position: absolute;
-  right: 10px;
-  top: 8px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #131f6e;
-  font-size: 26px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.material-registration-modal-close:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.material-registration-modal-submit {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 16px;
-  border: 0;
-  border-radius: 100px;
-  background-image: linear-gradient(180deg, #3899ec 0%, #274ec4 100%);
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.material-registration-modal-submit:disabled {
-  cursor: not-allowed;
-  filter: grayscale(0.4);
-  opacity: 0.72;
 }
 
 @keyframes material-registration-loading-slide {
