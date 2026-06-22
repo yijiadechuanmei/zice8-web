@@ -33,6 +33,10 @@ function normalizePageNumber(page, pageCount) {
   return clampPageIndex((Number(page) || 1) - 1, pageCount)
 }
 
+function hasNarrationAudio(index) {
+  return index >= 2
+}
+
 export default function TjrcbPensionManualApp({ routeParams }) {
   const activityKey =
     routeParams?.activityKey ||
@@ -44,6 +48,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [audioPlaying, setAudioPlaying] = useState(false)
   const audioRef = useRef(null)
+  const autoTimerRef = useRef(null)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   const manualConfig = useMemo(() => mergeManualConfig(publicConfig), [publicConfig])
@@ -86,6 +91,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     }
   }, [manualConfig, publicConfig])
   const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
+  const showLoading = loading || (publicConfig && !authReady && !blockedMessage)
 
   useWechatShare(activityKey, shareActivity)
 
@@ -129,7 +135,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     async (index) => {
       const audio = audioRef.current
       const src = audioUrls[index]
-      if (!audio || !src) return
+      if (!audio || !src || !hasNarrationAudio(index)) return false
 
       if (audio.src !== src) {
         audio.src = src
@@ -139,17 +145,18 @@ export default function TjrcbPensionManualApp({ routeParams }) {
       try {
         await audio.play()
         setAudioPlaying(true)
+        return true
       } catch {
         setAudioPlaying(false)
+        return false
       }
     },
     [audioUrls],
   )
 
-  function goToIndex(nextIndex, source) {
+  const goToIndex = useCallback((nextIndex, source) => {
     const normalized = clampPageIndex(nextIndex, pageCount)
     setCurrentIndex(normalized)
-    playAudioAt(normalized)
     trackEvent({
       activityKey,
       eventType: 'manual_page_change',
@@ -160,7 +167,53 @@ export default function TjrcbPensionManualApp({ routeParams }) {
         source,
       },
     })
-  }
+  }, [activityKey, pageCount])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || showLoading || blockedMessage || error) return undefined
+
+    if (autoTimerRef.current) {
+      window.clearTimeout(autoTimerRef.current)
+      autoTimerRef.current = null
+    }
+
+    audio.pause()
+    audio.currentTime = 0
+
+    if (!hasNarrationAudio(safeCurrentIndex)) {
+      if (safeCurrentIndex < pageCount - 1) {
+        autoTimerRef.current = window.setTimeout(() => {
+          goToIndex(safeCurrentIndex + 1, 'auto-no-audio')
+        }, 3000)
+      }
+      return () => {
+        if (autoTimerRef.current) {
+          window.clearTimeout(autoTimerRef.current)
+          autoTimerRef.current = null
+        }
+      }
+    }
+
+    autoTimerRef.current = window.setTimeout(() => {
+      playAudioAt(safeCurrentIndex)
+    }, 0)
+
+    return () => {
+      if (autoTimerRef.current) {
+        window.clearTimeout(autoTimerRef.current)
+        autoTimerRef.current = null
+      }
+    }
+  }, [
+    blockedMessage,
+    error,
+    goToIndex,
+    pageCount,
+    playAudioAt,
+    safeCurrentIndex,
+    showLoading,
+  ])
 
   function toggleAudio() {
     const audio = audioRef.current
@@ -175,10 +228,16 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     playAudioAt(safeCurrentIndex)
   }
 
+  function handleNarrationEnded() {
+    setAudioPlaying(false)
+    if (safeCurrentIndex < pageCount - 1) {
+      goToIndex(safeCurrentIndex + 1, 'audio-ended')
+    }
+  }
+
   const backgroundUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.backgroundImage)
   const logoUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.logoImage)
   const titleUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.titleImage)
-  const showLoading = loading || (publicConfig && !authReady && !blockedMessage)
 
   if (blockedMessage) {
     return (
@@ -258,7 +317,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           preload="none"
           onPlay={() => setAudioPlaying(true)}
           onPause={() => setAudioPlaying(false)}
-          onEnded={() => setAudioPlaying(false)}
+          onEnded={handleNarrationEnded}
         />
       </div>
       {bgmConfig?.showControl !== false ? (
