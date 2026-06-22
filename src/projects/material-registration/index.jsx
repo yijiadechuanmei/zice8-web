@@ -545,7 +545,7 @@ function HomePage({
         />
         <AgreementButton
           checked={agreementChoice === 'no-attendance'}
-          label="同意 本次大会不参加"
+          label="同意，本次不参会"
           onClick={onNoAttendance}
         />
         <AgreementButton
