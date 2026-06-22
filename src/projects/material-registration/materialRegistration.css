@@ -186,6 +186,60 @@
   text-align: center;
 }
 
+.material-registration-page-form {
+  background-position: center top;
+}
+
+.material-registration-form-flow {
+  display: flex;
+  width: 100%;
+  padding: 40px 7px 32px;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.material-registration-meeting-schedule {
+  color: #ffffff;
+}
+
+.material-registration-meeting-schedule h1 {
+  margin: 0 30px 10px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.material-registration-meeting-schedule dl {
+  width: calc(100% - 14px);
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.material-registration-meeting-schedule dl > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.material-registration-meeting-schedule dt,
+.material-registration-meeting-schedule dd {
+  margin: 0;
+}
+
+.material-registration-meeting-schedule dt {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.material-registration-page-form .material-registration-form-heading {
+  position: static;
+  width: auto;
+  min-height: 30px;
+  margin: 15px 30px 10px;
+  font-size: 18px;
+}
+
 .material-registration-card {
   position: absolute;
   left: 7px;
@@ -247,6 +301,13 @@
 
 .material-registration-form-card {
   padding: 18px 18px 28px;
+}
+
+.material-registration-page-form .material-registration-form-card {
+  position: static;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
 .material-registration-field {

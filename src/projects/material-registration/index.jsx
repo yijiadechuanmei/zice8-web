@@ -545,10 +545,28 @@ function FormPage({
   return (
     <>
       <BackButton assetsBaseUrl={assetsBaseUrl} onClick={onBack} />
-      <h1 className="material-registration-page-title material-registration-form-heading">
-        参会信息
-      </h1>
-      <form className="material-registration-card material-registration-form-card" onSubmit={onSubmit}>
+      <div className="material-registration-form-flow">
+        <section className="material-registration-meeting-schedule" aria-labelledby="meeting-schedule-title">
+          <h1 id="meeting-schedule-title">会议安排</h1>
+          <dl>
+            <div>
+              <dt>时间：</dt>
+              <dd>2026年6月30日14:30</dd>
+            </div>
+            <div>
+              <dt>地点：</dt>
+              <dd>武汉理工大学南湖校区体育馆</dd>
+            </div>
+            <div>
+              <dt>入住酒店：</dt>
+              <dd>雄楚国际大酒店</dd>
+            </div>
+          </dl>
+        </section>
+        <h2 className="material-registration-page-title material-registration-form-heading">
+          参会信息
+        </h2>
+        <form className="material-registration-card material-registration-form-card" onSubmit={onSubmit}>
         <Field label="单位名称">
           <input value={form.unitName} onChange={(event) => onUpdate('unitName', event.target.value)} />
         </Field>
@@ -644,10 +662,11 @@ function FormPage({
             placeholder="如有意见或建议，请填写"
           />
         </Field>
-        <button type="submit" className="material-registration-submit-button" disabled={submitting}>
-          {submitting ? '提交中...' : '提交报名'}
-        </button>
-      </form>
+          <button type="submit" className="material-registration-submit-button" disabled={submitting}>
+            {submitting ? '提交中...' : '提交报名'}
+          </button>
+        </form>
+      </div>
     </>
   )
 }
