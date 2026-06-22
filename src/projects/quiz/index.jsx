@@ -161,6 +161,7 @@ function QuizMain() {
         shareImage: bootstrap?.shareConfig?.imgUrl || bootstrap?.activity?.shareImage || publicConfig?.shareImage || quizAssets.common.logoEvent,
       }
     : null
+  const bgmConfig = bootstrap?.bgmConfig || publicConfig?.bgmConfig
 
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
@@ -511,7 +512,7 @@ function QuizMain() {
           onBack={backHome}
         />
       ) : null}
-      <ActivityBgmPlayer bgm={bootstrap?.bgmConfig} activityKey={activityKey} />
+      <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       <QuizLoadingOverlay visible={submitting} />
       <QuizToast visible={Boolean(toast)} message={toast} />
       {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}

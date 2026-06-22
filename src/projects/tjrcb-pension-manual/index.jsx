@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam } from '../../shared/utils/url'
@@ -245,6 +246,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onEnded={() => setAudioPlaying(false)}
         />
       </div>
+      <ActivityBgmPlayer bgm={publicConfig?.bgmConfig} activityKey={activityKey} />
     </main>
   )
 }
