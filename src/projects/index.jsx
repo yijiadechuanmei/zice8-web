@@ -4,11 +4,20 @@ import { lazy } from 'react'
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
 const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
+const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
 
 export const projectRoutes = [
   {
     path: '/phase-quiz-lottery/:activityKey',
     Component: PhaseQuizLotteryProject,
+  },
+  {
+    path: '/anti-fraud-board-game/:activityKey',
+    Component: AntiFraudBoardGameProject,
+  },
+  {
+    path: '/anti_fraud_board_game/:activityKey',
+    Component: AntiFraudBoardGameProject,
   },
   {
     path: '/phase-quiz-lottery/:activityKey/:page',
