@@ -619,6 +619,9 @@ function FormPage({
               onClick={onOpenHotelLocation}
               aria-label={`${MATERIAL_REGISTRATION_HOTEL.name}导航`}
             >
+              <span className="material-registration-hotel-name">
+                酒店：{MATERIAL_REGISTRATION_HOTEL.name}
+              </span>
               <img
                 className="material-registration-hotel-map"
                 src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.mapButton)}

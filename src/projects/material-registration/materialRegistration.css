@@ -381,6 +381,16 @@
   cursor: pointer;
 }
 
+.material-registration-hotel-name {
+  display: block;
+  margin-bottom: 8px;
+  color: #131f6e;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: left;
+}
+
 .material-registration-hotel-map {
   display: block;
   width: 100%;
