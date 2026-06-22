@@ -177,11 +177,13 @@ class ActivityAudioService {
     const targetUrl = hasExplicitConfig ? nextConfig.url : this.config.url
     this.prepareAudio('set-config', { force: previousUrl !== targetUrl, url: targetUrl })
     if ((hasExplicitConfig ? nextConfig.autoplay : this.config.autoplay) && !this.state.userPaused) {
-      if (isWechatBrowser() && window.WeixinJSBridge?.invoke) {
-        this.runBridgeUnlock('set-config-wechat-bridge')
-      } else {
-        this.play('set-config')
+      if (isWechatBrowser()) {
+        if (window.WeixinJSBridge?.invoke) {
+          this.runBridgeUnlock('set-config-wechat-bridge')
+        }
+        return
       }
+      this.play('set-config')
     }
   }
 
@@ -362,6 +364,98 @@ class ActivityAudioService {
       })
     }
 
+    return true
+  }
+
+  playWechatAudible(reason, options = {}) {
+    const { forcePrepare = false } = options
+    if (!this.config.enabled || !this.config.url || this.state.userPaused) return false
+
+    const audio = this.prepareAudio(reason, { force: forcePrepare })
+    if (!audio) return false
+
+    audio.muted = false
+    audio.defaultMuted = false
+    audio.volume = this.config.volume
+    audio.loop = this.config.loop
+    audio.removeAttribute('muted')
+
+    const invokeAndPlay = () => {
+      let playPromise
+      try {
+        playPromise = audio.play()
+      } catch (error) {
+        this.patchState({
+          playing: false,
+          paused: true,
+          blocked: true,
+          mutedAutoplay: false,
+          lastError: error?.message || 'unknown',
+        })
+        debugLog('[ActivityAudio] wechat audible play threw', {
+          reason,
+          error: error?.message || 'unknown',
+        })
+        return
+      }
+
+      if (playPromise?.then) {
+        playPromise
+          .then(() => {
+            this.patchState({
+              playing: true,
+              paused: false,
+              blocked: false,
+              mutedAutoplay: false,
+              lastError: '',
+            })
+            this.clearFirstGestureListeners()
+            debugLog('[ActivityAudio] wechat audible play success', {
+              reason,
+              src: audio.currentSrc || audio.src || '',
+            })
+          })
+          .catch((error) => {
+            this.patchState({
+              playing: false,
+              paused: true,
+              blocked: true,
+              mutedAutoplay: false,
+              lastError: error?.message || 'unknown',
+            })
+            debugLog('[ActivityAudio] wechat audible play failed', {
+              reason,
+              error: error?.message || 'unknown',
+            })
+          })
+        return
+      }
+
+      this.patchState({
+        playing: true,
+        paused: false,
+        blocked: false,
+        mutedAutoplay: false,
+        lastError: '',
+      })
+      this.clearFirstGestureListeners()
+      debugLog('[ActivityAudio] wechat audible play called', {
+        reason,
+        src: audio.currentSrc || audio.src || '',
+      })
+    }
+
+    if (window.WeixinJSBridge?.invoke) {
+      this.patchState({ bridgeReady: true })
+      try {
+        window.WeixinJSBridge.invoke('getNetworkType', {}, invokeAndPlay)
+      } catch {
+        invokeAndPlay()
+      }
+      return true
+    }
+
+    invokeAndPlay()
     return true
   }
 
@@ -640,6 +734,10 @@ class ActivityAudioService {
       this.resumeAudioContext('first-gesture').catch(() => undefined)
       this.restoreAudibleElementState('first-gesture')
       if (this.config.autoplay && this.config.url && !this.state.userPaused) {
+        if (isWechatBrowser()) {
+          this.runBridgeUnlock('first-gesture-wechat')
+          return
+        }
         this.play('first-gesture', { forcePrepare: true, ignoreThrottle: true })
       }
     }
@@ -647,12 +745,20 @@ class ActivityAudioService {
     this.handleVisibilityChange = () => {
       if (document.visibilityState !== 'visible') return
       if (!this.config.autoplay || this.state.userPaused) return
+      if (isWechatBrowser()) {
+        this.runBridgeUnlock('visible-wechat')
+        return
+      }
       this.restoreAudibleElementState('visible')
       this.play('visible')
     }
 
     this.handlePageShow = () => {
       if (!this.config.autoplay || this.state.userPaused) return
+      if (isWechatBrowser()) {
+        this.runBridgeUnlock('pageshow-wechat')
+        return
+      }
       this.restoreAudibleElementState('pageshow')
       this.play('pageshow')
     }
@@ -677,6 +783,10 @@ class ActivityAudioService {
     if (window.wx && typeof window.wx.ready === 'function') {
       window.wx.ready(() => {
         if (this.config.autoplay && !this.state.userPaused) {
+          if (isWechatBrowser()) {
+            this.runBridgeUnlock('wx-ready-wechat')
+            return
+          }
           this.playNativeImmediately('wx-ready-native', { forcePrepare: true })
         }
       })
@@ -706,32 +816,23 @@ class ActivityAudioService {
     debugLog('[ActivityAudio] bridge unlock', { reason })
     this.resumeAudioContext(reason).catch(() => undefined)
 
-    const invokeAndPlay = () => {
-      if (this.config.autoplay && this.config.url && !this.state.userPaused) {
-        if (reason.includes('cached-url')) {
-          debugLog('[ActivityAudio] cached url weixin invoke')
-        }
-        this.playNativeImmediately(`${reason}-invoke-native`, { forcePrepare: true })
-        this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
+    if (this.config.autoplay && this.config.url && !this.state.userPaused) {
+      if (reason.includes('cached-url')) {
+        debugLog('[ActivityAudio] cached url weixin invoke')
       }
-    }
-
-    if (window.WeixinJSBridge?.invoke) {
-      try {
-        window.WeixinJSBridge.invoke('getNetworkType', {}, invokeAndPlay)
-      } catch {
-        invokeAndPlay()
-      }
-    } else {
-      invokeAndPlay()
+      this.playWechatAudible(`${reason}-invoke`, { forcePrepare: true })
+      this.resumeAudioContext(`${reason}-invoke`).catch(() => undefined)
     }
 
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.play(`${reason}-retry-300`, { forcePrepare: true, ignoreThrottle: true })
+      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-300`)
     }, 300)
     this.scheduleTask(() => {
-      if (this.config.autoplay) this.play(`${reason}-retry-800`, { forcePrepare: true, ignoreThrottle: true })
+      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-800`)
     }, 800)
+    this.scheduleTask(() => {
+      if (this.config.autoplay) this.playWechatAudible(`${reason}-retry-1500`)
+    }, 1500)
   }
 
   prepareCachedUrl() {
