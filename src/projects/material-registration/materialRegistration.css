@@ -328,6 +328,7 @@
   margin-bottom: 14px;
 }
 
+.material-registration-field-label,
 .material-registration-field label {
   display: block;
   margin-bottom: 7px;
@@ -374,31 +375,55 @@
 .material-registration-attendees {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
 .material-registration-attendee-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px;
+  display: block;
+  padding: 12px;
   border: 1px solid rgba(19, 31, 110, 0.12);
   border-radius: 10px;
   background: rgba(238, 243, 255, 0.58);
 }
 
+.material-registration-attendee-header {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin-bottom: 10px;
+}
+
+.material-registration-attendee-title {
+  color: #131f6e;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .material-registration-attendee-fields {
   display: flex;
-  flex: 1 1 auto;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+}
+
+.material-registration-attendee-fields > .material-registration-field {
+  margin-bottom: 0;
+}
+
+.material-registration-attendee-input-label {
+  margin: 0 !important;
+}
+
+.material-registration-attendee-input-label input {
+  display: block;
+  margin-top: 7px;
 }
 
 .material-registration-icon-button {
-  flex: 0 0 42px;
-  width: 42px;
-  min-height: 42px;
+  flex: 0 0 34px;
+  width: 34px;
+  min-height: 34px;
+  margin-left: auto;
   border: 0;
   border-radius: 8px;
   background: #eef3ff;
