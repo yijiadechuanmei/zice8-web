@@ -55,23 +55,9 @@
 .tufe-open-day-video {
   z-index: 2;
   object-fit: contain;
+  overflow: hidden;
+  border-radius: 12px;
   background: #000;
-}
-
-.tufe-open-day-video-play-area {
-  position: absolute;
-  z-index: 3;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.tufe-open-day-video-play-area:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
 }
 
 .tufe-open-day-floating {
