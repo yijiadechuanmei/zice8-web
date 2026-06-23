@@ -123,7 +123,8 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
     id: 'council-list',
     title: '理事长单位、副理事长单位建议名单',
     html: `
-      <p><strong style="font-size: 11pt; line-height: 28pt;">“真材实料 筑基强国”育人共同体理事单位与成员单位名单</strong></p>
+      <p class="ql-align-center"><strong style="font-size: 11pt; line-height: 28pt;">“真材实料 筑基强国”育人共同体理事单位与成员单位名单</strong></p>
+      <p class="ql-align-center"><br></p>
       <p><strong style="font-size: 11pt; line-height: 28pt;">一、指导单位</strong></p>
       <p style="font-size: 11pt; line-height: 28pt;">教育部思想政治工作司</p>
       <p><strong style="font-size: 11pt; line-height: 28pt;">二、理事长单位</strong></p>
