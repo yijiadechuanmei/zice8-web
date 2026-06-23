@@ -121,7 +121,7 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
   },
   {
     id: 'council-list',
-    title: '“真材实料 筑基强国”育人共同体理事单位与成员单位名单',
+    title: '理事长单位、副理事长单位建议名单',
     html: `
       <p><strong style="font-size: 11pt; line-height: 28pt;">“真材实料 筑基强国”育人共同体理事单位与成员单位名单</strong></p>
       <p><strong style="font-size: 11pt; line-height: 28pt;">一、指导单位</strong></p>
