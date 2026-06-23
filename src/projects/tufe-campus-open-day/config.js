@@ -59,7 +59,7 @@ export const CONTENT_LAYERS = [
   ['embedded-40-3649-212x58.png', 40, 3649, 212, 58, link('https://mp.weixin.qq.com/s/2hLrPOcv1s16UnfBk3WFfw', '专业介绍 13')],
   ['edddaca2757ad9a237f654a46b2a30a9_14341_213_58.png', 272, 3649, 213, 58, link('https://mp.weixin.qq.com/s/O2SJkbvOWWGyzhYGdaXwxQ', '专业介绍 14')],
   ['46b7085a2c075ff5130e45feb70c7a14_11223_212_58.png', 503, 3649, 212, 58, link('https://mp.weixin.qq.com/s/l3tgzqd6E0NVNmeiiKI6Fw', '专业介绍 15')],
-  ['0f5badb172fdaf76d8f7a121a3c87d9a_13226_212_58.png', 40, 3726, 212, 58, link('https://829tqnikz.wasee.com/wt/829tqnikz', '查看校园全景')],
+  ['0f5badb172fdaf76d8f7a121a3c87d9a_13226_212_58.png', 40, 3726, 212, 58, link('https://mp.weixin.qq.com/s/T5IOQnB8BS3yPXE5hdKp_A', '查看相关介绍')],
   ['b05f39597472dc92f3d62c4c3100f53d_11830_213_58.png', 272, 3726, 213, 58, link('https://mp.weixin.qq.com/s/d4mn2XY0HxSfmxLLrXw_OA', '专业介绍 17')],
   ['b12d7e68fda4f1465e40fb9e420c1f72_11623_212_58.png', 503, 3726, 212, 58, link('https://mp.weixin.qq.com/s/Hrefdb6jT0SXjs0IrBV2AQ', '专业介绍 18')],
   ['ad79f024904115c5d808edae79c6ee97_11586_213_57.png', 272, 3800, 213, 57, link('https://mp.weixin.qq.com/s/h3nZ0DFXe6V7HEFmqKqPDg', '专业介绍 19')],

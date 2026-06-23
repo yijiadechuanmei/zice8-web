@@ -98,6 +98,19 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
       </div>
       <div className="tufe-open-day-floating">
         <img src={assetUrl(config.assetsBaseUrl, config.floatingImage)} alt="" />
+        <a
+          className="tufe-open-day-handbook"
+          href="https://book.zjzw.cn/books/xiic/mobile/index.html#p=1"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="打开招生手册"
+          onClick={() => trackEvent({
+            activityKey,
+            eventType: 'external_link_click',
+            page: '/tufe-campus-open-day',
+            extra: { label: '招生手册', url: 'https://book.zjzw.cn/books/xiic/mobile/index.html#p=1' },
+          })}
+        />
         <button
           type="button"
           className="tufe-open-day-backtop"
