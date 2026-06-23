@@ -121,22 +121,26 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
   },
   {
     id: 'council-list',
-    title: '理事长单位、副理事长单位建议名单',
+    title: '“真材实料 筑基强国”育人共同体理事单位与成员单位名单',
     html: `
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>理事长单位</strong></p>
-      <p style="font-size: 12pt; line-height: 28pt;">武汉理工大学</p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>副理事长单位（33家）</strong></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>1.高校（6所）：</strong><span>清华大学、上海交通大学、武汉大学、华中科技大学、东南大学、西安电子科技大学</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>2.科研院所（4所）：</strong><span>苏州国家实验室、中国科学院上海硅酸盐研究所、交通运输部公路科学研究院、国家数字化学习工程技术研究中心</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>3.龙头企业（16家）：</strong><span>东风汽车集团有限公司、中国船舶集团有限公司、中国建材集团有限公司、中国交通建设集团有限公司、中国信息通信科技集团有限公司、招商局工业集团有限公司、国投新疆罗布泊钾盐有限责任公司、山东省港口集团有限公司、上汽通用五菱汽车股份有限公司、湖北交通投资集团有限公司、安徽海螺集团有限责任公司、</span><span style="color: #000000;">华工科技产业股份有限公司、</span><span>华为技术有限公司、比亚迪股份有限公司、科大讯飞股份有限公司、海康威视数字技术股份有限公司</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>4.行业协会（4家）：</strong><span>中国建筑材料联合会、中国航海学会、中国汽车工程学会、中国教育技术协会</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>5.地方政府（3个）：</strong><span>武汉市人民政府、三亚市人民政府、芜湖市人民政府</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>成员单位（63家）</strong></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>1.高校（21所）：</strong><span>北京大学、哈尔滨工业大学、北京航空航天大学、同济大学、华南理工大学、西北工业大学、北京理工大学、中南大学、湖南大学、重庆大学、南京航空航天大学、西南交通大学、北京交通大学、合肥工业大学、南京邮电大学、长安大学、大连海事大学、北京化工大学、华中师范大学、中南财经政法大学、武汉职业技术大学</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>2.中小学（7所）：</strong><span>华中师范大学第一附属中学、湖北省武昌实验中学、黄冈中学、武汉市第一中学、武汉中学、广东省佛山南海实验学校、陕西省安康市石泉县中心镇中心小学</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>3.科研院所（9所）：</strong><span>中国科学院宁波材料技术与工程研究所、交通运输部水运科学研究院、崖州湾国家实验室、佛山仙湖实验室、湖北隆中实验室、广东韩江实验室，武汉理工大学青岛研究院、深圳研究院、绍兴研究院</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>4.行业企业（21家）：</strong><span>中国第一汽车集团有限公司、中国机械工业集团有限公司、中国远洋海运集团有限公司、中国五矿集团有限公司、中国建筑集团有限公司、中国机械科学研究总院集团有限公司、中国能源建设集团有限公司、中国汽车技术研究中心有限公司、中国航天科技集团公司第八研究院、中国航发成都发动机有限公司、奇瑞汽车股份有限公司、长飞光纤光缆股份有限公司、东软集团股份有限公司、上海保隆汽车科技股份有限公司、岚图汽车科技有限公司、中复神鹰碳纤维股份有限公司、中国长江航运集团有限公司、矿冶科技集团有限公司、湖北三环集团有限公司、中国航天三江集团有限公司、中国青年报</span></p>
-      <p style="font-size: 12pt; line-height: 28pt;"><strong>5.地方政府（5个）：</strong><span>襄阳市人民政府、黄石市人民政府、随州市人民政府、佛山市人民政府、铜陵市人民政府</span></p>
+      <p><strong style="font-size: 11pt; line-height: 28pt;">“真材实料 筑基强国”育人共同体理事单位与成员单位名单</strong></p>
+      <p><strong style="font-size: 11pt; line-height: 28pt;">一、指导单位</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;">教育部思想政治工作司</p>
+      <p><strong style="font-size: 11pt; line-height: 28pt;">二、理事长单位</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;">武汉理工大学</p>
+      <p><strong style="font-size: 11pt; line-height: 28pt;">三、副理事长单位（37家）</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高等院校（8所）：</strong>清华大学、上海交通大学、武汉大学、华中科技大学、东南大学、西安电子科技大学、华中师范大学、中南财经政法大学</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.科研院所（4所）：</strong>苏州国家实验室、中国科学院上海硅酸盐研究所、交通运输部公路科学研究院、国家数字化学习工程技术研究中心</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.重点企业（18家）：</strong>东风汽车集团有限公司、中国船舶集团有限公司、中国建材集团有限公司、中国交通建设集团有限公司、中国能源建设集团有限公司、中国信息通信科技集团有限公司、招商局工业集团有限公司、国投新疆罗布泊钾盐有限责任公司、山东省港口集团有限公司、上汽通用五菱汽车股份有限公司、湖北交通投资集团有限公司、安徽海螺集团有限责任公司、华工科技产业股份有限公司、华为技术有限公司、比亚迪股份有限公司、科大讯飞股份有限公司、海康威视数字技术股份有限公司、山东京博控股股份有限公司</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业协会（4家）：</strong>中国建筑材料联合会、中国航海学会、中国汽车工程学会、中国教育技术协会</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（3个）：</strong>武汉市人民政府、三亚市人民政府、芜湖市人民政府</p>
+      <p><strong style="font-size: 11pt; line-height: 28pt;">四、成员单位（62家）</strong></p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高等院校（21所）：</strong>北京大学、哈尔滨工业大学、北京航空航天大学、同济大学、华南理工大学、西北工业大学、北京理工大学、中南大学、湖南大学、重庆大学、南京航空航天大学、西南交通大学、北京交通大学、合肥工业大学、南京邮电大学、长安大学、大连海事大学、北京化工大学、武汉科技大学、湖北工业大学、武汉职业技术大学</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>2.中小学（7所）：</strong>华中师范大学第一附属中学、湖北省武昌实验中学、黄冈中学、武汉市第一中学、武汉中学、广东省佛山南海实验学校、陕西省安康市石泉县中心镇中心小学</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>3.科研院所（9所）：</strong>中国科学院宁波材料技术与工程研究所、交通运输部水运科学研究院、崖州湾国家实验室、佛山仙湖实验室、湖北隆中实验室、广东韩江实验室，武汉理工大学青岛研究院、深圳研究院、绍兴研究院</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>4.行业企业（20家）：</strong>中国第一汽车集团有限公司、中国机械工业集团有限公司、中国远洋海运集团有限公司、中国五矿集团有限公司、中国建筑集团有限公司、中国机械科学研究总院集团有限公司、中国汽车技术研究中心有限公司、中国航天科技集团公司第八研究院、中国航发成都发动机有限公司、奇瑞汽车股份有限公司、长飞光纤光缆股份有限公司、东软集团股份有限公司、上海保隆汽车科技股份有限公司、岚图汽车科技有限公司、中复神鹰碳纤维股份有限公司、中国长江航运集团有限公司、矿冶科技集团有限公司、湖北三环集团有限公司、中国航天三江集团有限公司、中国青年报</p>
+      <p style="font-size: 11pt; line-height: 28pt;"><strong>5.地方政府（5个）：</strong>襄阳市人民政府、黄石市人民政府、随州市人民政府、佛山市人民政府、铜陵市人民政府</p>
+      <p class="ql-align-center"><br></p>
     `,
   },
   {
