@@ -123,10 +123,9 @@ function MaterialRegistrationMain({ routeParams }) {
   const assetsBaseUrl = bootstrap?.assetsBaseUrl || MATERIAL_REGISTRATION_FALLBACK_ASSETS_BASE_URL
   const apiDocuments = Array.isArray(bootstrap?.documents) ? bootstrap.documents : []
   const documents = apiDocuments.length
-    ? MATERIAL_REGISTRATION_DOCUMENTS.map((document) => {
-        const matched = apiDocuments.find((item) => item.id === document.id)
-        return matched ? { ...document, title: matched.title || document.title } : document
-      })
+    ? apiDocuments
+        .map((item) => MATERIAL_REGISTRATION_DOCUMENTS.find((document) => document.id === item.id))
+        .filter(Boolean)
     : MATERIAL_REGISTRATION_DOCUMENTS
   const formOptions = bootstrap?.formOptions || DEFAULT_FORM_OPTIONS
   const activeDocument = findMaterialDocument(activeDocumentId)
