@@ -9,6 +9,7 @@ import {
   STAGE_HEIGHT,
   STAGE_WIDTH,
   TUFE_CAMPUS_OPEN_DAY_ACTIVITY_KEY,
+  TUFE_CAMPUS_OPEN_DAY_QR_IMAGE,
 } from './config'
 import './styles.css'
 
@@ -23,16 +24,24 @@ function layerStyle(x, y, width, height) {
 
 function ImageLayer({ layer, baseUrl, activityKey }) {
   const [filename, x, y, width, height, action] = layer
-  const image = <img src={assetUrl(baseUrl, filename)} alt="" draggable="false" />
+  const isQrLayer = filename === TUFE_CAMPUS_OPEN_DAY_QR_IMAGE
+  const layerClassName = `tufe-open-day-layer${isQrLayer ? ' tufe-open-day-qr-layer' : ''}`
+  const image = (
+    <img
+      src={assetUrl(baseUrl, filename)}
+      alt={isQrLayer ? '天津财经大学2026校园开放日二维码' : ''}
+      draggable={isQrLayer ? 'true' : 'false'}
+    />
+  )
   const style = layerStyle(x, y, width, height)
 
   if (!action) {
-    return <div className="tufe-open-day-layer" style={style}>{image}</div>
+    return <div className={layerClassName} style={style}>{image}</div>
   }
 
   return (
     <a
-      className="tufe-open-day-layer tufe-open-day-link"
+      className={`${layerClassName} tufe-open-day-link`}
       style={style}
       href={action.url}
       target="_blank"

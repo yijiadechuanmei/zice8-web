@@ -4,6 +4,7 @@ export const TUFE_CAMPUS_OPEN_DAY_ASSETS_BASE_URL = '/assets/tufe-campus-open-da
 
 export const STAGE_WIDTH = 750
 export const STAGE_HEIGHT = 6919
+export const TUFE_CAMPUS_OPEN_DAY_QR_IMAGE = 'bd5a40a74f2228b7006f3190e2e6e74c_148566_468_555.png'
 
 export const BACKGROUND_LAYERS = [
   ['e45d806fde7a02ef4cf9a739bdd8d441_81322_750_1730.png', 0, 5189, 750, 1730],
@@ -73,7 +74,7 @@ export const CONTENT_LAYERS = [
   ['4413a12d4113a5fc0e887ab7c42d1870_31566_468_59.png', 147, 3929, 468, 59],
   ['926f68081d374d5bfedd0def66f20a35_11454_212_57.png', 503, 4131, 212, 57, link('https://mp.weixin.qq.com/s/a666kt94BVYwKsOVKjw5oQ', '专业介绍 25')],
   ['35e48dd7d130462b60f5378a54ce1778_56997_659_87.png', 58, 485, 659, 87],
-  ['bd5a40a74f2228b7006f3190e2e6e74c_148566_468_555.png', 147, 4362, 468, 555],
+  [TUFE_CAMPUS_OPEN_DAY_QR_IMAGE, 147, 4362, 468, 555],
   ['99b6a7c09e1d1f53e2d6839154e7b113_484325_653_374.png', 48, 614, 653, 374],
   ['87e2a20341f4d95ab12cb9536b4091c4_13301_213_58.png', 272, 3498, 213, 58, link('https://mp.weixin.qq.com/s/ZoGK1zvMoXpzTTPfehUKEw', '专业介绍 8')],
   ['d171f52c1d936fd6fbd92216cfbcad44_11022_212_58.png', 503, 3498, 212, 58, link('https://mp.weixin.qq.com/s/rCy279Mj97eOzCYqAeoFlg', '专业介绍 9')],
