@@ -1,6 +1,7 @@
 export const TUFE_CAMPUS_OPEN_DAY_ACTIVITY_TYPE = 'tufe_campus_open_day'
 export const TUFE_CAMPUS_OPEN_DAY_ACTIVITY_KEY = 'tufe_campus_open_day_2026'
-export const TUFE_CAMPUS_OPEN_DAY_ASSETS_BASE_URL = '/assets/tufe-campus-open-day'
+export const TUFE_CAMPUS_OPEN_DAY_ASSETS_BASE_URL =
+  'https://assets.zice8.com/tufe_campus_open_day/tufe_campus_open_day_2026'
 
 export const STAGE_WIDTH = 750
 export const STAGE_HEIGHT = 6919
