@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getTufeCampusOpenDayPublicConfig } from './api'
 import {
   assetUrl,
@@ -63,6 +64,17 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || TUFE_CAMPUS_OPEN_DAY_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
+  const shareActivity = useMemo(() => {
+    if (!publicConfig) return null
+    return {
+      ...publicConfig,
+      shareTitle: publicConfig.shareTitle || publicConfig.title || '天津财经大学2026校园开放日',
+      shareDesc: publicConfig.shareDesc ?? '数智财经，领航未来',
+      shareImage: publicConfig.shareImage || assetUrl(config.assetsBaseUrl, config.posterImage),
+    }
+  }, [config.assetsBaseUrl, config.posterImage, publicConfig])
+
+  useWechatShare(activityKey, shareActivity)
 
   useEffect(() => {
     let cancelled = false
