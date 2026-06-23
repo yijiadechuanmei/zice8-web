@@ -1,0 +1,88 @@
+.tufe-open-day-app {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #0a1b95;
+}
+
+.tufe-open-day-stage {
+  position: relative;
+  width: min(100%, 750px);
+  aspect-ratio: 750 / 6919;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #0a1b95;
+}
+
+.tufe-open-day-layer,
+.tufe-open-day-video {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tufe-open-day-layer img,
+.tufe-open-day-floating img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  object-fit: fill;
+}
+
+.tufe-open-day-link {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tufe-open-day-link:focus-visible,
+.tufe-open-day-backtop:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.tufe-open-day-video {
+  z-index: 2;
+  object-fit: contain;
+  background: #000;
+}
+
+.tufe-open-day-floating {
+  position: fixed;
+  z-index: 10;
+  top: 50%;
+  right: 0;
+  width: min(26.933vw, 202px);
+  aspect-ratio: 202 / 151;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.tufe-open-day-backtop {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 51%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 751px) {
+  .tufe-open-day-floating {
+    right: calc((100vw - 750px) / 2);
+    width: 202px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

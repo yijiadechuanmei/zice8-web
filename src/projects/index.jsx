@@ -5,6 +5,7 @@ const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.js
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
 const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
+const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index.jsx'))
 
 export const projectRoutes = [
   {
@@ -18,6 +19,14 @@ export const projectRoutes = [
   {
     path: '/anti_fraud_board_game/:activityKey',
     Component: AntiFraudBoardGameProject,
+  },
+  {
+    path: '/tufe-campus-open-day/:activityKey',
+    Component: TufeCampusOpenDayProject,
+  },
+  {
+    path: '/tufe_campus_open_day/:activityKey',
+    Component: TufeCampusOpenDayProject,
   },
   {
     path: '/phase-quiz-lottery/:activityKey/:page',
