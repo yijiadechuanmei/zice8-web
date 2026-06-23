@@ -14,6 +14,30 @@ import {
 } from './config'
 import './styles.css'
 
+const SCROLL_POSITION_KEY_PREFIX = 'tufe_open_day_scroll:'
+
+function getScrollPositionKey(activityKey) {
+  return `${SCROLL_POSITION_KEY_PREFIX}${activityKey || TUFE_CAMPUS_OPEN_DAY_ACTIVITY_KEY}`
+}
+
+function saveScrollPosition(activityKey) {
+  try {
+    sessionStorage.setItem(getScrollPositionKey(activityKey), String(window.scrollY || 0))
+  } catch {
+    // Ignore unavailable sessionStorage in restricted webviews.
+  }
+}
+
+function restoreScrollPosition(activityKey) {
+  try {
+    const scrollTop = Number(sessionStorage.getItem(getScrollPositionKey(activityKey)) || 0)
+    if (!Number.isFinite(scrollTop) || scrollTop <= 0) return
+    window.requestAnimationFrame(() => window.scrollTo({ top: scrollTop, left: 0, behavior: 'auto' }))
+  } catch {
+    // Ignore unavailable sessionStorage in restricted webviews.
+  }
+}
+
 function layerStyle(x, y, width, height) {
   return {
     left: `${(x / STAGE_WIDTH) * 100}%`,
@@ -48,12 +72,15 @@ function ImageLayer({ layer, baseUrl, activityKey }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={action.label}
-      onClick={() => trackEvent({
-        activityKey,
-        eventType: 'external_link_click',
-        page: '/tufe-campus-open-day',
-        extra: { label: action.label, url: action.url },
-      })}
+      onClick={() => {
+        saveScrollPosition(activityKey)
+        trackEvent({
+          activityKey,
+          eventType: 'external_link_click',
+          page: '/tufe-campus-open-day',
+          extra: { label: action.label, url: action.url },
+        })
+      }}
     >
       {image}
     </a>
@@ -75,6 +102,17 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
   }, [config.assetsBaseUrl, config.posterImage, publicConfig])
 
   useWechatShare(activityKey, shareActivity)
+
+  useEffect(() => {
+    const handlePageShow = () => restoreScrollPosition(activityKey)
+    const timeout = window.setTimeout(handlePageShow, 0)
+    window.addEventListener('pageshow', handlePageShow)
+
+    return () => {
+      window.clearTimeout(timeout)
+      window.removeEventListener('pageshow', handlePageShow)
+    }
+  }, [activityKey])
 
   useEffect(() => {
     let cancelled = false
@@ -125,12 +163,15 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="打开招生手册"
-          onClick={() => trackEvent({
-            activityKey,
-            eventType: 'external_link_click',
-            page: '/tufe-campus-open-day',
-            extra: { label: '招生手册', url: 'https://book.zjzw.cn/books/xiic/mobile/index.html#p=1' },
-          })}
+          onClick={() => {
+            saveScrollPosition(activityKey)
+            trackEvent({
+              activityKey,
+              eventType: 'external_link_click',
+              page: '/tufe-campus-open-day',
+              extra: { label: '招生手册', url: 'https://book.zjzw.cn/books/xiic/mobile/index.html#p=1' },
+            })
+          }}
         />
         <button
           type="button"
