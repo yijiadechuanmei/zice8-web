@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { getTufeCampusOpenDayPublicConfig } from './api'
 import {
@@ -53,7 +53,31 @@ function ImageLayer({ layer, baseUrl, activityKey }) {
 export default function TufeCampusOpenDayProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || TUFE_CAMPUS_OPEN_DAY_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
+  const [hasVideoStarted, setHasVideoStarted] = useState(false)
+  const videoRef = useRef(null)
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
+
+  const toggleVideoPlayback = () => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (video.paused) {
+      video.play()?.catch(() => {})
+      return
+    }
+
+    video.pause()
+  }
+
+  const handleVideoClick = (event) => {
+    if (event.detail === 0) return
+
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const controlsHeight = Math.min(48, bounds.height * 0.25)
+    if (event.clientY >= bounds.bottom - controlsHeight) return
+
+    toggleVideoPlayback()
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -82,6 +106,7 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
           <ImageLayer key={`${layer[0]}-${index}`} layer={layer} baseUrl={config.assetsBaseUrl} activityKey={activityKey} />
         ))}
         <video
+          ref={videoRef}
           className="tufe-open-day-video"
           style={layerStyle(48, 614, 653, 374)}
           controls
@@ -94,7 +119,18 @@ export default function TufeCampusOpenDayProject({ routeParams }) {
           poster={assetUrl(config.assetsBaseUrl, config.posterImage)}
           src={assetUrl(config.assetsBaseUrl, config.videoFile)}
           aria-label="天津财经大学校园开放日视频"
+          onClick={handleVideoClick}
+          onPlay={() => setHasVideoStarted(true)}
         />
+        {!hasVideoStarted && (
+          <button
+            type="button"
+            className="tufe-open-day-video-play-area"
+            style={layerStyle(48, 614, 653, 374)}
+            aria-label="播放天津财经大学校园开放日视频"
+            onClick={toggleVideoPlayback}
+          />
+        )}
       </div>
       <div className="tufe-open-day-floating">
         <img src={assetUrl(config.assetsBaseUrl, config.floatingImage)} alt="" />
