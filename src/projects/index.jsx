@@ -6,8 +6,17 @@ const MaterialRegistrationProject = lazy(() => import('./material-registration/i
 const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
 const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index.jsx'))
+const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
 
 export const projectRoutes = [
+  {
+    path: '/xiwuqi-99-road-night/:activityKey',
+    Component: Xiwuqi99RoadNightProject,
+  },
+  {
+    path: '/xiwuqi_99_road_night/:activityKey',
+    Component: Xiwuqi99RoadNightProject,
+  },
   {
     path: '/phase-quiz-lottery/:activityKey',
     Component: PhaseQuizLotteryProject,

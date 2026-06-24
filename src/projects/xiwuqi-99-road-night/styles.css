@@ -1,0 +1,38 @@
+.xiwuqi-road-night-app {
+  display: grid;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  overflow: auto;
+  background: #050505;
+}
+
+.xiwuqi-road-night-link {
+  display: block;
+  width: min(100vw, 68.4307svh, 750px);
+  line-height: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.xiwuqi-road-night-link:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: -3px;
+}
+
+.xiwuqi-road-night-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 750 / 1096;
+  object-fit: contain;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@supports not (height: 100svh) {
+  .xiwuqi-road-night-link {
+    width: min(100vw, 68.4307vh, 750px);
+  }
+}
