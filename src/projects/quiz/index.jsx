@@ -39,7 +39,7 @@ const DEFAULT_ACTIVITY_KEY = 'quiz_demo_dragon_boat'
 const FEEDBACK_DELAY_MS = 1500
 const QUIZ_RANK_PAGE_SIZE = 50
 
-export default function QuizApp() {
+export default function QuizApp({ routeParams }) {
   const layoutPreview = getQueryParam('layout') === '1'
   if (layoutPreview) return <LayoutPreview />
 
@@ -50,11 +50,11 @@ export default function QuizApp() {
     return null
   }
 
-  return <QuizMain />
+  return <QuizMain routeParams={routeParams} />
 }
 
-function QuizMain() {
-  const activityKey = getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
+function QuizMain({ routeParams }) {
+  const activityKey = routeParams?.activityKey || getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
   const debug = getQueryParam('debug') === '1'
   const debugAuth = isQuizAuthDebugEnabled()
   const [page, setPage] = useState('home')

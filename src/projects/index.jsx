@@ -7,6 +7,7 @@ const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
 const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index.jsx'))
 const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
+const QuizProject = lazy(() => import('./quiz/index.jsx'))
 
 export const projectRoutes = [
   {
@@ -78,8 +79,12 @@ export const projectRoutes = [
     Component: lazy(() => import('./video-rank/index.jsx')),
   },
   {
+    path: '/quiz/:activityKey',
+    Component: QuizProject,
+  },
+  {
     path: '/quiz',
-    Component: lazy(() => import('./quiz/index.jsx')),
+    Component: QuizProject,
   },
   {
     path: '/admin',

@@ -61,7 +61,7 @@ function App() {
   if (unavailableActivity) return <ActivityUnavailablePage />
 
   const ProjectComponent = matchedProject.project.Component
-  const fallback = matchedProject.project.path === '/quiz' ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
+  const fallback = matchedProject.project.path.startsWith('/quiz') ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
   return <Suspense fallback={fallback}><ProjectComponent routeParams={matchedProject.params} /></Suspense>
 }
 
