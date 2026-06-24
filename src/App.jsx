@@ -1,5 +1,5 @@
 import './App.css'
-import { Suspense, useSyncExternalStore } from 'react'
+import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { projectRoutes } from './projects/index.jsx'
 import QuizLoadingState from './projects/quiz/components/LoadingState.jsx'
 import {
@@ -7,6 +7,7 @@ import {
   subscribeActivityAvailability,
 } from './shared/activityAvailability'
 import ActivityUnavailablePage from './shared/components/ActivityUnavailablePage.jsx'
+import { request } from './shared/api/request'
 
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
@@ -46,6 +47,46 @@ function NotFound() {
   )
 }
 
+function getActivityKey(params) {
+  if (params.activityKey) return params.activityKey
+  const searchParams = new URLSearchParams(window.location.search)
+  return searchParams.get('activity_key') || searchParams.get('activityKey') || ''
+}
+
+function ProjectRoute({ project, params, fallback }) {
+  const ProjectComponent = project.Component
+  return (
+    <Suspense fallback={fallback}>
+      <ProjectComponent routeParams={params} />
+    </Suspense>
+  )
+}
+
+function ActivityGate({ activityKey, project, params, fallback }) {
+  const [gateStatus, setGateStatus] = useState('checking')
+
+  useEffect(() => {
+    let active = true
+
+    request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
+      .then(() => {
+        if (active) setGateStatus('available')
+      })
+      .catch((error) => {
+        if (!active) return
+        setGateStatus(Number(error?.status) === 404 ? 'unavailable' : 'bypass')
+      })
+
+    return () => {
+      active = false
+    }
+  }, [activityKey])
+
+  if (gateStatus === 'checking') return fallback
+  if (gateStatus === 'unavailable') return <ActivityUnavailablePage />
+  return <ProjectRoute project={project} params={params} fallback={fallback} />
+}
+
 function App() {
   const unavailableActivity = useSyncExternalStore(
     subscribeActivityAvailability,
@@ -58,11 +99,28 @@ function App() {
     .find((item) => item.params)
 
   if (!matchedProject) return <NotFound />
-  if (unavailableActivity) return <ActivityUnavailablePage />
 
-  const ProjectComponent = matchedProject.project.Component
+  const activityKey = getActivityKey(matchedProject.params)
+  if (unavailableActivity?.activityKey === activityKey) return <ActivityUnavailablePage />
+
   const fallback = matchedProject.project.path.startsWith('/quiz') ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
-  return <Suspense fallback={fallback}><ProjectComponent routeParams={matchedProject.params} /></Suspense>
+  const gateEnabled = import.meta.env.VITE_ACTIVITY_GATE_ENABLED !== 'false'
+    && matchedProject.project.activityGate
+    && activityKey
+
+  if (gateEnabled) {
+    return (
+      <ActivityGate
+        key={activityKey}
+        activityKey={activityKey}
+        project={matchedProject.project}
+        params={matchedProject.params}
+        fallback={fallback}
+      />
+    )
+  }
+
+  return <ProjectRoute project={matchedProject.project} params={matchedProject.params} fallback={fallback} />
 }
 
 export default App

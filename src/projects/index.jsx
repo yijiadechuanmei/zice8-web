@@ -13,10 +13,12 @@ export const projectRoutes = [
   {
     path: '/xiwuqi-99-road-night/:activityKey',
     Component: Xiwuqi99RoadNightProject,
+    activityGate: true,
   },
   {
     path: '/xiwuqi_99_road_night/:activityKey',
     Component: Xiwuqi99RoadNightProject,
+    activityGate: true,
   },
   {
     path: '/phase-quiz-lottery/:activityKey',
@@ -81,10 +83,12 @@ export const projectRoutes = [
   {
     path: '/quiz/:activityKey',
     Component: QuizProject,
+    activityGate: true,
   },
   {
     path: '/quiz',
     Component: QuizProject,
+    activityGate: true,
   },
   {
     path: '/admin',
