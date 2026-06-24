@@ -521,6 +521,111 @@
   object-fit: contain;
 }
 
+.material-registration-decline-success-image {
+  position: absolute;
+  left: 74px;
+  top: 281px;
+  width: 225px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.material-registration-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(9, 22, 78, 0.54);
+  backdrop-filter: blur(5px);
+}
+
+.material-registration-dialog {
+  position: relative;
+  width: min(100%, 320px);
+  padding: 30px 24px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 64px rgba(19, 31, 110, 0.3);
+}
+
+.material-registration-dialog h2 {
+  margin: 0 0 22px;
+  color: #131f6e;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.material-registration-dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #52618f;
+  font-size: 27px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.material-registration-dialog form {
+  display: flex;
+  flex-direction: column;
+}
+
+.material-registration-dialog label {
+  margin-bottom: 8px;
+  color: #131f6e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.material-registration-dialog input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid rgba(19, 31, 110, 0.28);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172554;
+  font-size: 16px;
+  outline: none;
+}
+
+.material-registration-dialog input:focus {
+  border-color: #274ec4;
+  box-shadow: 0 0 0 3px rgba(39, 78, 196, 0.12);
+}
+
+.material-registration-dialog form > button {
+  min-height: 48px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 999px;
+  background-image: linear-gradient(180deg, #3899ec 0%, #274ec4 100%);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.material-registration-dialog button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .material-registration-loading,
 .material-registration-error,
 .material-registration-toast {
@@ -610,6 +715,7 @@
 }
 
 .material-registration-toast {
+  z-index: 45;
   top: 50%;
   max-width: 330px;
   padding: 9px 14px;
@@ -682,6 +788,10 @@
   }
 
   .material-registration-success-image {
+    left: calc(50% - 112.5px);
+  }
+
+  .material-registration-decline-success-image {
     left: calc(50% - 112.5px);
   }
 }

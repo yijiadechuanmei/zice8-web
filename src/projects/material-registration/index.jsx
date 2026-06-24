@@ -5,6 +5,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
+  createMaterialRegistrationDecline,
   createMaterialRegistrationSubmission,
   getMaterialRegistrationBootstrap,
   getMaterialRegistrationPublicConfig,
@@ -25,6 +26,7 @@ const PAGES = {
   DOCUMENT: 'document',
   FORM: 'form',
   SUCCESS: 'success',
+  DECLINE_SUCCESS: 'decline-success',
 }
 
 const LEGACY_MATERIAL_REGISTRATION_ACTIVITY_KEYS = new Set([
@@ -115,6 +117,9 @@ function MaterialRegistrationMain({ routeParams }) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [declineSubmitting, setDeclineSubmitting] = useState(false)
+  const [declineModalOpen, setDeclineModalOpen] = useState(false)
+  const [declineUnitName, setDeclineUnitName] = useState('')
   const [agreementChoice, setAgreementChoice] = useState('')
   const [form, setForm] = useState(initialForm)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
@@ -193,7 +198,13 @@ function MaterialRegistrationMain({ routeParams }) {
         if (cancelled) return
         setBootstrap(data)
         document.title = data?.activityName || publicConfig?.title || '参会信息提交'
-        setPage(data?.hasSubmitted ? PAGES.SUCCESS : PAGES.HOME)
+        setPage(
+          data?.hasSubmitted
+            ? (data?.submission?.attendanceStatus === 'not_attending'
+                ? PAGES.DECLINE_SUCCESS
+                : PAGES.SUCCESS)
+            : PAGES.HOME,
+        )
         setError('')
       })
       .catch((err) => {
@@ -245,10 +256,48 @@ function MaterialRegistrationMain({ routeParams }) {
 
   function handleNoAttendance() {
     setAgreementChoice('no-attendance')
+    setDeclineModalOpen(true)
   }
 
   function handleDisagree() {
     setAgreementChoice('disagree')
+  }
+
+  function closeDeclineModal() {
+    if (declineSubmitting) return
+    setDeclineModalOpen(false)
+    setAgreementChoice('')
+  }
+
+  async function handleDeclineSubmit(event) {
+    event.preventDefault()
+    const unitName = declineUnitName.trim()
+    if (!unitName) {
+      showMessage('请填写单位名称')
+      return
+    }
+
+    setDeclineSubmitting(true)
+    try {
+      const result = await createMaterialRegistrationDecline(activityKey, { unitName })
+      setBootstrap((current) => ({
+        ...(current || {}),
+        hasSubmitted: true,
+        submission: result?.submission || null,
+      }))
+      setDeclineModalOpen(false)
+      setPage(PAGES.DECLINE_SUCCESS)
+      trackEvent({
+        activityKey,
+        eventType: 'material_registration_decline_submit',
+        page: '/material-registration',
+        extra: { activityType: MATERIAL_REGISTRATION_ACTIVITY_TYPE, result: 'success' },
+      })
+    } catch (err) {
+      showMessage(err?.message || '提交失败，请稍后重试')
+    } finally {
+      setDeclineSubmitting(false)
+    }
   }
 
   function updateForm(field, value) {
@@ -474,6 +523,15 @@ function MaterialRegistrationMain({ routeParams }) {
           />
         )}
         {page === PAGES.SUCCESS && <SuccessPage assetsBaseUrl={assetsBaseUrl} />}
+        {page === PAGES.DECLINE_SUCCESS && <DeclineSuccessPage assetsBaseUrl={assetsBaseUrl} />}
+        <NoAttendanceDialog
+          open={declineModalOpen}
+          unitName={declineUnitName}
+          submitting={declineSubmitting}
+          onUnitNameChange={setDeclineUnitName}
+          onClose={closeDeclineModal}
+          onSubmit={handleDeclineSubmit}
+        />
       </div>
     </main>
   )
@@ -832,6 +890,63 @@ function SuccessPage({ assetsBaseUrl }) {
       src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.successTitle)}
       alt="报名成功"
     />
+  )
+}
+
+function DeclineSuccessPage({ assetsBaseUrl }) {
+  return (
+    <img
+      className="material-registration-decline-success-image"
+      src={assetUrl(assetsBaseUrl, MATERIAL_REGISTRATION_ASSETS.declineSuccessTitle)}
+      alt="信息已提交"
+    />
+  )
+}
+
+function NoAttendanceDialog({
+  open,
+  unitName,
+  submitting,
+  onUnitNameChange,
+  onClose,
+  onSubmit,
+}) {
+  if (!open) return null
+
+  return (
+    <div className="material-registration-dialog-backdrop" role="presentation">
+      <section
+        className="material-registration-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="material-registration-decline-title"
+      >
+        <button
+          type="button"
+          className="material-registration-dialog-close"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label="关闭"
+        >
+          ×
+        </button>
+        <h2 id="material-registration-decline-title">请填写单位名称</h2>
+        <form onSubmit={onSubmit}>
+          <label htmlFor="material-registration-decline-unit">单位名称</label>
+          <input
+            id="material-registration-decline-unit"
+            value={unitName}
+            onChange={(event) => onUnitNameChange(event.target.value)}
+            maxLength={200}
+            placeholder="请输入单位名称"
+            autoFocus
+          />
+          <button type="submit" disabled={submitting}>
+            {submitting ? '提交中...' : '提交'}
+          </button>
+        </form>
+      </section>
+    </div>
   )
 }
 

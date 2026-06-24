@@ -9,6 +9,7 @@ export const MATERIAL_REGISTRATION_ASSETS = {
   homeLogo: '73603d6d3051f84cbffd5e29a9f4006d_23330_356_78.png',
   homeTitle: 'cd01fc01e58bd1f3597586c1b97ec3da_31915_715_278.png',
   successTitle: '02ebaf25c38011a851dbb81f6bffa2ed_11098_455_91.png',
+  declineSuccessTitle: 'https://file3.ih5.cn/v35/edt/u10013600/c017168573ea9f56fd14661f278ad39a_10850_546_88.png',
   documentIcons: [
     '3caf49840fc38f106c75784cba1352c7_5687.svg',
     'a8f5261cddd5fe420bc75da17e7783dd_5206.svg',
@@ -21,5 +22,6 @@ export const MATERIAL_REGISTRATION_ASSETS = {
 }
 
 export function assetUrl(assetsBaseUrl, filename) {
+  if (/^(https?:)?\/\//i.test(filename)) return filename
   return `${assetsBaseUrl}/${filename}`
 }

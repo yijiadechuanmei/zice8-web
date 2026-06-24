@@ -15,6 +15,12 @@ export const createMaterialRegistrationSubmission = (activityKey, data) =>
     body: JSON.stringify(data),
   })
 
+export const createMaterialRegistrationDecline = (activityKey, data) =>
+  request(`/material-registration/activities/${activityKey}/declines`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+
 export function isUnauthorizedError(error) {
   const response = error?.response || {}
   const status = Number(response?.code) || Number(response?.status) || 0
