@@ -1,7 +1,12 @@
 import './App.css'
-import { Suspense } from 'react'
+import { Suspense, useSyncExternalStore } from 'react'
 import { projectRoutes } from './projects/index.jsx'
 import QuizLoadingState from './projects/quiz/components/LoadingState.jsx'
+import {
+  getUnavailableActivity,
+  subscribeActivityAvailability,
+} from './shared/activityAvailability'
+import ActivityUnavailablePage from './shared/components/ActivityUnavailablePage.jsx'
 
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
@@ -42,12 +47,18 @@ function NotFound() {
 }
 
 function App() {
+  const unavailableActivity = useSyncExternalStore(
+    subscribeActivityAvailability,
+    getUnavailableActivity,
+    getUnavailableActivity,
+  )
   const pathname = normalizePath(window.location.pathname)
   const matchedProject = projectRoutes
     .map((project) => ({ project, params: matchRoute(pathname, project.path) }))
     .find((item) => item.params)
 
   if (!matchedProject) return <NotFound />
+  if (unavailableActivity) return <ActivityUnavailablePage />
 
   const ProjectComponent = matchedProject.project.Component
   const fallback = matchedProject.project.path === '/quiz' ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />

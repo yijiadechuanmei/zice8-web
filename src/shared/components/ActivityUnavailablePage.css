@@ -1,0 +1,51 @@
+.activity-unavailable-page {
+  display: grid;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 32px 24px;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(212, 175, 55, 0.1), transparent 34%),
+    #f7f6f2;
+  color: #171717;
+}
+
+.activity-unavailable-content {
+  width: min(100%, 420px);
+  text-align: center;
+}
+
+.activity-unavailable-code {
+  margin: 0;
+  color: #dedbd1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(92px, 28vw, 156px);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+}
+
+.activity-unavailable-line {
+  display: block;
+  width: 42px;
+  height: 2px;
+  margin: 32px auto 24px;
+  background: #b28a19;
+}
+
+.activity-unavailable-content h1 {
+  margin: 0;
+  font-family: "Songti SC", "STSong", serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.activity-unavailable-description {
+  margin: 12px 0 0;
+  color: #666258;
+  font-size: 15px;
+  line-height: 1.7;
+}

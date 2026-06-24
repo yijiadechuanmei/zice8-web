@@ -68,6 +68,13 @@ export function updateActivityBgmConfig(activityKey, payload) {
   })
 }
 
+export function updateActivityStatus(activityKey, status) {
+  return adminRequest(`/admin/activities/${activityKey}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  })
+}
+
 export function getCharts(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/charts`)
 }

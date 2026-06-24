@@ -1,3 +1,5 @@
+import { markActivityUnavailable } from '../activityAvailability'
+
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 const TOKEN_KEY = 'zice8_token'
 
@@ -28,8 +30,12 @@ export async function request(path, options = {}) {
   })
   const result = await response.json().catch(() => ({ code: response.status, message: response.statusText, data: null }))
   if (!response.ok || result.code >= 400) {
+    if ((response.status === 404 || Number(result.code) === 404)) {
+      markActivityUnavailable(path)
+    }
     const error = new Error(result.message || '请求失败')
     error.response = result
+    error.status = response.status || Number(result.code) || 0
     throw error
   }
   return result.data

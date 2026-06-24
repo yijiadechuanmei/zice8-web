@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Space, Switch, Typography, message } from 'antd'
-import { getActivityConfig, updateActivityBgmConfig } from '../api'
+import { getActivityConfig, updateActivityBgmConfig, updateActivityStatus } from '../api'
 
 const { Text, Title } = Typography
 
@@ -16,7 +17,9 @@ const defaultBgm = {
 export default function ActivityConfigPage({ activity }) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [statusSaving, setStatusSaving] = useState(false)
   const [error, setError] = useState('')
+  const [activityStatus, setActivityStatus] = useState(Number(activity?.status) === 1 ? 1 : 0)
   const [bgm, setBgm] = useState(defaultBgm)
 
   useEffect(() => {
@@ -27,6 +30,7 @@ export default function ActivityConfigPage({ activity }) {
     getActivityConfig(activity.activityKey)
       .then((data) => {
         if (!alive) return
+        setActivityStatus(Number(data?.activity?.status) === 1 ? 1 : 0)
         setBgm({
           enabled: Boolean(data?.bgm?.enabled),
           url: String(data?.bgm?.url || ''),
@@ -77,6 +81,22 @@ export default function ActivityConfigPage({ activity }) {
     }
   }
 
+  async function handleStatusChange(enabled) {
+    setStatusSaving(true)
+    setError('')
+    try {
+      const data = await updateActivityStatus(activity.activityKey, enabled ? 1 : 0)
+      setActivityStatus(Number(data?.status) === 1 ? 1 : 0)
+      message.success(enabled ? '活动已启用' : '活动已停用')
+    } catch (err) {
+      const text = err.message || '活动状态更新失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setStatusSaving(false)
+    }
+  }
+
   return (
     <Card className="admin-card" loading={loading}>
       <div className="admin-page-head">
@@ -91,6 +111,21 @@ export default function ActivityConfigPage({ activity }) {
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         {error ? <Alert type="error" showIcon message={error} /> : null}
+
+        <Card size="small" title="活动状态">
+          <Space direction="vertical" size={12}>
+            <Switch
+              checked={activityStatus === 1}
+              checkedChildren="启用"
+              unCheckedChildren="停用"
+              loading={statusSaving}
+              onChange={handleStatusChange}
+            />
+            <Text type="secondary">
+              停用后，活动公开页面将显示“活动暂未开放”，公共业务接口也会拒绝访问。
+            </Text>
+          </Space>
+        </Card>
 
         <Card size="small" title="移动端音效配置">
           <Space direction="vertical" size={14} style={{ width: '100%' }}>
