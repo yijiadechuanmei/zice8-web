@@ -585,13 +585,6 @@
   flex-direction: column;
 }
 
-.material-registration-dialog label {
-  margin-bottom: 8px;
-  color: #131f6e;
-  font-size: 14px;
-  font-weight: 700;
-}
-
 .material-registration-dialog input {
   width: 100%;
   min-height: 46px;

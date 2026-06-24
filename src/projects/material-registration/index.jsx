@@ -932,9 +932,9 @@ function NoAttendanceDialog({
         </button>
         <h2 id="material-registration-decline-title">请填写单位名称</h2>
         <form onSubmit={onSubmit}>
-          <label htmlFor="material-registration-decline-unit">单位名称</label>
           <input
             id="material-registration-decline-unit"
+            aria-label="单位名称"
             value={unitName}
             onChange={(event) => onUnitNameChange(event.target.value)}
             maxLength={200}
