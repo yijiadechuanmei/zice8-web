@@ -23,46 +23,59 @@ export const projectRoutes = [
   {
     path: '/phase-quiz-lottery/:activityKey',
     Component: PhaseQuizLotteryProject,
+    activityGate: true,
   },
   {
     path: '/anti-fraud-board-game/:activityKey',
     Component: AntiFraudBoardGameProject,
+    activityGate: true,
   },
   {
     path: '/anti_fraud_board_game/:activityKey',
     Component: AntiFraudBoardGameProject,
+    activityGate: true,
   },
   {
     path: '/tufe-campus-open-day/:activityKey',
     Component: TufeCampusOpenDayProject,
+    activityGate: true,
   },
   {
     path: '/tufe_campus_open_day/:activityKey',
     Component: TufeCampusOpenDayProject,
+    activityGate: true,
   },
   {
     path: '/phase-quiz-lottery/:activityKey/:page',
     Component: PhaseQuizLotteryProject,
+    activityGate: true,
   },
   {
     path: '/appointment/:activityKey',
     Component: lazy(() => import('./appointment/index.jsx')),
+    activityGate: true,
   },
   {
     path: '/material_review_registration/:activityKey',
     Component: MaterialRegistrationProject,
+    activityGate: true,
+    activityGateExcludedKeys: ['material_community_registration_20260620'],
   },
   {
     path: '/material-registration/:activityKey',
     Component: MaterialRegistrationProject,
+    activityGate: true,
+    activityGateExcludedKeys: ['material_community_registration_20260620'],
   },
   {
     path: '/tjrcb-pension-manual/:activityKey',
     Component: lazy(() => import('./tjrcb-pension-manual/index.jsx')),
+    activityGate: true,
   },
   {
     path: '/tjrcb_pension_manual/:activityKey',
     Component: lazy(() => import('./tjrcb-pension-manual/index.jsx')),
+    activityGate: true,
   },
   {
     path: '/tjrcb-pension-manual/:activityKey/debug',
@@ -79,6 +92,7 @@ export const projectRoutes = [
   {
     path: '/video-rank',
     Component: lazy(() => import('./video-rank/index.jsx')),
+    activityGate: true,
   },
   {
     path: '/quiz/:activityKey',

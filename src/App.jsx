@@ -104,9 +104,11 @@ function App() {
   if (unavailableActivity?.activityKey === activityKey) return <ActivityUnavailablePage />
 
   const fallback = matchedProject.project.path.startsWith('/quiz') ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
+  const gateExcluded = matchedProject.project.activityGateExcludedKeys?.includes(activityKey)
   const gateEnabled = import.meta.env.VITE_ACTIVITY_GATE_ENABLED !== 'false'
     && matchedProject.project.activityGate
     && activityKey
+    && !gateExcluded
 
   if (gateEnabled) {
     return (
