@@ -30,24 +30,22 @@
 }
 
 .latex-brand-logo {
-  position: absolute;
-  z-index: 2;
-  top: 18px;
-  left: 22px;
-  width: 54px;
-  max-height: 28px;
+  display: block;
+  width: 108px;
+  max-height: 56px;
+  margin: 0 auto 18px;
   object-fit: contain;
 }
 
 .latex-hero-badge {
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto 22px;
+  margin: 0 auto 20px;
   padding: 7px 17px;
   border: 2px solid rgba(80, 119, 190, 0.72);
   border-radius: 999px;
   color: #4666a6;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.2;
   letter-spacing: 2px;
   text-align: center;
@@ -58,12 +56,12 @@
 
 .latex-eyebrow {
   max-width: 100%;
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   text-align: center;
   color: #36598f;
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1.2;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
 }
 
 .latex-title {
@@ -111,13 +109,13 @@
   text-align: center;
   color: #284a82;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.45;
   letter-spacing: 1px;
 }
 
 .latex-subtitle span {
   display: block;
-  margin-top: 10px;
+  margin-top: 3px;
 }
 
 .latex-intro-cards {
@@ -610,13 +608,13 @@
 
   .latex-hero-badge {
     padding: 7px 17px;
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 2px;
   }
 
   .latex-eyebrow {
-    font-size: 14px;
-    letter-spacing: 2px;
+    font-size: 18px;
+    letter-spacing: 4px;
   }
 
   .latex-title {
