@@ -48,6 +48,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
   const [knowledgeVisible, setKnowledgeVisible] = useState(false)
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
   const backgroundImage = assetUrl(config.assetsBaseUrl, config.backgroundImage)
+  const logoImage = assetUrl(config.assetsBaseUrl, config.logoImage)
   const currentQuestion = QUESTIONS[questionIndex]
   const selectedIds = answers[currentQuestion?.id] || []
   const scores = useMemo(() => getSelectedScoreMap(answers), [answers])
@@ -156,7 +157,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
       className="latex-test-app"
       style={backgroundImage ? { '--latex-bg-image': `url("${backgroundImage}")` } : undefined}
     >
-      {step === 'landing' ? <LandingPage onStart={startTest} /> : null}
+      {step === 'landing' ? <LandingPage logoImage={logoImage} onStart={startTest} /> : null}
       {step === 'quiz' ? (
         <QuizPage
           question={currentQuestion}
@@ -182,9 +183,19 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
   )
 }
 
-function LandingPage({ onStart }) {
+function LandingPage({ logoImage, onStart }) {
   return (
     <section className="latex-landing latex-page-in" aria-label="乳胶过敏风险自测封面页">
+      {logoImage ? (
+        <img
+          className="latex-brand-logo"
+          src={logoImage}
+          alt="品牌标识"
+          onError={(event) => {
+            event.currentTarget.style.display = 'none'
+          }}
+        />
+      ) : null}
       <div className="latex-hero-badge">别让敏感 困住亲密</div>
       <div className="latex-eyebrow">· 世 界 过 敏 日 · 特 别 策 划 ·</div>
       <h1 className="latex-title">乳胶过敏<br />风险自测</h1>

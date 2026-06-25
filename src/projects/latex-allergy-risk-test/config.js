@@ -6,6 +6,7 @@ export const LATEX_ALLERGY_RISK_TEST_ASSETS_BASE_URL =
 export const DEFAULT_CONFIG = {
   assetsBaseUrl: LATEX_ALLERGY_RISK_TEST_ASSETS_BASE_URL,
   backgroundImage: 'landing-bg.png',
+  logoImage: 'logo.png',
   storeUrl: '',
 }
 
