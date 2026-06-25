@@ -219,13 +219,21 @@
 
 .latex-disclaimer {
   margin-top: 26px;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .latex-disclaimer p {
   gap: 10px;
+  align-items: baseline;
   margin: 10px 0;
+}
+
+.latex-disclaimer .anticon {
+  flex: 0 0 auto;
+  font-size: 1em;
+  line-height: 1;
+  transform: translateY(1px);
 }
 
 .latex-quiz,
