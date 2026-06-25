@@ -7,7 +7,7 @@ export const DEFAULT_CONFIG = {
   assetsBaseUrl: XIWUQI_99_ROAD_NIGHT_ASSETS_BASE_URL,
   imageFile: 'main.png',
   imageAlt: '西乌旗99号公路之夜',
-  targetUrl: 'https://v.douyin.com/E3zxC1QEjuI/',
+  targetUrl: 'https://v.douyin.com/ooOBXZXQd8Q/',
 }
 
 export function mergeConfig(publicConfig) {
