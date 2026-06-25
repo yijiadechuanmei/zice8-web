@@ -2,7 +2,7 @@
 import { Component, Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { Button, Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
 import { InfoCircleOutlined } from '@ant-design/icons'
-import { getCharts, getOverview } from '../api'
+import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
@@ -10,22 +10,36 @@ const { Paragraph, Text, Title } = Typography
 
 const pvHint = '页面访问次数，同一访客同一页面 30 秒内重复访问只统计一次。'
 const uvHint = '按浏览器匿名访客 ID 去重统计。'
+const XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY = 'xiwuqi_99_road_night_20260624'
+const XIWUQI_AMAP_SOURCE_FILTER = {
+  source: 'amap',
+  campaign: 'xiwuqi_20260624',
+  page: '/xiwuqi-99-road-night',
+  days: '7',
+}
 
 export default function ActivityDashboard({ activity, compact = false }) {
   const [overview, setOverview] = useState(null)
   const [charts, setCharts] = useState(null)
+  const [sourceAccess, setSourceAccess] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
 
   useEffect(() => {
     let alive = true
     setLoading(true)
     setError('')
-    Promise.all([getOverview(activity.activityKey), getCharts(activity.activityKey)])
-      .then(([overviewData, chartData]) => {
+    setSourceAccess(null)
+    const sourceAccessRequest = isXiwuqiRoadNight
+      ? getSourceAccess(activity.activityKey, XIWUQI_AMAP_SOURCE_FILTER).catch(() => null)
+      : Promise.resolve(null)
+    Promise.all([getOverview(activity.activityKey), getCharts(activity.activityKey), sourceAccessRequest])
+      .then(([overviewData, chartData, sourceAccessData]) => {
         if (!alive) return
         setOverview(overviewData)
         setCharts(chartData)
+        setSourceAccess(sourceAccessData)
       })
       .catch((err) => {
         if (alive) setError(err.message || '加载失败')
@@ -36,11 +50,19 @@ export default function ActivityDashboard({ activity, compact = false }) {
     return () => {
       alive = false
     }
-  }, [activity.activityKey])
+  }, [activity.activityKey, isXiwuqiRoadNight])
 
   const metrics = useMemo(() => {
+    const sourceOverview = sourceAccess?.overview || {}
+    const xiwuqiAmapMetrics = isXiwuqiRoadNight ? [
+      { label: '高德 PV', value: sourceOverview.pv ?? 0, tooltip: '仅统计带 utm_source=amap 且 utm_campaign=xiwuqi_20260624 的投放链接访问。' },
+      { label: '高德 UV', value: sourceOverview.uv ?? 0, tooltip: uvHint },
+      { label: '抖音点击', value: sourceOverview.outboundClicks ?? 0, tooltip: '高德来源访客点击图片跳转抖音的次数。' },
+    ] : []
+
     if (activity.type === 'appointment_visit') {
       return [
+        ...xiwuqiAmapMetrics,
         { label: '白名单总数', value: overview?.whitelistTotal ?? 0 },
         { label: '已预约数', value: overview?.bookingTotal ?? 0 },
         { label: '未预约数', value: overview?.unbookedTotal ?? 0 },
@@ -58,6 +80,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
     if (activity.type === 'phase_quiz_lottery') {
       const pql = overview?.phaseQuizLottery || {}
       return [
+        ...xiwuqiAmapMetrics,
         { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: '参与答题人数', value: pql.attemptUserCount ?? 0 },
@@ -76,6 +99,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
     if (activity.type === 'material_review_registration') {
       const materialRegistration = overview?.materialRegistration || {}
       return [
+        ...xiwuqiAmapMetrics,
         { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
@@ -87,6 +111,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
 
     const videoRank = overview?.videoRank || {}
     return [
+      ...xiwuqiAmapMetrics,
       { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
       { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
       { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
@@ -97,7 +122,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, overview])
+  }, [activity.type, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))

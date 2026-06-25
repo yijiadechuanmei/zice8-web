@@ -91,6 +91,11 @@ export function getAnalyticsTrend(activityKey) {
   return adminRequest(`/admin/analytics/trend/${activityKey}`)
 }
 
+export function getSourceAccess(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/analytics/source-access/${activityKey}?${search.toString()}`)
+}
+
 export function getDataSchema(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/data-schema`)
 }
