@@ -8,9 +8,9 @@ export const DEFAULT_CONFIG = {
   backgroundImage: 'landing-bg.png',
   logoImage: 'logo.png',
   miniProgram: {
-    enabled: true,
-    username: 'gh_627bc4433e11',
-    path: 'pages/index/index',
+    enabled: false,
+    username: '',
+    path: '',
     envVersion: 'release',
     fallbackUrl: '',
   },
@@ -18,7 +18,15 @@ export const DEFAULT_CONFIG = {
 }
 
 export function mergeConfig(publicConfig) {
-  return { ...DEFAULT_CONFIG, ...(publicConfig?.mobileConfig || {}) }
+  const mobileConfig = publicConfig?.mobileConfig || {}
+  return {
+    ...DEFAULT_CONFIG,
+    ...mobileConfig,
+    miniProgram: {
+      ...DEFAULT_CONFIG.miniProgram,
+      ...(mobileConfig.miniProgram || {}),
+    },
+  }
 }
 
 export function assetUrl(baseUrl, filename) {
