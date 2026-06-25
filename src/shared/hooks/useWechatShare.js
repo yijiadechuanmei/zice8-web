@@ -29,13 +29,16 @@ function configureShare(wx, data) {
   }
 }
 
-export function useWechatShare(activityKey, activity, onStatusChange) {
+export function useWechatShare(activityKey, activity, onStatusChange, options = {}) {
+  const openTagListKey = (options?.openTagList || []).join(',')
+
   useEffect(() => {
     if (!activityKey || !activity) return
 
     let cancelled = false
     const url = sanitizeUrlForWechat(window.location.href)
     const wxDebug = getQueryParam('debug') === 'wx'
+    const openTagList = openTagListKey ? openTagListKey.split(',') : []
 
     async function initWechatShare() {
       try {
@@ -70,6 +73,7 @@ export function useWechatShare(activityKey, activity, onStatusChange) {
             'onMenuShareTimeline',
             'openLocation',
           ],
+          ...(openTagList.length ? { openTagList } : {}),
         })
 
         wx.ready(() => {
@@ -115,5 +119,5 @@ export function useWechatShare(activityKey, activity, onStatusChange) {
     return () => {
       cancelled = true
     }
-  }, [activityKey, activity, onStatusChange])
+  }, [activityKey, activity, onStatusChange, openTagListKey])
 }

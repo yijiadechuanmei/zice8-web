@@ -32,6 +32,31 @@ const INTRO_CARDS = [
   { icon: SafetyCertificateOutlined, text: '边测边学' },
 ]
 
+const WECHAT_LAUNCH_OPTIONS = { openTagList: ['wx-open-launch-weapp'] }
+
+function isWechatBrowser() {
+  return typeof navigator !== 'undefined' && /MicroMessenger/i.test(navigator.userAgent)
+}
+
+function isMiniProgramEnabled(miniProgram) {
+  return Boolean(miniProgram?.enabled && miniProgram.username && miniProgram.path)
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function miniProgramPath(miniProgram) {
+  if (!miniProgram?.query) return miniProgram?.path || ''
+  const separator = miniProgram.path.includes('?') ? '&' : '?'
+  return `${miniProgram.path}${separator}${miniProgram.query}`
+}
+
 function getSelectedScoreMap(answers) {
   return QUESTIONS.reduce((result, question) => {
     result[question.id] = scoreQuestion(question, answers[question.id] || [])
@@ -49,6 +74,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
   const backgroundImage = assetUrl(config.assetsBaseUrl, config.backgroundImage)
   const logoImage = assetUrl(config.assetsBaseUrl, config.logoImage)
+  const miniProgramEnabled = isMiniProgramEnabled(config.miniProgram)
   const currentQuestion = QUESTIONS[questionIndex]
   const selectedIds = answers[currentQuestion?.id] || []
   const scores = useMemo(() => getSelectedScoreMap(answers), [answers])
@@ -58,7 +84,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
   )
   const resultLevel = useMemo(() => getResultLevel(totalScore), [totalScore])
 
-  useWechatShare(activityKey, publicConfig)
+  useWechatShare(activityKey, publicConfig, undefined, miniProgramEnabled ? WECHAT_LAUNCH_OPTIONS : undefined)
 
   useEffect(() => {
     let cancelled = false
@@ -175,6 +201,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
           scores={scores}
           totalScore={totalScore}
           resultLevel={resultLevel}
+          miniProgram={config.miniProgram}
           onRestart={restart}
           onStore={config.storeUrl ? goStore : null}
         />
@@ -299,7 +326,75 @@ function KnowledgeSheet({ question, isLast, onNext }) {
   )
 }
 
-function ResultPage({ answers, scores, totalScore, resultLevel, onRestart, onStore }) {
+function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
+  const enabled = isMiniProgramEnabled(miniProgram)
+  const path = enabled ? miniProgramPath(miniProgram) : ''
+  const envVersion = miniProgram?.envVersion || 'release'
+  const inWechat = isWechatBrowser()
+  const escapedLabel = escapeHtml(label)
+  const template = `
+    <style>
+      .latex-mini-program-button {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 46px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+        background: linear-gradient(100deg, #879dff, #55b8ff);
+        box-shadow: 0 16px 30px rgba(76, 124, 211, 0.22), inset 0 0 18px rgba(255, 255, 255, 0.7);
+      }
+      .latex-mini-program-button svg {
+        flex: 0 0 auto;
+        width: 1em;
+        height: 1em;
+      }
+      .latex-mini-program-button span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    </style>
+    <button class="latex-mini-program-button" type="button">
+      <svg viewBox="0 0 1024 1024" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M922.9 701.9H327.4l29.9-60.9 496.8-.9c16.8 0 31.2-12 34.2-28.6l68.8-385.1c1.8-10.1-.9-20.5-7.5-28.4a34.99 34.99 0 00-26.6-12.5l-632-2.1-5.4-25.4c-3.4-16.2-18-28-34.6-28H96.5a35.3 35.3 0 100 70.6h125.9L246 312.8l58.1 281.3-74.8 122.1a34.96 34.96 0 00-3 36.8c6 11.9 18.1 19.4 31.5 19.4h62.8a102.43 102.43 0 00-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7h161.1a102.43 102.43 0 00-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7H923c19.4 0 35.3-15.8 35.3-35.3a35.42 35.42 0 00-35.4-35.2zM305.7 253l575.8 1.9-56.4 315.8-452.3.8L305.7 253zm96.9 612.7c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 01-31.6 31.6zm325.1 0c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 01-31.6 31.6z"></path></svg>
+      <span>${escapedLabel}</span>
+    </button>
+  `
+
+  if (enabled && inWechat) {
+    return (
+      <wx-open-launch-weapp
+        class="latex-mini-program-launch"
+        username={miniProgram.username}
+        path={path}
+        env-version={envVersion}
+      >
+        <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+      </wx-open-launch-weapp>
+    )
+  }
+
+  return (
+    <button className="latex-primary-button" type="button" onClick={onFallback || undefined}>
+      <ShoppingCartOutlined />
+      <span>{label}</span>
+    </button>
+  )
+}
+
+function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, onRestart, onStore }) {
+  const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
+
   return (
     <section className="latex-result latex-page-in" aria-label="测试结果页" style={{ '--risk-color': resultLevel.color }}>
       <p className="latex-result-kicker">你的乳胶过敏风险等级</p>
@@ -335,10 +430,7 @@ function ResultPage({ answers, scores, totalScore, resultLevel, onRestart, onSto
       </div>
 
       <div className="latex-result-actions">
-        <button className="latex-primary-button" type="button" onClick={onStore || undefined}>
-          <ShoppingCartOutlined />
-          <span>{onStore ? '前往微信店铺选购' : resultLevel.cta}</span>
-        </button>
+        <MiniProgramLaunchButton miniProgram={miniProgram} label={ctaLabel} onFallback={onStore} />
         <p>{resultLevel.subcopy}</p>
         <button className="latex-ghost-button" type="button" onClick={onRestart}>
           <ReloadOutlined />

@@ -7,6 +7,13 @@ export const DEFAULT_CONFIG = {
   assetsBaseUrl: LATEX_ALLERGY_RISK_TEST_ASSETS_BASE_URL,
   backgroundImage: 'landing-bg.png',
   logoImage: 'logo.png',
+  miniProgram: {
+    enabled: true,
+    username: 'gh_627bc4433e11',
+    path: 'pages/index/index',
+    envVersion: 'release',
+    fallbackUrl: '',
+  },
   storeUrl: '',
 }
 

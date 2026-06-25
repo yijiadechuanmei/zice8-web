@@ -555,6 +555,11 @@
   flex: 0 0 auto;
 }
 
+.latex-mini-program-launch {
+  display: block;
+  width: 100%;
+}
+
 .latex-result-actions p {
   margin: 10px 0 14px;
   color: #496895;
