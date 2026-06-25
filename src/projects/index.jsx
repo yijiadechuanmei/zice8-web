@@ -7,9 +7,20 @@ const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
 const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index.jsx'))
 const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
+const LatexAllergyRiskTestProject = lazy(() => import('./latex-allergy-risk-test/index.jsx'))
 const QuizProject = lazy(() => import('./quiz/index.jsx'))
 
 export const projectRoutes = [
+  {
+    path: '/latex-allergy-risk-test/:activityKey',
+    Component: LatexAllergyRiskTestProject,
+    activityGate: true,
+  },
+  {
+    path: '/latex_allergy_risk_test/:activityKey',
+    Component: LatexAllergyRiskTestProject,
+    activityGate: true,
+  },
   {
     path: '/xiwuqi-99-road-night/:activityKey',
     Component: Xiwuqi99RoadNightProject,
