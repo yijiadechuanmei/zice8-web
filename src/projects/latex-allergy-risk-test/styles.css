@@ -193,6 +193,17 @@
   z-index: 1;
 }
 
+.latex-card-orb .anticon-question-circle,
+.latex-card-orb .anticon-info-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
 .latex-card-orb .anticon-question-circle svg path:first-child,
 .latex-card-orb .anticon-info-circle svg path:first-child {
   display: none;
