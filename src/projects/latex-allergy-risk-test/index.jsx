@@ -454,7 +454,10 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, onSt
       {shareVisible ? (
         <div className="latex-share-mask" role="button" tabIndex={0} onClick={() => setShareVisible(false)}>
           <div className="latex-share-cue" aria-hidden="true">
-            <RightOutlined />
+            <svg viewBox="0 0 96 96" focusable="false" aria-hidden="true">
+              <path d="M20 72C30 40 51 27 76 24" />
+              <path d="M58 14L78 23L68 43" />
+            </svg>
           </div>
           <p>点击右上角分享给朋友测试</p>
         </div>

@@ -683,10 +683,22 @@
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 18px);
   right: 24px;
+  width: 76px;
+  height: 76px;
   color: #fff;
-  font-size: 44px;
   line-height: 1;
-  transform: rotate(-45deg);
+}
+
+.latex-share-cue svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .latex-result-footer {
