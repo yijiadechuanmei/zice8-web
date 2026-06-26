@@ -128,11 +128,14 @@
 
 .latex-intro-cards {
   align-self: center;
+  position: relative;
+  left: 50%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 9px;
   width: min(calc(100% + 18px), 640px);
   margin: 0 auto 32px;
+  transform: translateX(-50%);
 }
 
 .latex-intro-card {
@@ -168,18 +171,10 @@
     0 8px 20px rgba(94, 133, 196, 0.16);
 }
 
-.latex-card-orb::before,
 .latex-card-orb::after {
   position: absolute;
   content: "";
   pointer-events: none;
-}
-
-.latex-card-orb::before {
-  inset: 11px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  opacity: 0.9;
 }
 
 .latex-card-orb::after {
@@ -196,6 +191,11 @@
 .latex-card-orb .anticon {
   position: relative;
   z-index: 1;
+}
+
+.latex-card-orb .anticon-question-circle svg path:first-child,
+.latex-card-orb .anticon-info-circle svg path:first-child {
+  display: none;
 }
 
 .latex-card-line {
