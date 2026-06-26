@@ -7,6 +7,11 @@ export const DEFAULT_CONFIG = {
   assetsBaseUrl: LATEX_ALLERGY_RISK_TEST_ASSETS_BASE_URL,
   backgroundImage: 'landing-bg.png',
   logoImage: 'logo.png',
+  productCarouselImages: [
+    'product-carousel-01.png',
+    'product-carousel-02.png',
+    'product-carousel-03.png',
+  ],
   miniProgram: {
     enabled: false,
     username: '',

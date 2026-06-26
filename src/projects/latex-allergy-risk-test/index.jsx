@@ -73,6 +73,12 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
   const backgroundImage = assetUrl(config.assetsBaseUrl, config.backgroundImage)
   const logoImage = assetUrl(config.assetsBaseUrl, config.logoImage)
+  const productCarouselImages = useMemo(
+    () => (config.productCarouselImages || [])
+      .map((filename) => assetUrl(config.assetsBaseUrl, filename))
+      .filter(Boolean),
+    [config.assetsBaseUrl, config.productCarouselImages],
+  )
   const miniProgramEnabled = isMiniProgramEnabled(config.miniProgram)
   const currentQuestion = QUESTIONS[questionIndex]
   const selectedIds = answers[currentQuestion?.id] || []
@@ -194,6 +200,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
           resultLevel={resultLevel}
           miniProgram={config.miniProgram}
           logoImage={logoImage}
+          productCarouselImages={productCarouselImages}
           onStore={config.storeUrl ? goStore : null}
         />
       ) : null}
@@ -388,7 +395,46 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
   )
 }
 
-function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, onStore }) {
+function ProductCarousel({ images }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    if (images.length <= 1) return undefined
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % images.length)
+    }, 2800)
+    return () => window.clearInterval(timer)
+  }, [images.length])
+
+  if (!images.length) return null
+
+  return (
+    <div className="latex-product-carousel" aria-label="杰士邦仿生皮产品图">
+      <div className="latex-product-carousel-track">
+        {images.map((image, index) => (
+          <img
+            alt={`杰士邦仿生皮产品图 ${index + 1}`}
+            className={index === activeIndex ? 'is-active' : ''}
+            key={image}
+            src={image}
+            onError={(event) => {
+              event.currentTarget.style.display = 'none'
+            }}
+          />
+        ))}
+      </div>
+      {images.length > 1 ? (
+        <div className="latex-product-carousel-dots" aria-hidden="true">
+          {images.map((image, index) => (
+            <i className={index === activeIndex ? 'is-active' : ''} key={image} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, productCarouselImages, onStore }) {
   const [shareVisible, setShareVisible] = useState(false)
   const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
 
@@ -436,6 +482,7 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, onSt
       <footer className="latex-result-footer">
         <p>本测试参考 WAO/EAACI 国际过敏指南设计</p>
         <p>仅作健康科普参考，不构成医学诊断。如有不适请咨询专业医生。</p>
+        <ProductCarousel images={productCarouselImages} />
         <div className="latex-result-brand">
           {logoImage ? (
             <img
