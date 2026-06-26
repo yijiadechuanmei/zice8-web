@@ -478,6 +478,15 @@
   line-height: 1.78;
 }
 
+.latex-knowledge-sheet .latex-knowledge-highlight {
+  padding: 12px 14px;
+  border: 1px solid rgba(112, 161, 231, 0.28);
+  border-radius: 14px;
+  color: #1f467d;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(224, 239, 255, 0.9), rgba(247, 251, 255, 0.92));
+}
+
 .latex-knowledge-sheet small {
   display: block;
   margin-top: 24px;
@@ -521,7 +530,7 @@
 
 .latex-gauge-ring strong {
   display: block;
-  margin-top: 20px;
+  margin-top: 0;
   font-size: 24px;
   line-height: 1;
 }
@@ -644,6 +653,40 @@
   font-size: 14px;
   white-space: nowrap;
   background: rgba(255, 255, 255, 0.58);
+}
+
+.latex-share-mask {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 76px) 28px 0;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+}
+
+.latex-share-mask p {
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.latex-share-cue {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 18px);
+  right: 24px;
+  color: #fff;
+  font-size: 44px;
+  line-height: 1;
+  transform: rotate(-45deg);
 }
 
 .latex-result-footer {

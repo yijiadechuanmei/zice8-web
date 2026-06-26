@@ -4,7 +4,6 @@ import {
   CheckOutlined,
   InfoCircleOutlined,
   QuestionCircleOutlined,
-  ReloadOutlined,
   RightOutlined,
   SafetyCertificateOutlined,
   ShoppingCartOutlined,
@@ -160,13 +159,6 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
     setQuestionIndex((current) => current + 1)
   }
 
-  function restart() {
-    setAnswers({})
-    setQuestionIndex(0)
-    setKnowledgeVisible(false)
-    setStep('landing')
-  }
-
   function goStore() {
     if (!config.storeUrl) return
     trackEvent({
@@ -199,11 +191,9 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
         <ResultPage
           answers={answers}
           scores={scores}
-          totalScore={totalScore}
           resultLevel={resultLevel}
           miniProgram={config.miniProgram}
           logoImage={logoImage}
-          onRestart={restart}
           onStore={config.storeUrl ? goStore : null}
         />
       ) : null}
@@ -315,7 +305,12 @@ function KnowledgeSheet({ question, isLast, onNext }) {
         <p className="latex-sheet-kicker">知识解析</p>
         <h3>{question.knowledge.title}</h3>
         {question.knowledge.body.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+          <p
+            className={question.knowledge.highlights?.includes(paragraph) ? 'latex-knowledge-highlight' : undefined}
+            key={paragraph}
+          >
+            {paragraph}
+          </p>
         ))}
         <small>{question.knowledge.reference}</small>
         <button className="latex-primary-button latex-sheet-button" type="button" onClick={onNext}>
@@ -393,7 +388,8 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
   )
 }
 
-function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, logoImage, onRestart, onStore }) {
+function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, onStore }) {
+  const [shareVisible, setShareVisible] = useState(false)
   const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
 
   return (
@@ -402,7 +398,6 @@ function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, log
       <div className="latex-gauge">
         <div className="latex-gauge-ring">
           <strong>{resultLevel.label}</strong>
-          <span>{totalScore} 分</span>
         </div>
         <div className="latex-risk-dots">
           {[1, 2, 3, 4].map((dot) => (
@@ -433,9 +428,8 @@ function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, log
       <div className="latex-result-actions">
         <MiniProgramLaunchButton miniProgram={miniProgram} label={ctaLabel} onFallback={onStore} />
         <p>{resultLevel.subcopy}</p>
-        <button className="latex-ghost-button" type="button" onClick={onRestart}>
-          <ReloadOutlined />
-          <span>重新测试</span>
+        <button className="latex-ghost-button" type="button" onClick={() => setShareVisible(true)}>
+          <span>点击分享给朋友测试</span>
         </button>
       </div>
 
@@ -456,6 +450,15 @@ function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, log
           <strong>7月8日杰士邦仿生皮 · 世界过敏日特别策划</strong>
         </div>
       </footer>
+
+      {shareVisible ? (
+        <div className="latex-share-mask" role="button" tabIndex={0} onClick={() => setShareVisible(false)}>
+          <div className="latex-share-cue" aria-hidden="true">
+            <RightOutlined />
+          </div>
+          <p>点击右上角分享给朋友测试</p>
+        </div>
+      ) : null}
     </section>
   )
 }
