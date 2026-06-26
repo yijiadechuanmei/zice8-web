@@ -142,7 +142,7 @@ export const MATERIAL_REGISTRATION_DOCUMENTS = [
     title: '成员单位建议名单',
     html: `
       <p class="ql-align-center"><strong style="font-size: 14pt; line-height: 28pt;">成员单位建议名单</strong></p>
-      <p class="ql-align-justify" style="font-size: 11pt; line-height: 28pt;"><strong>成员单位（62家）</strong></p>
+      <p class="ql-align-justify" style="font-size: 11pt; line-height: 28pt;"><strong>成员单位（66家）</strong></p>
       <p style="font-size: 11pt; line-height: 28pt;"><strong>1.高等院校（25所）：</strong>北京大学、哈尔滨工业大学、北京航空航天大学、同济大学、南开大学、北京科技大学、南京理工大学、华南理工大学、西北工业大学、北京理工大学、中南大学、湖南大学、重庆大学、南京航空航天大学、哈尔滨工程大学、西南交通大学、北京交通大学、合肥工业大学、南京邮电大学、长安大学、大连海事大学、北京化工大学、武汉科技大学、湖北工业大学、武汉职业技术大学</p>
       <p style="font-size: 11pt; line-height: 28pt;"><strong>2.中小学（7所）：</strong>华中师范大学第一附属中学、湖北省武昌实验中学、黄冈中学、武汉市第一中学、武汉中学、广东省佛山市南海实验中学、陕西省安康市石泉县中池镇中心小学</p>
       <p style="font-size: 11pt; line-height: 28pt;"><strong>3.科研院所（9所）：</strong><span>中国科学院宁波材料技术与工程研究所、交通运输部水运科学研究院、崖州湾国家实验室、佛山仙湖实验室、湖北隆中实验室、广东韩江实验室，武汉理工大学青岛研究院、深圳研究院、绍兴研究院</span></p>
