@@ -202,6 +202,7 @@ export default function LatexAllergyRiskTestProject({ routeParams }) {
           totalScore={totalScore}
           resultLevel={resultLevel}
           miniProgram={config.miniProgram}
+          logoImage={logoImage}
           onRestart={restart}
           onStore={config.storeUrl ? goStore : null}
         />
@@ -392,7 +393,7 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
   )
 }
 
-function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, onRestart, onStore }) {
+function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, logoImage, onRestart, onStore }) {
   const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
 
   return (
@@ -441,7 +442,19 @@ function ResultPage({ answers, scores, totalScore, resultLevel, miniProgram, onR
       <footer className="latex-result-footer">
         <p>本测试参考 WAO/EAACI 国际过敏指南设计</p>
         <p>仅作健康科普参考，不构成医学诊断。如有不适请咨询专业医生。</p>
-        <strong>杰士邦仿生皮 · 世界过敏日特别策划</strong>
+        <div className="latex-result-brand">
+          {logoImage ? (
+            <img
+              className="latex-result-logo"
+              src={logoImage}
+              alt="品牌标识"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none'
+              }}
+            />
+          ) : null}
+          <strong>7月8日杰士邦仿生皮 · 世界过敏日特别策划</strong>
+        </div>
       </footer>
     </section>
   )
