@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 const DEFAULT_SIZE = 520
 const DEFAULT_COLORS = ['#EEF6FF', '#F7FAFF']
-const WHEEL_SLOT_COUNT = 4
+const DEFAULT_WHEEL_SLOT_COUNT = 4
 const SEGMENT_LABEL_MAX_WIDTH_RATIO = 0.56
 const SEGMENT_LABEL_LINE_HEIGHT = 30
 
@@ -12,7 +12,8 @@ function getNormalizedTargetRotation(targetIndex, segmentCount) {
 }
 
 function normalizeSegments(segments) {
-  const fixedSegments = Array.from({ length: WHEEL_SLOT_COUNT }, (_, index) => (
+  const slotCount = Math.max(DEFAULT_WHEEL_SLOT_COUNT, segments?.length || 0)
+  const fixedSegments = Array.from({ length: slotCount }, (_, index) => (
     segments?.[index] || { label: '谢谢参与', background: DEFAULT_COLORS[index % DEFAULT_COLORS.length] }
   ))
   return fixedSegments
@@ -66,6 +67,17 @@ function wrapSegmentLabel(context, label, maxWidth) {
   return lines
 }
 
+function getSegmentLabelStyle(segment, segmentCount) {
+  const fontSize = segmentCount > DEFAULT_WHEEL_SLOT_COUNT ? 22 : 26
+  const weight = segment.prize ? 800 : 700
+  return {
+    font: `${weight} ${fontSize}px sans-serif`,
+    lineHeight: segmentCount > DEFAULT_WHEEL_SLOT_COUNT ? 26 : SEGMENT_LABEL_LINE_HEIGHT,
+    maxWidthRatio: segmentCount > DEFAULT_WHEEL_SLOT_COUNT ? 0.48 : SEGMENT_LABEL_MAX_WIDTH_RATIO,
+    labelRadiusRatio: segmentCount > DEFAULT_WHEEL_SLOT_COUNT ? 0.58 : 0.54,
+  }
+}
+
 export default function Wheel({
   segments,
   targetIndex,
@@ -78,9 +90,10 @@ export default function Wheel({
   onFinish,
 }) {
   const wheelSegments = useMemo(() => normalizeSegments(segments), [segments])
+  const segmentCount = wheelSegments.length
   const remainingDrawCount = draw ? 0 : 1
   const drawButtonText = drawing ? '抽奖中' : '立即抽奖'
-  const initialRotation = Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT) : 0
+  const initialRotation = Number.isInteger(targetIndex) ? getNormalizedTargetRotation(targetIndex, segmentCount) : 0
   const drawClickLockedRef = useRef(false)
   const drawButtonRef = useRef(null)
   const canvasRef = useRef(null)
@@ -113,7 +126,7 @@ export default function Wheel({
     context.clearRect(0, 0, DEFAULT_SIZE, DEFAULT_SIZE)
 
     const radius = DEFAULT_SIZE / 2
-    const segmentAngle = (Math.PI * 2) / WHEEL_SLOT_COUNT
+    const segmentAngle = (Math.PI * 2) / segmentCount
     const baseStart = -Math.PI / 2 - segmentAngle / 2
 
     wheelSegments.forEach((segment, index) => {
@@ -135,16 +148,17 @@ export default function Wheel({
       context.textAlign = 'center'
       context.textBaseline = 'middle'
       context.fillStyle = segment.prize ? '#0F172A' : '#2F80FF'
-      context.font = segment.prize ? '800 26px sans-serif' : '700 26px sans-serif'
-      const labelLines = wrapSegmentLabel(context, segment.label, radius * SEGMENT_LABEL_MAX_WIDTH_RATIO)
-      const totalHeight = Math.max(1, labelLines.length) * SEGMENT_LABEL_LINE_HEIGHT
+      const labelStyle = getSegmentLabelStyle(segment, segmentCount)
+      context.font = labelStyle.font
+      const labelLines = wrapSegmentLabel(context, segment.label, radius * labelStyle.maxWidthRatio)
+      const totalHeight = Math.max(1, labelLines.length) * labelStyle.lineHeight
       labelLines.forEach((line, lineIndex) => {
-        const y = lineIndex * SEGMENT_LABEL_LINE_HEIGHT - (totalHeight - SEGMENT_LABEL_LINE_HEIGHT) / 2
-        context.fillText(line, radius * 0.54, y)
+        const y = lineIndex * labelStyle.lineHeight - (totalHeight - labelStyle.lineHeight) / 2
+        context.fillText(line, radius * labelStyle.labelRadiusRatio, y)
       })
       context.restore()
     })
-  }, [wheelSegments])
+  }, [segmentCount, wheelSegments])
 
   useEffect(() => {
     if (!wheelDiscRef.current) return
@@ -164,10 +178,10 @@ export default function Wheel({
   }, [draw, drawing])
 
   useEffect(() => {
-    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= WHEEL_SLOT_COUNT || !spinKey) return
+    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= segmentCount || !spinKey) return
     const currentRotation = rotationRef.current
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360
-    const normalizedTarget = getNormalizedTargetRotation(targetIndex, WHEEL_SLOT_COUNT)
+    const normalizedTarget = getNormalizedTargetRotation(targetIndex, segmentCount)
     let delta = normalizedTarget - normalizedCurrent
     if (delta < 0) delta += 360
     const finalRotation = currentRotation + (reducedMotion ? 1 : 6) * 360 + delta
@@ -190,7 +204,7 @@ export default function Wheel({
 
     frameRef.current = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(frameRef.current)
-  }, [reducedMotion, spinKey, targetIndex])
+  }, [reducedMotion, segmentCount, spinKey, targetIndex])
 
   function handleDrawClick() {
     if (drawButtonDisabled || drawClickLockedRef.current) return

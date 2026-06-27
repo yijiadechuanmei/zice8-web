@@ -35,6 +35,16 @@ const PHASE_WHEEL_ASSETS = {
   wheelPointer: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_pointer.png`,
   wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
 }
+const BROCHURE_WHEEL_SEGMENTS = [
+  { label: '特等奖', prizeName: '特等奖', prize: true },
+  { label: '谢谢参与', prizeName: '谢谢参与' },
+  { label: '一等奖', prizeName: '一等奖', prize: true },
+  { label: '幸运奖', prizeName: '幸运奖', prize: true },
+  { label: '二等奖', prizeName: '二等奖', prize: true },
+  { label: '谢谢参与', prizeName: '谢谢参与' },
+  { label: '三等奖', prizeName: '三等奖', prize: true },
+  { label: '幸运奖', prizeName: '幸运奖', prize: true },
+]
 
 function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY
@@ -61,18 +71,23 @@ function buildBackgroundStyle(config) {
   }
 }
 
-function buildPhaseWheelSegments(prizeName) {
-  return [
-    { label: prizeName || '奖品', prize: true },
-    { label: '谢谢参与' },
-    { label: '谢谢参与' },
-    { label: '谢谢参与' },
-  ]
+function buildPhaseWheelSegments() {
+  return BROCHURE_WHEEL_SEGMENTS
+}
+
+function normalizePrizeName(value) {
+  return String(value || '').trim()
 }
 
 function resolveWheelTargetIndex(draw) {
   if (!draw) return null
-  return draw.won ? 0 : 1
+  if (Number.isInteger(draw.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < BROCHURE_WHEEL_SEGMENTS.length) {
+    return draw.wheelStopIndex
+  }
+  const prizeName = normalizePrizeName(draw.prizeName)
+  if (!draw.won || prizeName === '谢谢参与') return 1
+  const index = BROCHURE_WHEEL_SEGMENTS.findIndex((segment) => segment.prizeName === prizeName)
+  return index >= 0 ? index : 1
 }
 
 function formatPrizeTime(value) {
@@ -325,7 +340,7 @@ function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
 }
 
 function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, onWheelFinish }) {
-  const segments = useMemo(() => buildPhaseWheelSegments(draw?.prizeName), [draw?.prizeName])
+  const segments = useMemo(() => buildPhaseWheelSegments(), [])
 
   return (
     <main className="bql-phase-wheel-layout">

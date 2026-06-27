@@ -183,8 +183,8 @@
 
 .bql-question-page-panel {
   display: grid;
-  gap: 14px;
-  padding: 18px 14px 20px;
+  gap: 18px;
+  padding: 20px 16px 22px;
 }
 
 .bql-stage-kicker {
@@ -215,8 +215,8 @@
 
 .bql-progress-card {
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  gap: 11px;
+  padding: 16px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 14px rgba(47, 124, 196, 0.1);
@@ -279,7 +279,7 @@
 }
 
 .bql-question-card h1 {
-  margin: 10px 0 14px;
+  margin: 12px 0 16px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -293,7 +293,7 @@
 
 .bql-options {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .bql-option {
@@ -301,8 +301,8 @@
   grid-template-columns: 28px 1fr;
   gap: 9px;
   align-items: center;
-  min-height: 44px;
-  padding: 9px 11px;
+  min-height: 48px;
+  padding: 10px 12px;
   border: 1px solid rgba(31, 126, 216, 0.22);
   border-radius: 8px;
   background: #fff;
@@ -418,12 +418,12 @@
 }
 
 .bql-quiz-stage {
-  padding: 16px 12px 24px;
+  padding: 30px 14px 30px;
 }
 
 .bql-question-actions .bql-primary {
-  min-height: 46px;
-  margin-top: 4px;
+  min-height: 48px;
+  margin-top: 6px;
 }
 
 .bql-phase-like-panel {
