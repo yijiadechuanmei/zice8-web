@@ -61,6 +61,21 @@
   box-sizing: border-box;
 }
 
+.appointment-intro-hint {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  color: #000000;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+  animation: appointmentIntroHintBlink 2.4s ease-in-out infinite;
+}
+
 .appointment-stage-input,
 .appointment-picker-trigger {
   position: absolute;
@@ -370,6 +385,18 @@
   }
 
   to {
+    opacity: 1;
+  }
+}
+
+@keyframes appointmentIntroHintBlink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  45%,
+  65% {
     opacity: 1;
   }
 }

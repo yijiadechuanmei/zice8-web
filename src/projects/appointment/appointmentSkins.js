@@ -77,6 +77,13 @@ const DONGFANG_ZHENYUE_LAYOUT = {
       width: 132,
       height: 132,
     },
+    textHint: {
+      text: '点击或上滑进入下一页',
+      left: 221,
+      top: 1210,
+      width: 300,
+      height: 38,
+    },
   },
   rule: {
     height: APPOINTMENT_STAGE_HEIGHT,

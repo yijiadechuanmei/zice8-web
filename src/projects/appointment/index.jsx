@@ -600,6 +600,14 @@ function IntroStage({ layout, assetsBaseUrl, pageUrl }) {
           />
         </div>
       ) : null}
+      {layout.intro.textHint ? (
+        <div
+          className="appointment-intro-hint"
+          style={toAbsoluteStyle(layout.intro.textHint)}
+        >
+          {layout.intro.textHint.text}
+        </div>
+      ) : null}
     </>
   )
 }
