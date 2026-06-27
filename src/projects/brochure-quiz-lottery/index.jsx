@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getVisitorId, trackEvent, trackPageView } from '../../shared/analytics'
 import { getQueryParam } from '../../shared/utils/url'
+import { DEFAULT_OSS_BASE_URL } from '../phase-quiz-lottery/api'
+import PhaseWheel from '../phase-quiz-lottery/components/Wheel'
 import {
   drawPrize,
   getBootstrap,
@@ -22,6 +24,12 @@ import './styles.css'
 
 const isDebugRequested = getQueryParam('debug') === '1'
 const DEBUG_RESET_TOKEN = 'RESET_BQL_2026'
+const PHASE_WHEEL_ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/phase_quiz_lottery_test_001`
+const PHASE_WHEEL_ASSETS = {
+  wheelRing: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_ring.png`,
+  wheelPointer: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_pointer.png`,
+  wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
+}
 
 function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY
@@ -46,6 +54,20 @@ function buildBackgroundStyle(config) {
   return {
     '--bql-home-bg-overlay': `url("${assetUrl(config, config.home.bgOverlay)}")`,
   }
+}
+
+function buildPhaseWheelSegments(prizeName) {
+  return [
+    { label: prizeName || '奖品', prize: true },
+    { label: '谢谢参与' },
+    { label: '谢谢参与' },
+    { label: '谢谢参与' },
+  ]
+}
+
+function resolveWheelTargetIndex(draw) {
+  if (!draw) return null
+  return draw.won ? 0 : 1
 }
 
 function HomeCanvas({ config, currentSlide, onSlide, onParticipate }) {
@@ -277,23 +299,24 @@ function ResultPage({ result, onDraw, onHome }) {
   )
 }
 
-function WheelPage({ draw, spinning, onDraw, onMyPrizes, onHome }) {
-  const segments = ['特等奖', '一等奖', '二等奖', '谢谢参与', '三等奖', '幸运奖']
+function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, onHome, onWheelFinish }) {
+  const segments = useMemo(() => buildPhaseWheelSegments(draw?.prizeName), [draw?.prizeName])
 
   return (
     <main className="bql-stage">
-      <section className="bql-panel bql-wheel-panel bql-phase-like-panel">
+      <section className="bql-panel bql-wheel-panel bql-phase-like-panel bql-phase-wheel-panel">
         <h1>幸运转盘</h1>
-        <div className="bql-wheel-count">剩余抽奖次数：{draw ? 0 : 1}</div>
-        <div className={`bql-wheel ${spinning ? 'is-spinning' : ''}`}>
-          <div className="bql-wheel-pointer" />
-          {segments.map((segment, index) => (
-            <span className={`bql-wheel-label bql-wheel-label-${index + 1}`} key={segment}>{segment}</span>
-          ))}
-          <button className="bql-wheel-core" type="button" onClick={onDraw} disabled={spinning || Boolean(draw)}>
-            {spinning ? '抽奖中' : 'GO'}
-          </button>
-        </div>
+        <PhaseWheel
+          segments={segments}
+          targetIndex={targetIndex}
+          drawing={spinning}
+          draw={draw}
+          spinKey={spinKey}
+          assets={PHASE_WHEEL_ASSETS}
+          onDraw={onDraw}
+          onOpenPrize={onMyPrizes}
+          onFinish={onWheelFinish}
+        />
         {draw ? (
           <div className="bql-prize-result">
             <strong>{draw.won ? draw.prizeName : '谢谢参与'}</strong>
@@ -303,15 +326,8 @@ function WheelPage({ draw, spinning, onDraw, onMyPrizes, onHome }) {
           <p className="bql-stage-sub">每位用户仅限抽奖 1 次，奖项从剩余奖池中随机抽取。</p>
         )}
         <div className="bql-result-actions">
-          <button className="bql-secondary" type="button" onClick={onMyPrizes}>查看我的奖品</button>
           <button className="bql-secondary" type="button" onClick={onHome}>返回画册</button>
         </div>
-        {spinning ? (
-          <div className="bql-wheel-loading" aria-live="polite" aria-busy="true">
-            <span className="bql-wheel-loading-spinner" aria-hidden="true" />
-            <span>抽奖处理中...</span>
-          </div>
-        ) : null}
       </section>
     </main>
   )
@@ -397,6 +413,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [quizError, setQuizError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [spinning, setSpinning] = useState(false)
+  const [wheelSpinKey, setWheelSpinKey] = useState('')
+  const [wheelTargetIndex, setWheelTargetIndex] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const config = useMemo(() => mergeBrochureConfig(publicConfig), [publicConfig])
 
@@ -468,6 +486,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     setCurrentQuestionIndex(0)
     setQuizError('')
     setSpinning(false)
+    setWheelSpinKey('')
+    setWheelTargetIndex(null)
     setView('home')
   }
 
@@ -567,10 +587,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     try {
       const requestId = `bql_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
       const data = await drawPrize(activityKey, result?.id || attempt.id, { visitorId, requestId })
-      window.setTimeout(() => {
-        setDraw(data.draw)
-        setSpinning(false)
-      }, 900)
+      setDraw(data.draw)
+      setWheelTargetIndex(resolveWheelTargetIndex(data.draw))
+      setWheelSpinKey(`bql-wheel-${Date.now()}`)
       trackEvent({
         activityKey,
         eventType: 'brochure_quiz_lottery_draw',
@@ -581,6 +600,10 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       setSpinning(false)
       setError(err?.message || '抽奖失败，请重试')
     }
+  }
+
+  const handleWheelFinish = () => {
+    setSpinning(false)
   }
 
   const openMyPrizes = async () => {
@@ -694,9 +717,12 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         <WheelPage
           draw={draw}
           spinning={spinning}
+          targetIndex={wheelTargetIndex}
+          spinKey={wheelSpinKey}
           onDraw={handleDraw}
           onMyPrizes={openMyPrizes}
           onHome={() => setView('home')}
+          onWheelFinish={handleWheelFinish}
         />
       ) : null}
       {profileOpen ? (
