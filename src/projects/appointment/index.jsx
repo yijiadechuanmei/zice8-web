@@ -1026,7 +1026,7 @@ function getFriendlyAppointmentMessage(err, scene) {
   const businessCode = getAppointmentBusinessCode(err)
 
   if (businessCode === 'slot_soft_confirm_required') {
-    return rawMessage || '本时段已有较多人预约交付，此时段交付会等待较长时间，如需继续预约本时段，请您点击继续预约进行报名'
+    return rawMessage || '本时段已有较多人预约交付，此时段交付预计需等待1-2小时，如需继续预约本时段，请您点击继续预约进行报名'
   }
   if (businessCode === 'slot_full') {
     return '本时段预约人数已满，请选择其他时段报名预约'
@@ -1150,6 +1150,7 @@ function getAppointmentBusinessCode(err) {
   if (
     rawMessage.includes('已有较多人预约') ||
     rawMessage.includes('继续预约本时段') ||
+    rawMessage.includes('预计需等待1-2小时') ||
     rawMessage.includes('等待较长时间')
   ) {
     return 'slot_soft_confirm_required'
