@@ -12,6 +12,19 @@ export const getPublicConfig = (activityKey) =>
 export const getBootstrap = (activityKey, visitorId) =>
   request(withVisitor(`/brochure-quiz-lottery/activities/${encodeURIComponent(activityKey)}/bootstrap`, visitorId))
 
+export const getDebugAccess = (activityKey, visitorId) =>
+  request(withVisitor(`/brochure-quiz-lottery/activities/${encodeURIComponent(activityKey)}/debug-access`, visitorId))
+
+export const resetDebugData = (activityKey, data) =>
+  request('/brochure-quiz-lottery/dev/reset', {
+    method: 'POST',
+    body: JSON.stringify({
+      activityKey,
+      scope: 'me',
+      ...data,
+    }),
+  })
+
 export const saveProfile = (activityKey, data) =>
   request(`/brochure-quiz-lottery/activities/${encodeURIComponent(activityKey)}/profile`, {
     method: 'POST',

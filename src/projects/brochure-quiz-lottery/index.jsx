@@ -4,8 +4,10 @@ import { getQueryParam } from '../../shared/utils/url'
 import {
   drawPrize,
   getBootstrap,
+  getDebugAccess,
   getMyPrizes,
   getPublicConfig,
+  resetDebugData,
   saveProfile,
   startAttempt,
   submitAttempt,
@@ -17,6 +19,9 @@ import {
   mergeBrochureConfig,
 } from './config'
 import './styles.css'
+
+const isDebugRequested = getQueryParam('debug') === '1'
+const DEBUG_RESET_TOKEN = 'RESET_BQL_2026'
 
 function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY
@@ -335,6 +340,42 @@ function MyPrizesModal({ prizes, onClose }) {
   )
 }
 
+function DebugPanel({
+  enabled,
+  activityKey,
+  view,
+  attempt,
+  draw,
+  debugAccess,
+  onResetMine,
+  onResetAll,
+  onGoQuiz,
+  onLogState,
+}) {
+  if (!enabled) return null
+
+  return (
+    <div className="bql-debug-panel">
+      <div className="bql-debug-title">DEBUG</div>
+      <div className="bql-debug-meta">
+        <div>activityKey: {activityKey || '-'}</div>
+        <div>view: {view || '-'}</div>
+        <div>attemptId: {attempt?.id || '-'}</div>
+        <div>drawId: {draw?.id || '-'}</div>
+        <div>identity: {debugAccess?.identityKey || '-'}</div>
+      </div>
+      <div className="bql-debug-actions">
+        <button type="button" onClick={onResetMine}>重置我的测试数据</button>
+        {debugAccess?.allowActivityReset ? (
+          <button className="is-danger" type="button" onClick={onResetAll}>重置全部测试数据</button>
+        ) : null}
+        <button className="is-dark" type="button" onClick={onGoQuiz}>回到答题页</button>
+        <button className="is-light" type="button" onClick={onLogState}>console.log 当前状态</button>
+      </div>
+    </div>
+  )
+}
+
 export default function BrochureQuizLotteryApp({ routeParams }) {
   const activityKey = normalizeActivityKey(routeParams)
   const visitorId = useMemo(() => getVisitorId(), [])
@@ -351,10 +392,12 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [myPrizesOpen, setMyPrizesOpen] = useState(false)
   const [myPrizes, setMyPrizes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingText, setLoadingText] = useState('加载中...')
   const [error, setError] = useState('')
   const [quizError, setQuizError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [spinning, setSpinning] = useState(false)
+  const [debugAccess, setDebugAccess] = useState(null)
   const config = useMemo(() => mergeBrochureConfig(publicConfig), [publicConfig])
 
   useEffect(() => {
@@ -396,6 +439,37 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       activityType: BROCHURE_QUIZ_LOTTERY_ACTIVITY_TYPE,
     })
   }, [activityKey])
+
+  useEffect(() => {
+    if (!isDebugRequested || !activityKey || !visitorId) return
+    let cancelled = false
+    getDebugAccess(activityKey, visitorId)
+      .then((data) => {
+        if (!cancelled) setDebugAccess(data)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setDebugAccess(null)
+          console.warn('[brochure-quiz-lottery debug access]', err)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey, visitorId])
+
+  const resetLocalState = () => {
+    setProfile(null)
+    setAttempt(null)
+    setResult(null)
+    setDraw(null)
+    setMyPrizes([])
+    setAnswers({})
+    setCurrentQuestionIndex(0)
+    setQuizError('')
+    setSpinning(false)
+    setView('home')
+  }
 
   const enterInteraction = async () => {
     if (!profile) {
@@ -515,9 +589,72 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     setMyPrizesOpen(true)
   }
 
+  const handleDebugResetMine = async () => {
+    if (!debugAccess?.canDebug) return
+    setLoadingText('正在重置我的测试数据...')
+    setLoading(true)
+    try {
+      const data = await resetDebugData(activityKey, {
+        visitorId,
+        confirmToken: DEBUG_RESET_TOKEN,
+        scope: 'me',
+      })
+      console.log('[brochure-quiz-lottery debug reset mine]', data)
+      resetLocalState()
+    } catch (err) {
+      setError(err?.message || '重置失败')
+    } finally {
+      setLoading(false)
+      setLoadingText('加载中...')
+    }
+  }
+
+  const handleDebugResetAll = async () => {
+    if (!debugAccess?.canDebug || !debugAccess?.allowActivityReset) return
+    if (!window.confirm('确认重置全部测试数据？会清空本活动所有用户的提交信息、答题和抽奖记录，并恢复奖池。')) return
+    setLoadingText('正在重置全部测试数据...')
+    setLoading(true)
+    try {
+      const data = await resetDebugData(activityKey, {
+        visitorId,
+        confirmToken: DEBUG_RESET_TOKEN,
+        scope: 'activity',
+      })
+      console.log('[brochure-quiz-lottery debug reset all]', data)
+      resetLocalState()
+    } catch (err) {
+      setError(err?.message || '重置全部数据失败')
+    } finally {
+      setLoading(false)
+      setLoadingText('加载中...')
+    }
+  }
+
+  const handleDebugGoQuiz = () => {
+    if (!debugAccess?.canDebug || !attempt || attempt.status === 'submitted') return
+    setCurrentQuestionIndex(0)
+    setView('quiz')
+  }
+
+  const handleDebugLogState = () => {
+    console.log('[brochure-quiz-lottery debug state]', {
+      activityKey,
+      visitorId,
+      view,
+      profile,
+      attempt,
+      result,
+      draw,
+      answers,
+      currentQuestionIndex,
+      myPrizes,
+      debugAccess,
+    })
+  }
+
   const backgroundStyle = buildBackgroundStyle(config)
 
-  if (loading) return <div className="bql-loading" style={backgroundStyle} />
+  if (loading) return <div className="bql-loading" style={backgroundStyle}>{loadingText}</div>
   if (error) {
     return (
       <main className="bql-stage" style={backgroundStyle}>
@@ -571,6 +708,18 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         />
       ) : null}
       {myPrizesOpen ? <MyPrizesModal prizes={myPrizes} onClose={() => setMyPrizesOpen(false)} /> : null}
+      <DebugPanel
+        enabled={Boolean(isDebugRequested && debugAccess?.canDebug)}
+        activityKey={activityKey}
+        view={view}
+        attempt={attempt}
+        draw={draw}
+        debugAccess={debugAccess}
+        onResetMine={handleDebugResetMine}
+        onResetAll={handleDebugResetAll}
+        onGoQuiz={handleDebugGoQuiz}
+        onLogState={handleDebugLogState}
+      />
     </div>
   )
 }
