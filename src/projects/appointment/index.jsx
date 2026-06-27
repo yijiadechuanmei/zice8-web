@@ -67,6 +67,7 @@ function AppointmentMain({ routeParams }) {
   const [debugMessage, setDebugMessage] = useState('')
   const [activePicker, setActivePicker] = useState('')
   const [pickerDraftValue, setPickerDraftValue] = useState('')
+  const [capacityConfirmMessage, setCapacityConfirmMessage] = useState('')
   const toastTimerRef = useRef(0)
   const introTouchRef = useRef({ x: 0, y: 0 })
   const hasTrackedInitialViewRef = useRef(false)
@@ -296,8 +297,7 @@ function AppointmentMain({ routeParams }) {
     }
   }
 
-  async function handleBookingSubmit(event) {
-    event.preventDefault()
+  async function submitBooking(capacityConfirmed = false) {
     const validationMessage = validateBookingForm(bookingForm)
     if (validationMessage) {
       showToast(validationMessage)
@@ -305,11 +305,13 @@ function AppointmentMain({ routeParams }) {
     }
     setSubmitting(true)
     try {
+      setCapacityConfirmMessage('')
       const result = await createAppointmentBooking(activityKey, {
         verifyToken: verifyResult?.verifyToken || '',
         appointmentDate: bookingForm.appointmentDate,
         appointmentSlot: bookingForm.appointmentSlot,
         phone: bookingForm.phone.trim(),
+        capacityConfirmed,
       })
       trackAppointmentEvent(activityKey, 'appointment_booking_success', {
         pageKey: 'booking',
@@ -329,6 +331,10 @@ function AppointmentMain({ routeParams }) {
         reauth('appointment-booking')
         return
       }
+      if (isSlotSoftConfirmRequired(err)) {
+        setCapacityConfirmMessage(getFriendlyAppointmentMessage(err, 'booking'))
+        return
+      }
       trackAppointmentEvent(activityKey, 'appointment_booking_failed', {
         pageKey: 'booking',
         date: bookingForm.appointmentDate,
@@ -340,6 +346,11 @@ function AppointmentMain({ routeParams }) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  async function handleBookingSubmit(event) {
+    event.preventDefault()
+    await submitBooking(false)
   }
 
   function openPicker(fieldKey) {
@@ -479,6 +490,32 @@ function AppointmentMain({ routeParams }) {
         <div className="appointment-toast-mask" onClick={(event) => event.stopPropagation()}>
           <div className="appointment-toast rounded-xl px-6 py-4 text-[17px] font-medium leading-[1.45] tracking-[0.02em]">
             {toastMessage}
+          </div>
+        </div>
+      ) : null}
+
+      {capacityConfirmMessage ? (
+        <div className="appointment-confirm-mask" onClick={() => setCapacityConfirmMessage('')}>
+          <div className="appointment-confirm" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <p>{capacityConfirmMessage}</p>
+            <div className="appointment-confirm__actions">
+              <button
+                type="button"
+                className="appointment-confirm__secondary"
+                onClick={() => setCapacityConfirmMessage('')}
+                disabled={submitting}
+              >
+                选择其他时段
+              </button>
+              <button
+                type="button"
+                className="appointment-confirm__primary"
+                onClick={() => submitBooking(true)}
+                disabled={submitting}
+              >
+                {submitting ? '提交中' : '继续预约本时段'}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -922,6 +959,10 @@ function isUnauthorizedError(err) {
   return err?.response?.code === 401
 }
 
+function isSlotSoftConfirmRequired(err) {
+  return err?.response?.code === 'slot_soft_confirm_required'
+}
+
 function validateVerifyForm(form) {
   if (!String(form?.building || '').trim()) return '请填写楼号'
   if (!String(form?.room || '').trim()) return '请填写房号'
@@ -945,8 +986,11 @@ function getFriendlyAppointmentMessage(err, scene) {
   const rawMessage = String(err?.response?.message || err?.message || '').trim()
   const responseCode = err?.response?.code
 
+  if (responseCode === 'slot_soft_confirm_required') {
+    return rawMessage || '本时段已有较多人预约交付，此时段交付会等待较长时间，如需继续预约本时段，请您点击继续预约进行报名'
+  }
   if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满') || rawMessage.includes('预约时段人数已满')) {
-    return '预约时段人数已满\n请选择其他时段'
+    return '本时段预约人数已满，请选择其他时段报名预约'
   }
   if (rawMessage.includes('手机号格式不正确')) {
     return '请填写正确手机号'

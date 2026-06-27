@@ -198,6 +198,66 @@
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
 }
 
+.appointment-confirm-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 125;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.appointment-confirm {
+  width: min(86vw, 520px);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 24px 22px 20px;
+  color: #22130b;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.appointment-confirm p {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.58;
+}
+
+.appointment-confirm__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.appointment-confirm__secondary,
+.appointment-confirm__primary {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.appointment-confirm__secondary {
+  background: #f4f0eb;
+  color: #5b4a3d;
+}
+
+.appointment-confirm__primary {
+  background: #c85321;
+  color: #ffffff;
+}
+
+.appointment-confirm__secondary:disabled,
+.appointment-confirm__primary:disabled {
+  opacity: 0.64;
+}
+
 .appointment-debug-panel {
   position: fixed;
   left: 12px;
