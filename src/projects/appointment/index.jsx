@@ -991,7 +991,7 @@ function isUnauthorizedError(err) {
 }
 
 function isSlotSoftConfirmRequired(err) {
-  return err?.response?.code === 'slot_soft_confirm_required'
+  return getAppointmentBusinessCode(err) === 'slot_soft_confirm_required'
 }
 
 function validateVerifyForm(form) {
@@ -1014,13 +1014,13 @@ function validateBookingForm(form) {
 }
 
 function getFriendlyAppointmentMessage(err, scene) {
-  const rawMessage = String(err?.response?.message || err?.message || '').trim()
-  const responseCode = err?.response?.code
+  const rawMessage = getAppointmentErrorMessage(err)
+  const businessCode = getAppointmentBusinessCode(err)
 
-  if (responseCode === 'slot_soft_confirm_required') {
+  if (businessCode === 'slot_soft_confirm_required') {
     return rawMessage || '本时段已有较多人预约交付，此时段交付会等待较长时间，如需继续预约本时段，请您点击继续预约进行报名'
   }
-  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满') || rawMessage.includes('预约时段人数已满')) {
+  if (businessCode === 'slot_full') {
     return '本时段预约人数已满，请选择其他时段报名预约'
   }
   if (rawMessage.includes('手机号格式不正确')) {
@@ -1113,10 +1113,11 @@ function sanitizeAppointmentAnalyticsExtra(extra = {}) {
 }
 
 function classifyAppointmentAnalyticsReason(err, scene) {
-  const rawMessage = String(err?.response?.message || err?.message || '').trim()
-  const responseCode = String(err?.response?.code || '')
+  const rawMessage = getAppointmentErrorMessage(err)
+  const businessCode = getAppointmentBusinessCode(err)
 
-  if (responseCode === 'slot_full' || rawMessage.includes('时段报名人数已满') || rawMessage.includes('预约时段人数已满')) return 'slot_full'
+  if (businessCode === 'slot_soft_confirm_required') return 'slot_soft_confirm_required'
+  if (businessCode === 'slot_full') return 'slot_full'
   if (rawMessage.includes('手机号格式不正确')) return 'invalid_phone'
   if (rawMessage.includes('预约时间段不合法') || rawMessage.includes('预约日期格式不正确') || rawMessage.includes('请选择')) {
     return scene === 'booking' ? 'invalid_schedule' : 'invalid_input'
@@ -1127,4 +1128,31 @@ function classifyAppointmentAnalyticsReason(err, scene) {
   if (rawMessage.includes('活动已截止')) return 'activity_ended'
   if (rawMessage.includes('Failed to fetch') || rawMessage.includes('NetworkError')) return 'network_error'
   return scene === 'verify' ? 'verify_error' : 'booking_error'
+}
+
+function getAppointmentErrorMessage(err) {
+  return String(err?.response?.message || err?.message || '').trim()
+}
+
+function getAppointmentBusinessCode(err) {
+  const rawCode = err?.response?.code
+  if (rawCode === 'slot_soft_confirm_required' || rawCode === 'slot_full') return rawCode
+
+  const rawMessage = getAppointmentErrorMessage(err)
+  if (
+    rawMessage.includes('已有较多人预约') ||
+    rawMessage.includes('继续预约本时段') ||
+    rawMessage.includes('等待较长时间')
+  ) {
+    return 'slot_soft_confirm_required'
+  }
+  if (
+    rawMessage.includes('本时段预约人数已满') ||
+    rawMessage.includes('时段预约人数已满') ||
+    rawMessage.includes('时段报名人数已满') ||
+    rawMessage.includes('预约时段人数已满')
+  ) {
+    return 'slot_full'
+  }
+  return ''
 }
