@@ -499,7 +499,17 @@ function DevLayoutDebugPanel({ step }) {
 
 function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   const unavailable = model?.state === 'no_open_phase'
-  const subtitle = unavailable ? '当前暂无开放期次' : '第2期答题已开始'
+  const phaseNotStarted = model?.state === 'phase_not_started'
+  const phaseEnded = model?.state === 'phase_ended'
+  const phaseNo = model?.currentPhase?.phaseNo || 2
+  const subtitle = unavailable
+    ? '当前暂无开放期次'
+    : phaseNotStarted
+      ? `第${phaseNo}期已开放`
+      : phaseEnded
+        ? `第${phaseNo}期已结束`
+        : `第${phaseNo}期答题已开始`
+  const hint = phaseNotStarted ? '尚未到开始时间，请开始后再答题' : ''
 
   return (
     <section className="relative z-10 flex h-full flex-col text-center text-slate-900">
@@ -510,10 +520,11 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
       />
       <div className="px-[40px] pb-[88px] pt-[64px]">
         <h2 className="text-[40px] leading-[1.3] font-extrabold text-slate-900">{subtitle}</h2>
+        {hint ? <p className="mt-[18px] text-[24px] font-semibold text-slate-500">{hint}</p> : null}
         <button
           className="mt-[56px] min-h-[92px] w-full cursor-pointer rounded-full bg-slate-900 px-[32px] text-[32px] font-bold text-white shadow-[0_20px_40px_rgba(15,23,42,0.16)] transition-colors duration-200 disabled:cursor-not-allowed disabled:bg-slate-300"
           type="button"
-          disabled={disabled || unavailable}
+          disabled={disabled || unavailable || phaseEnded}
           onClick={onStart}
         >
           开始答题
@@ -1210,6 +1221,14 @@ function PhaseQuizLotteryMain({ routeParams }) {
     }
     if (entryState === ENTRY_STATE.QUESTION_FLOW || hasAttempt) {
       setStep(resolveQuestionFlowStep(model, myPrize))
+      return
+    }
+    if (model?.state === 'phase_not_started') {
+      showToast('活动未开始')
+      return
+    }
+    if (model?.state === 'phase_ended') {
+      showToast('本期已结束')
       return
     }
     if (!model?.currentPhase?.phaseNo) {
