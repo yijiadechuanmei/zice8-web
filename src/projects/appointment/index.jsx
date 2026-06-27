@@ -153,22 +153,34 @@ function AppointmentMain({ routeParams }) {
   }, [config?.timeSlots, verifyResult?.allowedSlots])
 
   useEffect(() => {
-    if (!bookingDateOptions.length) return
+    if (!bookingDateOptions.length) {
+      setBookingForm((current) => ({
+        ...current,
+        appointmentDate: '',
+      }))
+      return
+    }
     setBookingForm((current) => ({
       ...current,
       appointmentDate: bookingDateOptions.includes(current.appointmentDate)
         ? current.appointmentDate
-        : bookingDateOptions[0],
+        : '',
     }))
   }, [bookingDateOptions])
 
   useEffect(() => {
-    if (!bookingSlotOptions.length) return
+    if (!bookingSlotOptions.length) {
+      setBookingForm((current) => ({
+        ...current,
+        appointmentSlot: '',
+      }))
+      return
+    }
     setBookingForm((current) => ({
       ...current,
       appointmentSlot: bookingSlotOptions.includes(current.appointmentSlot)
         ? current.appointmentSlot
-        : bookingSlotOptions[0],
+        : '',
     }))
   }, [bookingSlotOptions])
 
@@ -277,8 +289,8 @@ function AppointmentMain({ routeParams }) {
       }
       setBookingForm((current) => ({
         ...current,
-        appointmentDate: result.allowedDates?.[0] || '',
-        appointmentSlot: result.allowedSlots?.[0] || '',
+        appointmentDate: '',
+        appointmentSlot: '',
       }))
       setStep(STEPS.BOOKING)
     } catch (err) {
