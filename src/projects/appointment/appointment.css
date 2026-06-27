@@ -379,6 +379,10 @@
   font-weight: 600;
 }
 
+.appointment-picker-option-full {
+  color: rgba(17, 17, 17, 0.32);
+}
+
 @keyframes appointmentFadeIn {
   from {
     opacity: 0;

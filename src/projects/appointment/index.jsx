@@ -151,6 +151,18 @@ function AppointmentMain({ routeParams }) {
     if (!allowedSlots.length) return configSlots
     return configSlots.filter((slot) => allowedSlots.includes(slot))
   }, [config?.timeSlots, verifyResult?.allowedSlots])
+  const slotAvailability = useMemo(
+    () => normalizeSlotAvailability(verifyResult?.slotAvailability),
+    [verifyResult?.slotAvailability],
+  )
+  const selectedDateSlotAvailability = useMemo(
+    () => slotAvailability[bookingForm.appointmentDate] || {},
+    [bookingForm.appointmentDate, slotAvailability],
+  )
+  const availableBookingSlotOptions = useMemo(
+    () => bookingSlotOptions.filter((slot) => !isAppointmentSlotFull(slot, selectedDateSlotAvailability)),
+    [bookingSlotOptions, selectedDateSlotAvailability],
+  )
 
   useEffect(() => {
     setBookingForm((current) => {
@@ -158,9 +170,11 @@ function AppointmentMain({ routeParams }) {
         current.appointmentDate,
         bookingDateOptions,
       )
-      const nextAppointmentSlot = resolveValidBookingFieldValue(
+      const nextSlotAvailability = slotAvailability[nextAppointmentDate] || {}
+      const nextAppointmentSlot = resolveValidBookingSlotValue(
         current.appointmentSlot,
         bookingSlotOptions,
+        nextSlotAvailability,
       )
       if (
         nextAppointmentDate === current.appointmentDate &&
@@ -174,7 +188,7 @@ function AppointmentMain({ routeParams }) {
         appointmentSlot: nextAppointmentSlot,
       }
     })
-  }, [bookingDateOptions, bookingSlotOptions])
+  }, [bookingDateOptions, bookingSlotOptions, slotAvailability])
 
   useEffect(() => {
     if (step !== STEPS.SUCCESS || !activityKey) return
@@ -227,7 +241,11 @@ function AppointmentMain({ routeParams }) {
   )
   const pickerColumns = activePicker === PICKERS.DATE
     ? [bookingDateOptions.map((date) => ({ label: date, value: date }))]
-    : [bookingSlotOptions.map((slot) => ({ label: slot, value: slot }))]
+    : [bookingSlotOptions.map((slot) => ({
+      label: slot,
+      value: slot,
+      full: isAppointmentSlotFull(slot, selectedDateSlotAvailability),
+    }))]
 
   function showToast(message) {
     window.clearTimeout(toastTimerRef.current)
@@ -360,7 +378,14 @@ function AppointmentMain({ routeParams }) {
   function openPicker(fieldKey) {
     const options = fieldKey === PICKERS.DATE ? bookingDateOptions : bookingSlotOptions
     if (!options.length) return
-    setPickerDraftValue(bookingForm[fieldKey] || options[0])
+    const initialValue = fieldKey === PICKERS.SLOT
+      ? getInitialSlotPickerValue(bookingForm[fieldKey], options, selectedDateSlotAvailability)
+      : bookingForm[fieldKey] || options[0]
+    if (!initialValue) {
+      showToast('本时段预约人数已满，请选择其他时段报名预约')
+      return
+    }
+    setPickerDraftValue(initialValue)
     setActivePicker(fieldKey)
   }
 
@@ -467,6 +492,7 @@ function AppointmentMain({ routeParams }) {
                 setBookingForm={setBookingForm}
                 bookingDateOptions={bookingDateOptions}
                 bookingSlotOptions={bookingSlotOptions}
+                availableBookingSlotOptions={availableBookingSlotOptions}
                 submitting={submitting}
                 onSubmit={handleBookingSubmit}
                 onPrev={() => setStep(STEPS.VERIFY)}
@@ -561,6 +587,11 @@ function AppointmentMain({ routeParams }) {
               setActivePicker('')
               return
             }
+            if (fieldKey === PICKERS.SLOT && isAppointmentSlotFull(nextValue, selectedDateSlotAvailability)) {
+              showToast('本时段预约人数已满，请选择其他时段报名预约')
+              setActivePicker('')
+              return
+            }
             setBookingForm((current) => ({
               ...current,
               [fieldKey]: nextValue,
@@ -571,6 +602,9 @@ function AppointmentMain({ routeParams }) {
           onSelect={(value, extend) => {
             setPickerDraftValue(normalizePickerValue(value, extend, pickerDraftValue))
           }}
+          renderLabel={(item) => (
+            item?.full ? <span className="appointment-picker-option-full">{item.label} 已满</span> : item.label
+          )}
         />
       ) : null}
     </div>
@@ -725,6 +759,7 @@ function BookingStage({
   setBookingForm,
   bookingDateOptions,
   bookingSlotOptions,
+  availableBookingSlotOptions,
   submitting,
   onSubmit,
   onPrev,
@@ -732,6 +767,12 @@ function BookingStage({
   onOpenSlotPicker,
 }) {
   const bookingLayout = layout.booking
+  const isSlotPickerDisabled =
+    !bookingSlotOptions.length ||
+    (Boolean(bookingForm.appointmentDate) && !availableBookingSlotOptions.length)
+  const slotPickerText =
+    bookingForm.appointmentSlot ||
+    (bookingForm.appointmentDate && !availableBookingSlotOptions.length ? '该日期时段已满' : '请选择时间段')
 
   return (
     <form onSubmit={onSubmit}>
@@ -762,12 +803,12 @@ function BookingStage({
 
       <button
         type="button"
-        className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentSlot ? '' : 'is-placeholder'} ${bookingSlotOptions.length ? '' : 'is-disabled'}`}
+        className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentSlot ? '' : 'is-placeholder'} ${isSlotPickerDisabled ? 'is-disabled' : ''}`}
         style={toAbsoluteStyle(bookingLayout.controls.appointmentSlot)}
         onClick={onOpenSlotPicker}
-        disabled={!bookingSlotOptions.length}
+        disabled={isSlotPickerDisabled}
       >
-        {bookingForm.appointmentSlot || '请选择时间段'}
+        {slotPickerText}
       </button>
 
       <input
@@ -972,6 +1013,41 @@ function resolveValidBookingFieldValue(value, options) {
   if (!normalizedValue) return ''
   if (!Array.isArray(options) || !options.length) return ''
   return options.includes(normalizedValue) ? normalizedValue : ''
+}
+
+function resolveValidBookingSlotValue(value, options, slotAvailability) {
+  const normalizedValue = resolveValidBookingFieldValue(value, options)
+  if (!normalizedValue) return ''
+  return isAppointmentSlotFull(normalizedValue, slotAvailability) ? '' : normalizedValue
+}
+
+function normalizeSlotAvailability(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  return Object.fromEntries(
+    Object.entries(value).map(([date, slots]) => [
+      date,
+      Object.fromEntries(
+        (Array.isArray(slots) ? slots : [])
+          .map((item) => ({
+            slot: String(item?.slot || '').trim(),
+            full: Boolean(item?.full),
+            unlimited: Boolean(item?.unlimited),
+          }))
+          .filter((item) => item.slot)
+          .map((item) => [item.slot, item]),
+      ),
+    ]),
+  )
+}
+
+function isAppointmentSlotFull(slot, slotAvailability) {
+  return Boolean(slotAvailability?.[String(slot || '').trim()]?.full)
+}
+
+function getInitialSlotPickerValue(currentValue, options, slotAvailability) {
+  const normalizedValue = resolveValidBookingSlotValue(currentValue, options, slotAvailability)
+  if (normalizedValue) return normalizedValue
+  return options.find((slot) => !isAppointmentSlotFull(slot, slotAvailability)) || ''
 }
 
 function normalizePickerValue(value, extend, fallback = '') {
