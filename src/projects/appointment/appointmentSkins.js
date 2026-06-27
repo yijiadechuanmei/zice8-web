@@ -83,11 +83,11 @@ const DONGFANG_ZHENYUE_LAYOUT = {
     background: '29c81089bf087ef57a859bf3de02262d_1251896.webp',
     images: [
       {
-        filename: '33aea9c38921f6cbea83856c3be03a06_40448_587_855.png',
-        left: 63,
-        top: 230,
-        width: 587,
-        height: 855,
+        filename: 'https://file3.ih5.cn/v35/edt/u10013600/773511a7bb9d4dcb2c564a9292a0fac5_47789_607_856.png',
+        left: 66,
+        top: 220,
+        width: 607,
+        height: 856,
       },
       {
         filename: '0f4ee1df38d9c2f6491e2c3487eca098_5490.webp',
