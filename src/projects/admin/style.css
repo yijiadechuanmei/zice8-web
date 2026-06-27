@@ -170,6 +170,10 @@
   align-items: center;
 }
 
+.admin-activity-summary.is-phase-scoped {
+  grid-template-columns: minmax(220px, 1.4fr) repeat(5, minmax(120px, 1fr));
+}
+
 .admin-activity-summary > div {
   display: grid;
   gap: 5px;
@@ -180,6 +184,10 @@
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.admin-phase-scope {
+  min-width: 140px;
 }
 
 .admin-tabs {

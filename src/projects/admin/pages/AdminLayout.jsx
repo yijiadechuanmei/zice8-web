@@ -51,6 +51,14 @@ const tabs = [
   { key: 'paymentTest', label: '支付链路测试', icon: <ToolOutlined /> },
 ]
 
+const phaseQuizLotteryScopeOptions = [
+  { value: 'all', label: '总览' },
+  ...Array.from({ length: 6 }, (_, index) => ({
+    value: String(index + 1),
+    label: `第${index + 1}期`,
+  })),
+]
+
 export default function AdminLayout({
   adminUser,
   activities,
@@ -64,6 +72,7 @@ export default function AdminLayout({
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [quizViewKeysByActivity, setQuizViewKeysByActivity] = useState({})
+  const [phaseScopeByActivity, setPhaseScopeByActivity] = useState({})
 
   useEffect(() => {
     if (!selectedActivity || selectedActivity.type !== 'quiz') return
@@ -95,6 +104,9 @@ export default function AdminLayout({
   const canAccessQuizOverview = selectedActivity?.type === 'quiz'
     ? (currentQuizViewKeys ? currentQuizViewKeys.has('quiz_overview') : true)
     : true
+  const selectedPhaseScope = selectedActivity?.type === 'phase_quiz_lottery'
+    ? phaseScopeByActivity[selectedActivity.activityKey] || 'all'
+    : 'all'
 
   const visibleTabs = tabs.filter((tab) => {
     if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs', 'paymentTest'].includes(tab.key)) return false
@@ -208,7 +220,7 @@ export default function AdminLayout({
         <Content className="admin-content">
           {selectedActivity && activeTab !== 'paymentTest' ? (
             <Card className="admin-activity-card" size="small">
-              <div className="admin-activity-summary">
+              <div className={`admin-activity-summary ${selectedActivity.type === 'phase_quiz_lottery' ? 'is-phase-scoped' : ''}`}>
                 <div>
                   <Text type="secondary">当前活动</Text>
                   <Title level={4} style={{ margin: '4px 0 0' }}>{selectedActivity.title}</Title>
@@ -217,6 +229,22 @@ export default function AdminLayout({
                 <div><Text type="secondary">类型</Text><strong>{selectedActivity.type}</strong></div>
                 <div><Text type="secondary">开始时间</Text><strong>{formatDate(selectedActivity.startTime)}</strong></div>
                 <div><Text type="secondary">结束时间</Text><strong>{formatDate(selectedActivity.endTime)}</strong></div>
+                {selectedActivity.type === 'phase_quiz_lottery' ? (
+                  <div className="admin-phase-scope">
+                    <Text type="secondary">数据范围</Text>
+                    <Select
+                      value={selectedPhaseScope}
+                      onChange={(value) => {
+                        setPhaseScopeByActivity((current) => ({
+                          ...current,
+                          [selectedActivity.activityKey]: value,
+                        }))
+                      }}
+                      options={phaseQuizLotteryScopeOptions}
+                      style={{ width: 140 }}
+                    />
+                  </div>
+                ) : null}
               </div>
             </Card>
           ) : null}
@@ -229,11 +257,11 @@ export default function AdminLayout({
           />
 
           {!selectedActivity && activeTab !== 'paymentTest' ? <Card><Empty description="请选择左侧活动" /></Card> : null}
-          {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact /> : null}
+          {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && canManageActivityConfig ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && !canManageActivityConfig ? <Card><Empty description="无权修改活动配置" /></Card> : null}
-          {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} /> : null}
-          {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} /> : null}
+          {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
+          {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport ? <Card><Empty description="无权访问题库导入，请联系管理员授权。" /></Card> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}

@@ -18,13 +18,17 @@ const XIWUQI_AMAP_SOURCE_FILTER = {
   days: '7',
 }
 
-export default function ActivityDashboard({ activity, compact = false }) {
+export default function ActivityDashboard({ activity, compact = false, phaseScope = 'all' }) {
   const [overview, setOverview] = useState(null)
   const [charts, setCharts] = useState(null)
   const [sourceAccess, setSourceAccess] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
+  const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
+    ? { phaseNo: phaseScope }
+    : {}
+  const phaseScopeLabel = phaseScope === 'all' ? '总览' : `第${phaseScope}期`
 
   useEffect(() => {
     let alive = true
@@ -34,7 +38,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
     const sourceAccessRequest = isXiwuqiRoadNight
       ? getSourceAccess(activity.activityKey, XIWUQI_AMAP_SOURCE_FILTER).catch(() => null)
       : Promise.resolve(null)
-    Promise.all([getOverview(activity.activityKey), getCharts(activity.activityKey), sourceAccessRequest])
+    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest])
       .then(([overviewData, chartData, sourceAccessData]) => {
         if (!alive) return
         setOverview(overviewData)
@@ -50,7 +54,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
     return () => {
       alive = false
     }
-  }, [activity.activityKey, isXiwuqiRoadNight])
+  }, [activity.activityKey, isXiwuqiRoadNight, phaseScope])
 
   const metrics = useMemo(() => {
     const sourceOverview = sourceAccess?.overview || {}
@@ -207,7 +211,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
                 </ChartPanel>
               </Col>
               <Col xs={24} xl={8}>
-                <ChartPanel title="近 7 天答题/抽奖趋势" description="按答题、满分、抽奖、中奖统计">
+                <ChartPanel title="近 7 天答题/抽奖趋势" description={`${phaseScopeLabel}，按答题、满分、抽奖、中奖统计`}>
                   <LazyChart
                     type="line"
                     data={phaseQuizLotteryTrend}
@@ -222,7 +226,7 @@ export default function ActivityDashboard({ activity, compact = false }) {
                 </ChartPanel>
               </Col>
               <Col xs={24} xl={8}>
-                <ChartPanel title="每期库存消耗" description="按 phase_quiz_lottery_prize 库存统计">
+                <ChartPanel title={phaseScope === 'all' ? '每期库存消耗' : `${phaseScopeLabel}库存消耗`} description="按 phase_quiz_lottery_prize 库存统计">
                   {phaseStockRows.length ? (
                     <LazyChart type="bar" data={phaseStockRows} series={[{ key: 'stockUsed', name: '已用库存' }, { key: 'stockRemaining', name: '剩余库存' }]} />
                   ) : (

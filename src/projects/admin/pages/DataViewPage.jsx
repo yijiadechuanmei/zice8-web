@@ -8,11 +8,11 @@ import QuizAdminDataPage from './QuizAdminDataPage'
 
 const pageSize = 20
 
-export default function DataViewPage({ activity }) {
-  return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} />
+export default function DataViewPage({ activity, phaseScope = 'all' }) {
+  return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} phaseScope={phaseScope} />
 }
 
-function GenericDataViewPage({ activity }) {
+function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [views, setViews] = useState([])
   const [activeViewKey, setActiveViewKey] = useState('')
   const [hiddenColumnsByView, setHiddenColumnsByView] = useState({})
@@ -28,6 +28,7 @@ function GenericDataViewPage({ activity }) {
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState('')
+  const phaseNo = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all' ? phaseScope : ''
 
   useEffect(() => {
     let alive = true
@@ -74,6 +75,7 @@ function GenericDataViewPage({ activity }) {
         date: appointmentDate,
         slot: appointmentSlot,
         status,
+        phaseNo,
       })
       .then((result) => {
         if (alive) setData(result)
@@ -87,7 +89,12 @@ function GenericDataViewPage({ activity }) {
     return () => {
       alive = false
     }
-  }, [activity.activityKey, activeViewKey, appointmentDate, appointmentSlot, page, keyword, sortField, sortOrder, status])
+  }, [activity.activityKey, activeViewKey, appointmentDate, appointmentSlot, page, keyword, sortField, sortOrder, status, phaseNo])
+
+  useEffect(() => {
+    setPage(1)
+    setData({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
+  }, [phaseNo])
 
   const activeView = useMemo(() => views.find((view) => view.viewKey === activeViewKey), [views, activeViewKey])
   const hiddenColumns = useMemo(() => hiddenColumnsByView[activeViewKey] || {}, [activeViewKey, hiddenColumnsByView])
@@ -123,6 +130,7 @@ function GenericDataViewPage({ activity }) {
         date: appointmentDate,
         slot: appointmentSlot,
         status,
+        phaseNo,
         fields: exportableFieldKeys,
       })
       downloadCsv(result.filename || `${activity.activityKey}-${activeViewKey}.csv`, result.csv || '')

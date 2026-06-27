@@ -53,8 +53,10 @@ export function getActivities() {
   return adminRequest('/admin/activities')
 }
 
-export function getOverview(activityKey) {
-  return adminRequest(`/admin/activities/${activityKey}/overview`)
+export function getOverview(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  const suffix = search.toString() ? `?${search.toString()}` : ''
+  return adminRequest(`/admin/activities/${activityKey}/overview${suffix}`)
 }
 
 export function getActivityConfig(activityKey) {
@@ -75,8 +77,10 @@ export function updateActivityStatus(activityKey, status) {
   })
 }
 
-export function getCharts(activityKey) {
-  return adminRequest(`/admin/activities/${activityKey}/charts`)
+export function getCharts(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  const suffix = search.toString() ? `?${search.toString()}` : ''
+  return adminRequest(`/admin/activities/${activityKey}/charts${suffix}`)
 }
 
 export function getAnalyticsFunnel(activityKey) {
