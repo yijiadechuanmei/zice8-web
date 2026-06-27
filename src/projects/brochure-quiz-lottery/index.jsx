@@ -36,12 +36,12 @@ const PHASE_WHEEL_ASSETS = {
   wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
 }
 const BROCHURE_WHEEL_SEGMENTS = [
-  { label: '特等奖', prizeName: '特等奖', prize: true, background: '#FFE7A3' },
-  { label: '一等奖', prizeName: '一等奖', prize: true, background: '#EEF6FF' },
-  { label: '二等奖', prizeName: '二等奖', prize: true, background: '#FFF7D6' },
-  { label: '三等奖', prizeName: '三等奖', prize: true, background: '#E6F2FF' },
-  { label: '幸运奖', prizeName: '幸运奖', prize: true, background: '#F7FAFF' },
-  { label: '谢谢参与', prizeName: '谢谢参与', background: '#EAF6FF' },
+  { label: '特等奖', prizeLevel: '特等奖', prize: true, background: '#FFE7A3' },
+  { label: '幸运奖', prizeLevel: '幸运奖', prize: true, background: '#F7FAFF' },
+  { label: '一等奖', prizeLevel: '一等奖', prize: true, background: '#EEF6FF' },
+  { label: '谢谢参与', prizeLevel: '未中奖', background: '#EAF6FF' },
+  { label: '二等奖', prizeLevel: '二等奖', prize: true, background: '#FFF7D6' },
+  { label: '三等奖', prizeLevel: '三等奖', prize: true, background: '#E6F2FF' },
 ]
 
 function normalizeActivityKey(routeParams) {
@@ -73,19 +73,20 @@ function buildPhaseWheelSegments() {
   return BROCHURE_WHEEL_SEGMENTS
 }
 
-function normalizePrizeName(value) {
+function normalizePrizeLevel(value) {
   return String(value || '').trim()
 }
 
 function resolveWheelTargetIndex(draw) {
   if (!draw) return null
+  const prizeLevel = normalizePrizeLevel(draw.prizeLevel)
+  const expectedPrizeLevel = draw.won && prizeLevel ? prizeLevel : '未中奖'
+  const expectedIndex = BROCHURE_WHEEL_SEGMENTS.findIndex((segment) => segment.prizeLevel === expectedPrizeLevel)
   if (Number.isInteger(draw.wheelStopIndex) && draw.wheelStopIndex >= 0 && draw.wheelStopIndex < BROCHURE_WHEEL_SEGMENTS.length) {
-    return draw.wheelStopIndex
+    const segment = BROCHURE_WHEEL_SEGMENTS[draw.wheelStopIndex]
+    if (segment?.prizeLevel === expectedPrizeLevel) return draw.wheelStopIndex
   }
-  const prizeName = normalizePrizeName(draw.prizeName)
-  if (!draw.won || prizeName === '谢谢参与') return 1
-  const index = BROCHURE_WHEEL_SEGMENTS.findIndex((segment) => segment.prizeName === prizeName)
-  return index >= 0 ? index : 1
+  return expectedIndex >= 0 ? expectedIndex : 3
 }
 
 function formatPrizeTime(value) {
