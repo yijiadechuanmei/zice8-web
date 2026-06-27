@@ -5,7 +5,6 @@ export const OSS_ASSET_ROOT =
   `https://assets.zice8.com/${BROCHURE_QUIZ_LOTTERY_ACTIVITY_TYPE}/${BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY}`
 
 const ASSET_NAME_ALIASES = {
-  'home-bg-base.png': '9e54d0536a902a24a945ae9feca95f7b_1530659_750_1624.png',
   'home-bg-overlay.png': '44b69f0f60d3d9169033a4abebc29184_1678508_750_1624.png',
   'home-title.png': 'ece697108c563e0e5edf936d310a41ee_172759_648_227.png',
   'carousel-placeholder.png': 'f4623270c38e7762f0e0472284893644_564204_750_422.png',
@@ -17,7 +16,6 @@ export const DEFAULT_CONFIG = {
   imagesBaseUrl: OSS_ASSET_ROOT,
   audiosBaseUrl: OSS_ASSET_ROOT,
   home: {
-    bgBase: '9e54d0536a902a24a945ae9feca95f7b_1530659_750_1624.png',
     bgOverlay: '44b69f0f60d3d9169033a4abebc29184_1678508_750_1624.png',
     title: 'ece697108c563e0e5edf936d310a41ee_172759_648_227.png',
     logo: 'logo.png',

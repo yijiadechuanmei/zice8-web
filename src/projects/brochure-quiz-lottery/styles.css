@@ -27,17 +27,12 @@
   -webkit-user-drag: none;
 }
 
-.bql-home-bg-base,
 .bql-home-bg-overlay {
   position: absolute;
   left: 0;
   top: calc(-87 / 750 * min(100vw, 750px));
   width: 100%;
   height: auto;
-}
-
-.bql-home-bg-base {
-  top: calc(-88 / 750 * min(100vw, 750px));
 }
 
 .bql-home-title {

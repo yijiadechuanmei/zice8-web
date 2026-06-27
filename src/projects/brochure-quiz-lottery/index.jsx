@@ -75,11 +75,6 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate }) {
     <main className="bql-home">
       <div className="bql-canvas">
         <img
-          className="bql-home-bg-base"
-          src={assetUrl(config, config.home.bgBase)}
-          alt=""
-        />
-        <img
           className="bql-home-bg-overlay"
           src={assetUrl(config, config.home.bgOverlay)}
           alt=""
