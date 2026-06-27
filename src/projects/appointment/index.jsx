@@ -951,8 +951,11 @@ function normalizeSuccessBooking(booking) {
 }
 
 function getAssetUrl(baseUrl, filename) {
-  if (!baseUrl || !filename) return ''
-  return `${String(baseUrl).replace(/\/$/, '')}/${String(filename).replace(/^\//, '')}`
+  if (!filename) return ''
+  const normalizedFilename = String(filename)
+  if (/^(https?:)?\/\//.test(normalizedFilename)) return normalizedFilename
+  if (!baseUrl) return ''
+  return `${String(baseUrl).replace(/\/$/, '')}/${normalizedFilename.replace(/^\//, '')}`
 }
 
 function isUnauthorizedError(err) {
