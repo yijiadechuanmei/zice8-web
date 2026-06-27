@@ -499,7 +499,7 @@ function DevLayoutDebugPanel({ step }) {
 
 function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   const unavailable = model?.state === 'no_open_phase'
-  const subtitle = unavailable ? '当前暂无开放期次' : '本期答题已开启'
+  const subtitle = unavailable ? '当前暂无开放期次' : '第2期答题已开始'
 
   return (
     <section className="relative z-10 flex h-full flex-col text-center text-slate-900">
