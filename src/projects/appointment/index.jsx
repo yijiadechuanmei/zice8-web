@@ -153,36 +153,28 @@ function AppointmentMain({ routeParams }) {
   }, [config?.timeSlots, verifyResult?.allowedSlots])
 
   useEffect(() => {
-    if (!bookingDateOptions.length) {
-      setBookingForm((current) => ({
+    setBookingForm((current) => {
+      const nextAppointmentDate = resolveValidBookingFieldValue(
+        current.appointmentDate,
+        bookingDateOptions,
+      )
+      const nextAppointmentSlot = resolveValidBookingFieldValue(
+        current.appointmentSlot,
+        bookingSlotOptions,
+      )
+      if (
+        nextAppointmentDate === current.appointmentDate &&
+        nextAppointmentSlot === current.appointmentSlot
+      ) {
+        return current
+      }
+      return {
         ...current,
-        appointmentDate: '',
-      }))
-      return
-    }
-    setBookingForm((current) => ({
-      ...current,
-      appointmentDate: bookingDateOptions.includes(current.appointmentDate)
-        ? current.appointmentDate
-        : '',
-    }))
-  }, [bookingDateOptions])
-
-  useEffect(() => {
-    if (!bookingSlotOptions.length) {
-      setBookingForm((current) => ({
-        ...current,
-        appointmentSlot: '',
-      }))
-      return
-    }
-    setBookingForm((current) => ({
-      ...current,
-      appointmentSlot: bookingSlotOptions.includes(current.appointmentSlot)
-        ? current.appointmentSlot
-        : '',
-    }))
-  }, [bookingSlotOptions])
+        appointmentDate: nextAppointmentDate,
+        appointmentSlot: nextAppointmentSlot,
+      }
+    })
+  }, [bookingDateOptions, bookingSlotOptions])
 
   useEffect(() => {
     if (step !== STEPS.SUCCESS || !activityKey) return
@@ -562,17 +554,22 @@ function AppointmentMain({ routeParams }) {
           popupClassName="appointment-mobile-picker"
           onClose={() => setActivePicker('')}
           onCancel={() => setActivePicker('')}
-          onConfirm={(value) => {
-            const nextValue = String(value?.[0] || '')
+          onConfirm={(value, extend) => {
+            const fieldKey = activePicker
+            const nextValue = normalizePickerValue(value, extend, pickerDraftValue)
+            if (!fieldKey || !nextValue) {
+              setActivePicker('')
+              return
+            }
             setBookingForm((current) => ({
               ...current,
-              [activePicker]: nextValue,
+              [fieldKey]: nextValue,
             }))
             setPickerDraftValue(nextValue)
             setActivePicker('')
           }}
-          onSelect={(value) => {
-            setPickerDraftValue(String(value?.[0] || ''))
+          onSelect={(value, extend) => {
+            setPickerDraftValue(normalizePickerValue(value, extend, pickerDraftValue))
           }}
         />
       ) : null}
@@ -960,6 +957,25 @@ function normalizeSuccessBooking(booking) {
     appointmentDate: String(booking.appointmentDate || '').trim(),
     appointmentSlot: String(booking.appointmentSlot || '').trim(),
   }
+}
+
+function resolveValidBookingFieldValue(value, options) {
+  const normalizedValue = String(value || '').trim()
+  if (!normalizedValue) return ''
+  if (!Array.isArray(options) || !options.length) return ''
+  return options.includes(normalizedValue) ? normalizedValue : ''
+}
+
+function normalizePickerValue(value, extend, fallback = '') {
+  const rawValue = Array.isArray(value) ? value[0] : value
+  if (rawValue !== undefined && rawValue !== null && rawValue !== '') {
+    return String(rawValue).trim()
+  }
+  const rawExtendValue = extend?.items?.[0]?.value
+  if (rawExtendValue !== undefined && rawExtendValue !== null && rawExtendValue !== '') {
+    return String(rawExtendValue).trim()
+  }
+  return String(fallback || '').trim()
 }
 
 function getAssetUrl(baseUrl, filename) {
