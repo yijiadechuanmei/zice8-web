@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getVisitorId, trackEvent, trackPageView } from '../../shared/analytics'
 import { getQueryParam } from '../../shared/utils/url'
 import { DEFAULT_OSS_BASE_URL } from '../phase-quiz-lottery/api'
+import StageLayout from '../phase-quiz-lottery/components/StageLayout'
 import PhaseWheel from '../phase-quiz-lottery/components/Wheel'
 import {
   drawPrize,
@@ -26,6 +27,10 @@ const isDebugRequested = getQueryParam('debug') === '1'
 const DEBUG_RESET_TOKEN = 'RESET_BQL_2026'
 const PHASE_WHEEL_ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/phase_quiz_lottery_test_001`
 const PHASE_WHEEL_ASSETS = {
+  resultTrophy: `${PHASE_WHEEL_ASSET_BASE}/result/result_trophy.png`,
+  prizeBox: `${PHASE_WHEEL_ASSET_BASE}/prize/prize_box.png`,
+  bannerBackground: `${PHASE_WHEEL_ASSET_BASE}/banner/banner_bg.png`,
+  bannerBook: `${PHASE_WHEEL_ASSET_BASE}/banner/banner_book.png`,
   wheelRing: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_ring.png`,
   wheelPointer: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_pointer.png`,
   wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
@@ -68,6 +73,14 @@ function buildPhaseWheelSegments(prizeName) {
 function resolveWheelTargetIndex(draw) {
   if (!draw) return null
   return draw.won ? 0 : 1
+}
+
+function formatPrizeTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 function HomeCanvas({ config, currentSlide, onSlide, onParticipate }) {
@@ -269,66 +282,72 @@ function QuizPage({ attempt, answers, currentIndex, onAnswer, onContinue, submit
   )
 }
 
-function ResultPage({ result, onDraw, onHome }) {
+function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
   const total = result?.totalCount || 5
   const correct = result?.correctCount || 0
   const wrong = Math.max(0, total - correct)
+  const hasDraw = Boolean(draw)
+  const hasPrize = Boolean(draw?.won)
 
   return (
     <main className="bql-stage">
       <section className="bql-panel bql-result-panel bql-phase-like-panel">
-        <div className="bql-result-emblem" aria-hidden="true">
-          <div className="bql-result-emblem-core">✓</div>
-        </div>
-        <h1>本次答题完成</h1>
-        <div className="bql-score-card">
-          <div className="bql-score-number">
-            <strong>{result?.score || 0}</strong><span>分</span>
+        <img className="bql-result-trophy" src={PHASE_WHEEL_ASSETS.resultTrophy} alt="" aria-hidden="true" />
+        <h1>{hasPrize ? '抽奖结果已确认' : hasDraw ? '未中奖' : '本次答题完成'}</h1>
+        {!hasPrize ? (
+          <div className="bql-score-card">
+            <div className="bql-score-number">
+              <strong>{result?.score || 0}</strong><span>分</span>
+            </div>
+            <div className="bql-score-meta">
+              <span>答对 {correct} 题</span>
+              <span>答错 {wrong} 题</span>
+            </div>
           </div>
-          <div className="bql-score-meta">
-            <span>答对 {correct} 题</span>
-            <span>答错 {wrong} 题</span>
-          </div>
-        </div>
+        ) : null}
         <div className="bql-result-actions">
-          <button className="bql-primary" type="button" onClick={onDraw}>立即抽奖</button>
-          <button className="bql-secondary" type="button" onClick={onHome}>返回画册</button>
+          {!hasDraw ? (
+            <>
+              <button className="bql-primary" type="button" onClick={onGoWheel}>立即抽奖</button>
+              <button className="bql-secondary" type="button" onClick={onHome}>返回首页</button>
+            </>
+          ) : null}
+          {hasPrize ? (
+            <button className="bql-prize-button" type="button" onClick={onOpenPrize}>我的奖品</button>
+          ) : null}
+          {hasDraw && !hasPrize ? (
+            <button className="bql-secondary" type="button" disabled>当前无可执行操作</button>
+          ) : null}
         </div>
       </section>
     </main>
   )
 }
 
-function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, onHome, onWheelFinish }) {
+function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, onWheelFinish }) {
   const segments = useMemo(() => buildPhaseWheelSegments(draw?.prizeName), [draw?.prizeName])
 
   return (
-    <main className="bql-stage">
-      <section className="bql-panel bql-wheel-panel bql-phase-like-panel bql-phase-wheel-panel">
-        <h1>幸运转盘</h1>
-        <PhaseWheel
-          segments={segments}
-          targetIndex={targetIndex}
-          drawing={spinning}
-          draw={draw}
-          spinKey={spinKey}
-          assets={PHASE_WHEEL_ASSETS}
-          onDraw={onDraw}
-          onOpenPrize={onMyPrizes}
-          onFinish={onWheelFinish}
-        />
-        {draw ? (
-          <div className="bql-prize-result">
-            <strong>{draw.won ? draw.prizeName : '谢谢参与'}</strong>
-            <span>{draw.won ? '奖品会由客户联系代理人发放' : '本次未中奖'}</span>
+    <main className="bql-phase-wheel-layout">
+      <StageLayout className="bg-[#f5f7fb]">
+        <div className="bql-phase-wheel-stage pql-stage relative overflow-hidden bg-[#f5f7fb] text-slate-900">
+          <div className="pql-wheel-stage flex-1 px-[32px] pb-[88px] pt-[28px]">
+            <section className="relative overflow-hidden rounded-[32px] bg-white px-[32px] py-[36px] text-center shadow-[0_20px_52px_rgba(15,23,42,0.08)]">
+              <PhaseWheel
+                segments={segments}
+                targetIndex={targetIndex}
+                drawing={spinning}
+                draw={draw}
+                spinKey={spinKey}
+                assets={PHASE_WHEEL_ASSETS}
+                onDraw={onDraw}
+                onOpenPrize={onMyPrizes}
+                onFinish={onWheelFinish}
+              />
+            </section>
           </div>
-        ) : (
-          <p className="bql-stage-sub">每位用户仅限抽奖 1 次，奖项从剩余奖池中随机抽取。</p>
-        )}
-        <div className="bql-result-actions">
-          <button className="bql-secondary" type="button" onClick={onHome}>返回画册</button>
         </div>
-      </section>
+      </StageLayout>
     </main>
   )
 }
@@ -343,8 +362,12 @@ function MyPrizesModal({ prizes, onClose }) {
           <div className="bql-prize-list">
             {prizes.map((prize) => (
               <div className="bql-prize-item" key={prize.id}>
-                <strong>{prize.prizeName}</strong>
-                <span>{prize.prizeLevel}</span>
+                <img src={PHASE_WHEEL_ASSETS.prizeBox} alt="" aria-hidden="true" />
+                <div>
+                  <strong>{prize.prizeName || '奖品待公布'}</strong>
+                  <span>{formatPrizeTime(prize.createdAt)}</span>
+                </div>
+                <em>{prize.prizeLevel || '中奖'}</em>
               </div>
             ))}
           </div>
@@ -497,7 +520,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       return
     }
     if (draw) {
-      setView('wheel')
+      setView('result')
       return
     }
     if (result || attempt?.status === 'submitted') {
@@ -604,6 +627,10 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
 
   const handleWheelFinish = () => {
     setSpinning(false)
+    setView('result')
+    if (draw?.won) {
+      openMyPrizes()
+    }
   }
 
   const openMyPrizes = async () => {
@@ -711,7 +738,13 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         />
       ) : null}
       {view === 'result' ? (
-        <ResultPage result={result || attempt} onDraw={() => setView('wheel')} onHome={() => setView('home')} />
+        <ResultPage
+          result={result || attempt}
+          draw={draw}
+          onGoWheel={() => setView('wheel')}
+          onOpenPrize={openMyPrizes}
+          onHome={() => setView('home')}
+        />
       ) : null}
       {view === 'wheel' ? (
         <WheelPage
@@ -721,7 +754,6 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           spinKey={wheelSpinKey}
           onDraw={handleDraw}
           onMyPrizes={openMyPrizes}
-          onHome={() => setView('home')}
           onWheelFinish={handleWheelFinish}
         />
       ) : null}
