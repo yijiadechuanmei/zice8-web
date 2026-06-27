@@ -188,58 +188,83 @@ function ProfileModal({ initialProfile, visitorId, onClose, onSaved }) {
   )
 }
 
-function QuizPage({ attempt, answers, onAnswer, onSubmit, submitting, error }) {
+function QuizPage({ attempt, answers, currentIndex, onAnswer, onContinue, submitting, error }) {
   const questions = attempt?.questions || []
+  const question = questions[currentIndex] || null
+  const selected = question ? answers[question.id] || [] : []
+  const total = questions.length || 5
+  const progress = total > 0 ? Math.min(1, (currentIndex + 1) / total) : 0
+  const isLast = currentIndex >= total - 1
+
   return (
     <main className="bql-stage bql-quiz-stage">
-      <section className="bql-panel">
-        <div className="bql-stage-kicker">互动答题</div>
-        <h1>随机 5 题</h1>
-        <p className="bql-stage-sub">判断题按 A 对、B 错选择；多选题可选择多个答案。</p>
-        <div className="bql-question-list">
-          {questions.map((question, questionIndex) => {
-            const selected = answers[question.id] || []
-            return (
-              <article className="bql-question" key={question.id}>
-                <h2>{questionIndex + 1}. {question.title}</h2>
-                <div className="bql-options">
-                  {question.options.map((option) => {
-                    const active = selected.includes(option.key)
-                    return (
-                      <button
-                        key={option.key}
-                        className={`bql-option ${active ? 'is-selected' : ''}`}
-                        type="button"
-                        onClick={() => onAnswer(question, option.key)}
-                      >
-                        <span>{option.key}</span>
-                        {option.text}
-                      </button>
-                    )
-                  })}
-                </div>
-              </article>
-            )
-          })}
+      <section className="bql-panel bql-question-page-panel">
+        <div className="bql-progress-card">
+          <div className="bql-progress-label">
+            题目 <strong>{Math.min(currentIndex + 1, total)}</strong><span>/{total}</span>
+          </div>
+          <div className="bql-progress-track">
+            <div className="bql-progress-fill" style={{ width: `${progress * 100}%` }} />
+          </div>
+        </div>
+
+        <article className="bql-question-card">
+          <div className="bql-stage-kicker">{question?.type === 'multiple' ? '多选题' : '单选题'}</div>
+          <h1>{question?.title || '题目加载中...'}</h1>
+          <div className="bql-options" role={question?.type === 'multiple' ? 'group' : 'radiogroup'} aria-label="题目选项">
+            {(question?.options || []).map((option) => {
+              const active = selected.includes(option.key)
+              return (
+                <button
+                  key={option.key}
+                  className={`bql-option ${active ? 'is-selected' : ''}`}
+                  type="button"
+                  disabled={submitting || !question}
+                  onClick={() => onAnswer(question, option.key)}
+                  aria-pressed={active}
+                >
+                  <span>{option.key}</span>
+                  {option.text}
+                </button>
+              )
+            })}
+          </div>
+        </article>
+
+        <div className="bql-question-actions">
+          <button className="bql-primary" type="button" onClick={onContinue} disabled={submitting || !selected.length}>
+            {submitting ? '提交中...' : isLast ? '提交答案' : '下一题'}
+          </button>
         </div>
         {error ? <p className="bql-form-error">{error}</p> : null}
-        <button className="bql-primary" type="button" onClick={onSubmit} disabled={submitting}>
-          {submitting ? '提交中...' : '提交答案'}
-        </button>
       </section>
     </main>
   )
 }
 
 function ResultPage({ result, onDraw, onHome }) {
+  const total = result?.totalCount || 5
+  const correct = result?.correctCount || 0
+  const wrong = Math.max(0, total - correct)
+
   return (
     <main className="bql-stage">
-      <section className="bql-panel bql-result-panel">
-        <div className="bql-stage-kicker">答题结果</div>
-        <h1>{result?.score || 0} 分</h1>
-        <p className="bql-stage-sub">答对 {result?.correctCount || 0} / {result?.totalCount || 5} 题，可参与转盘抽奖。</p>
+      <section className="bql-panel bql-result-panel bql-phase-like-panel">
+        <div className="bql-result-emblem" aria-hidden="true">
+          <div className="bql-result-emblem-core">✓</div>
+        </div>
+        <h1>本次答题完成</h1>
+        <div className="bql-score-card">
+          <div className="bql-score-number">
+            <strong>{result?.score || 0}</strong><span>分</span>
+          </div>
+          <div className="bql-score-meta">
+            <span>答对 {correct} 题</span>
+            <span>答错 {wrong} 题</span>
+          </div>
+        </div>
         <div className="bql-result-actions">
-          <button className="bql-primary" type="button" onClick={onDraw}>参与抽奖</button>
+          <button className="bql-primary" type="button" onClick={onDraw}>立即抽奖</button>
           <button className="bql-secondary" type="button" onClick={onHome}>返回画册</button>
         </div>
       </section>
@@ -248,14 +273,21 @@ function ResultPage({ result, onDraw, onHome }) {
 }
 
 function WheelPage({ draw, spinning, onDraw, onMyPrizes, onHome }) {
+  const segments = ['特等奖', '一等奖', '二等奖', '谢谢参与', '三等奖', '幸运奖']
+
   return (
     <main className="bql-stage">
-      <section className="bql-panel bql-wheel-panel">
-        <div className="bql-stage-kicker">幸运转盘</div>
-        <h1>抽取你的互动奖品</h1>
+      <section className="bql-panel bql-wheel-panel bql-phase-like-panel">
+        <h1>幸运转盘</h1>
+        <div className="bql-wheel-count">剩余抽奖次数：{draw ? 0 : 1}</div>
         <div className={`bql-wheel ${spinning ? 'is-spinning' : ''}`}>
           <div className="bql-wheel-pointer" />
-          <div className="bql-wheel-core">GO</div>
+          {segments.map((segment, index) => (
+            <span className={`bql-wheel-label bql-wheel-label-${index + 1}`} key={segment}>{segment}</span>
+          ))}
+          <button className="bql-wheel-core" type="button" onClick={onDraw} disabled={spinning || Boolean(draw)}>
+            {spinning ? '抽奖中' : 'GO'}
+          </button>
         </div>
         {draw ? (
           <div className="bql-prize-result">
@@ -266,12 +298,15 @@ function WheelPage({ draw, spinning, onDraw, onMyPrizes, onHome }) {
           <p className="bql-stage-sub">每位用户仅限抽奖 1 次，奖项从剩余奖池中随机抽取。</p>
         )}
         <div className="bql-result-actions">
-          <button className="bql-primary" type="button" onClick={onDraw} disabled={spinning || Boolean(draw)}>
-            {draw ? '已抽奖' : spinning ? '抽奖中...' : '开始抽奖'}
-          </button>
-          <button className="bql-secondary" type="button" onClick={onMyPrizes}>我的奖品</button>
+          <button className="bql-secondary" type="button" onClick={onMyPrizes}>查看我的奖品</button>
           <button className="bql-secondary" type="button" onClick={onHome}>返回画册</button>
         </div>
+        {spinning ? (
+          <div className="bql-wheel-loading" aria-live="polite" aria-busy="true">
+            <span className="bql-wheel-loading-spinner" aria-hidden="true" />
+            <span>抽奖处理中...</span>
+          </div>
+        ) : null}
       </section>
     </main>
   )
@@ -310,6 +345,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [draw, setDraw] = useState(null)
   const [view, setView] = useState('home')
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [profileOpen, setProfileOpen] = useState(false)
   const [myPrizesOpen, setMyPrizesOpen] = useState(false)
@@ -377,6 +413,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     const data = await startAttempt(activityKey, { visitorId })
     setAttempt(data.attempt)
     setAnswers({})
+    setCurrentQuestionIndex(0)
     setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
   }
 
@@ -387,6 +424,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     const started = await startAttempt(activityKey, { visitorId })
     setAttempt(started.attempt)
     setAnswers({})
+    setCurrentQuestionIndex(0)
     setView(started.attempt?.status === 'submitted' ? 'result' : 'quiz')
   }
 
@@ -432,6 +470,21 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleQuestionContinue = () => {
+    const questions = attempt?.questions || []
+    const question = questions[currentQuestionIndex]
+    if (!question || !(answers[question.id] || []).length) {
+      setQuizError('请选择答案')
+      return
+    }
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((index) => index + 1)
+      setQuizError('')
+      return
+    }
+    handleSubmit()
   }
 
   const handleDraw = async () => {
@@ -490,8 +543,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         <QuizPage
           attempt={attempt}
           answers={answers}
+          currentIndex={currentQuestionIndex}
           onAnswer={handleAnswer}
-          onSubmit={handleSubmit}
+          onContinue={handleQuestionContinue}
           submitting={submitting}
           error={quizError}
         />
