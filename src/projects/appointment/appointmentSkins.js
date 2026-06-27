@@ -5,7 +5,8 @@ import {
   APPOINTMENT_STAGE_WIDTH,
 } from './appointmentLayout'
 
-export const DONGFANG_ZHENYUE_ACTIVITY_KEY = 'baoli-dongfang-zhenyue-delivery-20260621'
+export const DONGFANG_ZHENYUE_ACTIVITY_KEY = 'baoli_dongfang_zhenyue_delivery_20260621'
+export const DONGFANG_ZHENYUE_LEGACY_ACTIVITY_KEY = 'baoli-dongfang-zhenyue-delivery-20260621'
 
 const DONGFANG_ZHENYUE_ASSETS_BASE_URL =
   'https://assets.zice8.com/appointment/baoli-dongfang-zhenyue-delivery-20260621'
@@ -237,8 +238,14 @@ const DONGFANG_ZHENYUE_SKIN = {
 }
 
 export function resolveAppointmentSkin(activityKey) {
-  if (String(activityKey || '') === DONGFANG_ZHENYUE_ACTIVITY_KEY) {
+  if (normalizeAppointmentActivityKey(activityKey) === DONGFANG_ZHENYUE_ACTIVITY_KEY) {
     return DONGFANG_ZHENYUE_SKIN
   }
   return MINGZHOU_ZHENYUE_SKIN
+}
+
+export function normalizeAppointmentActivityKey(activityKey) {
+  const key = String(activityKey || '')
+  if (key === DONGFANG_ZHENYUE_LEGACY_ACTIVITY_KEY) return DONGFANG_ZHENYUE_ACTIVITY_KEY
+  return key
 }

@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { lazy } from 'react'
+import { normalizeAppointmentActivityKey } from './appointment/appointmentSkins'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
@@ -9,6 +10,7 @@ const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index
 const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
 const LatexAllergyRiskTestProject = lazy(() => import('./latex-allergy-risk-test/index.jsx'))
 const QuizProject = lazy(() => import('./quiz/index.jsx'))
+const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
 
 export const projectRoutes = [
   {
@@ -63,8 +65,15 @@ export const projectRoutes = [
   },
   {
     path: '/appointment/:activityKey',
-    Component: lazy(() => import('./appointment/index.jsx')),
+    Component: AppointmentProject,
     activityGate: true,
+    normalizeActivityKey: normalizeAppointmentActivityKey,
+  },
+  {
+    path: '/appointment_visit/:activityKey',
+    Component: AppointmentProject,
+    activityGate: true,
+    normalizeActivityKey: normalizeAppointmentActivityKey,
   },
   {
     path: '/material_review_registration/:activityKey',

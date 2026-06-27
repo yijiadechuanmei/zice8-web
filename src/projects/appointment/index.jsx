@@ -12,7 +12,7 @@ import { createAppointmentBooking, getBootstrap, getPublicConfig, resetAppointme
 import {
   APPOINTMENT_FALLBACK_ASSETS_BASE_URL,
 } from './appointmentLayout'
-import { resolveAppointmentSkin } from './appointmentSkins'
+import { normalizeAppointmentActivityKey, resolveAppointmentSkin } from './appointmentSkins'
 import './appointment.css'
 
 const STEPS = {
@@ -42,7 +42,7 @@ export default function AppointmentApp({ routeParams }) {
 }
 
 function AppointmentMain({ routeParams }) {
-  const activityKey = routeParams?.activityKey || getQueryParam('activity_key') || ''
+  const activityKey = normalizeAppointmentActivityKey(routeParams?.activityKey || getQueryParam('activity_key') || '')
   const [pageUrl, setPageUrl] = useState('')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)

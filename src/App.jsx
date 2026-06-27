@@ -100,11 +100,21 @@ function App() {
 
   if (!matchedProject) return <NotFound />
 
-  const activityKey = getActivityKey(matchedProject.params)
-  if (unavailableActivity?.activityKey === activityKey) return <ActivityUnavailablePage />
+  const rawActivityKey = getActivityKey(matchedProject.params)
+  const activityKey = matchedProject.project.normalizeActivityKey
+    ? matchedProject.project.normalizeActivityKey(rawActivityKey)
+    : rawActivityKey
+  const routeParams = matchedProject.params.activityKey && activityKey !== rawActivityKey
+    ? { ...matchedProject.params, activityKey }
+    : matchedProject.params
+  if (
+    unavailableActivity?.activityKey === activityKey
+    || unavailableActivity?.activityKey === rawActivityKey
+  ) return <ActivityUnavailablePage />
 
   const fallback = matchedProject.project.path.startsWith('/quiz') ? <QuizLoadingState text="答题活动加载中..." /> : <Loading />
   const gateExcluded = matchedProject.project.activityGateExcludedKeys?.includes(activityKey)
+    || matchedProject.project.activityGateExcludedKeys?.includes(rawActivityKey)
   const gateEnabled = import.meta.env.VITE_ACTIVITY_GATE_ENABLED !== 'false'
     && matchedProject.project.activityGate
     && activityKey
@@ -116,13 +126,13 @@ function App() {
         key={activityKey}
         activityKey={activityKey}
         project={matchedProject.project}
-        params={matchedProject.params}
+        params={routeParams}
         fallback={fallback}
       />
     )
   }
 
-  return <ProjectRoute project={matchedProject.project} params={matchedProject.params} fallback={fallback} />
+  return <ProjectRoute project={matchedProject.project} params={routeParams} fallback={fallback} />
 }
 
 export default App
