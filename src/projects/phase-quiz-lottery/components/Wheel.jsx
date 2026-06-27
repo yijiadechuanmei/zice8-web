@@ -20,6 +20,7 @@ function normalizeSegments(segments) {
 }
 
 function getSegmentFill(context, segment, index) {
+  if (segment?.background) return segment.background
   if (segment?.prize) {
     const gradient = context.createLinearGradient(0, 0, DEFAULT_SIZE, DEFAULT_SIZE)
     gradient.addColorStop(0, '#FFE7A3')

@@ -36,14 +36,12 @@ const PHASE_WHEEL_ASSETS = {
   wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
 }
 const BROCHURE_WHEEL_SEGMENTS = [
-  { label: '特等奖', prizeName: '特等奖', prize: true },
-  { label: '谢谢参与', prizeName: '谢谢参与' },
-  { label: '一等奖', prizeName: '一等奖', prize: true },
-  { label: '幸运奖', prizeName: '幸运奖', prize: true },
-  { label: '二等奖', prizeName: '二等奖', prize: true },
-  { label: '谢谢参与', prizeName: '谢谢参与' },
-  { label: '三等奖', prizeName: '三等奖', prize: true },
-  { label: '幸运奖', prizeName: '幸运奖', prize: true },
+  { label: '特等奖', prizeName: '特等奖', prize: true, background: '#FFE7A3' },
+  { label: '一等奖', prizeName: '一等奖', prize: true, background: '#EEF6FF' },
+  { label: '二等奖', prizeName: '二等奖', prize: true, background: '#FFF7D6' },
+  { label: '三等奖', prizeName: '三等奖', prize: true, background: '#E6F2FF' },
+  { label: '幸运奖', prizeName: '幸运奖', prize: true, background: '#F7FAFF' },
+  { label: '谢谢参与', prizeName: '谢谢参与', background: '#EAF6FF' },
 ]
 
 function normalizeActivityKey(routeParams) {
@@ -378,11 +376,10 @@ function MyPrizesModal({ prizes, onClose }) {
             {prizes.map((prize) => (
               <div className="bql-prize-item" key={prize.id}>
                 <img src={PHASE_WHEEL_ASSETS.prizeBox} alt="" aria-hidden="true" />
-                <div>
-                  <strong>{prize.prizeName || '奖品待公布'}</strong>
-                  <span>{formatPrizeTime(prize.createdAt)}</span>
-                </div>
                 <em>{prize.prizeLevel || '中奖'}</em>
+                <strong>{prize.prizeName || '奖品待公布'}</strong>
+                <span>{formatPrizeTime(prize.createdAt)}</span>
+                <small>请联系中英人寿服务人员领取</small>
               </div>
             ))}
           </div>
