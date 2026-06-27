@@ -3,6 +3,7 @@ import { lazy } from 'react'
 import { normalizeAppointmentActivityKey } from './appointment/appointmentSkins'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
+const BrochureQuizLotteryProject = lazy(() => import('./brochure-quiz-lottery/index.jsx'))
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
 const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
@@ -36,6 +37,16 @@ export const projectRoutes = [
   {
     path: '/phase-quiz-lottery/:activityKey',
     Component: PhaseQuizLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/brochure-quiz-lottery/:activityKey',
+    Component: BrochureQuizLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/brochure_quiz_lottery/:activityKey',
+    Component: BrochureQuizLotteryProject,
     activityGate: true,
   },
   {
