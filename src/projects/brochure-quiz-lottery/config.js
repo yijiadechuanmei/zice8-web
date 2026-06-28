@@ -25,7 +25,8 @@ export const DEFAULT_CONFIG = {
     placeholderImage: 'f4623270c38e7762f0e0472284893644_564204_750_422.png',
     slides: [
       { key: 'waiver', title: '投保人豁免篇', image: 'carousel-waiver.png', audio: 'waiver.mp3' },
-      { key: 'value', title: '核心价值篇', image: 'carousel-value.png', audio: 'value.mp3' },
+      { key: 'value1', navKey: 'value', title: '核心价值篇', image: 'carousel-value1.png', audio: 'value1.mp3' },
+      { key: 'value2', navKey: 'value', title: '核心价值篇', image: 'carousel-value2.png', audio: 'value2.mp3' },
       { key: 'audience', title: '适用人群篇', image: 'carousel-audience.png', audio: 'audience.mp3' },
     ],
   },
@@ -68,6 +69,22 @@ export function assetUrl(config, filename, folder = 'images') {
   return `${base.replace(/\/$/, '')}/${resolvedFilename}`
 }
 
+function normalizeBrochureSlides(slides) {
+  const sourceSlides = slides?.length ? slides : DEFAULT_CONFIG.brochure.slides
+  return sourceSlides.flatMap((slide) => {
+    if (slide?.key === 'value' && slide.image === 'carousel-value.png' && slide.audio === 'value.mp3') {
+      return [
+        { ...slide, key: 'value1', navKey: 'value', image: 'carousel-value1.png', audio: 'value1.mp3' },
+        { ...slide, key: 'value2', navKey: 'value', image: 'carousel-value2.png', audio: 'value2.mp3' },
+      ]
+    }
+    return {
+      ...slide,
+      navKey: slide.navKey || (slide.key === 'value1' || slide.key === 'value2' ? 'value' : slide.key),
+    }
+  })
+}
+
 export function mergeBrochureConfig(publicConfig) {
   const mobile = publicConfig?.mobileConfig || publicConfig?.config || {}
   const merged = {
@@ -77,7 +94,7 @@ export function mergeBrochureConfig(publicConfig) {
     brochure: {
       ...DEFAULT_CONFIG.brochure,
       ...(mobile.brochure || {}),
-      slides: mobile.brochure?.slides?.length ? mobile.brochure.slides : DEFAULT_CONFIG.brochure.slides,
+      slides: normalizeBrochureSlides(mobile.brochure?.slides),
     },
     prizes: {
       ...DEFAULT_CONFIG.prizes,

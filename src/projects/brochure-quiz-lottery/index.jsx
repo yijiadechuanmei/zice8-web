@@ -145,9 +145,20 @@ function getPrizeImageUrl(config, prize) {
 
 function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlideAudio = true, bgmEnabled = false }) {
   const audioRef = useRef(null)
+  const touchRef = useRef({ startX: 0, startY: 0, active: false })
   const slides = config.brochure.slides
   const active = slides[currentSlide] || slides[0]
-  const activeImage = active.image || config.brochure.placeholderImage
+  const activeNavKey = active?.navKey || active?.key
+  const tabs = useMemo(() => {
+    const seen = new Set()
+    return slides.reduce((items, slide, index) => {
+      const navKey = slide.navKey || slide.key
+      if (seen.has(navKey)) return items
+      seen.add(navKey)
+      items.push({ key: navKey, title: slide.title, firstSlideIndex: index })
+      return items
+    }, [])
+  }, [slides])
 
   const startAudio = useCallback(async (index) => {
     const audio = audioRef.current
@@ -170,9 +181,30 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlid
     if (currentSlide < slides.length - 1) onSlide(currentSlide + 1)
   }
 
-  const handleSlideClick = (index) => {
+  const goToSlide = (index) => {
+    if (index < 0 || index >= slides.length) return
+    if (index === currentSlide) {
+      startAudio(index)
+      return
+    }
     onSlide(index)
-    window.setTimeout(() => startAudio(index), 0)
+  }
+
+  const handleTouchStart = (event) => {
+    const touch = event.touches?.[0]
+    if (!touch) return
+    touchRef.current = { startX: touch.clientX, startY: touch.clientY, active: true }
+  }
+
+  const handleTouchEnd = (event) => {
+    const touch = event.changedTouches?.[0]
+    const start = touchRef.current
+    touchRef.current = { startX: 0, startY: 0, active: false }
+    if (!touch || !start.active) return
+    const deltaX = touch.clientX - start.startX
+    const deltaY = touch.clientY - start.startY
+    if (Math.abs(deltaX) < 42 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return
+    goToSlide(currentSlide + (deltaX < 0 ? 1 : -1))
   }
 
   return (
@@ -197,31 +229,48 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlid
           }}
         />
 
-        <div className="bql-carousel-frame">
-          <img
-            className="bql-carousel-image"
-            src={assetUrl(config, activeImage)}
-            alt={active.title}
-            onError={(event) => {
-              if (activeImage !== config.brochure.placeholderImage && !event.currentTarget.dataset.placeholderApplied) {
-                event.currentTarget.dataset.placeholderApplied = '1'
-                event.currentTarget.src = assetUrl(config, config.brochure.placeholderImage)
-                return
-              }
-            }}
-          />
+        <div
+          className="bql-carousel-frame"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div
+            className="bql-carousel-track"
+            style={{ transform: `translate3d(-${currentSlide * 100}%, 0, 0)` }}
+          >
+            {slides.map((slide) => {
+              const slideImage = slide.image || config.brochure.placeholderImage
+              return (
+                <div className="bql-carousel-slide" key={slide.key}>
+                  <img
+                    className="bql-carousel-image"
+                    src={assetUrl(config, slideImage)}
+                    alt={slide.title}
+                    draggable="false"
+                    onError={(event) => {
+                      if (slideImage !== config.brochure.placeholderImage && !event.currentTarget.dataset.placeholderApplied) {
+                        event.currentTarget.dataset.placeholderApplied = '1'
+                        event.currentTarget.src = assetUrl(config, config.brochure.placeholderImage)
+                        return
+                      }
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className="bql-tab-row" aria-label="画册篇章">
-          {slides.map((slide, index) => (
+          {tabs.map((tab, index) => (
             <button
-              key={slide.key}
-              className={`bql-image-button bql-tab bql-tab-${index + 1} ${index === currentSlide ? 'is-active' : ''}`}
+              key={tab.key}
+              className={`bql-image-button bql-tab bql-tab-${index + 1} ${tab.key === activeNavKey ? 'is-active' : ''}`}
               type="button"
-              onClick={() => handleSlideClick(index)}
-              aria-label={slide.title}
+              onClick={() => goToSlide(tab.firstSlideIndex)}
+              aria-label={tab.title}
             >
-              <span className="bql-tab-text">{slide.title}</span>
+              <span className="bql-tab-text">{tab.title}</span>
             </button>
           ))}
         </div>
