@@ -36,10 +36,10 @@ const PHASE_WHEEL_ASSETS = {
   wheelCenterButton: `${PHASE_WHEEL_ASSET_BASE}/wheel/wheel_center_btn.png`,
 }
 const BROCHURE_WHEEL_SEGMENTS = [
+  { label: '谢谢参与', prizeLevel: '未中奖', background: '#EAF6FF' },
   { label: '特等奖', prizeLevel: '特等奖', prize: true, background: '#FFE7A3' },
   { label: '幸运奖', prizeLevel: '幸运奖', prize: true, background: '#F7FAFF' },
   { label: '一等奖', prizeLevel: '一等奖', prize: true, background: '#EEF6FF' },
-  { label: '谢谢参与', prizeLevel: '未中奖', background: '#EAF6FF' },
   { label: '二等奖', prizeLevel: '二等奖', prize: true, background: '#FFF7D6' },
   { label: '三等奖', prizeLevel: '三等奖', prize: true, background: '#E6F2FF' },
 ]
@@ -86,7 +86,7 @@ function resolveWheelTargetIndex(draw) {
     const segment = BROCHURE_WHEEL_SEGMENTS[draw.wheelStopIndex]
     if (segment?.prizeLevel === expectedPrizeLevel) return draw.wheelStopIndex
   }
-  return expectedIndex >= 0 ? expectedIndex : 3
+  return expectedIndex >= 0 ? expectedIndex : 0
 }
 
 function formatPrizeTime(value) {
