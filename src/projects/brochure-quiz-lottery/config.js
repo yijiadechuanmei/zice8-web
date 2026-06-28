@@ -30,12 +30,20 @@ export const DEFAULT_CONFIG = {
     ],
   },
   prizes: {
+    imageVersion: '20260628a',
     images: {
       特等奖: 'prize-special.png',
       一等奖: 'prize-first.png',
       二等奖: 'prize-second.png',
       三等奖: 'prize-third.png',
       幸运奖: 'prize-lucky.png',
+    },
+    imagesByCode: {
+      special: 'prize-special.png',
+      first: 'prize-first.png',
+      second: 'prize-second.png',
+      third: 'prize-third.png',
+      lucky: 'prize-lucky.png',
     },
   },
 }
@@ -77,6 +85,10 @@ export function mergeBrochureConfig(publicConfig) {
       images: {
         ...DEFAULT_CONFIG.prizes.images,
         ...(mobile.prizes?.images || {}),
+      },
+      imagesByCode: {
+        ...DEFAULT_CONFIG.prizes.imagesByCode,
+        ...(mobile.prizes?.imagesByCode || {}),
       },
     },
   }

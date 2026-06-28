@@ -128,9 +128,18 @@ function formatPrizeTime(value) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function appendUrlVersion(url, version) {
+  if (!url || !version) return url
+  return `${url}${url.includes('?') ? '&' : '?'}v=${encodeURIComponent(version)}`
+}
+
 function getPrizeImageUrl(config, prize) {
-  const image = config.prizes?.images?.[prize?.prizeLevel]
-  return image ? assetUrl(config, image) : PHASE_WHEEL_ASSETS.prizeBox
+  const image =
+    config.prizes?.imagesByCode?.[prize?.prizeCode] ||
+    config.prizes?.images?.[prize?.prizeLevel]
+  return image
+    ? appendUrlVersion(assetUrl(config, image), config.prizes?.imageVersion)
+    : PHASE_WHEEL_ASSETS.prizeBox
 }
 
 function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlideAudio = true, bgmEnabled = false }) {
