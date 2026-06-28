@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getVisitorId, trackEvent, trackPageView } from '../../shared/analytics'
 import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam } from '../../shared/utils/url'
 import { DEFAULT_OSS_BASE_URL } from '../phase-quiz-lottery/api'
 import StageLayout from '../phase-quiz-lottery/components/StageLayout'
@@ -486,30 +488,35 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [wheelTargetIndex, setWheelTargetIndex] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const config = useMemo(() => mergeBrochureConfig(publicConfig), [publicConfig])
+  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+  const defaultShareImage = assetUrl(config, config.home.logo)
+  const shareActivity = useMemo(() => {
+    if (!publicConfig) return null
+    return {
+      ...publicConfig,
+      shareTitle: publicConfig.shareTitle || publicConfig.title || '中英人寿互动答题',
+      shareDesc: publicConfig.shareDesc ?? '',
+      shareImage: publicConfig.shareImage || defaultShareImage,
+    }
+  }, [defaultShareImage, publicConfig])
   const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
   const bgmEnabled = Boolean(bgmConfig?.enabled && bgmConfig?.url)
+  const showLoading = loading || (publicConfig && !authReady && !blockedMessage)
+
+  const handleWechatShareStatus = useCallback((status) => {
+    if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
+      console.warn('[brochure-quiz-lottery-share] setup failed', status)
+    }
+  }, [])
+
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
   useEffect(() => {
     let cancelled = false
     getPublicConfig(activityKey)
-      .then(async (publicData) => {
-        const bootstrap = await getBootstrap(activityKey, visitorId).catch(() => ({
-          profile: null,
-          attempt: null,
-          result: null,
-          draw: null,
-          myPrizes: [],
-        }))
-        return [publicData, bootstrap]
-      })
-      .then(([publicData, bootstrap]) => {
+      .then((publicData) => {
         if (cancelled) return
         setPublicConfig(publicData)
-        setProfile(bootstrap.profile)
-        setAttempt(bootstrap.attempt)
-        setResult(bootstrap.result)
-        setDraw(bootstrap.draw)
-        setMyPrizes(bootstrap.myPrizes || [])
         document.title = publicData?.title || '中英人寿互动答题'
       })
       .catch((err) => {
@@ -521,7 +528,27 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     return () => {
       cancelled = true
     }
-  }, [activityKey, visitorId])
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!activityKey || !visitorId || !publicConfig || !authReady) return
+    let cancelled = false
+    getBootstrap(activityKey, visitorId)
+      .then((bootstrap) => {
+        if (cancelled) return
+        setProfile(bootstrap.profile)
+        setAttempt(bootstrap.attempt)
+        setResult(bootstrap.result)
+        setDraw(bootstrap.draw)
+        setMyPrizes(bootstrap.myPrizes || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err?.message || '项目加载失败')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey, authReady, publicConfig, visitorId])
 
   useEffect(() => {
     trackPageView(activityKey, '/brochure-quiz-lottery', {
@@ -791,7 +818,16 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
 
   const backgroundStyle = buildBackgroundStyle(config)
 
-  if (loading) return <div className="bql-loading" style={backgroundStyle}>{loadingText}</div>
+  if (showLoading) return <div className="bql-loading" style={backgroundStyle}>{loadingText}</div>
+  if (blockedMessage) {
+    return (
+      <main className="bql-stage" style={backgroundStyle}>
+        <section className="bql-panel">
+          <h1>{blockedMessage}</h1>
+        </section>
+      </main>
+    )
+  }
   if (error) {
     return (
       <main className="bql-stage" style={backgroundStyle}>
