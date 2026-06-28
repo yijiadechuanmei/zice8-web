@@ -160,6 +160,26 @@
   font-weight: 800;
 }
 
+.bql-blocked {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(248, 252, 255, 0.1), rgba(236, 247, 255, 0.18)),
+    var(--bql-home-bg-overlay, none) center top / cover no-repeat,
+    #f2f8ff;
+}
+
+.bql-blocked p {
+  margin: 0;
+  color: rgba(15, 79, 154, 0.78);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .bql-stage {
   min-height: 100vh;
   padding: 24px 14px 36px;

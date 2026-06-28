@@ -821,10 +821,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   if (showLoading) return <div className="bql-loading" style={backgroundStyle}>{loadingText}</div>
   if (blockedMessage) {
     return (
-      <main className="bql-stage" style={backgroundStyle}>
-        <section className="bql-panel">
-          <h1>{blockedMessage}</h1>
-        </section>
+      <main className="bql-blocked" style={backgroundStyle}>
+        <p>{blockedMessage}</p>
       </main>
     )
   }
