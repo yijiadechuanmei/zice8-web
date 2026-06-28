@@ -29,6 +29,15 @@ export const DEFAULT_CONFIG = {
       { key: 'audience', title: '适用人群篇', image: 'carousel-audience.png', audio: 'audience.mp3' },
     ],
   },
+  prizes: {
+    images: {
+      特等奖: 'prize-special.png',
+      一等奖: 'prize-first.png',
+      二等奖: 'prize-second.png',
+      三等奖: 'prize-third.png',
+      幸运奖: 'prize-lucky.png',
+    },
+  },
 }
 
 export function resolveAssetFilename(filename) {
@@ -61,6 +70,14 @@ export function mergeBrochureConfig(publicConfig) {
       ...DEFAULT_CONFIG.brochure,
       ...(mobile.brochure || {}),
       slides: mobile.brochure?.slides?.length ? mobile.brochure.slides : DEFAULT_CONFIG.brochure.slides,
+    },
+    prizes: {
+      ...DEFAULT_CONFIG.prizes,
+      ...(mobile.prizes || {}),
+      images: {
+        ...DEFAULT_CONFIG.prizes.images,
+        ...(mobile.prizes?.images || {}),
+      },
     },
   }
   return {

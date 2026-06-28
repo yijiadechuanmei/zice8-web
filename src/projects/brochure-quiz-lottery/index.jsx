@@ -128,6 +128,11 @@ function formatPrizeTime(value) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function getPrizeImageUrl(config, prize) {
+  const image = config.prizes?.images?.[prize?.prizeLevel]
+  return image ? assetUrl(config, image) : PHASE_WHEEL_ASSETS.prizeBox
+}
+
 function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlideAudio = true, bgmEnabled = false }) {
   const audioRef = useRef(null)
   const slides = config.brochure.slides
@@ -401,7 +406,7 @@ function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, o
   )
 }
 
-function MyPrizesModal({ prizes, onClose }) {
+function MyPrizesModal({ config, prizes, onClose }) {
   return (
     <div className="bql-modal-mask">
       <section className="bql-profile-modal bql-prize-modal">
@@ -411,7 +416,7 @@ function MyPrizesModal({ prizes, onClose }) {
           <div className="bql-prize-list">
             {prizes.map((prize) => (
               <div className="bql-prize-item" key={prize.id}>
-                <img src={PHASE_WHEEL_ASSETS.prizeBox} alt="" aria-hidden="true" />
+                <img src={getPrizeImageUrl(config, prize)} alt="" aria-hidden="true" />
                 <em>{prize.prizeLevel || '中奖'}</em>
                 <strong>{prize.prizeName || '奖品待公布'}</strong>
                 <span>{formatPrizeTime(prize.createdAt)}</span>
@@ -888,7 +893,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           onSaved={handleProfileSaved}
         />
       ) : null}
-      {myPrizesOpen ? <MyPrizesModal prizes={myPrizes} onClose={() => setMyPrizesOpen(false)} /> : null}
+      {myPrizesOpen ? <MyPrizesModal config={config} prizes={myPrizes} onClose={() => setMyPrizesOpen(false)} /> : null}
       <DebugPanel
         enabled={Boolean(isDebugRequested && debugAccess?.canDebug)}
         activityKey={activityKey}
