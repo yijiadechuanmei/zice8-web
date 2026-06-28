@@ -186,6 +186,37 @@
   white-space: nowrap;
 }
 
+.admin-activity-title-line {
+  display: flex !important;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+}
+
+.admin-activity-title-line h4 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-activity-title-line a {
+  color: inherit;
+}
+
+.admin-activity-title-line .ant-btn {
+  flex: 0 0 auto;
+}
+
+.admin-activity-qr {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 8px 0 4px;
+  text-align: center;
+  word-break: break-all;
+}
+
 .admin-phase-scope {
   min-width: 140px;
 }

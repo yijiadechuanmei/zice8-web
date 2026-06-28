@@ -6,6 +6,9 @@ import {
   Empty,
   Input,
   Layout,
+  message,
+  Modal,
+  QRCode,
   Select,
   Space,
   Tabs,
@@ -15,9 +18,12 @@ import {
 } from 'antd'
 import {
   BarChartOutlined,
+  CopyOutlined,
   DashboardOutlined,
   DatabaseOutlined,
+  LinkOutlined,
   LogoutOutlined,
+  QrcodeOutlined,
   SearchOutlined,
   SettingOutlined,
   TableOutlined,
@@ -38,6 +44,7 @@ import { getDataSchema } from '../api'
 
 const { Header, Sider, Content } = Layout
 const { Text, Title } = Typography
+const WEB_ORIGIN = 'https://web.zice8.com'
 
 const tabs = [
   { key: 'overview', label: '概览', icon: <DashboardOutlined /> },
@@ -73,6 +80,7 @@ export default function AdminLayout({
   const [statusFilter, setStatusFilter] = useState('')
   const [quizViewKeysByActivity, setQuizViewKeysByActivity] = useState({})
   const [phaseScopeByActivity, setPhaseScopeByActivity] = useState({})
+  const [qrActivity, setQrActivity] = useState(null)
 
   useEffect(() => {
     if (!selectedActivity || selectedActivity.type !== 'quiz') return
@@ -107,6 +115,7 @@ export default function AdminLayout({
   const selectedPhaseScope = selectedActivity?.type === 'phase_quiz_lottery'
     ? phaseScopeByActivity[selectedActivity.activityKey] || 'all'
     : 'all'
+  const selectedActivityUrl = selectedActivity ? buildActivityUrl(selectedActivity) : ''
 
   const visibleTabs = tabs.filter((tab) => {
     if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs', 'paymentTest'].includes(tab.key)) return false
@@ -223,7 +232,38 @@ export default function AdminLayout({
               <div className={`admin-activity-summary ${selectedActivity.type === 'phase_quiz_lottery' ? 'is-phase-scoped' : ''}`}>
                 <div>
                   <Text type="secondary">当前活动</Text>
-                  <Title level={4} style={{ margin: '4px 0 0' }}>{selectedActivity.title}</Title>
+                  <div className="admin-activity-title-line">
+                    <Title level={4} style={{ margin: 0 }}>
+                      <a href={selectedActivityUrl} target="_blank" rel="noreferrer">
+                        {selectedActivity.title}
+                      </a>
+                    </Title>
+                    <Tooltip title="打开活动链接">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<LinkOutlined />}
+                        href={selectedActivityUrl}
+                        target="_blank"
+                      />
+                    </Tooltip>
+                    <Tooltip title="复制活动链接">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyActivityUrl(selectedActivityUrl)}
+                      />
+                    </Tooltip>
+                    <Tooltip title="活动二维码">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<QrcodeOutlined />}
+                        onClick={() => setQrActivity(selectedActivity)}
+                      />
+                    </Tooltip>
+                  </div>
                 </div>
                 <div><Text type="secondary">Activity Key</Text><strong>{selectedActivity.activityKey}</strong></div>
                 <div><Text type="secondary">类型</Text><strong>{selectedActivity.type}</strong></div>
@@ -270,6 +310,20 @@ export default function AdminLayout({
           {activeTab === 'paymentTest' && adminUser.role === 'super_admin' ? <PaymentTestPage /> : null}
         </Content>
       </Layout>
+      <Modal
+        title="活动二维码"
+        open={Boolean(qrActivity)}
+        footer={null}
+        onCancel={() => setQrActivity(null)}
+        centered
+      >
+        {qrActivity ? (
+          <div className="admin-activity-qr">
+            <QRCode value={buildActivityUrl(qrActivity)} size={220} />
+            <Text copyable={{ text: buildActivityUrl(qrActivity) }}>{buildActivityUrl(qrActivity)}</Text>
+          </div>
+        ) : null}
+      </Modal>
     </Layout>
   )
 }
@@ -277,4 +331,41 @@ export default function AdminLayout({
 function formatDate(value) {
   if (!value) return '-'
   return String(value).replace('T', ' ').slice(0, 16)
+}
+
+function buildActivityUrl(activity) {
+  const key = encodeURIComponent(activity.activityKey)
+  const pathPrefixByType = {
+    appointment_visit: '/appointment',
+    brochure_quiz_lottery: '/brochure-quiz-lottery',
+    phase_quiz_lottery: '/phase-quiz-lottery',
+    material_review_registration: '/material-registration',
+    tjrcb_pension_manual: '/tjrcb-pension-manual',
+    tufe_campus_open_day: '/tufe-campus-open-day',
+    xiwuqi_99_road_night: '/xiwuqi-99-road-night',
+    latex_allergy_risk_test: '/latex-allergy-risk-test',
+    quiz: '/quiz',
+  }
+  const prefix = pathPrefixByType[activity.type] || `/${encodeURIComponent(activity.type || '')}`
+  return `${WEB_ORIGIN}${prefix}/${key}`
+}
+
+async function copyActivityUrl(url) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = url
+      textarea.style.position = 'fixed'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      textarea.remove()
+    }
+    message.success('活动链接已复制')
+  } catch {
+    message.error('复制失败，请手动复制链接')
+  }
 }
