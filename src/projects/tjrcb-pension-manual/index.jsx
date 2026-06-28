@@ -153,6 +153,40 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     activityAudioService.setConfig(bgmConfig, { activityKey })
   }, [activityKey, bgmConfig])
 
+  useEffect(() => {
+    if (!bgmConfig?.enabled || !bgmConfig?.url || !activityKey) return undefined
+
+    let unlocked = false
+    const unlockBgm = () => {
+      if (unlocked) return
+      const state = activityAudioService.getState()
+      activityAudioService.setConfig(bgmConfig, { activityKey })
+      if (state.playing && !state.mutedAutoplay) {
+        unlocked = true
+        return
+      }
+      if (state.mutedAutoplay) {
+        activityAudioService.restoreAudibleElementState('tjrcb-manual-first-gesture')
+      } else {
+        activityAudioService.toggle('tjrcb-manual-first-gesture')
+      }
+      window.setTimeout(() => {
+        const nextState = activityAudioService.getState()
+        unlocked = Boolean(nextState.playing && !nextState.mutedAutoplay)
+      }, 300)
+    }
+
+    window.addEventListener('touchstart', unlockBgm, { capture: true, passive: true })
+    window.addEventListener('pointerdown', unlockBgm, { capture: true })
+    window.addEventListener('click', unlockBgm, { capture: true })
+
+    return () => {
+      window.removeEventListener('touchstart', unlockBgm, { capture: true, passive: true })
+      window.removeEventListener('pointerdown', unlockBgm, { capture: true })
+      window.removeEventListener('click', unlockBgm, { capture: true })
+    }
+  }, [activityKey, bgmConfig])
+
   const playAudioAt = useCallback(
     async (index) => {
       const audio = audioRef.current
@@ -346,7 +380,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onEnded={handleNarrationEnded}
         />
       </div>
-      {bgmConfig?.showControl !== false ? (
+      {bgmConfig?.enabled && bgmConfig?.url ? (
         <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       ) : null}
     </main>
