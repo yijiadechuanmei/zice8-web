@@ -50,11 +50,12 @@ function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY
 }
 
-function playAudio(audio) {
-  if (!audio) return Promise.resolve(false)
-  if (!/MicroMessenger/i.test(navigator.userAgent || '') || !window.WeixinJSBridge?.invoke) {
-    return audio.play().then(() => true)
-  }
+function isWechatBrowser() {
+  if (typeof navigator === 'undefined') return false
+  return /MicroMessenger/i.test(navigator.userAgent || '')
+}
+
+function playWithWechatBridge(audio) {
   return new Promise((resolve) => {
     const run = () => audio.play().then(() => resolve(true)).catch(() => resolve(false))
     try {
@@ -62,6 +63,32 @@ function playAudio(audio) {
     } catch {
       run()
     }
+  })
+}
+
+function playAudio(audio) {
+  if (!audio) return Promise.resolve(false)
+  if (!isWechatBrowser()) {
+    return audio.play().then(() => true).catch(() => false)
+  }
+  if (window.WeixinJSBridge?.invoke) {
+    return playWithWechatBridge(audio)
+  }
+  return new Promise((resolve) => {
+    let settled = false
+    const finish = (result) => {
+      if (settled) return
+      settled = true
+      document.removeEventListener('WeixinJSBridgeReady', handleReady)
+      resolve(result)
+    }
+    const handleReady = () => {
+      playWithWechatBridge(audio).then(finish)
+    }
+    document.addEventListener('WeixinJSBridgeReady', handleReady, { once: true })
+    window.setTimeout(() => {
+      audio.play().then(() => finish(true)).catch(() => finish(false))
+    }, 1200)
   })
 }
 
@@ -109,26 +136,20 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlid
     const audio = audioRef.current
     const slide = slides[index]
     if (!audio || !slide?.audio) return
-    if (bgmEnabled) {
-      activityAudioService.pause('brochure-slide-audio')
-    }
     audio.src = assetUrl(config, slide.audio, 'audios')
     audio.currentTime = 0
-    const played = await playAudio(audio).catch(() => false)
-    if (!played && bgmEnabled) {
-      activityAudioService.toggle('brochure-slide-audio-failed')
-    }
-  }, [bgmEnabled, config, slides])
+    await playAudio(audio)
+  }, [config, slides])
 
   useEffect(() => {
     if (!autoplaySlideAudio) return
-    startAudio(currentSlide)
-  }, [autoplaySlideAudio, currentSlide, startAudio])
+    const timer = window.setTimeout(() => {
+      startAudio(currentSlide)
+    }, bgmEnabled ? 450 : 0)
+    return () => window.clearTimeout(timer)
+  }, [autoplaySlideAudio, bgmEnabled, currentSlide, startAudio])
 
   const handleEnded = () => {
-    if (bgmEnabled) {
-      activityAudioService.toggle('brochure-slide-audio-ended')
-    }
     if (currentSlide < slides.length - 1) onSlide(currentSlide + 1)
   }
 
