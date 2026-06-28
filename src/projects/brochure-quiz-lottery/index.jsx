@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getVisitorId, trackEvent, trackPageView } from '../../shared/analytics'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { getQueryParam } from '../../shared/utils/url'
 import { DEFAULT_OSS_BASE_URL } from '../phase-quiz-lottery/api'
 import StageLayout from '../phase-quiz-lottery/components/StageLayout'
@@ -97,7 +99,7 @@ function formatPrizeTime(value) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
-function HomeCanvas({ config, currentSlide, onSlide, onParticipate }) {
+function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlideAudio = true, bgmEnabled = false }) {
   const audioRef = useRef(null)
   const slides = config.brochure.slides
   const active = slides[currentSlide] || slides[0]
@@ -107,16 +109,23 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate }) {
     const audio = audioRef.current
     const slide = slides[index]
     if (!audio || !slide?.audio) return
+    if (bgmEnabled) {
+      activityAudioService.pause('brochure-slide-audio')
+    }
     audio.src = assetUrl(config, slide.audio, 'audios')
     audio.currentTime = 0
     await playAudio(audio).catch(() => false)
-  }, [config, slides])
+  }, [bgmEnabled, config, slides])
 
   useEffect(() => {
+    if (!autoplaySlideAudio) return
     startAudio(currentSlide)
-  }, [currentSlide, startAudio])
+  }, [autoplaySlideAudio, currentSlide, startAudio])
 
   const handleEnded = () => {
+    if (bgmEnabled) {
+      activityAudioService.toggle('brochure-slide-audio-ended')
+    }
     if (currentSlide < slides.length - 1) onSlide(currentSlide + 1)
   }
 
@@ -453,6 +462,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [wheelTargetIndex, setWheelTargetIndex] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const config = useMemo(() => mergeBrochureConfig(publicConfig), [publicConfig])
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
+  const bgmEnabled = Boolean(bgmConfig?.enabled && bgmConfig?.url)
 
   useEffect(() => {
     let cancelled = false
@@ -511,6 +522,45 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       cancelled = true
     }
   }, [activityKey, visitorId])
+
+  useEffect(() => {
+    if (!bgmEnabled) return
+    activityAudioService.setConfig(bgmConfig, { activityKey })
+  }, [activityKey, bgmConfig, bgmEnabled])
+
+  useEffect(() => {
+    if (!bgmEnabled || !activityKey) return undefined
+
+    let unlocked = false
+    const unlockBgm = () => {
+      if (unlocked) return
+      const state = activityAudioService.getState()
+      activityAudioService.setConfig(bgmConfig, { activityKey })
+      if (state.playing && !state.mutedAutoplay) {
+        unlocked = true
+        return
+      }
+      if (state.mutedAutoplay) {
+        activityAudioService.restoreAudibleElementState('brochure-first-gesture')
+      } else {
+        activityAudioService.toggle('brochure-first-gesture')
+      }
+      window.setTimeout(() => {
+        const nextState = activityAudioService.getState()
+        unlocked = Boolean(nextState.playing && !nextState.mutedAutoplay)
+      }, 300)
+    }
+
+    window.addEventListener('touchstart', unlockBgm, { capture: true, passive: true })
+    window.addEventListener('pointerdown', unlockBgm, { capture: true })
+    window.addEventListener('click', unlockBgm, { capture: true })
+
+    return () => {
+      window.removeEventListener('touchstart', unlockBgm, { capture: true, passive: true })
+      window.removeEventListener('pointerdown', unlockBgm, { capture: true })
+      window.removeEventListener('click', unlockBgm, { capture: true })
+    }
+  }, [activityKey, bgmConfig, bgmEnabled])
 
   const resetLocalState = () => {
     setProfile(null)
@@ -737,6 +787,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           currentSlide={currentSlide}
           onSlide={setCurrentSlide}
           onParticipate={enterInteraction}
+          autoplaySlideAudio={!bgmEnabled}
+          bgmEnabled={bgmEnabled}
         />
       ) : null}
       {view === 'quiz' ? (
@@ -791,6 +843,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         onGoQuiz={handleDebugGoQuiz}
         onLogState={handleDebugLogState}
       />
+      {bgmEnabled ? <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /> : null}
     </div>
   )
 }
