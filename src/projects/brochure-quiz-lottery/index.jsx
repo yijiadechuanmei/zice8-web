@@ -29,6 +29,7 @@ import './styles.css'
 
 const isDebugRequested = getQueryParam('debug') === '1'
 const DEBUG_RESET_TOKEN = 'RESET_BQL_2026'
+const MIN_DRAW_SCORE = 60
 const PHASE_WHEEL_ASSET_BASE = `${DEFAULT_OSS_BASE_URL}/phase-quiz-lottery/phase_quiz_lottery_test_001`
 const PHASE_WHEEL_ASSETS = {
   resultTrophy: `${PHASE_WHEEL_ASSET_BASE}/result/result_trophy.png`,
@@ -348,9 +349,11 @@ function QuizPage({ attempt, answers, currentIndex, onAnswer, onContinue, submit
 function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
   const total = result?.totalCount || 5
   const correct = result?.correctCount || 0
+  const score = Number(result?.score || 0)
   const wrong = Math.max(0, total - correct)
   const hasDraw = Boolean(draw)
   const hasPrize = Boolean(draw?.won)
+  const canDraw = score >= MIN_DRAW_SCORE
 
   return (
     <main className="bql-stage">
@@ -360,7 +363,7 @@ function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
         {!hasPrize ? (
           <div className="bql-score-card">
             <div className="bql-score-number">
-              <strong>{result?.score || 0}</strong><span>分</span>
+              <strong>{score}</strong><span>分</span>
             </div>
             <div className="bql-score-meta">
               <span>答对 {correct} 题</span>
@@ -369,9 +372,15 @@ function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
           </div>
         ) : null}
         <div className="bql-result-actions">
-          {!hasDraw ? (
+          {!hasDraw && canDraw ? (
             <>
               <button className="bql-primary" type="button" onClick={onGoWheel}>立即抽奖</button>
+              <button className="bql-secondary" type="button" onClick={onHome}>返回首页</button>
+            </>
+          ) : null}
+          {!hasDraw && !canDraw ? (
+            <>
+              <p className="bql-result-tip">答题分数达到60分才可参与抽奖</p>
               <button className="bql-secondary" type="button" onClick={onHome}>返回首页</button>
             </>
           ) : null}
@@ -734,6 +743,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
 
   const handleDraw = async () => {
     if (!result?.id && !attempt?.id) return
+    const score = Number((result || attempt)?.score || 0)
+    if (score < MIN_DRAW_SCORE) {
+      setView('result')
+      return
+    }
     setSpinning(true)
     try {
       const requestId = `bql_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
