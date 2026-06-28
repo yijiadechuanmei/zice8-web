@@ -114,7 +114,10 @@ function HomeCanvas({ config, currentSlide, onSlide, onParticipate, autoplaySlid
     }
     audio.src = assetUrl(config, slide.audio, 'audios')
     audio.currentTime = 0
-    await playAudio(audio).catch(() => false)
+    const played = await playAudio(audio).catch(() => false)
+    if (!played && bgmEnabled) {
+      activityAudioService.toggle('brochure-slide-audio-failed')
+    }
   }, [bgmEnabled, config, slides])
 
   useEffect(() => {
@@ -787,7 +790,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           currentSlide={currentSlide}
           onSlide={setCurrentSlide}
           onParticipate={enterInteraction}
-          autoplaySlideAudio={!bgmEnabled}
+          autoplaySlideAudio
           bgmEnabled={bgmEnabled}
         />
       ) : null}
