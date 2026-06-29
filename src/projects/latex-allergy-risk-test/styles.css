@@ -845,19 +845,19 @@
   0%,
   64%,
   100% {
-    transform: scale(1);
+    filter: brightness(1);
   }
   12% {
-    transform: scale(1.018);
+    filter: brightness(1.08);
   }
   24% {
-    transform: scale(1);
+    filter: brightness(1);
   }
   36% {
-    transform: scale(1.012);
+    filter: brightness(1.05);
   }
   48% {
-    transform: scale(1);
+    filter: brightness(1);
   }
 }
 

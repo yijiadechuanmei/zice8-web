@@ -380,11 +380,11 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
         white-space: nowrap;
       }
       @keyframes latexCtaHeartbeat {
-        0%, 64%, 100% { transform: scale(1); }
-        12% { transform: scale(1.018); }
-        24% { transform: scale(1); }
-        36% { transform: scale(1.012); }
-        48% { transform: scale(1); }
+        0%, 64%, 100% { filter: brightness(1); }
+        12% { filter: brightness(1.08); }
+        24% { filter: brightness(1); }
+        36% { filter: brightness(1.05); }
+        48% { filter: brightness(1); }
       }
       @media (prefers-reduced-motion: reduce) {
         .latex-mini-program-button { animation: none; }
