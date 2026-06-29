@@ -349,19 +349,24 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
         display: block;
         width: 100%;
         height: 100%;
+        min-height: 1px;
         padding: 0;
         border: 0;
-        background: transparent;
+        background: rgba(255, 255, 255, 0.01);
       }
     </style>
     <button class="latex-store-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
   `
 
+  function requestWechatLaunch() {
+    launchRef.current?.click?.()
+    launchRef.current?.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true }))
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (enabled && inWechat) {
-        launchRef.current?.click?.()
-        launchRef.current?.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true }))
+        requestWechatLaunch()
         return
       }
       const fallbackUrl = miniProgram?.fallbackUrl
@@ -375,6 +380,14 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
     return () => window.clearTimeout(timer)
   }, [enabled, inWechat, miniProgram?.fallbackUrl, onFallback])
 
+  function handlePosterClick() {
+    if (enabled && inWechat) {
+      requestWechatLaunch()
+      return
+    }
+    handleFallbackLaunch()
+  }
+
   function handleFallbackLaunch() {
     const fallbackUrl = miniProgram?.fallbackUrl
     if (fallbackUrl) {
@@ -387,7 +400,7 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   return (
     <div className="latex-store-modal-mask" role="dialog" aria-modal="true" aria-label="杰士邦仿生皮产品图">
       <div className="latex-store-modal-panel">
-        <div className="latex-store-modal-image-wrap">
+        <div className="latex-store-modal-image-wrap" onClick={handlePosterClick}>
           <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
           {enabled && inWechat ? (
             <wx-open-launch-weapp
