@@ -606,12 +606,12 @@
 }
 
 .latex-result-actions {
-  width: min(calc(100% - 32px), 500px);
+  width: min(100%, 532px);
   margin-top: 14px;
   margin-right: 0;
   margin-left: 50%;
   overflow: visible;
-  padding: 8px 0;
+  padding: 8px 16px;
   transform: translateX(-50%);
 }
 
@@ -656,9 +656,9 @@
 .latex-mini-program-launch {
   box-sizing: border-box;
   display: block;
-  width: 100%;
+  width: calc(100% + 32px);
   min-height: 64px;
-  margin: 0 auto;
+  margin: 0 -16px;
   overflow: visible;
 }
 
@@ -845,19 +845,19 @@
   0%,
   64%,
   100% {
-    filter: brightness(1);
+    transform: scale(1);
   }
   12% {
-    filter: brightness(1.08);
+    transform: scale(1.018);
   }
   24% {
-    filter: brightness(1);
+    transform: scale(1);
   }
   36% {
-    filter: brightness(1.05);
+    transform: scale(1.012);
   }
   48% {
-    filter: brightness(1);
+    transform: scale(1);
   }
 }
 
