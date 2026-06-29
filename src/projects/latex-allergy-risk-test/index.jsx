@@ -32,6 +32,7 @@ const INTRO_CARDS = [
 ]
 
 const WECHAT_LAUNCH_OPTIONS = { openTagList: ['wx-open-launch-weapp'] }
+const PRODUCT_CTA_LABEL = '了解杰士邦仿生皮，从材质源头规避未来风险'
 
 function isWechatBrowser() {
   return typeof navigator !== 'undefined' && /MicroMessenger/i.test(navigator.userAgent)
@@ -436,67 +437,69 @@ function ProductCarousel({ images }) {
 
 function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, productCarouselImages, onStore }) {
   const [shareVisible, setShareVisible] = useState(false)
-  const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
+  const ctaLabel = PRODUCT_CTA_LABEL
 
   return (
-    <section className="latex-result latex-page-in" aria-label="测试结果页" style={{ '--risk-color': resultLevel.color }}>
-      <p className="latex-result-kicker">你的乳胶过敏风险等级</p>
-      <div className="latex-gauge">
-        <div className="latex-gauge-ring">
-          <strong>{resultLevel.label}</strong>
+    <>
+      <section className="latex-result latex-page-in" aria-label="测试结果页" style={{ '--risk-color': resultLevel.color }}>
+        <p className="latex-result-kicker">你的乳胶过敏风险等级</p>
+        <div className="latex-gauge">
+          <div className="latex-gauge-ring">
+            <strong>{resultLevel.label}</strong>
+          </div>
+          <div className="latex-risk-dots">
+            {[1, 2, 3, 4].map((dot) => (
+              <i key={dot} className={dot <= resultLevel.dots ? 'is-active' : ''} />
+            ))}
+          </div>
         </div>
-        <div className="latex-risk-dots">
-          {[1, 2, 3, 4].map((dot) => (
-            <i key={dot} className={dot <= resultLevel.dots ? 'is-active' : ''} />
-          ))}
+
+        <article className="latex-result-card">
+          <h1>{resultLevel.title}</h1>
+          <p>{resultLevel.description}</p>
+        </article>
+
+        <div className="latex-dimension-table">
+          <h2>分维度分析</h2>
+          {QUESTIONS.map((question) => {
+            const selectedIds = answers[question.id] || []
+            const status = getDimensionStatus(question, selectedIds, scores[question.id] || 0)
+            return (
+              <div className="latex-dimension-row" key={question.id}>
+                <span>{question.dimension}</span>
+                <strong>{status}</strong>
+              </div>
+            )
+          })}
         </div>
-      </div>
 
-      <article className="latex-result-card">
-        <h1>{resultLevel.title}</h1>
-        <p>{resultLevel.description}</p>
-      </article>
-
-      <div className="latex-dimension-table">
-        <h2>分维度分析</h2>
-        {QUESTIONS.map((question) => {
-          const selectedIds = answers[question.id] || []
-          const status = getDimensionStatus(question, selectedIds, scores[question.id] || 0)
-          return (
-            <div className="latex-dimension-row" key={question.id}>
-              <span>{question.dimension}</span>
-              <strong>{status}</strong>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="latex-result-actions">
-        <MiniProgramLaunchButton miniProgram={miniProgram} label={ctaLabel} onFallback={onStore} />
-        <p>{resultLevel.subcopy}</p>
-        <button className="latex-ghost-button" type="button" onClick={() => setShareVisible(true)}>
-          <span>点击分享给朋友测试</span>
-        </button>
-      </div>
-
-      <footer className="latex-result-footer">
-        <p>本测试参考 WAO/EAACI 国际过敏指南设计</p>
-        <p>仅作健康科普参考，不构成医学诊断。如有不适请咨询专业医生。</p>
-        <ProductCarousel images={productCarouselImages} />
-        <div className="latex-result-brand">
-          {logoImage ? (
-            <img
-              className="latex-result-logo"
-              src={logoImage}
-              alt="品牌标识"
-              onError={(event) => {
-                event.currentTarget.style.display = 'none'
-              }}
-            />
-          ) : null}
-          <strong>7月8日杰士邦仿生皮 · 世界过敏日特别策划</strong>
+        <div className="latex-result-actions">
+          <MiniProgramLaunchButton miniProgram={miniProgram} label={ctaLabel} onFallback={onStore} />
+          <p>{resultLevel.subcopy}</p>
+          <button className="latex-ghost-button" type="button" onClick={() => setShareVisible(true)}>
+            <span>点击分享给朋友测试</span>
+          </button>
         </div>
-      </footer>
+
+        <footer className="latex-result-footer">
+          <p>本测试参考 WAO/EAACI 国际过敏指南设计</p>
+          <p>仅作健康科普参考，不构成医学诊断。如有不适请咨询专业医生。</p>
+          <ProductCarousel images={productCarouselImages} />
+          <div className="latex-result-brand">
+            {logoImage ? (
+              <img
+                className="latex-result-logo"
+                src={logoImage}
+                alt="品牌标识"
+                onError={(event) => {
+                  event.currentTarget.style.display = 'none'
+                }}
+              />
+            ) : null}
+            <strong>7月8日杰士邦仿生皮 · 世界过敏日特别策划</strong>
+          </div>
+        </footer>
+      </section>
 
       {shareVisible ? (
         <div className="latex-share-mask" role="button" tabIndex={0} onClick={() => setShareVisible(false)}>
@@ -509,6 +512,6 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
           <p>点击右上角分享给朋友测试</p>
         </div>
       ) : null}
-    </section>
+    </>
   )
 }

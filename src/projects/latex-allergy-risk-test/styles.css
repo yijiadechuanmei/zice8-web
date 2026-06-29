@@ -657,12 +657,12 @@
 
 .latex-share-mask {
   position: fixed;
-  z-index: 40;
+  z-index: 1000;
   inset: 0;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
-  padding: calc(env(safe-area-inset-top, 0px) + 76px) 28px 0;
+  justify-content: flex-end;
+  padding: calc(env(safe-area-inset-top, 0px) + 92px) 16px 0 28px;
   color: #fff;
   background: rgba(0, 0, 0, 0.62);
   cursor: pointer;
@@ -676,13 +676,14 @@
   font-size: 16px;
   font-weight: 800;
   line-height: 1.35;
+  text-align: right;
   background: rgba(255, 255, 255, 0.12);
 }
 
 .latex-share-cue {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 18px);
-  right: 24px;
+  right: max(18px, env(safe-area-inset-right, 0px));
   width: 76px;
   height: 76px;
   color: #fff;
