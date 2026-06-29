@@ -341,7 +341,7 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
       .latex-mini-program-inner {
         box-sizing: border-box;
         width: 100%;
-        padding: 10px 0 18px;
+        padding: 14px 12px 22px;
         overflow: visible;
       }
       .latex-mini-program-button {

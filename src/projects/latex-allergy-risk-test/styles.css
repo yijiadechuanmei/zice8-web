@@ -607,12 +607,12 @@
 
 .latex-result-actions {
   width: 100%;
-  max-width: 538px;
+  max-width: 500px;
   margin-top: 14px;
   margin-right: auto;
   margin-left: auto;
   overflow: visible;
-  padding: 8px 0;
+  padding: 14px 12px 16px;
 }
 
 .latex-result-actions .latex-primary-button {
@@ -657,7 +657,7 @@
   box-sizing: border-box;
   display: block;
   width: 100%;
-  min-height: 74px;
+  min-height: 86px;
   margin: 0 auto;
   overflow: visible;
 }
