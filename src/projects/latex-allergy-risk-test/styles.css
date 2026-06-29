@@ -689,14 +689,26 @@
   animation: latexStoreModalIn 260ms ease both;
 }
 
-.latex-store-modal-image-button,
-.latex-store-launch-open-tag {
+.latex-store-modal-image-wrap {
+  position: relative;
   box-sizing: border-box;
   display: block;
   width: 100%;
+}
+
+.latex-store-modal-image-hit,
+.latex-store-launch-open-tag {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 100%;
   padding: 0;
   border: 0;
   background: transparent;
+  cursor: pointer;
 }
 
 .latex-store-modal-image {

@@ -42,15 +42,6 @@ function isMiniProgramEnabled(miniProgram) {
   return Boolean(miniProgram?.enabled && miniProgram.username && miniProgram.path)
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
 function miniProgramPath(miniProgram) {
   if (!miniProgram?.query) return miniProgram?.path || ''
   const separator = miniProgram.path.includes('?') ? '&' : '?'
@@ -350,7 +341,6 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
   const launchRef = useRef(null)
-  const escapedImage = escapeHtml(image)
   const template = `
     <style>
       .latex-store-launch-template {
@@ -358,27 +348,20 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
         box-sizing: border-box;
         display: block;
         width: 100%;
+        height: 100%;
         padding: 0;
         border: 0;
         background: transparent;
       }
-      .latex-store-launch-template img {
-        display: block;
-        width: 100%;
-        max-height: 68vh;
-        object-fit: contain;
-        border-radius: 18px;
-      }
     </style>
-    <button class="latex-store-launch-template" type="button">
-      <img src="${escapedImage}" alt="">
-    </button>
+    <button class="latex-store-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
   `
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (enabled && inWechat) {
         launchRef.current?.click?.()
+        launchRef.current?.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true }))
         return
       }
       const fallbackUrl = miniProgram?.fallbackUrl
@@ -404,26 +387,27 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   return (
     <div className="latex-store-modal-mask" role="dialog" aria-modal="true" aria-label="杰士邦仿生皮产品图">
       <div className="latex-store-modal-panel">
-        {enabled && inWechat ? (
-          <wx-open-launch-weapp
-            class="latex-store-launch-open-tag"
-            username={miniProgram.username}
-            path={path}
-            env-version={envVersion}
-            ref={launchRef}
-          >
-            <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
-          </wx-open-launch-weapp>
-        ) : (
-          <button
-            className="latex-store-modal-image-button"
-            type="button"
-            onClick={handleFallbackLaunch}
-            aria-label="查看杰士邦仿生皮"
-          >
-            <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
-          </button>
-        )}
+        <div className="latex-store-modal-image-wrap">
+          <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
+          {enabled && inWechat ? (
+            <wx-open-launch-weapp
+              class="latex-store-launch-open-tag"
+              username={miniProgram.username}
+              path={path}
+              env-version={envVersion}
+              ref={launchRef}
+            >
+              <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+            </wx-open-launch-weapp>
+          ) : (
+            <button
+              className="latex-store-modal-image-hit"
+              type="button"
+              onClick={handleFallbackLaunch}
+              aria-label="查看杰士邦仿生皮"
+            />
+          )}
+        </div>
         <button className="latex-store-modal-close" type="button" onClick={onClose} aria-label="关闭">
           <CloseOutlined />
         </button>
