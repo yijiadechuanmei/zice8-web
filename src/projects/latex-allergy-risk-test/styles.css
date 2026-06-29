@@ -616,6 +616,8 @@
   font-size: 14px;
   letter-spacing: 0;
   white-space: nowrap;
+  transform-origin: center center;
+  animation: latexCtaHeartbeat 2.4s ease-in-out infinite;
 }
 
 .latex-result-actions .latex-primary-button span {
@@ -805,6 +807,32 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+@keyframes latexCtaHeartbeat {
+  0%,
+  64%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.035);
+  }
+  24% {
+    transform: scale(1);
+  }
+  36% {
+    transform: scale(1.026);
+  }
+  48% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .latex-result-actions .latex-primary-button {
+    animation: none;
   }
 }
 

@@ -32,7 +32,6 @@ const INTRO_CARDS = [
 ]
 
 const WECHAT_LAUNCH_OPTIONS = { openTagList: ['wx-open-launch-weapp'] }
-const PRODUCT_CTA_LABEL = '了解杰士邦仿生皮，从材质源头规避未来风险'
 
 function isWechatBrowser() {
   return typeof navigator !== 'undefined' && /MicroMessenger/i.test(navigator.userAgent)
@@ -356,6 +355,8 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
         white-space: nowrap;
         background: linear-gradient(100deg, #879dff, #55b8ff);
         box-shadow: 0 16px 30px rgba(76, 124, 211, 0.22), inset 0 0 18px rgba(255, 255, 255, 0.7);
+        transform-origin: center center;
+        animation: latexCtaHeartbeat 2.4s ease-in-out infinite;
       }
       .latex-mini-program-button svg {
         flex: 0 0 auto;
@@ -367,6 +368,16 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+      @keyframes latexCtaHeartbeat {
+        0%, 64%, 100% { transform: scale(1); }
+        12% { transform: scale(1.035); }
+        24% { transform: scale(1); }
+        36% { transform: scale(1.026); }
+        48% { transform: scale(1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .latex-mini-program-button { animation: none; }
       }
     </style>
     <button class="latex-mini-program-button" type="button">
@@ -437,7 +448,7 @@ function ProductCarousel({ images }) {
 
 function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, productCarouselImages, onStore }) {
   const [shareVisible, setShareVisible] = useState(false)
-  const ctaLabel = PRODUCT_CTA_LABEL
+  const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
 
   return (
     <>
