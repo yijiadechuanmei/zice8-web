@@ -606,13 +606,16 @@
 }
 
 .latex-result-actions {
+  width: min(calc(100% + 20px), 620px);
   margin-top: 14px;
+  margin-right: auto;
+  margin-left: auto;
   overflow: visible;
-  padding: 8px 9px 8px;
+  padding: 8px 0;
 }
 
 .latex-result-actions .latex-primary-button {
-  width: min(100%, 538px);
+  width: 100%;
   min-height: 46px;
   gap: 8px;
   padding: 0 12px;
@@ -652,7 +655,7 @@
 .latex-mini-program-launch {
   box-sizing: border-box;
   display: block;
-  width: min(100%, 538px);
+  width: 100%;
   min-height: 74px;
   margin: 0 auto;
   overflow: visible;
@@ -918,6 +921,7 @@
   }
 
   .latex-result-actions .latex-primary-button {
+    font-size: 13px;
     box-shadow: none;
   }
 }
