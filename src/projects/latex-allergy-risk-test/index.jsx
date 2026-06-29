@@ -351,12 +351,12 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
         justify-content: center;
         gap: 6px;
         width: 100%;
-        min-height: 46px;
+        min-height: 48px;
         padding: 0 10px;
         border: 0;
         border-radius: 999px;
         color: #fff;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 800;
         letter-spacing: 0;
         white-space: nowrap;
