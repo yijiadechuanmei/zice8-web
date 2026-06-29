@@ -395,7 +395,7 @@ function QuizPage({ attempt, answers, currentIndex, onAnswer, onContinue, submit
   )
 }
 
-function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome, onRetry }) {
+function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome, onRetry, retrying }) {
   const total = result?.totalCount || 5
   const correct = result?.correctCount || 0
   const score = Number(result?.score || 0)
@@ -430,7 +430,9 @@ function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome, onRetry }) {
           {!hasDraw && !canDraw ? (
             <>
               <p className="bql-result-tip">答题分数达到60分才可参与抽奖</p>
-              <button className="bql-primary" type="button" onClick={onRetry}>重新测试</button>
+              <button className="bql-primary" type="button" onClick={onRetry} disabled={retrying}>
+                {retrying ? '准备题目中...' : '重新测试'}
+              </button>
               <button className="bql-secondary" type="button" onClick={onHome}>返回首页</button>
             </>
           ) : null}
@@ -556,6 +558,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [error, setError] = useState('')
   const [quizError, setQuizError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [retrying, setRetrying] = useState(false)
   const [spinning, setSpinning] = useState(false)
   const [wheelSpinKey, setWheelSpinKey] = useState('')
   const [wheelTargetIndex, setWheelTargetIndex] = useState(null)
@@ -791,17 +794,26 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     handleSubmit()
   }
 
-  const handleRetry = () => {
-    setAttempt(null)
-    setResult(null)
-    setDraw(null)
-    setAnswers({})
-    setCurrentQuestionIndex(0)
+  const handleRetry = async () => {
+    setRetrying(true)
     setQuizError('')
-    setSpinning(false)
-    setWheelSpinKey('')
-    setWheelTargetIndex(null)
-    setView('home')
+    setError('')
+    try {
+      const data = await startAttempt(activityKey, { visitorId })
+      setAttempt(data.attempt)
+      setResult(null)
+      setDraw(null)
+      setAnswers({})
+      setCurrentQuestionIndex(0)
+      setSpinning(false)
+      setWheelSpinKey('')
+      setWheelTargetIndex(null)
+      setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
+    } catch (err) {
+      setError(err?.message || '重新测试失败，请重试')
+    } finally {
+      setRetrying(false)
+    }
   }
 
   const handleDraw = async () => {
@@ -959,6 +971,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           onOpenPrize={openMyPrizes}
           onHome={() => setView('home')}
           onRetry={handleRetry}
+          retrying={retrying}
         />
       ) : null}
       {view === 'wheel' ? (
