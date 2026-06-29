@@ -916,4 +916,8 @@
     min-height: 52px;
     font-size: 19px;
   }
+
+  .latex-result-actions .latex-primary-button {
+    box-shadow: none;
+  }
 }
