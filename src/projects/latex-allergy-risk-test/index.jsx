@@ -341,7 +341,7 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
       .latex-mini-program-inner {
         box-sizing: border-box;
         width: 100%;
-        padding: 8px 10px 10px;
+        padding: 8px 0 10px;
         overflow: visible;
       }
       .latex-mini-program-button {
@@ -351,12 +351,12 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
         justify-content: center;
         gap: 6px;
         width: 100%;
-        min-height: 48px;
+        min-height: 46px;
         padding: 0 10px;
         border: 0;
         border-radius: 999px;
         color: #fff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
         letter-spacing: 0;
         white-space: nowrap;
@@ -381,9 +381,9 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
       }
       @keyframes latexCtaHeartbeat {
         0%, 64%, 100% { transform: scale(1); }
-        12% { transform: scale(1.035); }
+        12% { transform: scale(1.018); }
         24% { transform: scale(1); }
-        36% { transform: scale(1.026); }
+        36% { transform: scale(1.012); }
         48% { transform: scale(1); }
       }
       @media (prefers-reduced-motion: reduce) {
