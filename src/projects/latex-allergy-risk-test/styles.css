@@ -607,9 +607,12 @@
 
 .latex-result-actions {
   margin-top: 14px;
+  overflow: visible;
+  padding: 8px 9px 2px;
 }
 
 .latex-result-actions .latex-primary-button {
+  width: min(100%, 538px);
   min-height: 46px;
   gap: 8px;
   padding: 0 12px;
@@ -620,7 +623,7 @@
   animation: latexCtaHeartbeat 2.4s ease-in-out infinite;
 }
 
-.latex-result-actions .latex-primary-button span {
+.latex-result-actions .latex-primary-button > span:not(.anticon) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -628,12 +631,29 @@
 }
 
 .latex-result-actions .latex-primary-button .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  overflow: visible;
+  line-height: 1;
+}
+
+.latex-result-actions .latex-primary-button .anticon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
 }
 
 .latex-mini-program-launch {
   display: block;
-  width: 100%;
+  width: min(100%, 538px);
+  margin: 0 auto;
+  overflow: visible;
 }
 
 .latex-result-actions p {

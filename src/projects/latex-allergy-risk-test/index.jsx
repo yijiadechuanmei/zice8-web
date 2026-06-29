@@ -360,8 +360,11 @@ function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
       }
       .latex-mini-program-button svg {
         flex: 0 0 auto;
-        width: 1em;
-        height: 1em;
+        display: block;
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        overflow: visible;
       }
       .latex-mini-program-button span {
         min-width: 0;
