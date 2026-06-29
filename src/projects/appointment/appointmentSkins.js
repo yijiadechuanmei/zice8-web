@@ -29,7 +29,7 @@ const DONGFANG_ZHENYUE_LAYOUT = {
     background: '98be13fdc7fe356a0a7c67a57322897b_1270758.webp',
     images: [
       {
-        filename: 'https://file3.ih5.cn/v35/edt/u10013600/0516a8b1b2fed854e36378c318e462ae_13604_527_62.png',
+        filename: '0516a8b1b2fed854e36378c318e462ae_13604_527_62.png',
         left: 109,
         top: 217,
         width: 527,
@@ -43,28 +43,28 @@ const DONGFANG_ZHENYUE_LAYOUT = {
         height: 137,
       },
       {
-        filename: 'https://file3.ih5.cn/v35/edt/u10013600/ba821dbed8b7eb62cec259459447aa17_1676_204_48.png',
+        filename: 'ba821dbed8b7eb62cec259459447aa17_1676_204_48.png',
         left: 269,
         top: 325,
         width: 204,
         height: 48,
       },
       {
-        filename: 'https://file3.ih5.cn/v35/edt/u10013600/0acf7c199e1a50e37156d42dd28d0d72_6116_548_131.png',
+        filename: '0acf7c199e1a50e37156d42dd28d0d72_6116_548_131.png',
         left: 97,
         top: 491,
         width: 548,
         height: 131,
       },
       {
-        filename: 'https://file3.ih5.cn/v35/edt/u10013600/c866979d3a97cde1758744190618f7cb_4933_356_128.png',
+        filename: 'c866979d3a97cde1758744190618f7cb_4933_356_128.png',
         left: 193,
         top: 729,
         width: 356,
         height: 128,
       },
       {
-        filename: 'https://file3.ih5.cn/v35/edt/u10013600/370c75fbf7652ac99ee586fe482e6d83_996_147_31.png',
+        filename: '370c75fbf7652ac99ee586fe482e6d83_996_147_31.png',
         left: 300,
         top: 1157,
         width: 147,
