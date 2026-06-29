@@ -608,7 +608,7 @@
 .latex-result-actions {
   margin-top: 14px;
   overflow: visible;
-  padding: 8px 9px 2px;
+  padding: 8px 9px 8px;
 }
 
 .latex-result-actions .latex-primary-button {
@@ -650,8 +650,10 @@
 }
 
 .latex-mini-program-launch {
+  box-sizing: border-box;
   display: block;
   width: min(100%, 538px);
+  min-height: 74px;
   margin: 0 auto;
   overflow: visible;
 }
