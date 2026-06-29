@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   BookOutlined,
   CheckOutlined,
@@ -340,7 +340,6 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   const path = enabled ? miniProgramPath(miniProgram) : ''
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
-  const launchRef = useRef(null)
   const template = `
     <style>
       .latex-store-launch-template {
@@ -358,33 +357,8 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
     <button class="latex-store-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
   `
 
-  function requestWechatLaunch() {
-    launchRef.current?.click?.()
-    launchRef.current?.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true }))
-  }
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (enabled && inWechat) {
-        requestWechatLaunch()
-        return
-      }
-      const fallbackUrl = miniProgram?.fallbackUrl
-      if (fallbackUrl) {
-        window.location.href = fallbackUrl
-        return
-      }
-      onFallback?.()
-    }, 2000)
-
-    return () => window.clearTimeout(timer)
-  }, [enabled, inWechat, miniProgram?.fallbackUrl, onFallback])
-
   function handlePosterClick() {
-    if (enabled && inWechat) {
-      requestWechatLaunch()
-      return
-    }
+    if (enabled && inWechat) return
     handleFallbackLaunch()
   }
 
@@ -408,7 +382,6 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
               username={miniProgram.username}
               path={path}
               env-version={envVersion}
-              ref={launchRef}
             >
               <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
             </wx-open-launch-weapp>
