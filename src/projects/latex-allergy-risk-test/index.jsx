@@ -514,13 +514,15 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
 
       {shareVisible ? (
         <div className="latex-share-mask" role="button" tabIndex={0} onClick={() => setShareVisible(false)}>
-          <div className="latex-share-cue" aria-hidden="true">
-            <svg className="latex-share-arrow" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
-              <path d="M24 92C34 53 61 31 100 25" />
-              <path d="M76 10L102 24L88 52" />
-            </svg>
+          <div className="latex-share-panel">
+            <div className="latex-share-cue" aria-hidden="true">
+              <svg className="latex-share-arrow" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+                <path d="M24 92C34 53 61 31 100 25" />
+                <path d="M76 10L102 24L88 52" />
+              </svg>
+            </div>
+            <p>点击右上角分享给朋友测试</p>
           </div>
-          <p>点击右上角分享给朋友测试</p>
         </div>
       ) : null}
     </>
