@@ -340,6 +340,7 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   const path = enabled ? miniProgramPath(miniProgram) : ''
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
+  const escapedImage = image.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const template = `
     <style>
       .latex-store-launch-template {
@@ -347,14 +348,22 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
         box-sizing: border-box;
         display: block;
         width: 100%;
-        height: 100%;
-        min-height: 1px;
         padding: 0;
         border: 0;
-        background: rgba(255, 255, 255, 0.01);
+        border-radius: 18px;
+        background: transparent;
+        overflow: hidden;
+      }
+      .latex-store-launch-template img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 750 / 1220;
+        object-fit: cover;
       }
     </style>
-    <button class="latex-store-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
+    <button class="latex-store-launch-template" type="button" aria-label="查看杰士邦仿生皮">
+      <img src="${escapedImage}" alt="">
+    </button>
   `
 
   function handlePosterClick() {
@@ -374,26 +383,26 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   return (
     <div className="latex-store-modal-mask" role="dialog" aria-modal="true" aria-label="杰士邦仿生皮产品图">
       <div className="latex-store-modal-panel">
-        <div className="latex-store-modal-image-wrap" onClick={handlePosterClick}>
-          <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
-          {enabled && inWechat ? (
-            <wx-open-launch-weapp
-              class="latex-store-launch-open-tag"
-              username={miniProgram.username}
-              path={path}
-              env-version={envVersion}
-            >
-              <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
-            </wx-open-launch-weapp>
-          ) : (
+        {enabled && inWechat ? (
+          <wx-open-launch-weapp
+            class="latex-store-launch-open-tag"
+            username={miniProgram.username}
+            path={path}
+            env-version={envVersion}
+          >
+            <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+          </wx-open-launch-weapp>
+        ) : (
+          <div className="latex-store-modal-image-wrap" onClick={handlePosterClick}>
+            <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
             <button
               className="latex-store-modal-image-hit"
               type="button"
               onClick={handleFallbackLaunch}
               aria-label="查看杰士邦仿生皮"
             />
-          )}
-        </div>
+          </div>
+        )}
         <button className="latex-store-modal-close" type="button" onClick={onClose} aria-label="关闭">
           <CloseOutlined />
         </button>
