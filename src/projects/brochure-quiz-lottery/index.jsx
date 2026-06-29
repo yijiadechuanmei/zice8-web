@@ -395,7 +395,7 @@ function QuizPage({ attempt, answers, currentIndex, onAnswer, onContinue, submit
   )
 }
 
-function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
+function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome, onRetry }) {
   const total = result?.totalCount || 5
   const correct = result?.correctCount || 0
   const score = Number(result?.score || 0)
@@ -430,6 +430,7 @@ function ResultPage({ result, draw, onGoWheel, onOpenPrize, onHome }) {
           {!hasDraw && !canDraw ? (
             <>
               <p className="bql-result-tip">答题分数达到60分才可参与抽奖</p>
+              <button className="bql-primary" type="button" onClick={onRetry}>重新测试</button>
               <button className="bql-secondary" type="button" onClick={onHome}>返回首页</button>
             </>
           ) : null}
@@ -790,6 +791,19 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     handleSubmit()
   }
 
+  const handleRetry = () => {
+    setAttempt(null)
+    setResult(null)
+    setDraw(null)
+    setAnswers({})
+    setCurrentQuestionIndex(0)
+    setQuizError('')
+    setSpinning(false)
+    setWheelSpinKey('')
+    setWheelTargetIndex(null)
+    setView('home')
+  }
+
   const handleDraw = async () => {
     if (!result?.id && !attempt?.id) return
     const score = Number((result || attempt)?.score || 0)
@@ -944,6 +958,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
           onGoWheel={() => setView('wheel')}
           onOpenPrize={openMyPrizes}
           onHome={() => setView('home')}
+          onRetry={handleRetry}
         />
       ) : null}
       {view === 'wheel' ? (
