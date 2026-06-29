@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BookOutlined,
   CheckOutlined,
+  CloseOutlined,
   InfoCircleOutlined,
   QuestionCircleOutlined,
   RightOutlined,
@@ -32,7 +33,6 @@ const INTRO_CARDS = [
 ]
 
 const WECHAT_LAUNCH_OPTIONS = { openTagList: ['wx-open-launch-weapp'] }
-const SHOPPING_CART_ICON_URL = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1024 1024%22%3E%3Cpath fill=%22%23fff%22 d=%22M922.9 701.9H327.4l29.9-60.9 496.8-.9c16.8 0 31.2-12 34.2-28.6l68.8-385.1c1.8-10.1-.9-20.5-7.5-28.4a34.99 34.99 0 00-26.6-12.5l-632-2.1-5.4-25.4c-3.4-16.2-18-28-34.6-28H96.5a35.3 35.3 0 100 70.6h125.9L246 312.8l58.1 281.3-74.8 122.1a34.96 34.96 0 00-3 36.8c6 11.9 18.1 19.4 31.5 19.4h62.8a102.43 102.43 0 00-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7h161.1a102.43 102.43 0 00-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7H923c19.4 0 35.3-15.8 35.3-35.3a35.42 35.42 0 00-35.4-35.2zM305.7 253l575.8 1.9-56.4 315.8-452.3.8L305.7 253zm96.9 612.7c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 01-31.6 31.6zm325.1 0c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 01-31.6 31.6z%22/%3E%3C/svg%3E'
 
 function isWechatBrowser() {
   return typeof navigator !== 'undefined' && /MicroMessenger/i.test(navigator.userAgent)
@@ -55,6 +55,11 @@ function miniProgramPath(miniProgram) {
   if (!miniProgram?.query) return miniProgram?.path || ''
   const separator = miniProgram.path.includes('?') ? '&' : '?'
   return `${miniProgram.path}${separator}${miniProgram.query}`
+}
+
+function pickRandomImage(images) {
+  if (!images.length) return ''
+  return images[Math.floor(Math.random() * images.length)]
 }
 
 function getSelectedScoreMap(answers) {
@@ -330,92 +335,100 @@ function KnowledgeSheet({ question, isLast, onNext }) {
   )
 }
 
-function MiniProgramLaunchButton({ miniProgram, label, onFallback }) {
+function StorePreviewButton({ label, onClick }) {
+  return (
+    <button className="latex-primary-button" type="button" onClick={onClick}>
+      <ShoppingCartOutlined />
+      <span>{label}</span>
+    </button>
+  )
+}
+
+function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   const enabled = isMiniProgramEnabled(miniProgram)
   const path = enabled ? miniProgramPath(miniProgram) : ''
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
-  const escapedLabel = escapeHtml(label)
+  const launchRef = useRef(null)
+  const escapedImage = escapeHtml(image)
   const template = `
     <style>
-      .latex-mini-program-inner {
+      .latex-store-launch-template {
+        appearance: none;
         box-sizing: border-box;
-        width: 100%;
-        padding: 8px 16px 10px;
-        overflow: visible;
-      }
-      .latex-mini-program-button {
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        width: 100%;
-        min-height: 46px;
-        padding: 0 10px;
-        border: 0;
-        border-radius: 999px;
-        color: #fff;
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: 0;
-        white-space: nowrap;
-        background: linear-gradient(100deg, #879dff, #55b8ff);
-        box-shadow: none;
-        transform-origin: center center;
-        animation: latexCtaHeartbeat 2.4s ease-in-out infinite;
-      }
-      .latex-mini-program-cart {
-        flex: 0 0 auto;
         display: block;
-        width: 18px;
-        height: 18px;
-        min-width: 18px;
-        background: url('${SHOPPING_CART_ICON_URL}') center / contain no-repeat;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
       }
-      .latex-mini-program-button-label {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      @keyframes latexCtaHeartbeat {
-        0%, 64%, 100% { transform: scale(1); }
-        12% { transform: scale(1.018); }
-        24% { transform: scale(1); }
-        36% { transform: scale(1.012); }
-        48% { transform: scale(1); }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .latex-mini-program-button { animation: none; }
+      .latex-store-launch-template img {
+        display: block;
+        width: 100%;
+        max-height: 68vh;
+        object-fit: contain;
+        border-radius: 18px;
       }
     </style>
-    <div class="latex-mini-program-inner">
-      <button class="latex-mini-program-button" type="button">
-        <span class="latex-mini-program-cart" aria-hidden="true"></span>
-        <span class="latex-mini-program-button-label">${escapedLabel}</span>
-      </button>
-    </div>
+    <button class="latex-store-launch-template" type="button">
+      <img src="${escapedImage}" alt="">
+    </button>
   `
 
-  if (enabled && inWechat) {
-    return (
-      <wx-open-launch-weapp
-        class="latex-mini-program-launch"
-        username={miniProgram.username}
-        path={path}
-        env-version={envVersion}
-      >
-        <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
-      </wx-open-launch-weapp>
-    )
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (enabled && inWechat) {
+        launchRef.current?.click?.()
+        return
+      }
+      const fallbackUrl = miniProgram?.fallbackUrl
+      if (fallbackUrl) {
+        window.location.href = fallbackUrl
+        return
+      }
+      onFallback?.()
+    }, 2000)
+
+    return () => window.clearTimeout(timer)
+  }, [enabled, inWechat, miniProgram?.fallbackUrl, onFallback])
+
+  function handleFallbackLaunch() {
+    const fallbackUrl = miniProgram?.fallbackUrl
+    if (fallbackUrl) {
+      window.location.href = fallbackUrl
+      return
+    }
+    onFallback?.()
   }
 
   return (
-    <button className="latex-primary-button" type="button" onClick={onFallback || undefined}>
-      <ShoppingCartOutlined />
-      <span>{label}</span>
-    </button>
+    <div className="latex-store-modal-mask" role="dialog" aria-modal="true" aria-label="杰士邦仿生皮产品图">
+      <div className="latex-store-modal-panel">
+        {enabled && inWechat ? (
+          <wx-open-launch-weapp
+            class="latex-store-launch-open-tag"
+            username={miniProgram.username}
+            path={path}
+            env-version={envVersion}
+            ref={launchRef}
+          >
+            <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+          </wx-open-launch-weapp>
+        ) : (
+          <button
+            className="latex-store-modal-image-button"
+            type="button"
+            onClick={handleFallbackLaunch}
+            aria-label="查看杰士邦仿生皮"
+          >
+            <img className="latex-store-modal-image" src={image} alt="杰士邦仿生皮产品图" />
+          </button>
+        )}
+        <button className="latex-store-modal-close" type="button" onClick={onClose} aria-label="关闭">
+          <CloseOutlined />
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -460,7 +473,17 @@ function ProductCarousel({ images }) {
 
 function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, productCarouselImages, onStore }) {
   const [shareVisible, setShareVisible] = useState(false)
+  const [storePreviewImage, setStorePreviewImage] = useState('')
   const ctaLabel = onStore ? '前往微信店铺选购' : resultLevel.cta
+
+  function openStorePreview() {
+    const previewImage = pickRandomImage(productCarouselImages)
+    if (!previewImage) {
+      onStore?.()
+      return
+    }
+    setStorePreviewImage(previewImage)
+  }
 
   return (
     <>
@@ -497,7 +520,7 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
         </div>
 
         <div className="latex-result-actions">
-          <MiniProgramLaunchButton miniProgram={miniProgram} label={ctaLabel} onFallback={onStore} />
+          <StorePreviewButton label={ctaLabel} onClick={openStorePreview} />
           <p>{resultLevel.subcopy}</p>
           <button className="latex-ghost-button" type="button" onClick={() => setShareVisible(true)}>
             <span>点击分享给朋友测试</span>
@@ -536,6 +559,15 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
             <p>点击右上角分享给朋友测试</p>
           </div>
         </div>
+      ) : null}
+
+      {storePreviewImage ? (
+        <StorePreviewModal
+          image={storePreviewImage}
+          miniProgram={miniProgram}
+          onClose={() => setStorePreviewImage('')}
+          onFallback={onStore}
+        />
       ) : null}
     </>
   )

@@ -668,6 +668,61 @@
   font-size: 12px;
 }
 
+.latex-store-modal-mask {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top, 0px)) 22px max(24px, env(safe-area-inset-bottom, 0px));
+  background: rgba(18, 35, 64, 0.58);
+}
+
+.latex-store-modal-panel {
+  display: flex;
+  width: min(calc(100vw - 44px), 360px);
+  max-height: calc(100vh - 48px);
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: latexStoreModalIn 260ms ease both;
+}
+
+.latex-store-modal-image-button,
+.latex-store-launch-open-tag {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.latex-store-modal-image {
+  display: block;
+  width: 100%;
+  max-height: 68vh;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  object-fit: contain;
+  box-shadow: 0 10px 28px rgba(27, 58, 101, 0.22);
+}
+
+.latex-store-modal-close {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  color: #31538f;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 16px rgba(27, 58, 101, 0.16);
+}
+
 .latex-ghost-button {
   display: inline-flex;
   align-items: center;
@@ -838,6 +893,17 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+@keyframes latexStoreModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
