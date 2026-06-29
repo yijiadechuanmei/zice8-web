@@ -730,6 +730,12 @@ function VerifyStage({
         style={toAbsoluteStyle(verifyLayout.inputs.idTail)}
         value={verifyForm.idTail}
         onChange={(event) => setVerifyForm((current) => ({ ...current, idTail: normalizeIdTailInput(event.target.value) }))}
+        onPaste={(event) => {
+          const pastedText = event.clipboardData?.getData('text')
+          if (!pastedText) return
+          event.preventDefault()
+          setVerifyForm((current) => ({ ...current, idTail: normalizeIdTailInput(pastedText) }))
+        }}
         maxLength={verifyLayout.inputs.idTail.maxLength}
         inputMode={verifyLayout.inputs.idTail.inputMode}
         type="text"
@@ -992,10 +998,12 @@ function verifyHouseKey(form) {
 }
 
 function normalizeIdTailInput(value) {
-  return String(value || '')
+  const normalized = String(value || '')
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[ｘＸ]/g, 'X')
     .toUpperCase()
     .replace(/[^0-9X]/g, '')
-    .slice(0, 4)
+  return normalized.length > 4 ? normalized.slice(-4) : normalized
 }
 
 function normalizeSuccessBooking(booking) {
