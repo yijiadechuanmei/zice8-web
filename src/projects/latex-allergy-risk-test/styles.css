@@ -606,12 +606,13 @@
 }
 
 .latex-result-actions {
-  width: 100%;
+  width: min(calc(100% + 12px), 560px);
   margin-top: 14px;
-  margin-right: auto;
-  margin-left: auto;
+  margin-right: 0;
+  margin-left: 50%;
   overflow: visible;
   padding: 8px 0;
+  transform: translateX(-50%);
 }
 
 .latex-result-actions .latex-primary-button {
