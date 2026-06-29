@@ -606,7 +606,8 @@
 }
 
 .latex-result-actions {
-  width: min(calc(100% + 20px), 620px);
+  width: 100%;
+  max-width: 538px;
   margin-top: 14px;
   margin-right: auto;
   margin-left: auto;
