@@ -9,7 +9,7 @@ const asset = (filename) => `${LONG_MARCH_STUDY_ASSET_ROOT}/${filename}`
 export const longMarchStudyAssets = {
   home: {
     background: asset('93c60fd921a536d388a178b41488ba9b_1088216_750_1624.png'),
-    title: asset('e87b38824f50bcd03264ba37d6e0e986_185513_612_366.png'),
+    title: asset('1d0cded85f7d17e338bf72dddbc61727_192912_612_366.png'),
     startButton: asset('11f498edf60ef86948992c9c81795401_67802_503_108.png'),
     rulesButton: asset('d9fb45cc0377f28f6d503edc91b4b0ba_2279_43_103.png'),
     mineButton: asset('6118df165b616d93b21fa16a1e65e963_1773_43_103.png'),
@@ -53,5 +53,30 @@ export const longMarchStudyAssets = {
     shareTitle: asset('2e413cf764fa35f14d7cc3461850eb4a_21979_275_66.png'),
     shareContent: asset('d5186e2960e5724a87a4ee0d16dcebb5_13594_607_181.png'),
     shareButton: asset('d589e5f414195448856e34fc6b629b41_22444_277_67.png'),
+  },
+  checkin: {
+    background: asset('6d82d38087e1b37eddbf023260ac2173_1167263_750_1624.png'),
+    map: asset('bb9b6afbafd1cbb478e346dadb8fadbf_1250650_1156_1694.png'),
+    silhouette: asset('87d3ed8bac5e1426510c6f70235f6f73_100281_607_870.png'),
+    locationOne: asset('1721be6c4318820efe55591a6d5fcf56_118921_363_276.png'),
+    locationOneActive: asset('3dde499c787390ea151bcadfc14fc0db_101568_363_276.png'),
+    locationTwo: asset('e18b5889e061591da2a33b991cabe2f2_125628_361_278.png'),
+    locationTwoActive: asset('eb954da39a73320ec1415484ee8d6f19_102861_361_278.png'),
+    locationThree: asset('c461bcc484aabe6568bea433b390d60b_140842_379_279.png'),
+    locationThreeActive: asset('d3c32f61aeeb7c09ca5330ed053a89e3_113656_379_279.png'),
+    locationFour: asset('65a7425c14a7be116b73da77298b7ac6_147080_384_276.png'),
+    locationFourActive: asset('f426c928645a9427b53682804a0cc867_119367_384_276.png'),
+    checkButton: asset('3437ca526beaab53ce0a3a93c786ca10_10476_158_52.png'),
+    homeButton: asset('1805234c8d7c935ecfb04f47f9dc5753_30178_367_68.png'),
+  },
+  honors: {
+    badge: asset('a55e1e9da1cb4578ffac6b0eebedd582_26351_119_134.png'),
+    honorPanel: asset('82dca40305f5fdd8028054e4801f88a2_18477_688_980.png'),
+    posterPanel: asset('e0cd35378356b62af1ad6741f3dcafc8_16437_688_864.png'),
+    certificate: asset('4092e3d7f20dfabccf122eb24fb73e60_214938_621_1140.png'),
+    poster: asset('f967f593d141e3624dbf034e355bffb0_792812_685_1184.png'),
+  },
+  shared: {
+    backIcon: asset('b25fef0a7ef46a1fc9580c405518deae_215.svg'),
   },
 }

@@ -41,6 +41,8 @@ const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
 const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
 const RADIO_STAGE_WIDTH = 750
 const RADIO_STAGE_HEIGHT = 1448
+const IVX_STAGE_WIDTH = 750
+const IVX_STAGE_HEIGHT = 1448
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
@@ -58,6 +60,27 @@ function useStageScale(baseWidth = 750) {
   }, [baseWidth])
 
   return scale
+}
+
+function IvxStage({ title, className = '', background, onBack, children }) {
+  const scale = useStageScale(IVX_STAGE_WIDTH)
+  return (
+    <div className="lm-ivx-viewport" style={{ width: IVX_STAGE_WIDTH * scale, height: IVX_STAGE_HEIGHT * scale }}>
+      <section
+        className={`lm-ivx-stage ${className}`}
+        style={{
+          backgroundImage: background ? `url(${background})` : undefined,
+          transform: `scale(${scale})`,
+          '--lm-ivx-ui-scale': scale ? 1 / scale : 1,
+          '--lm-back-icon': `url(${longMarchStudyAssets.shared.backIcon})`,
+        }}
+      >
+        {onBack ? <button className="lm-ivx-back" type="button" onClick={onBack} aria-label="返回" /> : null}
+        {title ? <div className="lm-ivx-title">{title}</div> : null}
+        {children}
+      </section>
+    </div>
+  )
 }
 
 export default function LongMarchStudyApp({ routeParams }) {
@@ -268,6 +291,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <CheckinPage
           config={config}
           nextCheckin={bootstrap?.nextCheckin}
+          onBack={() => setPage(PAGE.HOME)}
           onCheckin={async (location) => {
             try {
               const result = await checkinLocation(activityKey, location.key, { visitorId })
@@ -330,6 +354,8 @@ export default function LongMarchStudyApp({ routeParams }) {
       {page === PAGE.HONORS ? (
         <HonorsPage
           honors={bootstrap?.honors || []}
+          profile={bootstrap?.profile}
+          onBack={() => setPage(PAGE.HOME)}
           onGenerate={async () => {
             try {
               const data = await generateHonor(activityKey, { visitorId, honorType: 'poster' })
@@ -342,16 +368,15 @@ export default function LongMarchStudyApp({ routeParams }) {
           onOpen={(honor) => setPoster(honor.snapshot)}
         />
       ) : null}
-      {page === PAGE.RANK ? <RankPage rank={bootstrap?.rank} /> : null}
+      {page === PAGE.RANK ? <RankPage rank={bootstrap?.rank} onBack={() => setPage(PAGE.HOME)} /> : null}
       {page === PAGE.MINE ? (
         <MinePage
           mine={mine}
           onPage={setPage}
           onPoster={() => showPoster('mine')}
+          onBack={() => setPage(PAGE.HOME)}
         />
       ) : null}
-
-      {page !== PAGE.HOME && ![PAGE.QUIZ, PAGE.RADIO, PAGE.UPLOAD].includes(page) ? <button className="lm-back" type="button" onClick={() => setPage(PAGE.HOME)}>返回首页</button> : null}
 
       {showProfile ? (
         <ProfileModal
@@ -698,45 +723,55 @@ function DailyDoneModal({ onBack }) {
   )
 }
 
-function CheckinPage({ config, nextCheckin, onCheckin }) {
+function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
   const locations = config.locations || []
+  const assets = longMarchStudyAssets.checkin
+  const visualLocations = [
+    { className: 'is-one', asset: assets.locationOne, activeAsset: assets.locationOneActive },
+    { className: 'is-two', asset: assets.locationTwo, activeAsset: assets.locationTwoActive },
+    { className: 'is-three', asset: assets.locationThree, activeAsset: assets.locationThreeActive },
+    { className: 'is-four', asset: assets.locationFour, activeAsset: assets.locationFourActive },
+  ].map((item, index) => ({ ...item, location: locations[index] })).filter((item) => item.location)
+
   return (
-    <Panel title="云上打卡·红色足迹">
-      <div className="lm-map">
-        {locations.map((location, index) => (
+    <IvxStage title="云上打卡" className="lm-checkin-page" background={assets.background} onBack={onBack}>
+      <img className="lm-checkin-map-bg" src={assets.map} alt="" />
+      <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
+      {visualLocations.map(({ location, className, asset, activeAsset }) => {
+        const isNext = nextCheckin?.key === location.key
+        return (
           <button
             key={location.key}
-            className={nextCheckin?.key === location.key ? 'is-next' : ''}
+            className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''}`}
             type="button"
-            onClick={() => nextCheckin?.key === location.key ? onCheckin(location) : null}
+            onClick={() => isNext ? onCheckin(location) : null}
+            aria-label={`打卡${location.title}`}
           >
-            <span>{index + 1}</span>{location.title}
+            <img className="lm-checkin-location-card" src={isNext ? activeAsset : asset} alt="" />
+            <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" />
+            <span>{location.title}</span>
           </button>
-        ))}
-      </div>
-      {nextCheckin ? (
-        <div className="lm-location">
-          <img src={nextCheckin.image} alt={nextCheckin.title} />
-          <h2>{nextCheckin.title}</h2>
-          <p>{nextCheckin.description}</p>
-          <button className="lm-primary" type="button" onClick={() => onCheckin(nextCheckin)}>完成今日打卡</button>
-        </div>
-      ) : <p>所有地点已完成打卡。</p>}
-    </Panel>
+        )
+      })}
+      {!nextCheckin ? (
+        <div className="lm-checkin-complete">所有地点已完成打卡</div>
+      ) : null}
+    </IvxStage>
   )
 }
 
 function CheckinResultPage({ result, onPoster, onRank, onBack }) {
   return (
-    <Panel title="打卡完成">
-      <div className="lm-score">+{result?.checkin?.pointsEarned || 0}</div>
-      <p>当前总积分：{result?.profile?.totalPoints || 0}</p>
-      <div className="lm-actions">
-        <button type="button" onClick={onPoster}>海报分享</button>
-        <button type="button" onClick={onRank}>排行榜</button>
-        <button type="button" onClick={onBack}>返回</button>
-      </div>
-    </Panel>
+    <IvxStage title="云上打卡" className="lm-checkin-result-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
+      <section className="lm-checkin-result-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.successPanel})` }}>
+        <h2>打卡完成</h2>
+        <div className="lm-checkin-result-score">+{result?.checkin?.pointsEarned || 0}</div>
+        <p>当前总积分：{result?.profile?.totalPoints || 0}</p>
+        <button className="is-poster" type="button" onClick={onPoster}>海报分享</button>
+        <button className="is-rank" type="button" onClick={onRank}>排行榜</button>
+        <button className="is-back" type="button" onClick={onBack}>返回首页</button>
+      </section>
+    </IvxStage>
   )
 }
 
@@ -750,6 +785,7 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
           backgroundImage: `url(${longMarchStudyAssets.radio.background})`,
           transform: `scale(${scale})`,
           '--lm-radio-ui-scale': scale ? 1 / scale : 1,
+          '--lm-radio-back-icon': `url(${longMarchStudyAssets.shared.backIcon})`,
         }}
       >
         <button className="lm-radio-back" type="button" onClick={onBack} aria-label="返回">←</button>
@@ -1245,44 +1281,65 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   )
 }
 
-function HonorsPage({ honors, onGenerate, onOpen }) {
+function HonorsPage({ honors, profile, onGenerate, onOpen, onBack }) {
+  const firstHonor = honors[0]
   return (
-    <Panel title="我的荣誉">
-      <button className="lm-primary" type="button" onClick={onGenerate}>生成当前海报</button>
-      <div className="lm-honors">
-        {honors.map((honor) => (
-          <button key={honor.id} type="button" onClick={() => onOpen(honor)}>
-            <strong>{honor.title}</strong>
-            <span>{honor.createdAt}</span>
-          </button>
-        ))}
-      </div>
-    </Panel>
+    <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
+      <section className="lm-honors-card">
+        <h2>我的荣誉</h2>
+        <button className="lm-honors-badge-row" type="button" onClick={firstHonor ? () => onOpen(firstHonor) : onGenerate}>
+          <img src={longMarchStudyAssets.honors.badge} alt="" />
+          <strong>{firstHonor?.title || '已获得长征研学徽章'}</strong>
+          <span>{firstHonor ? '点击查看海报' : '完成任务后可生成荣誉海报'}</span>
+        </button>
+      </section>
+      <section className="lm-honors-poster-card">
+        <h2>我的海报</h2>
+        <div className="lm-honors-poster-preview">
+          <div className="lm-honors-poster-name">{profile?.name || '研学用户'}</div>
+          <div className="lm-honors-poster-score">{profile?.totalPoints || 0}</div>
+          <div className="lm-honors-poster-days">{profile?.challengeDays || 0}</div>
+        </div>
+        <button type="button" onClick={onGenerate}>生成当前海报</button>
+      </section>
+      {honors.length > 1 ? (
+        <div className="lm-honors-history">
+          {honors.slice(1, 4).map((honor) => (
+            <button key={honor.id} type="button" onClick={() => onOpen(honor)}>{honor.title}</button>
+          ))}
+        </div>
+      ) : null}
+    </IvxStage>
   )
 }
 
-function RankPage({ rank }) {
+function RankPage({ rank, onBack }) {
+  const rows = rank?.rows || []
   return (
-    <Panel title="积分排行榜">
-      <div className="lm-rank">
-        {(rank?.rows || []).map((row) => (
-          <div key={row.id}>
-            <span>{row.rank}</span>
-            <strong>{row.name}</strong>
-            <em>{row.totalPoints} 分</em>
-            <small>{row.titleBadge}</small>
-          </div>
-        ))}
-      </div>
-    </Panel>
+    <IvxStage title="积分排行榜" className="lm-rank-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
+      <section className="lm-rank-panel">
+        <h2>积分排行榜</h2>
+        <div className="lm-rank-list">
+          {rows.length ? rows.map((row) => (
+            <div className="lm-rank-row" key={row.id}>
+              <span>{String(row.rank).padStart(2, '0')}</span>
+              <strong>{row.name || '昵称'}</strong>
+              <em>{row.totalPoints || 0}</em>
+              <small>{row.titleBadge || '长征研学'}</small>
+            </div>
+          )) : <p>暂无排行数据</p>}
+        </div>
+      </section>
+    </IvxStage>
   )
 }
 
-function MinePage({ mine, onPage, onPoster }) {
+function MinePage({ mine, onPage, onPoster, onBack }) {
   const profile = mine?.profile
   return (
-    <Panel title="我的">
-      <div className="lm-mine-card">
+    <IvxStage title="我的" className="lm-mine-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
+      <section className="lm-mine-panel">
+        <div className="lm-mine-card">
         {mine?.wechat?.avatar ? <img src={mine.wechat.avatar} alt="微信头像" /> : <div className="lm-avatar-placeholder" />}
         <div>
           <strong>{mine?.wechat?.nickname || profile?.name}</strong>
@@ -1303,7 +1360,8 @@ function MinePage({ mine, onPage, onPoster }) {
         <button type="button" onClick={onPoster}>我的海报</button>
         <button type="button" onClick={() => onPage(PAGE.RANK)}>积分排行榜</button>
       </div>
-    </Panel>
+      </section>
+    </IvxStage>
   )
 }
 
@@ -1317,15 +1375,16 @@ function RulesModal({ rules, onClose }) {
 
 function PosterModal({ poster, onClose }) {
   return (
-    <Modal title="分享海报" onClose={onClose}>
-      <div className="lm-poster">
+    <div className="lm-poster-mask">
+      <section className="lm-poster-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.honors.poster})` }}>
         {poster.avatar ? <img src={poster.avatar} alt="头像" /> : <div className="lm-avatar-placeholder" />}
         <h2>{poster.nickname || poster.name || '研学用户'}</h2>
         <p>闯关天数：{poster.challengeDays || 0} 天</p>
         <p>累计积分：{poster.totalPoints || 0}</p>
         <strong>重走长征路 共筑爱国魂</strong>
-      </div>
-    </Modal>
+        <button type="button" onClick={onClose}>返回</button>
+      </section>
+    </div>
   )
 }
 

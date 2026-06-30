@@ -834,6 +834,243 @@
   background: #ead8c6;
 }
 
+.lm-ivx-viewport {
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.lm-ivx-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 750px;
+  min-height: 1448px;
+  overflow: hidden;
+  background-color: #fff;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  transform-origin: top left;
+}
+
+.lm-ivx-title {
+  position: absolute;
+  left: 225px;
+  top: 33px;
+  z-index: 5;
+  width: 300px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.lm-ivx-back {
+  position: absolute;
+  left: 20px;
+  top: 32px;
+  z-index: 6;
+  width: 71px;
+  height: 49px;
+  padding: 0;
+  border: 0;
+  background-color: #fff;
+  mask: var(--lm-back-icon) center / contain no-repeat;
+  -webkit-mask: var(--lm-back-icon) center / contain no-repeat;
+}
+
+.lm-checkin-map-bg {
+  position: absolute;
+  left: -312px;
+  top: -87px;
+  width: 1156px;
+  height: 1694px;
+  display: block;
+}
+
+.lm-checkin-silhouette {
+  position: absolute;
+  left: 387px;
+  top: 346px;
+  width: 607px;
+  height: 870px;
+  display: block;
+}
+
+.lm-checkin-location {
+  position: absolute;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lm-checkin-location.is-one {
+  left: 694px;
+  top: 245px;
+  width: 363px;
+  height: 276px;
+}
+
+.lm-checkin-location.is-two {
+  left: 335px;
+  top: 490px;
+  width: 361px;
+  height: 278px;
+}
+
+.lm-checkin-location.is-three {
+  left: 615px;
+  top: 756px;
+  width: 379px;
+  height: 279px;
+}
+
+.lm-checkin-location.is-four {
+  left: 542px;
+  top: 1111px;
+  width: 384px;
+  height: 276px;
+}
+
+.lm-checkin-location-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lm-checkin-location-cta {
+  position: absolute;
+  left: 109px;
+  top: 61px;
+  width: 158px;
+  height: 52px;
+  display: block;
+  opacity: 0.42;
+}
+
+.lm-checkin-location.is-two .lm-checkin-location-cta {
+  left: 109px;
+}
+
+.lm-checkin-location.is-three .lm-checkin-location-cta {
+  left: 109px;
+  top: 63px;
+}
+
+.lm-checkin-location.is-four .lm-checkin-location-cta {
+  left: 109px;
+  top: 70px;
+}
+
+.lm-checkin-location.is-next .lm-checkin-location-cta {
+  opacity: 1;
+}
+
+.lm-checkin-location span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.lm-checkin-complete {
+  position: absolute;
+  left: 82px;
+  top: 114px;
+  width: 586px;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  border-radius: 25px;
+  background: #fff;
+  color: #c42d15;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.lm-checkin-result-panel {
+  position: absolute;
+  left: 32px;
+  top: 180px;
+  width: 685px;
+  height: 958px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.lm-checkin-result-panel h2 {
+  position: absolute;
+  left: 154px;
+  top: 124px;
+  width: 374px;
+  margin: 0;
+  color: #fffcdf;
+  font-size: 55px;
+  text-align: center;
+}
+
+.lm-checkin-result-score {
+  position: absolute;
+  left: 235px;
+  top: 355px;
+  width: 210px;
+  color: #d82500;
+  font-size: 80px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.lm-checkin-result-panel p {
+  position: absolute;
+  left: 160px;
+  top: 520px;
+  width: 360px;
+  margin: 0;
+  color: #fff;
+  font-size: 29px;
+  text-align: center;
+}
+
+.lm-checkin-result-panel button {
+  position: absolute;
+  left: 195px;
+  width: 292px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.lm-checkin-result-panel .is-poster {
+  top: 650px;
+  background: #e34020;
+}
+
+.lm-checkin-result-panel .is-rank {
+  top: 740px;
+  background: #fe7f2a;
+}
+
+.lm-checkin-result-panel .is-back {
+  top: 830px;
+  background: #ffd161;
+  color: #e34020;
+}
+
 .lm-radio-viewport {
   position: relative;
   max-width: 100%;
@@ -871,18 +1108,18 @@
 
 .lm-radio-back {
   position: absolute;
-  left: calc(4vw * var(--lm-radio-ui-scale, 1));
-  top: calc(4.2vh * var(--lm-radio-ui-scale, 1));
+  left: 20px;
+  top: 32px;
   z-index: 4;
-  width: calc(44px * var(--lm-radio-ui-scale, 1));
-  height: calc(44px * var(--lm-radio-ui-scale, 1));
+  width: 71px;
+  height: 49px;
   padding: 0;
   border: 0;
-  background: transparent;
-  color: #fff;
-  font-size: calc(clamp(34px, 8vw, 58px) * var(--lm-radio-ui-scale, 1));
-  line-height: 1;
-  text-align: center;
+  background-color: #fff;
+  color: transparent;
+  font-size: 0;
+  mask: var(--lm-radio-back-icon) center / contain no-repeat;
+  -webkit-mask: var(--lm-radio-back-icon) center / contain no-repeat;
 }
 
 .lm-radio-panel,
@@ -1062,12 +1299,12 @@
   left: 191px;
   top: 1286px;
   width: 364px;
-  height: calc(min(9.066vw, 68px) * var(--lm-radio-ui-scale, 1));
+  height: 68px;
   border: 0;
   border-radius: 100px;
   background: #e34020;
   color: #fff;
-  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
+  font-size: 34px;
   font-weight: 700;
 }
 
@@ -1129,12 +1366,12 @@
 .lm-radio-detail-vote {
   margin-top: 76px;
   width: 364px;
-  height: calc(min(9.066vw, 68px) * var(--lm-radio-ui-scale, 1));
+  height: 68px;
   border: 0;
   border-radius: 100px;
   background: #e34020;
   color: #fff;
-  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
+  font-size: 34px;
   font-weight: 700;
 }
 
@@ -1298,10 +1535,10 @@
 .lm-radio-return-button {
   position: absolute;
   top: 1306px;
-  height: calc(min(9.066vw, 68px) * var(--lm-radio-ui-scale, 1));
+  height: 68px;
   border: 0;
   border-radius: 100px;
-  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
+  font-size: 34px;
   font-weight: 700;
 }
 
@@ -1379,6 +1616,407 @@
   z-index: 1;
   color: #fff;
   font-size: 34px;
+}
+
+.lm-honors-card,
+.lm-honors-poster-card,
+.lm-rank-panel,
+.lm-mine-panel {
+  position: absolute;
+  left: 31px;
+  overflow: hidden;
+  border-radius: 25px;
+  background: #fff;
+}
+
+.lm-honors-card {
+  top: 113px;
+  width: 688px;
+  height: 428px;
+}
+
+.lm-honors-poster-card {
+  top: 560px;
+  width: 688px;
+  height: 864px;
+}
+
+.lm-honors-card h2,
+.lm-honors-poster-card h2,
+.lm-rank-panel h2,
+.lm-mine-panel h2 {
+  margin: 0;
+  padding: 40px 0;
+  color: #c42d15;
+  font-size: 40px;
+  line-height: 1;
+  text-align: center;
+}
+
+.lm-honors-badge-row {
+  position: absolute;
+  left: 25px;
+  top: 141px;
+  width: 633px;
+  height: 198px;
+  border: 0;
+  border-radius: 20px;
+  background: #f5f5f5;
+  color: #000;
+  text-align: left;
+}
+
+.lm-honors-badge-row img {
+  position: absolute;
+  left: 48px;
+  top: 38px;
+  width: 119px;
+  height: 134px;
+}
+
+.lm-honors-badge-row strong {
+  position: absolute;
+  left: 178px;
+  top: 36px;
+  width: 390px;
+  color: #000;
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.lm-honors-badge-row span {
+  position: absolute;
+  left: 178px;
+  top: 112px;
+  width: 390px;
+  color: #89645b;
+  font-size: 24px;
+}
+
+.lm-honors-poster-preview {
+  position: absolute;
+  left: 78px;
+  top: 138px;
+  width: 532px;
+  height: 530px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff8e8 0%, #ffd37b 100%);
+  color: #c42d15;
+  text-align: center;
+}
+
+.lm-honors-poster-preview::before {
+  content: "重走长征路 共筑爱国魂";
+  position: absolute;
+  left: 46px;
+  top: 58px;
+  width: 440px;
+  color: #c42d15;
+  font-size: 38px;
+  font-weight: 700;
+}
+
+.lm-honors-poster-name {
+  position: absolute;
+  left: 86px;
+  top: 170px;
+  width: 360px;
+  color: #000;
+  font-size: 34px;
+}
+
+.lm-honors-poster-score,
+.lm-honors-poster-days {
+  position: absolute;
+  top: 285px;
+  width: 180px;
+  color: #e34020;
+  font-size: 56px;
+  font-weight: 900;
+}
+
+.lm-honors-poster-score {
+  left: 72px;
+}
+
+.lm-honors-poster-days {
+  right: 72px;
+}
+
+.lm-honors-poster-score::after,
+.lm-honors-poster-days::after {
+  display: block;
+  margin-top: 8px;
+  color: #000;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.lm-honors-poster-score::after {
+  content: "累计积分";
+}
+
+.lm-honors-poster-days::after {
+  content: "闯关天数";
+}
+
+.lm-honors-poster-card > button {
+  position: absolute;
+  left: 160px;
+  top: 724px;
+  width: 367px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.lm-honors-history {
+  position: absolute;
+  left: 56px;
+  top: 1290px;
+  width: 638px;
+  display: flex;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.lm-honors-history button {
+  flex: 0 0 198px;
+  height: 54px;
+  border: 0;
+  border-radius: 100px;
+  background: #ffe596;
+  color: #e34020;
+  font-size: 24px;
+}
+
+.lm-rank-panel,
+.lm-mine-panel {
+  top: 114px;
+  width: 685px;
+  height: 1137px;
+}
+
+.lm-rank-list {
+  position: absolute;
+  left: 24px;
+  top: 126px;
+  width: 637px;
+  height: 960px;
+  overflow: hidden auto;
+}
+
+.lm-rank-row {
+  position: relative;
+  width: 637px;
+  height: 105px;
+  border-bottom: 2px solid #ececec;
+  color: #000;
+}
+
+.lm-rank-row span {
+  position: absolute;
+  left: 12px;
+  top: 28px;
+  display: grid;
+  width: 72px;
+  height: 48px;
+  place-items: center;
+  border-radius: 0;
+  background: transparent;
+  color: #e34020;
+  font-size: 29px;
+  font-weight: 700;
+}
+
+.lm-rank-row strong {
+  position: absolute;
+  left: 110px;
+  top: 32px;
+  width: 210px;
+  overflow: hidden;
+  color: #000;
+  font-size: 29px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-rank-row em {
+  position: absolute;
+  left: 355px;
+  top: 31px;
+  width: 120px;
+  color: #e34020;
+  font-size: 29px;
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
+}
+
+.lm-rank-row small {
+  position: absolute;
+  left: 500px;
+  top: 36px;
+  width: 116px;
+  overflow: hidden;
+  color: #89645b;
+  font-size: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-rank-list > p {
+  display: grid;
+  height: 260px;
+  place-items: center;
+  margin: 0;
+  color: #666;
+  font-size: 29px;
+}
+
+.lm-mine-panel {
+  padding: 124px 40px 40px;
+}
+
+.lm-mine-panel .lm-mine-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-radius: 20px;
+  background: #f5f5f5;
+  padding: 28px;
+}
+
+.lm-mine-panel .lm-mine-card img,
+.lm-mine-panel .lm-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+}
+
+.lm-mine-panel .lm-mine-card strong {
+  color: #000;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.lm-mine-panel .lm-mine-card p {
+  margin: 10px 0 0;
+  color: #89645b;
+  font-size: 24px;
+}
+
+.lm-mine-panel .lm-stats {
+  margin-top: 26px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.lm-mine-panel .lm-stats span {
+  min-height: 116px;
+  border-radius: 20px;
+  background: #f5f5f5;
+  color: #89645b;
+  font-size: 24px;
+}
+
+.lm-mine-panel .lm-stats strong {
+  color: #e34020;
+  font-size: 34px;
+}
+
+.lm-mine-panel .lm-task-grid {
+  margin-top: 28px;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.lm-mine-panel .lm-task-grid button {
+  min-height: 92px;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: 29px;
+  font-weight: 700;
+}
+
+.lm-poster-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.lm-poster-modal {
+  position: relative;
+  width: min(91.333vw, 685px);
+  aspect-ratio: 685 / 1184;
+  overflow: hidden;
+  background-color: #fff8e8;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #000;
+  text-align: center;
+}
+
+.lm-poster-modal img,
+.lm-poster-modal .lm-avatar-placeholder {
+  position: absolute;
+  left: 40.73%;
+  top: 18.24%;
+  width: 18.54%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.lm-poster-modal h2 {
+  position: absolute;
+  left: 18%;
+  top: 31%;
+  width: 64%;
+  margin: 0;
+  color: #000;
+  font-size: clamp(22px, 4.533vw, 34px);
+}
+
+.lm-poster-modal p {
+  position: relative;
+  top: 40%;
+  margin: 12px 0;
+  color: #c42d15;
+  font-size: clamp(18px, 3.866vw, 29px);
+}
+
+.lm-poster-modal strong {
+  position: absolute;
+  left: 14%;
+  top: 57%;
+  width: 72%;
+  color: #c42d15;
+  font-size: clamp(24px, 5.333vw, 40px);
+}
+
+.lm-poster-modal button {
+  position: absolute;
+  left: 23.21%;
+  top: 87%;
+  width: 53.58%;
+  height: 5.743%;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: clamp(22px, 4.533vw, 34px);
+  font-weight: 700;
 }
 
 .lm-recordings {
