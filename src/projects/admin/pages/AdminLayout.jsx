@@ -335,6 +335,9 @@ function formatDate(value) {
 
 function buildActivityUrl(activity) {
   const key = encodeURIComponent(activity.activityKey)
+  if (activity.type === 'long_march_study') {
+    return `${WEB_ORIGIN}/${encodeURIComponent(activity.type)}/${key}`
+  }
   const pathPrefixByType = {
     appointment_visit: '/appointment',
     brochure_quiz_lottery: '/brochure-quiz-lottery',
@@ -344,7 +347,6 @@ function buildActivityUrl(activity) {
     tufe_campus_open_day: '/tufe-campus-open-day',
     xiwuqi_99_road_night: '/xiwuqi-99-road-night',
     latex_allergy_risk_test: '/latex-allergy-risk-test',
-    long_march_study: '/long_march_study',
     quiz: '/quiz',
   }
   const prefix = pathPrefixByType[activity.type] || `/${encodeURIComponent(activity.type || '')}`
