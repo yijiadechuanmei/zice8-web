@@ -734,6 +734,8 @@
     linear-gradient(rgba(19, 79, 143, 0.14), rgba(8, 50, 101, 0.22)),
     var(--bql-home-bg-overlay, none) center top / cover no-repeat;
   backdrop-filter: blur(7px);
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .bql-profile-modal {
@@ -753,6 +755,10 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   overflow-wrap: anywhere;
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .bql-profile-modal h2 {

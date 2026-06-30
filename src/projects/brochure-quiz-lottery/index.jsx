@@ -336,7 +336,7 @@ function ProfileModal({ initialProfile, visitorId, onClose, onSaved }) {
   }
 
   return (
-    <div className="bql-modal-mask">
+    <ModalMask>
       <form className="bql-profile-modal" onSubmit={handleSubmit}>
         <button className="bql-close" type="button" onClick={onClose} aria-label="关闭">×</button>
         <h2>参与信息</h2>
@@ -355,6 +355,26 @@ function ProfileModal({ initialProfile, visitorId, onClose, onSaved }) {
         {error ? <p className="bql-form-error">{error}</p> : null}
         <button className="bql-primary" type="submit" disabled={submitting}>{submitting ? '提交中...' : '提交并答题'}</button>
       </form>
+    </ModalMask>
+  )
+}
+
+function ModalMask({ children }) {
+  const blockMaskEvent = (event) => {
+    if (event.target !== event.currentTarget) return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  return (
+    <div
+      className="bql-modal-mask"
+      onClick={blockMaskEvent}
+      onMouseDown={blockMaskEvent}
+      onPointerDown={blockMaskEvent}
+      onTouchMove={blockMaskEvent}
+    >
+      {children}
     </div>
   )
 }
@@ -496,7 +516,7 @@ function WheelPage({ draw, spinning, targetIndex, spinKey, onDraw, onMyPrizes, o
 
 function MyPrizesModal({ config, prizes, onClose }) {
   return (
-    <div className="bql-modal-mask">
+    <ModalMask>
       <section className="bql-profile-modal bql-prize-modal">
         <button className="bql-close" type="button" onClick={onClose} aria-label="关闭">×</button>
         <h2>我的奖品</h2>
@@ -516,7 +536,7 @@ function MyPrizesModal({ config, prizes, onClose }) {
           <p className="bql-empty">暂无中奖记录</p>
         )}
       </section>
-    </div>
+    </ModalMask>
   )
 }
 
