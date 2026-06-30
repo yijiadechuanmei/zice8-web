@@ -832,6 +832,437 @@
   background: #ead8c6;
 }
 
+.lm-radio-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.lm-radio-page {
+  position: relative;
+  width: 750px;
+  min-height: 1448px;
+  margin: 0 auto;
+  overflow: hidden;
+  background-color: #fff;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  transform-origin: top center;
+}
+
+.lm-radio-title {
+  position: absolute;
+  left: 225px;
+  top: 33px;
+  width: 300px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.lm-radio-back {
+  position: absolute;
+  left: 20px;
+  top: 32px;
+  z-index: 4;
+  width: 71px;
+  height: 49px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 50px;
+  line-height: 1;
+}
+
+.lm-radio-panel,
+.lm-radio-script-panel {
+  position: absolute;
+  left: 31px;
+  top: 114px;
+  width: 685px;
+  height: 1137px;
+  overflow: hidden;
+  border-radius: 25px;
+  background: #fff;
+}
+
+.lm-radio-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 92px;
+  background: #ccc;
+}
+
+.lm-radio-tabs button {
+  border: 0;
+  background: #fff;
+  color: #000;
+  font-size: 29px;
+}
+
+.lm-radio-tabs button.is-active {
+  background: #e34020;
+  color: #fff;
+}
+
+.lm-radio-recordings {
+  height: 1045px;
+  overflow: hidden auto;
+}
+
+.lm-radio-row {
+  position: relative;
+  height: 105px;
+  border-bottom: 2px solid #ececec;
+}
+
+.lm-radio-row-rank {
+  position: absolute;
+  left: 12px;
+  top: 13px;
+  width: 80px;
+  height: 77px;
+}
+
+.lm-radio-row-rank img {
+  position: absolute;
+  left: 9px;
+  top: 0;
+  width: 61px;
+  height: 77px;
+}
+
+.lm-radio-row-rank span {
+  position: absolute;
+  left: 0;
+  top: 23px;
+  width: 80px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 29px;
+}
+
+.lm-radio-row-star {
+  position: absolute;
+  left: 108px;
+  top: 27px;
+  width: 62px;
+  height: 62px;
+}
+
+.lm-radio-row-main {
+  position: absolute;
+  left: 248px;
+  top: 18px;
+  width: 172px;
+  min-height: 72px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+.lm-radio-row-main strong {
+  overflow: hidden;
+  color: #000;
+  font-size: 29px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-radio-row-main audio {
+  width: 168px;
+  height: 28px;
+}
+
+.lm-radio-row-main small {
+  color: #777;
+  font-size: 20px;
+}
+
+.lm-radio-row-votes {
+  position: absolute;
+  left: 423px;
+  top: 29px;
+  display: flex;
+  align-items: center;
+  height: 53px;
+}
+
+.lm-radio-row-votes span {
+  color: #e34020;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.lm-radio-row-votes em {
+  margin-left: 6px;
+  color: #000;
+  font-size: 29px;
+  font-style: normal;
+}
+
+.lm-radio-row button {
+  position: absolute;
+  left: 548px;
+  top: 37px;
+  width: 93px;
+  height: 36px;
+  border: 0;
+  border-radius: 100px;
+  background: #c42d15;
+  color: #fff;
+  font-size: 24px;
+}
+
+.lm-radio-row button:disabled {
+  opacity: 0.65;
+}
+
+.lm-radio-empty {
+  display: grid;
+  height: 280px;
+  place-items: center;
+  color: #666;
+  font-size: 29px;
+}
+
+.lm-radio-bottom-button {
+  position: absolute;
+  left: 191px;
+  top: 1286px;
+  width: 364px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: 34px;
+}
+
+.lm-radio-script-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.lm-radio-script-panel h2 {
+  margin: 0;
+  padding: 40px 0;
+  color: #c42d15;
+  font-size: 40px;
+  text-align: center;
+}
+
+.lm-radio-script-list {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  height: 980px;
+  overflow: hidden auto;
+}
+
+.lm-radio-script-list button {
+  width: 637px;
+  min-height: 200px;
+  border: 0;
+  border-radius: 20px;
+  background: #ececec;
+  padding: 20px;
+  color: #000;
+  text-align: left;
+}
+
+.lm-radio-script-list button.is-active {
+  background: #f6ddd2;
+}
+
+.lm-radio-script-list strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 29px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.lm-radio-script-list span {
+  display: block;
+  font-size: 29px;
+  line-height: 1.45;
+}
+
+.lm-radio-record-panel {
+  position: absolute;
+  left: 31px;
+  top: 114px;
+  width: 685px;
+  height: 848px;
+  overflow: hidden auto;
+  border-radius: 25px;
+  background: #fff;
+  padding: 20px;
+}
+
+.lm-radio-record-panel h2 {
+  margin: 0 0 16px;
+  color: #000;
+  font-size: 29px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.lm-radio-record-panel p {
+  margin: 0;
+  color: #000;
+  font-size: 29px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.lm-radio-record-visual {
+  position: absolute;
+  left: 46px;
+  top: 997px;
+  width: 659px;
+  height: 260px;
+}
+
+.lm-radio-record-visual img {
+  position: absolute;
+  display: block;
+}
+
+.lm-radio-record-visual .is-base {
+  left: 148px;
+  top: 26px;
+  width: 363px;
+  height: 234px;
+}
+
+.lm-radio-record-visual .is-mic {
+  left: 226px;
+  top: 0;
+  width: 207px;
+  height: 260px;
+}
+
+.lm-radio-record-visual .is-wave {
+  left: 0;
+  top: 88px;
+  width: 659px;
+  height: 48px;
+}
+
+.lm-radio-record-visual .is-people {
+  left: 235px;
+  top: 26px;
+  width: 193px;
+  height: 234px;
+}
+
+.lm-radio-record-visual .is-note {
+  left: 435px;
+  top: 74px;
+  width: 64px;
+  height: 101px;
+}
+
+.lm-radio-record-status {
+  position: absolute;
+  left: 120px;
+  top: 1248px;
+  width: 510px;
+  color: #fff;
+  font-size: 24px;
+  text-align: center;
+}
+
+.lm-radio-confirm-button,
+.lm-radio-return-button {
+  position: absolute;
+  top: 1306px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  font-size: 34px;
+}
+
+.lm-radio-confirm-button {
+  left: 68px;
+  width: 367px;
+  background: #e34020;
+  color: #fff;
+}
+
+.lm-radio-return-button {
+  left: 451px;
+  width: 236px;
+  background: #ffe596;
+  color: #e34020;
+}
+
+.lm-radio-notice-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.lm-radio-notice-panel {
+  position: relative;
+  width: 685px;
+  height: 584px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.lm-radio-notice-panel p {
+  position: absolute;
+  left: 98px;
+  top: 167px;
+  width: 486px;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #000;
+  font-size: 29px;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.lm-radio-notice-panel button {
+  position: absolute;
+  left: 205px;
+  top: 424px;
+  width: 277px;
+  height: 67px;
+  border: 0;
+  background: transparent;
+}
+
+.lm-radio-notice-panel button img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lm-radio-notice-panel button span {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-size: 34px;
+}
+
 .lm-recordings {
   display: grid;
   gap: 12px;

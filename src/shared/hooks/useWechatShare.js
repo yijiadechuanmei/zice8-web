@@ -72,6 +72,9 @@ export function useWechatShare(activityKey, activity, onStatusChange, options = 
             'onMenuShareAppMessage',
             'onMenuShareTimeline',
             'openLocation',
+            'startRecord',
+            'stopRecord',
+            'uploadVoice',
           ],
           ...(openTagList.length ? { openTagList } : {}),
         })
