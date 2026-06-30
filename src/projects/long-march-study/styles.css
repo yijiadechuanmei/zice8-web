@@ -652,10 +652,12 @@
 
 .lm-quiz-success-label {
   position: absolute;
-  left: 42.336%;
+  left: 38.686%;
   top: 33.194%;
+  width: 13.333%;
   color: #fff;
   font-size: clamp(18px, 4.234vw, 29px);
+  text-align: center;
 }
 
 .lm-quiz-success-points-box {
