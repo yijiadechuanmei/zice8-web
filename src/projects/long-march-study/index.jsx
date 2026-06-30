@@ -741,7 +741,7 @@ function CheckinResultPage({ result, onPoster, onRank, onBack }) {
 function RadioShell({ title = '云上红色电台', onBack, children }) {
   const scale = useStageScale()
   return (
-    <div className="lm-radio-viewport" style={{ height: 1448 * scale }}>
+    <div className="lm-radio-viewport" style={{ width: 750 * scale, height: 1448 * scale }}>
       <section
         className="lm-radio-page"
         style={{
@@ -759,7 +759,24 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
 
 function RadioPage({ recordings, onUpload, onVote, onBack }) {
   const [tab, setTab] = useState('featured')
+  const [selectedRecordingId, setSelectedRecordingId] = useState('')
   const rows = tab === 'featured' ? recordings?.featured || [] : recordings?.all || []
+  const allRows = [...(recordings?.featured || []), ...(recordings?.all || [])]
+  const selectedRecording = selectedRecordingId
+    ? allRows.find((item) => item.id === selectedRecordingId) || null
+    : null
+
+  if (selectedRecording) {
+    return (
+      <RadioDetailPage
+        recording={selectedRecording}
+        myVote={recordings?.myVoteRecordingId}
+        onBack={() => setSelectedRecordingId('')}
+        onVote={onVote}
+      />
+    )
+  }
+
   return (
     <RadioShell onBack={onBack}>
       <div className="lm-radio-panel">
@@ -767,40 +784,155 @@ function RadioPage({ recordings, onUpload, onVote, onBack }) {
           <button className={tab === 'featured' ? 'is-active' : ''} type="button" onClick={() => setTab('featured')}>精选板块</button>
           <button className={tab === 'all' ? 'is-active' : ''} type="button" onClick={() => setTab('all')}>全部录音</button>
         </div>
-        <RecordingList rows={rows} myVote={recordings?.myVoteRecordingId} onVote={onVote} />
+        <RecordingList
+          rows={rows}
+          myVote={recordings?.myVoteRecordingId}
+          onOpen={(recording) => setSelectedRecordingId(recording.id)}
+          onVote={onVote}
+        />
       </div>
       <button className="lm-radio-bottom-button" type="button" onClick={onUpload}>点击参赛</button>
     </RadioShell>
   )
 }
 
-function RecordingList({ rows, myVote, onVote }) {
+function useUrlAudioPlayer() {
+  const audioRef = useRef(null)
+  const [playingId, setPlayingId] = useState('')
+
+  useEffect(() => {
+    const audio = new Audio()
+    const clearPlaying = () => setPlayingId('')
+    audioRef.current = audio
+    audio.addEventListener('ended', clearPlaying)
+    audio.addEventListener('error', clearPlaying)
+    return () => {
+      audio.pause()
+      audio.removeEventListener('ended', clearPlaying)
+      audio.removeEventListener('error', clearPlaying)
+      audioRef.current = null
+    }
+  }, [])
+
+  const toggleAudio = useCallback(async (recording, onMissing) => {
+    if (!recording?.audioUrl) {
+      onMissing?.()
+      return
+    }
+    const audio = audioRef.current
+    if (!audio) return
+    if (playingId === recording.id && !audio.paused) {
+      audio.pause()
+      setPlayingId('')
+      return
+    }
+    audio.pause()
+    audio.src = recording.audioUrl
+    audio.currentTime = 0
+    try {
+      await audio.play()
+      setPlayingId(recording.id)
+    } catch {
+      setPlayingId('')
+      onMissing?.('音频播放失败')
+    }
+  }, [playingId])
+
+  return { playingId, toggleAudio }
+}
+
+function RecordingList({ rows, myVote, onOpen, onVote }) {
+  const { playingId, toggleAudio } = useUrlAudioPlayer()
+
   if (!rows.length) {
     return <div className="lm-radio-empty">暂无审核通过的录音</div>
   }
   return (
     <div className="lm-radio-recordings">
       {rows.map((recording, index) => (
-        <article className="lm-radio-row" key={recording.id}>
+        <article
+          className="lm-radio-row"
+          key={recording.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => onOpen(recording)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              onOpen(recording)
+            }
+          }}
+        >
           <div className="lm-radio-row-rank">
             <img src={longMarchStudyAssets.radio.rankBadge} alt="" />
             <span>{String(index + 1).padStart(2, '0')}</span>
           </div>
-          <img className="lm-radio-row-star" src={myVote === recording.id ? longMarchStudyAssets.radio.starActive : longMarchStudyAssets.radio.star} alt="" />
+          <button
+            className="lm-radio-row-play"
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              toggleAudio(recording)
+            }}
+            aria-label={playingId === recording.id ? '暂停音频' : '播放音频'}
+          >
+            <img src={playingId === recording.id ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
+          </button>
           <div className="lm-radio-row-main">
             <strong>{recording.authorName || recording.title || '昵称'}</strong>
-            {recording.audioUrl ? <audio controls src={recording.audioUrl} /> : <small>{recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>}
+            <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>
           </div>
           <div className="lm-radio-row-votes">
             <span aria-hidden="true">★</span>
             <em>{recording.voteCount || 0}</em>
           </div>
-          <button type="button" disabled={Boolean(myVote)} onClick={() => onVote(recording)}>
+          <button
+            className="lm-radio-row-vote"
+            type="button"
+            disabled={Boolean(myVote)}
+            onClick={(event) => {
+              event.stopPropagation()
+              onVote(recording)
+            }}
+          >
             {myVote === recording.id ? '已送出' : '送红星'}
           </button>
         </article>
       ))}
     </div>
+  )
+}
+
+function RadioDetailPage({ recording, myVote, onBack, onVote }) {
+  const { playingId, toggleAudio } = useUrlAudioPlayer()
+  const isPlaying = playingId === recording.id
+  return (
+    <RadioShell title="录音详情" onBack={onBack}>
+      <section className="lm-radio-detail-panel">
+        <button
+          className="lm-radio-detail-play"
+          type="button"
+          onClick={() => toggleAudio(recording)}
+          aria-label={isPlaying ? '暂停音频' : '播放音频'}
+        >
+          <img src={isPlaying ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
+        </button>
+        <h2>{recording.authorName || '昵称'}</h2>
+        <p>{recording.title || '我的红色电台'}</p>
+        <div className="lm-radio-detail-meta">
+          <span>{recording.durationSec ? `${recording.durationSec}秒` : '录音作品'}</span>
+          <span>{recording.voteCount || 0} 颗红星</span>
+        </div>
+        <button
+          className="lm-radio-detail-vote"
+          type="button"
+          disabled={Boolean(myVote)}
+          onClick={() => onVote(recording)}
+        >
+          {myVote === recording.id ? '已送出红星' : '送出红星'}
+        </button>
+      </section>
+    </RadioShell>
   )
 }
 
@@ -825,13 +957,32 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
+  const [recordDurationSec, setRecordDurationSec] = useState(0)
+  const [previewPlaying, setPreviewPlaying] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
   const startedAtRef = useRef(0)
   const activeScript = scripts.find((item) => item.key === scriptKey) || scripts[0]
+  const hasRecording = Boolean(localId || mediaId)
+
+  useEffect(() => {
+    const wx = getWx()
+    if (!wx?.onVoicePlayEnd || !localId) return undefined
+    wx.onVoicePlayEnd({
+      success: (res) => {
+        if (!res?.localId || res.localId === localId) setPreviewPlaying(false)
+      },
+    })
+    return undefined
+  }, [localId])
 
   const start = () => {
     const wx = getWx()
     startedAtRef.current = Date.now()
+    setLocalId('')
+    setMediaId('')
+    setRecordDurationSec(0)
+    setPreviewPlaying(false)
     if (wx?.startRecord) {
       wx.startRecord()
       setRecording(true)
@@ -845,10 +996,12 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
 
   const stop = () => {
     const wx = getWx()
+    const nextDuration = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000))
     if (wx?.stopRecord) {
       wx.stopRecord({
         success: (res) => {
           setLocalId(res.localId)
+          setRecordDurationSec(nextDuration)
           setRecording(false)
         },
         fail: () => {
@@ -858,22 +1011,52 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
       })
       return
     }
+    setLocalId(`debug-local-${Date.now()}`)
+    setRecordDurationSec(nextDuration)
     setRecording(false)
   }
 
+  const playPreview = () => {
+    const wx = getWx()
+    if (wx?.playVoice && localId) {
+      wx.playVoice({ localId })
+      setPreviewPlaying(true)
+      return
+    }
+    onToast(localId ? '当前环境暂不支持试听微信录音' : '请先完成录音')
+  }
+
+  const pausePreview = () => {
+    const wx = getWx()
+    if (wx?.pauseVoice && localId) wx.pauseVoice({ localId })
+    setPreviewPlaying(false)
+  }
+
+  const resetRecording = () => {
+    const wx = getWx()
+    if (wx?.stopVoice && localId) wx.stopVoice({ localId })
+    setRecording(false)
+    setLocalId('')
+    setMediaId('')
+    setRecordDurationSec(0)
+    setPreviewPlaying(false)
+  }
+
   const upload = async () => {
+    if (uploading) return
     const submit = async (nextMediaId) => {
       await submitRecording(activityKey, {
         visitorId,
         title: activeScript?.title || '我的红色电台',
         scriptKey: activeScript?.key,
         mediaId: nextMediaId,
-        durationSec: Math.round((Date.now() - startedAtRef.current) / 1000),
+        durationSec: recordDurationSec,
       })
       setNotice('录音审核中\n审核通过后即可获得积分')
     }
 
     const wx = getWx()
+    setUploading(true)
     if (wx?.uploadVoice && localId && !mediaId) {
       wx.uploadVoice({
         localId,
@@ -889,9 +1072,14 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
               return
             }
             onToast(error.message || '上传失败')
+          } finally {
+            setUploading(false)
           }
         },
-        fail: () => onToast('微信录音上传失败'),
+        fail: () => {
+          setUploading(false)
+          onToast('微信录音上传失败')
+        },
       })
       return
     }
@@ -904,6 +1092,8 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
         return
       }
       onToast(error.message || '上传失败')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -948,17 +1138,34 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
             <p>{activeScript?.content || '知识解析内容'}</p>
           </div>
           <div className="lm-radio-record-visual">
-            <img className="is-base" src={longMarchStudyAssets.radio.recordBase} alt="" />
-            <img className="is-mic" src={longMarchStudyAssets.radio.recordMic} alt="" />
-            <img className="is-wave" src={longMarchStudyAssets.radio.recordWave} alt="" />
-            <img className="is-people" src={longMarchStudyAssets.radio.recordPeople} alt="" />
-            <img className="is-note" src={longMarchStudyAssets.radio.recordNote} alt="" />
+            {!recording && !hasRecording ? (
+              <button className="is-base" type="button" onClick={start} aria-label="开始录音">
+                <img src={longMarchStudyAssets.radio.recordBase} alt="" />
+              </button>
+            ) : null}
+            {recording ? (
+              <>
+                <img className="is-mic" src={longMarchStudyAssets.radio.recordMic} alt="" />
+                <img className="is-wave" src={longMarchStudyAssets.radio.recordWave} alt="" />
+                <button className="lm-radio-record-hit" type="button" onClick={stop} aria-label="暂停录音" />
+              </>
+            ) : null}
+            {!recording && hasRecording ? (
+              <>
+                <button className="is-people" type="button" onClick={previewPlaying ? pausePreview : playPreview} aria-label={previewPlaying ? '暂停试听' : '播放试听'}>
+                  <img src={longMarchStudyAssets.radio.recordPeople} alt="" />
+                </button>
+                <button className="is-note" type="button" onClick={resetRecording} aria-label="取消录音">
+                  <img src={longMarchStudyAssets.radio.recordNote} alt="" />
+                </button>
+              </>
+            ) : null}
           </div>
           <div className="lm-radio-record-status">
-            {recording ? '录音中，再次点击结束' : localId || mediaId ? '录音已完成，可以上传' : '请点击开始录音'}
+            {recording ? '录音中，点击暂停完成录制' : hasRecording ? '录音已完成，可以试听或上传' : '请点击开始录音'}
           </div>
-          <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction}>
-            {recording ? '结束录音' : localId || mediaId ? '确认上传' : '开始录音'}
+          <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction} disabled={uploading}>
+            {uploading ? '上传中' : recording ? '暂停录音' : hasRecording ? '确认上传' : '开始录音'}
           </button>
           <button className="lm-radio-return-button" type="button" onClick={() => setStep('scripts')}>返回</button>
         </>

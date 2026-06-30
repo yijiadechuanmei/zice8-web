@@ -835,21 +835,25 @@
 }
 
 .lm-radio-viewport {
-  width: 100%;
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
   overflow: hidden;
 }
 
 .lm-radio-page {
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 750px;
   min-height: 1448px;
-  margin: 0 auto;
+  margin: 0;
   overflow: hidden;
   background-color: #fff;
   background-position: center top;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  transform-origin: top center;
+  transform-origin: top left;
 }
 
 .lm-radio-title {
@@ -919,6 +923,7 @@
   position: relative;
   height: 105px;
   border-bottom: 2px solid #ececec;
+  cursor: pointer;
 }
 
 .lm-radio-row-rank {
@@ -949,12 +954,21 @@
   font-size: 29px;
 }
 
-.lm-radio-row-star {
+.lm-radio-row-play {
   position: absolute;
   left: 108px;
   top: 27px;
   width: 62px;
   height: 62px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lm-radio-row-play img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .lm-radio-row-main {
@@ -983,8 +997,11 @@
 }
 
 .lm-radio-row-main small {
+  overflow: hidden;
   color: #777;
   font-size: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lm-radio-row-votes {
@@ -1009,7 +1026,7 @@
   font-style: normal;
 }
 
-.lm-radio-row button {
+.lm-radio-row-vote {
   position: absolute;
   left: 548px;
   top: 37px;
@@ -1022,7 +1039,7 @@
   font-size: 24px;
 }
 
-.lm-radio-row button:disabled {
+.lm-radio-row-vote:disabled {
   opacity: 0.65;
 }
 
@@ -1050,6 +1067,71 @@
 .lm-radio-script-panel {
   display: flex;
   flex-direction: column;
+}
+
+.lm-radio-detail-panel {
+  position: absolute;
+  left: 31px;
+  top: 114px;
+  width: 685px;
+  height: 1137px;
+  overflow: hidden;
+  border-radius: 25px;
+  background: #fff;
+  padding: 156px 54px 48px;
+  text-align: center;
+}
+
+.lm-radio-detail-play {
+  width: 124px;
+  height: 124px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lm-radio-detail-play img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lm-radio-detail-panel h2 {
+  margin: 38px 0 14px;
+  color: #000;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.lm-radio-detail-panel p {
+  margin: 0;
+  color: #333;
+  font-size: 30px;
+  line-height: 1.45;
+}
+
+.lm-radio-detail-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 46px;
+  color: #c42d15;
+  font-size: 28px;
+}
+
+.lm-radio-detail-vote {
+  margin-top: 76px;
+  width: 364px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: 34px;
+}
+
+.lm-radio-detail-vote:disabled {
+  opacity: 0.65;
 }
 
 .lm-radio-script-panel h2 {
@@ -1138,6 +1220,20 @@
   display: block;
 }
 
+.lm-radio-record-visual button {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lm-radio-record-visual button img {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .lm-radio-record-visual .is-base {
   left: 148px;
   top: 26px;
@@ -1173,6 +1269,13 @@
   height: 101px;
 }
 
+.lm-radio-record-hit {
+  left: 0;
+  top: 0;
+  width: 659px;
+  height: 260px;
+}
+
 .lm-radio-record-status {
   position: absolute;
   left: 120px;
@@ -1198,6 +1301,10 @@
   width: 367px;
   background: #e34020;
   color: #fff;
+}
+
+.lm-radio-confirm-button:disabled {
+  opacity: 0.65;
 }
 
 .lm-radio-return-button {
