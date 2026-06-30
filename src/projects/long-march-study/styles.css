@@ -375,7 +375,7 @@
   top: 7.15%;
   z-index: 3;
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   gap: min(1.333vw, 10px);
   height: min(8.4vw, 63px);
   color: #fff;
@@ -383,12 +383,12 @@
 
 .lm-quiz-progress-text span {
   font-size: clamp(18px, 3.866vw, 29px);
-  line-height: 50px;
+  line-height: 1;
 }
 
 .lm-quiz-progress-text strong {
   font-size: clamp(30px, 5.866vw, 44px);
-  line-height: 50px;
+  line-height: 1;
 }
 
 .lm-quiz-progress-bar {
@@ -636,6 +636,10 @@
   position: absolute;
   left: 31.387%;
   top: 21.712%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 36.788%;
   color: #fff;
   font-size: clamp(18px, 4.234vw, 29px);
 }
@@ -643,6 +647,7 @@
 .lm-quiz-success-correct strong {
   margin: 0 min(1.333vw, 10px) 0 0;
   font-size: clamp(34px, 7.445vw, 51px);
+  line-height: 1;
 }
 
 .lm-quiz-success-label {
@@ -651,6 +656,16 @@
   top: 33.194%;
   color: #fff;
   font-size: clamp(18px, 4.234vw, 29px);
+}
+
+.lm-quiz-success-points-box {
+  position: absolute;
+  left: 26.131%;
+  top: 42.693%;
+  width: 47.883%;
+  height: 19.624%;
+  border-radius: 20px;
+  background: #fffcdf;
 }
 
 .lm-quiz-success-points {

@@ -655,8 +655,13 @@ function QuizResultPage({ result, onRank, onBack }) {
       <section className="lm-quiz-success-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.successPanel})` }}>
         <h2>闯关成功</h2>
         <img src={longMarchStudyAssets.quiz.successMedal} alt="" />
-        <div className="lm-quiz-success-correct">答对：<strong>{data?.correctCount || 0}</strong>题</div>
+        <div className="lm-quiz-success-correct">
+          <span>答对：</span>
+          <strong>{data?.correctCount || 0}</strong>
+          <span>题</span>
+        </div>
         <div className="lm-quiz-success-label">获得</div>
+        <div className="lm-quiz-success-points-box" />
         <div className="lm-quiz-success-points"><strong>{data?.pointsEarned || 0}</strong><span>积分</span></div>
         <button className="lm-quiz-result-rank" type="button" onClick={onRank}>排行榜</button>
         <button className="lm-quiz-result-back" type="button" onClick={onBack}>返回首页</button>
