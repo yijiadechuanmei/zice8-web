@@ -616,6 +616,7 @@
   background: #fdecbf;
   color: #241714;
   font-size: clamp(18px, 4.267vw, 32px);
+  font-weight: 400;
   padding: 0 30px;
 }
 
