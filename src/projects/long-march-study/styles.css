@@ -698,16 +698,51 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+.lm-debug-panel.is-collapsed {
+  left: auto;
+  max-width: calc(100vw - 20px);
+  overflow: hidden;
+}
+
+.lm-debug-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
 .lm-debug-title {
-  margin-bottom: 6px;
   color: #ffd166;
   font-weight: 900;
   letter-spacing: 0.08em;
 }
 
+.lm-debug-summary {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.74);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-debug-toggle {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  padding: 2px 7px;
+  font-weight: 800;
+}
+
 .lm-debug-meta {
   display: grid;
   gap: 2px;
+  margin-top: 6px;
   word-break: break-all;
 }
 

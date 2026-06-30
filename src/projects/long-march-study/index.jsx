@@ -398,6 +398,7 @@ function DebugPanel({
   onResetAll,
   onLogState,
 }) {
+  const [collapsed, setCollapsed] = useState(false)
   const shareLabel = shareStatus.shareConfigured
     ? '已配置'
     : shareStatus.wxConfigStatus === 'failed'
@@ -406,23 +407,31 @@ function DebugPanel({
   const userLabel = profile ? `已记录：${profile.name}` : '未提交资料'
 
   return (
-    <div className="lm-debug-panel">
-      <div className="lm-debug-title">DEBUG</div>
-      <div className="lm-debug-meta">
-        <div>activityKey: {activityKey}</div>
-        <div>page: {page}</div>
-        <div>visitorId: {visitorId}</div>
-        <div>identity: {identityKey || '-'}</div>
-        <div>用户记录: {userLabel}</div>
-        <div>微信授权: {authReady ? 'ready' : 'pending'}</div>
-        <div>微信分享: {shareLabel}</div>
-        <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
-      </div>
-      <div className="lm-debug-actions">
-        <button type="button" onClick={onResetMine}>重置我的数据</button>
-        <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
-        <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
-      </div>
+    <div className={`lm-debug-panel ${collapsed ? 'is-collapsed' : ''}`}>
+      <button className="lm-debug-header" type="button" onClick={() => setCollapsed((current) => !current)}>
+        <span className="lm-debug-title">DEBUG</span>
+        <span className="lm-debug-summary">{page} · {shareLabel}</span>
+        <span className="lm-debug-toggle">{collapsed ? '展开' : '收起'}</span>
+      </button>
+      {!collapsed ? (
+        <>
+          <div className="lm-debug-meta">
+            <div>activityKey: {activityKey}</div>
+            <div>page: {page}</div>
+            <div>visitorId: {visitorId}</div>
+            <div>identity: {identityKey || '-'}</div>
+            <div>用户记录: {userLabel}</div>
+            <div>微信授权: {authReady ? 'ready' : 'pending'}</div>
+            <div>微信分享: {shareLabel}</div>
+            <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
+          </div>
+          <div className="lm-debug-actions">
+            <button type="button" onClick={onResetMine}>重置我的数据</button>
+            <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
+            <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }
