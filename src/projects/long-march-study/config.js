@@ -38,6 +38,7 @@ export const longMarchStudyAssets = {
   },
   radio: {
     background: asset('2202c2c14234671ff69c8642c0d51226_615533_750_1624.png'),
+    backIcon: asset('b25fef0a7ef46a1fc9580c405518deae_215.svg'),
     rankBadge: asset('31ea4dbdc9b6e8a865872b6543b42105_6925_59_71.png'),
     play: asset('3ae2bc9c7013b8a43776eeca87d06dd5_7175_62_62.png'),
     pause: asset('2a8b5b103e124b2cb35d5a3ef0f979df_6951_62_62.png'),

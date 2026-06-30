@@ -846,7 +846,7 @@
   left: 0;
   top: 0;
   width: 750px;
-  min-height: 1624px;
+  min-height: 1448px;
   margin: 0;
   overflow: hidden;
   background-color: #fff;
@@ -871,17 +871,24 @@
 
 .lm-radio-back {
   position: absolute;
-  left: 35px;
-  top: 38px;
+  left: 20px;
+  top: 32px;
   z-index: 4;
-  width: 44px;
-  height: 44px;
+  width: 71px;
+  height: 49px;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: #fff;
-  font-size: 34px;
-  line-height: 44px;
-  text-align: center;
+  font-size: 0;
+}
+
+.lm-radio-back span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  mask: var(--lm-radio-back-icon) center center / contain no-repeat;
+  -webkit-mask: var(--lm-radio-back-icon) center center / contain no-repeat;
 }
 
 .lm-radio-panel,
@@ -975,12 +982,11 @@
 .lm-radio-row-main {
   position: absolute;
   left: 248px;
-  top: 18px;
-  width: 172px;
-  min-height: 72px;
-  display: grid;
-  align-content: center;
-  gap: 4px;
+  top: 32px;
+  width: 177px;
+  height: 50px;
+  display: flex;
+  align-items: center;
 }
 
 .lm-radio-row-main strong {
@@ -998,11 +1004,7 @@
 }
 
 .lm-radio-row-main small {
-  overflow: hidden;
-  color: #777;
-  font-size: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: none;
 }
 
 .lm-radio-row-votes {
@@ -1011,20 +1013,29 @@
   top: 29px;
   display: flex;
   align-items: center;
+  width: 146px;
   height: 53px;
 }
 
 .lm-radio-row-votes span {
-  color: #e34020;
-  font-size: 44px;
-  line-height: 1;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 53px;
+  background: #e34020;
+  clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
+  color: transparent;
+  font-size: 0;
 }
 
 .lm-radio-row-votes em {
-  margin-left: 6px;
+  width: 97px;
+  height: 50px;
+  margin-left: -7px;
   color: #000;
   font-size: 29px;
   font-style: normal;
+  line-height: 50px;
+  text-align: left;
 }
 
 .lm-radio-row-vote {
@@ -1287,71 +1298,6 @@
   text-align: center;
 }
 
-.lm-radio-record-debug {
-  position: absolute;
-  left: 65px;
-  top: 1278px;
-  width: 620px;
-  min-height: 58px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.18);
-  padding: 8px 12px;
-  color: #fff;
-  font-size: 18px;
-  line-height: 1.25;
-}
-
-.lm-radio-record-debug div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.lm-radio-record-debug span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lm-radio-record-debug small {
-  display: block;
-  margin-top: 5px;
-  overflow: hidden;
-  opacity: 0.9;
-  font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lm-radio-record-actions {
-  position: absolute;
-  left: 45px;
-  top: 1356px;
-  width: 660px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-
-.lm-radio-record-actions button {
-  height: 56px;
-  border: 0;
-  border-radius: 999px;
-  background: #e34020;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 56px;
-  text-align: center;
-}
-
-.lm-radio-record-actions button:disabled {
-  opacity: 0.52;
-}
-
 .lm-radio-confirm-button,
 .lm-radio-return-button {
   position: absolute;
@@ -1374,12 +1320,10 @@
 }
 
 .lm-radio-return-button {
-  left: 257px;
-  top: 1424px;
+  left: 451px;
   width: 236px;
   background: #ffe596;
   color: #e34020;
-  font-size: 24px;
 }
 
 .lm-radio-notice-mask {
