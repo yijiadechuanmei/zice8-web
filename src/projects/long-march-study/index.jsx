@@ -174,7 +174,6 @@ export default function LongMarchStudyApp({ routeParams }) {
     <main className="lm-page">
       {page === PAGE.HOME ? (
         <HomePage
-          profile={profile}
           onStart={openJourney}
           onRules={() => setShowRules(true)}
           onMine={openMine}
@@ -319,7 +318,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   )
 }
 
-function HomePage({ profile, onStart, onRules, onMine, onRank }) {
+function HomePage({ onStart, onRules, onMine, onRank }) {
   return (
     <section
       className="lm-home"
@@ -327,16 +326,16 @@ function HomePage({ profile, onStart, onRules, onMine, onRank }) {
     >
       <img className="lm-home-title-image" src={longMarchStudyAssets.home.title} alt="重走长征路 共筑爱国魂" />
       <div className="lm-home-side-actions" aria-label="首页快捷入口">
-        <button type="button" onClick={onRules}>活动规则</button>
-        <button type="button" onClick={onMine}>我的</button>
-        <button type="button" onClick={onRank}>排行榜</button>
+        <button type="button" onClick={onRules} aria-label="活动规则">
+          <img src={longMarchStudyAssets.home.rulesButton} alt="" />
+        </button>
+        <button type="button" onClick={onMine} aria-label="我的">
+          <img src={longMarchStudyAssets.home.mineButton} alt="" />
+        </button>
+        <button type="button" onClick={onRank} aria-label="排行榜">
+          <img src={longMarchStudyAssets.home.rankButton} alt="" />
+        </button>
       </div>
-      {profile ? (
-        <div className="lm-profile-pill">
-          <span>{profile.name}</span>
-          <strong>{profile.totalPoints} 积分</strong>
-        </div>
-      ) : null}
       <button className="lm-home-start" type="button" onClick={onStart} aria-label="开启研学之旅">
         <img src={longMarchStudyAssets.home.startButton} alt="" />
       </button>

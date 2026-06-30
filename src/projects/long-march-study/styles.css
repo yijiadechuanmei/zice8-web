@@ -84,18 +84,16 @@
 .lm-home-side-actions button {
   width: 100%;
   height: calc(min(100vw, 750px) * 103 / 750);
+  padding: 0;
   border: 0;
-  border-radius: 999px 0 0 999px;
-  background: linear-gradient(180deg, #fdf4c9 0%, #f7bc48 44%, #d83d21 100%);
-  box-shadow: 0 5px 12px rgba(126, 32, 24, 0.22);
-  color: #7e2018;
-  font-size: clamp(11px, 2.5vw, 18px);
-  font-weight: 900;
-  line-height: 1.1;
-  padding: 8px 4px;
-  text-align: center;
-  writing-mode: vertical-rl;
-  letter-spacing: 0.08em;
+  background: transparent;
+}
+
+.lm-home-side-actions img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .lm-home-start {
