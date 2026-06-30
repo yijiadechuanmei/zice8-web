@@ -16,12 +16,12 @@ const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
 
 export const projectRoutes = [
   {
-    path: '/long-march-study/:activityKey',
+    path: '/long_march_study/:activityKey',
     Component: LongMarchStudyProject,
     activityGate: true,
   },
   {
-    path: '/long_march_study/:activityKey',
+    path: '/long-march-study/:activityKey',
     Component: LongMarchStudyProject,
     activityGate: true,
   },

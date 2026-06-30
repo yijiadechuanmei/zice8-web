@@ -344,7 +344,7 @@ function buildActivityUrl(activity) {
     tufe_campus_open_day: '/tufe-campus-open-day',
     xiwuqi_99_road_night: '/xiwuqi-99-road-night',
     latex_allergy_risk_test: '/latex-allergy-risk-test',
-    long_march_study: '/long-march-study',
+    long_march_study: '/long_march_study',
     quiz: '/quiz',
   }
   const prefix = pathPrefixByType[activity.type] || `/${encodeURIComponent(activity.type || '')}`

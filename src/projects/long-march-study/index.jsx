@@ -58,6 +58,17 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [mine, setMine] = useState(null)
 
   useEffect(() => {
+    if (window.location.pathname.startsWith('/long-march-study/')) {
+      const canonicalPath = `/long_march_study/${encodeURIComponent(activityKey)}`
+      window.history.replaceState(
+        null,
+        '',
+        `${canonicalPath}${window.location.search}${window.location.hash}`,
+      )
+    }
+  }, [activityKey])
+
+  useEffect(() => {
     const token = getTokenFromUrl()
     if (token) setToken(token)
   }, [])
