@@ -53,6 +53,24 @@ function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || BROCHURE_QUIZ_LOTTERY_ACTIVITY_KEY
 }
 
+function resolveNewParticipationBlock({ activityState, activityWindow, availablePoolCount }) {
+  if (activityState === 'activity_not_started' || activityWindow?.status === 'not_started') return '活动未开始'
+  const poolCount = Number(availablePoolCount)
+  if (
+    activityState === 'activity_ended' ||
+    activityWindow?.status === 'ended' ||
+    (Number.isFinite(poolCount) && poolCount <= 0)
+  ) {
+    return '活动已结束'
+  }
+  return ''
+}
+
+function isActivityWindowError(error) {
+  const message = error?.message || ''
+  return message.includes('活动未开始') || message.includes('活动已结束')
+}
+
 function isWechatBrowser() {
   if (typeof navigator === 'undefined') return false
   return /MicroMessenger/i.test(navigator.userAgent || '')
@@ -553,6 +571,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [profileOpen, setProfileOpen] = useState(false)
   const [myPrizesOpen, setMyPrizesOpen] = useState(false)
   const [myPrizes, setMyPrizes] = useState([])
+  const [activityState, setActivityState] = useState('')
+  const [activityWindow, setActivityWindow] = useState(null)
+  const [availablePoolCount, setAvailablePoolCount] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadingText, setLoadingText] = useState('加载中...')
   const [error, setError] = useState('')
@@ -578,6 +599,10 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
   const bgmEnabled = Boolean(bgmConfig?.enabled && bgmConfig?.url)
   const showLoading = loading || (publicConfig && !authReady && !blockedMessage)
+  const newParticipationBlockedMessage = useMemo(
+    () => resolveNewParticipationBlock({ activityState, activityWindow, availablePoolCount }),
+    [activityState, activityWindow, availablePoolCount],
+  )
 
   const handleWechatShareStatus = useCallback((status) => {
     if (status?.wxConfigStatus === 'failed' || status?.signatureStatus === 'failed' || status?.wxScriptLoadStatus === 'failed') {
@@ -617,6 +642,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         setResult(bootstrap.result)
         setDraw(bootstrap.draw)
         setMyPrizes(bootstrap.myPrizes || [])
+        setActivityState(bootstrap.state || '')
+        setActivityWindow(bootstrap.activity?.activityWindow || null)
+        setAvailablePoolCount(bootstrap.availablePoolCount ?? null)
       })
       .catch((err) => {
         if (!cancelled) setError(err?.message || '项目加载失败')
@@ -695,6 +723,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     setResult(null)
     setDraw(null)
     setMyPrizes([])
+    setActivityState('')
+    setActivityWindow(null)
+    setAvailablePoolCount(null)
     setAnswers({})
     setCurrentQuestionIndex(0)
     setQuizError('')
@@ -705,10 +736,6 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   }
 
   const enterInteraction = async () => {
-    if (!profile) {
-      setProfileOpen(true)
-      return
-    }
     if (draw) {
       setView('result')
       return
@@ -717,11 +744,31 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       setView('result')
       return
     }
-    const data = await startAttempt(activityKey, { visitorId })
-    setAttempt(data.attempt)
-    setAnswers({})
-    setCurrentQuestionIndex(0)
-    setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
+    if (attempt?.status === 'in_progress') {
+      setView('quiz')
+      return
+    }
+    if (newParticipationBlockedMessage) {
+      window.alert(newParticipationBlockedMessage)
+      return
+    }
+    if (!profile) {
+      setProfileOpen(true)
+      return
+    }
+    try {
+      const data = await startAttempt(activityKey, { visitorId })
+      setAttempt(data.attempt)
+      setAnswers({})
+      setCurrentQuestionIndex(0)
+      setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
+    } catch (err) {
+      if (isActivityWindowError(err)) {
+        window.alert(err.message)
+        return
+      }
+      setError(err?.message || '开始答题失败，请重试')
+    }
   }
 
   const handleProfileSaved = async (data) => {
@@ -795,6 +842,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   }
 
   const handleRetry = async () => {
+    if (newParticipationBlockedMessage) {
+      window.alert(newParticipationBlockedMessage)
+      setView('result')
+      return
+    }
     setRetrying(true)
     setQuizError('')
     setError('')
@@ -810,6 +862,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       setWheelTargetIndex(null)
       setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
     } catch (err) {
+      if (isActivityWindowError(err)) {
+        window.alert(err.message)
+        setView('result')
+        return
+      }
       setError(err?.message || '重新测试失败，请重试')
     } finally {
       setRetrying(false)
@@ -838,6 +895,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       })
     } catch (err) {
       setSpinning(false)
+      if (isActivityWindowError(err)) {
+        window.alert(err.message)
+        setView('result')
+        return
+      }
       setError(err?.message || '抽奖失败，请重试')
     }
   }
@@ -916,6 +978,9 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       currentQuestionIndex,
       myPrizes,
       debugAccess,
+      activityState,
+      activityWindow,
+      availablePoolCount,
     })
   }
 
