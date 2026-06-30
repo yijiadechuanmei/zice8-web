@@ -480,26 +480,28 @@
 
 .border-town-share-panel {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 236px;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 190px;
   text-align: right;
 }
 
 .border-town-share-panel svg {
-  width: 112px;
-  height: 112px;
+  display: block;
+  width: 76px;
+  height: 76px;
+  margin-left: auto;
   stroke: #fff9ed;
-  stroke-width: 7;
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
   fill: none;
 }
 
 .border-town-share-panel p {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   color: #fff9ed;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.5;
 }
