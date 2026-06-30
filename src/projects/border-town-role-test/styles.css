@@ -4,8 +4,11 @@
   --border-town-line: #436f61;
   --border-town-paper: #fff8e8;
   --border-town-page-bg: var(--border-town-hero-image);
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  height: 100svh;
+  max-height: 100vh;
+  max-height: 100svh;
+  overflow: hidden;
   color: var(--border-town-ink);
   background: #fff8e8;
   font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -21,7 +24,11 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  max-height: 100vh;
+  max-height: 100svh;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -31,7 +38,11 @@
   position: relative;
   flex: 0 0 auto;
   width: min(100vw, 750px);
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  max-height: 100vh;
+  max-height: 100svh;
   overflow: hidden;
   background-color: var(--border-town-paper);
   background-image: var(--border-town-page-bg);
@@ -45,8 +56,11 @@
 }
 
 .border-town-home-stage {
-  height: min(100svh, 1448px);
-  min-height: min(100svh, 1448px);
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  max-height: 100vh;
+  max-height: 100svh;
   background: #fff;
 }
 
@@ -169,8 +183,11 @@
 
 .border-town-quiz-stage,
 .border-town-result-stage {
-  height: max(100svh, min(216.27vw, 1622px));
-  min-height: max(100svh, min(216.27vw, 1622px));
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  max-height: 100vh;
+  max-height: 100svh;
   padding: 0;
 }
 
