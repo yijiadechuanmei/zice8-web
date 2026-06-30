@@ -750,7 +750,6 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
         style={{
           backgroundImage: `url(${longMarchStudyAssets.radio.background})`,
           transform: `scale(${scale})`,
-          '--lm-radio-ui-scale': scale ? 1 / scale : 1,
         }}
       >
         <button className="lm-radio-back" type="button" onClick={onBack} aria-label="返回">←</button>
