@@ -889,7 +889,9 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 
 .bql-toast-message {

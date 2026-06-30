@@ -645,6 +645,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     }, 1500)
   }, [])
 
+  const blockToastEvent = useCallback((event) => {
+    event.preventDefault()
+    event.stopPropagation()
+  }, [])
+
   useEffect(() => () => {
     if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
   }, [])
@@ -1111,7 +1116,15 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       />
       {bgmEnabled ? <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /> : null}
       {toastMessage ? (
-        <div className="bql-toast-layer" role="status" aria-live="polite">
+        <div
+          className="bql-toast-layer"
+          role="status"
+          aria-live="polite"
+          onClick={blockToastEvent}
+          onMouseDown={blockToastEvent}
+          onPointerDown={blockToastEvent}
+          onTouchMove={blockToastEvent}
+        >
           <div className="bql-toast-message">{toastMessage}</div>
         </div>
       ) : null}
