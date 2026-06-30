@@ -714,6 +714,8 @@ function Modal({ title, children, onClose, variant = 'default' }) {
     rules: longMarchStudyAssets.modal.rules,
     profile: longMarchStudyAssets.modal.profile,
   }[variant]
+  const showClose = variant !== 'profile'
+  const closeText = variant === 'rules' ? '返回' : '关闭'
 
   return (
     <div className={`lm-modal-mask lm-modal-mask-${variant}`}>
@@ -721,7 +723,10 @@ function Modal({ title, children, onClose, variant = 'default' }) {
         className={`lm-modal lm-modal-${variant}`}
         style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
       >
-        <header><h2>{title}</h2><button type="button" onClick={onClose}>关闭</button></header>
+        <header>
+          <h2>{title}</h2>
+          {showClose ? <button type="button" onClick={onClose}>{closeText}</button> : null}
+        </header>
         {children}
       </section>
     </div>
