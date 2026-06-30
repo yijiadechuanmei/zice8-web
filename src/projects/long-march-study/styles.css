@@ -846,7 +846,7 @@
   left: 0;
   top: 0;
   width: 750px;
-  min-height: 1448px;
+  min-height: 1624px;
   margin: 0;
   overflow: hidden;
   background-color: #fff;
@@ -871,16 +871,17 @@
 
 .lm-radio-back {
   position: absolute;
-  left: 20px;
-  top: 32px;
+  left: 35px;
+  top: 38px;
   z-index: 4;
-  width: 71px;
-  height: 49px;
+  width: 44px;
+  height: 44px;
   border: 0;
   background: transparent;
   color: #fff;
-  font-size: 50px;
-  line-height: 1;
+  font-size: 34px;
+  line-height: 44px;
+  text-align: center;
 }
 
 .lm-radio-panel,
@@ -1286,6 +1287,71 @@
   text-align: center;
 }
 
+.lm-radio-record-debug {
+  position: absolute;
+  left: 65px;
+  top: 1278px;
+  width: 620px;
+  min-height: 58px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.lm-radio-record-debug div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lm-radio-record-debug span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-radio-record-debug small {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  opacity: 0.9;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-radio-record-actions {
+  position: absolute;
+  left: 45px;
+  top: 1356px;
+  width: 660px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.lm-radio-record-actions button {
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: #e34020;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 56px;
+  text-align: center;
+}
+
+.lm-radio-record-actions button:disabled {
+  opacity: 0.52;
+}
+
 .lm-radio-confirm-button,
 .lm-radio-return-button {
   position: absolute;
@@ -1308,10 +1374,12 @@
 }
 
 .lm-radio-return-button {
-  left: 451px;
+  left: 257px;
+  top: 1424px;
   width: 236px;
   background: #ffe596;
   color: #e34020;
+  font-size: 24px;
 }
 
 .lm-radio-notice-mask {

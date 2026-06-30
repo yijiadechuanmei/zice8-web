@@ -39,6 +39,8 @@ const PAGE = {
 
 const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
 const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
+const RADIO_STAGE_WIDTH = 750
+const RADIO_STAGE_HEIGHT = 1624
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
@@ -317,6 +319,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           activityKey={activityKey}
           visitorId={visitorId}
           scripts={config.radioScripts || []}
+          shareStatus={shareStatus}
           onDone={async () => {
             await refresh()
             setPage(PAGE.RADIO)
@@ -739,9 +742,9 @@ function CheckinResultPage({ result, onPoster, onRank, onBack }) {
 }
 
 function RadioShell({ title = '云上红色电台', onBack, children }) {
-  const scale = useStageScale()
+  const scale = useStageScale(RADIO_STAGE_WIDTH)
   return (
-    <div className="lm-radio-viewport" style={{ width: 750 * scale, height: 1448 * scale }}>
+    <div className="lm-radio-viewport" style={{ width: RADIO_STAGE_WIDTH * scale, height: RADIO_STAGE_HEIGHT * scale }}>
       <section
         className="lm-radio-page"
         style={{
@@ -951,7 +954,18 @@ function RadioNoticeModal({ message, onClose }) {
   )
 }
 
-function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }) {
+function formatWxError(error) {
+  if (!error) return ''
+  if (typeof error === 'string') return error
+  if (error.errMsg) return error.errMsg
+  try {
+    return JSON.stringify(error)
+  } catch {
+    return String(error)
+  }
+}
+
+function UploadPage({ activityKey, visitorId, scripts, shareStatus, onDone, onBack, onToast }) {
   const [scriptKey, setScriptKey] = useState(scripts[0]?.key || '')
   const [step, setStep] = useState('scripts')
   const [recording, setRecording] = useState(false)
@@ -960,6 +974,10 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   const [recordDurationSec, setRecordDurationSec] = useState(0)
   const [previewPlaying, setPreviewPlaying] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [recordStatus, setRecordStatus] = useState('idle')
+  const [playStatus, setPlayStatus] = useState('idle')
+  const [uploadStatus, setUploadStatus] = useState('idle')
+  const [lastError, setLastError] = useState('')
   const [notice, setNotice] = useState('')
   const startedAtRef = useRef(0)
   const activeScript = scripts.find((item) => item.key === scriptKey) || scripts[0]
@@ -967,46 +985,91 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
 
   useEffect(() => {
     const wx = getWx()
-    if (!wx?.onVoicePlayEnd || !localId) return undefined
-    wx.onVoicePlayEnd({
-      success: (res) => {
-        if (!res?.localId || res.localId === localId) setPreviewPlaying(false)
-      },
-    })
+    if (wx?.onVoicePlayEnd) {
+      wx.onVoicePlayEnd({
+        success: (res) => {
+          if (!res?.localId || res.localId === localId) {
+            setPreviewPlaying(false)
+            setPlayStatus('ended')
+          }
+        },
+      })
+    }
+    if (wx?.onVoiceRecordEnd) {
+      wx.onVoiceRecordEnd({
+        complete: (res) => {
+          if (res?.localId) {
+            setLocalId(res.localId)
+            setRecordDurationSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)))
+            setRecording(false)
+            setRecordStatus('recorded')
+          }
+        },
+      })
+    }
     return undefined
   }, [localId])
 
   const start = () => {
+    if (recording) return
     const wx = getWx()
     startedAtRef.current = Date.now()
     setLocalId('')
     setMediaId('')
     setRecordDurationSec(0)
     setPreviewPlaying(false)
+    setRecordStatus('starting')
+    setPlayStatus('idle')
+    setUploadStatus('idle')
+    setLastError('')
     if (wx?.startRecord) {
-      wx.startRecord()
-      setRecording(true)
-      onToast('录音已开始')
+      wx.startRecord({
+        success: () => {
+          setRecording(true)
+          setRecordStatus('recording')
+          onToast('录音已开始')
+        },
+        cancel: () => {
+          setRecordStatus('idle')
+          setLastError('用户拒绝录音授权')
+          onToast('用户拒绝录音授权')
+        },
+        fail: (error) => {
+          const message = formatWxError(error) || '开始录音失败'
+          setRecordStatus('failed')
+          setLastError(message)
+          onToast(message)
+        },
+      })
       return
     }
     setLocalId(`debug-local-${Date.now()}`)
     setRecording(true)
+    setRecordStatus('recording')
     onToast('当前非微信环境，已进入调试录音模式')
   }
 
   const stop = () => {
+    if (!recording) return
     const wx = getWx()
     const nextDuration = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000))
+    setRecordStatus('stopping')
     if (wx?.stopRecord) {
       wx.stopRecord({
         success: (res) => {
           setLocalId(res.localId)
           setRecordDurationSec(nextDuration)
           setRecording(false)
+          setRecordStatus(res.localId ? 'recorded' : 'failed')
+          if (!res.localId) setLastError('停止录音未返回 localId')
+          onToast(res.localId ? '录音已完成' : '录音结束但未获取到音频')
         },
-        fail: () => {
+        fail: (error) => {
+          const message = formatWxError(error) || '停止录音失败'
           setRecording(false)
-          onToast('停止录音失败')
+          setRecordStatus('failed')
+          setLastError(message)
+          onToast(message)
         },
       })
       return
@@ -1014,22 +1077,39 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
     setLocalId(`debug-local-${Date.now()}`)
     setRecordDurationSec(nextDuration)
     setRecording(false)
+    setRecordStatus('recorded')
+    onToast('调试录音已完成')
   }
 
   const playPreview = () => {
     const wx = getWx()
     if (wx?.playVoice && localId) {
-      wx.playVoice({ localId })
+      setPlayStatus('playing')
+      setLastError('')
+      wx.playVoice({
+        localId,
+        fail: (error) => {
+          const message = formatWxError(error) || '播放录音失败'
+          setPreviewPlaying(false)
+          setPlayStatus('failed')
+          setLastError(message)
+          onToast(message)
+        },
+      })
       setPreviewPlaying(true)
       return
     }
-    onToast(localId ? '当前环境暂不支持试听微信录音' : '请先完成录音')
+    const message = localId ? '当前环境暂不支持试听微信录音' : '请先完成录音'
+    setPlayStatus('failed')
+    setLastError(message)
+    onToast(message)
   }
 
   const pausePreview = () => {
     const wx = getWx()
     if (wx?.pauseVoice && localId) wx.pauseVoice({ localId })
     setPreviewPlaying(false)
+    setPlayStatus('paused')
   }
 
   const resetRecording = () => {
@@ -1040,11 +1120,20 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
     setMediaId('')
     setRecordDurationSec(0)
     setPreviewPlaying(false)
+    setRecordStatus('idle')
+    setPlayStatus('idle')
+    setUploadStatus('idle')
+    setLastError('')
   }
 
   const upload = async () => {
     if (uploading) return
+    if (!localId && !mediaId) {
+      onToast('请先完成录音')
+      return
+    }
     const submit = async (nextMediaId) => {
+      setUploadStatus('syncing')
       await submitRecording(activityKey, {
         visitorId,
         title: activeScript?.title || '我的红色电台',
@@ -1052,11 +1141,14 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
         mediaId: nextMediaId,
         durationSec: recordDurationSec,
       })
+      setUploadStatus('submitted')
       setNotice('录音审核中\n审核通过后即可获得积分')
     }
 
     const wx = getWx()
     setUploading(true)
+    setUploadStatus('uploading')
+    setLastError('')
     if (wx?.uploadVoice && localId && !mediaId) {
       wx.uploadVoice({
         localId,
@@ -1065,48 +1157,50 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
           try {
             const nextMediaId = res.serverId
             setMediaId(nextMediaId)
+            setUploadStatus(nextMediaId ? 'uploaded' : 'failed')
+            if (!nextMediaId) throw new Error('微信上传未返回 serverId')
             await submit(nextMediaId)
           } catch (error) {
             if ((error.message || '').includes('只能上传一次')) {
+              setUploadStatus('failed')
               setNotice('每人只能上传一次')
               return
             }
+            setUploadStatus('failed')
+            setLastError(error.message || '上传失败')
             onToast(error.message || '上传失败')
           } finally {
             setUploading(false)
           }
         },
-        fail: () => {
+        fail: (error) => {
+          const message = formatWxError(error) || '微信录音上传失败'
           setUploading(false)
-          onToast('微信录音上传失败')
+          setUploadStatus('failed')
+          setLastError(message)
+          onToast(message)
         },
       })
       return
     }
 
     try {
+      if (wx && localId && !mediaId && !wx.uploadVoice) {
+        throw new Error('微信上传接口未就绪，请刷新页面后重试')
+      }
       await submit(mediaId || localId || `debug-media-${Date.now()}`)
     } catch (error) {
       if ((error.message || '').includes('只能上传一次')) {
+        setUploadStatus('failed')
         setNotice('每人只能上传一次')
         return
       }
+      setUploadStatus('failed')
+      setLastError(error.message || '上传失败')
       onToast(error.message || '上传失败')
     } finally {
       setUploading(false)
     }
-  }
-
-  const primaryRecordAction = () => {
-    if (recording) {
-      stop()
-      return
-    }
-    if (localId || mediaId) {
-      upload()
-      return
-    }
-    start()
   }
 
   return (
@@ -1161,12 +1255,31 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
               </>
             ) : null}
           </div>
+          <div className="lm-radio-record-debug">
+            <div>
+              <span>录音：{recording ? '录音中' : hasRecording ? '成功' : recordStatus === 'failed' ? '失败' : '未开始'}</span>
+              <span>音频：{localId ? '有' : '无'}</span>
+              <span>播放：{previewPlaying ? '播放中' : playStatus === 'paused' ? '已暂停' : playStatus === 'ended' ? '已结束' : '待播放'}</span>
+              <span>上传：{uploadStatus === 'submitted' ? '已提交' : uploadStatus === 'syncing' ? '同步OSS' : uploadStatus === 'uploaded' ? '已传微信' : uploadStatus === 'failed' ? '失败' : mediaId ? '有mediaId' : '未上传'}</span>
+            </div>
+            <small>
+              {recordDurationSec ? `时长 ${recordDurationSec} 秒` : '请先录音'}
+              {shareStatus?.wxConfigStatus ? ` · 微信 ${shareStatus.wxConfigStatus}` : ''}
+              {lastError ? ` · ${lastError}` : ''}
+            </small>
+          </div>
           <div className="lm-radio-record-status">
             {recording ? '录音中，点击暂停完成录制' : hasRecording ? '录音已完成，可以试听或上传' : '请点击开始录音'}
           </div>
-          <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction} disabled={uploading}>
-            {uploading ? '上传中' : recording ? '暂停录音' : hasRecording ? '确认上传' : '开始录音'}
-          </button>
+          <div className="lm-radio-record-actions">
+            <button type="button" onClick={start} disabled={recording || uploading}>录音</button>
+            <button type="button" onClick={stop} disabled={!recording || uploading}>暂停</button>
+            <button type="button" onClick={previewPlaying ? pausePreview : playPreview} disabled={!hasRecording || uploading}>
+              {previewPlaying ? '暂停' : '播放'}
+            </button>
+            <button type="button" onClick={upload} disabled={!hasRecording || recording || uploading}>{uploading ? '上传中' : '上传'}</button>
+            <button type="button" onClick={resetRecording} disabled={!hasRecording || uploading}>删除</button>
+          </div>
           <button className="lm-radio-return-button" type="button" onClick={() => setStep('scripts')}>返回</button>
         </>
       )}
