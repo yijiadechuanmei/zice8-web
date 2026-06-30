@@ -584,6 +584,8 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   const [wheelSpinKey, setWheelSpinKey] = useState('')
   const [wheelTargetIndex, setWheelTargetIndex] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
+  const [toastMessage, setToastMessage] = useState('')
+  const toastTimerRef = useRef(null)
   const config = useMemo(() => mergeBrochureConfig(publicConfig), [publicConfig])
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
   const defaultShareImage = assetUrl(config, config.home.logo)
@@ -611,6 +613,21 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
   }, [])
 
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
+
+  const showCenteredToast = useCallback((message) => {
+    const text = String(message || '').trim()
+    if (!text) return
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+    setToastMessage(text)
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage('')
+      toastTimerRef.current = null
+    }, 1500)
+  }, [])
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -729,6 +746,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     setAnswers({})
     setCurrentQuestionIndex(0)
     setQuizError('')
+    setToastMessage('')
     setSpinning(false)
     setWheelSpinKey('')
     setWheelTargetIndex(null)
@@ -749,7 +767,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       return
     }
     if (newParticipationBlockedMessage) {
-      window.alert(newParticipationBlockedMessage)
+      showCenteredToast(newParticipationBlockedMessage)
       return
     }
     if (!profile) {
@@ -764,7 +782,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
     } catch (err) {
       if (isActivityWindowError(err)) {
-        window.alert(err.message)
+        showCenteredToast(err.message)
         return
       }
       setError(err?.message || '开始答题失败，请重试')
@@ -843,7 +861,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
 
   const handleRetry = async () => {
     if (newParticipationBlockedMessage) {
-      window.alert(newParticipationBlockedMessage)
+      showCenteredToast(newParticipationBlockedMessage)
       setView('result')
       return
     }
@@ -863,7 +881,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
       setView(data.attempt?.status === 'submitted' ? 'result' : 'quiz')
     } catch (err) {
       if (isActivityWindowError(err)) {
-        window.alert(err.message)
+        showCenteredToast(err.message)
         setView('result')
         return
       }
@@ -896,7 +914,7 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
     } catch (err) {
       setSpinning(false)
       if (isActivityWindowError(err)) {
-        window.alert(err.message)
+        showCenteredToast(err.message)
         setView('result')
         return
       }
@@ -1072,6 +1090,11 @@ export default function BrochureQuizLotteryApp({ routeParams }) {
         onLogState={handleDebugLogState}
       />
       {bgmEnabled ? <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /> : null}
+      {toastMessage ? (
+        <div className="bql-toast-layer" role="status" aria-live="polite">
+          <div className="bql-toast-message">{toastMessage}</div>
+        </div>
+      ) : null}
     </div>
   )
 }
