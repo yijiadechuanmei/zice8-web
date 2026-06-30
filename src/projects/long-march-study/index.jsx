@@ -724,18 +724,22 @@ function DailyDoneModal({ onBack }) {
 }
 
 function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
+  const [pendingLocation, setPendingLocation] = useState(null)
   const locations = config.locations || []
   const assets = longMarchStudyAssets.checkin
   const visualLocations = [
-    { className: 'is-one', asset: assets.locationOne, activeAsset: assets.locationOneActive },
-    { className: 'is-two', asset: assets.locationTwo, activeAsset: assets.locationTwoActive },
-    { className: 'is-three', asset: assets.locationThree, activeAsset: assets.locationThreeActive },
-    { className: 'is-four', asset: assets.locationFour, activeAsset: assets.locationFourActive },
+    { className: 'is-one', asset: assets.locationOne, activeAsset: assets.locationOneActive, detail: assets.detailOne },
+    { className: 'is-two', asset: assets.locationTwo, activeAsset: assets.locationTwoActive, detail: assets.detailTwo },
+    { className: 'is-three', asset: assets.locationThree, activeAsset: assets.locationThreeActive, detail: assets.detailThree },
+    { className: 'is-four', asset: assets.locationFour, activeAsset: assets.locationFourActive, detail: assets.detailFour },
   ].map((item, index) => ({ ...item, location: locations[index] })).filter((item) => item.location)
+  const pendingVisual = pendingLocation
+    ? visualLocations.find((item) => item.location.key === pendingLocation.key)
+    : null
 
   return (
-    <IvxStage title="云上打卡" className="lm-checkin-page" background={assets.background} onBack={onBack}>
-      <img className="lm-checkin-map-bg" src={assets.map} alt="" />
+    <IvxStage title="云上打卡" className="lm-checkin-page" onBack={onBack}>
+      <img className="lm-checkin-bg" src={assets.background} alt="" />
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
       {visualLocations.map(({ location, className, asset, activeAsset }) => {
         const isNext = nextCheckin?.key === location.key
@@ -744,7 +748,7 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
             key={location.key}
             className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''}`}
             type="button"
-            onClick={() => isNext ? onCheckin(location) : null}
+            onClick={() => isNext ? setPendingLocation(location) : null}
             aria-label={`打卡${location.title}`}
           >
             <img className="lm-checkin-location-card" src={isNext ? activeAsset : asset} alt="" />
@@ -753,10 +757,44 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
           </button>
         )
       })}
-      {!nextCheckin ? (
-        <div className="lm-checkin-complete">所有地点已完成打卡</div>
+      <button className="lm-checkin-home-button" type="button" onClick={onBack} aria-label="返回首页">
+        <img src={assets.homeButton} alt="" />
+      </button>
+      {pendingLocation ? (
+        <CheckinConfirmModal
+          image={pendingVisual?.detail || assets.detailOne}
+          onConfirm={() => {
+            const location = pendingLocation
+            setPendingLocation(null)
+            onCheckin(location)
+          }}
+          onClose={() => setPendingLocation(null)}
+        />
       ) : null}
+      {!nextCheckin ? <CheckinDoneModal onBack={onBack} /> : null}
     </IvxStage>
+  )
+}
+
+function CheckinConfirmModal({ image, onConfirm, onClose }) {
+  return (
+    <div className="lm-checkin-modal-mask" onClick={onClose}>
+      <section className="lm-checkin-confirm-modal" onClick={(event) => event.stopPropagation()}>
+        <img src={image} alt="" />
+        <button type="button" onClick={onConfirm}>点击打卡</button>
+      </section>
+    </div>
+  )
+}
+
+function CheckinDoneModal({ onBack }) {
+  return (
+    <div className="lm-checkin-modal-mask">
+      <section className="lm-checkin-done-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
+        <p>今日打卡已完成</p>
+        <button type="button" onClick={onBack}>返回首页</button>
+      </section>
+    </div>
   )
 }
 

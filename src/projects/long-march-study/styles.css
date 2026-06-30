@@ -884,19 +884,19 @@
   -webkit-mask: var(--lm-back-icon) center / contain no-repeat;
 }
 
-.lm-checkin-map-bg {
+.lm-checkin-bg {
   position: absolute;
-  left: -312px;
+  left: 0;
   top: -87px;
-  width: 1156px;
-  height: 1694px;
+  width: 750px;
+  height: 1624px;
   display: block;
 }
 
 .lm-checkin-silhouette {
   position: absolute;
-  left: 387px;
-  top: 346px;
+  left: 75px;
+  top: 257px;
   width: 607px;
   height: 870px;
   display: block;
@@ -911,29 +911,29 @@
 }
 
 .lm-checkin-location.is-one {
-  left: 694px;
-  top: 245px;
+  left: 382px;
+  top: 156px;
   width: 363px;
   height: 276px;
 }
 
 .lm-checkin-location.is-two {
-  left: 335px;
-  top: 490px;
+  left: 23px;
+  top: 401px;
   width: 361px;
   height: 278px;
 }
 
 .lm-checkin-location.is-three {
-  left: 615px;
-  top: 756px;
+  left: 303px;
+  top: 667px;
   width: 379px;
   height: 279px;
 }
 
 .lm-checkin-location.is-four {
-  left: 542px;
-  top: 1111px;
+  left: 230px;
+  top: 1022px;
   width: 384px;
   height: 276px;
 }
@@ -953,7 +953,7 @@
   width: 158px;
   height: 52px;
   display: block;
-  opacity: 0.42;
+  opacity: 1;
 }
 
 .lm-checkin-location.is-two .lm-checkin-location-cta {
@@ -970,10 +970,6 @@
   top: 70px;
 }
 
-.lm-checkin-location.is-next .lm-checkin-location-cta {
-  opacity: 1;
-}
-
 .lm-checkin-location span {
   position: absolute;
   width: 1px;
@@ -983,18 +979,97 @@
   white-space: nowrap;
 }
 
-.lm-checkin-complete {
+.lm-checkin-home-button {
   position: absolute;
-  left: 82px;
-  top: 114px;
-  width: 586px;
-  min-height: 180px;
+  left: 191px;
+  top: 1315px;
+  z-index: 4;
+  width: 367px;
+  height: 68px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lm-checkin-home-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lm-checkin-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
   display: grid;
   place-items: center;
-  border-radius: 25px;
-  background: #fff;
-  color: #c42d15;
-  font-size: 34px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.lm-checkin-confirm-modal {
+  position: relative;
+  width: min(91.333vw, 685px);
+  aspect-ratio: 685 / 1184;
+}
+
+.lm-checkin-confirm-modal img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lm-checkin-confirm-modal button {
+  position: absolute;
+  left: 28.613%;
+  top: 37.753%;
+  width: 42.628%;
+  height: 5.743%;
+  border: 0;
+  border-radius: 100px;
+  background: #fe7f2a;
+  color: #fff;
+  font-size: clamp(22px, 4.533vw, 34px);
+  font-weight: 700;
+}
+
+.lm-checkin-done-modal {
+  position: relative;
+  width: min(91.333vw, 685px);
+  aspect-ratio: 685 / 677;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.lm-checkin-done-modal p {
+  position: absolute;
+  left: 14.161%;
+  top: 30.133%;
+  display: grid;
+  width: 70.949%;
+  height: 22.157%;
+  place-items: center;
+  margin: 0;
+  color: #000;
+  font-size: clamp(18px, 4.234vw, 29px);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.lm-checkin-done-modal button {
+  position: absolute;
+  left: 28.321%;
+  top: 63.368%;
+  width: 42.628%;
+  height: 10.044%;
+  border: 0;
+  border-radius: 100px;
+  background: #fe7f2a;
+  color: #fff;
+  font-size: clamp(22px, 4.963vw, 34px);
   font-weight: 700;
 }
 

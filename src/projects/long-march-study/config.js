@@ -5,6 +5,7 @@ export const LONG_MARCH_STUDY_ASSET_ROOT =
   `https://assets.zice8.com/${LONG_MARCH_STUDY_ACTIVITY_TYPE}/${LONG_MARCH_STUDY_ACTIVITY_KEY}`
 
 const asset = (filename) => `${LONG_MARCH_STUDY_ASSET_ROOT}/${filename}`
+const ih5Asset = (filename) => `https://file3.ih5.cn/v35/edt/u10013600/${filename}`
 
 export const longMarchStudyAssets = {
   home: {
@@ -55,8 +56,7 @@ export const longMarchStudyAssets = {
     shareButton: asset('d589e5f414195448856e34fc6b629b41_22444_277_67.png'),
   },
   checkin: {
-    background: asset('6d82d38087e1b37eddbf023260ac2173_1167263_750_1624.png'),
-    map: asset('bb9b6afbafd1cbb478e346dadb8fadbf_1250650_1156_1694.png'),
+    background: ih5Asset('522bb90d7aa579a2e8a338119f144eea_180528_750_1624.png'),
     silhouette: asset('87d3ed8bac5e1426510c6f70235f6f73_100281_607_870.png'),
     locationOne: asset('1721be6c4318820efe55591a6d5fcf56_118921_363_276.png'),
     locationOneActive: asset('3dde499c787390ea151bcadfc14fc0db_101568_363_276.png'),
@@ -68,6 +68,10 @@ export const longMarchStudyAssets = {
     locationFourActive: asset('f426c928645a9427b53682804a0cc867_119367_384_276.png'),
     checkButton: asset('3437ca526beaab53ce0a3a93c786ca10_10476_158_52.png'),
     homeButton: asset('1805234c8d7c935ecfb04f47f9dc5753_30178_367_68.png'),
+    detailOne: asset('bbf9ec2a07f6c20cdad629137a4738c7_730391_685_1139.png'),
+    detailTwo: asset('61f71c1b2376ead76a161b70ad380af9_625300_685_1139.png'),
+    detailThree: asset('4b7901a440f52f11201c664a61de4577_797191_685_1139.png'),
+    detailFour: asset('f967f593d141e3624dbf034e355bffb0_792812_685_1184.png'),
   },
   honors: {
     badge: asset('a55e1e9da1cb4578ffac6b0eebedd582_26351_119_134.png'),
