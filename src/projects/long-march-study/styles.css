@@ -679,6 +679,65 @@
   text-align: center;
 }
 
+.lm-debug-panel {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 220;
+  max-height: 44vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(20, 20, 20, 0.88);
+  color: #fff;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.lm-debug-title {
+  margin-bottom: 6px;
+  color: #ffd166;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.lm-debug-meta {
+  display: grid;
+  gap: 2px;
+  word-break: break-all;
+}
+
+.lm-debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.lm-debug-actions button {
+  border: 0;
+  border-radius: 999px;
+  background: #f8efe2;
+  color: #241714;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.lm-debug-actions button.is-danger {
+  background: #c42d15;
+  color: #fff;
+}
+
+.lm-debug-actions button.is-dark {
+  background: #444;
+  color: #fff;
+}
+
 .lm-empty,
 .lm-message {
   color: #72524b;

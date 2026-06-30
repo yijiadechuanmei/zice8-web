@@ -15,6 +15,7 @@ import {
   getMine,
   getPublicConfig,
   getRank,
+  resetDebugData,
   saveProfile,
   startQuiz,
   submitRecording,
@@ -36,6 +37,9 @@ const PAGE = {
   MINE: 'mine',
 }
 
+const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
+const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
+
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
 }
@@ -43,6 +47,7 @@ function getWx() {
 export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
+  const debugEnabled = useMemo(() => ['1', 'mobile'].includes(getQueryParam('debug')), [])
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
@@ -56,6 +61,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [quizResult, setQuizResult] = useState(null)
   const [checkinResult, setCheckinResult] = useState(null)
   const [mine, setMine] = useState(null)
+  const [shareStatus, setShareStatus] = useState({})
 
   useEffect(() => {
     if (window.location.pathname.startsWith('/long-march-study/')) {
@@ -117,11 +123,26 @@ export default function LongMarchStudyApp({ routeParams }) {
       shareImage: activity.shareImage,
     }
   }, [bootstrap, publicConfig])
-  useWechatShare(activityKey, shareActivity)
+  const handleWechatShareStatus = useCallback((nextStatus) => {
+    setShareStatus((current) => ({ ...current, ...nextStatus }))
+  }, [])
+  useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
   const config = bootstrap?.config || {}
   const profile = bootstrap?.profile
   const bgm = config.bgm || { enabled: false }
+
+  const clearRuntimeState = useCallback(() => {
+    setPage(PAGE.HOME)
+    setShowProfile(false)
+    setShowTasks(false)
+    setShowRules(false)
+    setPoster(null)
+    setQuizState(null)
+    setQuizResult(null)
+    setCheckinResult(null)
+    setMine(null)
+  }, [])
 
   const openJourney = () => {
     if (!profile) {
@@ -165,6 +186,32 @@ export default function LongMarchStudyApp({ routeParams }) {
       source,
     }
     setPoster(snapshot)
+  }
+
+  const resetDebugScope = async (scope) => {
+    try {
+      await resetDebugData(activityKey, {
+        visitorId,
+        confirmToken: DEBUG_RESET_CONFIRM_TOKEN,
+        scope,
+      })
+      clearRuntimeState()
+      await refresh()
+      setToast(scope === 'activity' ? '全部调试数据已重置' : '我的调试数据已重置')
+    } catch (error) {
+      setToast(error.message || '重置失败')
+    }
+  }
+
+  const resetAllDebugData = async () => {
+    const firstConfirmed = window.confirm('确认重置本活动全部用户数据？该操作会清空全部长征研学档案、积分、答题、打卡、录音、投票和荣誉。')
+    if (!firstConfirmed) return
+    const secondConfirmed = window.prompt(`二次确认：请输入“${DEBUG_RESET_ALL_CONFIRM_TEXT}”`)
+    if (secondConfirmed !== DEBUG_RESET_ALL_CONFIRM_TEXT) {
+      setToast('二次确认未通过')
+      return
+    }
+    await resetDebugScope('activity')
   }
 
   if (blockedMessage) return <MessageScreen title={blockedMessage} />
@@ -313,8 +360,70 @@ export default function LongMarchStudyApp({ routeParams }) {
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
       {poster ? <PosterModal poster={poster} onClose={() => setPoster(null)} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
+      {debugEnabled ? (
+        <DebugPanel
+          activityKey={activityKey}
+          page={page}
+          visitorId={visitorId}
+          identityKey={bootstrap?.identityKey}
+          profile={profile}
+          authReady={authReady}
+          shareStatus={shareStatus}
+          onResetMine={() => resetDebugScope('me')}
+          onResetAll={resetAllDebugData}
+          onLogState={() => console.log('[long-march-study debug state]', {
+            activityKey,
+            visitorId,
+            page,
+            bootstrap,
+            profile,
+            shareStatus,
+          })}
+        />
+      ) : null}
       <ActivityBgmPlayer bgm={bgm} activityKey={activityKey} />
     </main>
+  )
+}
+
+function DebugPanel({
+  activityKey,
+  page,
+  visitorId,
+  identityKey,
+  profile,
+  authReady,
+  shareStatus,
+  onResetMine,
+  onResetAll,
+  onLogState,
+}) {
+  const shareLabel = shareStatus.shareConfigured
+    ? '已配置'
+    : shareStatus.wxConfigStatus === 'failed'
+      ? '配置失败'
+      : '初始化中'
+  const userLabel = profile ? `已记录：${profile.name}` : '未提交资料'
+
+  return (
+    <div className="lm-debug-panel">
+      <div className="lm-debug-title">DEBUG</div>
+      <div className="lm-debug-meta">
+        <div>activityKey: {activityKey}</div>
+        <div>page: {page}</div>
+        <div>visitorId: {visitorId}</div>
+        <div>identity: {identityKey || '-'}</div>
+        <div>用户记录: {userLabel}</div>
+        <div>微信授权: {authReady ? 'ready' : 'pending'}</div>
+        <div>微信分享: {shareLabel}</div>
+        <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
+      </div>
+      <div className="lm-debug-actions">
+        <button type="button" onClick={onResetMine}>重置我的数据</button>
+        <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
+        <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
+      </div>
+    </div>
   )
 }
 
@@ -716,12 +825,17 @@ function Modal({ title, children, onClose, variant = 'default' }) {
   }[variant]
   const showClose = variant !== 'profile'
   const closeText = variant === 'rules' ? '返回' : '关闭'
+  const closeOnMask = variant === 'profile'
+  const handleMaskClick = (event) => {
+    if (closeOnMask && event.target === event.currentTarget) onClose()
+  }
 
   return (
-    <div className={`lm-modal-mask lm-modal-mask-${variant}`}>
+    <div className={`lm-modal-mask lm-modal-mask-${variant}`} onClick={handleMaskClick}>
       <section
         className={`lm-modal lm-modal-${variant}`}
         style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
+        onClick={(event) => event.stopPropagation()}
       >
         <header>
           <h2>{title}</h2>
