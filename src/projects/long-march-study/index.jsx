@@ -20,7 +20,7 @@ import {
   submitRecording,
   voteRecording,
 } from './api'
-import { LONG_MARCH_STUDY_ACTIVITY_KEY } from './config'
+import { LONG_MARCH_STUDY_ACTIVITY_KEY, longMarchStudyAssets } from './config'
 import './styles.css'
 
 const PAGE = {
@@ -131,6 +131,30 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowTasks(true)
   }
 
+  const openMine = async () => {
+    if (!profile) {
+      setShowProfile(true)
+      return
+    }
+    try {
+      const data = await getMine(activityKey, visitorId)
+      setMine(data)
+      setPage(PAGE.MINE)
+    } catch (error) {
+      setToast(error.message || '我的信息加载失败')
+    }
+  }
+
+  const openRank = async () => {
+    try {
+      const data = await getRank(activityKey, visitorId)
+      setBootstrap((current) => ({ ...current, rank: data }))
+      setPage(PAGE.RANK)
+    } catch (error) {
+      setToast(error.message || '排行榜加载失败')
+    }
+  }
+
   const showPoster = (source = 'journey') => {
     const snapshot = {
       name: profile?.name || '',
@@ -148,23 +172,14 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   return (
     <main className="lm-page">
-      <header className="lm-topbar">
-        <button type="button" onClick={() => setShowRules(true)}>活动规则</button>
-        <button type="button" onClick={async () => {
-          if (!profile) return setShowProfile(true)
-          const data = await getMine(activityKey, visitorId)
-          setMine(data)
-          setPage(PAGE.MINE)
-        }}>我的</button>
-        <button type="button" onClick={async () => {
-          const data = await getRank(activityKey, visitorId)
-          setBootstrap((current) => ({ ...current, rank: data }))
-          setPage(PAGE.RANK)
-        }}>排行榜</button>
-      </header>
-
       {page === PAGE.HOME ? (
-        <HomePage profile={profile} onStart={openJourney} />
+        <HomePage
+          profile={profile}
+          onStart={openJourney}
+          onRules={() => setShowRules(true)}
+          onMine={openMine}
+          onRank={openRank}
+        />
       ) : null}
       {page === PAGE.QUIZ ? (
         <QuizPage
@@ -304,19 +319,27 @@ export default function LongMarchStudyApp({ routeParams }) {
   )
 }
 
-function HomePage({ profile, onStart }) {
+function HomePage({ profile, onStart, onRules, onMine, onRank }) {
   return (
-    <section className="lm-home">
-      <div className="lm-brand">重走长征路</div>
-      <h1>共筑爱国魂</h1>
-      <p>完成红色任务，积累研学积分，点亮属于你的荣誉徽章。</p>
+    <section
+      className="lm-home"
+      style={{ backgroundImage: `url(${longMarchStudyAssets.home.background})` }}
+    >
+      <img className="lm-home-title-image" src={longMarchStudyAssets.home.title} alt="重走长征路 共筑爱国魂" />
+      <div className="lm-home-side-actions" aria-label="首页快捷入口">
+        <button type="button" onClick={onRules}>活动规则</button>
+        <button type="button" onClick={onMine}>我的</button>
+        <button type="button" onClick={onRank}>排行榜</button>
+      </div>
       {profile ? (
         <div className="lm-profile-pill">
           <span>{profile.name}</span>
           <strong>{profile.totalPoints} 积分</strong>
         </div>
       ) : null}
-      <button className="lm-primary" type="button" onClick={onStart}>开启研学之旅</button>
+      <button className="lm-home-start" type="button" onClick={onStart} aria-label="开启研学之旅">
+        <img src={longMarchStudyAssets.home.startButton} alt="" />
+      </button>
     </section>
   )
 }
@@ -325,10 +348,18 @@ function ProfileModal({ onClose, onSubmit }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   return (
-    <Modal title="填写研学信息" onClose={onClose}>
-      <label className="lm-field">姓名<input value={name} onChange={(event) => setName(event.target.value)} /></label>
-      <label className="lm-field">手机号码<input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" /></label>
-      <button className="lm-primary" type="button" onClick={() => onSubmit({ name, phone })}>提交并开启</button>
+    <Modal title="填写研学信息" onClose={onClose} variant="profile">
+      <div className="lm-profile-form">
+        <label className="lm-field">
+          <span className="lm-field-label">姓名</span>
+          <input placeholder="姓名（必填）" value={name} onChange={(event) => setName(event.target.value)} />
+        </label>
+        <label className="lm-field">
+          <span className="lm-field-label">电话</span>
+          <input placeholder="电话（必填）" value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" />
+        </label>
+      </div>
+      <button className="lm-profile-submit" type="button" onClick={() => onSubmit({ name, phone })}>提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交</button>
     </Modal>
   )
 }
@@ -650,7 +681,7 @@ function MinePage({ mine, onPage, onPoster }) {
 
 function RulesModal({ rules, onClose }) {
   return (
-    <Modal title="活动规则" onClose={onClose}>
+    <Modal title="活动规则" onClose={onClose} variant="rules">
       <ol className="lm-rules">{rules.map((rule) => <li key={rule}>{rule}</li>)}</ol>
     </Modal>
   )
@@ -679,10 +710,18 @@ function Panel({ title, children }) {
   )
 }
 
-function Modal({ title, children, onClose }) {
+function Modal({ title, children, onClose, variant = 'default' }) {
+  const backgroundImage = {
+    rules: longMarchStudyAssets.modal.rules,
+    profile: longMarchStudyAssets.modal.profile,
+  }[variant]
+
   return (
-    <div className="lm-modal-mask">
-      <section className="lm-modal">
+    <div className={`lm-modal-mask lm-modal-mask-${variant}`}>
+      <section
+        className={`lm-modal lm-modal-${variant}`}
+        style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
+      >
         <header><h2>{title}</h2><button type="button" onClick={onClose}>关闭</button></header>
         {children}
       </section>
