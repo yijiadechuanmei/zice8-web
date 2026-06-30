@@ -54,6 +54,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [showProfile, setShowProfile] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
   const [showRules, setShowRules] = useState(false)
+  const [showDailyDone, setShowDailyDone] = useState(false)
   const [poster, setPoster] = useState(null)
   const [toast, setToast] = useState('')
   const [loading, setLoading] = useState(true)
@@ -137,6 +138,7 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowProfile(false)
     setShowTasks(false)
     setShowRules(false)
+    setShowDailyDone(false)
     setPoster(null)
     setQuizState(null)
     setQuizResult(null)
@@ -238,11 +240,13 @@ export default function LongMarchStudyApp({ routeParams }) {
             setBootstrap((current) => ({ ...current, profile: result.profile }))
             setPage(PAGE.QUIZ_RESULT)
           }}
+          onBack={() => setPage(PAGE.HOME)}
+          onDailyDone={() => setShowDailyDone(true)}
           onToast={setToast}
         />
       ) : null}
       {page === PAGE.QUIZ_RESULT ? (
-        <QuizResultPage result={quizResult} onPoster={() => showPoster('quiz')} onRank={() => setPage(PAGE.RANK)} />
+        <QuizResultPage result={quizResult} onRank={() => setPage(PAGE.RANK)} onBack={() => setPage(PAGE.HOME)} />
       ) : null}
       {page === PAGE.CHECKIN ? (
         <CheckinPage
@@ -330,7 +334,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         />
       ) : null}
 
-      {page !== PAGE.HOME ? <button className="lm-back" type="button" onClick={() => setPage(PAGE.HOME)}>返回首页</button> : null}
+      {page !== PAGE.HOME && page !== PAGE.QUIZ ? <button className="lm-back" type="button" onClick={() => setPage(PAGE.HOME)}>返回首页</button> : null}
 
       {showProfile ? (
         <ProfileModal
@@ -358,6 +362,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         />
       ) : null}
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
+      {showDailyDone ? <DailyDoneModal onBack={() => { setShowDailyDone(false); setPage(PAGE.HOME) }} /> : null}
       {poster ? <PosterModal poster={poster} onClose={() => setPoster(null)} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       {debugEnabled ? (
@@ -507,77 +512,167 @@ function TaskModal({ onClose, onSelect }) {
   )
 }
 
-function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, onToast }) {
+function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, onBack, onDailyDone, onToast }) {
   const [index, setIndex] = useState(0)
+  const [selectedOptionId, setSelectedOptionId] = useState('')
   const [feedback, setFeedback] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const questions = quizState?.questions || []
+  const question = questions[index]
+  const questionCount = questions.length || 5
+  const progressPercent = `${Math.min(index + 1, questionCount) / questionCount * 100}%`
 
   useEffect(() => {
     if (quizState) return
     setBusy(true)
     startQuiz(activityKey, { visitorId })
       .then((data) => setQuizState(data.attempt))
-      .catch((error) => onToast(error.message || '今日答题不可用'))
+      .catch((error) => {
+        if ((error.message || '').includes('今日已完成答题')) {
+          onDailyDone()
+          return
+        }
+        onToast(error.message || '今日答题不可用')
+      })
       .finally(() => setBusy(false))
-  }, [activityKey, onToast, quizState, setQuizState, visitorId])
+  }, [activityKey, onDailyDone, onToast, quizState, setQuizState, visitorId])
 
-  if (busy || !quizState) return <Panel title="每日红色答题"><p>题目加载中...</p></Panel>
-  const question = quizState.questions[index]
-  if (!question) return <Panel title="每日红色答题"><button className="lm-primary" type="button" onClick={async () => onResult(await finishQuiz(activityKey, quizState.id, { visitorId }))}>查看结果</button></Panel>
+  const submitAnswer = async () => {
+    if (!question || !selectedOptionId || submitting || feedback) return
+    setSubmitting(true)
+    try {
+      const data = await answerQuiz(activityKey, quizState.id, {
+        visitorId,
+        questionId: question.id,
+        selectedOptionId,
+      })
+      setQuizState(data.attempt)
+      setFeedback(data.answer)
+    } catch (error) {
+      onToast(error.message || '提交答案失败')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const nextQuestion = async () => {
+    setFeedback(null)
+    setSelectedOptionId('')
+    if (index + 1 >= questionCount) {
+      const result = await finishQuiz(activityKey, quizState.id, { visitorId })
+      onResult(result)
+      return
+    }
+    setIndex(index + 1)
+  }
+
+  if (busy || !quizState || !question) {
+    return (
+      <section className="lm-quiz-page" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.background})` }}>
+        <div className="lm-quiz-loading">题目加载中...</div>
+      </section>
+    )
+  }
 
   return (
-    <Panel title={`第 ${index + 1} 题 / ${quizState.questions.length}`}>
-      <h2 className="lm-question">{question.title}</h2>
-      <div className="lm-options">
-        {question.options.map((option) => (
+    <section className="lm-quiz-page" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.background})` }}>
+      <div className="lm-quiz-stage">
+        <button className="lm-quiz-back" type="button" onClick={onBack} aria-label="返回">←</button>
+        <h1 className="lm-quiz-title">每日红色答题</h1>
+        <div className="lm-quiz-progress-text">
+          <span>答题进度</span>
+          <strong>{index + 1}</strong>
+          <span>/{questionCount}</span>
+        </div>
+        <div className="lm-quiz-progress-bar"><span style={{ width: progressPercent }} /></div>
+        <img className="lm-quiz-card-bg" src={longMarchStudyAssets.quiz.card} alt="" />
+        <div className="lm-quiz-content">
+          <div className="lm-quiz-tag">单选题</div>
+          <h2 className="lm-quiz-question">{index + 1}、{question.title}</h2>
+          <div className="lm-quiz-options">
+            {question.options.map((option, optionIndex) => {
+              const letter = String.fromCharCode(65 + optionIndex)
+              const isSelected = selectedOptionId === option.id
+              const isCorrect = feedback?.answerId === option.id
+              const isWrongSelected = feedback && isSelected && !feedback.correct
+              return (
+                <button
+                  key={option.id}
+                  className={`lm-quiz-option ${isSelected ? 'is-selected' : ''} ${isCorrect ? 'is-correct' : ''} ${isWrongSelected ? 'is-wrong' : ''}`}
+                  type="button"
+                  disabled={Boolean(feedback) || submitting}
+                  onClick={() => setSelectedOptionId(option.id)}
+                >
+                  {isWrongSelected ? <span className="lm-quiz-option-mark is-wrong">×</span> : null}
+                  {isCorrect ? <span className="lm-quiz-option-mark is-correct">✓</span> : null}
+                  <span>{letter}.{option.text}</span>
+                </button>
+              )
+            })}
+          </div>
           <button
-            key={option.id}
+            className="lm-quiz-submit"
             type="button"
-            disabled={Boolean(feedback)}
-            onClick={async () => {
-              try {
-                const data = await answerQuiz(activityKey, quizState.id, { visitorId, questionId: question.id, selectedOptionId: option.id })
-                setQuizState(data.attempt)
-                setFeedback(data.answer)
-              } catch (error) {
-                onToast(error.message || '提交答案失败')
-              }
-            }}
+            disabled={!selectedOptionId || submitting || Boolean(feedback)}
+            onClick={submitAnswer}
           >
-            {option.text}
+            提&nbsp;&nbsp;&nbsp;&nbsp;交
           </button>
-        ))}
+        </div>
       </div>
       {feedback ? (
-        <div className={`lm-feedback ${feedback.correct ? 'is-correct' : 'is-wrong'}`}>
-          <strong>{feedback.correct ? '回答正确' : '回答错误'}</strong>
-          <p>{feedback.analysis}</p>
-          <button className="lm-primary" type="button" onClick={async () => {
-            setFeedback(null)
-            if (index + 1 >= quizState.questions.length) {
-              const result = await finishQuiz(activityKey, quizState.id, { visitorId })
-              onResult(result)
-            } else {
-              setIndex(index + 1)
-            }
-          }}>继续</button>
-        </div>
+        <QuizFeedbackModal question={question} feedback={feedback} onNext={nextQuestion} />
       ) : null}
-    </Panel>
+    </section>
   )
 }
 
-function QuizResultPage({ result, onPoster, onRank }) {
+function QuizFeedbackModal({ question, feedback, onNext }) {
+  const answerIndex = (question?.options || []).findIndex((option) => option.id === feedback?.answerId)
+  const answerLetter = answerIndex >= 0 ? String.fromCharCode(65 + answerIndex) : (feedback?.answerId || '').toUpperCase()
+  return (
+    <div className="lm-quiz-modal-mask">
+      <section className="lm-quiz-feedback-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.feedbackPanel})` }}>
+        <div className="lm-quiz-feedback-status">{feedback.correct ? '回答正确' : '回答错误'}</div>
+        <div className="lm-quiz-feedback-answer">
+          <span>正确答案：</span><strong>{answerLetter}</strong>
+        </div>
+        <div className="lm-quiz-analysis">
+          <strong>知识解析卡：</strong>
+          <p>{feedback.analysis}</p>
+        </div>
+        <button className="lm-quiz-feedback-next" type="button" onClick={onNext}>下一题</button>
+      </section>
+    </div>
+  )
+}
+
+function QuizResultPage({ result, onRank, onBack }) {
   const data = result?.result
   return (
-    <Panel title="答题结果">
-      <div className="lm-score">{data?.score || 0}</div>
-      <p>答对 {data?.correctCount || 0} 题，获得 {data?.pointsEarned || 0} 积分</p>
-      <div className="lm-actions">
-        <button type="button" onClick={onPoster}>分享海报</button>
-        <button type="button" onClick={onRank}>排行榜</button>
-      </div>
-    </Panel>
+    <div className="lm-quiz-modal-mask">
+      <section className="lm-quiz-success-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.successPanel})` }}>
+        <h2>闯关成功</h2>
+        <img src={longMarchStudyAssets.quiz.successMedal} alt="" />
+        <div className="lm-quiz-success-correct">答对：<strong>{data?.correctCount || 0}</strong>题</div>
+        <div className="lm-quiz-success-label">获得</div>
+        <div className="lm-quiz-success-points"><strong>{data?.pointsEarned || 0}</strong><span>积分</span></div>
+        <button className="lm-quiz-result-rank" type="button" onClick={onRank}>排行榜</button>
+        <button className="lm-quiz-result-back" type="button" onClick={onBack}>返回首页</button>
+      </section>
+    </div>
+  )
+}
+
+function DailyDoneModal({ onBack }) {
+  return (
+    <div className="lm-quiz-modal-mask">
+      <section className="lm-quiz-done-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
+        <p>今日答题已完成<br />明天再来吧</p>
+        <button type="button" onClick={onBack}>返回首页</button>
+      </section>
+    </div>
   )
 }
 

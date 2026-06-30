@@ -28,4 +28,12 @@ export const longMarchStudyAssets = {
     radio: asset('d8182bd442b8dee95e9a31f92fe56d9e_107643_363_323.png'),
     honors: asset('92380f896067012b90a0ceae354d9892_130276_363_203.png'),
   },
+  quiz: {
+    background: asset('47dd9b7e076e8ed058a850edd9d695db_310081_750_1624.png'),
+    card: asset('2a6b3e480de2afa4fa79975cf6b238e7_65570_695_1153.png'),
+    feedbackPanel: asset('e3f78375422ded1b45926228995b2ee8_72462_685_958.png'),
+    successPanel: asset('ad8e60995b44a6d23f6452cb08dd7da1_612722_685_958.png'),
+    successMedal: asset('6bca398c1407c5d6b48ac671673c7866_40625_465_380.png'),
+    dailyDonePanel: asset('eb0dae3751e32de454cc7e37ba2822ac_65711_685_677.png'),
+  },
 }
