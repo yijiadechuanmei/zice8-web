@@ -202,6 +202,115 @@
   background: #fffaf2;
 }
 
+.lm-task-choice-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  overflow-y: auto;
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lm-task-choice {
+  position: relative;
+  width: min(100vw, 750px);
+  min-height: max(100vh, calc(min(100vw, 750px) * 1448 / 750));
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+}
+
+.lm-task-choice-bg,
+.lm-task-choice-title,
+.lm-task-choice-route,
+.lm-task-choice-card,
+.lm-task-choice-card img {
+  position: absolute;
+  display: block;
+}
+
+.lm-task-choice-bg {
+  left: -0.1333%;
+  top: -6.0773%;
+  width: 100%;
+  height: 112.1547%;
+  object-fit: fill;
+}
+
+.lm-task-choice-title {
+  left: 30.6667%;
+  top: 12.0166%;
+  width: 42%;
+  height: auto;
+  animation: lm-enter-pop 620ms 120ms cubic-bezier(0.16, 0.92, 0.28, 1) both;
+}
+
+.lm-task-choice-route {
+  left: 6.4%;
+  top: 11.395%;
+  width: 74.1333%;
+  height: auto;
+  animation: lm-enter-up 680ms 260ms cubic-bezier(0.16, 0.92, 0.28, 1) both;
+}
+
+.lm-task-choice-card {
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  animation: lm-enter-pop 620ms 420ms cubic-bezier(0.16, 0.92, 0.28, 1) both;
+}
+
+.lm-task-choice-card img {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.lm-task-choice-card.is-quiz {
+  left: 10.2667%;
+  top: 20.0967%;
+  width: 48.4%;
+  height: 16.2983%;
+}
+
+.lm-task-choice-card.is-checkin {
+  left: 50%;
+  top: 34.4613%;
+  width: 48.4%;
+  height: 18.5773%;
+}
+
+.lm-task-choice-card.is-radio {
+  left: 2.1333%;
+  top: 45.0967%;
+  width: 48.4%;
+  height: 22.3066%;
+}
+
+.lm-task-choice-card.is-honors {
+  left: 48.1333%;
+  top: 66.5746%;
+  width: 48.4%;
+  height: 14.0193%;
+}
+
+.lm-task-choice-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 3;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #c42d15;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 6px 14px rgba(126, 32, 24, 0.14);
+}
+
 .lm-question {
   font-size: 20px;
   line-height: 1.45;

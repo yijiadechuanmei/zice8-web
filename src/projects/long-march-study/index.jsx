@@ -482,15 +482,28 @@ function ProfileModal({ onClose, onSubmit }) {
 }
 
 function TaskModal({ onClose, onSelect }) {
+  const tasks = longMarchStudyAssets.tasks
   return (
-    <Modal title="任务中心" onClose={onClose}>
-      <div className="lm-task-grid">
-        <button type="button" onClick={() => onSelect(PAGE.QUIZ)}>每日红色答题</button>
-        <button type="button" onClick={() => onSelect(PAGE.CHECKIN)}>云上打卡·红色足迹</button>
-        <button type="button" onClick={() => onSelect(PAGE.RADIO)}>云上红色电台</button>
-        <button type="button" onClick={() => onSelect(PAGE.HONORS)}>我的荣誉</button>
-      </div>
-    </Modal>
+    <div className="lm-task-choice-mask">
+      <section className="lm-task-choice" aria-label="玩法选择">
+        <img className="lm-task-choice-bg" src={tasks.background} alt="" />
+        <img className="lm-task-choice-title" src={tasks.title} alt="玩法选择" />
+        <img className="lm-task-choice-route" src={tasks.route} alt="" />
+        <button className="lm-task-choice-card is-quiz" type="button" onClick={() => onSelect(PAGE.QUIZ)} aria-label="每日红色答题">
+          <img src={tasks.quiz} alt="" />
+        </button>
+        <button className="lm-task-choice-card is-checkin" type="button" onClick={() => onSelect(PAGE.CHECKIN)} aria-label="云上打卡·红色足迹">
+          <img src={tasks.checkin} alt="" />
+        </button>
+        <button className="lm-task-choice-card is-radio" type="button" onClick={() => onSelect(PAGE.RADIO)} aria-label="云上红色电台">
+          <img src={tasks.radio} alt="" />
+        </button>
+        <button className="lm-task-choice-card is-honors" type="button" onClick={() => onSelect(PAGE.HONORS)} aria-label="我的荣誉">
+          <img src={tasks.honors} alt="" />
+        </button>
+        <button className="lm-task-choice-close" type="button" onClick={onClose}>返回首页</button>
+      </section>
+    </div>
   )
 }
 

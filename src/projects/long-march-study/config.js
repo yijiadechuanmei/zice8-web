@@ -19,4 +19,13 @@ export const longMarchStudyAssets = {
     rules: asset('e3f78375422ded1b45926228995b2ee8_72462_685_958.png'),
     profile: asset('ba27e78232205479ae5c6f8b5f6d18c1_68551_686_794.png'),
   },
+  tasks: {
+    background: asset('74c6f34fc9b0ab2d02237c39b28c364f_639659_750_1624.png'),
+    title: asset('950d4238c826bf986d72cf19db15e013_25084_315_82.png'),
+    route: asset('c63aee7827c30882f9c46408acb8f3b7_66658_556_1112.png'),
+    quiz: asset('2b9ff07ee4d2fc00432a31f375d8a2bb_130590_363_236.png'),
+    checkin: asset('0a544d1c36c42801fba12970c65e604a_160968_363_269.png'),
+    radio: asset('d8182bd442b8dee95e9a31f92fe56d9e_107643_363_323.png'),
+    honors: asset('92380f896067012b90a0ceae354d9892_130276_363_203.png'),
+  },
 }
