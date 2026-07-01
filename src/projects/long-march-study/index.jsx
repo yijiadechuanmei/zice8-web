@@ -821,7 +821,6 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
         className="lm-radio-page"
         style={{
           transform: `scale(${scale})`,
-          '--lm-radio-ui-scale': scale ? 1 / scale : 1,
           '--lm-radio-back-icon': `url(${longMarchStudyAssets.shared.backIcon})`,
         }}
       >
