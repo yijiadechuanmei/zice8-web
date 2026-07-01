@@ -1969,15 +1969,12 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState(shareScreenshot || null)
   const currentStatus = status || shareScreenshot || null
-  const statusText = currentStatus?.status === 'approved'
-    ? '分享截图已通过，积分已发放'
-    : currentStatus?.status === 'rejected'
-      ? `分享截图未通过：${currentStatus.rejectReason || '请重新提交'}`
-      : currentStatus?.status === 'pending'
-        ? '上传成功，等待后台审核'
-        : currentStatus?.status === 'failed'
-          ? currentStatus.rejectReason || '截图提交失败'
-          : '请上传分享截图，审核通过后获得积分'
+  const submittedToday = Boolean(currentStatus?.submittedToday) || ['pending', 'approved', 'rejected'].includes(currentStatus?.status)
+  const statusText = submittedToday
+    ? '每日只可提交1次'
+    : currentStatus?.status === 'failed'
+      ? currentStatus.rejectReason || '截图提交失败'
+      : '请上传分享截图，审核通过后获得积分'
 
   const handleFile = async (event) => {
     const file = event.target.files?.[0]
@@ -1991,11 +1988,15 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
     try {
       const imageDataUrl = await readUploadImageDataUrl(file)
       const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
-      const screenshot = result?.screenshot || { status: 'pending' }
+      const screenshot = { ...(result?.screenshot || { status: 'pending' }), submittedToday: true }
       setStatus(screenshot)
       await onSubmitted?.(screenshot)
     } catch (error) {
       const message = error.message || '截图提交失败'
+      if (message.includes('每日') || message.includes('今日') || message.includes('只能提交') || message.includes('只能上传')) {
+        setStatus({ status: 'pending', submittedToday: true })
+        return
+      }
       setStatus({ status: 'failed', rejectReason: message })
       onToast?.(message)
     } finally {
@@ -2003,19 +2004,24 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
     }
   }
 
-  const canUpload = currentStatus?.status !== 'approved'
+  const canUpload = !submittedToday
 
   return (
     <RadioNoticeFrame className="lm-share-upload-panel" ariaLabel="提交截图">
       <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
       <p>{statusText}</p>
-      <button
-        className="lm-share-upload-submit"
-        type="button"
-        disabled={uploading}
-        onClick={canUpload ? () => inputRef.current?.click() : onClose}
-      >
-        <span>{uploading ? '提交中' : canUpload ? '提交' : '返回首页'}</span>
+      {canUpload ? (
+        <button
+          className="lm-share-upload-submit"
+          type="button"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
+        >
+          <span>{uploading ? '提交中' : '提交'}</span>
+        </button>
+      ) : null}
+      <button className="lm-share-upload-return" type="button" onClick={onClose}>
+        <span>返回</span>
       </button>
     </RadioNoticeFrame>
   )
@@ -2136,10 +2142,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         }
 
         if (isSharePoster) {
-          const [background, sharePoster] = await Promise.all([
-            loadPosterImage(posterAssets.shareBackground),
-            loadPosterImage(posterAssets.share),
-          ])
+          const sharePoster = await loadPosterImage(posterAssets.share)
           let avatar = null
           if (poster?.avatar) {
             try {
@@ -2149,16 +2152,15 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
             }
           }
           const canvas = document.createElement('canvas')
-          canvas.width = POSTER_STAGE_WIDTH
-          canvas.height = POSTER_STAGE_HEIGHT
+          canvas.width = 689
+          canvas.height = 1237
           const ctx = canvas.getContext('2d')
           ctx.fillStyle = '#fff'
           ctx.fillRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(background, 0, -88, 750, 1624)
-          ctx.drawImage(sharePoster, 30, 92, 689, 1237)
+          ctx.drawImage(sharePoster, 0, 0, 689, 1237)
 
-          const avatarX = 77
-          const avatarY = 1217
+          const avatarX = 47
+          const avatarY = 1125
           const avatarWidth = 85
           const avatarHeight = 86
           if (avatar) {
@@ -2175,18 +2177,13 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
           const qrCanvas = qrCanvasRef.current
           if (qrCanvas) {
             ctx.fillStyle = '#fff'
-            ctx.fillRect(540, 1217, 85, 85)
-            ctx.drawImage(qrCanvas, 540, 1217, 85, 85)
+            ctx.fillRect(510, 1125, 85, 85)
+            ctx.drawImage(qrCanvas, 510, 1125, 85, 85)
           }
 
-          drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 190, 1206, 328, 25, { align: 'center', color: '#fff' })
-          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 190, 1241, 328, 25, { align: 'center', color: '#fff' })
-          drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 190, 1276, 328, 25, { align: 'center', color: '#fff' })
-          ctx.fillStyle = '#fff'
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          ctx.font = '400 30px Arial, sans-serif'
-          ctx.fillText('长按海报可保存分享海报', 375, 1378)
+          drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 160, 1114, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 160, 1149, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 160, 1184, 328, 25, { align: 'left', color: '#fff' })
 
           const url = canvas.toDataURL('image/png')
           if (!cancelled) setPosterImage(url)
@@ -2256,12 +2253,12 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.shareBackground, posterAssets.title])
+  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
       <section
-        className={`lm-poster-page ${isHonorPoster ? 'is-honor-certificate' : ''}`}
+        className={`lm-poster-page ${isHonorPoster ? 'is-honor-certificate' : ''} ${isSharePoster ? 'is-share-poster' : ''}`}
         style={{
           transform: `scale(${scaleX})`,
           '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
@@ -2295,8 +2292,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
               />
             </div>
           ) : isSharePoster ? (
-            <>
-              <img className="lm-share-poster-bg" src={posterAssets.shareBackground} alt="" />
+            <div className="lm-share-poster-card">
               <img className="lm-share-poster-image" src={posterAssets.share} alt="" />
               {poster?.avatar ? <img className="lm-share-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-share-poster-avatar lm-avatar-placeholder" />}
               <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
@@ -2305,8 +2301,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
                 <span>闯关天数：{poster?.challengeDays || 0}天</span>
                 <span>累计分数：{poster?.totalPoints || 0}</span>
               </div>
-              <div className="lm-share-poster-save-tip">长按海报可保存分享海报</div>
-            </>
+            </div>
           ) : (
             <>
               <img className="lm-poster-bg" src={posterAssets.background} alt="" />
@@ -2323,7 +2318,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
             </>
           )}
         </div>
-        {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
+        {posterImage ? <img className={`lm-poster-generated ${isSharePoster ? 'is-share-poster-generated' : ''}`} src={posterImage} alt="长征研学分享海报" /> : null}
         {!posterImage && (!isHonorPoster || error) ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
       </section>
     </div>

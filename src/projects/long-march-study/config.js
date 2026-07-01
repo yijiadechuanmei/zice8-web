@@ -87,7 +87,6 @@ export const longMarchStudyAssets = {
   checkinPoster: {
     background: ih5Asset('b6fa357bd43abe1217388630d0ae368f_992544_750_1624.png'),
     title: ih5Asset('1d0cded85f7d17e338bf72dddbc61727_192912_612_366.png'),
-    shareBackground: ih5Asset('2202c2c14234671ff69c8642c0d51226_615533_750_1624.png'),
     share: ih5Asset('3e17b8ebb7ea1c14259431fd2ea5d142_1185040_689_1237.png'),
     locations: [
       ih5Asset('0c91f6328e26a61205498d9d4f6a3b7f_1089662_698_799.png'),
