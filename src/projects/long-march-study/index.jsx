@@ -294,6 +294,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <CheckinPage
           config={config}
           nextCheckin={bootstrap?.nextCheckin}
+          today={bootstrap?.today}
           onBack={() => setPage(PAGE.HOME)}
           onCheckin={async (location) => {
             try {
@@ -728,9 +729,9 @@ function DailyDoneModal({ onBack }) {
   )
 }
 
-function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
+function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
   const [pendingLocation, setPendingLocation] = useState(null)
-  const [showCheckinDone, setShowCheckinDone] = useState(false)
+  const [checkinNotice, setCheckinNotice] = useState('')
   const locations = config.locations || []
   const assets = longMarchStudyAssets.checkin
   const visualLocations = [
@@ -749,12 +750,13 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
       {visualLocations.map(({ location, className, asset, activeAsset }) => {
         const isNext = nextCheckin?.key === location.key
+        const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
           <button
             key={location.key}
             className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''}`}
             type="button"
-            onClick={() => isNext ? setPendingLocation(location) : setShowCheckinDone(true)}
+            onClick={() => isNext ? setPendingLocation(location) : setCheckinNotice(lockedNotice)}
             aria-label={`打卡${location.title}`}
           >
             <img className="lm-checkin-location-card" src={isNext ? asset : activeAsset} alt="" />
@@ -777,7 +779,7 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
           onClose={() => setPendingLocation(null)}
         />
       ) : null}
-      {showCheckinDone ? <CheckinDoneModal onBack={onBack} /> : null}
+      {checkinNotice ? <CheckinDoneModal message={checkinNotice} onBack={onBack} /> : null}
     </IvxStage>
   )
 }
@@ -793,11 +795,11 @@ function CheckinConfirmModal({ image, onConfirm, onClose }) {
   )
 }
 
-function CheckinDoneModal({ onBack }) {
+function CheckinDoneModal({ message = '今日打卡已完成', onBack }) {
   return (
     <div className="lm-checkin-modal-mask">
       <section className="lm-checkin-done-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
-        <p>今日打卡已完成</p>
+        <p>{message}</p>
         <button type="button" onClick={onBack}>返回首页</button>
       </section>
     </div>
