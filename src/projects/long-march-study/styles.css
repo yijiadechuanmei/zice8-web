@@ -2204,7 +2204,7 @@
   color: #fff;
   font-size: 25px;
   line-height: 35px;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

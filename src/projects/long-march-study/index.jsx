@@ -143,7 +143,8 @@ function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
   ctx.fillStyle = options.color || '#fff'
   ctx.textAlign = options.align || 'center'
   ctx.textBaseline = options.baseline || 'middle'
-  ctx.fillText(value, x + width / 2, y)
+  const textX = options.align === 'left' ? x : options.align === 'right' ? x + width : x + width / 2
+  ctx.fillText(value, textX, y)
 }
 
 function drawAvatarPlaceholder(ctx, x, y, size) {
@@ -1648,9 +1649,9 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
           ctx.drawImage(qrCanvas, 575, 1326, 85, 85)
         }
 
-        drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 185, 1329, 328, 25, { color: '#fff' })
-        drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 185, 1364, 328, 25, { color: '#fff' })
-        drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 185, 1399, 328, 25, { color: '#fff' })
+        drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 185, 1329, 328, 25, { align: 'left', color: '#fff' })
+        drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 185, 1364, 328, 25, { align: 'left', color: '#fff' })
+        drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 185, 1399, 328, 25, { align: 'left', color: '#fff' })
 
         const url = canvas.toDataURL('image/png')
         if (!cancelled) setPosterImage(url)
