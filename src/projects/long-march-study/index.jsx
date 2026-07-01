@@ -757,7 +757,7 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
             aria-label={`打卡${location.title}`}
           >
             <img className="lm-checkin-location-card" src={isNext ? activeAsset : asset} alt="" />
-            <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" />
+            {isNext ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
             <span>{location.title}</span>
           </button>
         )
