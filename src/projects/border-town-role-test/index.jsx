@@ -14,7 +14,7 @@ import {
   BORDER_TOWN_ROLE_TEST_ACTIVITY_TYPE,
   mergeConfig,
 } from './config'
-import { QUESTIONS, ROLE_ORDER, ROLES, getResultRole, scoreAnswers } from './quizData'
+import { QUESTIONS, ROLES, SCORE_RANGES, getResultRole, scoreAnswers } from './quizData'
 import './styles.css'
 
 export default function BorderTownRoleTestProject({ routeParams }) {
@@ -36,8 +36,8 @@ export default function BorderTownRoleTestProject({ routeParams }) {
   const homeTitleImage = assetUrl(config.assetsBaseUrl, config.homeTitleImage)
   const homeButtonImage = assetUrl(config.assetsBaseUrl, config.homeButtonImage)
   const currentQuestion = QUESTIONS[questionIndex]
-  const scores = useMemo(() => scoreAnswers(answers), [answers])
-  const resultRole = useMemo(() => getResultRole(scores, answers), [scores, answers])
+  const totalScore = useMemo(() => scoreAnswers(answers), [answers])
+  const resultRole = useMemo(() => getResultRole(totalScore), [totalScore])
   const answeredCount = Object.keys(answers).length
   const progress = step === 'quiz' ? ((questionIndex + 1) / QUESTIONS.length) * 100 : 0
 
@@ -151,7 +151,7 @@ export default function BorderTownRoleTestProject({ routeParams }) {
         <ResultPage
           answeredCount={answeredCount}
           resultRole={resultRole}
-          scores={scores}
+          totalScore={totalScore}
           onRestart={restart}
           onShare={() => setShareVisible(true)}
         />
@@ -232,7 +232,7 @@ function QuizPage({ answer, advancing, progress, question, questionIndex, onBack
   )
 }
 
-function ResultPage({ answeredCount, resultRole, scores, onRestart, onShare }) {
+function ResultPage({ answeredCount, resultRole, totalScore, onRestart, onShare }) {
   return (
     <section className="border-town-result border-town-page-in" aria-label="测试结果">
       <div className="border-town-fixed-stage border-town-result-stage">
@@ -246,9 +246,9 @@ function ResultPage({ answeredCount, resultRole, scores, onRestart, onShare }) {
         </article>
 
         <p className="border-town-score-note">
-          已完成 {answeredCount}/{QUESTIONS.length} 题 · 最高角色分 {scores[resultRole.id] || 0} 分
+          已完成 {answeredCount}/{QUESTIONS.length} 题 · 总分 {totalScore}/20 分
         </p>
-        <ScoreBars scores={scores} activeRoleId={resultRole.id} />
+        <ScoreBars totalScore={totalScore} activeRoleId={resultRole.id} />
 
         <div className="border-town-actions">
           <button className="border-town-secondary-button" type="button" onClick={onRestart}>
@@ -265,18 +265,20 @@ function ResultPage({ answeredCount, resultRole, scores, onRestart, onShare }) {
   )
 }
 
-function ScoreBars({ scores, activeRoleId }) {
-  const maxScore = QUESTIONS.length * 5
+function ScoreBars({ totalScore, activeRoleId }) {
+  const maxScore = QUESTIONS.length * 4
   return (
-    <div className="border-town-score-list" aria-label="角色分数">
-      {ROLE_ORDER.map((roleId) => {
+    <div className="border-town-score-list" aria-label="分数区间">
+      {SCORE_RANGES.map((range) => {
+        const roleId = range.roleId
         const role = ROLES[roleId]
-        const score = scores[roleId] || 0
+        const rangeMidpoint = (range.min + range.max) / 2
+        const width = roleId === activeRoleId ? (totalScore / maxScore) * 100 : (rangeMidpoint / maxScore) * 100
         return (
           <div className={roleId === activeRoleId ? 'is-active' : ''} key={roleId}>
             <span>{role.name}</span>
-            <i><b style={{ width: `${(score / maxScore) * 100}%` }} /></i>
-            <strong>{score}</strong>
+            <i><b style={{ width: `${width}%` }} /></i>
+            <strong>{role.rangeLabel}</strong>
           </div>
         )
       })}
