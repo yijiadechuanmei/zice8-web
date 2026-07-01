@@ -5,7 +5,7 @@ import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam, getTokenFromUrl } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, isWechatBrowser } from '../../shared/utils/url'
 import { setToken } from '../../shared/api/request'
 import {
   answerQuiz,
@@ -60,6 +60,7 @@ const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
 }
+const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
   const rank = index + 1
   return {
@@ -186,6 +187,36 @@ function readFileAsDataUrl(file) {
     reader.onload = () => resolve(String(reader.result || ''))
     reader.onerror = () => reject(new Error('截图读取失败'))
     reader.readAsDataURL(file)
+  })
+}
+
+async function readUploadImageDataUrl(file) {
+  const originalDataUrl = await readFileAsDataUrl(file)
+  return new Promise((resolve) => {
+    const image = new Image()
+    image.onload = () => {
+      const maxSide = 1440
+      const width = image.naturalWidth || image.width
+      const height = image.naturalHeight || image.height
+      if (!width || !height) {
+        resolve(originalDataUrl)
+        return
+      }
+      const scale = Math.min(1, maxSide / width, maxSide / height)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.max(1, Math.round(width * scale))
+      canvas.height = Math.max(1, Math.round(height * scale))
+      const context = canvas.getContext('2d')
+      if (!context) {
+        resolve(originalDataUrl)
+        return
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      const compressed = canvas.toDataURL('image/jpeg', 0.82)
+      resolve(compressed.length < originalDataUrl.length ? compressed : originalDataUrl)
+    }
+    image.onerror = () => resolve(originalDataUrl)
+    image.src = originalDataUrl
   })
 }
 
@@ -611,6 +642,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           activityKey={activityKey}
           visitorId={visitorId}
           scripts={config.radioScripts || []}
+          wechatConfigStatus={shareStatus.wxConfigStatus}
           onDone={async () => {
             await refresh()
             setPage(PAGE.RADIO)
@@ -1421,18 +1453,35 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
   )
 }
 
+function RadioNoticeFrame({ children, className = '', ariaLabel = '提示' }) {
+  const modalFit = useModalFit(NOTICE_PANEL_SPEC)
+  return (
+    <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label={ariaLabel}>
+      <div className="lm-radio-notice-frame" style={{ width: modalFit.width, height: modalFit.height }}>
+        <section
+          className={`lm-radio-notice-panel ${className}`.trim()}
+          style={{
+            backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})`,
+            transform: `scale(${modalFit.scale})`,
+          }}
+        >
+          {children}
+        </section>
+      </div>
+    </div>
+  )
+}
+
 function RadioNoticeModal({ message, onClose }) {
   if (!message) return null
   return (
-    <div className="lm-radio-notice-mask">
-      <section className="lm-radio-notice-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})` }}>
-        <p>{message}</p>
-        <button type="button" onClick={onClose}>
-          <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
-          <span>返回首页</span>
-        </button>
-      </section>
-    </div>
+    <RadioNoticeFrame>
+      <p>{message}</p>
+      <button type="button" onClick={onClose}>
+        <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
+        <span>返回首页</span>
+      </button>
+    </RadioNoticeFrame>
   )
 }
 
@@ -1447,7 +1496,7 @@ function formatWxError(error) {
   }
 }
 
-function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }) {
+function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDone, onBack, onToast }) {
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
@@ -1487,6 +1536,10 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   const start = () => {
     if (recording) return
     const wx = getWx()
+    if (isWechatBrowser() && (!wx?.startRecord || wechatConfigStatus !== 'success')) {
+      onToast(wechatConfigStatus === 'failed' ? '微信录音初始化失败，请刷新页面后重试' : '微信录音初始化中，请稍后再试')
+      return
+    }
     startedAtRef.current = Date.now()
     setLocalId('')
     setMediaId('')
@@ -1923,7 +1976,7 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
     }
     setUploading(true)
     try {
-      const imageDataUrl = await readFileAsDataUrl(file)
+      const imageDataUrl = await readUploadImageDataUrl(file)
       const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
       const screenshot = result?.screenshot || { status: 'pending' }
       setStatus(screenshot)
@@ -1940,21 +1993,19 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
   const canUpload = currentStatus?.status !== 'approved'
 
   return (
-    <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label="提交截图">
-      <section className="lm-radio-notice-panel lm-share-upload-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})` }}>
-        <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
-        <p>{statusText}</p>
-        <button
-          type="button"
-          disabled={uploading}
-          onClick={canUpload ? () => inputRef.current?.click() : onClose}
-        >
-          <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
-          <span>{uploading ? '提交中' : canUpload ? '上传截图' : '关闭'}</span>
-        </button>
-        <button className="lm-share-upload-close" type="button" onClick={onClose}>关闭</button>
-      </section>
-    </div>
+    <RadioNoticeFrame className="lm-share-upload-panel" ariaLabel="提交截图">
+      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
+      <p>{statusText}</p>
+      <button
+        type="button"
+        disabled={uploading}
+        onClick={canUpload ? () => inputRef.current?.click() : onClose}
+      >
+        <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
+        <span>{uploading ? '提交中' : canUpload ? '上传截图' : '关闭'}</span>
+      </button>
+      <button className="lm-share-upload-close" type="button" onClick={onClose}>关闭</button>
+    </RadioNoticeFrame>
   )
 }
 

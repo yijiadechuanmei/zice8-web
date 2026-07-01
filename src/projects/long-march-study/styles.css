@@ -1882,6 +1882,11 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
+  transform-origin: 0 0;
+}
+
+.lm-radio-notice-frame {
+  position: relative;
 }
 
 .lm-radio-notice-panel p {
@@ -1932,12 +1937,22 @@
   opacity: 0.7;
 }
 
+.lm-share-upload-panel p {
+  top: 154px;
+  height: 172px;
+  padding: 0 28px;
+  font-size: 28px;
+  line-height: 1.5;
+}
+
 .lm-share-upload-close {
-  top: 508px !important;
+  left: 272px !important;
+  top: 502px !important;
+  width: 140px !important;
   height: 44px !important;
   background: transparent !important;
   color: #8a3a24 !important;
-  font-size: 24px !important;
+  font-size: 23px !important;
 }
 
 .lm-honors-card,
