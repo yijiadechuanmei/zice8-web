@@ -481,7 +481,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       || checkinResult?.checkin
       || checkins[0]
       || null
-    if (!selectedCheckin && options.source !== 'honor') {
+    if (!selectedCheckin && !['honor', 'share'].includes(options.source)) {
       setToast('完成打卡后可查看海报')
       return
     }
@@ -732,6 +732,10 @@ export default function LongMarchStudyApp({ routeParams }) {
           onSelect={async (nextPage) => {
             setShowTasks(false)
             if (nextPage === PAGE.QUIZ) setQuizState(null)
+            if (nextPage === 'sharePoster') {
+              await showPoster({ source: 'share', returnPage: PAGE.HOME })
+              return
+            }
             if (nextPage === PAGE.HONORS) {
               await openHonors()
               return
@@ -883,7 +887,7 @@ function TaskModal({ onClose, onSelect }) {
         <button className="lm-task-choice-card is-radio" type="button" onClick={() => onSelect(PAGE.RADIO)} aria-label="云上红色电台">
           <img src={tasks.radio} alt="" />
         </button>
-        <button className="lm-task-choice-card is-honors" type="button" onClick={() => onSelect(PAGE.HONORS)} aria-label="我的荣誉">
+        <button className="lm-task-choice-card is-honors" type="button" onClick={() => onSelect('sharePoster')} aria-label="分享传播">
           <img src={tasks.honors} alt="" />
         </button>
         <button className="lm-task-choice-close" type="button" onClick={onClose}>返回首页</button>
@@ -2068,6 +2072,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
   const [error, setError] = useState('')
   const posterAssets = longMarchStudyAssets.checkinPoster
   const isHonorPoster = poster?.source === 'honor'
+  const isSharePoster = poster?.source === 'share'
   const certificateName = poster?.name || poster?.nickname || '姓名'
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
   const locationImage = getCheckinPosterImage(poster, posterLocationIndex)
@@ -2122,6 +2127,64 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
             ctx.fillRect(530, 1068, 116, 116)
             ctx.drawImage(qrCanvas, 530, 1068, 116, 116)
           }
+
+          const url = canvas.toDataURL('image/png')
+          if (!cancelled) setPosterImage(url)
+          return
+        }
+
+        if (isSharePoster) {
+          const [background, sharePoster] = await Promise.all([
+            loadPosterImage(longMarchStudyAssets.radio.background),
+            loadPosterImage(posterAssets.share),
+          ])
+          let avatar = null
+          if (poster?.avatar) {
+            try {
+              avatar = await loadPosterImage(poster.avatar, { verifyCanvas: true })
+            } catch {
+              avatar = null
+            }
+          }
+          const canvas = document.createElement('canvas')
+          canvas.width = POSTER_STAGE_WIDTH
+          canvas.height = POSTER_STAGE_HEIGHT
+          const ctx = canvas.getContext('2d')
+          ctx.fillStyle = '#fff'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(background, 0, -88, 750, 1624)
+          ctx.drawImage(sharePoster, 30, 92, 689, 1237)
+
+          const avatarX = 77
+          const avatarY = 1217
+          const avatarWidth = 85
+          const avatarHeight = 86
+          if (avatar) {
+            ctx.save()
+            ctx.beginPath()
+            ctx.arc(avatarX + avatarWidth / 2, avatarY + avatarHeight / 2, avatarWidth / 2, 0, Math.PI * 2)
+            ctx.clip()
+            ctx.drawImage(avatar, avatarX, avatarY, avatarWidth, avatarHeight)
+            ctx.restore()
+          } else {
+            drawAvatarPlaceholder(ctx, avatarX, avatarY, avatarWidth)
+          }
+
+          const qrCanvas = qrCanvasRef.current
+          if (qrCanvas) {
+            ctx.fillStyle = '#fff'
+            ctx.fillRect(540, 1217, 85, 85)
+            ctx.drawImage(qrCanvas, 540, 1217, 85, 85)
+          }
+
+          drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 190, 1206, 328, 25, { align: 'center', color: '#fff' })
+          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 190, 1241, 328, 25, { align: 'center', color: '#fff' })
+          drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 190, 1276, 328, 25, { align: 'center', color: '#fff' })
+          ctx.fillStyle = '#fff'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.font = '400 30px Arial, sans-serif'
+          ctx.fillText('长按海报可保存分享海报', 375, 1378)
 
           const url = canvas.toDataURL('image/png')
           if (!cancelled) setPosterImage(url)
@@ -2191,7 +2254,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, certificateName, isHonorPoster, locationImage, poster, posterAssets.background, posterAssets.title])
+  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
@@ -2229,6 +2292,19 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
                 marginSize={1}
               />
             </div>
+          ) : isSharePoster ? (
+            <>
+              <img className="lm-share-poster-bg" src={longMarchStudyAssets.radio.background} alt="" />
+              <img className="lm-share-poster-image" src={posterAssets.share} alt="" />
+              {poster?.avatar ? <img className="lm-share-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-share-poster-avatar lm-avatar-placeholder" />}
+              <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
+              <div className="lm-share-poster-user">
+                <span>{poster?.nickname || poster?.name || '研学用户'}</span>
+                <span>闯关天数：{poster?.challengeDays || 0}天</span>
+                <span>累计分数：{poster?.totalPoints || 0}</span>
+              </div>
+              <div className="lm-share-poster-save-tip">长按海报可保存分享海报</div>
+            </>
           ) : (
             <>
               <img className="lm-poster-bg" src={posterAssets.background} alt="" />

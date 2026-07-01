@@ -2726,6 +2726,85 @@
   height: 1624px;
 }
 
+.lm-share-poster-bg {
+  position: absolute;
+  left: 0;
+  top: -88px;
+  width: 750px;
+  height: 1624px;
+  object-fit: fill;
+}
+
+.lm-share-poster-image {
+  position: absolute;
+  left: 30px;
+  top: 92px;
+  width: 689px;
+  height: 1237px;
+  object-fit: fill;
+}
+
+.lm-share-poster-avatar {
+  position: absolute;
+  left: 77px;
+  top: 1217px;
+  width: 85px;
+  height: 86px;
+  overflow: hidden;
+  border-radius: 100px;
+  object-fit: cover;
+}
+
+.lm-share-poster-qrcode {
+  position: absolute;
+  left: 540px;
+  top: 1217px;
+  width: 85px !important;
+  height: 85px !important;
+  background: #fff;
+}
+
+.lm-share-poster-user {
+  position: absolute;
+  left: 190px;
+  top: 1205px;
+  width: 328px;
+  height: 113px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.lm-share-poster-user span {
+  width: 100%;
+  height: 35px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 25px;
+  line-height: 35px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-share-poster-save-tip {
+  position: absolute;
+  left: 131px;
+  top: 1356px;
+  width: 488px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  font-size: 30px;
+  line-height: 43px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .lm-poster-location {
   position: absolute;
   left: 47px;
