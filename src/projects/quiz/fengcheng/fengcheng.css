@@ -616,14 +616,18 @@
   background: #dcefff;
 }
 
-.fengcheng-loading-page .fengcheng-home-bg {
-  top: 0;
+.fengcheng-loading-page .fengcheng-bg-fallback {
+  background:
+    radial-gradient(circle at 13% 8%, rgba(255,255,255,.76) 0 24px, transparent 25px),
+    radial-gradient(circle at 21% -5%, rgba(255,255,255,.72) 0 210px, transparent 212px),
+    radial-gradient(circle at 92% 5%, rgba(255,255,255,.36) 0 170px, transparent 171px),
+    linear-gradient(180deg, #cfe9ff 0%, #f8fcff 48%, #eff8ff 76%, #75bdff 100%);
 }
 
 .fengcheng-loading-card {
   position: absolute;
   left: 168px;
-  top: 612px;
+  top: 592px;
   width: 414px;
   min-height: 148px;
   border-radius: 32px;

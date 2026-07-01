@@ -1,12 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 const DESIGN_WIDTH = 750
 
+function getInitialScale(height, fitToViewport) {
+  if (typeof window === 'undefined') return 1
+  const widthScale = window.innerWidth / DESIGN_WIDTH
+  const heightScale = fitToViewport ? window.innerHeight / height : 1
+  return Math.min(widthScale, heightScale, 1)
+}
+
 export default function DesignStage({ height = 1624, fitToViewport = false, children }) {
   const viewportRef = useRef(null)
-  const [scale, setScale] = useState(1)
+  const [scale, setScale] = useState(() => getInitialScale(height, fitToViewport))
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     function updateScale() {
       const containerWidth = viewportRef.current?.parentElement?.getBoundingClientRect().width || window.innerWidth
       const widthScale = containerWidth / DESIGN_WIDTH
@@ -16,7 +23,11 @@ export default function DesignStage({ height = 1624, fitToViewport = false, chil
 
     updateScale()
     window.addEventListener('resize', updateScale)
-    return () => window.removeEventListener('resize', updateScale)
+    window.visualViewport?.addEventListener('resize', updateScale)
+    return () => {
+      window.removeEventListener('resize', updateScale)
+      window.visualViewport?.removeEventListener('resize', updateScale)
+    }
   }, [fitToViewport, height])
 
   return (

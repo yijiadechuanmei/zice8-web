@@ -36,7 +36,7 @@ import {
   FengchengRankPage,
   FengchengResultPage,
 } from './fengcheng/FengchengQuiz'
-import { createFengchengLocalPublicConfig, isFengchengQuiz } from './fengcheng/config'
+import { createFengchengLocalPublicConfig, isFengchengQuiz, preloadFengchengHomeAssets } from './fengcheng/config'
 import { FENGCHENG_LOCAL_QUESTIONS } from './fengcheng/questions'
 import LayoutPreview from './dev/LayoutPreview'
 import { QUIZ_VERSION, quizAssets } from './assets'
@@ -208,9 +208,10 @@ function QuizMain({ routeParams }) {
       })
       .catch((err) => {
         if (isFengchengQuiz(activityKey)) {
-          setPublicConfig(createFengchengLocalPublicConfig())
+          const localConfig = createFengchengLocalPublicConfig()
+          setPublicConfig(localConfig)
           setError('')
-          setLoading(false)
+          preloadFengchengHomeAssets(localConfig).finally(() => setLoading(false))
           return
         }
         setError(err.message || '活动加载失败')
@@ -221,8 +222,10 @@ function QuizMain({ routeParams }) {
   const loadBootstrap = useCallback(async (options = {}) => {
     const { resetPage = true, withLoading = true } = options
     if (withLoading) setLoading(true)
+    let nextBootstrap = null
     try {
       const data = await getBootstrap(activityKey)
+      nextBootstrap = data
       setBootstrap(data)
       document.title = data?.activity?.title || '端午知识竞赛'
       debugLog('[QuizAuthDebug] bootstrap', {
@@ -246,7 +249,12 @@ function QuizMain({ routeParams }) {
       if (handleUnauthorized(err, 'bootstrap-401', { bootstrapUnauthorized: true })) return
       showError(err)
     } finally {
-      if (withLoading) setLoading(false)
+      if (withLoading) {
+        if (isFengchengQuiz(activityKey, nextBootstrap, publicConfig)) {
+          await preloadFengchengHomeAssets(publicConfig)
+        }
+        setLoading(false)
+      }
     }
   }, [activityKey, handleUnauthorized, publicConfig, showError])
 
@@ -268,6 +276,11 @@ function QuizMain({ routeParams }) {
             showError(err)
             setLoading(false)
           })
+        return
+      }
+      if (fengchengSkin) {
+        setLoading(true)
+        preloadFengchengHomeAssets(publicConfig).finally(() => setLoading(false))
         return
       }
       setLoading(false)

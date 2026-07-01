@@ -1,6 +1,7 @@
 export const FENGCHENG_ACTIVITY_KEY = 'fengcheng_wx_coin_partner_quiz_20260701'
 export const FENGCHENG_THEME_KEY = 'fengcheng-partner-quiz'
 export const FENGCHENG_ASSET_BASE_URL = `https://assets.zice8.com/quiz/${FENGCHENG_ACTIVITY_KEY}`
+const FENGCHENG_PRELOAD_CACHE = new Map()
 
 const DEFAULT_ASSET_NAMES = {
   homeBackground: 'a4e5502d7c05d5aea112eceb47cab20e_30184_750_1624.png',
@@ -67,6 +68,46 @@ export function getFengchengAssets(publicConfig) {
     pageBackground: `${baseUrl}/${names.pageBackground}`,
     pageForeground: `${baseUrl}/${names.pageForeground}`,
   }
+}
+
+function preloadImage(src) {
+  if (!src || typeof window === 'undefined') return Promise.resolve()
+  if (FENGCHENG_PRELOAD_CACHE.has(src)) return FENGCHENG_PRELOAD_CACHE.get(src)
+
+  const promise = new Promise((resolve) => {
+    const img = new window.Image()
+    let settled = false
+    const done = () => {
+      if (settled) return
+      settled = true
+      resolve()
+    }
+    const decodeAndDone = () => {
+      if (typeof img.decode === 'function') {
+        img.decode().catch(() => {}).finally(done)
+        return
+      }
+      done()
+    }
+
+    img.onload = decodeAndDone
+    img.onerror = done
+    img.src = src
+    if (img.complete) decodeAndDone()
+  })
+
+  FENGCHENG_PRELOAD_CACHE.set(src, promise)
+  return promise
+}
+
+export function preloadFengchengHomeAssets(publicConfig) {
+  const assets = getFengchengAssets(publicConfig)
+  return Promise.all([
+    preloadImage(assets.homeBackground),
+    preloadImage(assets.homeForeground),
+    preloadImage(assets.homeTitle),
+    preloadImage(assets.homeStartButton),
+  ]).then(() => undefined)
 }
 
 export function formatFengchengDuration(ms) {
