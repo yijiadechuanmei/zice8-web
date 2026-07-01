@@ -3440,7 +3440,8 @@
 }
 
 .lm-debug-panel.is-collapsed {
-  left: auto;
+  right: auto;
+  width: auto;
   max-width: calc(100vw - 20px);
   overflow: hidden;
 }

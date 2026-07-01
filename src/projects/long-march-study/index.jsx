@@ -784,7 +784,7 @@ function DebugPanel({
   onResetAll,
   onLogState,
 }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const shareLabel = shareStatus.shareConfigured
     ? '已配置'
     : shareStatus.wxConfigStatus === 'failed'
