@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { getVisitorId, trackPageView } from '../../shared/analytics'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
@@ -60,6 +61,7 @@ const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
 }
+const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
   const rank = index + 1
   return {
@@ -1465,18 +1467,23 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
 }
 
 function RadioNoticeFrame({ children, className = '', ariaLabel = '提示' }) {
-  return (
+  const modalFit = useModalFit(NOTICE_PANEL_SPEC, 16)
+  const content = (
     <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label={ariaLabel}>
-      <div className="lm-radio-notice-frame">
+      <div className="lm-radio-notice-frame" style={{ width: modalFit.width, height: modalFit.height }}>
         <section
           className={`lm-radio-notice-panel ${className}`.trim()}
-          style={{ backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})` }}
+          style={{
+            backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})`,
+            transform: `scale(${modalFit.scale})`,
+          }}
         >
           {children}
         </section>
       </div>
     </div>
   )
+  return typeof document === 'undefined' ? content : createPortal(content, document.body)
 }
 
 function RadioNoticeModal({ message, onClose }) {
