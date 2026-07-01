@@ -103,6 +103,12 @@ export const startAttempt = (activityKey, data) =>
     body: JSON.stringify(data),
   })
 
+export const submitFengchengLocalResult = (activityKey, data) =>
+  quizRequest(`/quiz/activities/${activityKey}/fengcheng-local-result`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+
 export const getCurrentAttempt = (activityKey, attemptId) =>
   quizRequest(`/quiz/activities/${activityKey}/attempts/${attemptId}/current`)
 

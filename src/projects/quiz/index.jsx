@@ -21,6 +21,7 @@ import {
   resetDemoActivity,
   startAttempt,
   submitAnswer,
+  submitFengchengLocalResult,
   submitProfile,
   submitTimeout,
 } from './api'
@@ -36,6 +37,7 @@ import {
   FengchengResultPage,
 } from './fengcheng/FengchengQuiz'
 import { createFengchengLocalPublicConfig, isFengchengQuiz } from './fengcheng/config'
+import { FENGCHENG_LOCAL_QUESTIONS } from './fengcheng/questions'
 import LayoutPreview from './dev/LayoutPreview'
 import { QUIZ_VERSION, quizAssets } from './assets'
 import HomePage from './pages/HomePage'
@@ -93,6 +95,9 @@ function QuizMain({ routeParams }) {
   const toastTimerRef = useRef(null)
   const rankRequestRef = useRef(false)
   const debugPcLoginRef = useRef(false)
+  const fengchengLocalAnswersRef = useRef([])
+  const fengchengLocalStartedAtRef = useRef(0)
+  const fengchengLocalRequestIdRef = useRef('')
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -293,6 +298,30 @@ function QuizMain({ routeParams }) {
     }, 1500)
   }
 
+  function createFengchengLocalCurrent(index) {
+    const question = FENGCHENG_LOCAL_QUESTIONS[index]
+    return {
+      attemptId: fengchengLocalRequestIdRef.current,
+      currentQuestion: question,
+      currentQuestionSort: question?.questionSort || index + 1,
+      totalQuestions: FENGCHENG_LOCAL_QUESTIONS.length,
+      questionCount: FENGCHENG_LOCAL_QUESTIONS.length,
+    }
+  }
+
+  function startFengchengLocalAttempt() {
+    const timestamp = Date.now()
+    const attemptId = `fengcheng-local-${timestamp}`
+    fengchengLocalAnswersRef.current = []
+    fengchengLocalStartedAtRef.current = timestamp
+    fengchengLocalRequestIdRef.current = attemptId
+    setActiveAttemptId(attemptId)
+    setResultAttemptId(null)
+    setCurrent(createFengchengLocalCurrent(0))
+    setFeedback(null)
+    setPage('question')
+  }
+
   async function handleStart() {
     if (!getToken()) return startAuthorize()
     if (!bootstrap?.profileCompleted) {
@@ -311,6 +340,10 @@ function QuizMain({ routeParams }) {
   }
 
   async function doStartAttempt() {
+    if (fengchengSkin) {
+      startFengchengLocalAttempt()
+      return
+    }
     setSubmitting(true)
     try {
       const timestamp = Date.now()
@@ -358,6 +391,10 @@ function QuizMain({ routeParams }) {
   }
 
   async function handleAnswer(questionId, selectedOptions) {
+    if (fengchengSkin && String(current?.attemptId || '').startsWith('fengcheng-local-')) {
+      await handleFengchengLocalAnswer(selectedOptions)
+      return
+    }
     if (submitting || feedback) return
     setSubmitting(true)
     try {
@@ -370,6 +407,46 @@ function QuizMain({ routeParams }) {
       window.setTimeout(() => advanceAfterFeedback(data), fengchengSkin ? FENGCHENG_FEEDBACK_DELAY_MS : FEEDBACK_DELAY_MS)
     } catch (err) {
       if (handleUnauthorized(err, 'answer-401')) return
+      showError(err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleFengchengLocalAnswer(selectedOptions) {
+    if (submitting || feedback) return
+    const questionSort = Number(current?.currentQuestion?.questionSort || current?.currentQuestionSort || 1)
+    const nextAnswers = [
+      ...fengchengLocalAnswersRef.current,
+      { questionSort, selectedOptions },
+    ]
+    fengchengLocalAnswersRef.current = nextAnswers
+
+    if (questionSort < FENGCHENG_LOCAL_QUESTIONS.length) {
+      setCurrent(createFengchengLocalCurrent(questionSort))
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const totalTimeMs = Math.max(Date.now() - fengchengLocalStartedAtRef.current, 0)
+      const data = await submitFengchengLocalResult(activityKey, {
+        answers: nextAnswers,
+        totalTimeMs,
+        requestId: fengchengLocalRequestIdRef.current,
+      })
+      setResultAttemptId(data?.attemptId || '')
+      setActiveAttemptId(null)
+      setResult(data)
+      setFeedback(null)
+      setPage('result')
+      loadBootstrap({ resetPage: false, withLoading: false }).catch(() => {})
+    } catch (err) {
+      if (handleUnauthorized(err, 'fengcheng-local-result-401')) return
+      if (/答题次数已用完/.test(err?.message || '')) {
+        showAttemptUsedAndOpenRank()
+        return
+      }
       showError(err)
     } finally {
       setSubmitting(false)
@@ -548,6 +625,9 @@ function QuizMain({ routeParams }) {
     setPage('home')
     setFeedback(null)
     setFengchengProfileOpen(false)
+    fengchengLocalAnswersRef.current = []
+    fengchengLocalStartedAtRef.current = 0
+    fengchengLocalRequestIdRef.current = ''
   }
 
   if (blockedMessage) {

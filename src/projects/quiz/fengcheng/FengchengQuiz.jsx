@@ -203,7 +203,6 @@ export function FengchengQuestionPage({
   current,
   submitting,
   onAnswer,
-  onTimeout,
 }) {
   const question = current?.currentQuestion
 
@@ -222,7 +221,6 @@ export function FengchengQuestionPage({
       question={question}
       submitting={submitting}
       onAnswer={onAnswer}
-      onTimeout={onTimeout}
     />
   )
 }
@@ -233,13 +231,9 @@ function FengchengQuestionContent({
   question,
   submitting,
   onAnswer,
-  onTimeout,
 }) {
   const [selected, setSelected] = useState('')
-  const limitSeconds = question?.timeLimitSeconds ?? current?.questionTimeLimitSeconds ?? 60
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const [questionElapsedSeconds, setQuestionElapsedSeconds] = useState(0)
-  const timeoutRef = useRef(false)
   const answerTimerRef = useRef(null)
   const attemptId = current?.attemptId || ''
 
@@ -253,28 +247,18 @@ function FengchengQuestionContent({
 
   useEffect(() => {
     setSelected('')
-    timeoutRef.current = false
-    setQuestionElapsedSeconds(0)
   }, [question.questionId])
 
   useEffect(() => {
     if (submitting) return undefined
-    if (!selected && questionElapsedSeconds >= limitSeconds) {
-      if (!timeoutRef.current) {
-        timeoutRef.current = true
-        onTimeout(question.questionId)
-      }
-      return undefined
-    }
     const timer = window.setTimeout(() => {
       setElapsedSeconds((value) => value + 1)
-      setQuestionElapsedSeconds((value) => value + 1)
     }, 1000)
     return () => window.clearTimeout(timer)
-  }, [limitSeconds, onTimeout, question.questionId, questionElapsedSeconds, selected, submitting])
+  }, [elapsedSeconds, submitting])
 
   function handleOptionSelect(value) {
-    if (selected || submitting || timeoutRef.current) return
+    if (selected || submitting) return
     setSelected(value)
     answerTimerRef.current = window.setTimeout(() => {
       onAnswer(question.questionId, [value])
