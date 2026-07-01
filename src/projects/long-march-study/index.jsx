@@ -735,7 +735,7 @@ function DailyDoneModal({ onBack }) {
 }
 
 function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
-  const [pendingLocation, setPendingLocation] = useState(null)
+  const [pendingCheckin, setPendingCheckin] = useState(null)
   const [checkinNotice, setCheckinNotice] = useState('')
   const locations = config.locations || []
   const assets = longMarchStudyAssets.checkin
@@ -745,8 +745,8 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
     { className: 'is-three', asset: assets.locationThree, activeAsset: assets.locationThreeActive, detail: assets.detailThree },
     { className: 'is-four', asset: assets.locationFour, activeAsset: assets.locationFourActive, detail: assets.detailFour },
   ].map((item, index) => ({ ...item, location: locations[index] })).filter((item) => item.location)
-  const pendingVisual = pendingLocation
-    ? visualLocations.find((item) => item.location.key === pendingLocation.key)
+  const pendingVisual = pendingCheckin
+    ? visualLocations.find((item) => item.location.key === pendingCheckin.location.key)
     : null
   const nextLocationIndex = visualLocations.findIndex((item) => item.location.key === nextCheckin?.key)
   const todayCheckinIndex = visualLocations.findIndex((item) => item.location.key === today?.checkin?.locationKey)
@@ -765,7 +765,7 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
             key={location.key}
             className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''} ${isCompleted ? 'is-completed' : ''}`}
             type="button"
-            onClick={() => isNext ? setPendingLocation(location) : setCheckinNotice(lockedNotice)}
+            onClick={() => isNext || isCompleted ? setPendingCheckin({ location, completed: isCompleted }) : setCheckinNotice(lockedNotice)}
             aria-label={`打卡${location.title}`}
           >
             <img className="lm-checkin-location-card" src={isNext || isCompleted ? asset : activeAsset} alt="" />
@@ -777,15 +777,17 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
       <button className="lm-checkin-home-button" type="button" onClick={onBack} aria-label="返回首页">
         <img src={assets.homeButton} alt="" />
       </button>
-      {pendingLocation ? (
+      {pendingCheckin ? (
         <CheckinConfirmModal
+          completed={pendingCheckin.completed}
           image={pendingVisual?.detail || assets.detailOne}
           onConfirm={() => {
-            const location = pendingLocation
-            setPendingLocation(null)
+            const location = pendingCheckin.location
+            setPendingCheckin(null)
+            if (pendingCheckin.completed) return
             onCheckin(location)
           }}
-          onClose={() => setPendingLocation(null)}
+          onClose={() => setPendingCheckin(null)}
         />
       ) : null}
       {checkinNotice ? <CheckinDoneModal message={checkinNotice} onBack={onBack} /> : null}
@@ -793,12 +795,12 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
   )
 }
 
-function CheckinConfirmModal({ image, onConfirm, onClose }) {
+function CheckinConfirmModal({ completed, image, onConfirm, onClose }) {
   return (
     <div className="lm-checkin-modal-mask" onClick={onClose}>
       <section className="lm-checkin-confirm-modal" onClick={(event) => event.stopPropagation()}>
         <img src={image} alt="" />
-        <button type="button" onClick={onConfirm}>点击打卡</button>
+        <button type="button" onClick={onConfirm}>{completed ? '返回' : '点击打卡'}</button>
       </section>
     </div>
   )
