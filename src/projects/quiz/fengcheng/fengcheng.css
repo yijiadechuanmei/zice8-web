@@ -57,34 +57,6 @@
   object-fit: contain;
 }
 
-.fengcheng-home-title-fallback {
-  position: absolute;
-  left: 46px;
-  top: 222px;
-  display: flex;
-  width: 658px;
-  height: 420px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #e2141e;
-  text-align: center;
-  text-shadow: 0 3px 0 rgba(255,255,255,.86), 0 10px 24px rgba(61, 126, 207, .16);
-}
-
-.fengcheng-home-title-fallback span {
-  font-size: 34px;
-  font-weight: 900;
-}
-
-.fengcheng-home-title-fallback strong {
-  margin-top: 34px;
-  color: #144da9;
-  font-size: 58px;
-  font-weight: 900;
-  line-height: 1.18;
-}
-
 .fengcheng-home-start {
   position: absolute;
   left: 181px;
@@ -99,7 +71,9 @@
 }
 
 .fengcheng-home-start img,
-.fengcheng-rank-back img {
+.fengcheng-rank-back img,
+.fengcheng-image-button img,
+.fengcheng-profile-submit img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -107,15 +81,8 @@
   object-fit: contain;
 }
 
-.fengcheng-home-start span,
-.fengcheng-rank-back span {
-  position: relative;
-  z-index: 1;
-}
-
 .fengcheng-home-start:active,
-.fengcheng-primary-button:active,
-.fengcheng-blue-button:active,
+.fengcheng-image-button:active,
 .fengcheng-rank-back:active {
   transform: scale(.985);
 }
@@ -145,19 +112,6 @@
   width: 573px;
   height: 558px;
   object-fit: contain;
-}
-
-.fengcheng-profile-modal::before {
-  content: "提交信息";
-  position: absolute;
-  left: 0;
-  top: 66px;
-  z-index: 1;
-  width: 100%;
-  text-align: center;
-  color: #124ba4;
-  font-size: 42px;
-  font-weight: 900;
 }
 
 .fengcheng-profile-close {
@@ -228,43 +182,20 @@
 
 .fengcheng-profile-submit {
   position: absolute;
-  left: 43px;
-  top: 402px;
+  left: 94px;
+  top: 410px;
   z-index: 1;
-  width: 492px;
-  height: 128px;
+  width: 386px;
+  height: 113px;
   border: 0;
-  border-radius: 70px;
-  background: linear-gradient(180deg, #ff7452 0%, #fb1b1f 72%, #d40711 100%);
-  box-shadow: 0 10px 20px rgba(210, 26, 31, .24), inset 0 3px 5px rgba(255,255,255,.58);
-}
-
-.fengcheng-profile-submit::after {
-  content: "开始答题";
-  color: #fff;
-  font-size: 42px;
-  font-weight: 900;
+  padding: 0;
+  background: transparent;
 }
 
 .fengcheng-profile-submit:disabled {
   opacity: .58;
 }
 
-.fengcheng-header-title {
-  position: absolute;
-  left: 36px;
-  top: 86px;
-  display: flex;
-  width: 678px;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  color: #e2141e;
-  font-size: 34px;
-  font-weight: 900;
-}
-
-.fengcheng-header-title i,
 .fengcheng-section-title i {
   display: block;
   width: 82px;
@@ -272,20 +203,14 @@
   background: linear-gradient(90deg, transparent, #e2141e 70%, #e2141e);
 }
 
-.fengcheng-header-title i:last-child,
 .fengcheng-section-title i:last-child {
   transform: scaleX(-1);
-}
-
-.fengcheng-header-title em {
-  color: #154ea8;
-  font-style: normal;
 }
 
 .fengcheng-question-meta {
   position: absolute;
   left: 54px;
-  top: 240px;
+  top: 184px;
   display: flex;
   width: 642px;
   align-items: center;
@@ -315,7 +240,7 @@
 .fengcheng-question-card {
   position: absolute;
   left: 40px;
-  top: 322px;
+  top: 282px;
   display: flex;
   width: 670px;
   min-height: 254px;
@@ -354,7 +279,7 @@
 .fengcheng-option-list {
   position: absolute;
   left: 48px;
-  top: 632px;
+  top: 592px;
   display: flex;
   width: 654px;
   flex-direction: column;
@@ -390,37 +315,6 @@
 
 .fengcheng-option strong {
   min-width: 58px;
-}
-
-.fengcheng-primary-button,
-.fengcheng-blue-button {
-  border: 0;
-  border-radius: 64px;
-  color: #fff;
-  font-weight: 900;
-  box-shadow: 0 12px 22px rgba(214, 28, 30, .25), inset 0 4px 6px rgba(255,255,255,.62);
-}
-
-.fengcheng-primary-button {
-  background: linear-gradient(180deg, #ff7250 0%, #fa1d24 73%, #db0712 100%);
-}
-
-.fengcheng-blue-button {
-  background: linear-gradient(180deg, #6db6ff 0%, #2d7ef1 70%, #1460d5 100%);
-  box-shadow: 0 12px 22px rgba(35, 107, 220, .25), inset 0 4px 6px rgba(255,255,255,.62);
-}
-
-.fengcheng-primary-button:disabled {
-  opacity: .55;
-}
-
-.fengcheng-question-next {
-  position: absolute;
-  left: 116px;
-  top: 1284px;
-  width: 520px;
-  height: 112px;
-  font-size: 52px;
 }
 
 .fengcheng-debug-entry {
@@ -585,10 +479,12 @@
 .fengcheng-result-retry,
 .fengcheng-result-rank {
   position: absolute;
-  left: 122px;
-  width: 342px;
-  height: 104px;
-  font-size: 42px;
+  left: 100px;
+  width: 386px;
+  height: 113px;
+  border: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .fengcheng-result-retry {
@@ -608,21 +504,6 @@
   object-fit: contain;
 }
 
-.fengcheng-rank-title-fallback {
-  position: absolute;
-  left: 139px;
-  top: 81px;
-  display: flex;
-  width: 469px;
-  height: 84px;
-  align-items: center;
-  justify-content: center;
-  color: #e2141e;
-  font-size: 48px;
-  font-weight: 900;
-  text-shadow: 0 3px 0 rgba(255,255,255,.85);
-}
-
 .fengcheng-rank-panel {
   position: absolute;
   left: 36px;
@@ -639,9 +520,10 @@
 .fengcheng-rank-head,
 .fengcheng-rank-row {
   display: grid;
-  grid-template-columns: 80px 130px 180px 110px 126px;
+  grid-template-columns: 78px minmax(110px, 1fr) minmax(170px, 1.3fr) 94px 118px;
   align-items: center;
   gap: 4px;
+  box-sizing: border-box;
 }
 
 .fengcheng-rank-head {
@@ -650,6 +532,7 @@
   color: #164ca3;
   font-size: 24px;
   font-weight: 900;
+  padding: 0 18px;
   text-align: center;
 }
 
@@ -709,12 +592,8 @@
   width: 387px;
   height: 106px;
   border: 0;
-  border-radius: 54px;
-  background: linear-gradient(180deg, #66b3ff 0%, #267ef2 72%, #155fd0 100%);
-  box-shadow: 0 12px 22px rgba(35, 107, 220, .25), inset 0 4px 6px rgba(255,255,255,.62);
-  color: #fff;
-  font-size: 38px;
-  font-weight: 900;
+  padding: 0;
+  background: transparent;
 }
 
 .fengcheng-question-empty {
