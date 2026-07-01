@@ -6,6 +6,7 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getBorderTownRoleTestPublicConfig } from './api'
 import {
@@ -35,6 +36,7 @@ export default function BorderTownRoleTestProject({ routeParams }) {
   const homeIntroImage = assetUrl(config.assetsBaseUrl, config.homeIntroImage)
   const homeTitleImage = assetUrl(config.assetsBaseUrl, config.homeTitleImage)
   const homeButtonImage = assetUrl(config.assetsBaseUrl, config.homeButtonImage)
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || config.bgm
   const currentQuestion = QUESTIONS[questionIndex]
   const totalScore = useMemo(() => scoreAnswers(answers), [answers])
   const resultRole = useMemo(() => getResultRole(totalScore), [totalScore])
@@ -157,6 +159,7 @@ export default function BorderTownRoleTestProject({ routeParams }) {
         />
       ) : null}
       {shareVisible ? <ShareOverlay onClose={() => setShareVisible(false)} /> : null}
+      {bgmConfig?.enabled && bgmConfig?.url ? <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /> : null}
     </main>
   )
 }
