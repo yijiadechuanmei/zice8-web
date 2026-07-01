@@ -296,34 +296,6 @@
   height: 14.0193%;
 }
 
-.lm-task-choice-back {
-  position: absolute;
-  left: 20px;
-  top: 32px;
-  z-index: 4;
-  width: 71px;
-  height: 49px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: transparent;
-  font-size: 0;
-}
-
-.lm-task-choice-back::before {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #fff;
-  -webkit-mask: url("https://assets.zice8.com/long_march_study/long_march_study_2026/b25fef0a7ef46a1fc9580c405518deae_215.svg") center / contain no-repeat;
-  mask: url("https://assets.zice8.com/long_march_study/long_march_study_2026/b25fef0a7ef46a1fc9580c405518deae_215.svg") center / contain no-repeat;
-}
-
-.lm-task-choice-back img {
-  display: none;
-}
-
 .lm-question {
   font-size: 20px;
   line-height: 1.45;
