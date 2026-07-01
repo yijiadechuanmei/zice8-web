@@ -348,11 +348,15 @@
   left: 4%;
   top: 4.2%;
   z-index: 3;
+  width: min(9.4667vw, 71px);
+  height: min(6.5333vw, 49px);
+  padding: 0;
   border: 0;
-  background: transparent;
-  color: #fff;
-  font-size: clamp(34px, 8vw, 58px);
-  line-height: 1;
+  background-color: #fff;
+  color: transparent;
+  font-size: 0;
+  mask: var(--lm-quiz-back-icon) center / contain no-repeat;
+  -webkit-mask: var(--lm-quiz-back-icon) center / contain no-repeat;
 }
 
 .lm-quiz-title {

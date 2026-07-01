@@ -619,8 +619,11 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
 
   return (
     <section className="lm-quiz-page" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.background})` }}>
-      <div className="lm-quiz-stage">
-        <button className="lm-quiz-back" type="button" onClick={onBack} aria-label="返回">←</button>
+      <div
+        className="lm-quiz-stage"
+        style={{ '--lm-quiz-back-icon': `url(${longMarchStudyAssets.shared.backIcon})` }}
+      >
+        <button className="lm-quiz-back" type="button" onClick={onBack} aria-label="返回" />
         <h1 className="lm-quiz-title">每日红色答题</h1>
         <div className="lm-quiz-progress-text">
           <span>答题进度</span>
@@ -825,7 +828,7 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
         }}
       >
         <img className="lm-radio-bg" src={longMarchStudyAssets.radio.background} alt="" />
-        <button className="lm-radio-back" type="button" onClick={onBack} aria-label="返回">←</button>
+        <button className="lm-radio-back" type="button" onClick={onBack} aria-label="返回" />
         <div className="lm-radio-title">{title}</div>
         {children}
       </section>
