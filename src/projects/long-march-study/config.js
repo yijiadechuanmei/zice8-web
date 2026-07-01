@@ -20,6 +20,13 @@ export const longMarchStudyAssets = {
     rules: asset('e3f78375422ded1b45926228995b2ee8_72462_685_958.png'),
     profile: asset('ba27e78232205479ae5c6f8b5f6d18c1_68551_686_794.png'),
   },
+  mine: {
+    ledgerButton: ih5Asset('a6ae0c1eb7b456ca6c252d35149681f7_5813_626_59.png'),
+    quizButton: ih5Asset('597a300bd8d4018e3eb9b48fa96ab09b_5978_626_61.png'),
+    checkinButton: ih5Asset('63ec4f98ad44e6b1772ae676d27a26ea_5839_626_64.png'),
+    honorsButton: ih5Asset('095d9fddd09f5d111c49362c208d2ae6_6067_626_64.png'),
+    posterButton: ih5Asset('9f34650f48d774409f433f55802643f0_6037_626_62.png'),
+  },
   tasks: {
     background: asset('74c6f34fc9b0ab2d02237c39b28c364f_639659_750_1624.png'),
     title: asset('950d4238c826bf986d72cf19db15e013_25084_315_82.png'),

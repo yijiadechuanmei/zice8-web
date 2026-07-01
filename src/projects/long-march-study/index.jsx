@@ -577,7 +577,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {page === PAGE.MINE ? (
         <MinePage
           mine={mine}
-          onPage={setPage}
+          activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
           onPoster={() => showPoster('mine')}
           onHonors={openHonors}
           onBack={() => setPage(PAGE.HOME)}
@@ -1677,33 +1677,59 @@ function normalizeRankRows(rows = []) {
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
-function MinePage({ mine, onPage, onPoster, onHonors, onBack }) {
+function MinePage({ mine, activityUrl, onPoster, onHonors, onBack }) {
+  const [qrOpen, setQrOpen] = useState(false)
   const profile = mine?.profile
+  const avatar = mine?.wechat?.avatar || profile?.avatar || ''
+  const nickname = mine?.wechat?.nickname || profile?.nickname || profile?.name || '昵称'
+  const phone = profile?.phone || '18851257958'
+  const qrValue = activityUrl || (typeof window !== 'undefined' ? window.location.href : '')
+  const mineButtons = [
+    { key: 'ledger', image: longMarchStudyAssets.mine.ledgerButton, label: `积分流水 ${mine?.ledgers?.length || 0}` },
+    { key: 'quiz', image: longMarchStudyAssets.mine.quizButton, label: `答题流水 ${mine?.quizAttempts?.length || 0}` },
+    { key: 'checkin', image: longMarchStudyAssets.mine.checkinButton, label: `闯关流水 ${mine?.checkins?.length || 0}` },
+    { key: 'honors', image: longMarchStudyAssets.mine.honorsButton, label: '我的荣誉', onClick: onHonors },
+    { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onPoster },
+  ]
+
   return (
     <IvxStage title="我的" className="lm-mine-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
-      <section className="lm-mine-panel">
-        <div className="lm-mine-card">
-        {mine?.wechat?.avatar ? <img src={mine.wechat.avatar} alt="微信头像" /> : <div className="lm-avatar-placeholder" />}
-        <div>
-          <strong>{mine?.wechat?.nickname || profile?.name}</strong>
-          <p>{profile?.name} · {profile?.phone}</p>
+      <section className="lm-mine-profile">
+        <div className="lm-mine-profile-card">
+          <div className="lm-mine-qr-box">
+            <button className="lm-mine-qr-button" type="button" onClick={() => setQrOpen(true)} aria-label="放大二维码">
+              {qrValue ? <QRCodeCanvas value={qrValue} size={190} includeMargin={false} /> : null}
+            </button>
+          </div>
+          {avatar ? <img className="lm-mine-avatar" src={avatar} alt="微信头像" /> : <div className="lm-mine-avatar lm-mine-avatar-default" aria-hidden="true" />}
+          <strong className="lm-mine-name">{nickname}</strong>
+          <span className="lm-mine-phone">{phone}</span>
+          <div className="lm-mine-stat-labels" aria-hidden="true">
+            <span>累计积分</span>
+            <span>剩余积分</span>
+            <span>闯关天数</span>
+          </div>
+          <b className="lm-mine-stat lm-mine-stat-total">{profile?.totalPoints ?? 600}</b>
+          <b className="lm-mine-stat lm-mine-stat-remaining">{profile?.remainingPoints ?? 600}</b>
+          <b className="lm-mine-stat lm-mine-stat-days">{profile?.challengeDays ?? 600}</b>
         </div>
-      </div>
-      <div className="lm-stats">
-        <span>会员码<strong>{profile?.memberCode}</strong></span>
-        <span>总积分<strong>{profile?.totalPoints}</strong></span>
-        <span>剩余积分<strong>{profile?.remainingPoints}</strong></span>
-        <span>闯关天数<strong>{profile?.challengeDays}</strong></span>
-      </div>
-      <div className="lm-task-grid">
-        <button type="button">积分流水 {mine?.ledgers?.length || 0}</button>
-        <button type="button">答题流水 {mine?.quizAttempts?.length || 0}</button>
-        <button type="button">闯关流水 {mine?.checkins?.length || 0}</button>
-        <button type="button" onClick={onHonors}>我的荣誉</button>
-        <button type="button" onClick={onPoster}>我的海报</button>
-        <button type="button" onClick={() => onPage(PAGE.RANK)}>积分排行榜</button>
-      </div>
       </section>
+      <section className="lm-mine-menu" aria-label="我的功能">
+        {mineButtons.map((item) => (
+          <button key={item.key} type="button" onClick={item.onClick} aria-label={item.label}>
+            <img src={item.image} alt="" aria-hidden="true" />
+          </button>
+        ))}
+      </section>
+      <button className="lm-mine-home-button" type="button" onClick={onBack}>返回首页</button>
+      {qrOpen ? (
+        <div className="lm-mine-qr-modal" role="dialog" aria-modal="true" aria-label="二维码">
+          <button className="lm-mine-qr-mask" type="button" onClick={() => setQrOpen(false)} aria-label="关闭二维码" />
+          <div className="lm-mine-qr-large">
+            {qrValue ? <QRCodeCanvas value={qrValue} size={360} includeMargin /> : null}
+          </div>
+        </div>
+      ) : null}
     </IvxStage>
   )
 }

@@ -2173,69 +2173,256 @@
   text-align: center;
 }
 
-.lm-mine-panel {
-  padding: 124px 40px 40px;
+.lm-mine-profile {
+  position: absolute;
+  left: 32px;
+  top: 44px;
+  width: 685px;
+  height: 399px;
 }
 
-.lm-mine-panel .lm-mine-card {
+.lm-mine-profile-card {
+  position: absolute;
+  left: 0;
+  top: 69px;
+  width: 685px;
+  height: 330px;
+  overflow: visible;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.lm-mine-avatar {
+  position: absolute;
+  left: 70px;
+  top: 55px;
+  width: 118px;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 100px;
+  object-fit: cover;
+}
+
+.lm-mine-avatar-default {
+  background:
+    radial-gradient(circle at 50% 35%, #fff3ea 0 27px, transparent 28px),
+    radial-gradient(circle at 50% 94%, #fff3ea 0 48px, transparent 49px),
+    linear-gradient(180deg, #e34020 0%, #b6231f 100%);
+}
+
+.lm-mine-name,
+.lm-mine-phone,
+.lm-mine-stat {
+  position: absolute;
   display: flex;
   align-items: center;
-  gap: 24px;
-  border-radius: 20px;
-  background: #f5f5f5;
-  padding: 28px;
-}
-
-.lm-mine-panel .lm-mine-card img,
-.lm-mine-panel .lm-avatar-placeholder {
-  width: 96px;
-  height: 96px;
-}
-
-.lm-mine-panel .lm-mine-card strong {
+  overflow: hidden;
   color: #000;
-  font-size: 34px;
-  font-weight: 700;
+  line-height: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.lm-mine-panel .lm-mine-card p {
-  margin: 10px 0 0;
-  color: #89645b;
-  font-size: 24px;
+.lm-mine-name {
+  left: 222px;
+  top: 72px;
+  width: 229px;
+  height: 50px;
+  font-size: 29px;
+  font-weight: 400;
 }
 
-.lm-mine-panel .lm-stats {
-  margin-top: 26px;
-  grid-template-columns: 1fr 1fr;
+.lm-mine-phone {
+  left: 222px;
+  top: 114px;
+  width: 229px;
+  height: 50px;
+  font-size: 26px;
 }
 
-.lm-mine-panel .lm-stats span {
-  min-height: 116px;
-  border-radius: 20px;
+.lm-mine-qr-box {
+  position: absolute;
+  left: 515px;
+  top: 62px;
+  display: flex;
+  width: 110px;
+  height: 110px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
   background: #f5f5f5;
-  color: #89645b;
-  font-size: 24px;
 }
 
-.lm-mine-panel .lm-stats strong {
+.lm-mine-qr-button {
+  width: 95px;
+  height: 95px;
+  border: 0;
+  padding: 0;
+  background: #fff;
+}
+
+.lm-mine-qr-button canvas {
+  display: block;
+  width: 95px !important;
+  height: 95px !important;
+}
+
+.lm-mine-stat-labels {
+  position: absolute;
+  left: 90px;
+  top: 223px;
+  display: grid;
+  width: 519px;
+  height: 76px;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: end;
+  border-top: 4px solid #e34020;
   color: #e34020;
-  font-size: 34px;
+  font-size: 23px;
+  font-weight: 700;
+  text-align: center;
 }
 
-.lm-mine-panel .lm-task-grid {
-  margin-top: 28px;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.lm-mine-stat-labels::before,
+.lm-mine-stat-labels::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: 32px;
+  background: #e34020;
 }
 
-.lm-mine-panel .lm-task-grid button {
-  min-height: 92px;
+.lm-mine-stat-labels::before {
+  left: 173px;
+}
+
+.lm-mine-stat-labels::after {
+  left: 346px;
+}
+
+.lm-mine-stat {
+  top: 261px;
+  justify-content: center;
+  width: 139px;
+  height: 50px;
+  font-size: 26px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.lm-mine-stat-total {
+  left: 66px;
+}
+
+.lm-mine-stat-remaining {
+  left: 273px;
+}
+
+.lm-mine-stat-days {
+  left: 480px;
+}
+
+.lm-mine-menu {
+  position: absolute;
+  left: 32px;
+  top: 478px;
+  display: flex;
+  width: 685px;
+  height: 760px;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  border-radius: 20px;
+  background: #fff;
+  padding-top: 40px;
+  padding-bottom: 20px;
+}
+
+.lm-mine-menu button {
+  width: 626px;
+  margin: 0 0 31px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 0;
+}
+
+.lm-mine-menu button:nth-child(1) {
+  height: 59px;
+}
+
+.lm-mine-menu button:nth-child(2) {
+  height: 61px;
+}
+
+.lm-mine-menu button:nth-child(3),
+.lm-mine-menu button:nth-child(4) {
+  height: 64px;
+}
+
+.lm-mine-menu button:nth-child(5) {
+  height: 62px;
+}
+
+.lm-mine-menu img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.lm-mine-home-button {
+  position: absolute;
+  left: 191px;
+  top: 1286px;
+  width: 364px;
+  height: 68px;
   border: 0;
   border-radius: 100px;
   background: #e34020;
   color: #fff;
-  font-size: 29px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
+
+.lm-mine-qr-modal,
+.lm-mine-qr-mask {
+  position: absolute;
+  inset: 0;
+}
+
+.lm-mine-qr-modal {
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lm-mine-qr-mask {
+  border: 0;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.lm-mine-qr-large {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 430px;
+  height: 430px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.26);
+}
+
+.lm-mine-qr-large canvas {
+  display: block;
+  width: 360px !important;
+  height: 360px !important;
 }
 
 .lm-poster-viewport {
