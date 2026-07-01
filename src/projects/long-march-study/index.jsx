@@ -72,10 +72,13 @@ function IvxStage({ title, className = '', background, onBack, children }) {
           backgroundImage: background ? `url(${background})` : undefined,
           transform: `scale(${scale})`,
           '--lm-ivx-ui-scale': scale ? 1 / scale : 1,
-          '--lm-back-icon': `url(${longMarchStudyAssets.shared.backIcon})`,
         }}
       >
-        {onBack ? <button className="lm-ivx-back" type="button" onClick={onBack} aria-label="返回" /> : null}
+        {onBack ? (
+          <button className="lm-ivx-back" type="button" onClick={onBack} aria-label="返回">
+            <img src={longMarchStudyAssets.shared.backIcon} alt="" />
+          </button>
+        ) : null}
         {title ? <div className="lm-ivx-title">{title}</div> : null}
         {children}
       </section>
