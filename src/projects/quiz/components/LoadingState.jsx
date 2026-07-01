@@ -16,10 +16,9 @@ export default function LoadingState() {
     return (
       <main className="quiz-loading-page fengcheng-loading-page" aria-label="加载中">
         <section className="fengcheng-stage-wrap">
-          <DesignStage height={1448} fitToViewport>
+          <DesignStage height={1624}>
             <div className="fengcheng-bg-fallback" />
             <img className="fengcheng-home-bg" src={assets.homeBackground} alt="" aria-hidden="true" />
-            <img className="fengcheng-home-foreground" src={assets.homeForeground} alt="" aria-hidden="true" />
             <div className="fengcheng-loading-card">
               <div className="fengcheng-loading-title">活动加载中</div>
               <div className="fengcheng-loading-bar" aria-hidden="true">

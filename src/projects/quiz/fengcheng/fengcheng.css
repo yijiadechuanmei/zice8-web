@@ -616,6 +616,10 @@
   background: #dcefff;
 }
 
+.fengcheng-loading-page .fengcheng-home-bg {
+  top: 0;
+}
+
 .fengcheng-loading-card {
   position: absolute;
   left: 168px;
@@ -648,26 +652,26 @@
 
 .fengcheng-loading-bar i {
   display: block;
+  width: 46%;
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, #2378ee 0%, #4eb5ff 42%, #ff4b3d 100%);
-  animation: fengcheng-loading-bar-loop 1.25s ease-in-out infinite;
+  transform: translate3d(-110%, 0, 0);
+  will-change: transform;
+  animation: fengcheng-loading-bar-loop 1.35s ease-in-out infinite;
 }
 
 @keyframes fengcheng-loading-bar-loop {
   0% {
-    width: 18%;
-    transform: translateX(0);
+    transform: translate3d(-110%, 0, 0);
   }
 
   50% {
-    width: 76%;
-    transform: translateX(20%);
+    transform: translate3d(58%, 0, 0);
   }
 
   100% {
-    width: 18%;
-    transform: translateX(420%);
+    transform: translate3d(230%, 0, 0);
   }
 }
 
