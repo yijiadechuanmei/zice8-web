@@ -5,7 +5,7 @@ import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam, getTokenFromUrl } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { setToken } from '../../shared/api/request'
 import {
   answerQuiz,
@@ -46,6 +46,7 @@ const IVX_STAGE_WIDTH = 750
 const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
+const RADIO_RECORDING_QUERY = 'radio_recording_id'
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
@@ -168,9 +169,11 @@ export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
   const debugEnabled = useMemo(() => ['1', 'mobile'].includes(getQueryParam('debug')), [])
+  const initialRadioRecordingId = useMemo(() => getQueryParam(RADIO_RECORDING_QUERY) || '', [])
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
+  const [deepLinkRecordingId, setDeepLinkRecordingId] = useState(initialRadioRecordingId)
   const [showProfile, setShowProfile] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
   const [showRules, setShowRules] = useState(false)
@@ -234,6 +237,12 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [refresh])
 
   useEffect(() => {
+    if (!bootstrap || !deepLinkRecordingId) return
+    const timer = window.setTimeout(() => setPage(PAGE.RADIO), 0)
+    return () => window.clearTimeout(timer)
+  }, [bootstrap, deepLinkRecordingId])
+
+  useEffect(() => {
     trackPageView(activityKey, '/long-march-study', { pageKey: page })
   }, [activityKey, page])
 
@@ -257,6 +266,7 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const clearRuntimeState = useCallback(() => {
     setPage(PAGE.HOME)
+    setDeepLinkRecordingId('')
     setShowProfile(false)
     setShowTasks(false)
     setShowRules(false)
@@ -268,6 +278,48 @@ export default function LongMarchStudyApp({ routeParams }) {
     setCheckinResult(null)
     setMine(null)
   }, [])
+
+  const buildRadioRecordingShareUrl = useCallback((recordingId) => {
+    const url = new URL(window.location.href)
+    url.pathname = `/long_march_study/${encodeURIComponent(activityKey)}`
+    url.hash = ''
+    url.searchParams.delete('token')
+    url.searchParams.delete('code')
+    url.searchParams.delete('state')
+    url.searchParams.set(RADIO_RECORDING_QUERY, recordingId)
+    return url.toString()
+  }, [activityKey])
+
+  const clearRadioRecordingDeepLink = useCallback(() => {
+    setDeepLinkRecordingId('')
+    const url = new URL(window.location.href)
+    url.searchParams.delete(RADIO_RECORDING_QUERY)
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+  }, [])
+
+  const prepareRadioRecordingShare = useCallback((recording) => {
+    const link = buildRadioRecordingShareUrl(recording.id)
+    const parsed = new URL(link)
+    window.history.replaceState(null, '', `${parsed.pathname}${parsed.search}`)
+    const wx = getWx()
+    const data = {
+      title: `${recording.authorName || '好友'}正在参与云上红色电台`,
+      desc: '请为我点亮红星',
+      link,
+      imgUrl: shareActivity.shareImage || 'https://web.zice8.com/share/default-share.jpg',
+    }
+    if (wx?.updateAppMessageShareData) wx.updateAppMessageShareData(data)
+    if (wx?.updateTimelineShareData) wx.updateTimelineShareData(data)
+    if (wx?.onMenuShareAppMessage) wx.onMenuShareAppMessage(data)
+    if (wx?.onMenuShareTimeline) wx.onMenuShareTimeline(data)
+    setShareStatus((current) => ({
+      ...current,
+      shareTitle: data.title,
+      shareConfigured: Boolean(wx),
+      radioShareLink: sanitizeUrlForWechat(link),
+    }))
+    return link
+  }, [buildRadioRecordingShareUrl, shareActivity.shareImage])
 
   const openJourney = () => {
     if (!profile) {
@@ -453,7 +505,17 @@ export default function LongMarchStudyApp({ routeParams }) {
           config={config}
           recordings={bootstrap?.recordings}
           onUpload={() => setPage(PAGE.UPLOAD)}
-          onBack={() => setPage(PAGE.HOME)}
+          initialRecordingId={deepLinkRecordingId}
+          isSharedRecording={Boolean(deepLinkRecordingId)}
+          onPrepareShare={prepareRadioRecordingShare}
+          onSharedHome={() => {
+            clearRadioRecordingDeepLink()
+            setPage(PAGE.HOME)
+          }}
+          onBack={() => {
+            clearRadioRecordingDeepLink()
+            setPage(PAGE.HOME)
+          }}
           onVote={async (recording) => {
             try {
               const data = await voteRecording(activityKey, recording.id, { visitorId })
@@ -991,22 +1053,32 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
   )
 }
 
-function RadioPage({ recordings, onUpload, onVote, onBack }) {
+function RadioPage({
+  recordings,
+  onUpload,
+  onVote,
+  onBack,
+  initialRecordingId = '',
+  isSharedRecording = false,
+  onPrepareShare,
+  onSharedHome,
+}) {
   const [tab, setTab] = useState('featured')
-  const [selectedRecordingId, setSelectedRecordingId] = useState('')
+  const [selectedRecordingId, setSelectedRecordingId] = useState(initialRecordingId)
   const rows = tab === 'featured' ? recordings?.featured || [] : recordings?.all || []
   const allRows = [...(recordings?.featured || []), ...(recordings?.all || [])]
   const selectedRecording = selectedRecordingId
     ? allRows.find((item) => item.id === selectedRecordingId) || null
     : null
+  const selectedFromShare = Boolean(isSharedRecording && selectedRecordingId && selectedRecordingId === initialRecordingId)
 
   if (selectedRecording) {
     return (
       <RadioDetailPage
         recording={selectedRecording}
-        myVote={recordings?.myVoteRecordingId}
-        onBack={() => setSelectedRecordingId('')}
-        onVote={onVote}
+        isSharedEntry={selectedFromShare}
+        onBack={selectedFromShare ? onSharedHome : () => setSelectedRecordingId('')}
+        onPrepareShare={onPrepareShare}
       />
     )
   }
@@ -1033,17 +1105,32 @@ function RadioPage({ recordings, onUpload, onVote, onBack }) {
 function useUrlAudioPlayer() {
   const audioRef = useRef(null)
   const [playingId, setPlayingId] = useState('')
+  const [progress, setProgress] = useState({ id: '', currentTime: 0, duration: 0 })
 
   useEffect(() => {
     const audio = new Audio()
-    const clearPlaying = () => setPlayingId('')
+    const updateProgress = () => {
+      setProgress((current) => ({
+        id: current.id,
+        currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+        duration: Number.isFinite(audio.duration) ? audio.duration : current.duration,
+      }))
+    }
+    const clearPlaying = () => {
+      updateProgress()
+      setPlayingId('')
+    }
     audioRef.current = audio
     audio.addEventListener('ended', clearPlaying)
     audio.addEventListener('error', clearPlaying)
+    audio.addEventListener('timeupdate', updateProgress)
+    audio.addEventListener('loadedmetadata', updateProgress)
     return () => {
       audio.pause()
       audio.removeEventListener('ended', clearPlaying)
       audio.removeEventListener('error', clearPlaying)
+      audio.removeEventListener('timeupdate', updateProgress)
+      audio.removeEventListener('loadedmetadata', updateProgress)
       audioRef.current = null
     }
   }, [])
@@ -1063,6 +1150,7 @@ function useUrlAudioPlayer() {
     audio.pause()
     audio.src = recording.audioUrl
     audio.currentTime = 0
+    setProgress({ id: recording.id, currentTime: 0, duration: recording.durationSec || 0 })
     try {
       await audio.play()
       setPlayingId(recording.id)
@@ -1072,7 +1160,7 @@ function useUrlAudioPlayer() {
     }
   }, [playingId])
 
-  return { playingId, toggleAudio }
+  return { playingId, progress, toggleAudio }
 }
 
 function RecordingList({ rows, myVote, onOpen, onVote }) {
@@ -1137,36 +1225,67 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
   )
 }
 
-function RadioDetailPage({ recording, myVote, onBack, onVote }) {
-  const { playingId, toggleAudio } = useUrlAudioPlayer()
+function RadioDetailPage({ recording, isSharedEntry, onBack, onPrepareShare }) {
+  const { playingId, progress, toggleAudio } = useUrlAudioPlayer()
+  const [shareVisible, setShareVisible] = useState(false)
   const isPlaying = playingId === recording.id
+  const duration = progress.id === recording.id ? progress.duration : recording.durationSec || 0
+  const currentTime = progress.id === recording.id ? progress.currentTime : 0
+  const progressPercent = duration > 0 ? `${Math.min(100, Math.max(0, currentTime / duration * 100))}%` : '0%'
+  const authorName = recording.authorName || '昵称'
+  const requestText = '我正在参与云上红色电台活动\n请为我点亮红星'
+  const showSharePrompt = () => {
+    onPrepareShare?.(recording)
+    setShareVisible(true)
+  }
+
   return (
-    <RadioShell title="录音详情" onBack={onBack}>
+    <RadioShell title="云上红色电台" onBack={onBack}>
       <section className="lm-radio-detail-panel">
-        <button
-          className="lm-radio-detail-play"
-          type="button"
-          onClick={() => toggleAudio(recording)}
-          aria-label={isPlaying ? '暂停音频' : '播放音频'}
-        >
-          <img src={isPlaying ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
-        </button>
-        <h2>{recording.authorName || '昵称'}</h2>
-        <p>{recording.title || '我的红色电台'}</p>
-        <div className="lm-radio-detail-meta">
-          <span>{recording.durationSec ? `${recording.durationSec}秒` : '录音作品'}</span>
-          <span>{recording.voteCount || 0} 颗红星</span>
-        </div>
-        <button
-          className="lm-radio-detail-vote"
-          type="button"
-          disabled={Boolean(myVote)}
-          onClick={() => onVote(recording)}
-        >
-          {myVote === recording.id ? '已送出红星' : '送出红星'}
-        </button>
+        <h2>我的参赛作品</h2>
+        <article className="lm-radio-detail-card">
+          {recording.avatar ? <img className="lm-radio-detail-avatar" src={recording.avatar} alt="头像" /> : <div className="lm-radio-detail-avatar lm-avatar-placeholder" />}
+          <div className="lm-radio-detail-name">{authorName}</div>
+          <button
+            className="lm-radio-detail-play"
+            type="button"
+            onClick={() => toggleAudio(recording)}
+            aria-label={isPlaying ? '暂停音频' : '播放音频'}
+          >
+            <img src={isPlaying ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
+          </button>
+          <div className="lm-radio-detail-copy">{requestText}</div>
+          <div className="lm-radio-detail-progress">
+            <span style={{ width: progressPercent }} />
+          </div>
+          <div className="lm-radio-detail-stars">
+            <span aria-hidden="true" />
+            <em>{recording.voteCount || 0}</em>
+          </div>
+          <button className="lm-radio-detail-share" type="button" onClick={showSharePrompt}>为我点亮红星</button>
+        </article>
       </section>
+      <button className="lm-radio-detail-bottom" type="button" onClick={onBack}>
+        {isSharedEntry ? '前往活动首页' : '返回'}
+      </button>
+      {shareVisible ? <RadioSharePrompt onClose={() => setShareVisible(false)} /> : null}
     </RadioShell>
+  )
+}
+
+function RadioSharePrompt({ onClose }) {
+  return (
+    <div className="lm-radio-share-mask" role="button" tabIndex={0} onClick={onClose} onKeyDown={(event) => {
+      if (event.key === 'Enter' || event.key === ' ') onClose()
+    }}>
+      <div className="lm-radio-share-panel">
+        <svg viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+          <path d="M24 92C34 53 61 31 100 25" />
+          <path d="M76 10L102 24L88 52" />
+        </svg>
+        <p>点击右上角分享给朋友</p>
+      </div>
+    </div>
   )
 }
 
