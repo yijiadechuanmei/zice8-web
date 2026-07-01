@@ -730,6 +730,7 @@ function DailyDoneModal({ onBack }) {
 
 function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
   const [pendingLocation, setPendingLocation] = useState(null)
+  const [showCheckinDone, setShowCheckinDone] = useState(false)
   const locations = config.locations || []
   const assets = longMarchStudyAssets.checkin
   const visualLocations = [
@@ -753,10 +754,10 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
             key={location.key}
             className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''}`}
             type="button"
-            onClick={() => isNext ? setPendingLocation(location) : null}
+            onClick={() => isNext ? setPendingLocation(location) : setShowCheckinDone(true)}
             aria-label={`打卡${location.title}`}
           >
-            <img className="lm-checkin-location-card" src={isNext ? activeAsset : asset} alt="" />
+            <img className="lm-checkin-location-card" src={isNext ? asset : activeAsset} alt="" />
             {isNext ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
             <span>{location.title}</span>
           </button>
@@ -776,7 +777,7 @@ function CheckinPage({ config, nextCheckin, onCheckin, onBack }) {
           onClose={() => setPendingLocation(null)}
         />
       ) : null}
-      {!nextCheckin ? <CheckinDoneModal onBack={onBack} /> : null}
+      {showCheckinDone ? <CheckinDoneModal onBack={onBack} /> : null}
     </IvxStage>
   )
 }
