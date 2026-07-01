@@ -51,9 +51,9 @@ const POSTER_STAGE_HEIGHT = 1448
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
 const INVITER_QUERY = 'inviter'
 const CHECKIN_POSTER_LOCATION_ALIASES = [
+  ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
   ['beimen', 'north_gate', 'north-gate', '北门', '城楼', '镇远楼'],
   ['square', 'plaza', 'guangchang', '红军广场', '红色广场', '广场'],
-  ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
   ['martyrs', 'lieshi', '陵园', '烈士陵园', '烈士'],
 ]
 const MODAL_FRAME_SPECS = {
