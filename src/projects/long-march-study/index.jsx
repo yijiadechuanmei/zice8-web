@@ -2130,7 +2130,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
 
         if (isSharePoster) {
           const [background, sharePoster] = await Promise.all([
-            loadPosterImage(longMarchStudyAssets.radio.background),
+            loadPosterImage(posterAssets.shareBackground),
             loadPosterImage(posterAssets.share),
           ])
           let avatar = null
@@ -2249,7 +2249,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.title])
+  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.shareBackground, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
@@ -2289,7 +2289,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
             </div>
           ) : isSharePoster ? (
             <>
-              <img className="lm-share-poster-bg" src={longMarchStudyAssets.radio.background} alt="" />
+              <img className="lm-share-poster-bg" src={posterAssets.shareBackground} alt="" />
               <img className="lm-share-poster-image" src={posterAssets.share} alt="" />
               {poster?.avatar ? <img className="lm-share-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-share-poster-avatar lm-avatar-placeholder" />}
               <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
