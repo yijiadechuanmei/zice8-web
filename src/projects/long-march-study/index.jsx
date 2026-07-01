@@ -441,6 +441,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       avatar: currentWechat?.avatar || honorSnapshot.avatar || '',
       challengeDays: currentProfile?.challengeDays ?? honorSnapshot.challengeDays ?? 0,
       totalPoints: currentProfile?.totalPoints ?? honorSnapshot.totalPoints ?? 0,
+      honorTitle: options.honor?.title || honorSnapshot.honorTitle || '',
       locationKey: selectedCheckin?.locationKey || honorSnapshot.locationKey || '',
       locationTitle: selectedCheckin?.locationTitle || honorSnapshot.locationTitle || '',
       source: options.source || 'journey',
@@ -597,7 +598,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       ) : null}
       {page === PAGE.HONORS ? (
         <HonorsPage
-          honors={bootstrap?.honors || []}
+          honors={mine?.honors || bootstrap?.honors || []}
           checkins={mine?.checkins || []}
           locations={config.locations || []}
           onBack={() => setPage(PAGE.HOME)}
@@ -1855,6 +1856,8 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
   const [posterImage, setPosterImage] = useState('')
   const [error, setError] = useState('')
   const posterAssets = longMarchStudyAssets.checkinPoster
+  const isHonorPoster = poster?.source === 'honor'
+  const certificateName = poster?.name || poster?.nickname || '姓名'
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
   const locationImage = posterAssets.locations[posterLocationIndex] || posterAssets.locations[0]
 
@@ -1864,6 +1867,49 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
       setError('')
       setPosterImage('')
       try {
+        if (isHonorPoster) {
+          const [background, certificate] = await Promise.all([
+            loadPosterImage(longMarchStudyAssets.radio.background),
+            loadPosterImage(longMarchStudyAssets.honors.certificate),
+          ])
+          let avatar = null
+          if (poster?.avatar) {
+            try {
+              avatar = await loadPosterImage(poster.avatar, { verifyCanvas: true })
+            } catch {
+              avatar = null
+            }
+          }
+          const canvas = document.createElement('canvas')
+          canvas.width = POSTER_STAGE_WIDTH
+          canvas.height = POSTER_STAGE_HEIGHT
+          const ctx = canvas.getContext('2d')
+          ctx.fillStyle = '#fff'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(background, 0, -88, 750, 1624)
+          ctx.drawImage(certificate, 66, 133, 621, 1140)
+
+          const avatarX = 311
+          const avatarY = 450
+          const avatarSize = 124
+          if (avatar) {
+            ctx.save()
+            ctx.beginPath()
+            ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2)
+            ctx.clip()
+            ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize)
+            ctx.restore()
+          } else {
+            drawAvatarPlaceholder(ctx, avatarX, avatarY, avatarSize)
+          }
+
+          drawTextFit(ctx, certificateName, 291, 636, 177, 30, { color: '#000' })
+
+          const url = canvas.toDataURL('image/png')
+          if (!cancelled) setPosterImage(url)
+          return
+        }
+
         const [background, title, location] = await Promise.all([
           loadPosterImage(posterAssets.background),
           loadPosterImage(posterAssets.title),
@@ -1927,12 +1973,12 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, locationImage, poster, posterAssets.background, posterAssets.title])
+  }, [activityUrl, certificateName, isHonorPoster, locationImage, poster, posterAssets.background, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
       <section
-        className="lm-poster-page"
+        className={`lm-poster-page ${isHonorPoster ? 'is-honor-certificate' : ''}`}
         style={{
           transform: `scale(${scaleX})`,
           '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
@@ -1941,25 +1987,37 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         <button className="lm-poster-back" type="button" onClick={onBack} aria-label="返回">
           <img src={longMarchStudyAssets.shared.backIcon} alt="" />
         </button>
+        {isHonorPoster ? <div className="lm-certificate-title">我的证书</div> : null}
         <div className="lm-poster-live" aria-hidden={Boolean(posterImage)}>
-          <img className="lm-poster-bg" src={posterAssets.background} alt="" />
-          <img className="lm-poster-location" src={locationImage} alt="" />
-          <img className="lm-poster-title" src={posterAssets.title} alt="" />
-          {poster?.avatar ? <img className="lm-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-poster-avatar lm-avatar-placeholder" />}
-          <QRCodeCanvas
-            ref={qrCanvasRef}
-            className="lm-poster-qrcode"
-            value={activityUrl}
-            size={400}
-            level="M"
-            marginSize={2}
-          />
-          <div className="lm-poster-user">
-            <span>{poster?.nickname || poster?.name || '研学用户'}</span>
-            <span>闯关天数：{poster?.challengeDays || 0}天</span>
-            <span>累计分数：{poster?.totalPoints || 0}</span>
-          </div>
-          <div className="lm-poster-save-tip">长按海报可保存分享海报</div>
+          {isHonorPoster ? (
+            <>
+              <img className="lm-certificate-bg" src={longMarchStudyAssets.radio.background} alt="" />
+              <img className="lm-certificate-image" src={longMarchStudyAssets.honors.certificate} alt="" />
+              {poster?.avatar ? <img className="lm-certificate-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-certificate-avatar lm-avatar-placeholder" />}
+              <div className="lm-certificate-name">{certificateName}</div>
+            </>
+          ) : (
+            <>
+              <img className="lm-poster-bg" src={posterAssets.background} alt="" />
+              <img className="lm-poster-location" src={locationImage} alt="" />
+              <img className="lm-poster-title" src={posterAssets.title} alt="" />
+              {poster?.avatar ? <img className="lm-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-poster-avatar lm-avatar-placeholder" />}
+              <QRCodeCanvas
+                ref={qrCanvasRef}
+                className="lm-poster-qrcode"
+                value={activityUrl}
+                size={400}
+                level="M"
+                marginSize={2}
+              />
+              <div className="lm-poster-user">
+                <span>{poster?.nickname || poster?.name || '研学用户'}</span>
+                <span>闯关天数：{poster?.challengeDays || 0}天</span>
+                <span>累计分数：{poster?.totalPoints || 0}</span>
+              </div>
+              <div className="lm-poster-save-tip">长按海报可保存分享海报</div>
+            </>
+          )}
         </div>
         {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
         {!posterImage ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}

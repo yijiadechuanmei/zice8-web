@@ -2500,6 +2500,10 @@
   transform-origin: 0 0;
 }
 
+.lm-poster-page.is-honor-certificate {
+  background: #fff;
+}
+
 .lm-poster-back {
   position: absolute;
   left: 20px;
@@ -2519,6 +2523,25 @@
   filter: brightness(0) invert(1);
 }
 
+.lm-certificate-title {
+  position: absolute;
+  left: 225px;
+  top: 33px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 50px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 34px;
+  line-height: normal;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+}
+
 .lm-poster-live,
 .lm-poster-generated {
   position: absolute;
@@ -2526,6 +2549,53 @@
   top: 0;
   width: 750px;
   height: 1448px;
+}
+
+.lm-certificate-bg {
+  position: absolute;
+  left: 0;
+  top: -88px;
+  width: 750px;
+  height: 1624px;
+  object-fit: fill;
+}
+
+.lm-certificate-image {
+  position: absolute;
+  left: 66px;
+  top: 133px;
+  width: 621px;
+  height: 1140px;
+  object-fit: fill;
+}
+
+.lm-certificate-avatar {
+  position: absolute;
+  left: 311px;
+  top: 450px;
+  width: 124px;
+  height: 124px;
+  overflow: hidden;
+  border-radius: 200px;
+  object-fit: cover;
+}
+
+.lm-certificate-name {
+  position: absolute;
+  left: 291px;
+  top: 611px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 177px;
+  height: 50px;
+  overflow: hidden;
+  color: #000;
+  font-size: 30px;
+  line-height: normal;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: pre;
 }
 
 .lm-poster-generated {
