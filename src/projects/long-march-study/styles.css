@@ -1379,7 +1379,7 @@
   border-radius: 100px;
   background: #e34020;
   color: #fff;
-  font-size: 34px;
+  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
   font-weight: 700;
 }
 
@@ -1446,7 +1446,7 @@
   border-radius: 100px;
   background: #e34020;
   color: #fff;
-  font-size: 34px;
+  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
   font-weight: 700;
 }
 
@@ -1613,7 +1613,7 @@
   height: 68px;
   border: 0;
   border-radius: 100px;
-  font-size: 34px;
+  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
   font-weight: 700;
 }
 
@@ -1690,7 +1690,7 @@
   position: relative;
   z-index: 1;
   color: #fff;
-  font-size: 34px;
+  font-size: calc(clamp(22px, 4.533vw, 34px) * var(--lm-radio-ui-scale, 1));
 }
 
 .lm-honors-card,
