@@ -1197,8 +1197,6 @@ function formatWxError(error) {
 }
 
 function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }) {
-  const [scriptKey, setScriptKey] = useState(scripts[0]?.key || '')
-  const [step, setStep] = useState('scripts')
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
@@ -1207,7 +1205,7 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
   const startedAtRef = useRef(0)
-  const activeScript = scripts.find((item) => item.key === scriptKey) || scripts[0]
+  const activeScript = scripts[0]
   const hasRecording = Boolean(localId || mediaId)
 
   useEffect(() => {
@@ -1404,66 +1402,38 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   }
 
   return (
-    <RadioShell onBack={step === 'scripts' ? onBack : () => setStep('scripts')}>
-      {step === 'scripts' ? (
-        <>
-          <div className="lm-radio-script-panel">
-            <h2>请选择参赛文稿</h2>
-            <div className="lm-radio-script-list">
-              {scripts.map((script) => (
-                <button
-                  className={script.key === activeScript?.key ? 'is-active' : ''}
-                  key={script.key}
-                  type="button"
-                  onClick={() => setScriptKey(script.key)}
-                >
-                  <strong>{script.title}</strong>
-                  <span>{script.content}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <button className="lm-radio-bottom-button" type="button" onClick={() => setStep('record')}>进入录音</button>
-        </>
-      ) : (
-        <>
-          <div className="lm-radio-record-panel">
-            <h2>{activeScript?.title || '文稿一'}</h2>
-            <p>{activeScript?.content || '知识解析内容'}</p>
-          </div>
-          <div className="lm-radio-record-visual">
-            {!recording && !hasRecording ? (
-              <button className="is-base" type="button" onClick={start} aria-label="开始录音">
-                <img src={longMarchStudyAssets.radio.recordBase} alt="" />
-              </button>
-            ) : null}
-            {recording ? (
-              <>
-                <img className="is-mic" src={longMarchStudyAssets.radio.recordMic} alt="" />
-                <img className="is-wave" src={longMarchStudyAssets.radio.recordWave} alt="" />
-                <button className="lm-radio-record-hit" type="button" onClick={stop} aria-label="暂停录音" />
-              </>
-            ) : null}
-            {!recording && hasRecording ? (
-              <>
-                <button className="is-people" type="button" onClick={previewPlaying ? pausePreview : playPreview} aria-label={previewPlaying ? '暂停试听' : '播放试听'}>
-                  <img src={longMarchStudyAssets.radio.recordPeople} alt="" />
-                </button>
-                <button className="is-note" type="button" onClick={resetRecording} aria-label="取消录音">
-                  <img src={longMarchStudyAssets.radio.recordNote} alt="" />
-                </button>
-              </>
-            ) : null}
-          </div>
-          <div className="lm-radio-record-status">
-            {recording ? '录音中，点击暂停完成录制' : hasRecording ? '录音已完成，可以试听或上传' : '请点击开始录音'}
-          </div>
-          <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction} disabled={uploading}>
-            {uploading ? '上传中' : recording ? '暂停录音' : hasRecording ? '确认上传' : '开始录音'}
+    <RadioShell onBack={onBack}>
+      <div className="lm-radio-record-visual">
+        {!recording && !hasRecording ? (
+          <button className="is-base" type="button" onClick={start} aria-label="开始录音">
+            <img src={longMarchStudyAssets.radio.recordBase} alt="" />
           </button>
-          <button className="lm-radio-return-button" type="button" onClick={() => setStep('scripts')}>返回</button>
-        </>
-      )}
+        ) : null}
+        {recording ? (
+          <>
+            <img className="is-mic" src={longMarchStudyAssets.radio.recordMic} alt="" />
+            <img className="is-wave" src={longMarchStudyAssets.radio.recordWave} alt="" />
+            <button className="lm-radio-record-hit" type="button" onClick={stop} aria-label="暂停录音" />
+          </>
+        ) : null}
+        {!recording && hasRecording ? (
+          <>
+            <button className="is-people" type="button" onClick={previewPlaying ? pausePreview : playPreview} aria-label={previewPlaying ? '暂停试听' : '播放试听'}>
+              <img src={longMarchStudyAssets.radio.recordPeople} alt="" />
+            </button>
+            <button className="is-note" type="button" onClick={resetRecording} aria-label="取消录音">
+              <img src={longMarchStudyAssets.radio.recordNote} alt="" />
+            </button>
+          </>
+        ) : null}
+      </div>
+      <div className="lm-radio-record-status">
+        {recording ? '录音中，点击暂停完成录制' : hasRecording ? '录音已完成，可以试听或上传' : '请点击开始录音'}
+      </div>
+      <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction} disabled={uploading}>
+        {uploading ? '上传中' : recording ? '暂停录音' : hasRecording ? '确认上传' : '开始录音'}
+      </button>
+      <button className="lm-radio-return-button" type="button" onClick={onBack}>返回</button>
       <RadioNoticeModal
         message={notice}
         onClose={async () => {

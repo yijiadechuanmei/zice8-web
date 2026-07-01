@@ -1229,8 +1229,7 @@
   pointer-events: none;
 }
 
-.lm-radio-panel,
-.lm-radio-script-panel {
+.lm-radio-panel {
   position: absolute;
   left: 31px;
   top: 114px;
@@ -1401,25 +1400,6 @@
   font-size: 29px;
 }
 
-.lm-radio-bottom-button {
-  position: absolute;
-  left: 191px;
-  top: 1286px;
-  width: 364px;
-  height: 68px;
-  border: 0;
-  border-radius: 100px;
-  background: #e34020;
-  color: #fff;
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.lm-radio-script-panel {
-  display: flex;
-  flex-direction: column;
-}
-
 .lm-radio-detail-panel {
   position: absolute;
   left: 31px;
@@ -1486,83 +1466,10 @@
   opacity: 0.65;
 }
 
-.lm-radio-script-panel h2 {
-  margin: 0;
-  padding: 40px 0;
-  color: #c42d15;
-  font-size: 40px;
-  text-align: center;
-}
-
-.lm-radio-script-list {
-  display: grid;
-  justify-items: center;
-  gap: 20px;
-  height: 980px;
-  overflow: hidden auto;
-}
-
-.lm-radio-script-list button {
-  width: 637px;
-  min-height: 200px;
-  border: 0;
-  border-radius: 20px;
-  background: #ececec;
-  padding: 20px;
-  color: #000;
-  text-align: left;
-}
-
-.lm-radio-script-list button.is-active {
-  background: #f6ddd2;
-}
-
-.lm-radio-script-list strong {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 29px;
-  font-weight: 400;
-  text-align: center;
-}
-
-.lm-radio-script-list span {
-  display: block;
-  font-size: 29px;
-  line-height: 1.45;
-}
-
-.lm-radio-record-panel {
-  position: absolute;
-  left: 31px;
-  top: 114px;
-  width: 685px;
-  height: 848px;
-  overflow: hidden auto;
-  border-radius: 25px;
-  background: #fff;
-  padding: 20px;
-}
-
-.lm-radio-record-panel h2 {
-  margin: 0 0 16px;
-  color: #000;
-  font-size: 29px;
-  font-weight: 400;
-  text-align: center;
-}
-
-.lm-radio-record-panel p {
-  margin: 0;
-  color: #000;
-  font-size: 29px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
 .lm-radio-record-visual {
   position: absolute;
   left: 46px;
-  top: 997px;
+  top: 516px;
   width: 659px;
   height: 260px;
 }
@@ -1631,17 +1538,16 @@
 .lm-radio-record-status {
   position: absolute;
   left: 120px;
-  top: 1248px;
+  top: 828px;
   width: 510px;
   color: #fff;
-  font-size: 24px;
+  font-size: 30px;
   text-align: center;
 }
 
 .lm-radio-confirm-button,
 .lm-radio-return-button {
   position: absolute;
-  top: 1306px;
   height: 68px;
   border: 0;
   border-radius: 100px;
@@ -1650,7 +1556,8 @@
 }
 
 .lm-radio-confirm-button {
-  left: 68px;
+  left: 191px;
+  top: 1128px;
   width: 367px;
   background: #e34020;
   color: #fff;
@@ -1661,7 +1568,8 @@
 }
 
 .lm-radio-return-button {
-  left: 451px;
+  left: 257px;
+  top: 1222px;
   width: 236px;
   background: #ffe596;
   color: #e34020;
