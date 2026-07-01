@@ -1517,10 +1517,13 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
   const [notice, setNotice] = useState('')
   const startedAtRef = useRef(0)
   const autoStopRef = useRef(false)
+  const frozenDurationRef = useRef(0)
   const activeScript = scripts[0]
   const hasRecording = Boolean(localId || mediaId)
   const hasRecordingProgress = hasRecording || stoppingRecording
-  const currentDurationSec = recording ? elapsedSec : (recordDurationSec || elapsedSec)
+  const currentDurationSec = recording
+    ? elapsedSec
+    : Math.max(recordDurationSec, frozenDurationRef.current)
   const recordProgressPercent = `${Math.min(currentDurationSec / RADIO_RECORD_MAX_SECONDS, 1) * 100}%`
   const formatRecordTime = (seconds) => {
     const safeSeconds = Math.max(0, Math.min(RADIO_RECORD_MAX_SECONDS, Number(seconds) || 0))
@@ -1546,6 +1549,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
               RADIO_RECORD_MAX_SECONDS,
               Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
             )
+            frozenDurationRef.current = nextDuration
             setLocalId(res.localId)
             setRecordDurationSec(nextDuration)
             setElapsedSec(nextDuration)
@@ -1565,6 +1569,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
       Math.max(1, durationOverride ?? Math.round((Date.now() - startedAtRef.current) / 1000)),
     )
     if (wx?.stopRecord) {
+      frozenDurationRef.current = nextDuration
       setRecordDurationSec(nextDuration)
       setElapsedSec(nextDuration)
       setRecording(false)
@@ -1583,6 +1588,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
       })
       return
     }
+    frozenDurationRef.current = nextDuration
     setLocalId(`debug-local-${Date.now()}`)
     setRecordDurationSec(nextDuration)
     setElapsedSec(nextDuration)
@@ -1617,6 +1623,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
       return
     }
     startedAtRef.current = Date.now()
+    frozenDurationRef.current = 0
     setLocalId('')
     setMediaId('')
     setRecordDurationSec(0)
@@ -1671,6 +1678,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
   const resetRecording = () => {
     const wx = getWx()
     if (wx?.stopVoice && localId) wx.stopVoice({ localId })
+    frozenDurationRef.current = 0
     setRecording(false)
     setLocalId('')
     setMediaId('')
