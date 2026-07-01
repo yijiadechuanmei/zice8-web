@@ -19,6 +19,7 @@ import {
   saveProfile,
   startQuiz,
   submitRecording,
+  submitShareScreenshot,
   voteRecording,
 } from './api'
 import { LONG_MARCH_STUDY_ACTIVITY_KEY, longMarchStudyAssets } from './config'
@@ -47,6 +48,7 @@ const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
+const INVITER_QUERY = 'inviter'
 const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
@@ -171,6 +173,15 @@ function loadPosterImage(src, { verifyCanvas = false } = {}) {
   })
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(new Error('截图读取失败'))
+    reader.readAsDataURL(file)
+  })
+}
+
 function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
   const value = String(text || '')
   const minSize = options.minSize || 18
@@ -209,6 +220,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const visitorId = useMemo(() => getVisitorId(), [])
   const debugEnabled = useMemo(() => ['1', 'mobile'].includes(getQueryParam('debug')), [])
   const initialRadioRecordingId = useMemo(() => getQueryParam(RADIO_RECORDING_QUERY) || '', [])
+  const inviterCode = useMemo(() => getQueryParam(INVITER_QUERY) || '', [])
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
@@ -286,6 +298,22 @@ export default function LongMarchStudyApp({ routeParams }) {
     trackPageView(activityKey, '/long-march-study', { pageKey: page })
   }, [activityKey, page])
 
+  const config = bootstrap?.config || {}
+  const profile = bootstrap?.profile
+
+  const buildActivityShareUrl = useCallback((memberCode = profile?.memberCode) => {
+    if (typeof window === 'undefined') return ''
+    const url = new URL(window.location.href)
+    url.pathname = `/long_march_study/${encodeURIComponent(activityKey)}`
+    url.hash = ''
+    url.searchParams.delete('token')
+    url.searchParams.delete('code')
+    url.searchParams.delete('state')
+    url.searchParams.delete(RADIO_RECORDING_QUERY)
+    if (memberCode) url.searchParams.set(INVITER_QUERY, memberCode)
+    return url.toString()
+  }, [activityKey, profile?.memberCode])
+
   const shareActivity = useMemo(() => {
     const activity = bootstrap?.activity || publicConfig || {}
     return {
@@ -293,15 +321,14 @@ export default function LongMarchStudyApp({ routeParams }) {
       shareTitle: activity.shareTitle || '重走长征路 共筑爱国魂',
       shareDesc: activity.shareDesc || '完成红色任务，赢取积分与荣誉',
       shareImage: activity.shareImage,
+      shareLink: buildActivityShareUrl(),
     }
-  }, [bootstrap, publicConfig])
+  }, [bootstrap, buildActivityShareUrl, publicConfig])
   const handleWechatShareStatus = useCallback((nextStatus) => {
     setShareStatus((current) => ({ ...current, ...nextStatus }))
   }, [])
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
-  const config = bootstrap?.config || {}
-  const profile = bootstrap?.profile
   const bgm = config.bgm || { enabled: false }
 
   const clearRuntimeState = useCallback(() => {
@@ -613,7 +640,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {page === PAGE.MINE ? (
         <MinePage
           mine={mine}
-          activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
+          activityUrl={buildActivityShareUrl()}
           onFlow={setMineFlowModal}
           onHonors={openHonors}
           onRank={openRank}
@@ -624,7 +651,25 @@ export default function LongMarchStudyApp({ routeParams }) {
         <PosterPage
           poster={poster}
           locations={config.locations || []}
-          activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
+          activityUrl={buildActivityShareUrl()}
+          activityKey={activityKey}
+          visitorId={visitorId}
+          shareScreenshot={bootstrap?.today?.shareScreenshot}
+          onSubmitted={async (screenshot) => {
+            setBootstrap((current) => ({
+              ...current,
+              today: {
+                ...(current?.today || {}),
+                shareScreenshot: screenshot,
+              },
+            }))
+            try {
+              const data = await getMine(activityKey, visitorId)
+              setMine(data)
+            } catch {
+              // keep poster flow available even if mine refresh fails
+            }
+          }}
           onBack={() => setPage(posterReturnPage)}
         />
       ) : null}
@@ -634,7 +679,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           onClose={() => setShowProfile(false)}
           onSubmit={async (payload) => {
             try {
-              const data = await saveProfile(activityKey, { ...payload, visitorId })
+              const data = await saveProfile(activityKey, { ...payload, visitorId, inviterCode })
               setBootstrap((current) => ({ ...current, profile: data.profile }))
               setShowProfile(false)
               setShowTasks(true)
@@ -1850,16 +1895,23 @@ function RulesModal({ rules, onClose }) {
   )
 }
 
-function PosterPage({ poster, locations, activityUrl, onBack }) {
+function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, shareScreenshot, onSubmitted, onBack }) {
   const { scaleX, width, height } = useStageFit(POSTER_STAGE_WIDTH, POSTER_STAGE_HEIGHT)
   const qrCanvasRef = useRef(null)
+  const screenshotInputRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [error, setError] = useState('')
+  const [shareUploadStatus, setShareUploadStatus] = useState(shareScreenshot || null)
+  const [shareUploading, setShareUploading] = useState(false)
   const posterAssets = longMarchStudyAssets.checkinPoster
   const isHonorPoster = poster?.source === 'honor'
   const certificateName = poster?.name || poster?.nickname || '姓名'
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
   const locationImage = posterAssets.locations[posterLocationIndex] || posterAssets.locations[0]
+
+  useEffect(() => {
+    setShareUploadStatus(shareScreenshot || null)
+  }, [shareScreenshot])
 
   useEffect(() => {
     let cancelled = false
@@ -1975,6 +2027,38 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     }
   }, [activityUrl, certificateName, isHonorPoster, locationImage, poster, posterAssets.background, posterAssets.title])
 
+  const handleShareScreenshotFile = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setShareUploadStatus({ status: 'failed', rejectReason: '请选择图片文件' })
+      return
+    }
+    setShareUploading(true)
+    try {
+      const imageDataUrl = await readFileAsDataUrl(file)
+      const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
+      const screenshot = result?.screenshot
+      setShareUploadStatus(screenshot || { status: 'pending' })
+      onSubmitted?.(screenshot)
+    } catch (uploadError) {
+      setShareUploadStatus({ status: 'failed', rejectReason: uploadError.message || '截图提交失败' })
+    } finally {
+      setShareUploading(false)
+    }
+  }
+
+  const shareStatusText = shareUploadStatus?.status === 'approved'
+    ? '分享截图已通过，积分已发放'
+    : shareUploadStatus?.status === 'rejected'
+      ? `分享截图未通过：${shareUploadStatus.rejectReason || '请重新提交'}`
+      : shareUploadStatus?.status === 'pending'
+        ? '分享截图已提交，等待后台审核'
+        : shareUploadStatus?.status === 'failed'
+          ? shareUploadStatus.rejectReason || '截图提交失败'
+          : '分享后上传截图，后台审核通过后加5分'
+
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
       <section
@@ -2021,6 +2105,24 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         </div>
         {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
         {!posterImage ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
+        {!isHonorPoster ? (
+          <div className="lm-share-screenshot-uploader">
+            <input
+              ref={screenshotInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleShareScreenshotFile}
+            />
+            <button
+              type="button"
+              disabled={shareUploading}
+              onClick={() => screenshotInputRef.current?.click()}
+            >
+              {shareUploading ? '提交中' : shareUploadStatus?.status === 'approved' ? '已审核通过' : '提交分享截图'}
+            </button>
+            <span>{shareStatusText}</span>
+          </div>
+        ) : null}
       </section>
     </div>
   )

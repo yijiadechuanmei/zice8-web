@@ -139,6 +139,13 @@ export function reviewLongMarchRecording(activityKey, recordingId, payload) {
   })
 }
 
+export function reviewLongMarchShareScreenshot(activityKey, screenshotId, payload) {
+  return adminRequest(`/long-march-study/admin/activities/${activityKey}/share-screenshots/${screenshotId}/review`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getOperationLogs(params = {}) {
   const search = new URLSearchParams(params)
   return adminRequest(`/admin/operation-logs?${search.toString()}`)

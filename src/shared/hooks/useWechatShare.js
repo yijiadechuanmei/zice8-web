@@ -9,7 +9,7 @@ function getShareData(activity, url) {
   return {
     title: activity.shareTitle || activity.title,
     desc: activity.shareDesc ?? '',
-    link: url,
+    link: activity.shareLink || url,
     imgUrl: activity.shareImage || SHARE_IMAGE_URL,
   }
 }

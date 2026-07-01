@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Input, Popconfirm, Select, Space, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording } from '../api'
+import { exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -28,6 +28,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
+  const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
   const [error, setError] = useState('')
   const phaseNo = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all' ? phaseScope : ''
 
@@ -134,6 +135,30 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     }
   }, [activity.activityKey])
 
+  const handleReviewShareScreenshot = useCallback(async (row, payload, action) => {
+    if (!row?.id) return
+    setReviewingShareScreenshotId(`${row.id}:${action}`)
+    try {
+      const result = await reviewLongMarchShareScreenshot(activity.activityKey, row.id, payload)
+      const screenshot = result?.screenshot || {}
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? {
+          ...item,
+          status: screenshot.status || payload.status || item.status,
+          pointsEarned: screenshot.pointsEarned ?? item.pointsEarned,
+          rejectReason: screenshot.rejectReason ?? payload.rejectReason ?? item.rejectReason,
+          reviewedAt: screenshot.reviewedAt || new Date().toISOString(),
+        } : item),
+      }))
+      message.success(action === 'rejected' ? '已驳回截图' : '已通过截图审核')
+    } catch (err) {
+      message.error(err.message || '审核失败')
+    } finally {
+      setReviewingShareScreenshotId('')
+    }
+  }, [activity.activityKey])
+
   const tableColumns = useMemo(() => {
     const columns = buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
       visibleColumns.map((column) => [
@@ -187,8 +212,44 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         ),
       })
     }
+    if (activity.type === 'long_march_study' && activeViewKey === 'long_march_share_screenshots') {
+      columns.push({
+        title: '审核操作',
+        key: 'shareReviewActions',
+        fixed: 'right',
+        width: 160,
+        render: (_, row) => (
+          <Space size={6} wrap>
+            <Button
+              size="small"
+              type={row.status === 'approved' ? 'default' : 'primary'}
+              loading={reviewingShareScreenshotId === `${row.id}:approved`}
+              disabled={Boolean(reviewingShareScreenshotId) || row.status === 'approved'}
+              onClick={() => handleReviewShareScreenshot(row, { status: 'approved' }, 'approved')}
+            >
+              通过
+            </Button>
+            <Popconfirm
+              title="确认驳回该分享截图？"
+              okText="驳回"
+              cancelText="取消"
+              onConfirm={() => handleReviewShareScreenshot(row, { status: 'rejected', rejectReason: '后台审核驳回' }, 'rejected')}
+            >
+              <Button
+                size="small"
+                danger
+                loading={reviewingShareScreenshotId === `${row.id}:rejected`}
+                disabled={Boolean(reviewingShareScreenshotId) || row.status === 'rejected'}
+              >
+                驳回
+              </Button>
+            </Popconfirm>
+          </Space>
+        ),
+      })
+    }
     return columns
-  }, [activity.type, activeViewKey, handleReviewRecording, reviewingRecordingId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, handleReviewRecording, handleReviewShareScreenshot, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return
