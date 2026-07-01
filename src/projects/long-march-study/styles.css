@@ -296,6 +296,13 @@
   height: 14.0193%;
 }
 
+.lm-task-choice-ivx-back {
+  left: calc(min(100vw, 750px) * 20 / 750);
+  top: calc(min(100vw, 750px) * 32 / 750);
+  width: calc(min(100vw, 750px) * 71 / 750);
+  height: calc(min(100vw, 750px) * 49 / 750);
+}
+
 .lm-question {
   font-size: 20px;
   line-height: 1.45;

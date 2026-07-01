@@ -885,7 +885,7 @@ function TaskModal({ onClose, onSelect }) {
     <div className="lm-task-choice-mask">
       <section className="lm-task-choice" aria-label="玩法选择">
         <img className="lm-task-choice-bg" src={tasks.background} alt="" />
-        <button className="lm-ivx-back" type="button" onClick={onClose} aria-label="返回">
+        <button className="lm-ivx-back lm-task-choice-ivx-back" type="button" onClick={onClose} aria-label="返回">
           <img src={longMarchStudyAssets.shared.backIcon} alt="" />
         </button>
         <img className="lm-task-choice-title" src={tasks.title} alt="玩法选择" />
