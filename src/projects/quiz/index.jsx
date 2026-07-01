@@ -98,6 +98,7 @@ function QuizMain({ routeParams }) {
   const fengchengLocalAnswersRef = useRef([])
   const fengchengLocalStartedAtRef = useRef(0)
   const fengchengLocalRequestIdRef = useRef('')
+  const fengchengLocalSubmittingRef = useRef(false)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -306,6 +307,7 @@ function QuizMain({ routeParams }) {
       currentQuestionSort: question?.questionSort || index + 1,
       totalQuestions: FENGCHENG_LOCAL_QUESTIONS.length,
       questionCount: FENGCHENG_LOCAL_QUESTIONS.length,
+      startedAtMs: fengchengLocalStartedAtRef.current,
     }
   }
 
@@ -315,6 +317,7 @@ function QuizMain({ routeParams }) {
     fengchengLocalAnswersRef.current = []
     fengchengLocalStartedAtRef.current = timestamp
     fengchengLocalRequestIdRef.current = attemptId
+    fengchengLocalSubmittingRef.current = false
     setActiveAttemptId(attemptId)
     setResultAttemptId(null)
     setCurrent(createFengchengLocalCurrent(0))
@@ -414,7 +417,7 @@ function QuizMain({ routeParams }) {
   }
 
   async function handleFengchengLocalAnswer(selectedOptions) {
-    if (submitting || feedback) return
+    if (fengchengLocalSubmittingRef.current || feedback) return
     const questionSort = Number(current?.currentQuestion?.questionSort || current?.currentQuestionSort || 1)
     const nextAnswers = [
       ...fengchengLocalAnswersRef.current,
@@ -427,6 +430,7 @@ function QuizMain({ routeParams }) {
       return
     }
 
+    fengchengLocalSubmittingRef.current = true
     setSubmitting(true)
     try {
       const totalTimeMs = Math.max(Date.now() - fengchengLocalStartedAtRef.current, 0)
@@ -449,6 +453,7 @@ function QuizMain({ routeParams }) {
       }
       showError(err)
     } finally {
+      fengchengLocalSubmittingRef.current = false
       setSubmitting(false)
     }
   }
@@ -628,6 +633,7 @@ function QuizMain({ routeParams }) {
     fengchengLocalAnswersRef.current = []
     fengchengLocalStartedAtRef.current = 0
     fengchengLocalRequestIdRef.current = ''
+    fengchengLocalSubmittingRef.current = false
   }
 
   if (blockedMessage) {
@@ -708,7 +714,7 @@ function QuizMain({ routeParams }) {
           />
         ) : null}
         <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
-        <QuizLoadingOverlay visible={submitting} />
+        <QuizLoadingOverlay visible={submitting && page !== 'question'} />
         <QuizToast visible={Boolean(toast)} message={toast} />
         {debug ? (
           <button className="fengcheng-debug-entry" type="button" onClick={() => setPage('debug')}>

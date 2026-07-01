@@ -101,11 +101,9 @@ function FengchengFrame({ children }) {
   return <div className="fengcheng-quiz-app">{children}</div>
 }
 
-function formatSeconds(seconds) {
-  const totalSeconds = Math.max(Math.floor(Number(seconds || 0)), 0)
-  const minutes = Math.floor(totalSeconds / 60)
-  const restSeconds = totalSeconds % 60
-  return `${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`
+function formatElapsedMs(ms) {
+  const seconds = Math.max(Number(ms || 0) / 1000, 0)
+  return `${seconds.toFixed(2)}s`
 }
 
 function StageBackground({ publicConfig, children, className = '' }) {
@@ -233,41 +231,43 @@ function FengchengQuestionContent({
   onAnswer,
 }) {
   const [selected, setSelected] = useState('')
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const answerTimerRef = useRef(null)
+  const [elapsedMs, setElapsedMs] = useState(0)
+  const startedAtRef = useRef(0)
+  const answerLockedRef = useRef(false)
   const attemptId = current?.attemptId || ''
-
-  useEffect(() => () => {
-    if (answerTimerRef.current) window.clearTimeout(answerTimerRef.current)
-  }, [])
+  const startedAtMs = Number(current?.startedAtMs || 0)
 
   useEffect(() => {
-    setElapsedSeconds(0)
-  }, [attemptId])
+    const fallbackStartedAt = Date.now()
+    startedAtRef.current = startedAtMs || fallbackStartedAt
+    setElapsedMs(Math.max(Date.now() - startedAtRef.current, 0))
+  }, [attemptId, startedAtMs])
 
   useEffect(() => {
     setSelected('')
+    answerLockedRef.current = false
   }, [question.questionId])
 
   useEffect(() => {
-    if (submitting) return undefined
-    const timer = window.setTimeout(() => {
-      setElapsedSeconds((value) => value + 1)
-    }, 1000)
-    return () => window.clearTimeout(timer)
-  }, [elapsedSeconds, submitting])
+    if (!attemptId) return undefined
+    const updateElapsed = () => {
+      setElapsedMs(Math.max(Date.now() - startedAtRef.current, 0))
+    }
+    updateElapsed()
+    const timer = window.setInterval(updateElapsed, 50)
+    return () => window.clearInterval(timer)
+  }, [attemptId])
 
   function handleOptionSelect(value) {
-    if (selected || submitting) return
+    if (selected || submitting || answerLockedRef.current) return
+    answerLockedRef.current = true
     setSelected(value)
-    answerTimerRef.current = window.setTimeout(() => {
-      onAnswer(question.questionId, [value])
-    }, 80)
+    onAnswer(question.questionId, [value])
   }
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 30
   const questionSort = question.questionSort || current?.currentQuestionSort || 1
-  const timerText = formatSeconds(elapsedSeconds)
+  const timerText = formatElapsedMs(elapsedMs)
 
   return (
     <StageBackground publicConfig={publicConfig} className="fengcheng-question-page">
@@ -291,7 +291,7 @@ function FengchengQuestionContent({
               type="button"
               className={`fengcheng-option ${selected === value ? 'is-selected' : ''}`}
               onClick={() => handleOptionSelect(value)}
-              disabled={submitting || Boolean(selected)}
+              disabled={submitting || Boolean(selected) || answerLockedRef.current}
             >
               <strong>{label}.</strong>
               <span>{option.content}</span>
@@ -388,7 +388,7 @@ export function FengchengRankPage({
                   <strong>{item.rank || index + 1}</strong>
                   <span>{item.participantName || item.name || '未填写'}</span>
                   <span>{item.department || '-'}</span>
-                  <span>{item.totalScore || 0}</span>
+                  <span>{item.totalScore || 0}分</span>
                   <span>{formatFengchengDuration(item.totalTimeMs)}</span>
                 </div>
               ))}

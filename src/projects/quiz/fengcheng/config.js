@@ -70,8 +70,6 @@ export function getFengchengAssets(publicConfig) {
 }
 
 export function formatFengchengDuration(ms) {
-  const totalSeconds = Math.max(Math.floor(Number(ms || 0) / 1000), 0)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  const seconds = Math.max(Number(ms || 0) / 1000, 0)
+  return `${seconds.toFixed(2)}s`
 }
