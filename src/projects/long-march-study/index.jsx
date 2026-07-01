@@ -758,6 +758,7 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
       {visualLocations.map(({ location, className, asset, activeAsset }, index) => {
         const isNext = nextCheckin?.key === location.key
+        const canCheckin = isNext && !today?.checkinDone
         const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
         const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
@@ -765,11 +766,11 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
             key={location.key}
             className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''} ${isCompleted ? 'is-completed' : ''}`}
             type="button"
-            onClick={() => isNext || isCompleted ? setPendingCheckin({ location, completed: isCompleted }) : setCheckinNotice(lockedNotice)}
+            onClick={() => canCheckin || isCompleted ? setPendingCheckin({ location, completed: isCompleted }) : setCheckinNotice(lockedNotice)}
             aria-label={`打卡${location.title}`}
           >
-            <img className="lm-checkin-location-card" src={isNext || isCompleted ? asset : activeAsset} alt="" />
-            {isNext ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
+            <img className="lm-checkin-location-card" src={canCheckin || isCompleted ? asset : activeAsset} alt="" />
+            {canCheckin ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
             <span>{location.title}</span>
           </button>
         )
