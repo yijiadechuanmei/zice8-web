@@ -1564,9 +1564,10 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
   const stop = useCallback((durationOverride) => {
     if (!recording) return
     const wx = getWx()
+    const explicitDuration = typeof durationOverride === 'number' ? durationOverride : undefined
     const nextDuration = Math.min(
       RADIO_RECORD_MAX_SECONDS,
-      Math.max(1, durationOverride ?? Math.round((Date.now() - startedAtRef.current) / 1000)),
+      Math.max(1, explicitDuration ?? Math.round((Date.now() - startedAtRef.current) / 1000)),
     )
     if (wx?.stopRecord) {
       frozenDurationRef.current = nextDuration
@@ -1780,7 +1781,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
           <>
             <img className="is-mic" src={longMarchStudyAssets.radio.recordMic} alt="" />
             <img className="is-wave" src={longMarchStudyAssets.radio.recordWave} alt="" />
-            <button className="lm-radio-record-hit" type="button" onClick={stop} aria-label="暂停录音" />
+            <button className="lm-radio-record-hit" type="button" onClick={() => stop()} aria-label="暂停录音" />
           </>
         ) : null}
         {!recording && hasRecordingProgress ? (
