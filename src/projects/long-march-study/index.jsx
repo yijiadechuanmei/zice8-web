@@ -49,6 +49,12 @@ const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
 const INVITER_QUERY = 'inviter'
+const CHECKIN_POSTER_LOCATION_ALIASES = [
+  ['beimen', 'north_gate', 'north-gate', '北门', '城楼', '镇远楼'],
+  ['square', 'plaza', 'guangchang', '红军广场', '红色广场', '广场'],
+  ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
+  ['martyrs', 'lieshi', '陵园', '烈士陵园', '烈士'],
+]
 const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
@@ -180,6 +186,19 @@ function readFileAsDataUrl(file) {
     reader.onerror = () => reject(new Error('截图读取失败'))
     reader.readAsDataURL(file)
   })
+}
+
+function normalizeLocationText(value) {
+  return String(value || '').toLowerCase().replace(/[\s_－—-]+/g, '')
+}
+
+function getCheckinPosterImage(location, fallbackIndex = 0) {
+  const posters = longMarchStudyAssets.checkinPoster.locations
+  const text = normalizeLocationText(`${location?.key || ''}${location?.title || ''}${location?.name || ''}${location?.locationTitle || ''}`)
+  const matchedIndex = CHECKIN_POSTER_LOCATION_ALIASES.findIndex((aliases) =>
+    aliases.some((alias) => text.includes(normalizeLocationText(alias))),
+  )
+  return posters[matchedIndex >= 0 ? matchedIndex : fallbackIndex % posters.length] || posters[0]
 }
 
 function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
@@ -574,7 +593,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           mine={mine}
           onPoster={() => showPoster('checkin')}
           onRank={() => setPage(PAGE.RANK)}
-          onBack={() => setPage(PAGE.HOME)}
+          onBack={() => setPage(PAGE.CHECKIN)}
         />
       ) : null}
       {page === PAGE.RADIO ? (
@@ -583,7 +602,13 @@ export default function LongMarchStudyApp({ routeParams }) {
           visitorId={visitorId}
           config={config}
           recordings={bootstrap?.recordings}
-          onUpload={() => setPage(PAGE.UPLOAD)}
+          onUpload={() => {
+            if (bootstrap?.today?.recordingSubmitted) {
+              setToast('今日录音已提交')
+              return
+            }
+            setPage(PAGE.UPLOAD)
+          }}
           initialRecordingId={deepLinkRecordingId}
           isSharedRecording={Boolean(deepLinkRecordingId)}
           onPrepareShare={prepareRadioRecordingShare}
@@ -1594,8 +1619,8 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
             if (!nextMediaId) throw new Error('微信上传未返回 serverId')
             await submit(nextMediaId)
           } catch (error) {
-            if ((error.message || '').includes('只能上传一次')) {
-              setNotice('每人只能上传一次')
+            if ((error.message || '').includes('今日录音已提交') || (error.message || '').includes('只能上传一次')) {
+              setNotice('今日录音已提交')
               return
             }
             onToast(error.message || '上传失败')
@@ -1621,8 +1646,8 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
       }
       await submit(mediaId || localId || `debug-media-${Date.now()}`)
     } catch (error) {
-      if ((error.message || '').includes('只能上传一次')) {
-        setNotice('每人只能上传一次')
+      if ((error.message || '').includes('今日录音已提交') || (error.message || '').includes('只能上传一次')) {
+        setNotice('今日录音已提交')
         return
       }
       onToast(error.message || '上传失败')
@@ -1696,7 +1721,7 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
   const locationPosterItems = (locations || []).slice(0, posterThumbnails.length).map((location, index) => ({
     id: location.key || `location-${index + 1}`,
     title: location.title || location.name || `打卡海报${index + 1}`,
-    thumbnail: posterThumbnails[index] || posterThumbnails[0],
+    thumbnail: getCheckinPosterImage(location, index),
     checkin: checkinByLocation.get(location.key),
   }))
   const extraCheckinItems = (checkins || [])
@@ -1704,7 +1729,7 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
     .map((checkin, index) => ({
       id: checkin.id || checkin.locationKey || `checkin-${index + 1}`,
       title: checkin.locationTitle || `打卡海报${locationPosterItems.length + index + 1}`,
-      thumbnail: posterThumbnails[(locationPosterItems.length + index) % posterThumbnails.length] || posterThumbnails[0],
+      thumbnail: getCheckinPosterImage(checkin, locationPosterItems.length + index),
       checkin,
     }))
   const fallbackItems = !locationPosterItems.length && !extraCheckinItems.length
@@ -1924,7 +1949,7 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
   const isHonorPoster = poster?.source === 'honor'
   const certificateName = poster?.name || poster?.nickname || '姓名'
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
-  const locationImage = posterAssets.locations[posterLocationIndex] || posterAssets.locations[0]
+  const locationImage = getCheckinPosterImage(poster, posterLocationIndex)
 
   useEffect(() => {
     let cancelled = false
@@ -2031,7 +2056,7 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
         const url = canvas.toDataURL('image/png')
         if (!cancelled) setPosterImage(url)
       } catch {
-        if (!cancelled) setError('海报生成失败，请稍后重试')
+        if (!cancelled && !isHonorPoster) setError('海报生成失败，请稍后重试')
       }
     }
     composePoster()
@@ -2117,7 +2142,7 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
           )}
         </div>
         {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
-        {!posterImage ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
+        {!posterImage && (!isHonorPoster || error) ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
         {!isHonorPoster ? (
           <div className="lm-share-screenshot-uploader">
             <input

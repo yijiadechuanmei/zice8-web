@@ -1761,6 +1761,7 @@
   top: 0;
   width: 207px;
   height: 260px;
+  animation: lm-record-slow-pulse 1.8s ease-in-out infinite;
 }
 
 .lm-radio-record-visual .is-wave {
@@ -1768,6 +1769,7 @@
   top: 88px;
   width: 659px;
   height: 48px;
+  animation: lm-record-wave-glow 2.4s ease-in-out infinite;
 }
 
 .lm-radio-record-visual .is-people {
@@ -1789,6 +1791,30 @@
   top: 0;
   width: 659px;
   height: 260px;
+}
+
+@keyframes lm-record-slow-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes lm-record-wave-glow {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .lm-radio-record-status {
