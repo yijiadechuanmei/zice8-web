@@ -27,6 +27,7 @@ export const longMarchStudyAssets = {
     honorsButton: ih5Asset('63ec4f98ad44e6b1772ae676d27a26ea_5839_626_64.png'),
     posterButton: ih5Asset('095d9fddd09f5d111c49362c208d2ae6_6067_626_64.png'),
     rankButton: ih5Asset('9f34650f48d774409f433f55802643f0_6037_626_62.png'),
+    shareScreenshotButton: ih5Asset('f4a57957d2f8aa00ab48e5c6ff0030ff_5989_626_61.png'),
   },
   tasks: {
     background: asset('74c6f34fc9b0ab2d02237c39b28c364f_639659_750_1624.png'),

@@ -56,6 +56,9 @@ export const submitRecording = (activityKey, data) =>
     body: JSON.stringify(data),
   })
 
+export const getRecording = (activityKey, recordingId) =>
+  request(`${base(activityKey)}/recordings/${encodeURIComponent(recordingId)}`)
+
 export const submitShareScreenshot = (activityKey, data) =>
   request(`${base(activityKey)}/share-screenshots`, {
     method: 'POST',

@@ -359,7 +359,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
                 size="small"
                 danger
                 loading={reviewingRecordingId === `${row.id}:rejected`}
-                disabled={Boolean(reviewingRecordingId) || row.status === 'rejected'}
+                disabled={Boolean(reviewingRecordingId) || row.status === 'rejected' || row.status === 'approved'}
               >
                 驳回
               </Button>

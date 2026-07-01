@@ -5,7 +5,7 @@ import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl } from '../../shared/utils/url'
 import { setToken } from '../../shared/api/request'
 import {
   answerQuiz,
@@ -15,6 +15,7 @@ import {
   getMine,
   getPublicConfig,
   getRank,
+  getRecording,
   resetDebugData,
   saveProfile,
   startQuiz,
@@ -252,6 +253,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [poster, setPoster] = useState(null)
   const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
   const [toast, setToast] = useState('')
+  const [radioNotice, setRadioNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [quizState, setQuizState] = useState(null)
   const [quizResult, setQuizResult] = useState(null)
@@ -359,22 +361,12 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowDailyDone(false)
     setPoster(null)
     setPosterReturnPage(PAGE.MINE)
+    setRadioNotice('')
     setQuizState(null)
     setQuizResult(null)
     setCheckinResult(null)
     setMine(null)
   }, [])
-
-  const buildRadioRecordingShareUrl = useCallback((recordingId) => {
-    const url = new URL(window.location.href)
-    url.pathname = `/long_march_study/${encodeURIComponent(activityKey)}`
-    url.hash = ''
-    url.searchParams.delete('token')
-    url.searchParams.delete('code')
-    url.searchParams.delete('state')
-    url.searchParams.set(RADIO_RECORDING_QUERY, recordingId)
-    return url.toString()
-  }, [activityKey])
 
   const clearRadioRecordingDeepLink = useCallback(() => {
     setDeepLinkRecordingId('')
@@ -382,30 +374,6 @@ export default function LongMarchStudyApp({ routeParams }) {
     url.searchParams.delete(RADIO_RECORDING_QUERY)
     window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
   }, [])
-
-  const prepareRadioRecordingShare = useCallback((recording) => {
-    const link = buildRadioRecordingShareUrl(recording.id)
-    const parsed = new URL(link)
-    window.history.replaceState(null, '', `${parsed.pathname}${parsed.search}`)
-    const wx = getWx()
-    const data = {
-      title: `${recording.authorName || '好友'}正在参与云上红色电台`,
-      desc: '请为我点亮红星',
-      link,
-      imgUrl: shareActivity.shareImage || 'https://web.zice8.com/share/default-share.jpg',
-    }
-    if (wx?.updateAppMessageShareData) wx.updateAppMessageShareData(data)
-    if (wx?.updateTimelineShareData) wx.updateTimelineShareData(data)
-    if (wx?.onMenuShareAppMessage) wx.onMenuShareAppMessage(data)
-    if (wx?.onMenuShareTimeline) wx.onMenuShareTimeline(data)
-    setShareStatus((current) => ({
-      ...current,
-      shareTitle: data.title,
-      shareConfigured: Boolean(wx),
-      radioShareLink: sanitizeUrlForWechat(link),
-    }))
-    return link
-  }, [buildRadioRecordingShareUrl, shareActivity.shareImage])
 
   const openJourney = () => {
     if (!profile) {
@@ -604,14 +572,13 @@ export default function LongMarchStudyApp({ routeParams }) {
           recordings={bootstrap?.recordings}
           onUpload={() => {
             if (bootstrap?.today?.recordingSubmitted) {
-              setToast('今日录音已提交')
+              setRadioNotice('今日录音已提交')
               return
             }
             setPage(PAGE.UPLOAD)
           }}
           initialRecordingId={deepLinkRecordingId}
           isSharedRecording={Boolean(deepLinkRecordingId)}
-          onPrepareShare={prepareRadioRecordingShare}
           onSharedHome={() => {
             clearRadioRecordingDeepLink()
             setPage(PAGE.HOME)
@@ -670,21 +637,10 @@ export default function LongMarchStudyApp({ routeParams }) {
         <MinePage
           mine={mine}
           activityUrl={buildActivityShareUrl()}
-          onFlow={setMineFlowModal}
-          onHonors={openHonors}
-          onRank={openRank}
-          onBack={() => setPage(PAGE.HOME)}
-        />
-      ) : null}
-      {page === PAGE.POSTER ? (
-        <PosterPage
-          poster={poster}
-          locations={config.locations || []}
-          activityUrl={buildActivityShareUrl()}
           activityKey={activityKey}
           visitorId={visitorId}
           shareScreenshot={bootstrap?.today?.shareScreenshot}
-          onSubmitted={async (screenshot) => {
+          onScreenshotSubmitted={async (screenshot) => {
             setBootstrap((current) => ({
               ...current,
               today: {
@@ -696,9 +652,21 @@ export default function LongMarchStudyApp({ routeParams }) {
               const data = await getMine(activityKey, visitorId)
               setMine(data)
             } catch {
-              // keep poster flow available even if mine refresh fails
+              // keep mine page available even if mine refresh fails
             }
           }}
+          onToast={setToast}
+          onFlow={setMineFlowModal}
+          onHonors={openHonors}
+          onRank={openRank}
+          onBack={() => setPage(PAGE.HOME)}
+        />
+      ) : null}
+      {page === PAGE.POSTER ? (
+        <PosterPage
+          poster={poster}
+          locations={config.locations || []}
+          activityUrl={buildActivityShareUrl()}
           onBack={() => setPage(posterReturnPage)}
         />
       ) : null}
@@ -736,6 +704,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {mineFlowModal ? <MineFlowModal type={mineFlowModal} mine={mine} onClose={() => setMineFlowModal('')} /> : null}
       {showDailyDone ? <DailyDoneModal onBack={() => { setShowDailyDone(false); setPage(PAGE.HOME) }} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
+      <RadioNoticeModal message={radioNotice} onClose={() => setRadioNotice('')} />
       {debugEnabled ? (
         <DebugPanel
           activityKey={activityKey}
@@ -1197,33 +1166,63 @@ function RadioShell({ title = '云上红色电台', onBack, children }) {
 }
 
 function RadioPage({
+  activityKey,
   recordings,
   onUpload,
   onVote,
   onBack,
   initialRecordingId = '',
   isSharedRecording = false,
-  onPrepareShare,
   onSharedHome,
 }) {
   const [tab, setTab] = useState('featured')
   const [selectedRecordingId, setSelectedRecordingId] = useState(initialRecordingId)
+  const [sharedRecordingState, setSharedRecordingState] = useState({ id: '', recording: null, failed: false })
   const rows = tab === 'featured' ? recordings?.featured || [] : recordings?.all || []
   const allRows = [...(recordings?.featured || []), ...(recordings?.all || [])]
   const selectedRecording = selectedRecordingId
-    ? allRows.find((item) => item.id === selectedRecordingId) || null
+    ? allRows.find((item) => item.id === selectedRecordingId)
+      || (sharedRecordingState.id === selectedRecordingId ? sharedRecordingState.recording : null)
     : null
   const selectedFromShare = Boolean(isSharedRecording && selectedRecordingId && selectedRecordingId === initialRecordingId)
+  const sharedLoading = Boolean(
+    selectedFromShare &&
+    selectedRecordingId &&
+    !selectedRecording &&
+    sharedRecordingState.id !== selectedRecordingId,
+  )
+
+  useEffect(() => {
+    if (!selectedFromShare || !selectedRecordingId || selectedRecording) return undefined
+    let cancelled = false
+    getRecording(activityKey, selectedRecordingId)
+      .then((result) => {
+        if (!cancelled) {
+          setSharedRecordingState({ id: selectedRecordingId, recording: result?.recording || null, failed: !result?.recording })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSharedRecordingState({ id: selectedRecordingId, recording: null, failed: true })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey, selectedFromShare, selectedRecording, selectedRecordingId])
 
   if (selectedRecording) {
     return (
       <RadioDetailPage
         recording={selectedRecording}
         isSharedEntry={selectedFromShare}
+        myVote={recordings?.myVoteRecordingId}
+        onVote={onVote}
         onBack={selectedFromShare ? onSharedHome : () => setSelectedRecordingId('')}
-        onPrepareShare={onPrepareShare}
       />
     )
+  }
+
+  if (selectedFromShare && sharedLoading) {
+    return <RadioShell onBack={onSharedHome}><div className="lm-radio-empty">录音加载中</div></RadioShell>
   }
 
   return (
@@ -1353,7 +1352,7 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
             <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>
           </div>
           <div className="lm-radio-row-votes">
-            <span aria-hidden="true">★</span>
+            <span aria-hidden="true" />
             <em>{recording.voteCount || 0}</em>
           </div>
           <button
@@ -1373,19 +1372,14 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
   )
 }
 
-function RadioDetailPage({ recording, isSharedEntry, onBack, onPrepareShare }) {
+function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
   const { playingId, progress, toggleAudio } = useUrlAudioPlayer()
-  const [shareVisible, setShareVisible] = useState(false)
   const isPlaying = playingId === recording.id
   const duration = progress.id === recording.id ? progress.duration : recording.durationSec || 0
   const currentTime = progress.id === recording.id ? progress.currentTime : 0
   const progressPercent = duration > 0 ? `${Math.min(100, Math.max(0, currentTime / duration * 100))}%` : '0%'
   const authorName = recording.authorName || '昵称'
   const requestText = '我正在参与云上红色电台活动\n请为我点亮红星'
-  const showSharePrompt = () => {
-    onPrepareShare?.(recording)
-    setShareVisible(true)
-  }
 
   return (
     <RadioShell title="云上红色电台" onBack={onBack}>
@@ -1410,30 +1404,20 @@ function RadioDetailPage({ recording, isSharedEntry, onBack, onPrepareShare }) {
             <span aria-hidden="true" />
             <em>{recording.voteCount || 0}</em>
           </div>
-          <button className="lm-radio-detail-share" type="button" onClick={showSharePrompt}>为我点亮红星</button>
+          <button
+            className="lm-radio-detail-share"
+            type="button"
+            disabled={Boolean(myVote)}
+            onClick={() => onVote(recording)}
+          >
+            {myVote === recording.id ? '已送出' : '送红星'}
+          </button>
         </article>
       </section>
       <button className="lm-radio-detail-bottom" type="button" onClick={onBack}>
         {isSharedEntry ? '前往活动首页' : '返回'}
       </button>
-      {shareVisible ? <RadioSharePrompt onClose={() => setShareVisible(false)} /> : null}
     </RadioShell>
-  )
-}
-
-function RadioSharePrompt({ onClose }) {
-  return (
-    <div className="lm-radio-share-mask" role="button" tabIndex={0} onClick={onClose} onKeyDown={(event) => {
-      if (event.key === 'Enter' || event.key === ' ') onClose()
-    }}>
-      <div className="lm-radio-share-panel">
-        <svg viewBox="0 0 120 120" focusable="false" aria-hidden="true">
-          <path d="M24 92C34 53 61 31 100 25" />
-          <path d="M76 10L102 24L88 52" />
-        </svg>
-        <p>点击右上角分享给朋友</p>
-      </div>
-    </div>
   )
 }
 
@@ -1837,8 +1821,21 @@ function normalizeRankRows(rows = []) {
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
-function MinePage({ mine, activityUrl, onFlow, onHonors, onRank, onBack }) {
+function MinePage({
+  mine,
+  activityUrl,
+  activityKey,
+  visitorId,
+  shareScreenshot,
+  onScreenshotSubmitted,
+  onToast,
+  onFlow,
+  onHonors,
+  onRank,
+  onBack,
+}) {
   const [qrOpen, setQrOpen] = useState(false)
+  const [screenshotOpen, setScreenshotOpen] = useState(false)
   const profile = mine?.profile
   const avatar = mine?.wechat?.avatar || profile?.avatar || ''
   const nickname = mine?.wechat?.nickname || profile?.nickname || profile?.name || '昵称'
@@ -1850,6 +1847,7 @@ function MinePage({ mine, activityUrl, onFlow, onHonors, onRank, onBack }) {
     { key: 'honors', image: longMarchStudyAssets.mine.honorsButton, label: '我的荣誉', onClick: onHonors },
     { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onHonors },
     { key: 'rank', image: longMarchStudyAssets.mine.rankButton, label: '积分排行榜', onClick: onRank },
+    { key: 'shareScreenshot', image: longMarchStudyAssets.mine.shareScreenshotButton, label: '提交截图', onClick: () => setScreenshotOpen(true) },
   ]
 
   return (
@@ -1886,7 +1884,77 @@ function MinePage({ mine, activityUrl, onFlow, onHonors, onRank, onBack }) {
           </div>
         </div>
       ) : null}
+      {screenshotOpen ? (
+        <ShareScreenshotUploadModal
+          activityKey={activityKey}
+          visitorId={visitorId}
+          shareScreenshot={shareScreenshot}
+          onSubmitted={onScreenshotSubmitted}
+          onToast={onToast}
+          onClose={() => setScreenshotOpen(false)}
+        />
+      ) : null}
     </IvxStage>
+  )
+}
+
+function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, onSubmitted, onToast, onClose }) {
+  const inputRef = useRef(null)
+  const [uploading, setUploading] = useState(false)
+  const [status, setStatus] = useState(shareScreenshot || null)
+  const currentStatus = status || shareScreenshot || null
+  const statusText = currentStatus?.status === 'approved'
+    ? '分享截图已通过，积分已发放'
+    : currentStatus?.status === 'rejected'
+      ? `分享截图未通过：${currentStatus.rejectReason || '请重新提交'}`
+      : currentStatus?.status === 'pending'
+        ? '上传成功，等待后台审核'
+        : currentStatus?.status === 'failed'
+          ? currentStatus.rejectReason || '截图提交失败'
+          : '请上传分享截图，审核通过后获得积分'
+
+  const handleFile = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setStatus({ status: 'failed', rejectReason: '请选择图片文件' })
+      return
+    }
+    setUploading(true)
+    try {
+      const imageDataUrl = await readFileAsDataUrl(file)
+      const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
+      const screenshot = result?.screenshot || { status: 'pending' }
+      setStatus(screenshot)
+      await onSubmitted?.(screenshot)
+    } catch (error) {
+      const message = error.message || '截图提交失败'
+      setStatus({ status: 'failed', rejectReason: message })
+      onToast?.(message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const canUpload = currentStatus?.status !== 'approved'
+
+  return (
+    <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label="提交截图">
+      <section className="lm-radio-notice-panel lm-share-upload-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})` }}>
+        <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
+        <p>{statusText}</p>
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={canUpload ? () => inputRef.current?.click() : onClose}
+        >
+          <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
+          <span>{uploading ? '提交中' : canUpload ? '上传截图' : '关闭'}</span>
+        </button>
+        <button className="lm-share-upload-close" type="button" onClick={onClose}>关闭</button>
+      </section>
+    </div>
   )
 }
 
@@ -1936,15 +2004,11 @@ function RulesModal({ rules, onClose }) {
   )
 }
 
-function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, shareScreenshot, onSubmitted, onBack }) {
+function PosterPage({ poster, locations, activityUrl, onBack }) {
   const { scaleX, width, height } = useStageFit(POSTER_STAGE_WIDTH, POSTER_STAGE_HEIGHT)
   const qrCanvasRef = useRef(null)
-  const screenshotInputRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [error, setError] = useState('')
-  const [shareUploadStatus, setShareUploadStatus] = useState(shareScreenshot || null)
-  const [shareUploading, setShareUploading] = useState(false)
-  const displayedShareStatus = shareUploadStatus || shareScreenshot || null
   const posterAssets = longMarchStudyAssets.checkinPoster
   const isHonorPoster = poster?.source === 'honor'
   const certificateName = poster?.name || poster?.nickname || '姓名'
@@ -2065,38 +2129,6 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
     }
   }, [activityUrl, certificateName, isHonorPoster, locationImage, poster, posterAssets.background, posterAssets.title])
 
-  const handleShareScreenshotFile = async (event) => {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setShareUploadStatus({ status: 'failed', rejectReason: '请选择图片文件' })
-      return
-    }
-    setShareUploading(true)
-    try {
-      const imageDataUrl = await readFileAsDataUrl(file)
-      const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
-      const screenshot = result?.screenshot
-      setShareUploadStatus(screenshot || { status: 'pending' })
-      onSubmitted?.(screenshot)
-    } catch (uploadError) {
-      setShareUploadStatus({ status: 'failed', rejectReason: uploadError.message || '截图提交失败' })
-    } finally {
-      setShareUploading(false)
-    }
-  }
-
-  const shareStatusText = displayedShareStatus?.status === 'approved'
-    ? '分享截图已通过，积分已发放'
-    : displayedShareStatus?.status === 'rejected'
-      ? `分享截图未通过：${displayedShareStatus.rejectReason || '请重新提交'}`
-      : displayedShareStatus?.status === 'pending'
-        ? '上传成功，等待后台审核，通过后加5分'
-        : displayedShareStatus?.status === 'failed'
-          ? displayedShareStatus.rejectReason || '截图提交失败'
-          : '分享后上传截图，后台审核通过后加5分'
-
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
       <section
@@ -2143,24 +2175,6 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
         </div>
         {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
         {!posterImage && (!isHonorPoster || error) ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
-        {!isHonorPoster ? (
-          <div className="lm-share-screenshot-uploader">
-            <input
-              ref={screenshotInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleShareScreenshotFile}
-            />
-            <button
-              type="button"
-              disabled={shareUploading}
-              onClick={() => screenshotInputRef.current?.click()}
-            >
-              {shareUploading ? '提交中' : displayedShareStatus?.status === 'approved' ? '已审核通过' : '提交分享截图'}
-            </button>
-            <span>{shareStatusText}</span>
-          </div>
-        ) : null}
       </section>
     </div>
   )
@@ -2229,7 +2243,11 @@ function Toast({ text, onClose }) {
     const timer = window.setTimeout(onClose, 2600)
     return () => window.clearTimeout(timer)
   }, [onClose])
-  return <div className="lm-toast">{text}</div>
+  return (
+    <div className="lm-toast-mask" role="status" aria-live="polite">
+      <div className="lm-toast">{text}</div>
+    </div>
+  )
 }
 
 function MessageScreen({ title }) {
