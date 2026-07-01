@@ -10,7 +10,7 @@
 .lm-page button,
 .lm-page input,
 .lm-page select {
-  font: inherit;
+  font-family: inherit;
 }
 
 .lm-page *,
