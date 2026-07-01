@@ -104,18 +104,18 @@ function useStageFit(baseWidth = 750, baseHeight = 1448) {
   return stageFit
 }
 
-function useModalFit(spec) {
+function useModalFit(spec, viewportPadding = 32) {
   const resolve = useCallback(() => {
     if (!spec || typeof window === 'undefined') return { scale: 1, width: spec?.width || 0, height: spec?.height || 0 }
     const viewportWidth = window.innerWidth || spec.width
-    const scale = Math.min((viewportWidth - 32) / spec.width, 1)
+    const scale = Math.min((viewportWidth - viewportPadding) / spec.width, 1)
     const safeScale = Math.max(scale, 0.1)
     return {
       scale: safeScale,
       width: spec.width * safeScale,
       height: spec.height * safeScale,
     }
-  }, [spec])
+  }, [spec, viewportPadding])
   const [fit, setFit] = useState(() => resolve())
 
   useEffect(() => {
@@ -353,8 +353,10 @@ export default function LongMarchStudyApp({ routeParams }) {
   const config = bootstrap?.config || {}
   const profile = bootstrap?.profile
 
-  const buildActivityShareUrl = useCallback((memberCode = profile?.memberCode) => {
+  const buildActivityShareUrl = useCallback((input = {}) => {
     if (typeof window === 'undefined') return ''
+    const options = typeof input === 'string' ? { memberCode: input } : input
+    const memberCode = options.memberCode ?? profile?.memberCode
     const url = new URL(window.location.href)
     url.pathname = `/long_march_study/${encodeURIComponent(activityKey)}`
     url.hash = ''
@@ -362,7 +364,10 @@ export default function LongMarchStudyApp({ routeParams }) {
     url.searchParams.delete('code')
     url.searchParams.delete('state')
     url.searchParams.delete(RADIO_RECORDING_QUERY)
+    url.searchParams.set('share', '1')
     if (memberCode) url.searchParams.set(INVITER_QUERY, memberCode)
+    if (options.source) url.searchParams.set('share_source', options.source)
+    if (options.locationKey) url.searchParams.set('share_location', options.locationKey)
     return url.toString()
   }, [activityKey, profile?.memberCode])
 
@@ -698,7 +703,10 @@ export default function LongMarchStudyApp({ routeParams }) {
         <PosterPage
           poster={poster}
           locations={config.locations || []}
-          activityUrl={buildActivityShareUrl()}
+          activityUrl={buildActivityShareUrl({
+            source: poster?.source || 'poster',
+            locationKey: poster?.locationKey,
+          })}
           onBack={() => setPage(posterReturnPage)}
         />
       ) : null}
@@ -1454,7 +1462,7 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
 }
 
 function RadioNoticeFrame({ children, className = '', ariaLabel = '提示' }) {
-  const modalFit = useModalFit(NOTICE_PANEL_SPEC)
+  const modalFit = useModalFit(NOTICE_PANEL_SPEC, 8)
   return (
     <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label={ariaLabel}>
       <div className="lm-radio-notice-frame" style={{ width: modalFit.width, height: modalFit.height }}>
@@ -1477,9 +1485,8 @@ function RadioNoticeModal({ message, onClose }) {
   return (
     <RadioNoticeFrame>
       <p>{message}</p>
-      <button type="button" onClick={onClose}>
+      <button className="lm-radio-notice-image-button" type="button" onClick={onClose} aria-label="返回首页">
         <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
-        <span>返回首页</span>
       </button>
     </RadioNoticeFrame>
   )
@@ -2002,9 +2009,8 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
         onClick={canUpload ? () => inputRef.current?.click() : onClose}
       >
         <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
-        <span>{uploading ? '提交中' : canUpload ? '上传截图' : '关闭'}</span>
+        <span>{uploading ? '提交中' : canUpload ? '提交' : '返回首页'}</span>
       </button>
-      <button className="lm-share-upload-close" type="button" onClick={onClose}>关闭</button>
     </RadioNoticeFrame>
   )
 }
@@ -2110,6 +2116,13 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
 
           drawTextFit(ctx, certificateName, 291, 636, 177, 30, { color: '#000' })
 
+          const qrCanvas = qrCanvasRef.current
+          if (qrCanvas) {
+            ctx.fillStyle = '#fff'
+            ctx.fillRect(530, 1068, 116, 116)
+            ctx.drawImage(qrCanvas, 530, 1068, 116, 116)
+          }
+
           const url = canvas.toDataURL('image/png')
           if (!cancelled) setPosterImage(url)
           return
@@ -2171,7 +2184,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         const url = canvas.toDataURL('image/png')
         if (!cancelled) setPosterImage(url)
       } catch {
-        if (!cancelled && !isHonorPoster) setError('海报生成失败，请稍后重试')
+        if (!cancelled) setError('海报生成失败，请稍后重试')
       }
     }
     composePoster()
@@ -2193,28 +2206,36 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
           <img src={longMarchStudyAssets.shared.backIcon} alt="" />
         </button>
         {isHonorPoster ? <div className="lm-certificate-title">我的证书</div> : null}
+        <QRCodeCanvas
+          ref={qrCanvasRef}
+          className="lm-poster-qrcode-source"
+          value={activityUrl}
+          size={400}
+          level="M"
+          marginSize={2}
+        />
         <div className="lm-poster-live" aria-hidden={Boolean(posterImage)}>
           {isHonorPoster ? (
-            <>
+            <div className="lm-certificate-poster">
               <img className="lm-certificate-bg" src={longMarchStudyAssets.radio.background} alt="" />
               <img className="lm-certificate-image" src={longMarchStudyAssets.honors.certificate} alt="" />
               {poster?.avatar ? <img className="lm-certificate-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-certificate-avatar lm-avatar-placeholder" />}
               <div className="lm-certificate-name">{certificateName}</div>
-            </>
+              <QRCodeCanvas
+                className="lm-certificate-qrcode"
+                value={activityUrl}
+                size={116}
+                level="M"
+                marginSize={1}
+              />
+            </div>
           ) : (
             <>
               <img className="lm-poster-bg" src={posterAssets.background} alt="" />
               <img className="lm-poster-location" src={locationImage} alt="" />
               <img className="lm-poster-title" src={posterAssets.title} alt="" />
               {poster?.avatar ? <img className="lm-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-poster-avatar lm-avatar-placeholder" />}
-              <QRCodeCanvas
-                ref={qrCanvasRef}
-                className="lm-poster-qrcode"
-                value={activityUrl}
-                size={400}
-                level="M"
-                marginSize={2}
-              />
+              <QRCodeCanvas className="lm-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
               <div className="lm-poster-user">
                 <span>{poster?.nickname || poster?.name || '研学用户'}</span>
                 <span>闯关天数：{poster?.challengeDays || 0}天</span>

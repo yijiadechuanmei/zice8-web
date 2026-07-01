@@ -1929,6 +1929,10 @@
   font-size: 34px;
 }
 
+.lm-radio-notice-image-button span {
+  display: none;
+}
+
 .lm-share-upload-panel input {
   display: none;
 }
@@ -1943,16 +1947,6 @@
   padding: 0 28px;
   font-size: 28px;
   line-height: 1.5;
-}
-
-.lm-share-upload-close {
-  left: 272px !important;
-  top: 502px !important;
-  width: 140px !important;
-  height: 44px !important;
-  background: transparent !important;
-  color: #8a3a24 !important;
-  font-size: 23px !important;
 }
 
 .lm-honors-card,
@@ -2645,6 +2639,21 @@
   height: 1448px;
 }
 
+.lm-poster-qrcode-source {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  width: 400px;
+  height: 400px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lm-certificate-poster {
+  position: absolute;
+  inset: 0;
+}
+
 .lm-certificate-bg {
   position: absolute;
   left: 0;
@@ -2690,6 +2699,16 @@
   text-align: center;
   text-overflow: ellipsis;
   white-space: pre;
+}
+
+.lm-certificate-qrcode {
+  position: absolute;
+  left: 530px;
+  top: 1068px;
+  width: 116px !important;
+  height: 116px !important;
+  padding: 3px;
+  background: #fff;
 }
 
 .lm-poster-generated {
