@@ -2984,7 +2984,7 @@
 }
 
 .lm-profile-form .lm-field {
-  width: min(70.667vw, 530px);
+  width: 530px;
   margin: 0;
 }
 
@@ -2999,15 +2999,16 @@
 
 .lm-profile-form .lm-field input {
   width: 100%;
-  height: min(11.6vw, 87px);
-  min-height: 52px;
+  height: 87px;
   border: 0;
   border-radius: 999px;
   background: #fdecbf;
   color: #241714;
-  font-size: clamp(18px, 4.267vw, 32px);
+  font-size: 32px;
   font-weight: 400;
   padding: 0 30px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .lm-profile-form .lm-field input::placeholder {
@@ -3024,7 +3025,7 @@
   border-radius: 999px;
   background: #fe7f2a;
   color: #fff;
-  font-size: clamp(18px, 4.533vw, 34px);
+  font-size: 34px;
   font-weight: 700;
 }
 
