@@ -760,6 +760,7 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
         const isNext = nextCheckin?.key === location.key
         const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
         const canCheckin = isNext && !isCompleted && !today?.checkinDone
+        const isUnlocked = canCheckin || isCompleted
         const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
           <button
@@ -769,8 +770,7 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
             onClick={() => canCheckin || isCompleted ? setPendingCheckin({ location, completed: isCompleted }) : setCheckinNotice(lockedNotice)}
             aria-label={`打卡${location.title}`}
           >
-            <img className="lm-checkin-location-card" src={canCheckin || isCompleted ? asset : activeAsset} alt="" />
-            {canCheckin ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
+            <img className="lm-checkin-location-card" src={isUnlocked ? asset : activeAsset} alt="" />
             <span>{location.title}</span>
           </button>
         )
