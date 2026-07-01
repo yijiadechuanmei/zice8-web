@@ -2849,23 +2849,6 @@
   white-space: nowrap;
 }
 
-.lm-share-poster-save-tip {
-  position: absolute;
-  left: 131px;
-  top: 1356px;
-  width: 488px;
-  height: 43px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  color: #fff;
-  font-size: 30px;
-  line-height: 43px;
-  text-align: center;
-  white-space: nowrap;
-}
-
 .lm-poster-location {
   position: absolute;
   left: 47px;
@@ -2928,8 +2911,12 @@
   position: absolute;
   left: 266px;
   top: 1206px;
+  z-index: 7;
   width: 488px;
   height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   color: #fff;
   font-size: 30px;
@@ -2937,6 +2924,24 @@
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+  pointer-events: none;
+  animation: lm-poster-save-tip-blink 1.35s ease-in-out infinite;
+}
+
+.lm-poster-save-tip.is-share-poster-tip {
+  left: 131px;
+  top: 1356px;
+}
+
+@keyframes lm-poster-save-tip-blink {
+  0%,
+  100% {
+    opacity: 0.48;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .lm-poster-generating {

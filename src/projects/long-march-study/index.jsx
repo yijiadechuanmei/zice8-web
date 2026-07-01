@@ -2212,11 +2212,6 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         ctx.drawImage(background, 0, -88, 750, 1624)
         ctx.drawImage(location, 47, 379, location.naturalWidth, location.naturalHeight)
         ctx.drawImage(title, 74, 40, 612, 366)
-        ctx.fillStyle = '#fff'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.font = '400 30px Arial, sans-serif'
-        ctx.fillText('长按海报可保存分享海报', 510, 1228)
 
         const avatarX = 71
         const avatarY = 1328
@@ -2317,11 +2312,11 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
                 <span>闯关天数：{poster?.challengeDays || 0}天</span>
                 <span>累计分数：{poster?.totalPoints || 0}</span>
               </div>
-              <div className="lm-poster-save-tip">长按海报可保存分享海报</div>
             </>
           )}
         </div>
         {posterImage ? <img className={`lm-poster-generated ${isSharePoster ? 'is-share-poster-generated' : ''}`} src={posterImage} alt="长征研学分享海报" /> : null}
+        <div className={`lm-poster-save-tip ${isSharePoster ? 'is-share-poster-tip' : ''}`}>长按海报可保存分享海报</div>
         {!posterImage && (!isHonorPoster || error) ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
       </section>
     </div>
