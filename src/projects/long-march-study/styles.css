@@ -383,7 +383,7 @@
 .lm-quiz-progress-text {
   position: absolute;
   left: 4%;
-  top: 7.15%;
+  top: 8.55%;
   z-index: 3;
   display: flex;
   align-items: baseline;
@@ -405,7 +405,7 @@
 .lm-quiz-progress-bar {
   position: absolute;
   left: 4.1333%;
-  top: 11.85%;
+  top: 12.95%;
   z-index: 3;
   width: 91.6%;
   height: min(1.4667vw, 11px);
