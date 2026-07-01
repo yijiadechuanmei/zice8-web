@@ -126,3 +126,9 @@ export const resetDemoActivity = (activityKey) =>
     method: 'POST',
     body: JSON.stringify({ confirm: 'RESET_QUIZ_DEMO' }),
   })
+
+export const resetFengchengDebugData = (activityKey, scope = 'me') =>
+  quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {
+    method: 'POST',
+    body: JSON.stringify({ confirm: 'RESET_FENGCHENG_QUIZ', scope }),
+  })

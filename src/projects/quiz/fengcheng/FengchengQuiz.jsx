@@ -101,6 +101,13 @@ function FengchengFrame({ children }) {
   return <div className="fengcheng-quiz-app">{children}</div>
 }
 
+function formatSeconds(seconds) {
+  const totalSeconds = Math.max(Math.floor(Number(seconds || 0)), 0)
+  const minutes = Math.floor(totalSeconds / 60)
+  const restSeconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(restSeconds).padStart(2, '0')}`
+}
+
 function StageBackground({ publicConfig, children, className = '' }) {
   const assets = getFengchengAssets(publicConfig)
   return (
@@ -135,14 +142,9 @@ export function FengchengHomePage({
           <div className="fengcheng-bg-fallback" />
           <img className="fengcheng-home-bg" src={assets.homeBackground} alt="" aria-hidden="true" />
           <img className="fengcheng-home-foreground" src={assets.homeForeground} alt="" aria-hidden="true" />
-          <div className="fengcheng-home-title-fallback">
-            <span>凤城实验学校“为先币”系列活动</span>
-            <strong>亲子时政<br />“最强拍档”挑战赛</strong>
-          </div>
           <img className="fengcheng-home-title" src={assets.homeTitle} alt={publicConfig?.title || '亲子时政“最强拍档”挑战赛'} />
           <button className="fengcheng-home-start" type="button" onClick={onStart} aria-label="开始挑战">
             <img src={assets.homeStartButton} alt="" aria-hidden="true" />
-            <span>开始挑战</span>
           </button>
           {profileModalOpen ? (
             <FengchengProfileModal
@@ -235,14 +237,22 @@ function FengchengQuestionContent({
   onTimeout,
 }) {
   const [selected, setSelected] = useState('')
-  const [remainingSeconds, setRemainingSeconds] = useState(
-    current?.remainingSeconds ?? question?.timeLimitSeconds ?? 60,
-  )
+  const limitSeconds = question?.timeLimitSeconds ?? current?.questionTimeLimitSeconds ?? 60
+  const initialElapsedSeconds =
+    current?.remainingSeconds !== null && current?.remainingSeconds !== undefined
+      ? Math.max(Number(limitSeconds) - Number(current.remainingSeconds), 0)
+      : 0
+  const [elapsedSeconds, setElapsedSeconds] = useState(initialElapsedSeconds)
   const timeoutRef = useRef(false)
+  const answerTimerRef = useRef(null)
+
+  useEffect(() => () => {
+    if (answerTimerRef.current) window.clearTimeout(answerTimerRef.current)
+  }, [])
 
   useEffect(() => {
-    if (submitting) return undefined
-    if (remainingSeconds <= 0) {
+    if (submitting || selected) return undefined
+    if (elapsedSeconds >= limitSeconds) {
       if (!timeoutRef.current) {
         timeoutRef.current = true
         onTimeout(question.questionId)
@@ -250,21 +260,29 @@ function FengchengQuestionContent({
       return undefined
     }
     const timer = window.setTimeout(() => {
-      setRemainingSeconds((value) => Math.max(value - 1, 0))
+      setElapsedSeconds((value) => Math.min(value + 1, limitSeconds))
     }, 1000)
     return () => window.clearTimeout(timer)
-  }, [onTimeout, question, remainingSeconds, submitting])
+  }, [elapsedSeconds, limitSeconds, onTimeout, question, selected, submitting])
+
+  function handleOptionSelect(value) {
+    if (selected || submitting || timeoutRef.current) return
+    setSelected(value)
+    answerTimerRef.current = window.setTimeout(() => {
+      onAnswer(question.questionId, [value])
+    }, 80)
+  }
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 30
   const questionSort = question.questionSort || current?.currentQuestionSort || 1
-  const timerText = `00:${String(remainingSeconds).padStart(2, '0')}`
+  const timerText = formatSeconds(elapsedSeconds)
 
   return (
     <StageBackground publicConfig={publicConfig} className="fengcheng-question-page">
       <HeaderTitle />
       <div className="fengcheng-question-meta">
         <span>第 <strong>{questionSort}</strong> 题 / 共 {totalQuestions} 题</span>
-        <span className="fengcheng-timer"><ClockCircleOutlined />倒计时 <strong>{timerText}</strong></span>
+        <span className="fengcheng-timer"><ClockCircleOutlined />计时 <strong>{timerText}</strong></span>
       </div>
 
       <section className="fengcheng-question-card">
@@ -281,8 +299,8 @@ function FengchengQuestionContent({
               key={value}
               type="button"
               className={`fengcheng-option ${selected === value ? 'is-selected' : ''}`}
-              onClick={() => setSelected(value)}
-              disabled={submitting}
+              onClick={() => handleOptionSelect(value)}
+              disabled={submitting || Boolean(selected)}
             >
               <strong>{label}.</strong>
               <span>{option.content}</span>
@@ -290,15 +308,32 @@ function FengchengQuestionContent({
           )
         })}
       </section>
+    </StageBackground>
+  )
+}
 
-      <button
-        className="fengcheng-primary-button fengcheng-question-next"
-        type="button"
-        disabled={!selected || submitting}
-        onClick={() => onAnswer(question.questionId, [selected])}
-      >
-        <span>下一题</span>
-      </button>
+export function FengchengDebugPage({
+  publicConfig,
+  resetting = false,
+  onResetMine,
+  onResetAll,
+  onBack,
+}) {
+  return (
+    <StageBackground publicConfig={publicConfig} className="fengcheng-debug-page">
+      <section className="fengcheng-debug-panel" aria-label="调试工具">
+        <h1>调试工具</h1>
+        <p>清理凤城答题记录、排行榜和提交信息。</p>
+        <button type="button" disabled={resetting} onClick={onResetMine}>
+          清除我的数据
+        </button>
+        <button className="is-danger" type="button" disabled={resetting} onClick={onResetAll}>
+          清除全部项目数据
+        </button>
+        <button className="is-muted" type="button" disabled={resetting} onClick={onBack}>
+          返回首页
+        </button>
+      </section>
     </StageBackground>
   )
 }

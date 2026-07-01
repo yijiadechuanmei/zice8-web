@@ -16,6 +16,7 @@ import {
   getPublicConfig,
   getRank,
   isUnauthorizedError,
+  resetFengchengDebugData,
   resetDemoActivity,
   startAttempt,
   submitAnswer,
@@ -27,6 +28,7 @@ import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
 import {
   FengchengHomePage,
+  FengchengDebugPage,
   FengchengQuestionPage,
   FengchengQuizPreviewApp,
   FengchengRankPage,
@@ -45,6 +47,7 @@ import './quiz.css'
 
 const DEFAULT_ACTIVITY_KEY = 'quiz_demo_dragon_boat'
 const FEEDBACK_DELAY_MS = 1500
+const FENGCHENG_FEEDBACK_DELAY_MS = 120
 const QUIZ_RANK_PAGE_SIZE = 50
 
 export default function QuizApp({ routeParams }) {
@@ -322,7 +325,7 @@ function QuizMain({ routeParams }) {
         requestId: `web-answer-${Date.now()}-${questionId}`,
       })
       setFeedback(data)
-      window.setTimeout(() => advanceAfterFeedback(data), FEEDBACK_DELAY_MS)
+      window.setTimeout(() => advanceAfterFeedback(data), fengchengSkin ? FENGCHENG_FEEDBACK_DELAY_MS : FEEDBACK_DELAY_MS)
     } catch (err) {
       if (handleUnauthorized(err, 'answer-401')) return
       showError(err)
@@ -466,6 +469,38 @@ function QuizMain({ routeParams }) {
     }
   }
 
+  async function handleFengchengDebugReset(scope) {
+    if (!fengchengSkin || !debug) return
+    const resetAll = scope === 'activity'
+    const confirmed = window.confirm(
+      resetAll
+        ? '确认清除凤城项目全部用户的提交信息、答题记录和排行榜？'
+        : '确认清除你自己的提交信息、答题记录和排行榜？',
+    )
+    if (!confirmed) return
+    setSubmitting(true)
+    try {
+      await resetFengchengDebugData(activityKey, resetAll ? 'activity' : 'me')
+      setCurrent(null)
+      setResult(null)
+      setActiveAttemptId(null)
+      setResultAttemptId(null)
+      setFeedback(null)
+      setRanks([])
+      setRankOffset(0)
+      setRankHasMore(true)
+      setFengchengProfileOpen(false)
+      await loadBootstrap({ resetPage: false, withLoading: false })
+      setPage('home')
+      showToast(resetAll ? '全部项目数据已清除' : '我的数据已清除')
+    } catch (err) {
+      if (handleUnauthorized(err, 'fengcheng-debug-reset-401')) return
+      showError(err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   function backHome() {
     setActiveAttemptId(null)
     setPage('home')
@@ -541,9 +576,23 @@ function QuizMain({ routeParams }) {
             onBack={backHome}
           />
         ) : null}
+        {page === 'debug' ? (
+          <FengchengDebugPage
+            publicConfig={publicConfig}
+            resetting={submitting}
+            onResetMine={() => handleFengchengDebugReset('me')}
+            onResetAll={() => handleFengchengDebugReset('activity')}
+            onBack={backHome}
+          />
+        ) : null}
         <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
         <QuizLoadingOverlay visible={submitting} />
         <QuizToast visible={Boolean(toast)} message={toast} />
+        {debug ? (
+          <button className="fengcheng-debug-entry" type="button" onClick={() => setPage('debug')}>
+            DEBUG
+          </button>
+        ) : null}
         {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
       </div>
     )
