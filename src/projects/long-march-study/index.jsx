@@ -592,7 +592,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <HonorsPage
           honors={bootstrap?.honors || []}
           checkins={mine?.checkins || []}
-          profile={mine?.profile || bootstrap?.profile}
+          locations={config.locations || []}
           onBack={() => setPage(PAGE.HOME)}
           onGenerate={async () => {
             await showPoster({ source: 'honors' })
@@ -1607,51 +1607,68 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   )
 }
 
-function HonorsPage({ honors, checkins, profile, onGenerate, onOpen, onOpenCheckin, onBack }) {
+function HonorsPage({ honors, checkins, locations = [], onGenerate, onOpen, onOpenCheckin, onBack }) {
   const firstHonor = honors[0]
-  const latestCheckin = checkins[0]
+  const posterThumbnails = longMarchStudyAssets.checkinPoster.locations
+  const checkinByLocation = new Map((checkins || []).map((checkin) => [checkin.locationKey, checkin]))
+  const locationPosterItems = (locations || []).slice(0, posterThumbnails.length).map((location, index) => ({
+    id: location.key || `location-${index + 1}`,
+    title: location.title || location.name || `打卡海报${index + 1}`,
+    thumbnail: posterThumbnails[index] || posterThumbnails[0],
+    checkin: checkinByLocation.get(location.key),
+  }))
+  const extraCheckinItems = (checkins || [])
+    .filter((checkin) => !locationPosterItems.some((item) => item.id === checkin.locationKey))
+    .map((checkin, index) => ({
+      id: checkin.id || checkin.locationKey || `checkin-${index + 1}`,
+      title: checkin.locationTitle || `打卡海报${locationPosterItems.length + index + 1}`,
+      thumbnail: posterThumbnails[(locationPosterItems.length + index) % posterThumbnails.length] || posterThumbnails[0],
+      checkin,
+    }))
+  const fallbackItems = !locationPosterItems.length && !extraCheckinItems.length
+    ? posterThumbnails.map((thumbnail, index) => ({
+        id: `poster-placeholder-${index + 1}`,
+        title: `打卡海报${index + 1}`,
+        thumbnail,
+        checkin: null,
+      }))
+    : []
+  const posterItems = [...locationPosterItems, ...extraCheckinItems, ...fallbackItems]
+  const honorTitle = firstHonor?.title || '长征研学徽章'
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
-      <section className="lm-honors-card">
+      <section className="lm-honors-card" aria-label="我的荣誉">
         <h2>我的荣誉</h2>
         <button className="lm-honors-badge-row" type="button" onClick={firstHonor ? () => onOpen(firstHonor) : onGenerate}>
           <img src={longMarchStudyAssets.honors.badge} alt="" />
-          <strong>{firstHonor?.title || '已获得长征研学徽章'}</strong>
-          <span>{firstHonor ? '点击查看海报' : '完成任务后可生成荣誉海报'}</span>
+          <strong>已获得{honorTitle}</strong>
         </button>
       </section>
-      <section className="lm-honors-poster-card">
+      <div className="lm-honors-earned-label">已获得</div>
+      <section className="lm-honors-poster-card" aria-label="我的海报">
+        <img className="lm-honors-poster-panel" src={longMarchStudyAssets.honors.posterPanel} alt="" aria-hidden="true" />
         <h2>我的海报</h2>
-        <button
-          className="lm-honors-poster-preview"
-          type="button"
-          onClick={latestCheckin ? () => onOpenCheckin(latestCheckin) : onGenerate}
-        >
-          <div className="lm-honors-poster-name">{profile?.name || '研学用户'}</div>
-          <div className="lm-honors-poster-score">{profile?.totalPoints || 0}</div>
-          <div className="lm-honors-poster-days">{profile?.challengeDays || 0}</div>
-          <span>{latestCheckin?.locationTitle || '完成打卡后生成海报'}</span>
-        </button>
-        <button type="button" onClick={latestCheckin ? () => onOpenCheckin(latestCheckin) : onGenerate}>
-          {latestCheckin ? '查看最新海报' : '完成打卡后生成海报'}
-        </button>
-        {checkins.length ? (
-          <div className="lm-honors-poster-list">
-            {checkins.slice(0, 4).map((checkin) => (
-              <button key={checkin.id || checkin.locationKey} type="button" onClick={() => onOpenCheckin(checkin)}>
-                {checkin.locationTitle || '打卡海报'}
+        <div className="lm-honors-poster-list">
+          {posterItems.map((item) => {
+            const canOpen = Boolean(item.checkin)
+            return (
+              <button
+                key={item.id}
+                className={canOpen ? 'is-earned' : 'is-locked'}
+                type="button"
+                onClick={canOpen ? () => onOpenCheckin(item.checkin) : undefined}
+                disabled={!canOpen}
+                aria-label={canOpen ? `查看${item.title}` : `${item.title}未获得`}
+              >
+                <span className="lm-honors-poster-thumb">
+                  <img src={item.thumbnail} alt="" />
+                </span>
+                <span className="lm-honors-poster-action">{canOpen ? '点击转发' : '未获得'}</span>
               </button>
-            ))}
-          </div>
-        ) : null}
-      </section>
-      {honors.length > 1 ? (
-        <div className="lm-honors-history">
-          {honors.slice(1, 4).map((honor) => (
-            <button key={honor.id} type="button" onClick={() => onOpen(honor)}>{honor.title}</button>
-          ))}
+            )
+          })}
         </div>
-      ) : null}
+      </section>
     </IvxStage>
   )
 }
