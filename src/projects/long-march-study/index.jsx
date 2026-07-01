@@ -60,7 +60,6 @@ const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
 }
-const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
   const rank = index + 1
   return {
@@ -1466,16 +1465,12 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
 }
 
 function RadioNoticeFrame({ children, className = '', ariaLabel = '提示' }) {
-  const modalFit = useModalFit(NOTICE_PANEL_SPEC, 8)
   return (
     <div className="lm-radio-notice-mask" role="dialog" aria-modal="true" aria-label={ariaLabel}>
-      <div className="lm-radio-notice-frame" style={{ width: modalFit.width, height: modalFit.height }}>
+      <div className="lm-radio-notice-frame">
         <section
           className={`lm-radio-notice-panel ${className}`.trim()}
-          style={{
-            backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})`,
-            transform: `scale(${modalFit.scale})`,
-          }}
+          style={{ backgroundImage: `url(${longMarchStudyAssets.radio.noticePanel})` }}
         >
           {children}
         </section>
@@ -2008,11 +2003,11 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
       <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
       <p>{statusText}</p>
       <button
+        className="lm-share-upload-submit"
         type="button"
         disabled={uploading}
         onClick={canUpload ? () => inputRef.current?.click() : onClose}
       >
-        <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
         <span>{uploading ? '提交中' : canUpload ? '提交' : '返回首页'}</span>
       </button>
     </RadioNoticeFrame>
