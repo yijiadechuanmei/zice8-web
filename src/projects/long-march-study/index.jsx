@@ -303,6 +303,11 @@ export default function LongMarchStudyApp({ routeParams }) {
               setBootstrap((current) => ({
                 ...current,
                 profile: result.profile,
+                today: {
+                  ...(current?.today || {}),
+                  checkinDone: true,
+                  checkin: result.checkin,
+                },
                 nextCheckin: result.nextCheckin,
               }))
               setPage(PAGE.CHECKIN_RESULT)
@@ -743,23 +748,27 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
   const pendingVisual = pendingLocation
     ? visualLocations.find((item) => item.location.key === pendingLocation.key)
     : null
+  const nextLocationIndex = visualLocations.findIndex((item) => item.location.key === nextCheckin?.key)
+  const todayCheckinIndex = visualLocations.findIndex((item) => item.location.key === today?.checkin?.locationKey)
+  const completedThroughIndex = nextLocationIndex >= 0 ? nextLocationIndex - 1 : todayCheckinIndex
 
   return (
     <IvxStage title="云上打卡" className="lm-checkin-page" onBack={onBack}>
       <img className="lm-checkin-bg" src={assets.background} alt="" />
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
-      {visualLocations.map(({ location, className, asset, activeAsset }) => {
+      {visualLocations.map(({ location, className, asset, activeAsset }, index) => {
         const isNext = nextCheckin?.key === location.key
+        const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
         const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
           <button
             key={location.key}
-            className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''}`}
+            className={`lm-checkin-location ${className} ${isNext ? 'is-next' : ''} ${isCompleted ? 'is-completed' : ''}`}
             type="button"
             onClick={() => isNext ? setPendingLocation(location) : setCheckinNotice(lockedNotice)}
             aria-label={`打卡${location.title}`}
           >
-            <img className="lm-checkin-location-card" src={isNext ? asset : activeAsset} alt="" />
+            <img className="lm-checkin-location-card" src={isNext || isCompleted ? asset : activeAsset} alt="" />
             {isNext ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
             <span>{location.title}</span>
           </button>
