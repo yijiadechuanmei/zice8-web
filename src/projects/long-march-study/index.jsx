@@ -1102,6 +1102,7 @@ function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = fals
             aria-label={`打卡${location.title}`}
           >
             <img className="lm-checkin-location-card" src={isUnlocked ? asset : activeAsset} alt="" />
+            {canCheckin ? <img className="lm-checkin-location-cta" src={assets.checkButton} alt="" /> : null}
             <span>{location.title}</span>
           </button>
         )
