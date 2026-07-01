@@ -2181,9 +2181,9 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
             ctx.drawImage(qrCanvas, 510, 1125, 85, 85)
           }
 
-          drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 160, 1114, 328, 25, { align: 'left', color: '#fff' })
-          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 160, 1149, 328, 25, { align: 'left', color: '#fff' })
-          drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 160, 1184, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 160, 1134, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 160, 1169, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 160, 1204, 328, 25, { align: 'left', color: '#fff' })
 
           const url = canvas.toDataURL('image/png')
           if (!cancelled) setPosterImage(url)
@@ -2292,16 +2292,19 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
               />
             </div>
           ) : isSharePoster ? (
-            <div className="lm-share-poster-card">
-              <img className="lm-share-poster-image" src={posterAssets.share} alt="" />
-              {poster?.avatar ? <img className="lm-share-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-share-poster-avatar lm-avatar-placeholder" />}
-              <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
-              <div className="lm-share-poster-user">
-                <span>{poster?.nickname || poster?.name || '研学用户'}</span>
-                <span>闯关天数：{poster?.challengeDays || 0}天</span>
-                <span>累计分数：{poster?.totalPoints || 0}</span>
+            <>
+              <img className="lm-share-poster-bg" src={longMarchStudyAssets.radio.background} alt="" />
+              <div className="lm-share-poster-card">
+                <img className="lm-share-poster-image" src={posterAssets.share} alt="" />
+                {poster?.avatar ? <img className="lm-share-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-share-poster-avatar lm-avatar-placeholder" />}
+                <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
+                <div className="lm-share-poster-user">
+                  <span>{poster?.nickname || poster?.name || '研学用户'}</span>
+                  <span>闯关天数：{poster?.challengeDays || 0}天</span>
+                  <span>累计分数：{poster?.totalPoints || 0}</span>
+                </div>
               </div>
-            </div>
+            </>
           ) : (
             <>
               <img className="lm-poster-bg" src={posterAssets.background} alt="" />

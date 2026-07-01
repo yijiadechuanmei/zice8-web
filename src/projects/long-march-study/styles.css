@@ -1954,7 +1954,7 @@
 }
 
 .lm-share-upload-panel .lm-share-upload-return {
-  top: 424px;
+  top: 444px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2771,6 +2771,15 @@
   height: 1624px;
 }
 
+.lm-share-poster-bg {
+  position: absolute;
+  left: 0;
+  top: -88px;
+  width: 750px;
+  height: 1624px;
+  object-fit: fill;
+}
+
 .lm-share-poster-card {
   position: absolute;
   left: 30px;
@@ -2812,7 +2821,7 @@
 .lm-share-poster-user {
   position: absolute;
   left: 160px;
-  top: 1113px;
+  top: 1133px;
   width: 328px;
   height: 113px;
   display: flex;
