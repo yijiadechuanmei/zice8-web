@@ -47,6 +47,18 @@ const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
+const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
+  const rank = index + 1
+  return {
+    id: `long-march-rank-test-${rank}`,
+    rank,
+    name: `昵称${String(rank).padStart(2, '0')}`,
+    nickname: `昵称${String(rank).padStart(2, '0')}`,
+    avatar: '',
+    totalPoints: Math.max(9999 - index * 137, 120),
+    titleBadge: rank <= 3 ? '红色先锋' : '长征之星',
+  }
+})
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
@@ -1615,24 +1627,54 @@ function HonorsPage({ honors, checkins, profile, onGenerate, onOpen, onOpenCheck
 }
 
 function RankPage({ rank, onBack }) {
-  const rows = rank?.rows || []
+  const rows = normalizeRankRows(rank?.rows)
   return (
     <IvxStage title="积分排行榜" className="lm-rank-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-rank-panel">
         <h2>积分排行榜</h2>
         <div className="lm-rank-list">
-          {rows.length ? rows.map((row) => (
-            <div className="lm-rank-row" key={row.id}>
-              <span>{String(row.rank).padStart(2, '0')}</span>
-              <strong>{row.name || '昵称'}</strong>
-              <em>{row.totalPoints || 0}</em>
-              <small>{row.titleBadge || '长征研学'}</small>
+          {rows.map((row) => (
+            <div className="lm-rank-row" key={row.id || `rank-${row.rank}`}>
+              <div className="lm-rank-row-no">
+                {row.rank <= 3 ? <img src={longMarchStudyAssets.radio.rankBadge} alt="" aria-hidden="true" /> : null}
+                <span>{String(row.rank).padStart(2, '0')}</span>
+              </div>
+              {row.avatar ? (
+                <img className="lm-rank-avatar" src={row.avatar} alt="" />
+              ) : (
+                <div className="lm-rank-avatar lm-rank-avatar-default" aria-hidden="true" />
+              )}
+              <strong>{row.nickname || row.name || '昵称'}</strong>
+              <em>积分：{row.totalPoints || 0}</em>
             </div>
-          )) : <p>暂无排行数据</p>}
+          ))}
         </div>
       </section>
+      <button className="lm-rank-home-button" type="button" onClick={onBack}>返回首页</button>
     </IvxStage>
   )
+}
+
+function normalizeRankRows(rows = []) {
+  const normalizedRows = Array.isArray(rows)
+    ? rows.map((row, index) => ({
+        ...row,
+        id: row.id || `long-march-rank-${index + 1}`,
+        rank: Number(row.rank || index + 1),
+        nickname: row.nickname || row.displayName || row.name || '',
+        avatar: row.avatar || row.displayAvatar || '',
+        totalPoints: Number(row.totalPoints || row.points || 0),
+      }))
+    : []
+
+  const existingIds = new Set(normalizedRows.map((row) => row.id))
+  const fillerRows = LONG_MARCH_RANK_TEST_ROWS
+    .filter((row) => !existingIds.has(row.id))
+    .slice(0, Math.max(50 - normalizedRows.length, 0))
+
+  return [...normalizedRows, ...fillerRows]
+    .slice(0, 50)
+    .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
 function MinePage({ mine, onPage, onPoster, onHonors, onBack }) {
