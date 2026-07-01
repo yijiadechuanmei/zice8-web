@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Input, Popconfirm, Select, Space, message } from 'antd'
+import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
+import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -27,6 +27,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [loading, setLoading] = useState(true)
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [adjustingProfileId, setAdjustingProfileId] = useState('')
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
   const [error, setError] = useState('')
@@ -159,6 +160,49 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     }
   }, [activity.activityKey])
 
+  const handleAdjustProfile = useCallback(async (row, action, options = {}) => {
+    if (!row?.id) return
+    const actionLabels = {
+      deduct_points: '扣分',
+      clear_points: '清零',
+      disqualify: '取消资格',
+      restore: '恢复资格',
+    }
+    let payload = { action, ...options }
+    if (action === 'deduct_points') {
+      const input = window.prompt('请输入扣减积分')
+      if (input === null) return
+      const points = Number.parseInt(input, 10)
+      if (!Number.isInteger(points) || points <= 0) {
+        message.warning('请输入大于 0 的扣减积分')
+        return
+      }
+      const reason = window.prompt('请输入操作原因（可选）') || '后台人工扣分'
+      payload = { action, points, reason }
+    }
+    setAdjustingProfileId(`${row.id}:${action}`)
+    try {
+      const result = await adjustLongMarchProfile(activity.activityKey, row.id, payload)
+      const profile = result?.profile || {}
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? {
+          ...item,
+          totalPoints: profile.totalPoints ?? item.totalPoints,
+          remainingPoints: profile.remainingPoints ?? item.remainingPoints,
+          status: profile.status ?? item.status,
+          lastPointAt: profile.lastPointAt || item.lastPointAt,
+          updatedAt: profile.updatedAt || new Date().toISOString(),
+        } : item),
+      }))
+      message.success(`已${actionLabels[action] || '操作'}`)
+    } catch (err) {
+      message.error(err.message || '操作失败')
+    } finally {
+      setAdjustingProfileId('')
+    }
+  }, [activity.activityKey])
+
   const tableColumns = useMemo(() => {
     const columns = buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
       visibleColumns.map((column) => [
@@ -168,7 +212,85 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         },
       ]),
     ))
+    if (activity.type === 'long_march_study' && activeViewKey === 'long_march_profiles') {
+      const statusColumn = columns.find((column) => column.key === 'status' || column.dataIndex === 'status')
+      if (statusColumn) {
+        statusColumn.render = (value) => Number(value) === 0 ? <Tag color="red">已取消</Tag> : <Tag color="green">有效</Tag>
+      }
+      columns.push({
+        title: '人工操作',
+        key: 'profileActions',
+        fixed: 'right',
+        width: 230,
+        render: (_, row) => (
+          <Space size={6} wrap>
+            <Button
+              size="small"
+              danger
+              loading={adjustingProfileId === `${row.id}:deduct_points`}
+              disabled={Boolean(adjustingProfileId)}
+              onClick={() => handleAdjustProfile(row, 'deduct_points')}
+            >
+              扣分
+            </Button>
+            <Popconfirm
+              title="确认清零该用户积分？"
+              okText="清零"
+              cancelText="取消"
+              onConfirm={() => handleAdjustProfile(row, 'clear_points', { reason: '后台清零积分' })}
+            >
+              <Button
+                size="small"
+                danger
+                loading={adjustingProfileId === `${row.id}:clear_points`}
+                disabled={Boolean(adjustingProfileId)}
+              >
+                清零
+              </Button>
+            </Popconfirm>
+            {Number(row.status) === 0 ? (
+              <Popconfirm
+                title="确认恢复该用户排名资格？"
+                okText="恢复"
+                cancelText="取消"
+                onConfirm={() => handleAdjustProfile(row, 'restore', { reason: '后台恢复排名资格' })}
+              >
+                <Button
+                  size="small"
+                  loading={adjustingProfileId === `${row.id}:restore`}
+                  disabled={Boolean(adjustingProfileId)}
+                >
+                  恢复
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Popconfirm
+                title="确认取消该用户排名资格？"
+                okText="取消资格"
+                cancelText="返回"
+                onConfirm={() => handleAdjustProfile(row, 'disqualify', { reason: '后台取消排名资格' })}
+              >
+                <Button
+                  size="small"
+                  loading={adjustingProfileId === `${row.id}:disqualify`}
+                  disabled={Boolean(adjustingProfileId)}
+                >
+                  取消资格
+                </Button>
+              </Popconfirm>
+            )}
+          </Space>
+        ),
+      })
+    }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_recordings') {
+      const audioColumn = columns.find((column) => column.key === 'audioUrl' || column.dataIndex === 'audioUrl')
+      if (audioColumn) {
+        audioColumn.width = 240
+        audioColumn.render = (value) => value ? (
+          <audio src={value} controls preload="none" style={{ width: 210, maxWidth: '100%' }} />
+        ) : '-'
+      }
       columns.push({
         title: '审核操作',
         key: 'reviewActions',
@@ -213,6 +335,19 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       })
     }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_share_screenshots') {
+      const imageColumn = columns.find((column) => column.key === 'imageUrl' || column.dataIndex === 'imageUrl')
+      if (imageColumn) {
+        imageColumn.width = 96
+        imageColumn.render = (value) => value ? (
+          <Image
+            src={value}
+            alt="分享截图"
+            width={56}
+            height={56}
+            style={{ objectFit: 'cover', borderRadius: 6 }}
+          />
+        ) : '-'
+      }
       columns.push({
         title: '审核操作',
         key: 'shareReviewActions',
@@ -249,7 +384,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       })
     }
     return columns
-  }, [activity.type, activeViewKey, handleReviewRecording, handleReviewShareScreenshot, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleReviewRecording, handleReviewShareScreenshot, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return

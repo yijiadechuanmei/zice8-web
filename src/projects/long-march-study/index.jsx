@@ -1679,8 +1679,9 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   )
 }
 
-function HonorsPage({ honors, checkins, locations = [], onGenerate, onOpen, onOpenCheckin, onBack }) {
+function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, onBack }) {
   const firstHonor = honors[0]
+  const hasHonor = Boolean(firstHonor)
   const posterThumbnails = longMarchStudyAssets.checkinPoster.locations
   const checkinByLocation = new Map((checkins || []).map((checkin) => [checkin.locationKey, checkin]))
   const locationPosterItems = (locations || []).slice(0, posterThumbnails.length).map((location, index) => ({
@@ -1711,12 +1712,18 @@ function HonorsPage({ honors, checkins, locations = [], onGenerate, onOpen, onOp
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card" aria-label="我的荣誉">
         <h2>我的荣誉</h2>
-        <button className="lm-honors-badge-row" type="button" onClick={firstHonor ? () => onOpen(firstHonor) : onGenerate}>
+        <button
+          className={`lm-honors-badge-row ${hasHonor ? 'is-earned' : 'is-locked'}`}
+          type="button"
+          onClick={hasHonor ? () => onOpen(firstHonor) : undefined}
+          disabled={!hasHonor}
+          aria-label={hasHonor ? `查看${honorTitle}` : `${honorTitle}未获得`}
+        >
           <img src={longMarchStudyAssets.honors.badge} alt="" />
-          <strong>已获得{honorTitle}</strong>
+          <strong>{hasHonor ? `已获得${honorTitle}` : '未获得长征研学徽章'}</strong>
         </button>
       </section>
-      <div className="lm-honors-earned-label">已获得</div>
+      <div className="lm-honors-earned-label">{hasHonor ? '已获得' : '未获得'}</div>
       <section className="lm-honors-poster-card" aria-label="我的海报">
         <img className="lm-honors-poster-panel" src={longMarchStudyAssets.honors.posterPanel} alt="" aria-hidden="true" />
         <h2>我的海报</h2>
@@ -1903,15 +1910,12 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
   const [error, setError] = useState('')
   const [shareUploadStatus, setShareUploadStatus] = useState(shareScreenshot || null)
   const [shareUploading, setShareUploading] = useState(false)
+  const displayedShareStatus = shareUploadStatus || shareScreenshot || null
   const posterAssets = longMarchStudyAssets.checkinPoster
   const isHonorPoster = poster?.source === 'honor'
   const certificateName = poster?.name || poster?.nickname || '姓名'
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
   const locationImage = posterAssets.locations[posterLocationIndex] || posterAssets.locations[0]
-
-  useEffect(() => {
-    setShareUploadStatus(shareScreenshot || null)
-  }, [shareScreenshot])
 
   useEffect(() => {
     let cancelled = false
@@ -2049,14 +2053,14 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
     }
   }
 
-  const shareStatusText = shareUploadStatus?.status === 'approved'
+  const shareStatusText = displayedShareStatus?.status === 'approved'
     ? '分享截图已通过，积分已发放'
-    : shareUploadStatus?.status === 'rejected'
-      ? `分享截图未通过：${shareUploadStatus.rejectReason || '请重新提交'}`
-      : shareUploadStatus?.status === 'pending'
-        ? '分享截图已提交，等待后台审核'
-        : shareUploadStatus?.status === 'failed'
-          ? shareUploadStatus.rejectReason || '截图提交失败'
+    : displayedShareStatus?.status === 'rejected'
+      ? `分享截图未通过：${displayedShareStatus.rejectReason || '请重新提交'}`
+      : displayedShareStatus?.status === 'pending'
+        ? '上传成功，等待后台审核，通过后加5分'
+        : displayedShareStatus?.status === 'failed'
+          ? displayedShareStatus.rejectReason || '截图提交失败'
           : '分享后上传截图，后台审核通过后加5分'
 
   return (
@@ -2118,7 +2122,7 @@ function PosterPage({ poster, locations, activityUrl, activityKey, visitorId, sh
               disabled={shareUploading}
               onClick={() => screenshotInputRef.current?.click()}
             >
-              {shareUploading ? '提交中' : shareUploadStatus?.status === 'approved' ? '已审核通过' : '提交分享截图'}
+              {shareUploading ? '提交中' : displayedShareStatus?.status === 'approved' ? '已审核通过' : '提交分享截图'}
             </button>
             <span>{shareStatusText}</span>
           </div>

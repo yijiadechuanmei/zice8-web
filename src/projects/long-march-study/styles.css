@@ -1966,6 +1966,19 @@
   height: 134px;
 }
 
+.lm-honors-badge-row.is-locked {
+  cursor: default;
+}
+
+.lm-honors-badge-row:disabled {
+  opacity: 1;
+}
+
+.lm-honors-badge-row.is-locked img {
+  filter: grayscale(1);
+  opacity: 0.46;
+}
+
 .lm-honors-badge-row strong {
   position: absolute;
   left: 178px;
@@ -2720,9 +2733,11 @@
 .lm-share-screenshot-uploader button {
   width: 367px;
   height: 68px;
-  border: 0;
+  box-sizing: border-box;
+  border: 4px solid #fff;
   border-radius: 100px;
   background: #e53e15;
+  box-shadow: 0 4px 12px rgba(114, 23, 0, 0.18);
   color: #fff;
   font-size: 34px;
   font-weight: 700;
