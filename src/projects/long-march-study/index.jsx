@@ -45,6 +45,7 @@ const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
 const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
 const RADIO_STAGE_WIDTH = 750
 const RADIO_STAGE_HEIGHT = 1448
+const RADIO_RECORD_MAX_SECONDS = 60
 const IVX_STAGE_WIDTH = 750
 const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
@@ -1509,12 +1510,20 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
   const [recordDurationSec, setRecordDurationSec] = useState(0)
+  const [elapsedSec, setElapsedSec] = useState(0)
   const [previewPlaying, setPreviewPlaying] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
   const startedAtRef = useRef(0)
+  const autoStopRef = useRef(false)
   const activeScript = scripts[0]
   const hasRecording = Boolean(localId || mediaId)
+  const currentDurationSec = recording ? elapsedSec : recordDurationSec
+  const recordProgressPercent = `${Math.min(currentDurationSec / RADIO_RECORD_MAX_SECONDS, 1) * 100}%`
+  const formatRecordTime = (seconds) => {
+    const safeSeconds = Math.max(0, Math.min(RADIO_RECORD_MAX_SECONDS, Number(seconds) || 0))
+    return `${String(Math.floor(safeSeconds / 60)).padStart(2, '0')}:${String(safeSeconds % 60).padStart(2, '0')}`
+  }
 
   useEffect(() => {
     const wx = getWx()
@@ -1531,8 +1540,13 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
       wx.onVoiceRecordEnd({
         complete: (res) => {
           if (res?.localId) {
+            const nextDuration = Math.min(
+              RADIO_RECORD_MAX_SECONDS,
+              Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)),
+            )
             setLocalId(res.localId)
-            setRecordDurationSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)))
+            setRecordDurationSec(nextDuration)
+            setElapsedSec(nextDuration)
             setRecording(false)
           }
         },
@@ -1540,6 +1554,56 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
     }
     return undefined
   }, [localId])
+
+  const stop = useCallback((durationOverride) => {
+    if (!recording) return
+    const wx = getWx()
+    const nextDuration = Math.min(
+      RADIO_RECORD_MAX_SECONDS,
+      Math.max(1, durationOverride ?? Math.round((Date.now() - startedAtRef.current) / 1000)),
+    )
+    if (wx?.stopRecord) {
+      wx.stopRecord({
+        success: (res) => {
+          setLocalId(res.localId)
+          setRecordDurationSec(nextDuration)
+          setElapsedSec(nextDuration)
+          setRecording(false)
+          onToast(res.localId ? '录音已完成' : '录音结束但未获取到音频')
+        },
+        fail: (error) => {
+          const message = formatWxError(error) || '停止录音失败'
+          setRecording(false)
+          onToast(message)
+        },
+      })
+      return
+    }
+    setLocalId(`debug-local-${Date.now()}`)
+    setRecordDurationSec(nextDuration)
+    setElapsedSec(nextDuration)
+    setRecording(false)
+    onToast('调试录音已完成')
+  }, [onToast, recording])
+
+  useEffect(() => {
+    if (!recording) return undefined
+    autoStopRef.current = false
+    const updateElapsed = () => {
+      const nextElapsed = Math.min(
+        RADIO_RECORD_MAX_SECONDS,
+        Math.max(0, Math.floor((Date.now() - startedAtRef.current) / 1000)),
+      )
+      setElapsedSec(nextElapsed)
+      if (nextElapsed >= RADIO_RECORD_MAX_SECONDS && !autoStopRef.current) {
+        autoStopRef.current = true
+        stop(RADIO_RECORD_MAX_SECONDS)
+      }
+    }
+    updateElapsed()
+    const timer = window.setInterval(updateElapsed, 200)
+    return () => window.clearInterval(timer)
+  }, [recording, stop])
 
   const start = () => {
     if (recording) return
@@ -1552,6 +1616,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
     setLocalId('')
     setMediaId('')
     setRecordDurationSec(0)
+    setElapsedSec(0)
     setPreviewPlaying(false)
     if (wx?.startRecord) {
       wx.startRecord({
@@ -1572,32 +1637,6 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
     setLocalId(`debug-local-${Date.now()}`)
     setRecording(true)
     onToast('当前非微信环境，已进入调试录音模式')
-  }
-
-  const stop = () => {
-    if (!recording) return
-    const wx = getWx()
-    const nextDuration = Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000))
-    if (wx?.stopRecord) {
-      wx.stopRecord({
-        success: (res) => {
-          setLocalId(res.localId)
-          setRecordDurationSec(nextDuration)
-          setRecording(false)
-          onToast(res.localId ? '录音已完成' : '录音结束但未获取到音频')
-        },
-        fail: (error) => {
-          const message = formatWxError(error) || '停止录音失败'
-          setRecording(false)
-          onToast(message)
-        },
-      })
-      return
-    }
-    setLocalId(`debug-local-${Date.now()}`)
-    setRecordDurationSec(nextDuration)
-    setRecording(false)
-    onToast('调试录音已完成')
   }
 
   const playPreview = () => {
@@ -1631,6 +1670,7 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
     setLocalId('')
     setMediaId('')
     setRecordDurationSec(0)
+    setElapsedSec(0)
     setPreviewPlaying(false)
   }
 
@@ -1741,6 +1781,22 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
       </div>
       <div className="lm-radio-record-status">
         {recording ? '录音中，点击暂停完成录制' : hasRecording ? '录音已完成，可以试听或上传' : '请点击开始录音'}
+      </div>
+      <div className="lm-radio-record-progress" aria-label="录音时长进度">
+        <div
+          className="lm-radio-record-progress-track"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax={RADIO_RECORD_MAX_SECONDS}
+          aria-valuenow={currentDurationSec}
+        >
+          <span style={{ width: recordProgressPercent }} />
+        </div>
+        <div className="lm-radio-record-time" aria-live="polite">
+          <span>{formatRecordTime(currentDurationSec)}</span>
+          <em>/</em>
+          <span>{formatRecordTime(RADIO_RECORD_MAX_SECONDS)}</span>
+        </div>
       </div>
       <button className="lm-radio-confirm-button" type="button" onClick={primaryRecordAction} disabled={uploading}>
         {uploading ? '上传中' : recording ? '暂停录音' : hasRecording ? '确认上传' : '开始录音'}
