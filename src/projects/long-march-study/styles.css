@@ -296,19 +296,23 @@
   height: 14.0193%;
 }
 
-.lm-task-choice-close {
+.lm-task-choice-back {
   position: absolute;
-  right: 16px;
-  top: 16px;
+  left: 20px;
+  top: 32px;
   z-index: 3;
+  width: 71px;
+  height: 49px;
   border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: #c42d15;
-  padding: 7px 10px;
-  font-size: 13px;
-  font-weight: 800;
-  box-shadow: 0 6px 14px rgba(126, 32, 24, 0.14);
+  padding: 0;
+  background: transparent;
+}
+
+.lm-task-choice-back img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .lm-question {

@@ -877,6 +877,9 @@ function TaskModal({ onClose, onSelect }) {
     <div className="lm-task-choice-mask">
       <section className="lm-task-choice" aria-label="玩法选择">
         <img className="lm-task-choice-bg" src={tasks.background} alt="" />
+        <button className="lm-task-choice-back" type="button" onClick={onClose} aria-label="返回">
+          <img src={longMarchStudyAssets.shared.backIcon} alt="" />
+        </button>
         <img className="lm-task-choice-title" src={tasks.title} alt="玩法选择" />
         <img className="lm-task-choice-route" src={tasks.route} alt="" />
         <button className="lm-task-choice-card is-quiz" type="button" onClick={() => onSelect(PAGE.QUIZ)} aria-label="每日红色答题">
@@ -891,7 +894,6 @@ function TaskModal({ onClose, onSelect }) {
         <button className="lm-task-choice-card is-honors" type="button" onClick={() => onSelect('sharePoster')} aria-label="分享传播">
           <img src={tasks.honors} alt="" />
         </button>
-        <button className="lm-task-choice-close" type="button" onClick={onClose}>返回首页</button>
       </section>
     </div>
   )
