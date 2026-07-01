@@ -758,8 +758,8 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
       {visualLocations.map(({ location, className, asset, activeAsset }, index) => {
         const isNext = nextCheckin?.key === location.key
-        const canCheckin = isNext && !today?.checkinDone
         const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
+        const canCheckin = isNext && !isCompleted && !today?.checkinDone
         const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
           <button
@@ -791,7 +791,7 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
           onClose={() => setPendingCheckin(null)}
         />
       ) : null}
-      {checkinNotice ? <CheckinDoneModal message={checkinNotice} onBack={onBack} /> : null}
+      {checkinNotice ? <CheckinDoneModal message={checkinNotice} onClose={() => setCheckinNotice('')} /> : null}
     </IvxStage>
   )
 }
@@ -807,12 +807,12 @@ function CheckinConfirmModal({ completed, image, onConfirm, onClose }) {
   )
 }
 
-function CheckinDoneModal({ message = '今日打卡已完成', onBack }) {
+function CheckinDoneModal({ message = '今日打卡已完成', onClose }) {
   return (
     <div className="lm-checkin-modal-mask">
       <section className="lm-checkin-done-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
         <p>{message}</p>
-        <button type="button" onClick={onBack}>返回首页</button>
+        <button type="button" onClick={onClose}>返回</button>
       </section>
     </div>
   )
