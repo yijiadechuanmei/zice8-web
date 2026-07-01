@@ -410,6 +410,12 @@ export default function LongMarchStudyApp({ routeParams }) {
     window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
   }, [])
 
+  const backToTaskChoice = useCallback(() => {
+    clearRadioRecordingDeepLink()
+    setPage(PAGE.HOME)
+    setShowTasks(true)
+  }, [clearRadioRecordingDeepLink])
+
   const openJourney = () => {
     if (!profile) {
       setShowProfile(true)
@@ -550,7 +556,7 @@ export default function LongMarchStudyApp({ routeParams }) {
             setBootstrap((current) => ({ ...current, profile: result.profile }))
             setPage(PAGE.QUIZ_RESULT)
           }}
-          onBack={() => setPage(PAGE.HOME)}
+          onBack={backToTaskChoice}
           onToast={setToast}
         />
       ) : null}
@@ -563,7 +569,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           nextCheckin={bootstrap?.nextCheckin}
           today={bootstrap?.today}
           debugContinuousCheckin={debugEnabled}
-          onBack={() => setPage(PAGE.HOME)}
+          onBack={backToTaskChoice}
           onCheckin={async (location) => {
             try {
               const result = await checkinLocation(activityKey, location.key, {
@@ -618,8 +624,7 @@ export default function LongMarchStudyApp({ routeParams }) {
             setPage(PAGE.HOME)
           }}
           onBack={() => {
-            clearRadioRecordingDeepLink()
-            setPage(PAGE.HOME)
+            backToTaskChoice()
           }}
           onVote={async (recording) => {
             try {
@@ -705,7 +710,13 @@ export default function LongMarchStudyApp({ routeParams }) {
             source: poster?.source || 'poster',
             locationKey: poster?.locationKey,
           })}
-          onBack={() => setPage(posterReturnPage)}
+          onBack={() => {
+            if (poster?.source === 'share') {
+              backToTaskChoice()
+              return
+            }
+            setPage(posterReturnPage)
+          }}
         />
       ) : null}
 
