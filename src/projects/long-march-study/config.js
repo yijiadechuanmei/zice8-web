@@ -65,6 +65,8 @@ export const longMarchStudyAssets = {
   },
   checkin: {
     background: ih5Asset('522bb90d7aa579a2e8a338119f144eea_180528_750_1624.png'),
+    successBackground: ih5Asset('6d82d38087e1b37eddbf023260ac2173_1167263_750_1624.png'),
+    successPanel: ih5Asset('82dca40305f5fdd8028054e4801f88a2_18477_688_980.png'),
     silhouette: asset('87d3ed8bac5e1426510c6f70235f6f73_100281_607_870.png'),
     locationOne: asset('1721be6c4318820efe55591a6d5fcf56_118921_363_276.png'),
     locationOneActive: asset('3dde499c787390ea151bcadfc14fc0db_101568_363_276.png'),

@@ -536,7 +536,14 @@ export default function LongMarchStudyApp({ routeParams }) {
         />
       ) : null}
       {page === PAGE.CHECKIN_RESULT ? (
-        <CheckinResultPage result={checkinResult} onPoster={() => showPoster('checkin')} onRank={() => setPage(PAGE.RANK)} onBack={() => setPage(PAGE.HOME)} />
+        <CheckinResultPage
+          result={checkinResult}
+          profile={bootstrap?.profile}
+          mine={mine}
+          onPoster={() => showPoster('checkin')}
+          onRank={() => setPage(PAGE.RANK)}
+          onBack={() => setPage(PAGE.HOME)}
+        />
       ) : null}
       {page === PAGE.RADIO ? (
         <RadioPage
@@ -1059,18 +1066,37 @@ function CheckinDoneModal({ message = '今日打卡已完成', onClose }) {
   )
 }
 
-function CheckinResultPage({ result, onPoster, onRank, onBack }) {
+function CheckinResultPage({ result, profile, mine, onPoster, onRank, onBack }) {
+  const { scaleX, width, height } = useStageFit(750, 1624)
+  const displayName = mine?.wechat?.nickname || result?.wechat?.nickname || result?.profile?.nickname || result?.profile?.name || profile?.name || '昵称'
+  const avatar = mine?.wechat?.avatar || result?.wechat?.avatar || ''
+  const points = result?.checkin?.pointsEarned ?? 0
+
   return (
-    <IvxStage title="云上打卡" className="lm-checkin-result-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
-      <section className="lm-checkin-result-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.successPanel})` }}>
-        <h2>打卡完成</h2>
-        <div className="lm-checkin-result-score">+{result?.checkin?.pointsEarned || 0}</div>
-        <p>当前总积分：{result?.profile?.totalPoints || 0}</p>
-        <button className="is-poster" type="button" onClick={onPoster}>海报分享</button>
-        <button className="is-rank" type="button" onClick={onRank}>排行榜</button>
-        <button className="is-back" type="button" onClick={onBack}>返回首页</button>
+    <div className="lm-checkin-success-viewport" style={{ width, height }}>
+      <section
+        className="lm-checkin-success-page"
+        style={{
+          transform: `scale(${scaleX})`,
+        }}
+      >
+        <img className="lm-checkin-success-bg" src={longMarchStudyAssets.checkin.successBackground} alt="" />
+        <div className="lm-checkin-success-wrap">
+          <img className="lm-checkin-success-panel" src={longMarchStudyAssets.checkin.successPanel} alt="" />
+          <div className="lm-checkin-success-title">打卡成功！</div>
+          <div className="lm-checkin-success-avatar">
+            {avatar ? <img src={avatar} alt="头像" /> : null}
+          </div>
+          <div className="lm-checkin-success-name">{displayName}</div>
+          <div className="lm-checkin-success-earned">获得</div>
+          <div className="lm-checkin-success-score">{points}</div>
+          <div className="lm-checkin-success-unit">积分</div>
+          <button className="lm-checkin-success-poster" type="button" onClick={onPoster}>领取海报</button>
+          <button className="lm-checkin-success-rank" type="button" onClick={onRank}>排行榜</button>
+          <button className="lm-checkin-success-back" type="button" onClick={onBack}>返回</button>
+        </div>
       </section>
-    </IvxStage>
+    </div>
   )
 }
 
