@@ -281,7 +281,6 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [showTasks, setShowTasks] = useState(false)
   const [showRules, setShowRules] = useState(false)
   const [mineFlowModal, setMineFlowModal] = useState('')
-  const [showDailyDone, setShowDailyDone] = useState(false)
   const [poster, setPoster] = useState(null)
   const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
   const [toast, setToast] = useState('')
@@ -395,7 +394,6 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowProfile(false)
     setShowTasks(false)
     setShowRules(false)
-    setShowDailyDone(false)
     setPoster(null)
     setPosterReturnPage(PAGE.MINE)
     setRadioNotice('')
@@ -553,7 +551,6 @@ export default function LongMarchStudyApp({ routeParams }) {
             setPage(PAGE.QUIZ_RESULT)
           }}
           onBack={() => setPage(PAGE.HOME)}
-          onDailyDone={() => setShowDailyDone(true)}
           onToast={setToast}
         />
       ) : null}
@@ -747,7 +744,6 @@ export default function LongMarchStudyApp({ routeParams }) {
       ) : null}
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
       {mineFlowModal ? <MineFlowModal type={mineFlowModal} mine={mine} onClose={() => setMineFlowModal('')} /> : null}
-      {showDailyDone ? <DailyDoneModal onBack={() => { setShowDailyDone(false); setPage(PAGE.HOME) }} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       <RadioNoticeModal message={radioNotice} onClose={() => setRadioNotice('')} />
       {debugEnabled ? (
@@ -899,7 +895,7 @@ function TaskModal({ onClose, onSelect }) {
   )
 }
 
-function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, onBack, onDailyDone, onToast }) {
+function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, onBack, onToast }) {
   const [index, setIndex] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState('')
   const [feedback, setFeedback] = useState(null)
@@ -917,16 +913,12 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
       startQuiz(activityKey, { visitorId })
         .then((data) => setQuizState(data.attempt))
         .catch((error) => {
-          if ((error.message || '').includes('今日已完成答题')) {
-            onDailyDone()
-            return
-          }
           onToast(error.message || '今日答题不可用')
         })
         .finally(() => setBusy(false))
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [activityKey, onDailyDone, onToast, quizState, setQuizState, visitorId])
+  }, [activityKey, onToast, quizState, setQuizState, visitorId])
 
   const submitAnswer = async () => {
     if (!question || !selectedOptionId || submitting || feedback) return
@@ -1057,17 +1049,6 @@ function QuizResultPage({ result, onRank, onBack }) {
         <div className="lm-quiz-success-points"><strong>{data?.pointsEarned || 0}</strong><span>积分</span></div>
         <button className="lm-quiz-result-rank" type="button" onClick={onRank}>排行榜</button>
         <button className="lm-quiz-result-back" type="button" onClick={onBack}>返回首页</button>
-      </section>
-    </div>
-  )
-}
-
-function DailyDoneModal({ onBack }) {
-  return (
-    <div className="lm-quiz-modal-mask">
-      <section className="lm-quiz-done-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
-        <p>今日答题已完成<br />明天再来吧</p>
-        <button type="button" onClick={onBack}>返回首页</button>
       </section>
     </div>
   )
