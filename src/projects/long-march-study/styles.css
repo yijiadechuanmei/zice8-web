@@ -1162,10 +1162,16 @@
   margin: 0;
   overflow: hidden;
   background-color: #fff;
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
   transform-origin: top left;
+}
+
+.lm-radio-bg {
+  position: absolute;
+  left: 0;
+  top: -88px;
+  display: block;
+  width: 750px;
+  height: 1624px;
 }
 
 .lm-radio-title {
