@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useMemo, useState } from 'react'
-import { Input, Select, Space, message } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Input, Popconfirm, Select, Space, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { exportDataRows, getDataRows, getDataSchema } from '../api'
+import { exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -27,6 +27,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [loading, setLoading] = useState(true)
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [error, setError] = useState('')
   const phaseNo = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all' ? phaseScope : ''
 
@@ -109,14 +110,85 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     const exportable = new Set((activeView?.fields || []).filter((field) => field.canExport).map((field) => field.fieldKey || field.key))
     return visibleFieldKeys.filter((key) => exportable.has(key))
   }, [activeView?.fields, visibleFieldKeys])
-  const tableColumns = useMemo(() => buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
-    visibleColumns.map((column) => [
-      column.key,
-      {
-        sortOrder: sortField === column.key ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
-      },
-    ]),
-  )), [sortField, sortOrder, visibleColumns])
+
+  const handleReviewRecording = useCallback(async (row, payload, action) => {
+    if (!row?.id) return
+    setReviewingRecordingId(`${row.id}:${action}`)
+    try {
+      const result = await reviewLongMarchRecording(activity.activityKey, row.id, payload)
+      const recording = result?.recording || {}
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? {
+          ...item,
+          status: recording.status || payload.status || item.status,
+          featured: recording.featured ?? payload.featured ?? item.featured,
+          reviewedAt: recording.reviewedAt || new Date().toISOString(),
+        } : item),
+      }))
+      message.success(action === 'rejected' ? '已驳回录音' : action === 'featured' ? '已设为精选' : '已通过审核')
+    } catch (err) {
+      message.error(err.message || '审核失败')
+    } finally {
+      setReviewingRecordingId('')
+    }
+  }, [activity.activityKey])
+
+  const tableColumns = useMemo(() => {
+    const columns = buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
+      visibleColumns.map((column) => [
+        column.key,
+        {
+          sortOrder: sortField === column.key ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null,
+        },
+      ]),
+    ))
+    if (activity.type === 'long_march_study' && activeViewKey === 'long_march_recordings') {
+      columns.push({
+        title: '审核操作',
+        key: 'reviewActions',
+        fixed: 'right',
+        width: 220,
+        render: (_, row) => (
+          <Space size={6} wrap>
+            <Button
+              size="small"
+              type={row.status === 'approved' ? 'default' : 'primary'}
+              loading={reviewingRecordingId === `${row.id}:approved`}
+              disabled={Boolean(reviewingRecordingId) || row.status === 'approved'}
+              onClick={() => handleReviewRecording(row, { status: 'approved' }, 'approved')}
+            >
+              通过
+            </Button>
+            <Button
+              size="small"
+              loading={reviewingRecordingId === `${row.id}:featured`}
+              disabled={Boolean(reviewingRecordingId) || row.featured}
+              onClick={() => handleReviewRecording(row, { status: 'approved', featured: true }, 'featured')}
+            >
+              精选
+            </Button>
+            <Popconfirm
+              title="确认驳回该录音？"
+              okText="驳回"
+              cancelText="取消"
+              onConfirm={() => handleReviewRecording(row, { status: 'rejected', featured: false, rejectReason: '后台审核驳回' }, 'rejected')}
+            >
+              <Button
+                size="small"
+                danger
+                loading={reviewingRecordingId === `${row.id}:rejected`}
+                disabled={Boolean(reviewingRecordingId) || row.status === 'rejected'}
+              >
+                驳回
+              </Button>
+            </Popconfirm>
+          </Space>
+        ),
+      })
+    }
+    return columns
+  }, [activity.type, activeViewKey, handleReviewRecording, reviewingRecordingId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return

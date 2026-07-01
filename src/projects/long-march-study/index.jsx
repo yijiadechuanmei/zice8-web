@@ -1796,7 +1796,7 @@ function MineFlowModal({ type, mine, onClose }) {
             ) : (
               <>
                 <strong>{item.finishedAt ? '每日红色答题' : '答题未完成'}</strong>
-                <span>{formatLongMarchDate(item.finishedAt || item.startedAt)} · 得分 {item.score || 0}</span>
+                <span>{formatLongMarchDate(item.finishedAt || item.startedAt)} · 答题积分 {item.score || 0}</span>
                 <em>答对 {item.correctCount || 0}/{item.questionCount || 0} 题，获得 {item.pointsEarned || 0} 积分</em>
               </>
             )}
