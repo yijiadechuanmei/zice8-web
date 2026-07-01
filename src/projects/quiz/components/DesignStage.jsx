@@ -2,20 +2,22 @@ import { useEffect, useRef, useState } from 'react'
 
 const DESIGN_WIDTH = 750
 
-export default function DesignStage({ height = 1624, children }) {
+export default function DesignStage({ height = 1624, fitToViewport = false, children }) {
   const viewportRef = useRef(null)
   const [scale, setScale] = useState(1)
 
   useEffect(() => {
     function updateScale() {
       const containerWidth = viewportRef.current?.parentElement?.getBoundingClientRect().width || window.innerWidth
-      setScale(Math.min(containerWidth / DESIGN_WIDTH, 1))
+      const widthScale = containerWidth / DESIGN_WIDTH
+      const heightScale = fitToViewport ? window.innerHeight / height : 1
+      setScale(Math.min(widthScale, heightScale, 1))
     }
 
     updateScale()
     window.addEventListener('resize', updateScale)
     return () => window.removeEventListener('resize', updateScale)
-  }, [])
+  }, [fitToViewport, height])
 
   return (
     <div

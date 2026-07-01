@@ -113,8 +113,13 @@ export const finishAttempt = (activityKey, attemptId) =>
 
 export const getResult = (activityKey, attemptId) => quizRequest(`/quiz/activities/${activityKey}/result/${attemptId}`)
 
-export const getRank = (activityKey) =>
-  quizRequest(`/quiz/activities/${activityKey}/rank`, { skipAuth: true })
+export const getRank = (activityKey, offset, limit) => {
+  const params = new URLSearchParams()
+  if (offset !== undefined && offset !== null) params.set('offset', String(offset))
+  if (limit !== undefined && limit !== null) params.set('limit', String(limit))
+  const query = params.toString()
+  return quizRequest(`/quiz/activities/${activityKey}/rank${query ? `?${query}` : ''}`, { skipAuth: true })
+}
 
 export const resetDemoActivity = (activityKey) =>
   quizRequest(`/quiz/activities/${activityKey}/dev-reset`, {

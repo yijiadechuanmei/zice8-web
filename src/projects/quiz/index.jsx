@@ -25,6 +25,14 @@ import {
 import LoadingState from './components/LoadingState'
 import QuizLoadingOverlay from './components/QuizLoadingOverlay'
 import QuizToast from './components/QuizToast'
+import {
+  FengchengHomePage,
+  FengchengQuestionPage,
+  FengchengQuizPreviewApp,
+  FengchengRankPage,
+  FengchengResultPage,
+} from './fengcheng/FengchengQuiz'
+import { createFengchengLocalPublicConfig, isFengchengQuiz } from './fengcheng/config'
 import LayoutPreview from './dev/LayoutPreview'
 import { QUIZ_VERSION, quizAssets } from './assets'
 import HomePage from './pages/HomePage'
@@ -42,6 +50,9 @@ const QUIZ_RANK_PAGE_SIZE = 50
 export default function QuizApp({ routeParams }) {
   const layoutPreview = getQueryParam('layout') === '1'
   if (layoutPreview) return <LayoutPreview />
+
+  const fengchengPreview = getQueryParam('fengcheng_preview') === '1'
+  if (fengchengPreview) return <FengchengQuizPreviewApp />
 
   const tokenFromUrl = getTokenFromUrl()
   if (tokenFromUrl) {
@@ -69,6 +80,7 @@ function QuizMain({ routeParams }) {
   const [rankHasMore, setRankHasMore] = useState(true)
   const [rankLoading, setRankLoading] = useState(false)
   const [rankError, setRankError] = useState('')
+  const [fengchengProfileOpen, setFengchengProfileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState(null)
@@ -162,6 +174,7 @@ function QuizMain({ routeParams }) {
       }
     : null
   const bgmConfig = bootstrap?.bgmConfig || publicConfig?.bgmConfig
+  const fengchengSkin = isFengchengQuiz(activityKey, bootstrap, publicConfig)
 
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
@@ -183,6 +196,12 @@ function QuizMain({ routeParams }) {
         })
       })
       .catch((err) => {
+        if (isFengchengQuiz(activityKey)) {
+          setPublicConfig(createFengchengLocalPublicConfig())
+          setError('')
+          setLoading(false)
+          return
+        }
         setError(err.message || '活动加载失败')
         setLoading(false)
       })
@@ -243,7 +262,14 @@ function QuizMain({ routeParams }) {
 
   async function handleStart() {
     if (!getToken()) return startAuthorize()
-    if (!bootstrap?.profileCompleted) return setPage('profile')
+    if (!bootstrap?.profileCompleted) {
+      if (fengchengSkin) {
+        setPage('home')
+        setFengchengProfileOpen(true)
+        return
+      }
+      return setPage('profile')
+    }
     await doStartAttempt()
   }
 
@@ -276,6 +302,7 @@ function QuizMain({ routeParams }) {
     try {
       const profileResult = await submitProfile(activityKey, profile)
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
+      setFengchengProfileOpen(false)
       await doStartAttempt()
     } catch (err) {
       if (handleUnauthorized(err, 'participant-profile-401')) return
@@ -443,6 +470,7 @@ function QuizMain({ routeParams }) {
     setActiveAttemptId(null)
     setPage('home')
     setFeedback(null)
+    setFengchengProfileOpen(false)
   }
 
   if (blockedMessage) {
@@ -467,6 +495,59 @@ function QuizMain({ routeParams }) {
   }
 
   if (loading || !publicConfig || !authReady) return <LoadingState text="答题活动加载中..." />
+
+  if (fengchengSkin) {
+    return (
+      <div className="quiz-app">
+        {page === 'home' ? (
+          <FengchengHomePage
+            publicConfig={publicConfig}
+            profile={bootstrap?.participant}
+            profileModalOpen={fengchengProfileOpen}
+            submitting={submitting}
+            onStart={handleStart}
+            onCloseProfile={() => setFengchengProfileOpen(false)}
+            onSubmitProfile={handleProfileSubmit}
+          />
+        ) : null}
+        {page === 'question' ? (
+          <FengchengQuestionPage
+            publicConfig={publicConfig}
+            current={current ? { ...current, attemptId: activeAttemptId || current.attemptId } : current}
+            feedback={feedback}
+            submitting={submitting}
+            onAnswer={handleAnswer}
+            onTimeout={handleTimeout}
+            showToast={showToast}
+          />
+        ) : null}
+        {page === 'result' ? (
+          <FengchengResultPage
+            publicConfig={publicConfig}
+            result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result}
+            onRetry={handleStart}
+            onOpenRank={openRank}
+          />
+        ) : null}
+        {page === 'rank' ? (
+          <FengchengRankPage
+            publicConfig={publicConfig}
+            ranks={ranks}
+            loading={rankLoading}
+            hasMore={rankHasMore}
+            error={rankError}
+            onLoadMore={() => loadRankPage()}
+            onRetry={() => loadRankPage({ reset: !ranks.length })}
+            onBack={backHome}
+          />
+        ) : null}
+        <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+        <QuizLoadingOverlay visible={submitting} />
+        <QuizToast visible={Boolean(toast)} message={toast} />
+        {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
+      </div>
+    )
+  }
 
   return (
     <div className="quiz-app" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
