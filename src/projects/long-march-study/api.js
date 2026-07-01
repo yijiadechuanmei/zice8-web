@@ -11,8 +11,14 @@ const base = (activityKey) => `/long-march-study/activities/${encodeURIComponent
 export const getPublicConfig = (activityKey) =>
   request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
 
-export const getBootstrap = (activityKey, visitorId) =>
-  request(withVisitor(`${base(activityKey)}/bootstrap`, visitorId))
+export const getBootstrap = (activityKey, visitorId, options = {}) => {
+  let path = withVisitor(`${base(activityKey)}/bootstrap`, visitorId)
+  if (options.debugContinuousCheckin) {
+    const separator = path.includes('?') ? '&' : '?'
+    path = `${path}${separator}debugContinuousCheckin=1`
+  }
+  return request(path)
+}
 
 export const saveProfile = (activityKey, data) =>
   request(`${base(activityKey)}/profile`, {

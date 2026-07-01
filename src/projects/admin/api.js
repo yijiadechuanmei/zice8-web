@@ -139,6 +139,10 @@ export function reviewLongMarchRecording(activityKey, recordingId, payload) {
   })
 }
 
+export function getLongMarchRecordingPlayUrl(activityKey, recordingId) {
+  return adminRequest(`/long-march-study/admin/activities/${activityKey}/recordings/${recordingId}/play-url`)
+}
+
 export function adjustLongMarchProfile(activityKey, profileId, payload) {
   return adminRequest(`/long-march-study/admin/activities/${activityKey}/profiles/${profileId}/adjust`, {
     method: 'POST',

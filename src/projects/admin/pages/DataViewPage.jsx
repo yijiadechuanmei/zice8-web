@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
+import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -28,6 +28,8 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [schemaLoading, setSchemaLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [adjustingProfileId, setAdjustingProfileId] = useState('')
+  const [recordingPlayUrls, setRecordingPlayUrls] = useState({})
+  const [loadingRecordingPlayId, setLoadingRecordingPlayId] = useState('')
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
   const [error, setError] = useState('')
@@ -133,6 +135,24 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       message.error(err.message || '审核失败')
     } finally {
       setReviewingRecordingId('')
+    }
+  }, [activity.activityKey])
+
+  const handleLoadRecordingPlayUrl = useCallback(async (row) => {
+    if (!row?.id) return
+    setLoadingRecordingPlayId(row.id)
+    try {
+      const result = await getLongMarchRecordingPlayUrl(activity.activityKey, row.id)
+      const audioUrl = result?.audioUrl || row.audioUrl
+      setRecordingPlayUrls((current) => ({ ...current, [row.id]: audioUrl }))
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? { ...item, audioUrl } : item),
+      }))
+    } catch (err) {
+      message.error(err.message || '音频加载失败')
+    } finally {
+      setLoadingRecordingPlayId('')
     }
   }, [activity.activityKey])
 
@@ -287,9 +307,23 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       const audioColumn = columns.find((column) => column.key === 'audioUrl' || column.dataIndex === 'audioUrl')
       if (audioColumn) {
         audioColumn.width = 240
-        audioColumn.render = (value) => value ? (
-          <audio src={value} controls preload="none" style={{ width: 210, maxWidth: '100%' }} />
-        ) : '-'
+        audioColumn.render = (value, row) => {
+          const playableUrl = recordingPlayUrls[row.id] || (/\.(mp3|m4a|mp4|wav|ogg|aac)(?:[?#]|$)/i.test(value || '') ? value : '')
+          if (playableUrl) {
+            return <audio src={playableUrl} controls preload="none" style={{ width: 210, maxWidth: '100%' }} />
+          }
+          if (!value) return '-'
+          return (
+            <Button
+              size="small"
+              loading={loadingRecordingPlayId === row.id}
+              disabled={Boolean(loadingRecordingPlayId)}
+              onClick={() => handleLoadRecordingPlayUrl(row)}
+            >
+              加载播放
+            </Button>
+          )
+        }
       }
       columns.push({
         title: '审核操作',
@@ -384,7 +418,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       })
     }
     return columns
-  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleReviewRecording, handleReviewShareScreenshot, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, recordingPlayUrls, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return

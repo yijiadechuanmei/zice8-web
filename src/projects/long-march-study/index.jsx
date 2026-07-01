@@ -274,14 +274,14 @@ export default function LongMarchStudyApp({ routeParams }) {
     if (!authReady) return
     setLoading(true)
     try {
-      const data = await getBootstrap(activityKey, visitorId)
+      const data = await getBootstrap(activityKey, visitorId, { debugContinuousCheckin: debugEnabled })
       setBootstrap(data)
     } catch (error) {
       setToast(error.message || '活动加载失败')
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, visitorId])
+  }, [activityKey, authReady, debugEnabled, visitorId])
 
   useEffect(() => {
     const timer = window.setTimeout(() => refresh(), 0)
@@ -541,10 +541,14 @@ export default function LongMarchStudyApp({ routeParams }) {
           config={config}
           nextCheckin={bootstrap?.nextCheckin}
           today={bootstrap?.today}
+          debugContinuousCheckin={debugEnabled}
           onBack={() => setPage(PAGE.HOME)}
           onCheckin={async (location) => {
             try {
-              const result = await checkinLocation(activityKey, location.key, { visitorId })
+              const result = await checkinLocation(activityKey, location.key, {
+                visitorId,
+                debugContinuousCheckin: debugEnabled,
+              })
               setCheckinResult(result)
               setBootstrap((current) => ({
                 ...current,
@@ -1028,7 +1032,7 @@ function DailyDoneModal({ onBack }) {
   )
 }
 
-function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
+function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = false, onCheckin, onBack }) {
   const [pendingCheckin, setPendingCheckin] = useState(null)
   const [checkinNotice, setCheckinNotice] = useState('')
   const locations = config.locations || []
@@ -1053,9 +1057,9 @@ function CheckinPage({ config, nextCheckin, today, onCheckin, onBack }) {
       {visualLocations.map(({ location, className, asset, activeAsset }, index) => {
         const isNext = nextCheckin?.key === location.key
         const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
-        const canCheckin = isNext && !isCompleted && !today?.checkinDone
+        const canCheckin = isNext && !isCompleted && (!today?.checkinDone || debugContinuousCheckin)
         const isUnlocked = canCheckin || isCompleted
-        const lockedNotice = today?.checkinDone || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
+        const lockedNotice = (today?.checkinDone && !debugContinuousCheckin) || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
         return (
           <button
             key={location.key}
@@ -1314,6 +1318,11 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
           >
             <img src={playingId === recording.id ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
           </button>
+          {recording.avatar ? (
+            <img className="lm-radio-row-avatar" src={recording.avatar} alt="头像" />
+          ) : (
+            <div className="lm-radio-row-avatar lm-avatar-placeholder" aria-hidden="true" />
+          )}
           <div className="lm-radio-row-main">
             <strong>{recording.authorName || recording.title || '昵称'}</strong>
             <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>

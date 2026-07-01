@@ -1428,6 +1428,17 @@
   display: block;
 }
 
+.lm-radio-row-avatar {
+  position: absolute;
+  left: 184px;
+  top: 29px;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .lm-radio-row-main {
   position: absolute;
   left: 248px;
