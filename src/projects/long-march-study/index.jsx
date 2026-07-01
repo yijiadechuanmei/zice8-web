@@ -47,6 +47,10 @@ const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
+const MODAL_FRAME_SPECS = {
+  rules: { width: 685, height: 958 },
+  profile: { width: 686, height: 794 },
+}
 const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
   const rank = index + 1
   return {
@@ -70,13 +74,12 @@ function useStageFit(baseWidth = 750, baseHeight = 1448) {
       return { scaleX: 1, scaleY: 1, width: baseWidth, height: baseHeight }
     }
     const width = Math.min(window.innerWidth, baseWidth)
-    const viewportHeight = window.innerHeight || baseHeight
-    const height = Math.max(viewportHeight, width * baseHeight / baseWidth)
+    const scale = width / baseWidth
     return {
-      scaleX: width / baseWidth,
-      scaleY: height / baseHeight,
+      scaleX: scale,
+      scaleY: scale,
       width,
-      height,
+      height: baseHeight * scale,
     }
   }, [baseHeight, baseWidth])
   const [stageFit, setStageFit] = useState(() => resolve())
@@ -91,15 +94,39 @@ function useStageFit(baseWidth = 750, baseHeight = 1448) {
   return stageFit
 }
 
+function useModalFit(spec) {
+  const resolve = useCallback(() => {
+    if (!spec || typeof window === 'undefined') return { scale: 1, width: spec?.width || 0, height: spec?.height || 0 }
+    const viewportWidth = window.innerWidth || spec.width
+    const scale = Math.min((viewportWidth - 32) / spec.width, 1)
+    const safeScale = Math.max(scale, 0.1)
+    return {
+      scale: safeScale,
+      width: spec.width * safeScale,
+      height: spec.height * safeScale,
+    }
+  }, [spec])
+  const [fit, setFit] = useState(() => resolve())
+
+  useEffect(() => {
+    const update = () => setFit(resolve())
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [resolve])
+
+  return fit
+}
+
 function IvxStage({ title, className = '', background, onBack, children }) {
-  const { scaleX, scaleY, width, height } = useStageFit(IVX_STAGE_WIDTH, IVX_STAGE_HEIGHT)
+  const { scaleX, width, height } = useStageFit(IVX_STAGE_WIDTH, IVX_STAGE_HEIGHT)
   return (
     <div className="lm-ivx-viewport" style={{ width, height }}>
       <section
         className={`lm-ivx-stage ${className}`}
         style={{
           backgroundImage: background ? `url(${background})` : undefined,
-          transform: `scale(${scaleX}, ${scaleY})`,
+          transform: `scale(${scaleX})`,
           '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
         }}
       >
@@ -1048,13 +1075,13 @@ function CheckinResultPage({ result, onPoster, onRank, onBack }) {
 }
 
 function RadioShell({ title = '云上红色电台', onBack, children }) {
-  const { scaleX, scaleY, width, height } = useStageFit(RADIO_STAGE_WIDTH, RADIO_STAGE_HEIGHT)
+  const { scaleX, width, height } = useStageFit(RADIO_STAGE_WIDTH, RADIO_STAGE_HEIGHT)
   return (
     <div className="lm-radio-viewport" style={{ width, height }}>
       <section
         className="lm-radio-page"
         style={{
-          transform: `scale(${scaleX}, ${scaleY})`,
+          transform: `scale(${scaleX})`,
         }}
       >
         <img className="lm-radio-bg" src={longMarchStudyAssets.radio.background} alt="" />
@@ -1780,7 +1807,7 @@ function RulesModal({ rules, onClose }) {
 }
 
 function PosterPage({ poster, locations, activityUrl, onBack }) {
-  const { scaleX, scaleY, width, height } = useStageFit(POSTER_STAGE_WIDTH, POSTER_STAGE_HEIGHT)
+  const { scaleX, width, height } = useStageFit(POSTER_STAGE_WIDTH, POSTER_STAGE_HEIGHT)
   const qrCanvasRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [error, setError] = useState('')
@@ -1864,7 +1891,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
       <section
         className="lm-poster-page"
         style={{
-          transform: `scale(${scaleX}, ${scaleY})`,
+          transform: `scale(${scaleX})`,
           '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
         }}
       >
@@ -1899,7 +1926,8 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
 }
 
 function Modal({ title, children, onClose, variant = 'default' }) {
-  const { scaleX } = useStageFit(750, 1448)
+  const frameSpec = MODAL_FRAME_SPECS[variant]
+  const modalFit = useModalFit(frameSpec)
   const backgroundImage = {
     rules: longMarchStudyAssets.modal.rules,
     profile: longMarchStudyAssets.modal.profile,
@@ -1910,22 +1938,46 @@ function Modal({ title, children, onClose, variant = 'default' }) {
   const handleMaskClick = (event) => {
     if (closeOnMask && event.target === event.currentTarget) onClose()
   }
+  const content = (
+    <>
+      <header>
+        <h2>{title}</h2>
+        {showClose ? <button type="button" onClick={onClose}>{closeText}</button> : null}
+      </header>
+      {children}
+    </>
+  )
+
+  if (frameSpec) {
+    return (
+      <div className={`lm-modal-mask lm-modal-mask-${variant}`} onClick={handleMaskClick}>
+        <section
+          className={`lm-modal-frame lm-modal-frame-${variant}`}
+          style={{ width: modalFit.width, height: modalFit.height }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div
+            className={`lm-modal lm-modal-${variant}`}
+            style={{
+              ...(backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {}),
+              transform: `scale(${modalFit.scale})`,
+            }}
+          >
+            {content}
+          </div>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className={`lm-modal-mask lm-modal-mask-${variant}`} onClick={handleMaskClick}>
       <section
         className={`lm-modal lm-modal-${variant}`}
-        style={{
-          ...(backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {}),
-          '--lm-modal-scale': Math.min(scaleX || 1, 1),
-        }}
+        style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
         onClick={(event) => event.stopPropagation()}
       >
-        <header>
-          <h2>{title}</h2>
-          {showClose ? <button type="button" onClick={onClose}>{closeText}</button> : null}
-        </header>
-        {children}
+        {content}
       </section>
     </div>
   )
