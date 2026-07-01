@@ -282,6 +282,17 @@ function QuizMain({ routeParams }) {
     reauth('start-without-token')
   }
 
+  function isAttemptLimitReached(data = bootstrap) {
+    return data?.remainingTodayAttempts === 0 || data?.remainingTotalAttempts === 0
+  }
+
+  function showAttemptUsedAndOpenRank() {
+    showToast('答题次数已用完', 1500)
+    window.setTimeout(() => {
+      openRank().catch(showError)
+    }, 1500)
+  }
+
   async function handleStart() {
     if (!getToken()) return startAuthorize()
     if (!bootstrap?.profileCompleted) {
@@ -291,6 +302,10 @@ function QuizMain({ routeParams }) {
         return
       }
       return setPage('profile')
+    }
+    if (fengchengSkin && isAttemptLimitReached()) {
+      showAttemptUsedAndOpenRank()
+      return
     }
     await doStartAttempt()
   }
@@ -313,6 +328,10 @@ function QuizMain({ routeParams }) {
       setPage('question')
     } catch (err) {
       if (handleUnauthorized(err, 'start-attempt-401')) return
+      if (fengchengSkin && /答题次数已用完/.test(err?.message || '')) {
+        showAttemptUsedAndOpenRank()
+        return
+      }
       showError(err)
     } finally {
       setSubmitting(false)
@@ -325,6 +344,10 @@ function QuizMain({ routeParams }) {
       const profileResult = await submitProfile(activityKey, profile)
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
       setFengchengProfileOpen(false)
+      if (fengchengSkin && profileResult?.canStart === false) {
+        showAttemptUsedAndOpenRank()
+        return
+      }
       await doStartAttempt()
     } catch (err) {
       if (handleUnauthorized(err, 'participant-profile-401')) return
@@ -579,7 +602,7 @@ function QuizMain({ routeParams }) {
           <FengchengResultPage
             publicConfig={publicConfig}
             result={result ? { ...result, attemptId: resultAttemptId || result.attemptId } : result}
-            onRetry={handleStart}
+            onRetry={backHome}
             onOpenRank={openRank}
           />
         ) : null}

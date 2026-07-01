@@ -192,9 +192,7 @@ function FengchengProfileModal({ assets, profile, submitting, onClose, onSubmit 
           onClick={submit}
           disabled={submitting || !name.trim() || !department.trim()}
           aria-label="提交并开始答题"
-        >
-          <img src={assets.homeStartButton} alt="" aria-hidden="true" />
-        </button>
+        />
       </section>
     </div>
   )
@@ -239,27 +237,29 @@ function FengchengQuestionContent({
 }) {
   const [selected, setSelected] = useState('')
   const limitSeconds = question?.timeLimitSeconds ?? current?.questionTimeLimitSeconds ?? 60
-  const initialRemainingSeconds =
-    current?.remainingSeconds !== null && current?.remainingSeconds !== undefined
-      ? Math.max(Number(current.remainingSeconds), 0)
-      : Number(limitSeconds)
-  const [remainingSeconds, setRemainingSeconds] = useState(initialRemainingSeconds)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [questionElapsedSeconds, setQuestionElapsedSeconds] = useState(0)
   const timeoutRef = useRef(false)
   const answerTimerRef = useRef(null)
+  const attemptId = current?.attemptId || ''
 
   useEffect(() => () => {
     if (answerTimerRef.current) window.clearTimeout(answerTimerRef.current)
   }, [])
 
   useEffect(() => {
+    setElapsedSeconds(0)
+  }, [attemptId])
+
+  useEffect(() => {
     setSelected('')
     timeoutRef.current = false
-    setRemainingSeconds(initialRemainingSeconds)
-  }, [question.questionId, initialRemainingSeconds])
+    setQuestionElapsedSeconds(0)
+  }, [question.questionId])
 
   useEffect(() => {
     if (submitting) return undefined
-    if (remainingSeconds <= 0) {
+    if (!selected && questionElapsedSeconds >= limitSeconds) {
       if (!timeoutRef.current) {
         timeoutRef.current = true
         onTimeout(question.questionId)
@@ -267,10 +267,11 @@ function FengchengQuestionContent({
       return undefined
     }
     const timer = window.setTimeout(() => {
-      setRemainingSeconds((value) => Math.max(value - 1, 0))
+      setElapsedSeconds((value) => value + 1)
+      setQuestionElapsedSeconds((value) => value + 1)
     }, 1000)
     return () => window.clearTimeout(timer)
-  }, [onTimeout, question.questionId, remainingSeconds, submitting])
+  }, [limitSeconds, onTimeout, question.questionId, questionElapsedSeconds, selected, submitting])
 
   function handleOptionSelect(value) {
     if (selected || submitting || timeoutRef.current) return
@@ -282,7 +283,7 @@ function FengchengQuestionContent({
 
   const totalQuestions = current?.totalQuestions || current?.questionCount || 30
   const questionSort = question.questionSort || current?.currentQuestionSort || 1
-  const timerText = formatSeconds(remainingSeconds)
+  const timerText = formatSeconds(elapsedSeconds)
 
   return (
     <StageBackground publicConfig={publicConfig} className="fengcheng-question-page">
@@ -345,7 +346,6 @@ export function FengchengDebugPage({
 }
 
 export function FengchengResultPage({ publicConfig, result, onRetry, onOpenRank }) {
-  const assets = getFengchengAssets(publicConfig)
   return (
     <StageBackground publicConfig={publicConfig} className="fengcheng-result-page">
       <section className="fengcheng-result-card">
@@ -360,11 +360,11 @@ export function FengchengResultPage({ publicConfig, result, onRetry, onOpenRank 
           <span>用时</span>
           <strong>{formatFengchengDuration(result?.totalTimeMs)}</strong>
         </div>
-        <button className="fengcheng-image-button fengcheng-result-retry" type="button" onClick={onRetry} aria-label="再来一次">
-          <img src={assets.homeStartButton} alt="" aria-hidden="true" />
+        <button className="fengcheng-result-action fengcheng-result-rank-action" type="button" onClick={onOpenRank}>
+          排行榜
         </button>
-        <button className="fengcheng-image-button fengcheng-result-rank" type="button" onClick={onOpenRank} aria-label="查看排行榜">
-          <img src={assets.rankHomeButton} alt="" aria-hidden="true" />
+        <button className="fengcheng-result-action fengcheng-result-home-action" type="button" onClick={onRetry}>
+          返回首页
         </button>
       </section>
     </StageBackground>

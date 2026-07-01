@@ -71,9 +71,7 @@
 }
 
 .fengcheng-home-start img,
-.fengcheng-rank-back img,
-.fengcheng-image-button img,
-.fengcheng-profile-submit img {
+.fengcheng-rank-back img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -82,7 +80,7 @@
 }
 
 .fengcheng-home-start:active,
-.fengcheng-image-button:active,
+.fengcheng-result-action:active,
 .fengcheng-rank-back:active {
   transform: scale(.985);
 }
@@ -123,27 +121,6 @@
   height: 102px;
   border: 0;
   background: transparent;
-}
-
-.fengcheng-profile-close::before,
-.fengcheng-profile-close::after {
-  content: "";
-  position: absolute;
-  left: 46px;
-  top: 24px;
-  width: 8px;
-  height: 56px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(30, 92, 170, .3);
-}
-
-.fengcheng-profile-close::before {
-  transform: rotate(45deg);
-}
-
-.fengcheng-profile-close::after {
-  transform: rotate(-45deg);
 }
 
 .fengcheng-profile-input {
@@ -190,10 +167,11 @@
   border: 0;
   padding: 0;
   background: transparent;
+  cursor: pointer;
 }
 
 .fengcheng-profile-submit:disabled {
-  opacity: .58;
+  cursor: default;
 }
 
 .fengcheng-section-title i {
@@ -298,7 +276,7 @@
   color: #25282f;
   text-align: left;
   box-shadow: 0 6px 14px rgba(83, 118, 165, .1);
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
 }
 
@@ -393,67 +371,67 @@
 
 .fengcheng-result-card {
   position: absolute;
-  left: 82px;
-  top: 308px;
-  width: 586px;
-  min-height: 870px;
-  border-radius: 54px;
+  left: 92px;
+  top: 284px;
+  width: 566px;
+  height: 744px;
+  border-radius: 38px;
   background: rgba(255,255,255,.95);
   box-shadow: 0 14px 32px rgba(72, 128, 190, .18);
 }
 
 .fengcheng-section-title {
   position: absolute;
-  left: 76px;
-  top: 90px;
+  left: 62px;
+  top: 56px;
   display: flex;
-  width: 434px;
+  width: 442px;
   align-items: center;
   justify-content: center;
   gap: 18px;
   color: #e2141e;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 900;
 }
 
 .fengcheng-score-row {
   position: absolute;
   left: 0;
-  top: 188px;
+  top: 124px;
   width: 100%;
   text-align: center;
   color: #ef1b22;
 }
 
 .fengcheng-score-row strong {
-  font-size: 196px;
+  font-size: 126px;
   font-style: italic;
   line-height: .86;
   text-shadow: 0 5px 0 rgba(255,255,255,.85), 0 10px 18px rgba(222, 25, 28, .16);
 }
 
 .fengcheng-score-row span {
-  margin-left: 10px;
-  font-size: 70px;
+  margin-left: 8px;
+  font-size: 44px;
   font-weight: 900;
 }
 
 .fengcheng-result-divider {
   position: absolute;
-  left: 76px;
-  top: 474px;
-  width: 434px;
+  left: 62px;
+  top: 306px;
+  width: 442px;
   height: 1px;
   background: #e8eef6;
 }
 
 .fengcheng-time-row {
   position: absolute;
-  left: 188px;
-  top: 538px;
+  left: 134px;
+  top: 354px;
   display: grid;
-  grid-template-columns: 92px 1fr;
-  column-gap: 22px;
+  grid-template-columns: 68px 1fr;
+  column-gap: 18px;
   align-items: center;
   color: #2a2d35;
 }
@@ -461,38 +439,45 @@
 .fengcheng-time-row .anticon {
   grid-row: span 2;
   color: #2476ee;
-  font-size: 86px;
+  font-size: 58px;
 }
 
 .fengcheng-time-row span {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
 }
 
 .fengcheng-time-row strong {
   color: #1767de;
-  font-size: 68px;
+  font-size: 46px;
   font-weight: 900;
   line-height: 1;
 }
 
-.fengcheng-result-retry,
-.fengcheng-result-rank {
+.fengcheng-result-action {
   position: absolute;
-  left: 100px;
-  width: 386px;
-  height: 113px;
+  left: 126px;
+  width: 314px;
+  height: 78px;
   border: 0;
+  border-radius: 999px;
   padding: 0;
-  background: transparent;
+  background: linear-gradient(180deg, #5facff 0%, #2479ee 100%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(35, 107, 220, .24), inset 0 3px 5px rgba(255,255,255,.48);
 }
 
-.fengcheng-result-retry {
-  top: 692px;
+.fengcheng-result-rank-action {
+  top: 508px;
 }
 
-.fengcheng-result-rank {
-  top: 822px;
+.fengcheng-result-home-action {
+  top: 608px;
+  background: linear-gradient(180deg, #ff7250 0%, #ef1d24 100%);
+  box-shadow: 0 8px 18px rgba(214, 28, 30, .22), inset 0 3px 5px rgba(255,255,255,.48);
 }
 
 .fengcheng-rank-title {
