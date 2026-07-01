@@ -2093,7 +2093,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
       try {
         if (isHonorPoster) {
           const [background, certificate] = await Promise.all([
-            loadPosterImage(longMarchStudyAssets.radio.background),
+            loadPosterImage(posterAssets.posterBackground),
             loadPosterImage(longMarchStudyAssets.honors.certificate),
           ])
           let avatar = null
@@ -2248,7 +2248,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.share, posterAssets.title])
+  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.posterBackground, posterAssets.share, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
@@ -2274,7 +2274,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         <div className="lm-poster-live" aria-hidden={Boolean(posterImage)}>
           {isHonorPoster ? (
             <div className="lm-certificate-poster">
-              <img className="lm-certificate-bg" src={longMarchStudyAssets.radio.background} alt="" />
+              <img className="lm-certificate-bg" src={posterAssets.posterBackground} alt="" />
               <img className="lm-certificate-image" src={longMarchStudyAssets.honors.certificate} alt="" />
               {poster?.avatar ? <img className="lm-certificate-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-certificate-avatar lm-avatar-placeholder" />}
               <div className="lm-certificate-name">{certificateName}</div>
