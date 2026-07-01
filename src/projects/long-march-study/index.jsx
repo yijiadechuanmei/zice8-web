@@ -51,30 +51,43 @@ function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
 }
 
-function useStageScale(baseWidth = 750) {
-  const resolve = useCallback(() => (typeof window === 'undefined' ? 1 : Math.min(window.innerWidth, baseWidth) / baseWidth), [baseWidth])
-  const [scale, setScale] = useState(() => resolve())
+function useStageFit(baseWidth = 750, baseHeight = 1448) {
+  const resolve = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return { scaleX: 1, scaleY: 1, width: baseWidth, height: baseHeight }
+    }
+    const width = Math.min(window.innerWidth, baseWidth)
+    const viewportHeight = window.innerHeight || baseHeight
+    const height = Math.max(viewportHeight, width * baseHeight / baseWidth)
+    return {
+      scaleX: width / baseWidth,
+      scaleY: height / baseHeight,
+      width,
+      height,
+    }
+  }, [baseHeight, baseWidth])
+  const [stageFit, setStageFit] = useState(() => resolve())
 
   useEffect(() => {
-    const update = () => setScale(resolve())
+    const update = () => setStageFit(resolve())
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
   }, [resolve])
 
-  return scale
+  return stageFit
 }
 
 function IvxStage({ title, className = '', background, onBack, children }) {
-  const scale = useStageScale(IVX_STAGE_WIDTH)
+  const { scaleX, scaleY, width, height } = useStageFit(IVX_STAGE_WIDTH, IVX_STAGE_HEIGHT)
   return (
-    <div className="lm-ivx-viewport" style={{ width: IVX_STAGE_WIDTH * scale, height: IVX_STAGE_HEIGHT * scale }}>
+    <div className="lm-ivx-viewport" style={{ width, height }}>
       <section
         className={`lm-ivx-stage ${className}`}
         style={{
           backgroundImage: background ? `url(${background})` : undefined,
-          transform: `scale(${scale})`,
-          '--lm-ivx-ui-scale': scale ? 1 / scale : 1,
+          transform: `scale(${scaleX}, ${scaleY})`,
+          '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
         }}
       >
         {onBack ? (
@@ -957,13 +970,13 @@ function CheckinResultPage({ result, onPoster, onRank, onBack }) {
 }
 
 function RadioShell({ title = '云上红色电台', onBack, children }) {
-  const scale = useStageScale(RADIO_STAGE_WIDTH)
+  const { scaleX, scaleY, width, height } = useStageFit(RADIO_STAGE_WIDTH, RADIO_STAGE_HEIGHT)
   return (
-    <div className="lm-radio-viewport" style={{ width: RADIO_STAGE_WIDTH * scale, height: RADIO_STAGE_HEIGHT * scale }}>
+    <div className="lm-radio-viewport" style={{ width, height }}>
       <section
         className="lm-radio-page"
         style={{
-          transform: `scale(${scale})`,
+          transform: `scale(${scaleX}, ${scaleY})`,
         }}
       >
         <img className="lm-radio-bg" src={longMarchStudyAssets.radio.background} alt="" />
@@ -1572,7 +1585,7 @@ function RulesModal({ rules, onClose }) {
 }
 
 function PosterPage({ poster, locations, activityUrl, onBack }) {
-  const scale = useStageScale(POSTER_STAGE_WIDTH)
+  const { scaleX, scaleY, width, height } = useStageFit(POSTER_STAGE_WIDTH, POSTER_STAGE_HEIGHT)
   const qrCanvasRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [error, setError] = useState('')
@@ -1652,12 +1665,12 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
   }, [activityUrl, locationImage, poster, posterAssets.background, posterAssets.title])
 
   return (
-    <div className="lm-poster-viewport" style={{ width: POSTER_STAGE_WIDTH * scale, height: POSTER_STAGE_HEIGHT * scale }}>
+    <div className="lm-poster-viewport" style={{ width, height }}>
       <section
         className="lm-poster-page"
         style={{
-          transform: `scale(${scale})`,
-          '--lm-ivx-ui-scale': scale ? 1 / scale : 1,
+          transform: `scale(${scaleX}, ${scaleY})`,
+          '--lm-ivx-ui-scale': scaleX ? 1 / scaleX : 1,
         }}
       >
         <button className="lm-poster-back" type="button" onClick={onBack} aria-label="返回">
