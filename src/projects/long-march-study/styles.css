@@ -1264,6 +1264,21 @@
   overflow: hidden auto;
 }
 
+.lm-radio-bottom-button {
+  position: absolute;
+  left: 191px;
+  top: 1286px;
+  z-index: 3;
+  width: 364px;
+  height: 68px;
+  border: 0;
+  border-radius: 100px;
+  background: #e34020;
+  color: #fff;
+  font-size: 34px;
+  font-weight: 700;
+}
+
 .lm-radio-row {
   position: relative;
   height: 105px;
