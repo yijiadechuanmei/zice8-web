@@ -2630,6 +2630,10 @@
   background: #fff;
 }
 
+.lm-poster-page.is-share-poster {
+  background: transparent;
+}
+
 .lm-poster-back {
   position: absolute;
   left: 20px;
@@ -2761,6 +2765,7 @@
   top: 92px;
   width: 689px;
   height: 1237px;
+  border-radius: 28px;
 }
 
 .lm-poster-bg {
@@ -2787,6 +2792,8 @@
   width: 689px;
   height: 1237px;
   overflow: hidden;
+  border-radius: 28px;
+  background: transparent;
 }
 
 .lm-share-poster-image {
