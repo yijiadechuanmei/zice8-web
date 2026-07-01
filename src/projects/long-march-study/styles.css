@@ -2826,6 +2826,56 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.lm-flow-list {
+  display: block;
+  padding-left: min(3.2vw, 24px);
+  list-style: none;
+}
+
+.lm-flow-list li {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding: min(2.4vw, 18px) 0;
+}
+
+.lm-flow-list li:last-child {
+  border-bottom: 0;
+}
+
+.lm-flow-list strong,
+.lm-flow-list span,
+.lm-flow-list em {
+  display: block;
+}
+
+.lm-flow-list strong {
+  color: #000;
+  font-size: clamp(16px, 4.266vw, 32px);
+  font-weight: 700;
+}
+
+.lm-flow-list span {
+  margin-top: min(1.333vw, 10px);
+  color: #e34020;
+  font-size: clamp(14px, 3.733vw, 28px);
+}
+
+.lm-flow-list em {
+  margin-top: min(1.066vw, 8px);
+  color: #666;
+  font-size: clamp(12px, 3.2vw, 24px);
+  font-style: normal;
+}
+
+.lm-flow-list .is-empty {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 0;
+  color: #666;
+  font-size: clamp(16px, 4.266vw, 32px);
+}
+
 .lm-profile-form {
   position: absolute;
   left: 5.539%;

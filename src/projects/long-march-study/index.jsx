@@ -578,8 +578,8 @@ export default function LongMarchStudyApp({ routeParams }) {
         <MinePage
           mine={mine}
           activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
-          onPoster={() => showPoster('mine')}
           onHonors={openHonors}
+          onRank={openRank}
           onBack={() => setPage(PAGE.HOME)}
         />
       ) : null}
@@ -1677,19 +1677,20 @@ function normalizeRankRows(rows = []) {
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
-function MinePage({ mine, activityUrl, onPoster, onHonors, onBack }) {
+function MinePage({ mine, activityUrl, onHonors, onRank, onBack }) {
   const [qrOpen, setQrOpen] = useState(false)
+  const [flowModal, setFlowModal] = useState('')
   const profile = mine?.profile
   const avatar = mine?.wechat?.avatar || profile?.avatar || ''
   const nickname = mine?.wechat?.nickname || profile?.nickname || profile?.name || '昵称'
   const phone = profile?.phone || '18851257958'
   const qrValue = activityUrl || (typeof window !== 'undefined' ? window.location.href : '')
   const mineButtons = [
-    { key: 'ledger', image: longMarchStudyAssets.mine.ledgerButton, label: `积分流水 ${mine?.ledgers?.length || 0}` },
-    { key: 'quiz', image: longMarchStudyAssets.mine.quizButton, label: `答题流水 ${mine?.quizAttempts?.length || 0}` },
-    { key: 'checkin', image: longMarchStudyAssets.mine.checkinButton, label: `闯关流水 ${mine?.checkins?.length || 0}` },
+    { key: 'ledger', image: longMarchStudyAssets.mine.ledgerButton, label: `积分流水 ${mine?.ledgers?.length || 0}`, onClick: () => setFlowModal('ledger') },
+    { key: 'quiz', image: longMarchStudyAssets.mine.quizButton, label: `答题流水 ${mine?.quizAttempts?.length || 0}`, onClick: () => setFlowModal('quiz') },
     { key: 'honors', image: longMarchStudyAssets.mine.honorsButton, label: '我的荣誉', onClick: onHonors },
-    { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onPoster },
+    { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onHonors },
+    { key: 'rank', image: longMarchStudyAssets.mine.rankButton, label: '积分排行榜', onClick: onRank },
   ]
 
   return (
@@ -1726,8 +1727,47 @@ function MinePage({ mine, activityUrl, onPoster, onHonors, onBack }) {
           </div>
         </div>
       ) : null}
+      {flowModal ? <MineFlowModal type={flowModal} mine={mine} onClose={() => setFlowModal('')} /> : null}
     </IvxStage>
   )
+}
+
+function MineFlowModal({ type, mine, onClose }) {
+  const isLedger = type === 'ledger'
+  const title = isLedger ? '积分流水' : '答题流水'
+  const rows = isLedger ? (mine?.ledgers || []) : (mine?.quizAttempts || [])
+
+  return (
+    <Modal title={title} onClose={onClose} variant="rules">
+      <ol className="lm-rules lm-flow-list">
+        {rows.length ? rows.map((item, index) => (
+          <li key={item.id || `${type}-${index}`}>
+            {isLedger ? (
+              <>
+                <strong>{item.title || '积分变动'}</strong>
+                <span>{formatLongMarchDate(item.occurredAt)} · {item.points >= 0 ? '+' : ''}{item.points || 0}积分</span>
+                <em>剩余积分：{item.remainingAfter ?? '-'}，累计积分：{item.balanceAfter ?? '-'}</em>
+              </>
+            ) : (
+              <>
+                <strong>{item.finishedAt ? '每日红色答题' : '答题未完成'}</strong>
+                <span>{formatLongMarchDate(item.finishedAt || item.startedAt)} · 得分 {item.score || 0}</span>
+                <em>答对 {item.correctCount || 0}/{item.questionCount || 0} 题，获得 {item.pointsEarned || 0} 积分</em>
+              </>
+            )}
+          </li>
+        )) : <li className="is-empty">暂无{title}记录</li>}
+      </ol>
+    </Modal>
+  )
+}
+
+function formatLongMarchDate(value) {
+  if (!value) return '暂无时间'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '暂无时间'
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 function RulesModal({ rules, onClose }) {
