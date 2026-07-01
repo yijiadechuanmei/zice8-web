@@ -8,8 +8,9 @@ import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { buildBootDebug, buildTokenDebug, debugLog, isQuizAuthDebugEnabled, setQuizAuthDebugState } from '../../shared/debug/quizAuthDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, isWechatBrowser, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
+  debugLogin,
   finishAttempt,
   getBootstrap,
   getCurrentAttempt,
@@ -91,6 +92,7 @@ function QuizMain({ routeParams }) {
   const [error, setError] = useState('')
   const toastTimerRef = useRef(null)
   const rankRequestRef = useRef(false)
+  const debugPcLoginRef = useRef(false)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -245,11 +247,28 @@ function QuizMain({ routeParams }) {
   useEffect(() => {
     if (!publicConfig || !authReady) return
     if (!getToken()) {
+      if (debug && fengchengSkin && !isWechatBrowser()) {
+        if (debugPcLoginRef.current) return
+        debugPcLoginRef.current = true
+        setLoading(true)
+        debugLogin(activityKey)
+          .then((data) => {
+            if (!data?.token) throw new Error('调试登录失败，缺少 token')
+            setToken(data.token)
+            return loadBootstrap()
+          })
+          .catch((err) => {
+            debugPcLoginRef.current = false
+            showError(err)
+            setLoading(false)
+          })
+        return
+      }
       setLoading(false)
       return
     }
     loadBootstrap()
-  }, [authReady, loadBootstrap, publicConfig])
+  }, [activityKey, authReady, debug, fengchengSkin, loadBootstrap, publicConfig, showError])
 
   function startAuthorize() {
     debugLog('[QuizAuthDebug] oauth redirect', {

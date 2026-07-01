@@ -81,6 +81,16 @@ export const getPublicConfig = (activityKey) => quizRequest(`/activities/${activ
 
 export const getBootstrap = (activityKey) => quizRequest(`/quiz/activities/${activityKey}/bootstrap`)
 
+export const debugLogin = (activityKey, debugUser = 'pc') =>
+  quizRequest(`/quiz/activities/${activityKey}/debug-login`, {
+    method: 'POST',
+    skipAuth: true,
+    body: JSON.stringify({
+      confirm: 'RESET_FENGCHENG_QUIZ',
+      debugUser,
+    }),
+  })
+
 export const submitProfile = (activityKey, data) =>
   quizRequest(`/quiz/activities/${activityKey}/participant-profile`, {
     method: 'POST',
