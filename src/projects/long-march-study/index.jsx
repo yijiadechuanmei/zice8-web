@@ -1704,11 +1704,7 @@ function MinePage({ mine, activityUrl, onPoster, onHonors, onBack }) {
           {avatar ? <img className="lm-mine-avatar" src={avatar} alt="微信头像" /> : <div className="lm-mine-avatar lm-mine-avatar-default" aria-hidden="true" />}
           <strong className="lm-mine-name">{nickname}</strong>
           <span className="lm-mine-phone">{phone}</span>
-          <div className="lm-mine-stat-labels" aria-hidden="true">
-            <span>累计积分</span>
-            <span>剩余积分</span>
-            <span>闯关天数</span>
-          </div>
+          <img className="lm-mine-score-bar" src={longMarchStudyAssets.mine.scoreBar} alt="" aria-hidden="true" />
           <b className="lm-mine-stat lm-mine-stat-total">{profile?.totalPoints ?? 600}</b>
           <b className="lm-mine-stat lm-mine-stat-remaining">{profile?.remainingPoints ?? 600}</b>
           <b className="lm-mine-stat lm-mine-stat-days">{profile?.challengeDays ?? 600}</b>

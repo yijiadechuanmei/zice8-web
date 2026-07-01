@@ -2267,38 +2267,13 @@
   height: 95px !important;
 }
 
-.lm-mine-stat-labels {
+.lm-mine-score-bar {
   position: absolute;
   left: 90px;
   top: 223px;
-  display: grid;
   width: 519px;
   height: 76px;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: end;
-  border-top: 4px solid #e34020;
-  color: #e34020;
-  font-size: 23px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.lm-mine-stat-labels::before,
-.lm-mine-stat-labels::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 4px;
-  height: 32px;
-  background: #e34020;
-}
-
-.lm-mine-stat-labels::before {
-  left: 173px;
-}
-
-.lm-mine-stat-labels::after {
-  left: 346px;
+  object-fit: contain;
 }
 
 .lm-mine-stat {

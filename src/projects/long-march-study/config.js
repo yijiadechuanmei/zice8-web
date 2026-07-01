@@ -21,6 +21,7 @@ export const longMarchStudyAssets = {
     profile: asset('ba27e78232205479ae5c6f8b5f6d18c1_68551_686_794.png'),
   },
   mine: {
+    scoreBar: asset('98f00baf23d0b2da214e693a655e9958_6961_519_76.png'),
     ledgerButton: ih5Asset('a6ae0c1eb7b456ca6c252d35149681f7_5813_626_59.png'),
     quizButton: ih5Asset('597a300bd8d4018e3eb9b48fa96ab09b_5978_626_61.png'),
     checkinButton: ih5Asset('63ec4f98ad44e6b1772ae676d27a26ea_5839_626_64.png'),
