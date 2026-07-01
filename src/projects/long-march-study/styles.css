@@ -1807,10 +1807,12 @@
   top: 138px;
   width: 532px;
   height: 530px;
+  border: 0;
   border-radius: 20px;
   background: linear-gradient(180deg, #fff8e8 0%, #ffd37b 100%);
   color: #c42d15;
   text-align: center;
+  cursor: pointer;
 }
 
 .lm-honors-poster-preview::before {
@@ -1868,7 +1870,19 @@
   content: "闯关天数";
 }
 
-.lm-honors-poster-card > button {
+.lm-honors-poster-preview span {
+  position: absolute;
+  left: 56px;
+  top: 415px;
+  width: 420px;
+  overflow: hidden;
+  color: #89645b;
+  font-size: 26px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-honors-poster-card > button:not(.lm-honors-poster-preview) {
   position: absolute;
   left: 160px;
   top: 724px;
@@ -1880,6 +1894,30 @@
   color: #fff;
   font-size: 34px;
   font-weight: 700;
+}
+
+.lm-honors-poster-list {
+  position: absolute;
+  left: 54px;
+  top: 602px;
+  width: 580px;
+  height: 102px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 16px;
+  overflow: hidden;
+}
+
+.lm-honors-poster-list button {
+  height: 45px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 100px;
+  background: #ffe7a8;
+  color: #c42d15;
+  font-size: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lm-honors-history {
@@ -2052,78 +2090,151 @@
   font-weight: 700;
 }
 
-.lm-poster-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.8);
+.lm-poster-viewport {
+  position: relative;
+  overflow: hidden;
 }
 
-.lm-poster-modal {
+.lm-poster-page {
   position: relative;
-  width: min(91.333vw, 685px);
-  aspect-ratio: 685 / 1184;
+  width: 750px;
+  height: 1448px;
   overflow: hidden;
-  background-color: #fff8e8;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background: #fff;
   color: #000;
   text-align: center;
+  transform-origin: 0 0;
 }
 
-.lm-poster-modal img,
-.lm-poster-modal .lm-avatar-placeholder {
+.lm-poster-back {
   position: absolute;
-  left: 40.73%;
-  top: 18.24%;
-  width: 18.54%;
-  height: auto;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-
-.lm-poster-modal h2 {
-  position: absolute;
-  left: 18%;
-  top: 31%;
-  width: 64%;
-  margin: 0;
-  color: #000;
-  font-size: clamp(22px, 4.533vw, 34px);
-}
-
-.lm-poster-modal p {
-  position: relative;
-  top: 40%;
-  margin: 12px 0;
-  color: #c42d15;
-  font-size: clamp(18px, 3.866vw, 29px);
-}
-
-.lm-poster-modal strong {
-  position: absolute;
-  left: 14%;
-  top: 57%;
-  width: 72%;
-  color: #c42d15;
-  font-size: clamp(24px, 5.333vw, 40px);
-}
-
-.lm-poster-modal button {
-  position: absolute;
-  left: 23.21%;
-  top: 87%;
-  width: 53.58%;
-  height: 5.743%;
+  left: 20px;
+  top: 32px;
+  z-index: 4;
+  width: 71px;
+  height: 49px;
+  padding: 0;
   border: 0;
+  background: transparent;
+}
+
+.lm-poster-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.lm-poster-live,
+.lm-poster-generated {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 750px;
+  height: 1448px;
+}
+
+.lm-poster-generated {
+  z-index: 2;
+  object-fit: contain;
+  -webkit-touch-callout: default;
+  user-select: auto;
+}
+
+.lm-poster-bg {
+  position: absolute;
+  left: 0;
+  top: -88px;
+  width: 750px;
+  height: 1624px;
+}
+
+.lm-poster-location {
+  position: absolute;
+  left: 47px;
+  top: 379px;
+}
+
+.lm-poster-title {
+  position: absolute;
+  left: 74px;
+  top: 40px;
+  width: 612px;
+  height: 366px;
+}
+
+.lm-poster-avatar {
+  position: absolute;
+  left: 71px;
+  top: 1328px;
+  width: 85px;
+  height: 85px;
+  overflow: hidden;
   border-radius: 100px;
-  background: #e34020;
+  object-fit: cover;
+}
+
+.lm-poster-qrcode {
+  position: absolute;
+  left: 575px;
+  top: 1326px;
+  width: 85px !important;
+  height: 85px !important;
+  background: #fff;
+}
+
+.lm-poster-user {
+  position: absolute;
+  left: 185px;
+  top: 1313px;
+  width: 328px;
+  height: 113px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.lm-poster-user span {
+  width: 100%;
+  height: 35px;
+  overflow: hidden;
   color: #fff;
-  font-size: clamp(22px, 4.533vw, 34px);
-  font-weight: 700;
+  font-size: 25px;
+  line-height: 35px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-poster-save-tip {
+  position: absolute;
+  left: 266px;
+  top: 1206px;
+  width: 488px;
+  height: 43px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 30px;
+  line-height: 43px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-poster-generating {
+  position: absolute;
+  left: 190px;
+  top: 680px;
+  z-index: 3;
+  width: 370px;
+  height: 64px;
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 28px;
+  line-height: 64px;
+  text-align: center;
 }
 
 .lm-recordings {

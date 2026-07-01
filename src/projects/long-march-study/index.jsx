@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { getVisitorId, trackPageView } from '../../shared/analytics'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
@@ -10,7 +11,6 @@ import {
   answerQuiz,
   checkinLocation,
   finishQuiz,
-  generateHonor,
   getBootstrap,
   getMine,
   getPublicConfig,
@@ -35,6 +35,7 @@ const PAGE = {
   HONORS: 'honors',
   RANK: 'rank',
   MINE: 'mine',
+  POSTER: 'poster',
 }
 
 const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
@@ -43,21 +44,23 @@ const RADIO_STAGE_WIDTH = 750
 const RADIO_STAGE_HEIGHT = 1448
 const IVX_STAGE_WIDTH = 750
 const IVX_STAGE_HEIGHT = 1448
+const POSTER_STAGE_WIDTH = 750
+const POSTER_STAGE_HEIGHT = 1448
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
 }
 
 function useStageScale(baseWidth = 750) {
-  const resolve = () => (typeof window === 'undefined' ? 1 : Math.min(window.innerWidth, baseWidth) / baseWidth)
-  const [scale, setScale] = useState(resolve)
+  const resolve = useCallback(() => (typeof window === 'undefined' ? 1 : Math.min(window.innerWidth, baseWidth) / baseWidth), [baseWidth])
+  const [scale, setScale] = useState(() => resolve())
 
   useEffect(() => {
     const update = () => setScale(resolve())
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [baseWidth])
+  }, [resolve])
 
   return scale
 }
@@ -86,6 +89,67 @@ function IvxStage({ title, className = '', background, onBack, children }) {
   )
 }
 
+function loadPosterImage(src, { verifyCanvas = false } = {}) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      reject(new Error('missing image source'))
+      return
+    }
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.referrerPolicy = 'no-referrer'
+    image.onload = () => {
+      if (verifyCanvas) {
+        try {
+          const canvas = document.createElement('canvas')
+          canvas.width = 1
+          canvas.height = 1
+          canvas.getContext('2d').drawImage(image, 0, 0, 1, 1)
+          canvas.toDataURL('image/png')
+        } catch (error) {
+          reject(error)
+          return
+        }
+      }
+      resolve(image)
+    }
+    image.onerror = () => reject(new Error(`image load failed: ${src}`))
+    image.src = src
+  })
+}
+
+function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
+  const value = String(text || '')
+  const minSize = options.minSize || 18
+  let size = fontSize
+  do {
+    ctx.font = `${options.weight || 400} ${size}px ${options.family || 'Arial, sans-serif'}`
+    if (ctx.measureText(value).width <= width || size <= minSize) break
+    size -= 1
+  } while (size > minSize)
+  ctx.fillStyle = options.color || '#fff'
+  ctx.textAlign = options.align || 'center'
+  ctx.textBaseline = options.baseline || 'middle'
+  ctx.fillText(value, x + width / 2, y)
+}
+
+function drawAvatarPlaceholder(ctx, x, y, size) {
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2)
+  ctx.fillStyle = '#f7efe2'
+  ctx.fill()
+  ctx.clip()
+  ctx.fillStyle = '#d7b27a'
+  ctx.beginPath()
+  ctx.arc(x + size / 2, y + 32, 18, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(x + size / 2, y + 83, 42, Math.PI, 0)
+  ctx.fill()
+  ctx.restore()
+}
+
 export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
@@ -98,6 +162,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [showRules, setShowRules] = useState(false)
   const [showDailyDone, setShowDailyDone] = useState(false)
   const [poster, setPoster] = useState(null)
+  const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
   const [toast, setToast] = useState('')
   const [loading, setLoading] = useState(true)
   const [quizState, setQuizState] = useState(null)
@@ -150,7 +215,8 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [activityKey, authReady, visitorId])
 
   useEffect(() => {
-    refresh()
+    const timer = window.setTimeout(() => refresh(), 0)
+    return () => window.clearTimeout(timer)
   }, [refresh])
 
   useEffect(() => {
@@ -182,6 +248,7 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowRules(false)
     setShowDailyDone(false)
     setPoster(null)
+    setPosterReturnPage(PAGE.MINE)
     setQuizState(null)
     setQuizResult(null)
     setCheckinResult(null)
@@ -220,16 +287,61 @@ export default function LongMarchStudyApp({ routeParams }) {
     }
   }
 
-  const showPoster = (source = 'journey') => {
+  const openHonors = async () => {
+    if (!profile) {
+      setShowProfile(true)
+      return
+    }
+    try {
+      const data = await getMine(activityKey, visitorId)
+      setMine(data)
+      setPage(PAGE.HONORS)
+    } catch (error) {
+      setToast(error.message || '我的海报加载失败')
+    }
+  }
+
+  const showPoster = async (input = {}) => {
+    const options = typeof input === 'string' ? { source: input } : input
+    if (!profile && !mine?.profile) {
+      setShowProfile(true)
+      return
+    }
+    let currentMine = mine
+    if (!currentMine) {
+      try {
+        currentMine = await getMine(activityKey, visitorId)
+        setMine(currentMine)
+      } catch {
+        currentMine = null
+      }
+    }
+    const honorSnapshot = options.honor?.snapshot || {}
+    const currentProfile = currentMine?.profile || bootstrap?.profile || profile || honorSnapshot
+    const currentWechat = currentMine?.wechat || {}
+    const checkins = currentMine?.checkins || []
+    const selectedCheckin = options.checkin
+      || (options.locationKey ? checkins.find((item) => item.locationKey === options.locationKey) : null)
+      || checkinResult?.checkin
+      || checkins[0]
+      || null
+    if (!selectedCheckin && options.source !== 'honor') {
+      setToast('完成打卡后可查看海报')
+      return
+    }
     const snapshot = {
-      name: profile?.name || '',
-      nickname: mine?.wechat?.nickname || '',
-      avatar: mine?.wechat?.avatar || '',
-      challengeDays: profile?.challengeDays || 0,
-      totalPoints: profile?.totalPoints || 0,
-      source,
+      name: currentProfile?.name || honorSnapshot.name || '',
+      nickname: currentWechat?.nickname || honorSnapshot.nickname || currentProfile?.name || '',
+      avatar: currentWechat?.avatar || honorSnapshot.avatar || '',
+      challengeDays: currentProfile?.challengeDays ?? honorSnapshot.challengeDays ?? 0,
+      totalPoints: currentProfile?.totalPoints ?? honorSnapshot.totalPoints ?? 0,
+      locationKey: selectedCheckin?.locationKey || honorSnapshot.locationKey || '',
+      locationTitle: selectedCheckin?.locationTitle || honorSnapshot.locationTitle || '',
+      source: options.source || 'journey',
     }
     setPoster(snapshot)
+    setPosterReturnPage(options.returnPage || (options.source === 'checkin' ? PAGE.CHECKIN_RESULT : ['honors', 'honor'].includes(options.source) ? PAGE.HONORS : PAGE.MINE))
+    setPage(PAGE.POSTER)
   }
 
   const resetDebugScope = async (scope) => {
@@ -363,18 +475,14 @@ export default function LongMarchStudyApp({ routeParams }) {
       {page === PAGE.HONORS ? (
         <HonorsPage
           honors={bootstrap?.honors || []}
-          profile={bootstrap?.profile}
+          checkins={mine?.checkins || []}
+          profile={mine?.profile || bootstrap?.profile}
           onBack={() => setPage(PAGE.HOME)}
           onGenerate={async () => {
-            try {
-              const data = await generateHonor(activityKey, { visitorId, honorType: 'poster' })
-              setBootstrap((current) => ({ ...current, honors: [data.honor, ...(current.honors || [])] }))
-              setPoster(data.honor.snapshot)
-            } catch (error) {
-              setToast(error.message || '生成海报失败')
-            }
+            await showPoster({ source: 'honors' })
           }}
-          onOpen={(honor) => setPoster(honor.snapshot)}
+          onOpen={(honor) => showPoster({ source: 'honor', honor })}
+          onOpenCheckin={(checkin) => showPoster({ source: 'honors', checkin })}
         />
       ) : null}
       {page === PAGE.RANK ? <RankPage rank={bootstrap?.rank} onBack={() => setPage(PAGE.HOME)} /> : null}
@@ -383,7 +491,16 @@ export default function LongMarchStudyApp({ routeParams }) {
           mine={mine}
           onPage={setPage}
           onPoster={() => showPoster('mine')}
+          onHonors={openHonors}
           onBack={() => setPage(PAGE.HOME)}
+        />
+      ) : null}
+      {page === PAGE.POSTER ? (
+        <PosterPage
+          poster={poster}
+          locations={config.locations || []}
+          activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
+          onBack={() => setPage(posterReturnPage)}
         />
       ) : null}
 
@@ -408,13 +525,16 @@ export default function LongMarchStudyApp({ routeParams }) {
           onSelect={async (nextPage) => {
             setShowTasks(false)
             if (nextPage === PAGE.QUIZ) setQuizState(null)
+            if (nextPage === PAGE.HONORS) {
+              await openHonors()
+              return
+            }
             setPage(nextPage)
           }}
         />
       ) : null}
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
       {showDailyDone ? <DailyDoneModal onBack={() => { setShowDailyDone(false); setPage(PAGE.HOME) }} /> : null}
-      {poster ? <PosterModal poster={poster} onClose={() => setPoster(null)} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       {debugEnabled ? (
         <DebugPanel
@@ -576,17 +696,20 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
 
   useEffect(() => {
     if (quizState) return
-    setBusy(true)
-    startQuiz(activityKey, { visitorId })
-      .then((data) => setQuizState(data.attempt))
-      .catch((error) => {
-        if ((error.message || '').includes('今日已完成答题')) {
-          onDailyDone()
-          return
-        }
-        onToast(error.message || '今日答题不可用')
-      })
-      .finally(() => setBusy(false))
+    const timer = window.setTimeout(() => {
+      setBusy(true)
+      startQuiz(activityKey, { visitorId })
+        .then((data) => setQuizState(data.attempt))
+        .catch((error) => {
+          if ((error.message || '').includes('今日已完成答题')) {
+            onDailyDone()
+            return
+          }
+          onToast(error.message || '今日答题不可用')
+        })
+        .finally(() => setBusy(false))
+    }, 0)
+    return () => window.clearTimeout(timer)
   }, [activityKey, onDailyDone, onToast, quizState, setQuizState, visitorId])
 
   const submitAnswer = async () => {
@@ -1339,8 +1462,9 @@ function UploadPage({ activityKey, visitorId, scripts, onDone, onBack, onToast }
   )
 }
 
-function HonorsPage({ honors, profile, onGenerate, onOpen, onBack }) {
+function HonorsPage({ honors, checkins, profile, onGenerate, onOpen, onOpenCheckin, onBack }) {
   const firstHonor = honors[0]
+  const latestCheckin = checkins[0]
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card">
@@ -1353,12 +1477,28 @@ function HonorsPage({ honors, profile, onGenerate, onOpen, onBack }) {
       </section>
       <section className="lm-honors-poster-card">
         <h2>我的海报</h2>
-        <div className="lm-honors-poster-preview">
+        <button
+          className="lm-honors-poster-preview"
+          type="button"
+          onClick={latestCheckin ? () => onOpenCheckin(latestCheckin) : onGenerate}
+        >
           <div className="lm-honors-poster-name">{profile?.name || '研学用户'}</div>
           <div className="lm-honors-poster-score">{profile?.totalPoints || 0}</div>
           <div className="lm-honors-poster-days">{profile?.challengeDays || 0}</div>
-        </div>
-        <button type="button" onClick={onGenerate}>生成当前海报</button>
+          <span>{latestCheckin?.locationTitle || '完成打卡后生成海报'}</span>
+        </button>
+        <button type="button" onClick={latestCheckin ? () => onOpenCheckin(latestCheckin) : onGenerate}>
+          {latestCheckin ? '查看最新海报' : '完成打卡后生成海报'}
+        </button>
+        {checkins.length ? (
+          <div className="lm-honors-poster-list">
+            {checkins.slice(0, 4).map((checkin) => (
+              <button key={checkin.id || checkin.locationKey} type="button" onClick={() => onOpenCheckin(checkin)}>
+                {checkin.locationTitle || '打卡海报'}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </section>
       {honors.length > 1 ? (
         <div className="lm-honors-history">
@@ -1392,7 +1532,7 @@ function RankPage({ rank, onBack }) {
   )
 }
 
-function MinePage({ mine, onPage, onPoster, onBack }) {
+function MinePage({ mine, onPage, onPoster, onHonors, onBack }) {
   const profile = mine?.profile
   return (
     <IvxStage title="我的" className="lm-mine-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
@@ -1414,7 +1554,7 @@ function MinePage({ mine, onPage, onPoster, onBack }) {
         <button type="button">积分流水 {mine?.ledgers?.length || 0}</button>
         <button type="button">答题流水 {mine?.quizAttempts?.length || 0}</button>
         <button type="button">闯关流水 {mine?.checkins?.length || 0}</button>
-        <button type="button" onClick={() => onPage(PAGE.HONORS)}>我的荣誉</button>
+        <button type="button" onClick={onHonors}>我的荣誉</button>
         <button type="button" onClick={onPoster}>我的海报</button>
         <button type="button" onClick={() => onPage(PAGE.RANK)}>积分排行榜</button>
       </div>
@@ -1431,27 +1571,122 @@ function RulesModal({ rules, onClose }) {
   )
 }
 
-function PosterModal({ poster, onClose }) {
+function PosterPage({ poster, locations, activityUrl, onBack }) {
+  const scale = useStageScale(POSTER_STAGE_WIDTH)
+  const qrCanvasRef = useRef(null)
+  const [posterImage, setPosterImage] = useState('')
+  const [error, setError] = useState('')
+  const posterAssets = longMarchStudyAssets.checkinPoster
+  const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
+  const locationImage = posterAssets.locations[posterLocationIndex] || posterAssets.locations[0]
+
+  useEffect(() => {
+    let cancelled = false
+    async function composePoster() {
+      setError('')
+      setPosterImage('')
+      try {
+        const [background, title, location] = await Promise.all([
+          loadPosterImage(posterAssets.background),
+          loadPosterImage(posterAssets.title),
+          loadPosterImage(locationImage),
+        ])
+        let avatar = null
+        if (poster?.avatar) {
+          try {
+            avatar = await loadPosterImage(poster.avatar, { verifyCanvas: true })
+          } catch {
+            avatar = null
+          }
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = POSTER_STAGE_WIDTH
+        canvas.height = POSTER_STAGE_HEIGHT
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#fff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(background, 0, -88, 750, 1624)
+        ctx.drawImage(location, 47, 379, location.naturalWidth, location.naturalHeight)
+        ctx.drawImage(title, 74, 40, 612, 366)
+        ctx.fillStyle = '#fff'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = '400 30px Arial, sans-serif'
+        ctx.fillText('长按海报可保存分享海报', 510, 1228)
+
+        const avatarX = 71
+        const avatarY = 1328
+        const avatarSize = 85
+        if (avatar) {
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize)
+          ctx.restore()
+        } else {
+          drawAvatarPlaceholder(ctx, avatarX, avatarY, avatarSize)
+        }
+
+        const qrCanvas = qrCanvasRef.current
+        if (qrCanvas) {
+          ctx.fillStyle = '#fff'
+          ctx.fillRect(575, 1326, 85, 85)
+          ctx.drawImage(qrCanvas, 575, 1326, 85, 85)
+        }
+
+        drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 185, 1329, 328, 25, { color: '#fff' })
+        drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 185, 1364, 328, 25, { color: '#fff' })
+        drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 185, 1399, 328, 25, { color: '#fff' })
+
+        const url = canvas.toDataURL('image/png')
+        if (!cancelled) setPosterImage(url)
+      } catch {
+        if (!cancelled) setError('海报生成失败，请稍后重试')
+      }
+    }
+    composePoster()
+    return () => {
+      cancelled = true
+    }
+  }, [activityUrl, locationImage, poster, posterAssets.background, posterAssets.title])
+
   return (
-    <div className="lm-poster-mask">
-      <section className="lm-poster-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.honors.poster})` }}>
-        {poster.avatar ? <img src={poster.avatar} alt="头像" /> : <div className="lm-avatar-placeholder" />}
-        <h2>{poster.nickname || poster.name || '研学用户'}</h2>
-        <p>闯关天数：{poster.challengeDays || 0} 天</p>
-        <p>累计积分：{poster.totalPoints || 0}</p>
-        <strong>重走长征路 共筑爱国魂</strong>
-        <button type="button" onClick={onClose}>返回</button>
+    <div className="lm-poster-viewport" style={{ width: POSTER_STAGE_WIDTH * scale, height: POSTER_STAGE_HEIGHT * scale }}>
+      <section
+        className="lm-poster-page"
+        style={{
+          transform: `scale(${scale})`,
+          '--lm-ivx-ui-scale': scale ? 1 / scale : 1,
+        }}
+      >
+        <button className="lm-poster-back" type="button" onClick={onBack} aria-label="返回">
+          <img src={longMarchStudyAssets.shared.backIcon} alt="" />
+        </button>
+        <div className="lm-poster-live" aria-hidden={Boolean(posterImage)}>
+          <img className="lm-poster-bg" src={posterAssets.background} alt="" />
+          <img className="lm-poster-location" src={locationImage} alt="" />
+          <img className="lm-poster-title" src={posterAssets.title} alt="" />
+          {poster?.avatar ? <img className="lm-poster-avatar" src={poster.avatar} alt="头像" crossOrigin="anonymous" /> : <div className="lm-poster-avatar lm-avatar-placeholder" />}
+          <QRCodeCanvas
+            ref={qrCanvasRef}
+            className="lm-poster-qrcode"
+            value={activityUrl}
+            size={400}
+            level="M"
+            marginSize={2}
+          />
+          <div className="lm-poster-user">
+            <span>{poster?.nickname || poster?.name || '研学用户'}</span>
+            <span>闯关天数：{poster?.challengeDays || 0}天</span>
+            <span>累计分数：{poster?.totalPoints || 0}</span>
+          </div>
+          <div className="lm-poster-save-tip">长按海报可保存分享海报</div>
+        </div>
+        {posterImage ? <img className="lm-poster-generated" src={posterImage} alt="长征研学分享海报" /> : null}
+        {!posterImage ? <div className="lm-poster-generating">{error || '海报生成中'}</div> : null}
       </section>
     </div>
-  )
-}
-
-function Panel({ title, children }) {
-  return (
-    <section className="lm-panel">
-      <h1>{title}</h1>
-      {children}
-    </section>
   )
 }
 

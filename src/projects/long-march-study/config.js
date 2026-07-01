@@ -73,6 +73,16 @@ export const longMarchStudyAssets = {
     detailThree: asset('4b7901a440f52f11201c664a61de4577_797191_685_1139.png'),
     detailFour: asset('f967f593d141e3624dbf034e355bffb0_792812_685_1184.png'),
   },
+  checkinPoster: {
+    background: ih5Asset('b6fa357bd43abe1217388630d0ae368f_992544_750_1624.png'),
+    title: ih5Asset('1d0cded85f7d17e338bf72dddbc61727_192912_612_366.png'),
+    locations: [
+      ih5Asset('47529f86d322d6cf93e0fbf962e8d356_1050979_706_796.png'),
+      ih5Asset('01131dbffc13b2e982bbc096d05ec3b4_1299366_695_818.png'),
+      ih5Asset('0c91f6328e26a61205498d9d4f6a3b7f_1089662_698_799.png'),
+      ih5Asset('7329695e619d996c312b60506eae05ea_1035596_672_781.png'),
+    ],
+  },
   honors: {
     badge: asset('a55e1e9da1cb4578ffac6b0eebedd582_26351_119_134.png'),
     honorPanel: asset('82dca40305f5fdd8028054e4801f88a2_18477_688_980.png'),
