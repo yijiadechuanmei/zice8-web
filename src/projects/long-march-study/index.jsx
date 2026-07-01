@@ -189,6 +189,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [showProfile, setShowProfile] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
   const [showRules, setShowRules] = useState(false)
+  const [mineFlowModal, setMineFlowModal] = useState('')
   const [showDailyDone, setShowDailyDone] = useState(false)
   const [poster, setPoster] = useState(null)
   const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
@@ -578,6 +579,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <MinePage
           mine={mine}
           activityUrl={typeof window !== 'undefined' ? `${window.location.origin}/long_march_study/${encodeURIComponent(activityKey)}` : ''}
+          onFlow={setMineFlowModal}
           onHonors={openHonors}
           onRank={openRank}
           onBack={() => setPage(PAGE.HOME)}
@@ -622,6 +624,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         />
       ) : null}
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
+      {mineFlowModal ? <MineFlowModal type={mineFlowModal} mine={mine} onClose={() => setMineFlowModal('')} /> : null}
       {showDailyDone ? <DailyDoneModal onBack={() => { setShowDailyDone(false); setPage(PAGE.HOME) }} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       {debugEnabled ? (
@@ -1677,17 +1680,16 @@ function normalizeRankRows(rows = []) {
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
-function MinePage({ mine, activityUrl, onHonors, onRank, onBack }) {
+function MinePage({ mine, activityUrl, onFlow, onHonors, onRank, onBack }) {
   const [qrOpen, setQrOpen] = useState(false)
-  const [flowModal, setFlowModal] = useState('')
   const profile = mine?.profile
   const avatar = mine?.wechat?.avatar || profile?.avatar || ''
   const nickname = mine?.wechat?.nickname || profile?.nickname || profile?.name || '昵称'
   const phone = profile?.phone || '18851257958'
   const qrValue = activityUrl || (typeof window !== 'undefined' ? window.location.href : '')
   const mineButtons = [
-    { key: 'ledger', image: longMarchStudyAssets.mine.ledgerButton, label: `积分流水 ${mine?.ledgers?.length || 0}`, onClick: () => setFlowModal('ledger') },
-    { key: 'quiz', image: longMarchStudyAssets.mine.quizButton, label: `答题流水 ${mine?.quizAttempts?.length || 0}`, onClick: () => setFlowModal('quiz') },
+    { key: 'ledger', image: longMarchStudyAssets.mine.ledgerButton, label: `积分流水 ${mine?.ledgers?.length || 0}`, onClick: () => onFlow('ledger') },
+    { key: 'quiz', image: longMarchStudyAssets.mine.quizButton, label: `答题流水 ${mine?.quizAttempts?.length || 0}`, onClick: () => onFlow('quiz') },
     { key: 'honors', image: longMarchStudyAssets.mine.honorsButton, label: '我的荣誉', onClick: onHonors },
     { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onHonors },
     { key: 'rank', image: longMarchStudyAssets.mine.rankButton, label: '积分排行榜', onClick: onRank },
@@ -1727,7 +1729,6 @@ function MinePage({ mine, activityUrl, onHonors, onRank, onBack }) {
           </div>
         </div>
       ) : null}
-      {flowModal ? <MineFlowModal type={flowModal} mine={mine} onClose={() => setFlowModal('')} /> : null}
     </IvxStage>
   )
 }
@@ -1898,6 +1899,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
 }
 
 function Modal({ title, children, onClose, variant = 'default' }) {
+  const { scaleX } = useStageFit(750, 1448)
   const backgroundImage = {
     rules: longMarchStudyAssets.modal.rules,
     profile: longMarchStudyAssets.modal.profile,
@@ -1913,7 +1915,10 @@ function Modal({ title, children, onClose, variant = 'default' }) {
     <div className={`lm-modal-mask lm-modal-mask-${variant}`} onClick={handleMaskClick}>
       <section
         className={`lm-modal lm-modal-${variant}`}
-        style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}
+        style={{
+          ...(backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : {}),
+          '--lm-modal-scale': Math.min(scaleX || 1, 1),
+        }}
         onClick={(event) => event.stopPropagation()}
       >
         <header>
