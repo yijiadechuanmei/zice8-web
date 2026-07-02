@@ -1365,7 +1365,7 @@ function CheckinResultPage({ result, profile, mine, onPoster, onRank, onBack }) 
   const { scaleX, width, height } = useStageFit(750, 1624)
   const displayName = mine?.wechat?.nickname || result?.wechat?.nickname || result?.profile?.nickname || result?.profile?.name || profile?.name || '昵称'
   const avatar = mine?.wechat?.avatar || result?.wechat?.avatar || ''
-  const points = result?.checkin?.pointsEarned ?? 0
+  const points = result?.pointsEarned ?? result?.checkin?.pointsEarned ?? 0
 
   return (
     <div className="lm-checkin-success-viewport" style={{ width, height }}>
