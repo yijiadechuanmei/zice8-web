@@ -312,6 +312,11 @@ function getCheckinPosterImage(location, fallbackIndex = 0) {
   return posters[matchedIndex >= 0 ? matchedIndex : fallbackIndex % posters.length] || posters[0]
 }
 
+function getPosterChallengeDays(value) {
+  const days = Number(value)
+  return Number.isFinite(days) && days > 0 ? days : 1
+}
+
 function readCachedParticipationNo(activityKey, visitorId) {
   try {
     const value = localStorage.getItem(`${PARTICIPATION_CACHE_PREFIX}:${activityKey}:${visitorId}`)
@@ -619,7 +624,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       name: currentProfile?.name || honorSnapshot.name || '',
       nickname: currentWechat?.nickname || honorSnapshot.nickname || currentProfile?.name || '',
       avatar: currentWechat?.avatar || honorSnapshot.avatar || '',
-      challengeDays: currentProfile?.challengeDays ?? honorSnapshot.challengeDays ?? 0,
+      challengeDays: getPosterChallengeDays(currentProfile?.challengeDays ?? honorSnapshot.challengeDays),
       totalPoints: currentProfile?.totalPoints ?? honorSnapshot.totalPoints ?? 0,
       honorTitle: options.honor?.title || honorSnapshot.honorTitle || '',
       locationKey: selectedCheckin?.locationKey || honorSnapshot.locationKey || '',
@@ -2411,6 +2416,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
   const isHonorPoster = poster?.source === 'honor'
   const isSharePoster = poster?.source === 'share'
   const certificateName = poster?.name || poster?.nickname || '姓名'
+  const challengeDays = getPosterChallengeDays(poster?.challengeDays)
   const posterLocationIndex = Math.max(0, locations.findIndex((item) => item.key === poster?.locationKey))
   const locationImage = getCheckinPosterImage(poster, posterLocationIndex)
 
@@ -2511,7 +2517,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
           }
 
           drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 160, 1134, 328, 25, { align: 'left', color: '#fff' })
-          drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 160, 1169, 328, 25, { align: 'left', color: '#fff' })
+          drawTextFit(ctx, `闯关天数：${challengeDays}天`, 160, 1169, 328, 25, { align: 'left', color: '#fff' })
           drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 160, 1204, 328, 25, { align: 'left', color: '#fff' })
 
           const url = canvas.toDataURL('image/png')
@@ -2564,7 +2570,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
         }
 
         drawTextFit(ctx, poster?.nickname || poster?.name || '研学用户', 185, 1329, 328, 25, { align: 'left', color: '#fff' })
-        drawTextFit(ctx, `闯关天数：${poster?.challengeDays || 0}天`, 185, 1364, 328, 25, { align: 'left', color: '#fff' })
+        drawTextFit(ctx, `闯关天数：${challengeDays}天`, 185, 1364, 328, 25, { align: 'left', color: '#fff' })
         drawTextFit(ctx, `累计分数：${poster?.totalPoints || 0}`, 185, 1399, 328, 25, { align: 'left', color: '#fff' })
 
         const url = canvas.toDataURL('image/png')
@@ -2577,7 +2583,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
     return () => {
       cancelled = true
     }
-  }, [activityUrl, certificateName, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.posterBackground, posterAssets.share, posterAssets.title])
+  }, [activityUrl, certificateName, challengeDays, isHonorPoster, isSharePoster, locationImage, poster, posterAssets.background, posterAssets.posterBackground, posterAssets.share, posterAssets.title])
 
   return (
     <div className="lm-poster-viewport" style={{ width, height }}>
@@ -2624,7 +2630,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
                 <QRCodeCanvas className="lm-share-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
                 <div className="lm-share-poster-user">
                   <span>{poster?.nickname || poster?.name || '研学用户'}</span>
-                  <span>闯关天数：{poster?.challengeDays || 0}天</span>
+                  <span>闯关天数：{challengeDays}天</span>
                   <span>累计分数：{poster?.totalPoints || 0}</span>
                 </div>
               </div>
@@ -2638,7 +2644,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
               <QRCodeCanvas className="lm-poster-qrcode" value={activityUrl} size={400} level="M" marginSize={2} />
               <div className="lm-poster-user">
                 <span>{poster?.nickname || poster?.name || '研学用户'}</span>
-                <span>闯关天数：{poster?.challengeDays || 0}天</span>
+                <span>闯关天数：{challengeDays}天</span>
                 <span>累计分数：{poster?.totalPoints || 0}</span>
               </div>
             </>
