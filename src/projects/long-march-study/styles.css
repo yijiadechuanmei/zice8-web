@@ -1547,14 +1547,18 @@
   height: 53px;
 }
 
-.lm-radio-row-votes span {
+.lm-vote-star-icon {
   flex: 0 0 auto;
   width: 56px;
   height: 53px;
-  background: #e34020;
-  clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
-  color: transparent;
-  font-size: 0;
+  display: block;
+  fill: #e34020;
+  filter: drop-shadow(0 3px 3px rgba(151, 23, 10, 0.18));
+}
+
+.lm-vote-star-icon .lm-vote-star-shine {
+  fill: #ff6a3d;
+  opacity: 0.28;
 }
 
 .lm-radio-row-votes em {
@@ -1716,14 +1720,6 @@
   align-items: center;
   width: 146px;
   height: 53px;
-}
-
-.lm-radio-detail-stars span {
-  flex: 0 0 auto;
-  width: 56px;
-  height: 53px;
-  background: #e34020;
-  clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
 }
 
 .lm-radio-detail-stars em {

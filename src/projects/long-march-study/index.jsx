@@ -1627,7 +1627,7 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
               <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>
             </div>
             <div className="lm-radio-row-votes">
-              <span aria-hidden="true" />
+              <VoteStarIcon />
               <em>{recording.voteCount || 0}</em>
             </div>
             <button
@@ -1677,7 +1677,7 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
             <span style={{ width: progressPercent }} />
           </div>
           <div className="lm-radio-detail-stars">
-            <span aria-hidden="true" />
+            <VoteStarIcon />
             <em>{recording.voteCount || 0}</em>
           </div>
           <button
@@ -1694,6 +1694,18 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
         {isSharedEntry ? '前往活动首页' : '返回'}
       </button>
     </RadioShell>
+  )
+}
+
+function VoteStarIcon() {
+  return (
+    <svg className="lm-vote-star-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <path d="M32 5.8 39.9 23l18.7 2.2-13.8 12.7 3.7 18.4L32 47.2 15.5 56.3l3.7-18.4L5.4 25.2 24.1 23 32 5.8Z" />
+      <path
+        className="lm-vote-star-shine"
+        d="M31.7 14.4 35.8 25l10.9 1.1-8.2 7.1 2.4 11-9.2-5.6-9.3 5.6 2.5-11-8.2-7.1L27.6 25l4.1-10.6Z"
+      />
+    </svg>
   )
 }
 
