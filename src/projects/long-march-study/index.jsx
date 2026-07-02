@@ -554,17 +554,40 @@ export default function LongMarchStudyApp({ routeParams }) {
     setShowTasks(true)
   }
 
+  const loadMine = async () => {
+    const data = await getMine(activityKey, visitorId)
+    setMine(data)
+    if (data?.profile) {
+      setBootstrap((current) => ({
+        ...current,
+        profile: {
+          ...(current?.profile || {}),
+          ...data.profile,
+        },
+      }))
+    }
+    return data
+  }
+
   const openMine = async () => {
     if (!profile) {
       setShowProfile(true)
       return
     }
     try {
-      const data = await getMine(activityKey, visitorId)
-      setMine(data)
+      await loadMine()
       setPage(PAGE.MINE)
     } catch (error) {
       setToast(error.message || '我的信息加载失败')
+    }
+  }
+
+  const openMineFlow = async (type) => {
+    try {
+      await loadMine(type === 'ledger' ? '积分流水加载失败' : '答题流水加载失败')
+      setMineFlowModal(type)
+    } catch (error) {
+      setToast(error.message || (type === 'ledger' ? '积分流水加载失败' : '答题流水加载失败'))
     }
   }
 
@@ -584,8 +607,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       return
     }
     try {
-      const data = await getMine(activityKey, visitorId)
-      setMine(data)
+      await loadMine()
       setPage(PAGE.HONORS)
     } catch (error) {
       setToast(error.message || '我的海报加载失败')
@@ -844,14 +866,13 @@ export default function LongMarchStudyApp({ routeParams }) {
               },
             }))
             try {
-              const data = await getMine(activityKey, visitorId)
-              setMine(data)
+              await loadMine()
             } catch {
               // keep mine page available even if mine refresh fails
             }
           }}
           onToast={setToast}
-          onFlow={setMineFlowModal}
+          onFlow={openMineFlow}
           onHonors={openHonors}
           onRank={openRank}
           onBack={() => setPage(PAGE.HOME)}
@@ -2101,8 +2122,8 @@ function UploadPage({ activityKey, visitorId, script, wechatConfigStatus, onDone
 }
 
 function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, onBack }) {
-  const firstHonor = honors[0]
-  const hasHonor = Boolean(firstHonor)
+  const certificateHonor = honors.find((honor) => honor.honorType === 'rank_top_100')
+  const hasHonor = Boolean(certificateHonor)
   const posterThumbnails = longMarchStudyAssets.checkinPoster.locations
   const checkinByLocation = new Map((checkins || []).map((checkin) => [checkin.locationKey, checkin]))
   const locationPosterItems = (locations || []).slice(0, posterThumbnails.length).map((location, index) => ({
@@ -2128,7 +2149,7 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
       }))
     : []
   const posterItems = [...locationPosterItems, ...extraCheckinItems, ...fallbackItems]
-  const honorTitle = firstHonor?.title || '长征研学徽章'
+  const honorTitle = certificateHonor?.title || '「盘州红色传承官」电子证书'
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card" aria-label="我的荣誉">
@@ -2136,12 +2157,12 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
         <button
           className={`lm-honors-badge-row ${hasHonor ? 'is-earned' : 'is-locked'}`}
           type="button"
-          onClick={hasHonor ? () => onOpen(firstHonor) : undefined}
+          onClick={hasHonor ? () => onOpen(certificateHonor) : undefined}
           disabled={!hasHonor}
           aria-label={hasHonor ? `查看${honorTitle}` : `${honorTitle}未获得`}
         >
           <img src={longMarchStudyAssets.honors.badge} alt="" />
-          <strong>{hasHonor ? `已获得${honorTitle}` : '未获得长征研学徽章'}</strong>
+          <strong>{hasHonor ? `已获得${honorTitle}` : `未获得${honorTitle}`}</strong>
         </button>
       </section>
       <div className="lm-honors-earned-label">{hasHonor ? '已获得' : '未获得'}</div>
