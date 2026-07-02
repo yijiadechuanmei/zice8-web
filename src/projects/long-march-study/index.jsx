@@ -69,7 +69,8 @@ const MODAL_FRAME_SPECS = {
 }
 const CHECKIN_DONE_MODAL_SPEC = { width: 685, height: 677 }
 const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
-const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
+const LONG_MARCH_RANK_LIMIT = 100
+const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: LONG_MARCH_RANK_LIMIT }, (_, index) => {
   const rank = index + 1
   return {
     id: `long-march-rank-test-${rank}`,
@@ -2238,10 +2239,10 @@ function normalizeRankRows(rows = []) {
   const existingIds = new Set(normalizedRows.map((row) => row.id))
   const fillerRows = LONG_MARCH_RANK_TEST_ROWS
     .filter((row) => !existingIds.has(row.id))
-    .slice(0, Math.max(50 - normalizedRows.length, 0))
+    .slice(0, Math.max(LONG_MARCH_RANK_LIMIT - normalizedRows.length, 0))
 
   return [...normalizedRows, ...fillerRows]
-    .slice(0, 50)
+    .slice(0, LONG_MARCH_RANK_LIMIT)
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
