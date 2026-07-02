@@ -218,7 +218,7 @@ function LandingPage({ logoImage, onStart }) {
           }}
         />
       ) : null}
-      <div className="latex-hero-badge">7.8世界过敏日·特别策划</div>
+      <div className="latex-hero-badge">7月8日世界过敏性疾病日·特别策划</div>
       <div className="latex-eyebrow">别让敏感 困住亲密</div>
       <h1 className="latex-title">乳胶过敏<br />风险自测</h1>
       <p className="latex-subtitle">
@@ -521,7 +521,7 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
                 }}
               />
             ) : null}
-            <strong>7月8日杰士邦仿生皮 · 世界过敏日特别策划</strong>
+            <strong>杰士邦仿生皮·7月8日世界过敏性疾病日特别策划</strong>
           </div>
         </footer>
       </section>
