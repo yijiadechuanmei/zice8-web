@@ -35,6 +35,7 @@ const PAGE = {
   CHECKIN: 'checkin',
   CHECKIN_RESULT: 'checkinResult',
   RADIO: 'radio',
+  RADIO_SCRIPT_SELECT: 'radioScriptSelect',
   UPLOAD: 'upload',
   HONORS: 'honors',
   RANK: 'rank',
@@ -364,6 +365,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [checkinResult, setCheckinResult] = useState(null)
   const [mine, setMine] = useState(null)
   const [shareStatus, setShareStatus] = useState({})
+  const [selectedRadioScriptKey, setSelectedRadioScriptKey] = useState(LONG_MARCH_RADIO_SCRIPTS[0]?.key || '')
 
   useEffect(() => {
     if (window.location.pathname.startsWith('/long-march-study/')) {
@@ -428,6 +430,10 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const config = bootstrap?.config || {}
   const profile = bootstrap?.profile
+  const selectedRadioScript = useMemo(
+    () => LONG_MARCH_RADIO_SCRIPTS.find((script) => script.key === selectedRadioScriptKey) || LONG_MARCH_RADIO_SCRIPTS[0],
+    [selectedRadioScriptKey],
+  )
 
   const buildActivityShareUrl = useCallback((input = {}) => {
     if (typeof window === 'undefined') return ''
@@ -691,7 +697,7 @@ export default function LongMarchStudyApp({ routeParams }) {
               setRadioNotice('今日录音已提交')
               return
             }
-            setPage(PAGE.UPLOAD)
+            setPage(PAGE.RADIO_SCRIPT_SELECT)
           }}
           initialRecordingId={deepLinkRecordingId}
           isSharedRecording={Boolean(deepLinkRecordingId)}
@@ -721,18 +727,26 @@ export default function LongMarchStudyApp({ routeParams }) {
           }}
         />
       ) : null}
+      {page === PAGE.RADIO_SCRIPT_SELECT ? (
+        <RadioScriptSelectPage
+          scripts={LONG_MARCH_RADIO_SCRIPTS}
+          selectedKey={selectedRadioScriptKey}
+          onSelect={setSelectedRadioScriptKey}
+          onEnter={() => setPage(PAGE.UPLOAD)}
+          onBack={() => setPage(PAGE.RADIO)}
+        />
+      ) : null}
       {page === PAGE.UPLOAD ? (
         <UploadPage
           activityKey={activityKey}
           visitorId={visitorId}
-          scripts={LONG_MARCH_RADIO_SCRIPTS}
-          todayRecording={bootstrap?.today?.recording}
+          script={selectedRadioScript}
           wechatConfigStatus={shareStatus.wxConfigStatus}
           onDone={async () => {
             await refresh()
             setPage(PAGE.RADIO)
           }}
-          onBack={() => setPage(PAGE.RADIO)}
+          onBack={() => setPage(PAGE.RADIO_SCRIPT_SELECT)}
           onToast={setToast}
         />
       ) : null}
@@ -1581,6 +1595,35 @@ function RadioNoticeModal({ message, onClose }) {
   )
 }
 
+function RadioScriptSelectPage({ scripts, selectedKey, onSelect, onEnter, onBack }) {
+  const selectedScript = scripts.find((script) => script.key === selectedKey) || scripts[0]
+  return (
+    <RadioShell onBack={onBack}>
+      <section className="lm-radio-script-select-panel" aria-labelledby="lm-radio-script-select-title">
+        <h2 id="lm-radio-script-select-title">请选择参赛文稿</h2>
+        <div className="lm-radio-script-select-list">
+          {scripts.map((script) => {
+            const selected = script.key === selectedScript?.key
+            return (
+              <button
+                key={script.key}
+                className={selected ? 'is-active' : ''}
+                type="button"
+                onClick={() => onSelect(script.key)}
+                aria-pressed={selected}
+              >
+                <strong>{script.title}</strong>
+                <span>{script.content}</span>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+      <button className="lm-radio-enter-record-button" type="button" onClick={onEnter}>进入录音</button>
+    </RadioShell>
+  )
+}
+
 function formatWxError(error) {
   if (!error) return ''
   if (typeof error === 'string') return error
@@ -1592,13 +1635,12 @@ function formatWxError(error) {
   }
 }
 
-function UploadPage({ activityKey, visitorId, scripts, todayRecording, wechatConfigStatus, onDone, onBack, onToast }) {
+function UploadPage({ activityKey, visitorId, script, wechatConfigStatus, onDone, onBack, onToast }) {
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
   const [recordDurationSec, setRecordDurationSec] = useState(0)
   const [elapsedSec, setElapsedSec] = useState(0)
-  const [selectedScriptKey, setSelectedScriptKey] = useState(() => scripts[0]?.key || '')
   const [stoppingRecording, setStoppingRecording] = useState(false)
   const [previewPlaying, setPreviewPlaying] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -1606,21 +1648,9 @@ function UploadPage({ activityKey, visitorId, scripts, todayRecording, wechatCon
   const startedAtRef = useRef(0)
   const autoStopRef = useRef(false)
   const frozenDurationRef = useRef(0)
-  const scriptOptions = scripts.length ? scripts : [{ key: 'default', title: '我的红色电台', content: '请根据活动文稿完成录音。' }]
-  const activeScript = scriptOptions.find((script) => script.key === selectedScriptKey) || scriptOptions[0]
+  const activeScript = script || { key: 'default', title: '我的红色电台', content: '请根据活动文稿完成录音。' }
   const hasRecording = Boolean(localId || mediaId)
   const hasRecordingProgress = hasRecording || stoppingRecording
-  const scriptSelectionLocked = recording || hasRecordingProgress || uploading
-  const activeScriptRecording = todayRecording?.scriptKey && todayRecording.scriptKey === activeScript?.key ? todayRecording : null
-  const activeScriptStatus = activeScriptRecording
-    ? activeScriptRecording.status === 'approved'
-      ? '已通过'
-      : activeScriptRecording.status === 'rejected'
-        ? '未通过'
-        : '审核中'
-    : scriptSelectionLocked
-      ? '录音文稿已锁定'
-      : '请选择文稿后开始录音'
   const currentDurationSec = recording
     ? elapsedSec
     : recordDurationSec
@@ -1871,34 +1901,11 @@ function UploadPage({ activityKey, visitorId, scripts, todayRecording, wechatCon
 
   return (
     <RadioShell onBack={onBack}>
-      <section className="lm-radio-script-panel" aria-labelledby="lm-radio-script-title">
-        <div className="lm-radio-script-tabs" role="tablist" aria-label="选择录音文稿">
-          {scriptOptions.map((script, index) => {
-            const selected = script.key === activeScript?.key
-            const submitted = todayRecording?.scriptKey === script.key
-            return (
-              <button
-                key={script.key || `script-${index}`}
-                className={selected ? 'is-active' : ''}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                disabled={scriptSelectionLocked}
-                onClick={() => setSelectedScriptKey(script.key)}
-              >
-                {script.title || `文稿${index + 1}`}
-                {submitted ? <span>已提交</span> : null}
-              </button>
-            )
-          })}
+      <section className="lm-radio-record-script-panel" aria-labelledby="lm-radio-record-script-title">
+        <div className="lm-radio-record-script-heading">
+          <h2 id="lm-radio-record-script-title">{activeScript?.title || '我的红色电台'}</h2>
         </div>
-        <div className="lm-radio-script-card" role="tabpanel" aria-live="polite">
-          <div className="lm-radio-script-heading">
-            <h2 id="lm-radio-script-title">{activeScript?.title || '我的红色电台'}</h2>
-            <span>{activeScriptStatus}</span>
-          </div>
-          <p>{activeScript?.content || '请根据活动文稿完成录音。'}</p>
-        </div>
+        <p>{activeScript?.content || '请根据活动文稿完成录音。'}</p>
       </section>
       <div className="lm-radio-record-visual">
         {!recording && !hasRecordingProgress ? (
