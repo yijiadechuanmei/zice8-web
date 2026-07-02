@@ -76,6 +76,77 @@ const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
     titleBadge: rank <= 3 ? '红色先锋' : '长征之星',
   }
 })
+const LONG_MARCH_RADIO_SCRIPTS = [
+  {
+    key: 'corn-rice',
+    title: '篇一：一碗苞谷饭',
+    content: `1936年3月，盘县的天气还带着几分寒意。
+
+亦资孔村的山路上，远远来了一支队伍。乡亲们听说“兵”来了，纷纷锁了门往山上跑——这些年，大家被各种军队折腾怕了。只有赵大娘没跑，她腿脚不好，老伴走得早，家里就剩下十五岁的儿子狗娃。
+
+队伍进了村，没有踹门，没有吆喝。一个年轻战士轻轻敲门：“老乡，我们是红军，是来打富济贫的，不要怕。”赵大娘战战兢兢开了条门缝，看见门外站着个二十出头的小伙子，脸上带着笑，眼神干干净净。
+
+“大娘，能借您家院子歇歇脚吗？就在屋檐下坐坐，不进屋。”赵大娘点头答应了。几个红军战士进了院子，果然只是靠墙坐下，连门槛都没迈。
+
+夜里，战士们就在院子里和衣而卧。第二天队伍开拔时，年长的红军从口袋里摸出两块铜板：“大娘，昨晚烧了您家的柴火，借了您家的锅，这是柴火钱。”赵大娘不肯收，红军却执意塞进她手里：“不拿群众一针一线，这是我们的规矩。”
+
+队伍消失在晨雾里。狗娃发现灶台上多了一小袋盐——那是红军自己都舍不得吃的盐。赵大娘攥着那两块铜板，眼眶红了：“这些当兵的，跟以前来的那些，不一样啊。”
+
+那两块铜板，赵大娘一直没花。她说，那是红军的心。`,
+  },
+  {
+    key: 'horseshoe-silver',
+    title: '篇二：马掌与两块大洋',
+    content: `1935年4月，红三军团途经盘县保田镇鹅毛寨。由于国民党的反共宣传，当地百姓大多躲进了山里，只留下几个胆子大的老人守着寨子。
+
+一个姓李的老铁匠没有跑——他舍不得家里的铁匠铺。黄昏时分，一个红军团长牵着马走进铺子，马掌已经磨穿了。团长客气地说：“老人家，麻烦您帮钉个马掌。”老铁匠犹豫了一下，还是接过了活计。
+
+钉完马掌，团长从口袋里掏出两块白花花的大洋，递给老铁匠。老铁匠愣住了——两块大洋，在穷人家可不是小数目，够买半年的口粮。他连连摆手：“钉个马掌，不值这么多！”团长把大洋塞进他手里，笑着说：“老人家，这是我们的规矩。红军不拿群众一针一线，您帮了我们的忙，我们更要感谢您。”
+
+团长牵马走后，老铁匠把两块大洋攥得紧紧的，嘴里念叨着：“这兵，不一样，真的不一样。”
+
+后来寨子里的乡亲们陆续回来，听说这件事，又看到红军帮群众挑水、扫院子的痕迹，都后悔不该躲出去。村头墙上至今还保留着红军当年写的标语——“红军优待白军俘虏”。而老铁匠的故事，也像那两块大洋一样，在鹅毛寨传了一代又一代。`,
+  },
+  {
+    key: 'bridge-rail',
+    title: '篇三：拆下来的桥栏杆',
+    content: `1936年3月底，盘县会议刚刚结束，红二、六军团决定挥师北上。伤员很多，担架不够，部队犯了难。
+
+消息传到村里，乡亲们坐不住了。他们知道，这支队伍是穷人的队伍——前两天还在九间楼召开施贫大会，打开粮仓盐库分给百姓。现在红军有难处，大伙儿不能看着不管。
+
+有人喊了一声：“拆桥！”村口那座老木桥的栏杆，是现成的木材。二话不说，十几个乡亲抄起家伙就去了河边。撬的撬，锯的锯，拆下了一副长长的桥栏杆，绑上绳索，铺上稻草，一副担架就做成了。
+
+伤员被乡亲们抬着，一路翻山越岭，送到了云南富源。担架上的红军战士握着乡亲的手，眼泪往下掉：“老乡，等革命胜利了，我们一定回来谢你们！”送担架的乡亲们没有多留，把伤员交接给接应的队伍后，又把那副桥栏杆背回了村里，重新装回了桥上。
+
+他们抬着担架送红军，走的是一条山路。他们心里明白，红军走的那条路，是让穷人翻身的路。`,
+  },
+  {
+    key: 'red-army-locust',
+    title: '篇四：红军槐下',
+    content: `亦资孔村的村口，长着一棵老槐树，谁也不知道它在那里站了多少年。
+
+1936年3月，红六军团来到亦资孔休整。一天早晨，槐树下聚满了人——红军要在这里开施贫大会。一个年轻的红军战士爬上一块大石头，对着黑压压的人群喊话：“老乡们，我们是红军，是穷人的队伍！今天打开了大户的粮仓，粮食、盐巴，本来就该是你们劳动得来的，现在分给大家！”
+
+人群里响起了掌声，接着是欢呼声。红军战士又喊：“跟着红军走，打土豪，分田地，让穷人能挺起腰杆过日子！”一上午，就有好几十个年轻人跑到槐树下报名参军。
+
+很多年后，那棵老槐树还在。路过的人抬头看它，就会想起那个春天——槐树刚刚抽芽，一支队伍在树下许下了“让穷人翻身”的承诺。后来，它有了一个名字：红军槐。
+
+如今，盘州红军小学的小槐花剧场里，孩子们还在演着当年的故事。槐树年年发芽，故事代代相传。`,
+  },
+  {
+    key: 'five-silver-coat',
+    title: '篇五：五块银元的风衣',
+    content: `这是一个鲜为人知的故事。
+
+1936年初，乌蒙山回旋战打得最苦的时候，贺龙身边有一个年轻的警卫员，叫小刘，才十九岁。一天夜里行军，气温骤降，山风像刀子一样割在脸上。小刘冻得嘴唇发紫，身上那件单薄的军装根本挡不住寒气。
+
+贺龙看见了，脱下自己的风衣披在小刘身上。那是一件缴获来的半旧风衣，不算厚，但比单衣强多了。小刘连忙推辞：“首长，您穿！您是总指挥，不能冻着！”贺龙哈哈一笑：“我身子骨硬朗着呢。你这娃娃年纪小，冻坏了怎么跟着我闹革命？”
+
+小刘后来才知道，那件风衣是贺龙用五块银元从老乡手里买来的。五块银元，在当时够一家老小吃两个月饱饭。贺龙自己舍不得吃、舍不得穿，却把风衣给了战士。
+
+小刘穿着那件风衣走完了长征，后来在一次战斗中负伤，留在了当地。他始终记着那件风衣的温暖。晚年时他对孙子说：“贺老总给的不只是一件衣服，他把我们这些当兵的，都当成了自家孩子。”`,
+  },
+]
 
 function getWx() {
   return typeof window !== 'undefined' ? window.wx : null
@@ -654,7 +725,8 @@ export default function LongMarchStudyApp({ routeParams }) {
         <UploadPage
           activityKey={activityKey}
           visitorId={visitorId}
-          scripts={config.radioScripts || []}
+          scripts={LONG_MARCH_RADIO_SCRIPTS}
+          todayRecording={bootstrap?.today?.recording}
           wechatConfigStatus={shareStatus.wxConfigStatus}
           onDone={async () => {
             await refresh()
@@ -1520,12 +1592,13 @@ function formatWxError(error) {
   }
 }
 
-function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDone, onBack, onToast }) {
+function UploadPage({ activityKey, visitorId, scripts, todayRecording, wechatConfigStatus, onDone, onBack, onToast }) {
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
   const [recordDurationSec, setRecordDurationSec] = useState(0)
   const [elapsedSec, setElapsedSec] = useState(0)
+  const [selectedScriptKey, setSelectedScriptKey] = useState(() => scripts[0]?.key || '')
   const [stoppingRecording, setStoppingRecording] = useState(false)
   const [previewPlaying, setPreviewPlaying] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -1533,12 +1606,24 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
   const startedAtRef = useRef(0)
   const autoStopRef = useRef(false)
   const frozenDurationRef = useRef(0)
-  const activeScript = scripts[0]
+  const scriptOptions = scripts.length ? scripts : [{ key: 'default', title: '我的红色电台', content: '请根据活动文稿完成录音。' }]
+  const activeScript = scriptOptions.find((script) => script.key === selectedScriptKey) || scriptOptions[0]
   const hasRecording = Boolean(localId || mediaId)
   const hasRecordingProgress = hasRecording || stoppingRecording
+  const scriptSelectionLocked = recording || hasRecordingProgress || uploading
+  const activeScriptRecording = todayRecording?.scriptKey && todayRecording.scriptKey === activeScript?.key ? todayRecording : null
+  const activeScriptStatus = activeScriptRecording
+    ? activeScriptRecording.status === 'approved'
+      ? '已通过'
+      : activeScriptRecording.status === 'rejected'
+        ? '未通过'
+        : '审核中'
+    : scriptSelectionLocked
+      ? '录音文稿已锁定'
+      : '请选择文稿后开始录音'
   const currentDurationSec = recording
     ? elapsedSec
-    : Math.max(recordDurationSec, frozenDurationRef.current)
+    : recordDurationSec
   const recordProgressPercent = `${Math.min(currentDurationSec / RADIO_RECORD_MAX_SECONDS, 1) * 100}%`
   const formatRecordTime = (seconds) => {
     const safeSeconds = Math.max(0, Math.min(RADIO_RECORD_MAX_SECONDS, Number(seconds) || 0))
@@ -1786,6 +1871,35 @@ function UploadPage({ activityKey, visitorId, scripts, wechatConfigStatus, onDon
 
   return (
     <RadioShell onBack={onBack}>
+      <section className="lm-radio-script-panel" aria-labelledby="lm-radio-script-title">
+        <div className="lm-radio-script-tabs" role="tablist" aria-label="选择录音文稿">
+          {scriptOptions.map((script, index) => {
+            const selected = script.key === activeScript?.key
+            const submitted = todayRecording?.scriptKey === script.key
+            return (
+              <button
+                key={script.key || `script-${index}`}
+                className={selected ? 'is-active' : ''}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                disabled={scriptSelectionLocked}
+                onClick={() => setSelectedScriptKey(script.key)}
+              >
+                {script.title || `文稿${index + 1}`}
+                {submitted ? <span>已提交</span> : null}
+              </button>
+            )
+          })}
+        </div>
+        <div className="lm-radio-script-card" role="tabpanel" aria-live="polite">
+          <div className="lm-radio-script-heading">
+            <h2 id="lm-radio-script-title">{activeScript?.title || '我的红色电台'}</h2>
+            <span>{activeScriptStatus}</span>
+          </div>
+          <p>{activeScript?.content || '请根据活动文稿完成录音。'}</p>
+        </div>
+      </section>
       <div className="lm-radio-record-visual">
         {!recording && !hasRecordingProgress ? (
           <button className="is-base" type="button" onClick={start} aria-label="开始录音">

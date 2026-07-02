@@ -1723,6 +1723,130 @@
   white-space: nowrap;
 }
 
+.lm-radio-script-panel {
+  position: absolute;
+  left: 56px;
+  top: 118px;
+  z-index: 2;
+  width: 638px;
+  height: 350px;
+  border: 3px solid rgba(255, 219, 129, 0.78);
+  border-radius: 28px;
+  background: rgba(104, 35, 19, 0.72);
+  box-shadow:
+    inset 0 2px 14px rgba(255, 233, 164, 0.16),
+    0 12px 28px rgba(64, 18, 10, 0.24);
+  padding: 20px 22px;
+}
+
+.lm-radio-script-tabs {
+  display: flex;
+  gap: 12px;
+  height: 68px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.lm-radio-script-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.lm-radio-script-tabs button {
+  flex: 0 0 205px;
+  min-width: 0;
+  height: 68px;
+  border: 2px solid rgba(255, 229, 150, 0.74);
+  border-radius: 18px;
+  background: rgba(255, 245, 210, 0.18);
+  color: #fff7ea;
+  cursor: pointer;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.1;
+  padding: 0 14px;
+  text-align: center;
+}
+
+.lm-radio-script-tabs button span {
+  display: block;
+  margin-top: 4px;
+  color: #ffe596;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.lm-radio-script-tabs button.is-active {
+  border-color: #ffe596;
+  background: #ffe596;
+  color: #e34020;
+  box-shadow: 0 6px 12px rgba(56, 18, 8, 0.2);
+}
+
+.lm-radio-script-tabs button.is-active span {
+  color: #b92b16;
+}
+
+.lm-radio-script-tabs button:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.lm-radio-script-tabs button:focus-visible {
+  outline: 4px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 3px;
+}
+
+.lm-radio-script-card {
+  height: 224px;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(255, 247, 226, 0.94);
+  color: #6a2415;
+  padding: 18px 20px 20px;
+}
+
+.lm-radio-script-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.lm-radio-script-heading h2 {
+  min-width: 0;
+  margin: 0;
+  color: #d83a1c;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.lm-radio-script-heading span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #e34020;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.lm-radio-script-card p {
+  max-height: 132px;
+  margin: 12px 0 0;
+  overflow-y: auto;
+  color: #5d2619;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.42;
+  text-align: justify;
+}
+
 .lm-radio-record-visual {
   position: absolute;
   left: 46px;
