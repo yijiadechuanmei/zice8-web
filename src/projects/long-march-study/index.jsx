@@ -1564,61 +1564,64 @@ function RecordingList({ rows, myVote, onOpen, onVote }) {
   }
   return (
     <div className="lm-radio-recordings">
-      {rows.map((recording, index) => (
-        <article
-          className="lm-radio-row"
-          key={recording.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpen(recording)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault()
-              onOpen(recording)
-            }
-          }}
-        >
-          <div className="lm-radio-row-rank">
-            <img src={longMarchStudyAssets.radio.rankBadge} alt="" />
-            <span>{String(index + 1).padStart(2, '0')}</span>
-          </div>
-          <button
-            className="lm-radio-row-play"
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              toggleAudio(recording)
-            }}
-            aria-label={playingId === recording.id ? '暂停音频' : '播放音频'}
-          >
-            <img src={playingId === recording.id ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
-          </button>
-          {recording.avatar ? (
-            <img className="lm-radio-row-avatar" src={recording.avatar} alt="头像" />
-          ) : (
-            <div className="lm-radio-row-avatar lm-avatar-placeholder" aria-hidden="true" />
-          )}
-          <div className="lm-radio-row-main">
-            <strong>{recording.authorName || recording.title || '昵称'}</strong>
-            <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>
-          </div>
-          <div className="lm-radio-row-votes">
-            <span aria-hidden="true" />
-            <em>{recording.voteCount || 0}</em>
-          </div>
-          <button
-            className="lm-radio-row-vote"
-            type="button"
-            disabled={Boolean(myVote)}
-            onClick={(event) => {
-              event.stopPropagation()
-              onVote(recording)
+      {rows.map((recording, index) => {
+        const isTopThree = index < 3
+        return (
+          <article
+            className="lm-radio-row"
+            key={recording.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(recording)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onOpen(recording)
+              }
             }}
           >
-            {myVote === recording.id ? '已送出' : '送红星'}
-          </button>
-        </article>
-      ))}
+            <div className={`lm-radio-row-rank${isTopThree ? ' is-top-three' : ''}`}>
+              {isTopThree ? <img src={longMarchStudyAssets.radio.rankBadge} alt="" /> : null}
+              <span>{String(index + 1).padStart(2, '0')}</span>
+            </div>
+            <button
+              className="lm-radio-row-play"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleAudio(recording)
+              }}
+              aria-label={playingId === recording.id ? '暂停音频' : '播放音频'}
+            >
+              <img src={playingId === recording.id ? longMarchStudyAssets.radio.pause : longMarchStudyAssets.radio.play} alt="" />
+            </button>
+            {recording.avatar ? (
+              <img className="lm-radio-row-avatar" src={recording.avatar} alt="头像" />
+            ) : (
+              <div className="lm-radio-row-avatar lm-avatar-placeholder" aria-hidden="true" />
+            )}
+            <div className="lm-radio-row-main">
+              <strong>{recording.authorName || recording.title || '昵称'}</strong>
+              <small>{recording.audioUrl ? recording.title || '点击查看录音详情' : recording.mediaId ? '微信录音待同步' : '录音审核中'}</small>
+            </div>
+            <div className="lm-radio-row-votes">
+              <span aria-hidden="true" />
+              <em>{recording.voteCount || 0}</em>
+            </div>
+            <button
+              className="lm-radio-row-vote"
+              type="button"
+              disabled={Boolean(myVote)}
+              onClick={(event) => {
+                event.stopPropagation()
+                onVote(recording)
+              }}
+            >
+              {myVote === recording.id ? '已送出' : '送红星'}
+            </button>
+          </article>
+        )
+      })}
     </div>
   )
 }

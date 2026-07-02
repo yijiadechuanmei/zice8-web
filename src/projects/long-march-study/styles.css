@@ -1410,8 +1410,21 @@
 }
 
 .lm-radio-recordings {
+  position: absolute;
+  left: 0;
+  top: 92px;
+  width: 685px;
   height: 1045px;
-  overflow: hidden auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+}
+
+.lm-radio-recordings::-webkit-scrollbar {
+  display: none;
 }
 
 .lm-radio-bottom-button {
@@ -1439,15 +1452,15 @@
 .lm-radio-row-rank {
   position: absolute;
   left: 12px;
-  top: 13px;
+  top: 0;
   width: 80px;
-  height: 77px;
+  height: 105px;
 }
 
 .lm-radio-row-rank img {
   position: absolute;
   left: 9px;
-  top: 0;
+  top: 13px;
   width: 61px;
   height: 77px;
 }
@@ -1455,13 +1468,17 @@
 .lm-radio-row-rank span {
   position: absolute;
   left: 0;
-  top: 23px;
+  top: 36px;
   width: 80px;
   height: 48px;
   display: grid;
   place-items: center;
-  color: #fff;
+  color: #e34020;
   font-size: 29px;
+}
+
+.lm-radio-row-rank.is-top-three span {
+  color: #fff;
 }
 
 .lm-radio-row-play {
