@@ -300,9 +300,12 @@
   transform: translateY(1px);
 }
 
-.latex-quiz,
 .latex-result {
   padding-top: 24px;
+}
+
+.latex-quiz {
+  padding-top: 44px;
 }
 
 .latex-progress {
@@ -310,7 +313,7 @@
   grid-template-columns: 42px 1fr 34px;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   color: #3a619c;
   font-size: 15px;
   font-weight: 700;
@@ -344,7 +347,7 @@
 }
 
 .latex-question-panel {
-  padding: 18px 18px 18px;
+  padding: 22px 18px 20px;
 }
 
 .latex-question-label,
@@ -358,14 +361,14 @@
 }
 
 .latex-question-panel h2 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: #213f78;
   font-size: 20px;
   line-height: 1.28;
 }
 
 .latex-question-tip {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   color: rgba(45, 78, 127, 0.62);
   font-size: 12px;
   line-height: 1.42;
@@ -374,7 +377,7 @@
 .latex-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .latex-option {
@@ -383,8 +386,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 48px;
-  padding: 8px 12px;
+  min-height: 52px;
+  padding: 10px 12px;
   border: 1px solid rgba(179, 207, 250, 0.9);
   border-radius: 15px;
   color: #274b84;
@@ -425,7 +428,7 @@
   z-index: 5;
   width: 100%;
   min-height: 48px;
-  margin-top: 12px;
+  margin-top: 18px;
   border-radius: 999px;
   color: #fff;
   font-size: 17px;
