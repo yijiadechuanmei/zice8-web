@@ -59,20 +59,6 @@ export function drawEntryGuard(activityState) {
       reason: 'NOT_ELIGIBLE',
     }
   }
-  if (
-    activityState.soldOut === true ||
-    (Number.isFinite(activityState.stockRemaining) && activityState.stockRemaining <= 0) ||
-    (
-      Number.isFinite(activityState.stockUsed) &&
-      Number.isFinite(activityState.stockTotal) &&
-      activityState.stockUsed >= activityState.stockTotal
-    )
-  ) {
-    return {
-      allow: false,
-      reason: 'STOCK_EMPTY',
-    }
-  }
   if (activityState.eligibleForDraw !== true) {
     return {
       allow: false,

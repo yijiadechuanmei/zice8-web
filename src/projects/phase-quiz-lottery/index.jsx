@@ -237,7 +237,6 @@ function resolveInitialStep(model, myPrize = null, publicConfig = null) {
   return resolveStepFromEntryState(
     resolveEntryState({ model, myPrize, publicConfig }).entryState,
     model,
-    myPrize,
   )
 }
 
@@ -263,8 +262,8 @@ function resolvePrizeName(model, draw, myPrize) {
   )
 }
 
-function resolveSnapshotDraw(model, myPrize = null) {
-  return model?.draw || myPrize?.draw || null
+function resolveSnapshotDraw(model) {
+  return model?.draw || null
 }
 
 function getInitialAddressParts() {
@@ -308,25 +307,16 @@ function composeRecipientAddress(form) {
   return [form.province, form.city, form.district, form.detailAddress].filter(Boolean).join(' ')
 }
 
-function resolveHasAttempt(model, myPrize) {
+function resolveHasAttempt(model) {
   if (model?.attempt?.attemptId || model?.attemptId || model?.result || model?.draw) return true
   if (model?.state === 'answering' || model?.state === 'result') return true
   if (model?.eligibleForDraw || model?.alreadyDrawn || model?.won) return true
-  if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return true
   return false
 }
 
 function resolveEntryState({ model, myPrize, publicConfig }) {
   const stockInfo = resolvePrizeStockInfo(model, publicConfig, myPrize)
-  const hasAttempt = resolveHasAttempt(model, myPrize)
-
-  if (isPrizeStockExhausted(stockInfo)) {
-    return {
-      entryState: ENTRY_STATE.SOLD_OUT,
-      hasAttempt,
-      stockInfo,
-    }
-  }
+  const hasAttempt = resolveHasAttempt(model)
 
   if (!model && !myPrize && !publicConfig) {
     return {
@@ -343,18 +333,17 @@ function resolveEntryState({ model, myPrize, publicConfig }) {
   }
 }
 
-function resolveQuestionFlowStep(model, myPrize = null) {
+function resolveQuestionFlowStep(model) {
   if (model?.state === 'answering') return STEP.QUESTION
-  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || resolveSnapshotDraw(model, myPrize)) return STEP.RESULT
-  if (myPrize?.hasPrize || myPrize?.draw || myPrize?.claim) return STEP.RESULT
+  if (model?.result || model?.eligibleForDraw || model?.alreadyDrawn || model?.won || model?.draw) return STEP.RESULT
   return STEP.ENTRY
 }
 
-function resolveStepFromEntryState(entryState, model, myPrize = null) {
-  if (resolveSnapshotDraw(model, myPrize)) return STEP.RESULT
+function resolveStepFromEntryState(entryState, model) {
+  if (model?.draw) return STEP.RESULT
   if (entryState === ENTRY_STATE.SOLD_OUT) return STEP.SOLD_OUT
   if (entryState === ENTRY_STATE.ENTRY) return STEP.ENTRY
-  if (entryState === ENTRY_STATE.QUESTION_FLOW) return resolveQuestionFlowStep(model, myPrize)
+  if (entryState === ENTRY_STATE.QUESTION_FLOW) return resolveQuestionFlowStep(model)
   return STEP.ENTRY
 }
 
@@ -961,7 +950,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function applyResultModel(nextModel) {
-    const snapshotDraw = resolveSnapshotDraw(nextModel, myPrize)
+    const snapshotDraw = resolveSnapshotDraw(nextModel)
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(snapshotDraw)
@@ -987,7 +976,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   function applyHydratedState(nextModel, nextPrize) {
-    const snapshotDraw = resolveSnapshotDraw(nextModel, nextPrize)
+    const snapshotDraw = resolveSnapshotDraw(nextModel)
     setModel(nextModel)
     setAttemptId(nextModel?.attempt?.attemptId || '')
     setDraw(snapshotDraw)
@@ -1122,7 +1111,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
   useEffect(() => {
     if (entryState === ENTRY_STATE.UNKNOWN) return
     if (entryState === ENTRY_STATE.SOLD_OUT && step !== STEP.SOLD_OUT) {
-      if (resolveSnapshotDraw(model, myPrize)) return
+      if (resolveSnapshotDraw(model)) return
       setStep(STEP.SOLD_OUT)
       return
     }
@@ -1214,13 +1203,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
   }
 
   async function handleStart() {
-    if (entryState === ENTRY_STATE.SOLD_OUT || stockExhausted) {
-      setStep(STEP.SOLD_OUT)
-      showToast('本期奖品已发完')
-      return
-    }
     if (entryState === ENTRY_STATE.QUESTION_FLOW || hasAttempt) {
-      setStep(resolveQuestionFlowStep(model, myPrize))
+      setStep(resolveQuestionFlowStep(model))
       return
     }
     if (model?.state === 'phase_not_started') {
@@ -1331,7 +1315,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
           'phase-quiz-result',
         )
         if (resultData) {
-          const snapshotDraw = resolveSnapshotDraw(resultData, myPrize)
+          const snapshotDraw = resolveSnapshotDraw(resultData)
           setModel(resultData)
           setAttemptId(resultData?.attempt?.attemptId || '')
           setDraw(snapshotDraw)
@@ -1594,7 +1578,7 @@ function PhaseQuizLotteryMain({ routeParams }) {
             />
 
             {step === STEP.ENTRY ? (
-              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading || stockExhausted} assets={assets} />
+              <EntryPage activityTitle={activityTitle} model={model} onStart={handleStart} disabled={submitting || loading} assets={assets} />
             ) : null}
 
             {step === STEP.SOLD_OUT ? (
