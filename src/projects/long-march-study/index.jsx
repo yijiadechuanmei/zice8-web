@@ -7,6 +7,7 @@ import { enableMobileDebug } from '../../shared/debug/mobileDebug'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, isWechatBrowser } from '../../shared/utils/url'
+import { setDocumentTitle } from '../../shared/utils/documentTitle'
 import { setToken } from '../../shared/api/request'
 import {
   answerQuiz,
@@ -317,7 +318,10 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   useEffect(() => {
     getPublicConfig(activityKey)
-      .then(setPublicConfig)
+      .then((config) => {
+        setDocumentTitle(config?.title)
+        setPublicConfig(config)
+      })
       .catch((error) => setToast(error.message || '活动配置加载失败'))
   }, [activityKey])
 

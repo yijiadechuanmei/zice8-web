@@ -8,6 +8,7 @@ import {
 } from './shared/activityAvailability'
 import ActivityUnavailablePage from './shared/components/ActivityUnavailablePage.jsx'
 import { request } from './shared/api/request'
+import { setDocumentTitle } from './shared/utils/documentTitle'
 
 function normalizePath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1)
@@ -69,7 +70,8 @@ function ActivityGate({ activityKey, project, params, fallback }) {
     let active = true
 
     request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
-      .then(() => {
+      .then((config) => {
+        setDocumentTitle(config?.title)
         if (active) setGateStatus('available')
       })
       .catch((error) => {
