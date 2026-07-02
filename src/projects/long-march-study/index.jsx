@@ -695,7 +695,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           recordings={bootstrap?.recordings}
           onUpload={() => {
             if (bootstrap?.today?.recordingSubmitted) {
-              setRadioNotice('今日录音已提交')
+              setRadioNotice('已提交录音作品')
               return
             }
             setPage(PAGE.RADIO_SCRIPT_SELECT)
