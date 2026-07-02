@@ -837,6 +837,8 @@
 
 .latex-product-carousel-track {
   position: relative;
+  box-sizing: border-box;
+  display: block;
   aspect-ratio: 750 / 1220;
   overflow: hidden;
   border: 1px solid rgba(168, 196, 238, 0.28);
@@ -861,7 +863,6 @@
   opacity: 1;
 }
 
-.latex-product-carousel-open-tag,
 .latex-product-carousel-hit {
   position: absolute;
   inset: 0;
@@ -874,6 +875,10 @@
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.latex-product-carousel-open-tag {
+  width: 100%;
 }
 
 .latex-product-carousel-dots {

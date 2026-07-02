@@ -48,6 +48,10 @@ function miniProgramPath(miniProgram) {
   return `${miniProgram.path}${separator}${miniProgram.query}`
 }
 
+function escapeHtmlAttribute(value) {
+  return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 function pickRandomImage(images) {
   if (!images.length) return ''
   return images[Math.floor(Math.random() * images.length)]
@@ -340,7 +344,7 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   const path = enabled ? miniProgramPath(miniProgram) : ''
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
-  const escapedImage = image.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const escapedImage = escapeHtmlAttribute(image)
   const template = `
     <style>
       .latex-store-launch-template {
@@ -417,6 +421,8 @@ function ProductCarousel({ images, miniProgram, onFallback }) {
   const path = enabled ? miniProgramPath(miniProgram) : ''
   const envVersion = miniProgram?.envVersion || 'release'
   const inWechat = isWechatBrowser()
+  const activeImage = images[activeIndex] || images[0] || ''
+  const escapedActiveImage = escapeHtmlAttribute(activeImage)
   const template = `
     <style>
       .latex-product-carousel-launch-template {
@@ -427,10 +433,20 @@ function ProductCarousel({ images, miniProgram, onFallback }) {
         height: 100%;
         padding: 0;
         border: 0;
+        border-radius: 18px;
         background: transparent;
+        overflow: hidden;
+      }
+      .latex-product-carousel-launch-template img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
     </style>
-    <button class="latex-product-carousel-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
+    <button class="latex-product-carousel-launch-template" type="button" aria-label="查看杰士邦仿生皮">
+      <img src="${escapedActiveImage}" alt="">
+    </button>
   `
 
   useEffect(() => {
@@ -454,36 +470,37 @@ function ProductCarousel({ images, miniProgram, onFallback }) {
 
   return (
     <div className="latex-product-carousel" aria-label="杰士邦仿生皮产品图">
-      <div className="latex-product-carousel-track">
-        {images.map((image, index) => (
-          <img
-            alt={`杰士邦仿生皮产品图 ${index + 1}`}
-            className={index === activeIndex ? 'is-active' : ''}
-            key={image}
-            src={image}
-            onError={(event) => {
-              event.currentTarget.style.display = 'none'
-            }}
-          />
-        ))}
-        {enabled && inWechat ? (
-          <wx-open-launch-weapp
-            class="latex-product-carousel-open-tag"
-            username={miniProgram.username}
-            path={path}
-            env-version={envVersion}
-          >
-            <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
-          </wx-open-launch-weapp>
-        ) : (
+      {enabled && inWechat ? (
+        <wx-open-launch-weapp
+          key={activeImage}
+          class="latex-product-carousel-track latex-product-carousel-open-tag"
+          username={miniProgram.username}
+          path={path}
+          env-version={envVersion}
+        >
+          <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+        </wx-open-launch-weapp>
+      ) : (
+        <div className="latex-product-carousel-track">
+          {images.map((image, index) => (
+            <img
+              alt={`杰士邦仿生皮产品图 ${index + 1}`}
+              className={index === activeIndex ? 'is-active' : ''}
+              key={image}
+              src={image}
+              onError={(event) => {
+                event.currentTarget.style.display = 'none'
+              }}
+            />
+          ))}
           <button
             className="latex-product-carousel-hit"
             type="button"
             onClick={handleFallbackLaunch}
             aria-label="查看杰士邦仿生皮"
           />
-        )}
-      </div>
+        </div>
+      )}
       {images.length > 1 ? (
         <div className="latex-product-carousel-dots" aria-hidden="true">
           {images.map((image, index) => (
