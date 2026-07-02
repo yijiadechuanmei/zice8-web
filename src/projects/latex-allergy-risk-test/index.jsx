@@ -411,8 +411,27 @@ function StorePreviewModal({ image, miniProgram, onClose, onFallback }) {
   )
 }
 
-function ProductCarousel({ images }) {
+function ProductCarousel({ images, miniProgram, onFallback }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const enabled = isMiniProgramEnabled(miniProgram)
+  const path = enabled ? miniProgramPath(miniProgram) : ''
+  const envVersion = miniProgram?.envVersion || 'release'
+  const inWechat = isWechatBrowser()
+  const template = `
+    <style>
+      .latex-product-carousel-launch-template {
+        appearance: none;
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+    </style>
+    <button class="latex-product-carousel-launch-template" type="button" aria-label="查看杰士邦仿生皮"></button>
+  `
 
   useEffect(() => {
     if (images.length <= 1) return undefined
@@ -423,6 +442,15 @@ function ProductCarousel({ images }) {
   }, [images.length])
 
   if (!images.length) return null
+
+  function handleFallbackLaunch() {
+    const fallbackUrl = miniProgram?.fallbackUrl
+    if (fallbackUrl) {
+      window.location.href = fallbackUrl
+      return
+    }
+    onFallback?.()
+  }
 
   return (
     <div className="latex-product-carousel" aria-label="杰士邦仿生皮产品图">
@@ -438,6 +466,23 @@ function ProductCarousel({ images }) {
             }}
           />
         ))}
+        {enabled && inWechat ? (
+          <wx-open-launch-weapp
+            class="latex-product-carousel-open-tag"
+            username={miniProgram.username}
+            path={path}
+            env-version={envVersion}
+          >
+            <script type="text/wxtag-template" dangerouslySetInnerHTML={{ __html: template }} />
+          </wx-open-launch-weapp>
+        ) : (
+          <button
+            className="latex-product-carousel-hit"
+            type="button"
+            onClick={handleFallbackLaunch}
+            aria-label="查看杰士邦仿生皮"
+          />
+        )}
       </div>
       {images.length > 1 ? (
         <div className="latex-product-carousel-dots" aria-hidden="true">
@@ -509,7 +554,7 @@ function ResultPage({ answers, scores, resultLevel, miniProgram, logoImage, prod
         <footer className="latex-result-footer">
           <p>本测试参考 WAO/EAACI 国际过敏指南设计</p>
           <p>仅作健康科普参考，不构成医学诊断。如有不适请咨询专业医生。</p>
-          <ProductCarousel images={productCarouselImages} />
+          <ProductCarousel images={productCarouselImages} miniProgram={miniProgram} onFallback={onStore} />
           <div className="latex-result-brand">
             {logoImage ? (
               <img
