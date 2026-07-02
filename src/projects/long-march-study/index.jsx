@@ -1699,11 +1699,15 @@ function RadioDetailPage({ recording, isSharedEntry, myVote, onVote, onBack }) {
 
 function VoteStarIcon() {
   return (
-    <svg className="lm-vote-star-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <path d="M32 5.8 39.9 23l18.7 2.2-13.8 12.7 3.7 18.4L32 47.2 15.5 56.3l3.7-18.4L5.4 25.2 24.1 23 32 5.8Z" />
+    <svg className="lm-vote-star-icon" viewBox="0 0 64 64" width="56" height="53" aria-hidden="true" focusable="false">
+      <path
+        fill="#e34020"
+        d="M30.1 9.4 Q32 5 33.9 9.4 L38 19 Q39.3 22 42.5 22.3 L52.9 23.2 Q57.7 23.7 54.1 26.8 L46.2 33.7 Q43.8 35.8 44.5 39 L46.8 49.2 Q47.9 53.8 43.7 51.4 L34.7 46 Q32 44.4 29.3 46 L20.3 51.4 Q16.1 53.8 17.2 49.2 L19.5 39 Q20.2 35.8 17.8 33.7 L9.9 26.8 Q6.3 23.7 11.1 23.2 L21.5 22.3 Q24.7 22 26 19 Z"
+      />
       <path
         className="lm-vote-star-shine"
-        d="M31.7 14.4 35.8 25l10.9 1.1-8.2 7.1 2.4 11-9.2-5.6-9.3 5.6 2.5-11-8.2-7.1L27.6 25l4.1-10.6Z"
+        fill="#ff6a3d"
+        d="M30.8 16.9 Q32 14 33.2 16.9 L36 23.4 Q36.8 25.4 38.9 25.5 L45.9 26.2 Q49.1 26.4 46.7 28.5 L41.4 33.2 Q39.8 34.5 40.3 36.6 L41.9 43.4 Q42.6 46.6 39.8 44.9 L33.8 41.3 Q32 40.2 30.2 41.3 L24.2 44.9 Q21.4 46.6 22.1 43.4 L23.7 36.6 Q24.2 34.5 22.6 33.2 L17.3 28.5 Q14.9 26.4 18.1 26.2 L25.1 25.5 Q27.2 25.4 28 23.4 Z"
       />
     </svg>
   )
