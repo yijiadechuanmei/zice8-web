@@ -183,21 +183,22 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const handleAdjustProfile = useCallback(async (row, action, options = {}) => {
     if (!row?.id) return
     const actionLabels = {
+      add_points: '补分',
       deduct_points: '扣分',
       clear_points: '清零',
       disqualify: '取消资格',
       restore: '恢复资格',
     }
     let payload = { action, ...options }
-    if (action === 'deduct_points') {
-      const input = window.prompt('请输入扣减积分')
+    if (action === 'add_points' || action === 'deduct_points') {
+      const input = window.prompt(action === 'add_points' ? '请输入补充积分' : '请输入扣减积分')
       if (input === null) return
       const points = Number.parseInt(input, 10)
       if (!Number.isInteger(points) || points <= 0) {
-        message.warning('请输入大于 0 的扣减积分')
+        message.warning('请输入大于 0 的调整积分')
         return
       }
-      const reason = window.prompt('请输入操作原因（可选）') || '后台人工扣分'
+      const reason = window.prompt('请输入操作原因（可选）') || (action === 'add_points' ? '后台人工补分' : '后台人工扣分')
       payload = { action, points, reason }
     }
     setAdjustingProfileId(`${row.id}:${action}`)
@@ -241,9 +242,17 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         title: '人工操作',
         key: 'profileActions',
         fixed: 'right',
-        width: 230,
+        width: 280,
         render: (_, row) => (
           <Space size={6} wrap>
+            <Button
+              size="small"
+              loading={adjustingProfileId === `${row.id}:add_points`}
+              disabled={Boolean(adjustingProfileId)}
+              onClick={() => handleAdjustProfile(row, 'add_points')}
+            >
+              补分
+            </Button>
             <Button
               size="small"
               danger
