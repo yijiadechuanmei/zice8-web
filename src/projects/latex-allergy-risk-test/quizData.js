@@ -131,6 +131,19 @@ export const QUESTIONS = [
       ],
       reference: '参考：WAO/EAACI 诊断指南；UpToDate - Latex Allergy Diagnosis',
     },
+    knowledgeByOption: {
+      D: {
+        title: '了解乳胶过敏，给身体多一重温柔守护',
+        body: [
+          '使用乳胶安全套后接触部位出现瘙痒、灼热疼痛、红疹并停用后消退，是 IgE 介导的 I 型接触性荨麻疹的典型表现——这是乳胶过敏最常见的确诊路径。',
+          '即使只是轻微灼热感，也不应忽视——它可能是乳胶蛋白刺激的初期阶段。',
+          '长期反复接触的话可能导致皮肤出现增生，苔藓样或者色素沉着，强烈的瘙痒。',
+          '严重者甚至可能出现呼吸困难、血压降低休克等表现。',
+          '好消息是：乳胶过敏的人并非没有选择。聚异戊二烯材质的仿生皮安全套不含天然乳胶蛋白，从源头消除过敏原。',
+        ],
+        reference: '参考资料\n参考：WAO/EAACI 诊断指南；UpToDate - Latex Allergy Diagnosis',
+      },
+    },
   },
 ]
 
@@ -201,6 +214,13 @@ export function scoreQuestion(question, selectedIds = []) {
 
 export function getResultLevel(totalScore) {
   return RESULT_LEVELS.find((level) => totalScore >= level.min && totalScore <= level.max) || RESULT_LEVELS[0]
+}
+
+export function getQuestionKnowledge(question, selectedIds = []) {
+  const optionKnowledge = selectedIds
+    .map((id) => question.knowledgeByOption?.[id])
+    .find(Boolean)
+  return optionKnowledge || question.knowledge
 }
 
 export function getDimensionStatus(question, selectedIds = [], score = 0) {

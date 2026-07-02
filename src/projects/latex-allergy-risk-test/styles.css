@@ -498,6 +498,10 @@
   line-height: 1.62;
 }
 
+.latex-knowledge-sheet small span {
+  display: block;
+}
+
 .latex-sheet-button {
   min-height: 50px;
   margin-top: 28px;

@@ -20,6 +20,7 @@ import {
 } from './config'
 import {
   getDimensionStatus,
+  getQuestionKnowledge,
   getResultLevel,
   QUESTIONS,
   scoreQuestion,
@@ -299,28 +300,40 @@ function QuizPage({ question, questionIndex, selectedIds, knowledgeVisible, onTo
       </button>
 
       {knowledgeVisible ? (
-        <KnowledgeSheet question={question} isLast={questionIndex === QUESTIONS.length - 1} onNext={onNext} />
+        <KnowledgeSheet
+          question={question}
+          selectedIds={selectedIds}
+          isLast={questionIndex === QUESTIONS.length - 1}
+          onNext={onNext}
+        />
       ) : null}
     </section>
   )
 }
 
-function KnowledgeSheet({ question, isLast, onNext }) {
+function KnowledgeSheet({ question, selectedIds, isLast, onNext }) {
+  const knowledge = getQuestionKnowledge(question, selectedIds)
+  const referenceLines = String(knowledge.reference || '').split('\n').filter(Boolean)
+
   return (
     <div className="latex-sheet-backdrop" role="presentation">
       <article className="latex-knowledge-sheet" aria-label="知识解析">
         <span className="latex-sheet-handle" />
         <p className="latex-sheet-kicker">知识解析</p>
-        <h3>{question.knowledge.title}</h3>
-        {question.knowledge.body.map((paragraph) => (
+        <h3>{knowledge.title}</h3>
+        {knowledge.body.map((paragraph) => (
           <p
-            className={question.knowledge.highlights?.includes(paragraph) ? 'latex-knowledge-highlight' : undefined}
+            className={knowledge.highlights?.includes(paragraph) ? 'latex-knowledge-highlight' : undefined}
             key={paragraph}
           >
             {paragraph}
           </p>
         ))}
-        <small>{question.knowledge.reference}</small>
+        <small>
+          {referenceLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </small>
         <button className="latex-primary-button latex-sheet-button" type="button" onClick={onNext}>
           <span>{isLast ? '查看测试结果' : '继续下一题'}</span>
           <RightOutlined />
