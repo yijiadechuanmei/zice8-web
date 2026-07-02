@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { setToken } from '../../shared/api/request'
 import { getVisitorId, trackEvent, trackPageView } from '../../shared/analytics'
 import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { getQueryParam } from '../../shared/utils/url'
+import { getQueryParam, getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { DEFAULT_OSS_BASE_URL } from '../phase-quiz-lottery/api'
 import StageLayout from '../phase-quiz-lottery/components/StageLayout'
 import PhaseWheel from '../phase-quiz-lottery/components/Wheel'
@@ -576,6 +577,17 @@ function DebugPanel({
 }
 
 export default function BrochureQuizLotteryApp({ routeParams }) {
+  const tokenFromUrl = getTokenFromUrl()
+  if (tokenFromUrl) {
+    setToken(tokenFromUrl)
+    window.location.replace(sanitizeUrlForWechat(window.location.href))
+    return null
+  }
+
+  return <BrochureQuizLotteryMain routeParams={routeParams} />
+}
+
+function BrochureQuizLotteryMain({ routeParams }) {
   const activityKey = normalizeActivityKey(routeParams)
   const visitorId = useMemo(() => getVisitorId(), [])
   const [publicConfig, setPublicConfig] = useState(null)
