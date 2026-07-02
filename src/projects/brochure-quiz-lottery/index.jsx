@@ -527,7 +527,6 @@ function MyPrizesModal({ config, prizes, onClose }) {
                 <img src={getPrizeImageUrl(config, prize)} alt="" aria-hidden="true" />
                 <em>{prize.prizeLevel || '中奖'}</em>
                 <strong>{prize.prizeName || '奖品待公布'}</strong>
-                <span>{formatPrizeTime(prize.createdAt)}</span>
                 <small>请联系中英人寿服务人员领取</small>
               </div>
             ))}
