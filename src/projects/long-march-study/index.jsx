@@ -43,7 +43,8 @@ const PAGE = {
   POSTER: 'poster',
 }
 
-const SPLASH_DURATION_MS = 3000
+const SPLASH_DURATION_MS = 5000
+const PARTICIPATION_CACHE_PREFIX = 'long_march_participation_no'
 const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
 const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
 const RADIO_STAGE_WIDTH = 750
@@ -309,6 +310,25 @@ function getCheckinPosterImage(location, fallbackIndex = 0) {
   return posters[matchedIndex >= 0 ? matchedIndex : fallbackIndex % posters.length] || posters[0]
 }
 
+function readCachedParticipationNo(activityKey, visitorId) {
+  try {
+    const value = localStorage.getItem(`${PARTICIPATION_CACHE_PREFIX}:${activityKey}:${visitorId}`)
+    const parsed = Number(value || 0)
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : 0
+  } catch {
+    return 0
+  }
+}
+
+function writeCachedParticipationNo(activityKey, visitorId, participantNo) {
+  try {
+    if (!participantNo) return
+    localStorage.setItem(`${PARTICIPATION_CACHE_PREFIX}:${activityKey}:${visitorId}`, String(participantNo))
+  } catch {
+    // localStorage may be unavailable in private browsing; backend remains authoritative.
+  }
+}
+
 function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
   const value = String(text || '')
   const minSize = options.minSize || 18
@@ -348,6 +368,10 @@ export default function LongMarchStudyApp({ routeParams }) {
   const debugEnabled = useMemo(() => ['1', 'mobile'].includes(getQueryParam('debug')), [])
   const initialRadioRecordingId = useMemo(() => getQueryParam(RADIO_RECORDING_QUERY) || '', [])
   const inviterCode = useMemo(() => getQueryParam(INVITER_QUERY) || '', [])
+  const cachedParticipationNo = useMemo(
+    () => readCachedParticipationNo(activityKey, visitorId),
+    [activityKey, visitorId],
+  )
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
@@ -428,10 +452,16 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [bootstrap, deepLinkRecordingId, showSplash])
 
   useEffect(() => {
-    if (!bootstrap || !showSplash) return
+    const nextNo = bootstrap?.participation?.participantNo
+    if (nextNo) writeCachedParticipationNo(activityKey, visitorId, nextNo)
+  }, [activityKey, bootstrap?.participation?.participantNo, visitorId])
+
+  useEffect(() => {
+    const displayParticipantNo = bootstrap?.participation?.participantNo || cachedParticipationNo
+    if (!showSplash || !displayParticipantNo) return
     const timer = window.setTimeout(() => setShowSplash(false), SPLASH_DURATION_MS)
     return () => window.clearTimeout(timer)
-  }, [bootstrap, showSplash])
+  }, [bootstrap?.participation?.participantNo, cachedParticipationNo, showSplash])
 
   useEffect(() => {
     trackPageView(activityKey, '/long-march-study', { pageKey: page })
@@ -439,7 +469,7 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const config = bootstrap?.config || {}
   const profile = bootstrap?.profile
-  const participantNo = bootstrap?.participation?.participantNo || 0
+  const participantNo = bootstrap?.participation?.participantNo || cachedParticipationNo || 0
   const selectedRadioScript = useMemo(
     () => LONG_MARCH_RADIO_SCRIPTS.find((script) => script.key === selectedRadioScriptKey) || LONG_MARCH_RADIO_SCRIPTS[0],
     [selectedRadioScriptKey],
