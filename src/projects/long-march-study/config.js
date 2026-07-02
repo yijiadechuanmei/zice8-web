@@ -8,6 +8,10 @@ const asset = (filename) => `${LONG_MARCH_STUDY_ASSET_ROOT}/${filename}`
 const ih5Asset = (filename) => `https://file3.ih5.cn/v35/edt/u10013600/${filename}`
 
 export const longMarchStudyAssets = {
+  splash: {
+    background: ih5Asset('eceba6b9e5b20db2be0b0c0e971c9554_1320025_750_1624.png'),
+    participantFrame: ih5Asset('3a324b6317b93eb353b7289b2c5381d2_33278_547_541.png'),
+  },
   home: {
     background: asset('93c60fd921a536d388a178b41488ba9b_1088216_750_1624.png'),
     title: asset('1d0cded85f7d17e338bf72dddbc61727_192912_612_366.png'),

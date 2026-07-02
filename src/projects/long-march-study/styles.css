@@ -23,6 +23,60 @@
   cursor: pointer;
 }
 
+.lm-participation-viewport {
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+}
+
+.lm-participation-stage {
+  position: relative;
+  width: 750px;
+  height: 1448px;
+  overflow: hidden;
+  background: #fff;
+  transform-origin: 0 0;
+}
+
+.lm-participation-bg,
+.lm-participation-frame {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lm-participation-bg {
+  left: 0;
+  top: -88px;
+  width: 750px;
+  height: 1624px;
+}
+
+.lm-participation-frame {
+  left: 103px;
+  top: 344px;
+  width: 547px;
+  height: 541px;
+}
+
+.lm-participation-number {
+  position: absolute;
+  left: 184px;
+  top: 464px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 380px;
+  height: 85px;
+  color: #f90e1d;
+  font-size: 89px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .lm-topbar {
   position: fixed;
   top: 12px;

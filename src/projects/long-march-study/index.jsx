@@ -43,6 +43,7 @@ const PAGE = {
   POSTER: 'poster',
 }
 
+const SPLASH_DURATION_MS = 3000
 const DEBUG_RESET_CONFIRM_TOKEN = 'RESET_LONG_MARCH_2026'
 const DEBUG_RESET_ALL_CONFIRM_TEXT = '重置全部'
 const RADIO_STAGE_WIDTH = 750
@@ -350,6 +351,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
+  const [showSplash, setShowSplash] = useState(true)
   const [deepLinkRecordingId, setDeepLinkRecordingId] = useState(initialRadioRecordingId)
   const [showProfile, setShowProfile] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
@@ -420,10 +422,16 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [refresh])
 
   useEffect(() => {
-    if (!bootstrap || !deepLinkRecordingId) return
+    if (!bootstrap || !deepLinkRecordingId || showSplash) return
     const timer = window.setTimeout(() => setPage(PAGE.RADIO), 0)
     return () => window.clearTimeout(timer)
-  }, [bootstrap, deepLinkRecordingId])
+  }, [bootstrap, deepLinkRecordingId, showSplash])
+
+  useEffect(() => {
+    if (!bootstrap || !showSplash) return
+    const timer = window.setTimeout(() => setShowSplash(false), SPLASH_DURATION_MS)
+    return () => window.clearTimeout(timer)
+  }, [bootstrap, showSplash])
 
   useEffect(() => {
     trackPageView(activityKey, '/long-march-study', { pageKey: page })
@@ -431,6 +439,7 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const config = bootstrap?.config || {}
   const profile = bootstrap?.profile
+  const participantNo = bootstrap?.participation?.participantNo || 0
   const selectedRadioScript = useMemo(
     () => LONG_MARCH_RADIO_SCRIPTS.find((script) => script.key === selectedRadioScriptKey) || LONG_MARCH_RADIO_SCRIPTS[0],
     [selectedRadioScriptKey],
@@ -616,6 +625,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   }
 
   if (blockedMessage) return <MessageScreen title={blockedMessage} />
+  if (showSplash) return <ParticipationSplashPage participantNo={participantNo} />
   if (loading && !bootstrap) return <MessageScreen title="研学活动加载中" />
 
   return (
@@ -874,6 +884,27 @@ export default function LongMarchStudyApp({ routeParams }) {
       ) : null}
       <ActivityBgmPlayer bgm={bgm} activityKey={activityKey} />
     </main>
+  )
+}
+
+function ParticipationSplashPage({ participantNo }) {
+  const { scaleX, width, height } = useStageFit(750, 1448)
+  const participantText = participantNo ? String(participantNo) : '--'
+  const participantFontSize = participantText.length > 6
+    ? Math.max(48, Math.floor(89 * 6 / participantText.length))
+    : 89
+  return (
+    <div className="lm-participation-viewport" style={{ width, height }}>
+      <section
+        className="lm-participation-stage"
+        style={{ transform: `scale(${scaleX})` }}
+        aria-label={participantNo ? `我是第${participantNo}位参加活动的人` : '参与序号加载中'}
+      >
+        <img className="lm-participation-bg" src={longMarchStudyAssets.splash.background} alt="" />
+        <img className="lm-participation-frame" src={longMarchStudyAssets.splash.participantFrame} alt="" />
+        <div className="lm-participation-number" style={{ fontSize: participantFontSize }}>{participantText}</div>
+      </section>
+    </div>
   )
 }
 
