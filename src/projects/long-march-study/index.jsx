@@ -354,6 +354,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [showProfile, setShowProfile] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
   const [showRules, setShowRules] = useState(false)
+  const [showRadioIntro, setShowRadioIntro] = useState(false)
   const [mineFlowModal, setMineFlowModal] = useState('')
   const [poster, setPoster] = useState(null)
   const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
@@ -840,11 +841,13 @@ export default function LongMarchStudyApp({ routeParams }) {
               await openHonors()
               return
             }
+            if (nextPage === PAGE.RADIO) setShowRadioIntro(true)
             setPage(nextPage)
           }}
         />
       ) : null}
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
+      {showRadioIntro ? <RadioIntroModal onClose={() => setShowRadioIntro(false)} /> : null}
       {mineFlowModal ? <MineFlowModal type={mineFlowModal} mine={mine} onClose={() => setMineFlowModal('')} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       <RadioNoticeModal message={radioNotice} onClose={() => setRadioNotice('')} />
@@ -1592,6 +1595,28 @@ function RadioNoticeModal({ message, onClose }) {
         <img src={longMarchStudyAssets.radio.noticeButton} alt="" />
       </button>
     </RadioNoticeFrame>
+  )
+}
+
+function RadioIntroModal({ onClose }) {
+  return (
+    <Modal title="活动说明" onClose={onClose} variant="rules">
+      <section className="lm-radio-intro-content" aria-label="云上红色电台活动说明">
+        <h3>“云上红色电台”诵读活动说明</h3>
+        <p>{`各位参与者：
+
+欢迎加入“云上长征·盘州行”红色故事诵读活动！本活动是“云上长征·全民闯关”数字体验平台“创”模块的核心内容，旨在通过声音传递长征精神，让红色故事在云端回响。
+
+参与方式：
+
+1. 从平台提供的长征故事文稿中任选一段
+2. 录制60秒以内的朗诵/配音音频
+3. 上传至平台，经审核后展示在“云上红色电台”板块
+
+诵读小贴士：
+建议以平实、温情的语调诵读，关键情节可适当放慢语速、加重语气，突出故事的情感张力。让声音穿越时空，向革命先辈致敬！`}</p>
+      </section>
+    </Modal>
   )
 }
 

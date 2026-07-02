@@ -2107,6 +2107,42 @@
   display: none;
 }
 
+.lm-radio-intro-content {
+  position: absolute;
+  left: 38px;
+  top: 191px;
+  width: 610px;
+  height: 516px;
+  overflow: hidden auto;
+  border-radius: 20px;
+  background: #ececec;
+  color: #000;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lm-radio-intro-content h3 {
+  width: 100%;
+  margin: 0 0 20px;
+  color: #000;
+  font-size: 29px;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.lm-radio-intro-content p {
+  width: 100%;
+  margin: 0;
+  color: #000;
+  font-size: 29px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
 .lm-share-upload-panel input {
   display: none;
 }
