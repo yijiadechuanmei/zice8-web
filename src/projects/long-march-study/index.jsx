@@ -54,6 +54,7 @@ const IVX_STAGE_WIDTH = 750
 const IVX_STAGE_HEIGHT = 1448
 const POSTER_STAGE_WIDTH = 750
 const POSTER_STAGE_HEIGHT = 1448
+const QUIZ_DAILY_ATTEMPT_LIMIT = 2
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
 const INVITER_QUERY = 'inviter'
 const CHECKIN_POSTER_LOCATION_ALIASES = [
@@ -387,6 +388,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [posterReturnPage, setPosterReturnPage] = useState(PAGE.MINE)
   const [toast, setToast] = useState('')
   const [radioNotice, setRadioNotice] = useState('')
+  const [quizNotice, setQuizNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [quizState, setQuizState] = useState(null)
   const [quizResult, setQuizResult] = useState(null)
@@ -677,7 +679,22 @@ export default function LongMarchStudyApp({ routeParams }) {
           setQuizState={setQuizState}
           onResult={(result) => {
             setQuizResult(result)
-            setBootstrap((current) => ({ ...current, profile: result.profile }))
+            setBootstrap((current) => {
+              const attemptsUsed = Math.max(
+                Number(current?.today?.quizAttemptsUsed || 0),
+                Number(result?.result?.attemptNo || 0),
+              )
+              return {
+                ...current,
+                profile: result.profile,
+                today: {
+                  ...(current?.today || {}),
+                  quizAttemptsUsed: attemptsUsed,
+                  quizDone: attemptsUsed >= QUIZ_DAILY_ATTEMPT_LIMIT,
+                  quizAttempt: result.result,
+                },
+              }
+            })
             setPage(PAGE.QUIZ_RESULT)
           }}
           onBack={backToTaskChoice}
@@ -872,6 +889,10 @@ export default function LongMarchStudyApp({ routeParams }) {
         <TaskModal
           onClose={() => setShowTasks(false)}
           onSelect={async (nextPage) => {
+            if (nextPage === PAGE.QUIZ && bootstrap?.today?.quizDone) {
+              setQuizNotice('今日答题机会已用完')
+              return
+            }
             setShowTasks(false)
             if (nextPage === PAGE.QUIZ) setQuizState(null)
             if (nextPage === 'sharePoster') {
@@ -890,6 +911,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {showRules ? <RulesModal rules={config.rules || []} onClose={() => setShowRules(false)} /> : null}
       {showRadioIntro ? <RadioIntroModal onClose={() => setShowRadioIntro(false)} /> : null}
       {mineFlowModal ? <MineFlowModal type={mineFlowModal} mine={mine} onClose={() => setMineFlowModal('')} /> : null}
+      {quizNotice ? <CheckinDoneModal message={quizNotice} onClose={() => setQuizNotice('')} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       <RadioNoticeModal message={radioNotice} onClose={() => setRadioNotice('')} />
       {debugEnabled ? (

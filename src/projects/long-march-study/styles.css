@@ -1065,7 +1065,7 @@
 .lm-checkin-modal-mask {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 180;
   display: grid;
   place-items: center;
   background: rgba(0, 0, 0, 0.8);
