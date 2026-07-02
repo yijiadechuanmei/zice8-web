@@ -1076,6 +1076,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
   const [index, setIndex] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState('')
   const [feedback, setFeedback] = useState(null)
+  const [startNotice, setStartNotice] = useState('')
   const [busy, setBusy] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const questions = quizState?.questions || []
@@ -1084,18 +1085,23 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
   const progressPercent = `${Math.min(index + 1, questionCount) / questionCount * 100}%`
 
   useEffect(() => {
-    if (quizState) return
+    if (quizState || startNotice) return
     const timer = window.setTimeout(() => {
       setBusy(true)
       startQuiz(activityKey, { visitorId })
         .then((data) => setQuizState(data.attempt))
         .catch((error) => {
-          onToast(error.message || '今日答题不可用')
+          const message = error.message || '今日答题不可用'
+          if (message.includes('答题机会已用完')) {
+            setStartNotice('今日答题机会已用完')
+            return
+          }
+          setStartNotice(message)
         })
         .finally(() => setBusy(false))
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [activityKey, onToast, quizState, setQuizState, visitorId])
+  }, [activityKey, quizState, setQuizState, startNotice, visitorId])
 
   const submitAnswer = async () => {
     if (!question || !selectedOptionId || submitting || feedback) return
@@ -1129,7 +1135,8 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
   if (busy || !quizState || !question) {
     return (
       <section className="lm-quiz-page" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.background})` }}>
-        <div className="lm-quiz-loading">题目加载中...</div>
+        {!startNotice ? <div className="lm-quiz-loading">题目加载中...</div> : null}
+        {startNotice ? <CheckinDoneModal message={startNotice} onClose={onBack} /> : null}
       </section>
     )
   }
