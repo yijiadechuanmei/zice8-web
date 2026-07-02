@@ -3453,6 +3453,14 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.lm-rules p {
+  margin: 0 0 18px;
+}
+
+.lm-rules p:last-child {
+  margin-bottom: 0;
+}
+
 .lm-flow-list {
   display: block;
   padding-left: 24px;

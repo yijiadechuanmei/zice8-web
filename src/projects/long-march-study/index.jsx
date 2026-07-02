@@ -2296,7 +2296,7 @@ function formatLongMarchDate(value) {
 function RulesModal({ rules, onClose }) {
   return (
     <Modal title="活动规则" onClose={onClose} variant="rules">
-      <ol className="lm-rules">{rules.map((rule) => <li key={rule}>{rule}</li>)}</ol>
+      <div className="lm-rules">{rules.map((rule) => <p key={rule}>{rule}</p>)}</div>
     </Modal>
   )
 }
