@@ -1100,6 +1100,12 @@
   font-weight: 700;
 }
 
+.lm-checkin-done-frame {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
 .lm-checkin-done-modal {
   position: relative;
   width: 685px;
@@ -1107,6 +1113,7 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
+  transform-origin: 0 0;
 }
 
 .lm-checkin-done-modal p {

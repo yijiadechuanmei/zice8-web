@@ -66,6 +66,7 @@ const MODAL_FRAME_SPECS = {
   rules: { width: 685, height: 958 },
   profile: { width: 686, height: 794 },
 }
+const CHECKIN_DONE_MODAL_SPEC = { width: 685, height: 677 }
 const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: 50 }, (_, index) => {
   const rank = index + 1
@@ -1313,14 +1314,24 @@ function CheckinConfirmModal({ completed, image, onConfirm, onClose }) {
 }
 
 function CheckinDoneModal({ message = '今日打卡已完成', onClose }) {
-  return (
-    <div className="lm-checkin-modal-mask">
-      <section className="lm-checkin-done-modal" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})` }}>
-        <p>{message}</p>
-        <button type="button" onClick={onClose}>返回</button>
-      </section>
+  const modalFit = useModalFit(CHECKIN_DONE_MODAL_SPEC, 32)
+  const content = (
+    <div className="lm-checkin-modal-mask" role="dialog" aria-modal="true" aria-label={message}>
+      <div className="lm-checkin-done-frame" style={{ width: modalFit.width, height: modalFit.height }}>
+        <section
+          className="lm-checkin-done-modal"
+          style={{
+            backgroundImage: `url(${longMarchStudyAssets.quiz.dailyDonePanel})`,
+            transform: `scale(${modalFit.scale})`,
+          }}
+        >
+          <p>{message}</p>
+          <button type="button" onClick={onClose}>返回</button>
+        </section>
+      </div>
     </div>
   )
+  return typeof document === 'undefined' ? content : createPortal(content, document.body)
 }
 
 function CheckinResultPage({ result, profile, mine, onPoster, onRank, onBack }) {
