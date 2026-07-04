@@ -842,6 +842,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           honors={mine?.honors || bootstrap?.honors || []}
           checkins={mine?.checkins || []}
           locations={config.locations || []}
+          debugEnabled={debugEnabled}
           onBack={() => setPage(PAGE.HOME)}
           onGenerate={async () => {
             await showPoster({ source: 'honors' })
@@ -2141,9 +2142,10 @@ function UploadPage({ activityKey, visitorId, script, wechatConfigStatus, onDone
   )
 }
 
-function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, onBack }) {
+function HonorsPage({ honors, checkins, locations = [], debugEnabled = false, onOpen, onOpenCheckin, onBack }) {
   const certificateHonor = honors.find((honor) => honor.honorType === 'rank_top_100')
   const hasHonor = Boolean(certificateHonor)
+  const canPreviewCertificate = hasHonor || debugEnabled
   const posterThumbnails = longMarchStudyAssets.checkinPoster.locations
   const checkinByLocation = new Map((checkins || []).map((checkin) => [checkin.locationKey, checkin]))
   const locationPosterItems = (locations || []).slice(0, posterThumbnails.length).map((location, index) => ({
@@ -2170,16 +2172,23 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
     : []
   const posterItems = [...locationPosterItems, ...extraCheckinItems, ...fallbackItems]
   const honorTitle = certificateHonor?.title || '「盘州红色传承官」电子证书'
+  const previewCertificateHonor = certificateHonor || {
+    title: honorTitle,
+    honorType: 'rank_top_100',
+    snapshot: {
+      honorTitle,
+    },
+  }
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card" aria-label="我的荣誉">
         <h2>我的荣誉</h2>
         <button
-          className={`lm-honors-badge-row ${hasHonor ? 'is-earned' : 'is-locked'}`}
+          className={`lm-honors-badge-row ${hasHonor ? 'is-earned' : 'is-locked'} ${debugEnabled && !hasHonor ? 'is-debug-preview' : ''}`}
           type="button"
-          onClick={hasHonor ? () => onOpen(certificateHonor) : undefined}
-          disabled={!hasHonor}
-          aria-label={hasHonor ? `查看${honorTitle}` : `${honorTitle}未获得`}
+          onClick={canPreviewCertificate ? () => onOpen(previewCertificateHonor) : undefined}
+          disabled={!canPreviewCertificate}
+          aria-label={hasHonor ? `查看${honorTitle}` : debugEnabled ? `预览${honorTitle}` : `${honorTitle}未获得`}
         >
           <img src={longMarchStudyAssets.honors.badge} alt="" />
           <strong>{hasHonor ? `已获得${honorTitle}` : `未获得${honorTitle}`}</strong>

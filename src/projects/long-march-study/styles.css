@@ -2384,6 +2384,10 @@
   cursor: default;
 }
 
+.lm-honors-badge-row.is-debug-preview {
+  cursor: pointer;
+}
+
 .lm-honors-badge-row:disabled {
   opacity: 1;
 }
