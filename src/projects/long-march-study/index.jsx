@@ -726,6 +726,8 @@ export default function LongMarchStudyApp({ routeParams }) {
       })
       setBootstrap(data)
       setCheckinResult(null)
+      setQuizState(null)
+      setQuizResult(null)
       setToast(day ? `已切换到第 ${day} 天` : '已恢复自动调试日期')
     } catch (error) {
       setToast(error.message || '切换调试日期失败')
@@ -752,6 +754,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <QuizPage
           activityKey={activityKey}
           visitorId={visitorId}
+          debugDay={debugDay}
           quizState={quizState}
           setQuizState={setQuizState}
           onResult={(result) => {
@@ -882,6 +885,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <UploadPage
           activityKey={activityKey}
           visitorId={visitorId}
+          debugDay={debugDay}
           script={selectedRadioScript}
           wechatConfigStatus={shareStatus.wxConfigStatus}
           onDone={async () => {
@@ -913,6 +917,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           activityUrl={buildActivityShareUrl()}
           activityKey={activityKey}
           visitorId={visitorId}
+          debugDay={debugDay}
           shareScreenshot={bootstrap?.today?.shareScreenshot}
           onScreenshotSubmitted={async (screenshot) => {
             setBootstrap((current) => ({
@@ -1136,19 +1141,36 @@ function HomePage({ onStart, onRules, onMine, onRank }) {
 function ProfileModal({ onClose, onSubmit }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [nameError, setNameError] = useState('')
+  const handleSubmit = () => {
+    const safeName = name.trim()
+    if (!safeName) {
+      setNameError('请填写姓名')
+      return
+    }
+    onSubmit({ name: safeName, phone })
+  }
   return (
     <Modal title="填写研学信息" onClose={onClose} variant="profile">
       <div className="lm-profile-form">
         <label className="lm-field">
           <span className="lm-field-label">姓名</span>
-          <input placeholder="姓名（必填）" value={name} onChange={(event) => setName(event.target.value)} />
+          <input
+            placeholder="姓名（必填）"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value)
+              if (nameError) setNameError('')
+            }}
+          />
         </label>
         <label className="lm-field">
           <span className="lm-field-label">电话</span>
           <input placeholder="电话（必填）" value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" />
         </label>
+        {nameError ? <div className="lm-profile-error">{nameError}</div> : null}
       </div>
-      <button className="lm-profile-submit" type="button" onClick={() => onSubmit({ name, phone })}>提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交</button>
+      <button className="lm-profile-submit" type="button" onClick={handleSubmit}>提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交</button>
     </Modal>
   )
 }
@@ -1192,7 +1214,7 @@ function TaskModal({ onClose, onSelect }) {
   )
 }
 
-function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, onBack, onToast }) {
+function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, onResult, onBack, onToast }) {
   const [index, setIndex] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState('')
   const [feedback, setFeedback] = useState(null)
@@ -1209,7 +1231,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
     if (quizState || startNotice) return
     const timer = window.setTimeout(() => {
       setBusy(true)
-      startQuiz(activityKey, { visitorId })
+      startQuiz(activityKey, { visitorId, debugDay: debugDay || undefined })
         .then((data) => setQuizState(data.attempt))
         .catch((error) => {
           const message = error.message || '今日答题不可用'
@@ -1222,7 +1244,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
         .finally(() => setBusy(false))
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [activityKey, quizState, setQuizState, startNotice, visitorId])
+  }, [activityKey, debugDay, quizState, setQuizState, startNotice, visitorId])
 
   const submitAnswer = async () => {
     if (!question || !selectedOptionId || submitting || feedback) return
@@ -1250,6 +1272,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
     try {
       const data = await answerQuiz(activityKey, quizState.id, {
         visitorId,
+        debugDay: debugDay || undefined,
         questionId: question.id,
         selectedOptionId,
       })
@@ -1281,7 +1304,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
         })
         return
       }
-      const result = await finishQuiz(activityKey, quizState.id, { visitorId })
+      const result = await finishQuiz(activityKey, quizState.id, { visitorId, debugDay: debugDay || undefined })
       onResult(result)
       return
     }
@@ -1374,6 +1397,7 @@ function QuizFeedbackModal({ question, feedback, onNext }) {
 
 function QuizResultPage({ result, onRank, onBack }) {
   const data = result?.result
+  const displayPoints = data?.score ?? data?.pointsEarned ?? 0
   return (
     <div className="lm-quiz-modal-mask">
       <section className="lm-quiz-success-panel" style={{ backgroundImage: `url(${longMarchStudyAssets.quiz.successPanel})` }}>
@@ -1386,7 +1410,7 @@ function QuizResultPage({ result, onRank, onBack }) {
         </div>
         <div className="lm-quiz-success-label">获得</div>
         <div className="lm-quiz-success-points-box" />
-        <div className="lm-quiz-success-points"><strong>{data?.pointsEarned || 0}</strong><span>积分</span></div>
+        <div className="lm-quiz-success-points"><strong>{displayPoints}</strong><span>积分</span></div>
         <button className="lm-quiz-result-rank" type="button" onClick={onRank}>排行榜</button>
         <button className="lm-quiz-result-back" type="button" onClick={onBack}>返回首页</button>
       </section>
@@ -1913,7 +1937,7 @@ function formatWxError(error) {
   }
 }
 
-function UploadPage({ activityKey, visitorId, script, wechatConfigStatus, onDone, onBack, onToast }) {
+function UploadPage({ activityKey, visitorId, debugDay, script, wechatConfigStatus, onDone, onBack, onToast }) {
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
@@ -2106,6 +2130,7 @@ function UploadPage({ activityKey, visitorId, script, wechatConfigStatus, onDone
     const submit = async (nextMediaId) => {
       await submitRecording(activityKey, {
         visitorId,
+        debugDay: debugDay || undefined,
         title: activeScript?.title || '我的红色电台',
         scriptKey: activeScript?.key,
         mediaId: nextMediaId,
@@ -2381,6 +2406,7 @@ function MinePage({
   activityUrl,
   activityKey,
   visitorId,
+  debugDay,
   shareScreenshot,
   onScreenshotSubmitted,
   onToast,
@@ -2443,6 +2469,7 @@ function MinePage({
         <ShareScreenshotUploadModal
           activityKey={activityKey}
           visitorId={visitorId}
+          debugDay={debugDay}
           shareScreenshot={shareScreenshot}
           onSubmitted={onScreenshotSubmitted}
           onToast={onToast}
@@ -2453,7 +2480,7 @@ function MinePage({
   )
 }
 
-function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, onSubmitted, onToast, onClose }) {
+function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScreenshot, onSubmitted, onToast, onClose }) {
   const inputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState(shareScreenshot || null)
@@ -2476,7 +2503,11 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, shareScreenshot, o
     setUploading(true)
     try {
       const imageDataUrl = await readUploadImageDataUrl(file)
-      const result = await submitShareScreenshot(activityKey, { visitorId, imageDataUrl })
+      const result = await submitShareScreenshot(activityKey, {
+        visitorId,
+        debugDay: debugDay || undefined,
+        imageDataUrl,
+      })
       const screenshot = { ...(result?.screenshot || { status: 'pending' }), submittedToday: true }
       setStatus(screenshot)
       await onSubmitted?.(screenshot)

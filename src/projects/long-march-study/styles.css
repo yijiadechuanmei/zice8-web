@@ -3670,6 +3670,15 @@
   color: #bababa;
 }
 
+.lm-profile-error {
+  position: absolute;
+  left: 78px;
+  top: 238px;
+  color: #c42d15;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
 .lm-profile-submit {
   position: absolute;
   left: 28.4257%;
