@@ -685,6 +685,29 @@ export default function LongMarchStudyApp({ routeParams }) {
     await resetDebugScope('activity')
   }
 
+  const startDebugAllQuestions = () => {
+    const questions = Array.isArray(config.questions) ? config.questions : []
+    if (!questions.length) {
+      setToast('题库未加载')
+      return
+    }
+    setQuizState({
+      id: 'debug-all-questions',
+      debugMode: 'all_questions',
+      questionCount: questions.length,
+      questions: questions.map((question) => ({
+        ...question,
+        options: [...(question.options || [])],
+      })),
+      answers: [],
+      correctCount: 0,
+      score: 0,
+      pointsEarned: 0,
+    })
+    setQuizResult(null)
+    setPage(PAGE.QUIZ)
+  }
+
   if (blockedMessage) return <MessageScreen title={blockedMessage} />
   if (showSplash) return <ParticipationSplashPage participantNo={participantNo} />
   if (loading && !bootstrap) return <MessageScreen title="研学活动加载中" />
@@ -706,6 +729,11 @@ export default function LongMarchStudyApp({ routeParams }) {
           quizState={quizState}
           setQuizState={setQuizState}
           onResult={(result) => {
+            if (result?.debugMode) {
+              setQuizResult(result)
+              setPage(PAGE.QUIZ_RESULT)
+              return
+            }
             setQuizResult(result)
             setBootstrap((current) => {
               const attemptsUsed = Math.max(
@@ -951,7 +979,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           profile={profile}
           authReady={authReady}
           shareStatus={shareStatus}
-          onOpenHonors={openHonors}
+          onTestAllQuestions={startDebugAllQuestions}
           onResetMine={() => resetDebugScope('me')}
           onResetAll={resetAllDebugData}
           onLogState={() => console.log('[long-march-study debug state]', {
@@ -998,7 +1026,7 @@ function DebugPanel({
   profile,
   authReady,
   shareStatus,
-  onOpenHonors,
+  onTestAllQuestions,
   onResetMine,
   onResetAll,
   onLogState,
@@ -1031,7 +1059,7 @@ function DebugPanel({
             <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
           </div>
           <div className="lm-debug-actions">
-            <button type="button" onClick={onOpenHonors}>我的荣誉/海报</button>
+            <button type="button" onClick={onTestAllQuestions}>测试全部题目</button>
             <button type="button" onClick={onResetMine}>重置我的数据</button>
             <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
             <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
@@ -1136,6 +1164,7 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
   const questions = quizState?.questions || []
   const question = questions[index]
   const questionCount = questions.length || 5
+  const isDebugAllQuestions = quizState?.debugMode === 'all_questions'
   const progressPercent = `${Math.min(index + 1, questionCount) / questionCount * 100}%`
 
   useEffect(() => {
@@ -1159,6 +1188,26 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
 
   const submitAnswer = async () => {
     if (!question || !selectedOptionId || submitting || feedback) return
+    if (isDebugAllQuestions) {
+      const correct = question.answerId === selectedOptionId
+      const answer = {
+        questionId: question.id,
+        selectedOptionId,
+        answerId: question.answerId,
+        correct,
+        analysis: question.analysis,
+      }
+      setQuizState((current) => {
+        const answers = [...(current?.answers || []), answer]
+        return {
+          ...current,
+          answers,
+          correctCount: answers.filter((item) => item.correct).length,
+        }
+      })
+      setFeedback(answer)
+      return
+    }
     setSubmitting(true)
     try {
       const data = await answerQuiz(activityKey, quizState.id, {
@@ -1179,6 +1228,21 @@ function QuizPage({ activityKey, visitorId, quizState, setQuizState, onResult, o
     setFeedback(null)
     setSelectedOptionId('')
     if (index + 1 >= questionCount) {
+      if (isDebugAllQuestions) {
+        const answers = quizState?.answers || []
+        const correctCount = answers.filter((item) => item.correct).length
+        onResult({
+          debugMode: 'all_questions',
+          result: {
+            id: quizState.id,
+            status: 'debug_finished',
+            correctCount,
+            questionCount,
+            pointsEarned: 0,
+          },
+        })
+        return
+      }
       const result = await finishQuiz(activityKey, quizState.id, { visitorId })
       onResult(result)
       return
