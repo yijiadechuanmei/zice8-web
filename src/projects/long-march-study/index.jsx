@@ -2597,10 +2597,41 @@ function formatLongMarchDate(value) {
   return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function normalizeRuleSections(rules = []) {
+  if (!Array.isArray(rules)) return []
+  const sections = rules.map((rule, index) => {
+    if (typeof rule === 'string') {
+      return { title: index === 0 ? '活动规则' : '', items: [rule] }
+    }
+    return {
+      title: rule?.title || '',
+      subtitle: rule?.subtitle || '',
+      items: Array.isArray(rule?.items) ? rule.items.filter(Boolean) : [],
+    }
+  })
+  return sections.filter((section) => section.items.length)
+}
+
 function RulesModal({ rules, onClose }) {
+  const sections = normalizeRuleSections(rules)
   return (
     <Modal title="活动规则" onClose={onClose} variant="rules">
-      <div className="lm-rules">{rules.map((rule) => <p key={rule}>{rule}</p>)}</div>
+      <div className="lm-rules">
+        {sections.map((section, sectionIndex) => (
+          <section className="lm-rule-section" key={section.title || sectionIndex}>
+            {section.title ? <h3>{section.title}</h3> : null}
+            {section.subtitle ? <p className="lm-rule-subtitle">{section.subtitle}</p> : null}
+            <ol>
+              {section.items.map((item, itemIndex) => (
+                <li key={`${section.title || sectionIndex}-${item}`}>
+                  <span className="lm-rule-index">{itemIndex + 1}</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+      </div>
     </Modal>
   )
 }

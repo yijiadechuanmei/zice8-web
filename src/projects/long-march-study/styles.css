@@ -3545,21 +3545,70 @@
   height: 516px;
   margin: 0;
   overflow-y: auto;
-  color: #000;
-  font-size: 29px;
-  line-height: 1.7;
-  background: #ececec;
+  color: #3d251d;
+  font-size: 22px;
+  line-height: 1.45;
+  background: #fff7e8;
   border-radius: 20px;
-  padding: 20px 24px 20px 54px;
+  padding: 22px 26px;
   -webkit-overflow-scrolling: touch;
 }
 
-.lm-rules p {
-  margin: 0 0 18px;
+.lm-rule-section {
+  padding: 0 0 20px;
+  margin: 0 0 20px;
+  border-bottom: 1px dashed rgba(150, 54, 32, 0.28);
 }
 
-.lm-rules p:last-child {
+.lm-rule-section:last-child {
+  padding-bottom: 0;
   margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.lm-rule-section h3 {
+  margin: 0 0 8px;
+  color: #b6231f;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.lm-rule-subtitle {
+  margin: -2px 0 12px;
+  color: #7a4d36;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.lm-rules ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lm-rules li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.lm-rule-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: #f6d7a4;
+  color: #8d2f22;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .lm-flow-list {
