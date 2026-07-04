@@ -589,7 +589,11 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [clearRadioRecordingDeepLink])
 
   const openJourney = () => {
-    if (!guardActivityActive()) return
+    if (!guardActivityStarted()) return
+    if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED) {
+      setShowTasks(true)
+      return
+    }
     if (!profile) {
       setShowProfile(true)
       return
@@ -856,6 +860,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           nextCheckin={bootstrap?.nextCheckin}
           checkins={bootstrap?.checkins || []}
           today={bootstrap?.today}
+          activityWindowStatus={activityWindowStatus}
           debugContinuousCheckin={debugEnabled && !debugDay}
           onBack={backToTaskChoice}
           onCheckin={async (location) => {
@@ -1050,7 +1055,11 @@ export default function LongMarchStudyApp({ routeParams }) {
         <TaskModal
           onClose={() => setShowTasks(false)}
           onSelect={async (nextPage) => {
-            if (!guardActivityActive()) return
+            if (!guardActivityStarted()) return
+            if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED && nextPage === PAGE.QUIZ) {
+              setToast('活动已结束')
+              return
+            }
             if (nextPage === PAGE.QUIZ && bootstrap?.today?.quizDone) {
               setQuizNotice('今日答题机会已用完')
               return
@@ -1487,7 +1496,7 @@ function QuizResultPage({ result, onRank, onBack }) {
   )
 }
 
-function CheckinPage({ config, nextCheckin, checkins = [], today, debugContinuousCheckin = false, onCheckin, onBack }) {
+function CheckinPage({ config, nextCheckin, checkins = [], today, activityWindowStatus, debugContinuousCheckin = false, onCheckin, onBack }) {
   const [pendingCheckin, setPendingCheckin] = useState(null)
   const [checkinNotice, setCheckinNotice] = useState('')
   const locations = config.locations || []
@@ -1512,7 +1521,11 @@ function CheckinPage({ config, nextCheckin, checkins = [], today, debugContinuou
         const isCompleted = completedLocationKeys.has(location.key)
         const canCheckin = isNext && !isCompleted && (!today?.checkinDone || debugContinuousCheckin)
         const isUnlocked = canCheckin || isCompleted
-        const lockedNotice = (today?.checkinDone && !debugContinuousCheckin) || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
+        const lockedNotice = activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED
+          ? '活动已结束'
+          : (today?.checkinDone && !debugContinuousCheckin) || !nextCheckin
+            ? '今日打卡已完成'
+            : '请先解锁今日地标'
         return (
           <button
             key={location.key}
