@@ -793,6 +793,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <CheckinPage
           config={config}
           nextCheckin={bootstrap?.nextCheckin}
+          checkins={bootstrap?.checkins || []}
           today={bootstrap?.today}
           debugContinuousCheckin={debugEnabled && !debugDay}
           onBack={backToTaskChoice}
@@ -812,6 +813,7 @@ export default function LongMarchStudyApp({ routeParams }) {
                   checkinDone: true,
                   checkin: result.checkin,
                 },
+                checkins: upsertCheckin(current?.checkins || [], result.checkin),
                 nextCheckin: result.nextCheckin,
               }))
               setPage(PAGE.CHECKIN_RESULT)
@@ -1418,7 +1420,7 @@ function QuizResultPage({ result, onRank, onBack }) {
   )
 }
 
-function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = false, onCheckin, onBack }) {
+function CheckinPage({ config, nextCheckin, checkins = [], today, debugContinuousCheckin = false, onCheckin, onBack }) {
   const [pendingCheckin, setPendingCheckin] = useState(null)
   const [checkinNotice, setCheckinNotice] = useState('')
   const locations = config.locations || []
@@ -1432,9 +1434,7 @@ function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = fals
   const pendingVisual = pendingCheckin
     ? visualLocations.find((item) => item.location.key === pendingCheckin.location.key)
     : null
-  const nextLocationIndex = visualLocations.findIndex((item) => item.location.key === nextCheckin?.key)
-  const todayCheckinIndex = visualLocations.findIndex((item) => item.location.key === today?.checkin?.locationKey)
-  const completedThroughIndex = nextLocationIndex >= 0 ? nextLocationIndex - 1 : todayCheckinIndex
+  const completedLocationKeys = new Set((checkins || []).map((item) => item.locationKey))
 
   return (
     <IvxStage title="云上打卡" className="lm-checkin-page" onBack={onBack}>
@@ -1442,7 +1442,7 @@ function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = fals
       <img className="lm-checkin-silhouette" src={assets.silhouette} alt="" />
       {visualLocations.map(({ location, className, asset, activeAsset }, index) => {
         const isNext = nextCheckin?.key === location.key
-        const isCompleted = completedThroughIndex >= 0 && index <= completedThroughIndex
+        const isCompleted = completedLocationKeys.has(location.key)
         const canCheckin = isNext && !isCompleted && (!today?.checkinDone || debugContinuousCheckin)
         const isUnlocked = canCheckin || isCompleted
         const lockedNotice = (today?.checkinDone && !debugContinuousCheckin) || !nextCheckin ? '今日打卡已完成' : '请先解锁今日地标'
@@ -1479,6 +1479,15 @@ function CheckinPage({ config, nextCheckin, today, debugContinuousCheckin = fals
       {checkinNotice ? <CheckinDoneModal message={checkinNotice} onClose={() => setCheckinNotice('')} /> : null}
     </IvxStage>
   )
+}
+
+function upsertCheckin(checkins, checkin) {
+  if (!checkin?.locationKey) return checkins || []
+  const rows = Array.isArray(checkins) ? checkins : []
+  const exists = rows.some((item) => item.locationKey === checkin.locationKey)
+  return exists
+    ? rows.map((item) => item.locationKey === checkin.locationKey ? checkin : item)
+    : [...rows, checkin]
 }
 
 function CheckinConfirmModal({ completed, image, onConfirm, onClose }) {
