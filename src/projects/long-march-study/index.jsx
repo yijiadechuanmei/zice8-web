@@ -1032,6 +1032,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {showProfile ? (
         <ProfileModal
           onClose={() => setShowProfile(false)}
+          onToast={setToast}
           onSubmit={async (payload) => {
             if (!guardActivityActive()) return
             try {
@@ -1211,14 +1212,13 @@ function HomePage({ onStart, onRules, onMine, onRank }) {
   )
 }
 
-function ProfileModal({ onClose, onSubmit }) {
+function ProfileModal({ onClose, onSubmit, onToast }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [nameError, setNameError] = useState('')
   const handleSubmit = () => {
     const safeName = name.trim()
     if (!safeName) {
-      setNameError('请填写姓名')
+      onToast?.('请填写姓名')
       return
     }
     onSubmit({ name: safeName, phone })
@@ -1231,17 +1231,13 @@ function ProfileModal({ onClose, onSubmit }) {
           <input
             placeholder="姓名（必填）"
             value={name}
-            onChange={(event) => {
-              setName(event.target.value)
-              if (nameError) setNameError('')
-            }}
+            onChange={(event) => setName(event.target.value)}
           />
         </label>
         <label className="lm-field">
           <span className="lm-field-label">电话</span>
           <input placeholder="电话（必填）" value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" />
         </label>
-        {nameError ? <div className="lm-profile-error">{nameError}</div> : null}
       </div>
       <button className="lm-profile-submit" type="button" onClick={handleSubmit}>提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交</button>
     </Modal>
