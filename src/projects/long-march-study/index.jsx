@@ -2569,7 +2569,7 @@ function MineFlowModal({ type, mine, onClose }) {
               <>
                 <strong>{item.title || '积分变动'}</strong>
                 <span>{formatLongMarchDate(item.occurredAt)} · {item.points >= 0 ? '+' : ''}{item.points || 0}积分</span>
-                <em>剩余积分：{item.remainingAfter ?? '-'}，累计积分：{item.balanceAfter ?? '-'}</em>
+                <em>{formatLedgerDetail(item)}</em>
               </>
             ) : (
               <>
@@ -2583,6 +2583,13 @@ function MineFlowModal({ type, mine, onClose }) {
       </ol>
     </Modal>
   )
+}
+
+function formatLedgerDetail(item) {
+  const reason = String(item?.detail?.reason || '').trim()
+  const balanceText = `剩余积分：${item?.remainingAfter ?? '-'}，累计积分：${item?.balanceAfter ?? '-'}`
+  if (!reason || reason === item?.title) return balanceText
+  return `原因：${reason}，${balanceText}`
 }
 
 function formatLongMarchDate(value) {

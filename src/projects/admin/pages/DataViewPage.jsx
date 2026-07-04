@@ -198,8 +198,19 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         message.warning('请输入大于 0 的调整积分')
         return
       }
-      const reason = window.prompt('请输入操作原因（可选）') || (action === 'add_points' ? '后台人工补分' : '后台人工扣分')
+      const reason = (window.prompt('请输入操作原因（必填，会展示在用户积分流水）') || '').trim()
+      if (!reason) {
+        message.warning('请输入操作原因')
+        return
+      }
       payload = { action, points, reason }
+    } else if (action === 'clear_points') {
+      const reason = (window.prompt('请输入清零原因（必填，会展示在用户积分流水）') || '').trim()
+      if (!reason) {
+        message.warning('请输入清零原因')
+        return
+      }
+      payload = { action, reason }
     }
     setAdjustingProfileId(`${row.id}:${action}`)
     try {
@@ -266,7 +277,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
               title="确认清零该用户积分？"
               okText="清零"
               cancelText="取消"
-              onConfirm={() => handleAdjustProfile(row, 'clear_points', { reason: '后台清零积分' })}
+              onConfirm={() => handleAdjustProfile(row, 'clear_points')}
             >
               <Button
                 size="small"
