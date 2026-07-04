@@ -950,6 +950,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           profile={profile}
           authReady={authReady}
           shareStatus={shareStatus}
+          onOpenHonors={openHonors}
           onResetMine={() => resetDebugScope('me')}
           onResetAll={resetAllDebugData}
           onLogState={() => console.log('[long-march-study debug state]', {
@@ -996,6 +997,7 @@ function DebugPanel({
   profile,
   authReady,
   shareStatus,
+  onOpenHonors,
   onResetMine,
   onResetAll,
   onLogState,
@@ -1028,6 +1030,7 @@ function DebugPanel({
             <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
           </div>
           <div className="lm-debug-actions">
+            <button type="button" onClick={onOpenHonors}>我的荣誉/海报</button>
             <button type="button" onClick={onResetMine}>重置我的数据</button>
             <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
             <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
