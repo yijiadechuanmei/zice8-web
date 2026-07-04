@@ -70,6 +70,11 @@ const MODAL_FRAME_SPECS = {
 const CHECKIN_DONE_MODAL_SPEC = { width: 685, height: 677 }
 const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_LIMIT = 100
+const ACTIVITY_WINDOW_STATUS = {
+  NOT_STARTED: 'not_started',
+  ACTIVE: 'active',
+  ENDED: 'ended',
+}
 const LONG_MARCH_RADIO_SCRIPTS = [
   {
     key: 'corn-rice',
@@ -358,6 +363,23 @@ function drawAvatarPlaceholder(ctx, x, y, size) {
   ctx.restore()
 }
 
+function resolveActivityWindowStatus(activity) {
+  const status = activity?.activityWindow?.status
+  if (Object.values(ACTIVITY_WINDOW_STATUS).includes(status)) return status
+  const now = Date.now()
+  const startTime = activity?.startTime ? new Date(activity.startTime).getTime() : NaN
+  const endTime = activity?.endTime ? new Date(activity.endTime).getTime() : NaN
+  if (Number.isFinite(startTime) && now < startTime) return ACTIVITY_WINDOW_STATUS.NOT_STARTED
+  if (Number.isFinite(endTime) && now >= endTime) return ACTIVITY_WINDOW_STATUS.ENDED
+  return ACTIVITY_WINDOW_STATUS.ACTIVE
+}
+
+function getActivityWindowMessage(status) {
+  if (status === ACTIVITY_WINDOW_STATUS.NOT_STARTED) return '活动未开始'
+  if (status === ACTIVITY_WINDOW_STATUS.ENDED) return '活动已结束'
+  return ''
+}
+
 export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
@@ -446,11 +468,21 @@ export default function LongMarchStudyApp({ routeParams }) {
     return () => window.clearTimeout(timer)
   }, [refresh])
 
+  const activityWindowStatus = resolveActivityWindowStatus(bootstrap?.activity || publicConfig)
+
   useEffect(() => {
     if (!bootstrap || !deepLinkRecordingId || showSplash) return
+    if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.NOT_STARTED) {
+      setToast('活动未开始')
+      setDeepLinkRecordingId('')
+      const url = new URL(window.location.href)
+      url.searchParams.delete(RADIO_RECORDING_QUERY)
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+      return
+    }
     const timer = window.setTimeout(() => setPage(PAGE.RADIO), 0)
     return () => window.clearTimeout(timer)
-  }, [bootstrap, deepLinkRecordingId, showSplash])
+  }, [activityWindowStatus, bootstrap, deepLinkRecordingId, showSplash])
 
   useEffect(() => {
     const nextNo = bootstrap?.participation?.participantNo
@@ -511,6 +543,23 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const bgm = config.bgm || { enabled: false }
 
+  const guardActivityStarted = useCallback(() => {
+    if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.NOT_STARTED) {
+      setToast('活动未开始')
+      return false
+    }
+    return true
+  }, [activityWindowStatus])
+
+  const guardActivityActive = useCallback(() => {
+    const message = getActivityWindowMessage(activityWindowStatus)
+    if (message) {
+      setToast(message)
+      return false
+    }
+    return true
+  }, [activityWindowStatus])
+
   const clearRuntimeState = useCallback(() => {
     setPage(PAGE.HOME)
     setDeepLinkRecordingId('')
@@ -540,6 +589,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [clearRadioRecordingDeepLink])
 
   const openJourney = () => {
+    if (!guardActivityActive()) return
     if (!profile) {
       setShowProfile(true)
       return
@@ -563,7 +613,12 @@ export default function LongMarchStudyApp({ routeParams }) {
   }
 
   const openMine = async () => {
+    if (!guardActivityStarted()) return
     if (!profile) {
+      if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED) {
+        setToast('活动已结束')
+        return
+      }
       setShowProfile(true)
       return
     }
@@ -585,6 +640,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   }
 
   const openRank = async () => {
+    if (!guardActivityStarted()) return
     try {
       const data = await getRank(activityKey, visitorId)
       setBootstrap((current) => ({ ...current, rank: data }))
@@ -595,7 +651,12 @@ export default function LongMarchStudyApp({ routeParams }) {
   }
 
   const openHonors = async () => {
+    if (!guardActivityStarted()) return
     if (!profile) {
+      if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED) {
+        setToast('活动已结束')
+        return
+      }
       setShowProfile(true)
       return
     }
@@ -609,7 +670,12 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   const showPoster = async (input = {}) => {
     const options = typeof input === 'string' ? { source: input } : input
+    if (options.source === 'share' && !guardActivityActive()) return
     if (!profile && !mine?.profile) {
+      if (activityWindowStatus === ACTIVITY_WINDOW_STATUS.ENDED) {
+        setToast('活动已结束')
+        return
+      }
       setShowProfile(true)
       return
     }
@@ -793,6 +859,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           debugContinuousCheckin={debugEnabled && !debugDay}
           onBack={backToTaskChoice}
           onCheckin={async (location) => {
+            if (!guardActivityActive()) return
             try {
               const result = await checkinLocation(activityKey, location.key, {
                 visitorId,
@@ -835,6 +902,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           config={config}
           recordings={bootstrap?.recordings}
           onUpload={() => {
+            if (!guardActivityActive()) return
             if (bootstrap?.today?.recordingSubmitted) {
               setRadioNotice('今日录音已提交')
               return
@@ -851,6 +919,7 @@ export default function LongMarchStudyApp({ routeParams }) {
             backToTaskChoice()
           }}
           onVote={async (recording) => {
+            if (!guardActivityActive()) return
             try {
               const data = await voteRecording(activityKey, recording.id, { visitorId })
               setToast('已送出红星')
@@ -874,7 +943,10 @@ export default function LongMarchStudyApp({ routeParams }) {
           scripts={LONG_MARCH_RADIO_SCRIPTS}
           selectedKey={selectedRadioScriptKey}
           onSelect={setSelectedRadioScriptKey}
-          onEnter={() => setPage(PAGE.UPLOAD)}
+          onEnter={() => {
+            if (!guardActivityActive()) return
+            setPage(PAGE.UPLOAD)
+          }}
           onBack={() => setPage(PAGE.RADIO)}
         />
       ) : null}
@@ -885,6 +957,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           debugDay={debugDay}
           script={selectedRadioScript}
           wechatConfigStatus={shareStatus.wxConfigStatus}
+          onActivityAction={guardActivityActive}
           onDone={async () => {
             await refresh()
             setPage(PAGE.RADIO)
@@ -916,6 +989,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           visitorId={visitorId}
           debugDay={debugDay}
           shareScreenshot={bootstrap?.today?.shareScreenshot}
+          onActivityAction={guardActivityActive}
           onScreenshotSubmitted={async (screenshot) => {
             setBootstrap((current) => ({
               ...current,
@@ -959,6 +1033,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <ProfileModal
           onClose={() => setShowProfile(false)}
           onSubmit={async (payload) => {
+            if (!guardActivityActive()) return
             try {
               const data = await saveProfile(activityKey, { ...payload, visitorId, inviterCode })
               setBootstrap((current) => ({ ...current, profile: data.profile }))
@@ -974,6 +1049,7 @@ export default function LongMarchStudyApp({ routeParams }) {
         <TaskModal
           onClose={() => setShowTasks(false)}
           onSelect={async (nextPage) => {
+            if (!guardActivityActive()) return
             if (nextPage === PAGE.QUIZ && bootstrap?.today?.quizDone) {
               setQuizNotice('今日答题机会已用完')
               return
@@ -1941,7 +2017,7 @@ function formatWxError(error) {
   }
 }
 
-function UploadPage({ activityKey, visitorId, debugDay, script, wechatConfigStatus, onDone, onBack, onToast }) {
+function UploadPage({ activityKey, visitorId, debugDay, script, wechatConfigStatus, onActivityAction, onDone, onBack, onToast }) {
   const [recording, setRecording] = useState(false)
   const [localId, setLocalId] = useState('')
   const [mediaId, setMediaId] = useState('')
@@ -2053,6 +2129,7 @@ function UploadPage({ activityKey, visitorId, debugDay, script, wechatConfigStat
   }, [recording, stop])
 
   const start = () => {
+    if (onActivityAction?.() === false) return
     if (recording) return
     const wx = getWx()
     if (isWechatBrowser() && (!wx?.startRecord || wechatConfigStatus !== 'success')) {
@@ -2126,6 +2203,7 @@ function UploadPage({ activityKey, visitorId, debugDay, script, wechatConfigStat
   }
 
   const upload = async () => {
+    if (onActivityAction?.() === false) return
     if (uploading) return
     if (!localId && !mediaId) {
       onToast('请先完成录音')
@@ -2405,6 +2483,7 @@ function MinePage({
   visitorId,
   debugDay,
   shareScreenshot,
+  onActivityAction,
   onScreenshotSubmitted,
   onToast,
   onFlow,
@@ -2425,7 +2504,15 @@ function MinePage({
     { key: 'honors', image: longMarchStudyAssets.mine.honorsButton, label: '我的荣誉', onClick: onHonors },
     { key: 'poster', image: longMarchStudyAssets.mine.posterButton, label: '我的海报', onClick: onHonors },
     { key: 'rank', image: longMarchStudyAssets.mine.rankButton, label: '积分排行榜', onClick: onRank },
-    { key: 'shareScreenshot', image: longMarchStudyAssets.mine.shareScreenshotButton, label: '提交截图', onClick: () => setScreenshotOpen(true) },
+    {
+      key: 'shareScreenshot',
+      image: longMarchStudyAssets.mine.shareScreenshotButton,
+      label: '提交截图',
+      onClick: () => {
+        if (onActivityAction?.() === false) return
+        setScreenshotOpen(true)
+      },
+    },
   ]
 
   return (
@@ -2433,7 +2520,15 @@ function MinePage({
       <section className="lm-mine-profile">
         <div className="lm-mine-profile-card">
           <div className="lm-mine-qr-box">
-            <button className="lm-mine-qr-button" type="button" onClick={() => setQrOpen(true)} aria-label="放大二维码">
+            <button
+              className="lm-mine-qr-button"
+              type="button"
+              onClick={() => {
+                if (onActivityAction?.() === false) return
+                setQrOpen(true)
+              }}
+              aria-label="放大二维码"
+            >
               {qrValue ? <QRCodeCanvas value={qrValue} size={190} includeMargin={false} /> : null}
             </button>
           </div>
@@ -2468,6 +2563,7 @@ function MinePage({
           visitorId={visitorId}
           debugDay={debugDay}
           shareScreenshot={shareScreenshot}
+          onActivityAction={onActivityAction}
           onSubmitted={onScreenshotSubmitted}
           onToast={onToast}
           onClose={() => setScreenshotOpen(false)}
@@ -2477,7 +2573,7 @@ function MinePage({
   )
 }
 
-function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScreenshot, onSubmitted, onToast, onClose }) {
+function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScreenshot, onActivityAction, onSubmitted, onToast, onClose }) {
   const inputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState(shareScreenshot || null)
@@ -2496,6 +2592,7 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScr
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
+    if (onActivityAction?.() === false) return
     if (!file.type.startsWith('image/')) {
       setJustSubmitted(false)
       setStatus({ status: 'failed', rejectReason: '请选择图片文件' })
@@ -2597,41 +2694,10 @@ function formatLongMarchDate(value) {
   return `${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
-function normalizeRuleSections(rules = []) {
-  if (!Array.isArray(rules)) return []
-  const sections = rules.map((rule, index) => {
-    if (typeof rule === 'string') {
-      return { title: index === 0 ? '活动规则' : '', items: [rule] }
-    }
-    return {
-      title: rule?.title || '',
-      subtitle: rule?.subtitle || '',
-      items: Array.isArray(rule?.items) ? rule.items.filter(Boolean) : [],
-    }
-  })
-  return sections.filter((section) => section.items.length)
-}
-
 function RulesModal({ rules, onClose }) {
-  const sections = normalizeRuleSections(rules)
   return (
     <Modal title="活动规则" onClose={onClose} variant="rules">
-      <div className="lm-rules">
-        {sections.map((section, sectionIndex) => (
-          <section className="lm-rule-section" key={section.title || sectionIndex}>
-            {section.title ? <h3>{section.title}</h3> : null}
-            {section.subtitle ? <p className="lm-rule-subtitle">{section.subtitle}</p> : null}
-            <ol>
-              {section.items.map((item, itemIndex) => (
-                <li key={`${section.title || sectionIndex}-${item}`}>
-                  <span className="lm-rule-index">{itemIndex + 1}</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        ))}
-      </div>
+      <div className="lm-rules">{rules.map((rule) => <p key={rule}>{rule}</p>)}</div>
     </Modal>
   )
 }
