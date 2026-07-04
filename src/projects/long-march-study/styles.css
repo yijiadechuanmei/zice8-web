@@ -3054,11 +3054,11 @@
 
 .lm-certificate-qrcode {
   position: absolute;
-  left: 530px;
-  top: 1068px;
-  width: 116px !important;
-  height: 116px !important;
-  padding: 3px;
+  left: 337px;
+  top: 1014px;
+  width: 80px !important;
+  height: 80px !important;
+  padding: 0;
   background: #fff;
 }
 

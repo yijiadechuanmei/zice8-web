@@ -2520,8 +2520,8 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
           const qrCanvas = qrCanvasRef.current
           if (qrCanvas) {
             ctx.fillStyle = '#fff'
-            ctx.fillRect(530, 1068, 116, 116)
-            ctx.drawImage(qrCanvas, 530, 1068, 116, 116)
+            ctx.fillRect(337, 1014, 80, 80)
+            ctx.drawImage(qrCanvas, 337, 1014, 80, 80)
           }
 
           const url = canvas.toDataURL('image/png')
@@ -2669,7 +2669,7 @@ function PosterPage({ poster, locations, activityUrl, onBack }) {
               <QRCodeCanvas
                 className="lm-certificate-qrcode"
                 value={activityUrl}
-                size={116}
+                size={80}
                 level="M"
                 marginSize={1}
               />
