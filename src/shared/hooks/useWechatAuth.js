@@ -35,7 +35,7 @@ function getRequireUserinfo(publicConfig) {
   return Boolean(publicConfig?.requireUserinfo || publicConfig?.require_userinfo)
 }
 
-export function useWechatAuth(activityKey, publicConfig) {
+export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const [authReady, setAuthReady] = useState(false)
   const [blockedMessage, setBlockedMessage] = useState('')
   const [autoAuthStarted, setAutoAuthStarted] = useState(false)
@@ -43,6 +43,7 @@ export function useWechatAuth(activityKey, publicConfig) {
   const requiresWechatBrowser = getAccessMode(publicConfig) === 'wechat_required'
   const configuredOauthScope = getOauthScope(publicConfig)
   const configuredRequireUserinfo = getRequireUserinfo(publicConfig)
+  const blockSnapshotUser = Boolean(options.blockSnapshotUser)
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
@@ -133,10 +134,15 @@ export function useWechatAuth(activityKey, publicConfig) {
     setBlockedMessage('')
 
     if (getQueryParam('snapshot_user') === '1') {
-      removeToken()
-      setBlockedMessage('请点击微信右下角“使用完整服务”后重新进入活动')
-      setAuthReady(false)
-      setAuthStatus('error')
+      if (blockSnapshotUser) {
+        removeToken()
+        setBlockedMessage('请点击微信右下角“使用完整服务”后重新进入活动')
+        setAuthReady(false)
+        setAuthStatus('error')
+      } else {
+        setAuthReady(true)
+        setAuthStatus('ready')
+      }
       setQuizAuthDebugState({
         lastAuthStep: 'snapshot-user',
       })
@@ -172,7 +178,7 @@ export function useWechatAuth(activityKey, publicConfig) {
     })
     setAuthReady(true)
     setAuthStatus('ready')
-  }, [activityKey, publicConfig, reauth])
+  }, [activityKey, blockSnapshotUser, configuredOauthScope, configuredRequireUserinfo, publicConfig, reauth])
 
   return { authReady, blockedMessage, hasToken: Boolean(getToken()), autoAuthStarted, authStatus, reauth, clearToken: removeToken }
 }

@@ -448,7 +448,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const authPublicConfig = useMemo(() => publicConfig
     ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true }
     : publicConfig, [publicConfig])
-  const { authReady, blockedMessage } = useWechatAuth(activityKey, authPublicConfig)
+  const { authReady, blockedMessage } = useWechatAuth(activityKey, authPublicConfig, { blockSnapshotUser: true })
 
   const refresh = useCallback(async () => {
     if (!authReady) return
