@@ -380,6 +380,10 @@ function getActivityWindowMessage(status) {
   return ''
 }
 
+function isWechatAuthRequiredError(error) {
+  return Number(error?.status) === 401 || (error?.message || '').includes('请先完成微信授权')
+}
+
 export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
@@ -448,7 +452,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const authPublicConfig = useMemo(() => publicConfig
     ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true }
     : publicConfig, [publicConfig])
-  const { authReady, blockedMessage } = useWechatAuth(activityKey, authPublicConfig, { blockSnapshotUser: true })
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, authPublicConfig, { blockSnapshotUser: true })
 
   const refresh = useCallback(async () => {
     if (!authReady) return
@@ -460,11 +464,12 @@ export default function LongMarchStudyApp({ routeParams }) {
       })
       setBootstrap(data)
     } catch (error) {
+      if (isWechatAuthRequiredError(error) && reauth('long-march-bootstrap-unauthorized')) return
       setToast(error.message || '活动加载失败')
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, debugDay, debugEnabled, visitorId])
+  }, [activityKey, authReady, debugDay, debugEnabled, reauth, visitorId])
 
   useEffect(() => {
     const timer = window.setTimeout(() => refresh(), 0)
