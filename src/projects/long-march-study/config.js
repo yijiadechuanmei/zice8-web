@@ -89,7 +89,7 @@ export const longMarchStudyAssets = {
     detailFour: asset('f967f593d141e3624dbf034e355bffb0_792812_685_1184.png'),
   },
   checkinPoster: {
-    posterBackground: ih5Asset('2202c2c14234671ff69c8642c0d51226_615533_750_1624.png'),
+    posterBackground: asset('2202c2c14234671ff69c8642c0d51226_615533_750_1624.png'),
     background: ih5Asset('b6fa357bd43abe1217388630d0ae368f_992544_750_1624.png'),
     title: ih5Asset('1d0cded85f7d17e338bf72dddbc61727_192912_612_366.png'),
     share: ih5Asset('3e17b8ebb7ea1c14259431fd2ea5d142_1185040_689_1237.png'),
@@ -104,7 +104,7 @@ export const longMarchStudyAssets = {
     badge: asset('a55e1e9da1cb4578ffac6b0eebedd582_26351_119_134.png'),
     honorPanel: asset('82dca40305f5fdd8028054e4801f88a2_18477_688_980.png'),
     posterPanel: asset('e0cd35378356b62af1ad6741f3dcafc8_16437_688_864.png'),
-    certificate: ih5Asset('4092e3d7f20dfabccf122eb24fb73e60_214938_621_1140.png'),
+    certificate: asset('4092e3d7f20dfabccf122eb24fb73e60_214938_621_1140.png'),
     poster: asset('f967f593d141e3624dbf034e355bffb0_792812_685_1184.png'),
   },
   shared: {
