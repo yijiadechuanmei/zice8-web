@@ -70,18 +70,6 @@ const MODAL_FRAME_SPECS = {
 const CHECKIN_DONE_MODAL_SPEC = { width: 685, height: 677 }
 const NOTICE_PANEL_SPEC = { width: 685, height: 584 }
 const LONG_MARCH_RANK_LIMIT = 100
-const LONG_MARCH_RANK_TEST_ROWS = Array.from({ length: LONG_MARCH_RANK_LIMIT }, (_, index) => {
-  const rank = index + 1
-  return {
-    id: `long-march-rank-test-${rank}`,
-    rank,
-    name: `昵称${String(rank).padStart(2, '0')}`,
-    nickname: `昵称${String(rank).padStart(2, '0')}`,
-    avatar: '',
-    totalPoints: Math.max(9999 - index * 137, 120),
-    titleBadge: rank <= 3 ? '红色先锋' : '长征之星',
-  }
-})
 const LONG_MARCH_RADIO_SCRIPTS = [
   {
     key: 'corn-rice',
@@ -2396,7 +2384,7 @@ function RankPage({ rank, onBack }) {
 }
 
 function normalizeRankRows(rows = []) {
-  const normalizedRows = Array.isArray(rows)
+  return (Array.isArray(rows)
     ? rows.map((row, index) => ({
         ...row,
         id: row.id || `long-march-rank-${index + 1}`,
@@ -2405,14 +2393,7 @@ function normalizeRankRows(rows = []) {
         avatar: row.avatar || row.displayAvatar || '',
         totalPoints: Number(row.totalPoints || row.points || 0),
       }))
-    : []
-
-  const existingIds = new Set(normalizedRows.map((row) => row.id))
-  const fillerRows = LONG_MARCH_RANK_TEST_ROWS
-    .filter((row) => !existingIds.has(row.id))
-    .slice(0, Math.max(LONG_MARCH_RANK_LIMIT - normalizedRows.length, 0))
-
-  return [...normalizedRows, ...fillerRows]
+    : [])
     .slice(0, LONG_MARCH_RANK_LIMIT)
     .map((row, index) => ({ ...row, rank: index + 1 }))
 }
