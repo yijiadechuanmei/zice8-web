@@ -445,7 +445,10 @@ export default function LongMarchStudyApp({ routeParams }) {
       .catch((error) => setToast(error.message || '活动配置加载失败'))
   }, [activityKey])
 
-  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+  const authPublicConfig = useMemo(() => publicConfig
+    ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true }
+    : publicConfig, [publicConfig])
+  const { authReady, blockedMessage } = useWechatAuth(activityKey, authPublicConfig)
 
   const refresh = useCallback(async () => {
     if (!authReady) return

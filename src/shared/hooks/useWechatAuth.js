@@ -41,6 +41,8 @@ export function useWechatAuth(activityKey, publicConfig) {
   const [autoAuthStarted, setAutoAuthStarted] = useState(false)
   const [authStatus, setAuthStatus] = useState('checking')
   const requiresWechatBrowser = getAccessMode(publicConfig) === 'wechat_required'
+  const configuredOauthScope = getOauthScope(publicConfig)
+  const configuredRequireUserinfo = getRequireUserinfo(publicConfig)
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
@@ -76,7 +78,14 @@ export function useWechatAuth(activityKey, publicConfig) {
     setAuthStatus('redirecting')
 
     const redirectUrl = sanitizeUrlForWechat(window.location.href)
-    const oauthUrl = `${API_BASE_URL}/wechat/oauth/redirect?activity_key=${encodeURIComponent(activityKey)}&redirect_url=${encodeURIComponent(redirectUrl)}`
+    const oauthParams = new URLSearchParams({
+      activity_key: activityKey,
+      redirect_url: redirectUrl,
+    })
+    if (configuredRequireUserinfo || configuredOauthScope === 'snsapi_userinfo') {
+      oauthParams.set('scope', 'snsapi_userinfo')
+    }
+    const oauthUrl = `${API_BASE_URL}/wechat/oauth/redirect?${oauthParams.toString()}`
     debugLog('[QuizAuthDebug] oauth redirect', {
       reason,
       redirectUrl,
@@ -88,15 +97,15 @@ export function useWechatAuth(activityKey, publicConfig) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, requiresWechatBrowser])
+  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
 
     const inWechat = isWechatBrowser()
     const accessMode = getAccessMode(publicConfig)
-    const oauthScope = getOauthScope(publicConfig)
-    const requireUserinfo = getRequireUserinfo(publicConfig)
+    const oauthScope = configuredOauthScope
+    const requireUserinfo = configuredRequireUserinfo
     debugLog('[QuizAuthDebug] config', {
       accessMode,
       oauthScope,
@@ -124,8 +133,10 @@ export function useWechatAuth(activityKey, publicConfig) {
     setBlockedMessage('')
 
     if (getQueryParam('snapshot_user') === '1') {
-      setAuthReady(true)
-      setAuthStatus('ready')
+      removeToken()
+      setBlockedMessage('请点击微信右下角“使用完整服务”后重新进入活动')
+      setAuthReady(false)
+      setAuthStatus('error')
       setQuizAuthDebugState({
         lastAuthStep: 'snapshot-user',
       })
