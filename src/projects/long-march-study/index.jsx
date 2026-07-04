@@ -2484,23 +2484,28 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScr
   const inputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState(shareScreenshot || null)
+  const [justSubmitted, setJustSubmitted] = useState(false)
   const currentStatus = status || shareScreenshot || null
   const submittedToday = Boolean(currentStatus?.submittedToday) || ['pending', 'approved', 'rejected'].includes(currentStatus?.status)
-  const statusText = submittedToday
-    ? '每日只可提交1次'
-    : currentStatus?.status === 'failed'
-      ? currentStatus.rejectReason || '截图提交失败'
-      : '请上传分享截图，审核通过后获得积分'
+  const statusText = justSubmitted
+    ? '提交成功'
+    : submittedToday
+      ? '每日只可提交1次'
+      : currentStatus?.status === 'failed'
+        ? currentStatus.rejectReason || '截图提交失败'
+        : '请上传分享截图，审核通过后获得积分'
 
   const handleFile = async (event) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
     if (!file.type.startsWith('image/')) {
+      setJustSubmitted(false)
       setStatus({ status: 'failed', rejectReason: '请选择图片文件' })
       return
     }
     setUploading(true)
+    setJustSubmitted(false)
     try {
       const imageDataUrl = await readUploadImageDataUrl(file)
       const result = await submitShareScreenshot(activityKey, {
@@ -2510,13 +2515,16 @@ function ShareScreenshotUploadModal({ activityKey, visitorId, debugDay, shareScr
       })
       const screenshot = { ...(result?.screenshot || { status: 'pending' }), submittedToday: true }
       setStatus(screenshot)
+      setJustSubmitted(true)
       await onSubmitted?.(screenshot)
     } catch (error) {
       const message = error.message || '截图提交失败'
       if (message.includes('每日') || message.includes('今日') || message.includes('只能提交') || message.includes('只能上传')) {
+        setJustSubmitted(false)
         setStatus({ status: 'pending', submittedToday: true })
         return
       }
+      setJustSubmitted(false)
       setStatus({ status: 'failed', rejectReason: message })
       onToast?.(message)
     } finally {
