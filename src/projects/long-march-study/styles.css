@@ -3801,6 +3801,30 @@
   word-break: break-all;
 }
 
+.lm-debug-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.lm-debug-days button {
+  min-width: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.lm-debug-days button.is-active {
+  border-color: #ffd166;
+  background: #ffd166;
+  color: #241714;
+}
+
 .lm-debug-actions {
   display: flex;
   flex-wrap: wrap;

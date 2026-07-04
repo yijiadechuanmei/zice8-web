@@ -17,6 +17,10 @@ export const getBootstrap = (activityKey, visitorId, options = {}) => {
     const separator = path.includes('?') ? '&' : '?'
     path = `${path}${separator}debugContinuousCheckin=1`
   }
+  if (options.debugDay) {
+    const separator = path.includes('?') ? '&' : '?'
+    path = `${path}${separator}debugDay=${encodeURIComponent(options.debugDay)}`
+  }
   return request(path)
 }
 

@@ -401,6 +401,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const [checkinResult, setCheckinResult] = useState(null)
   const [mine, setMine] = useState(null)
   const [shareStatus, setShareStatus] = useState({})
+  const [debugDay, setDebugDay] = useState(0)
   const [selectedRadioScriptKey, setSelectedRadioScriptKey] = useState(LONG_MARCH_RADIO_SCRIPTS[0]?.key || '')
 
   useEffect(() => {
@@ -440,14 +441,17 @@ export default function LongMarchStudyApp({ routeParams }) {
     if (!authReady) return
     setLoading(true)
     try {
-      const data = await getBootstrap(activityKey, visitorId, { debugContinuousCheckin: debugEnabled })
+      const data = await getBootstrap(activityKey, visitorId, {
+        debugContinuousCheckin: debugEnabled && !debugDay,
+        debugDay: debugDay || undefined,
+      })
       setBootstrap(data)
     } catch (error) {
       setToast(error.message || '活动加载失败')
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, debugEnabled, visitorId])
+  }, [activityKey, authReady, debugDay, debugEnabled, visitorId])
 
   useEffect(() => {
     const timer = window.setTimeout(() => refresh(), 0)
@@ -708,6 +712,28 @@ export default function LongMarchStudyApp({ routeParams }) {
     setPage(PAGE.QUIZ)
   }
 
+  const switchDebugDay = async (day) => {
+    if (!authReady) {
+      setDebugDay(day)
+      return
+    }
+    setDebugDay(day)
+    setLoading(true)
+    try {
+      const data = await getBootstrap(activityKey, visitorId, {
+        debugContinuousCheckin: debugEnabled && !day,
+        debugDay: day || undefined,
+      })
+      setBootstrap(data)
+      setCheckinResult(null)
+      setToast(day ? `已切换到第 ${day} 天` : '已恢复自动调试日期')
+    } catch (error) {
+      setToast(error.message || '切换调试日期失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (blockedMessage) return <MessageScreen title={blockedMessage} />
   if (showSplash) return <ParticipationSplashPage participantNo={participantNo} />
   if (loading && !bootstrap) return <MessageScreen title="研学活动加载中" />
@@ -765,13 +791,14 @@ export default function LongMarchStudyApp({ routeParams }) {
           config={config}
           nextCheckin={bootstrap?.nextCheckin}
           today={bootstrap?.today}
-          debugContinuousCheckin={debugEnabled}
+          debugContinuousCheckin={debugEnabled && !debugDay}
           onBack={backToTaskChoice}
           onCheckin={async (location) => {
             try {
               const result = await checkinLocation(activityKey, location.key, {
                 visitorId,
-                debugContinuousCheckin: debugEnabled,
+                debugContinuousCheckin: debugEnabled && !debugDay,
+                debugDay: debugDay || undefined,
               })
               setCheckinResult(result)
               setBootstrap((current) => ({
@@ -979,6 +1006,8 @@ export default function LongMarchStudyApp({ routeParams }) {
           profile={profile}
           authReady={authReady}
           shareStatus={shareStatus}
+          debugDay={debugDay}
+          onSwitchDebugDay={switchDebugDay}
           onTestAllQuestions={startDebugAllQuestions}
           onResetMine={() => resetDebugScope('me')}
           onResetAll={resetAllDebugData}
@@ -1026,6 +1055,8 @@ function DebugPanel({
   profile,
   authReady,
   shareStatus,
+  debugDay,
+  onSwitchDebugDay,
   onTestAllQuestions,
   onResetMine,
   onResetAll,
@@ -1057,6 +1088,13 @@ function DebugPanel({
             <div>微信授权: {authReady ? 'ready' : 'pending'}</div>
             <div>微信分享: {shareLabel}</div>
             <div>shareTitle: {shareStatus.shareTitle || '-'}</div>
+            <div>调试日期: {debugDay ? `第 ${debugDay} 天` : '自动'}</div>
+          </div>
+          <div className="lm-debug-days" aria-label="调试日期切换">
+            <button className={!debugDay ? 'is-active' : ''} type="button" onClick={() => onSwitchDebugDay(0)}>自动</button>
+            {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+              <button className={debugDay === day ? 'is-active' : ''} type="button" key={day} onClick={() => onSwitchDebugDay(day)}>{day}</button>
+            ))}
           </div>
           <div className="lm-debug-actions">
             <button type="button" onClick={onTestAllQuestions}>测试全部题目</button>
