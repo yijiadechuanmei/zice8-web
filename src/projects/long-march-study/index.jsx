@@ -737,7 +737,14 @@ export default function LongMarchStudyApp({ routeParams }) {
   }
 
   if (blockedMessage) return <MessageScreen title={blockedMessage} />
-  if (showSplash) return <ParticipationSplashPage participantNo={participantNo} />
+  if (showSplash) {
+    return (
+      <main className="lm-page">
+        <ParticipationSplashPage participantNo={participantNo} />
+        <ActivityBgmPlayer bgm={bgm} activityKey={activityKey} />
+      </main>
+    )
+  }
   if (loading && !bootstrap) return <MessageScreen title="研学活动加载中" />
 
   return (
