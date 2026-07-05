@@ -5,6 +5,24 @@ import { buildTokenDebug, debugLog, setQuizAuthDebugState } from '../debug/quizA
 import { getQueryParam, isWechatBrowser, sanitizeUrlForWechat } from '../utils/url'
 
 const REAUTH_LIMIT = 2
+const AUTH_NONCE_STORAGE_PREFIX = 'wechat_auth_nonce'
+
+export function getWechatAuthNonceStorageKey(activityKey, nonceParam) {
+  return `${AUTH_NONCE_STORAGE_PREFIX}:${activityKey}:${nonceParam}`
+}
+
+function createAuthNonce() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function writeAuthNonce(activityKey, nonceParam, nonce) {
+  try {
+    sessionStorage.setItem(getWechatAuthNonceStorageKey(activityKey, nonceParam), nonce)
+  } catch {
+    // sessionStorage may be unavailable; the caller will reject unverified callbacks.
+  }
+}
 
 function getReauthAttemptKey(activityKey) {
   return `quiz_reauth_attempt_${activityKey}`
@@ -82,6 +100,11 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     if (options.authCallbackParam) {
       redirectUrlObject.searchParams.set(options.authCallbackParam, '1')
     }
+    if (options.authCallbackNonceParam) {
+      const nonce = createAuthNonce()
+      writeAuthNonce(activityKey, options.authCallbackNonceParam, nonce)
+      redirectUrlObject.searchParams.set(options.authCallbackNonceParam, nonce)
+    }
     const redirectUrl = redirectUrlObject.toString()
     const oauthParams = new URLSearchParams({
       activity_key: activityKey,
@@ -102,7 +125,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, options.authCallbackParam, requiresWechatBrowser])
+  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return

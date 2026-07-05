@@ -4,7 +4,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { getVisitorId, trackPageView } from '../../shared/analytics'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { enableMobileDebug } from '../../shared/debug/mobileDebug'
-import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { getWechatAuthNonceStorageKey, useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, isWechatBrowser } from '../../shared/utils/url'
 import { setDocumentTitle } from '../../shared/utils/documentTitle'
@@ -58,6 +58,7 @@ const QUIZ_DAILY_ATTEMPT_LIMIT = 2
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
 const INVITER_QUERY = 'inviter'
 const AUTH_CALLBACK_QUERY = 'lm_auth_callback'
+const AUTH_CALLBACK_NONCE_QUERY = 'lm_auth_nonce'
 const AUTH_VERIFIED_SESSION_PREFIX = 'long_march_auth_verified'
 const CHECKIN_POSTER_LOCATION_ALIASES = [
   ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
@@ -360,6 +361,18 @@ function clearVerifiedAuthSession(activityKey) {
   }
 }
 
+function consumeAuthCallbackNonce(activityKey, nonce) {
+  if (!nonce) return false
+  try {
+    const key = getWechatAuthNonceStorageKey(activityKey, AUTH_CALLBACK_NONCE_QUERY)
+    const expected = sessionStorage.getItem(key)
+    sessionStorage.removeItem(key)
+    return Boolean(expected && expected === nonce)
+  } catch {
+    return false
+  }
+}
+
 function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
   const value = String(text || '')
   const minSize = options.minSize || 18
@@ -471,8 +484,9 @@ export default function LongMarchStudyApp({ routeParams }) {
     const token = getTokenFromUrl()
     const url = new URL(window.location.href)
     const isAuthCallback = url.searchParams.get(AUTH_CALLBACK_QUERY) === '1'
+    const isTrustedAuthCallback = isAuthCallback && consumeAuthCallbackNonce(activityKey, url.searchParams.get(AUTH_CALLBACK_NONCE_QUERY))
     if (token) {
-      if (isAuthCallback) {
+      if (isTrustedAuthCallback) {
         setToken(token)
         writeVerifiedAuthSession(activityKey)
       } else {
@@ -483,6 +497,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       url.searchParams.delete('code')
       url.searchParams.delete('state')
       url.searchParams.delete(AUTH_CALLBACK_QUERY)
+      url.searchParams.delete(AUTH_CALLBACK_NONCE_QUERY)
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
       return
     }
@@ -514,6 +529,7 @@ export default function LongMarchStudyApp({ routeParams }) {
     : publicConfig, [publicConfig])
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, authPublicConfig, {
     authCallbackParam: AUTH_CALLBACK_QUERY,
+    authCallbackNonceParam: AUTH_CALLBACK_NONCE_QUERY,
     blockSnapshotUser: true,
   })
 
