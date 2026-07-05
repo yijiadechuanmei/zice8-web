@@ -8,7 +8,7 @@ import { getWechatAuthNonceStorageKey, useWechatAuth } from '../../shared/hooks/
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, isWechatBrowser } from '../../shared/utils/url'
 import { setDocumentTitle } from '../../shared/utils/documentTitle'
-import { removeToken, setToken } from '../../shared/api/request'
+import { getToken, removeToken, setToken } from '../../shared/api/request'
 import {
   answerQuiz,
   checkinLocation,
@@ -60,6 +60,7 @@ const INVITER_QUERY = 'inviter'
 const AUTH_CALLBACK_QUERY = 'lm_auth_callback'
 const AUTH_CALLBACK_NONCE_QUERY = 'lm_auth_nonce'
 const AUTH_VERIFIED_SESSION_PREFIX = 'long_march_auth_verified'
+const AUTH_VERIFIED_TOKEN_PREFIX = 'long_march_auth_token_verified'
 const CHECKIN_POSTER_LOCATION_ALIASES = [
   ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
   ['beimen', 'north_gate', 'north-gate', '北门', '城楼', '镇远楼'],
@@ -361,6 +362,47 @@ function clearVerifiedAuthSession(activityKey) {
   }
 }
 
+function getVerifiedTokenStorageKey(activityKey) {
+  return `${AUTH_VERIFIED_TOKEN_PREFIX}:${activityKey}`
+}
+
+function getTokenFingerprint(token) {
+  const value = String(token || '')
+  if (!value) return ''
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0
+  }
+  return `${value.length}:${Math.abs(hash)}`
+}
+
+function hasVerifiedAuthToken(activityKey) {
+  try {
+    const token = getToken()
+    const fingerprint = getTokenFingerprint(token)
+    return Boolean(fingerprint && localStorage.getItem(getVerifiedTokenStorageKey(activityKey)) === fingerprint)
+  } catch {
+    return false
+  }
+}
+
+function writeVerifiedAuthToken(activityKey, token) {
+  try {
+    const fingerprint = getTokenFingerprint(token)
+    if (fingerprint) localStorage.setItem(getVerifiedTokenStorageKey(activityKey), fingerprint)
+  } catch {
+    // localStorage may be unavailable; session verification still applies.
+  }
+}
+
+function clearVerifiedAuthToken(activityKey) {
+  try {
+    localStorage.removeItem(getVerifiedTokenStorageKey(activityKey))
+  } catch {
+    // localStorage may be unavailable.
+  }
+}
+
 function consumeAuthCallbackNonce(activityKey, nonce) {
   if (!nonce) return false
   try {
@@ -489,9 +531,11 @@ export default function LongMarchStudyApp({ routeParams }) {
       if (isTrustedAuthCallback) {
         setToken(token)
         writeVerifiedAuthSession(activityKey)
+        writeVerifiedAuthToken(activityKey, token)
       } else {
         removeToken()
         clearVerifiedAuthSession(activityKey)
+        clearVerifiedAuthToken(activityKey)
       }
       url.searchParams.delete('token')
       url.searchParams.delete('code')
@@ -501,12 +545,13 @@ export default function LongMarchStudyApp({ routeParams }) {
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
       return
     }
-    if (isShareEntry && !isAuthCallback) {
+    if (isShareEntry && !isAuthCallback && !hasVerifiedAuthToken(activityKey)) {
       removeToken()
       clearVerifiedAuthSession(activityKey)
+      clearVerifiedAuthToken(activityKey)
       return
     }
-    if (!hasVerifiedAuthSession(activityKey)) removeToken()
+    if (!hasVerifiedAuthSession(activityKey) && !hasVerifiedAuthToken(activityKey)) removeToken()
   }, [activityKey, isShareEntry])
 
   useEffect(() => {
