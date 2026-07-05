@@ -644,13 +644,7 @@ export default function LongMarchStudyApp({ routeParams }) {
     if (typeof window === 'undefined') return ''
     const options = typeof input === 'string' ? { memberCode: input } : input
     const memberCode = options.memberCode ?? profile?.memberCode
-    const url = new URL(window.location.href)
-    url.pathname = `/long_march_study/${encodeURIComponent(activityKey)}`
-    url.hash = ''
-    url.searchParams.delete('token')
-    url.searchParams.delete('code')
-    url.searchParams.delete('state')
-    url.searchParams.delete(RADIO_RECORDING_QUERY)
+    const url = new URL(`/long_march_study/${encodeURIComponent(activityKey)}`, window.location.origin)
     url.searchParams.set('share', '1')
     if (memberCode) url.searchParams.set(INVITER_QUERY, memberCode)
     if (options.source) url.searchParams.set('share_source', options.source)
