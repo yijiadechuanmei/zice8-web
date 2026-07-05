@@ -1106,6 +1106,7 @@ export default function LongMarchStudyApp({ routeParams }) {
           debugDay={debugDay}
           onSwitchDebugDay={switchDebugDay}
           onTestAllQuestions={startDebugAllQuestions}
+          onTestSubmitToast={() => setToast('提交失败，请稍后重试')}
           onResetMine={() => resetDebugScope('me')}
           onResetAll={resetAllDebugData}
           onLogState={() => console.log('[long-march-study debug state]', {
@@ -1155,6 +1156,7 @@ function DebugPanel({
   debugDay,
   onSwitchDebugDay,
   onTestAllQuestions,
+  onTestSubmitToast,
   onResetMine,
   onResetAll,
   onLogState,
@@ -1195,6 +1197,7 @@ function DebugPanel({
           </div>
           <div className="lm-debug-actions">
             <button type="button" onClick={onTestAllQuestions}>测试全部题目</button>
+            <button type="button" onClick={onTestSubmitToast}>测试提交提示</button>
             <button type="button" onClick={onResetMine}>重置我的数据</button>
             <button className="is-danger" type="button" onClick={onResetAll}>重置全部数据</button>
             <button className="is-dark" type="button" onClick={onLogState}>console.log 状态</button>
