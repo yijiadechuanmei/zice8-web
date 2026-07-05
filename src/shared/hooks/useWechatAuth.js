@@ -78,7 +78,11 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     setAuthReady(false)
     setAuthStatus('redirecting')
 
-    const redirectUrl = sanitizeUrlForWechat(window.location.href)
+    const redirectUrlObject = new URL(sanitizeUrlForWechat(window.location.href))
+    if (options.authCallbackParam) {
+      redirectUrlObject.searchParams.set(options.authCallbackParam, '1')
+    }
+    const redirectUrl = redirectUrlObject.toString()
     const oauthParams = new URLSearchParams({
       activity_key: activityKey,
       redirect_url: redirectUrl,
@@ -98,7 +102,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, requiresWechatBrowser])
+  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, options.authCallbackParam, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return

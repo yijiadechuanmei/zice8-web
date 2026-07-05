@@ -8,7 +8,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getQueryParam, getTokenFromUrl, isWechatBrowser } from '../../shared/utils/url'
 import { setDocumentTitle } from '../../shared/utils/documentTitle'
-import { setToken } from '../../shared/api/request'
+import { removeToken, setToken } from '../../shared/api/request'
 import {
   answerQuiz,
   checkinLocation,
@@ -57,6 +57,8 @@ const POSTER_STAGE_HEIGHT = 1448
 const QUIZ_DAILY_ATTEMPT_LIMIT = 2
 const RADIO_RECORDING_QUERY = 'radio_recording_id'
 const INVITER_QUERY = 'inviter'
+const AUTH_CALLBACK_QUERY = 'lm_auth_callback'
+const AUTH_VERIFIED_SESSION_PREFIX = 'long_march_auth_verified'
 const CHECKIN_POSTER_LOCATION_ALIASES = [
   ['jiujianlou', 'jiujian', 'nine-room', '九间楼', '盘县会议会址', '会议会址'],
   ['beimen', 'north_gate', 'north-gate', '北门', '城楼', '镇远楼'],
@@ -330,6 +332,34 @@ function writeCachedParticipationNo(activityKey, visitorId, participantNo) {
   }
 }
 
+function getAuthVerifiedSessionKey(activityKey) {
+  return `${AUTH_VERIFIED_SESSION_PREFIX}:${activityKey}`
+}
+
+function hasVerifiedAuthSession(activityKey) {
+  try {
+    return sessionStorage.getItem(getAuthVerifiedSessionKey(activityKey)) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeVerifiedAuthSession(activityKey) {
+  try {
+    sessionStorage.setItem(getAuthVerifiedSessionKey(activityKey), '1')
+  } catch {
+    // sessionStorage may be unavailable; OAuth still remains authoritative for this load.
+  }
+}
+
+function clearVerifiedAuthSession(activityKey) {
+  try {
+    sessionStorage.removeItem(getAuthVerifiedSessionKey(activityKey))
+  } catch {
+    // sessionStorage may be unavailable.
+  }
+}
+
 function drawTextFit(ctx, text, x, y, width, fontSize, options = {}) {
   const value = String(text || '')
   const minSize = options.minSize || 18
@@ -391,9 +421,16 @@ export default function LongMarchStudyApp({ routeParams }) {
   const debugUiVisible = useMemo(() => getQueryParam('debug_ui') === '1', [])
   const initialRadioRecordingId = useMemo(() => getQueryParam(RADIO_RECORDING_QUERY) || '', [])
   const inviterCode = useMemo(() => getQueryParam(INVITER_QUERY) || '', [])
+  const isShareEntry = useMemo(() => {
+    const search = new URLSearchParams(window.location.search)
+    return search.get('share') === '1' ||
+      search.has(INVITER_QUERY) ||
+      search.has('share_source') ||
+      search.has('share_location')
+  }, [])
   const cachedParticipationNo = useMemo(
-    () => readCachedParticipationNo(activityKey, visitorId),
-    [activityKey, visitorId],
+    () => isShareEntry ? 0 : readCachedParticipationNo(activityKey, visitorId),
+    [activityKey, isShareEntry, visitorId],
   )
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
@@ -432,8 +469,30 @@ export default function LongMarchStudyApp({ routeParams }) {
 
   useEffect(() => {
     const token = getTokenFromUrl()
-    if (token) setToken(token)
-  }, [])
+    const url = new URL(window.location.href)
+    const isAuthCallback = url.searchParams.get(AUTH_CALLBACK_QUERY) === '1'
+    if (token) {
+      if (isAuthCallback) {
+        setToken(token)
+        writeVerifiedAuthSession(activityKey)
+      } else {
+        removeToken()
+        clearVerifiedAuthSession(activityKey)
+      }
+      url.searchParams.delete('token')
+      url.searchParams.delete('code')
+      url.searchParams.delete('state')
+      url.searchParams.delete(AUTH_CALLBACK_QUERY)
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+      return
+    }
+    if (isShareEntry && !isAuthCallback) {
+      removeToken()
+      clearVerifiedAuthSession(activityKey)
+      return
+    }
+    if (!hasVerifiedAuthSession(activityKey)) removeToken()
+  }, [activityKey, isShareEntry])
 
   useEffect(() => {
     if (debugUiVisible && (getQueryParam('debug') === '1' || getQueryParam('debug') === 'mobile')) {
@@ -453,7 +512,10 @@ export default function LongMarchStudyApp({ routeParams }) {
   const authPublicConfig = useMemo(() => publicConfig
     ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true }
     : publicConfig, [publicConfig])
-  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, authPublicConfig, { blockSnapshotUser: true })
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, authPublicConfig, {
+    authCallbackParam: AUTH_CALLBACK_QUERY,
+    blockSnapshotUser: true,
+  })
 
   const refresh = useCallback(async () => {
     if (!authReady) return
