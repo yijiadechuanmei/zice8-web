@@ -651,10 +651,10 @@ function QuizMain({ routeParams }) {
 
   if (blockedMessage) {
     return (
-      <main className="quiz-loading-page" style={{ '--quiz-common-bg': `url(${quizAssets.common.bg})` }}>
-        <div className="px-6 text-center text-white">
-          <div className="text-[24px] font-bold">{blockedMessage}</div>
-          <div className="mt-3 text-[14px] text-white/75">请复制链接到微信后访问</div>
+      <main className="quiz-loading-page quiz-wechat-blocked-page">
+        <div className="quiz-wechat-blocked-message">
+          <div>{blockedMessage}</div>
+          <div className="quiz-wechat-blocked-subtitle">请复制链接到微信后访问</div>
         </div>
         {debugAuth ? <div className="quiz-version-badge">v{QUIZ_VERSION}</div> : null}
       </main>

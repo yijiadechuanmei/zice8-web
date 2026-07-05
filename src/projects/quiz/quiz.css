@@ -29,6 +29,25 @@
   justify-content: center;
 }
 
+.quiz-wechat-blocked-page {
+  background-color: #fff;
+  background-image: none;
+  color: #333;
+}
+
+.quiz-wechat-blocked-message {
+  padding: 0 24px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.quiz-wechat-blocked-subtitle {
+  margin-top: 6px;
+  color: #777;
+  font-size: 12px;
+}
+
 .quiz-version-badge {
   position: fixed;
   left: 50%;
