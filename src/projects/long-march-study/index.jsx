@@ -388,6 +388,7 @@ export default function LongMarchStudyApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || LONG_MARCH_STUDY_ACTIVITY_KEY
   const visitorId = useMemo(() => getVisitorId(), [])
   const debugEnabled = useMemo(() => ['1', 'mobile'].includes(getQueryParam('debug')), [])
+  const debugUiVisible = useMemo(() => getQueryParam('debug_ui') === '1', [])
   const initialRadioRecordingId = useMemo(() => getQueryParam(RADIO_RECORDING_QUERY) || '', [])
   const inviterCode = useMemo(() => getQueryParam(INVITER_QUERY) || '', [])
   const cachedParticipationNo = useMemo(
@@ -435,10 +436,10 @@ export default function LongMarchStudyApp({ routeParams }) {
   }, [])
 
   useEffect(() => {
-    if (getQueryParam('debug') === '1' || getQueryParam('debug') === 'mobile') {
+    if (debugUiVisible && (getQueryParam('debug') === '1' || getQueryParam('debug') === 'mobile')) {
       enableMobileDebug()
     }
-  }, [])
+  }, [debugUiVisible])
 
   useEffect(() => {
     getPublicConfig(activityKey)
@@ -1093,7 +1094,7 @@ export default function LongMarchStudyApp({ routeParams }) {
       {quizNotice ? <CheckinDoneModal message={quizNotice} onClose={() => setQuizNotice('')} /> : null}
       {toast ? <Toast text={toast} onClose={() => setToast('')} /> : null}
       <RadioNoticeModal message={radioNotice} onClose={() => setRadioNotice('')} />
-      {debugEnabled ? (
+      {debugEnabled && debugUiVisible ? (
         <DebugPanel
           activityKey={activityKey}
           page={page}
