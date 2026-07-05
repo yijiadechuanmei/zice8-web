@@ -1366,15 +1366,14 @@ function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, o
       setQuizState(data.attempt)
       setFeedback(data.answer)
     } catch (error) {
-      onToast(error.message || '提交答案失败')
+      onToast?.(error.message || '提交失败，请稍后重试')
     } finally {
       setSubmitting(false)
     }
   }
 
   const nextQuestion = async () => {
-    setFeedback(null)
-    setSelectedOptionId('')
+    if (submitting) return
     if (index + 1 >= questionCount) {
       if (isDebugAllQuestions) {
         const answers = quizState?.answers || []
@@ -1391,10 +1390,19 @@ function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, o
         })
         return
       }
-      const result = await finishQuiz(activityKey, quizState.id, { visitorId, debugDay: debugDay || undefined })
-      onResult(result)
+      setSubmitting(true)
+      try {
+        const result = await finishQuiz(activityKey, quizState.id, { visitorId, debugDay: debugDay || undefined })
+        onResult(result)
+      } catch (error) {
+        onToast?.(error.message || '提交失败，请稍后重试')
+      } finally {
+        setSubmitting(false)
+      }
       return
     }
+    setFeedback(null)
+    setSelectedOptionId('')
     setIndex(index + 1)
   }
 
@@ -1451,7 +1459,7 @@ function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, o
             disabled={!selectedOptionId || submitting || Boolean(feedback)}
             onClick={submitAnswer}
           >
-            提&nbsp;&nbsp;&nbsp;&nbsp;交
+            {submitting ? '提交中...' : '提\u00a0\u00a0\u00a0\u00a0交'}
           </button>
         </div>
       </div>
