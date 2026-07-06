@@ -270,3 +270,14 @@ export function closePaymentDemoOrder(orderNo) {
     method: 'POST',
   })
 }
+
+export function createPaymentDemoTransfer(payload) {
+  return adminRequest('/pay/demo/transfers', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function getPaymentDemoTransfer(payoutNo) {
+  return adminRequest(`/pay/demo/transfers/${encodeURIComponent(payoutNo)}`)
+}

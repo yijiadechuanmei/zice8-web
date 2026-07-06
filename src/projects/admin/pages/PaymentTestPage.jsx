@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Collapse,
   Descriptions,
   Input,
@@ -14,6 +15,7 @@ import {
 } from 'antd'
 import {
   CloseCircleOutlined,
+  SendOutlined,
   PlayCircleOutlined,
   ReloadOutlined,
   SyncOutlined,
@@ -22,7 +24,9 @@ import {
 import {
   closePaymentDemoOrder,
   createPaymentDemoJsapiOrder,
+  createPaymentDemoTransfer,
   getPaymentDemoOrder,
+  getPaymentDemoTransfer,
   syncPaymentDemoOrder,
 } from '../api'
 
@@ -42,6 +46,16 @@ export default function PaymentTestPage() {
   const [polling, setPolling] = useState(false)
   const [order, setOrder] = useState(null)
   const [paymentPayload, setPaymentPayload] = useState(null)
+  const [transferOpenid, setTransferOpenid] = useState('')
+  const [transferAmount, setTransferAmount] = useState(1)
+  const [transferSceneId] = useState('1000')
+  const [transferPerception, setTransferPerception] = useState('现金营销奖励')
+  const [transferRemark, setTransferRemark] = useState('Zice8 商家转账测试')
+  const [transferConfirmed, setTransferConfirmed] = useState(false)
+  const [creatingTransfer, setCreatingTransfer] = useState(false)
+  const [queryingTransfer, setQueryingTransfer] = useState(false)
+  const [transferPayload, setTransferPayload] = useState(null)
+  const [transferOrder, setTransferOrder] = useState(null)
   const pollTimerRef = useRef(null)
   const pollStartedAtRef = useRef(0)
 
@@ -193,6 +207,62 @@ export default function PaymentTestPage() {
       message.error(err.message || '微信支付调起失败')
     } finally {
       setInvoking(false)
+    }
+  }
+
+  async function handleCreateTransfer() {
+    if (!transferOpenid.trim()) {
+      message.warning('请输入转账 openid')
+      return
+    }
+    if (!transferConfirmed) {
+      message.warning('请先勾选确认转账')
+      return
+    }
+    setCreatingTransfer(true)
+    try {
+      const data = await createPaymentDemoTransfer({
+        openid: transferOpenid.trim(),
+        amount: transferAmount,
+        transferSceneId,
+        userRecvPerception: transferPerception.trim(),
+        remark: transferRemark.trim(),
+        confirmTransfer: true,
+      })
+      setTransferPayload(data)
+      setTransferOrder({
+        payoutNo: data.payoutNo,
+        status: 'accepted',
+        amount: transferAmount,
+        currency: 'CNY',
+        provider: 'wechat_transfer',
+        providerBatchId: data.outBillNo,
+        providerDetailId: data.transferBillNo,
+        updatedAt: new Date().toISOString(),
+      })
+      message.success(data.providerMode === 'wechat' ? '商家转账请求已提交微信' : 'mock 商家转账已创建')
+    } catch (err) {
+      message.error(resolveDemoErrorMessage(err, '创建商家转账失败'))
+    } finally {
+      setCreatingTransfer(false)
+    }
+  }
+
+  async function handleFetchTransfer() {
+    if (!transferPayload?.payoutNo) {
+      message.warning('请先创建商家转账')
+      return
+    }
+    setQueryingTransfer(true)
+    try {
+      const data = await getPaymentDemoTransfer(transferPayload.payoutNo)
+      setTransferOrder(data)
+      return data
+    } catch (err) {
+      message.error(resolveDemoErrorMessage(err, '转账状态查询失败'))
+      throw err
+    } finally {
+      setQueryingTransfer(false)
     }
   }
 
@@ -378,6 +448,113 @@ export default function PaymentTestPage() {
             : '当前不是微信内置浏览器。mock mode 可继续验证 API 与订单状态流，但无法真实调起 JSAPI 支付。'}
         </Paragraph>
       </Card>
+
+      <Card className="admin-card" title="商家转账调试">
+        <Alert
+          type="warning"
+          showIcon
+          message="仅限内部调试"
+          description="使用场景固定为现金营销 transferSceneId=1000。mock/test mode 不会真实出款；wechat mode 提交后会向微信发起商家转账到用户零钱，请只填写测试 openid 和小额金额。"
+          style={{ marginBottom: 16 }}
+        />
+
+        <div className="admin-payment-test-grid">
+          <Card size="small" title="创建商家转账" className="admin-card">
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <label className="admin-field-block">
+                <Text strong>openid</Text>
+                <Input
+                  value={transferOpenid}
+                  onChange={(event) => setTransferOpenid(event.target.value)}
+                  placeholder="请输入收款用户 openid"
+                />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>amount（分）</Text>
+                <InputNumber
+                  min={1}
+                  max={100}
+                  value={transferAmount}
+                  onChange={(value) => setTransferAmount(Number(value || 1))}
+                  style={{ width: '100%' }}
+                />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>transferSceneId</Text>
+                <Input value={transferSceneId} disabled />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>userRecvPerception</Text>
+                <Input
+                  maxLength={32}
+                  value={transferPerception}
+                  onChange={(event) => setTransferPerception(event.target.value)}
+                />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>remark</Text>
+                <Input
+                  maxLength={32}
+                  value={transferRemark}
+                  onChange={(event) => setTransferRemark(event.target.value)}
+                />
+              </label>
+              <Checkbox
+                checked={transferConfirmed}
+                onChange={(event) => setTransferConfirmed(event.target.checked)}
+              >
+                我确认这是测试 openid，wechat mode 会真实转账到用户零钱
+              </Checkbox>
+              <Button
+                danger
+                type="primary"
+                icon={<SendOutlined />}
+                loading={creatingTransfer}
+                onClick={handleCreateTransfer}
+              >
+                发起商家转账
+              </Button>
+            </Space>
+          </Card>
+
+          <Card size="small" title="转账状态" className="admin-card">
+            {transferPayload || transferOrder ? (
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                <Descriptions column={1} size="small" bordered>
+                  <Descriptions.Item label="payoutNo">{transferPayload?.payoutNo || transferOrder?.payoutNo}</Descriptions.Item>
+                  <Descriptions.Item label="providerMode">{transferPayload?.providerMode || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="status">
+                    <Tag color={transferStatusColor(transferOrder?.status || transferPayload?.status)}>
+                      {transferOrder?.status || transferPayload?.status || 'unknown'}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="amount">{transferOrder?.amount ?? transferAmount}</Descriptions.Item>
+                  <Descriptions.Item label="outBillNo">{transferPayload?.outBillNo || transferOrder?.providerBatchId || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="transferBillNo">
+                    {transferPayload?.transferBillNo || transferOrder?.providerDetailId || '-'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="failureCode">{transferOrder?.failureCode || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="failureReason">{transferOrder?.failureReason || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="notifyReceivedAt">{formatDateTime(transferOrder?.notifyReceivedAt)}</Descriptions.Item>
+                  <Descriptions.Item label="updatedAt">{formatDateTime(transferOrder?.updatedAt)}</Descriptions.Item>
+                </Descriptions>
+                <Space>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={handleFetchTransfer}
+                    loading={queryingTransfer}
+                    disabled={!transferPayload?.payoutNo}
+                  >
+                    查询转账状态
+                  </Button>
+                </Space>
+              </Space>
+            ) : (
+              <Text type="secondary">创建商家转账后，这里会显示 payoutNo 和微信返回的单号。</Text>
+            )}
+          </Card>
+        </div>
+      </Card>
     </div>
   )
 }
@@ -388,6 +565,15 @@ function statusColor(status) {
   if (status === 'failed') return 'error'
   if (status === 'closed') return 'default'
   if (status === 'pending') return 'default'
+  return 'warning'
+}
+
+function transferStatusColor(status) {
+  const normalized = String(status || '').toLowerCase()
+  if (['success', 'accepted'].includes(normalized)) return 'success'
+  if (['processing', 'pending'].includes(normalized)) return 'processing'
+  if (['failed', 'fail'].includes(normalized)) return 'error'
+  if (normalized === 'canceled') return 'default'
   return 'warning'
 }
 
