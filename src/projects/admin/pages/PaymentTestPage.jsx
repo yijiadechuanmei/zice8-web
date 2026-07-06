@@ -49,7 +49,6 @@ export default function PaymentTestPage() {
   const [transferOpenid, setTransferOpenid] = useState('')
   const [transferAmount, setTransferAmount] = useState(1)
   const [transferSceneId] = useState('1000')
-  const [transferPerception, setTransferPerception] = useState('现金营销奖励')
   const [transferRemark, setTransferRemark] = useState('Zice8 商家转账测试')
   const [transferActivityName, setTransferActivityName] = useState('Zice8支付链路测试')
   const [transferRewardDesc, setTransferRewardDesc] = useState('Zice8 商家转账测试')
@@ -231,7 +230,6 @@ export default function PaymentTestPage() {
         openid: transferOpenid.trim(),
         amount: transferAmount,
         transferSceneId,
-        userRecvPerception: transferPerception.trim(),
         remark: transferRemark.trim(),
         sceneReportInfos: [
           { infoType: '活动名称', infoContent: transferActivityName.trim() },
@@ -492,14 +490,6 @@ export default function PaymentTestPage() {
               <label className="admin-field-block">
                 <Text strong>transferSceneId</Text>
                 <Input value={transferSceneId} disabled />
-              </label>
-              <label className="admin-field-block">
-                <Text strong>userRecvPerception</Text>
-                <Input
-                  maxLength={32}
-                  value={transferPerception}
-                  onChange={(event) => setTransferPerception(event.target.value)}
-                />
               </label>
               <label className="admin-field-block">
                 <Text strong>remark</Text>
