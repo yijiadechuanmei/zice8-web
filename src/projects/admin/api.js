@@ -287,3 +287,9 @@ export function retryPaymentDemoTransfer(payoutNo) {
     method: 'POST',
   })
 }
+
+export function syncPaymentDemoTransfer(payoutNo) {
+  return adminRequest(`/pay/demo/transfers/${encodeURIComponent(payoutNo)}/sync`, {
+    method: 'POST',
+  })
+}

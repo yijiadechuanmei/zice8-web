@@ -28,6 +28,7 @@ import {
   getPaymentDemoOrder,
   getPaymentDemoTransfer,
   retryPaymentDemoTransfer,
+  syncPaymentDemoTransfer,
   syncPaymentDemoOrder,
 } from '../api'
 
@@ -57,6 +58,7 @@ export default function PaymentTestPage() {
   const [creatingTransfer, setCreatingTransfer] = useState(false)
   const [queryingTransfer, setQueryingTransfer] = useState(false)
   const [retryingTransfer, setRetryingTransfer] = useState(false)
+  const [syncingTransfer, setSyncingTransfer] = useState(false)
   const [transferPayload, setTransferPayload] = useState(null)
   const [transferOrder, setTransferOrder] = useState(null)
   const pollTimerRef = useRef(null)
@@ -278,6 +280,42 @@ export default function PaymentTestPage() {
       throw err
     } finally {
       setQueryingTransfer(false)
+    }
+  }
+
+  async function handleSyncTransfer() {
+    const payoutNo = transferPayload?.payoutNo || transferOrder?.payoutNo
+    if (!payoutNo) {
+      message.warning('请先创建商家转账')
+      return
+    }
+    setSyncingTransfer(true)
+    try {
+      const data = await syncPaymentDemoTransfer(payoutNo)
+      setTransferOrder((current) => ({
+        ...(current || {}),
+        payoutNo: data.payoutNo,
+        status: data.status || current?.status,
+        providerDetailId: data.transferBillNo || current?.providerDetailId,
+        failureCode: data.failureCode || null,
+        failureReason: data.failureReason || null,
+        notifyReceivedAt: data.notifyReceivedAt || current?.notifyReceivedAt,
+        updatedAt: new Date().toISOString(),
+        wechatState: data.wechatState,
+      }))
+      if (data.status === 'success') {
+        message.success('微信转账已成功，本地状态已同步')
+      } else if (data.status === 'failed') {
+        message.error(data.failureReason || `微信转账失败：${data.wechatState || '-'}`)
+      } else {
+        message.info(`微信当前状态：${data.wechatState || data.status}`)
+      }
+      return data
+    } catch (err) {
+      message.error(resolveDemoErrorMessage(err, '同步微信转账状态失败'))
+      throw err
+    } finally {
+      setSyncingTransfer(false)
     }
   }
 
@@ -582,6 +620,7 @@ export default function PaymentTestPage() {
                       {transferOrder?.status || transferPayload?.status || 'unknown'}
                     </Tag>
                   </Descriptions.Item>
+                  <Descriptions.Item label="wechatState">{transferOrder?.wechatState || '-'}</Descriptions.Item>
                   <Descriptions.Item label="amount">{transferOrder?.amount ?? transferAmount}</Descriptions.Item>
                   <Descriptions.Item label="outBillNo">{transferPayload?.outBillNo || transferOrder?.providerBatchId || '-'}</Descriptions.Item>
                   <Descriptions.Item label="transferBillNo">
@@ -599,7 +638,16 @@ export default function PaymentTestPage() {
                     loading={queryingTransfer}
                     disabled={!transferPayload?.payoutNo}
                   >
-                    查询转账状态
+                    查询本地状态
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<SyncOutlined />}
+                    onClick={handleSyncTransfer}
+                    loading={syncingTransfer}
+                    disabled={!transferPayload?.payoutNo}
+                  >
+                    同步微信状态
                   </Button>
                   <Button
                     icon={<SyncOutlined />}
