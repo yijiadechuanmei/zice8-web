@@ -61,6 +61,7 @@ export default function PaymentTestPage() {
   const [syncingTransfer, setSyncingTransfer] = useState(false)
   const [transferPayload, setTransferPayload] = useState(null)
   const [transferOrder, setTransferOrder] = useState(null)
+  const [existingPayoutNo, setExistingPayoutNo] = useState('')
   const pollTimerRef = useRef(null)
   const pollStartedAtRef = useRef(0)
 
@@ -266,13 +267,16 @@ export default function PaymentTestPage() {
   }
 
   async function handleFetchTransfer() {
-    if (!transferPayload?.payoutNo) {
-      message.warning('请先创建商家转账')
+    const payoutNo = transferPayload?.payoutNo || transferOrder?.payoutNo || existingPayoutNo.trim()
+    if (!payoutNo) {
+      message.warning('请输入或创建商家转账单号')
       return
     }
     setQueryingTransfer(true)
     try {
-      const data = await getPaymentDemoTransfer(transferPayload.payoutNo)
+      const data = await getPaymentDemoTransfer(payoutNo)
+      setExistingPayoutNo(data.payoutNo)
+      setTransferPayload((current) => ({ ...(current || {}), payoutNo: data.payoutNo }))
       setTransferOrder(data)
       return data
     } catch (err) {
@@ -281,6 +285,14 @@ export default function PaymentTestPage() {
     } finally {
       setQueryingTransfer(false)
     }
+  }
+
+  async function handleLoadExistingTransfer() {
+    if (!existingPayoutNo.trim()) {
+      message.warning('请输入已有 payoutNo')
+      return
+    }
+    await handleFetchTransfer()
   }
 
   async function handleSyncTransfer() {
@@ -610,6 +622,16 @@ export default function PaymentTestPage() {
           </Card>
 
           <Card size="small" title="转账状态" className="admin-card">
+            <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
+              <Input
+                value={existingPayoutNo}
+                onChange={(event) => setExistingPayoutNo(event.target.value)}
+                placeholder="输入已有 payoutNo 继续同步"
+              />
+              <Button icon={<ReloadOutlined />} onClick={handleLoadExistingTransfer} loading={queryingTransfer}>
+                载入
+              </Button>
+            </Space.Compact>
             {transferPayload || transferOrder ? (
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <Descriptions column={1} size="small" bordered>
@@ -636,7 +658,7 @@ export default function PaymentTestPage() {
                     icon={<ReloadOutlined />}
                     onClick={handleFetchTransfer}
                     loading={queryingTransfer}
-                    disabled={!transferPayload?.payoutNo}
+                    disabled={!transferPayload?.payoutNo && !transferOrder?.payoutNo && !existingPayoutNo.trim()}
                   >
                     查询本地状态
                   </Button>
@@ -645,7 +667,7 @@ export default function PaymentTestPage() {
                     icon={<SyncOutlined />}
                     onClick={handleSyncTransfer}
                     loading={syncingTransfer}
-                    disabled={!transferPayload?.payoutNo}
+                    disabled={!transferPayload?.payoutNo && !transferOrder?.payoutNo}
                   >
                     同步微信状态
                   </Button>
