@@ -27,6 +27,7 @@ import {
   createPaymentDemoTransfer,
   getPaymentDemoOrder,
   getPaymentDemoTransfer,
+  retryPaymentDemoTransfer,
   syncPaymentDemoOrder,
 } from '../api'
 
@@ -47,7 +48,7 @@ export default function PaymentTestPage() {
   const [order, setOrder] = useState(null)
   const [paymentPayload, setPaymentPayload] = useState(null)
   const [transferOpenid, setTransferOpenid] = useState('')
-  const [transferAmount, setTransferAmount] = useState(1)
+  const [transferAmount, setTransferAmount] = useState(30)
   const [transferSceneId] = useState('1000')
   const [transferRemark, setTransferRemark] = useState('Zice8 商家转账测试')
   const [transferActivityName, setTransferActivityName] = useState('Zice8支付链路测试')
@@ -55,6 +56,7 @@ export default function PaymentTestPage() {
   const [transferConfirmed, setTransferConfirmed] = useState(false)
   const [creatingTransfer, setCreatingTransfer] = useState(false)
   const [queryingTransfer, setQueryingTransfer] = useState(false)
+  const [retryingTransfer, setRetryingTransfer] = useState(false)
   const [transferPayload, setTransferPayload] = useState(null)
   const [transferOrder, setTransferOrder] = useState(null)
   const pollTimerRef = useRef(null)
@@ -240,15 +242,20 @@ export default function PaymentTestPage() {
       setTransferPayload(data)
       setTransferOrder({
         payoutNo: data.payoutNo,
-        status: 'accepted',
+        status: String(data.status || '').toLowerCase() === 'failed' ? 'failed' : 'accepted',
         amount: transferAmount,
         currency: 'CNY',
         provider: 'wechat_transfer',
         providerBatchId: data.outBillNo,
         providerDetailId: data.transferBillNo,
+        failureReason: data.errorMessage || null,
         updatedAt: new Date().toISOString(),
       })
-      message.success(data.providerMode === 'wechat' ? '商家转账请求已提交微信' : 'mock 商家转账已创建')
+      if (String(data.status || '').toLowerCase() === 'failed') {
+        message.error(data.errorMessage || '商家转账提交失败，可原单号重试')
+      } else {
+        message.success(data.providerMode === 'wechat' ? '商家转账请求已提交微信' : 'mock 商家转账已创建')
+      }
     } catch (err) {
       message.error(resolveDemoErrorMessage(err, '创建商家转账失败'))
     } finally {
@@ -271,6 +278,37 @@ export default function PaymentTestPage() {
       throw err
     } finally {
       setQueryingTransfer(false)
+    }
+  }
+
+  async function handleRetryTransfer() {
+    const payoutNo = transferPayload?.payoutNo || transferOrder?.payoutNo
+    if (!payoutNo) {
+      message.warning('请先创建商家转账')
+      return
+    }
+    setRetryingTransfer(true)
+    try {
+      const data = await retryPaymentDemoTransfer(payoutNo)
+      setTransferPayload((current) => ({ ...(current || {}), ...data }))
+      setTransferOrder((current) => ({
+        ...(current || {}),
+        payoutNo: data.payoutNo,
+        status: String(data.status || '').toLowerCase() === 'failed' ? 'failed' : 'accepted',
+        providerBatchId: data.outBillNo || current?.providerBatchId,
+        providerDetailId: data.transferBillNo || current?.providerDetailId,
+        failureReason: data.errorMessage || null,
+        updatedAt: new Date().toISOString(),
+      }))
+      if (String(data.status || '').toLowerCase() === 'failed') {
+        message.error(data.errorMessage || '原单号重试失败')
+      } else {
+        message.success('已使用原单号重新提交商家转账')
+      }
+    } catch (err) {
+      message.error(resolveDemoErrorMessage(err, '原单号重试失败'))
+    } finally {
+      setRetryingTransfer(false)
     }
   }
 
@@ -462,7 +500,7 @@ export default function PaymentTestPage() {
           type="warning"
           showIcon
           message="仅限内部调试"
-          description="使用场景固定为现金营销 transferSceneId=1000。mock/test mode 不会真实出款；wechat mode 提交后会向微信发起商家转账到用户零钱，请只填写测试 openid 和小额金额。"
+          description="使用场景固定为现金营销 transferSceneId=1000。mock/test mode 不会真实出款；wechat mode 提交后会向微信发起商家转账到用户零钱。当前按现金营销配置使用 30 分起测；若返回运营账户资金不足，充值后请使用原单号重试。"
           style={{ marginBottom: 16 }}
         />
 
@@ -480,7 +518,7 @@ export default function PaymentTestPage() {
               <label className="admin-field-block">
                 <Text strong>amount（分）</Text>
                 <InputNumber
-                  min={1}
+                  min={30}
                   max={100}
                   value={transferAmount}
                   onChange={(value) => setTransferAmount(Number(value || 1))}
@@ -562,6 +600,14 @@ export default function PaymentTestPage() {
                     disabled={!transferPayload?.payoutNo}
                   >
                     查询转账状态
+                  </Button>
+                  <Button
+                    icon={<SyncOutlined />}
+                    onClick={handleRetryTransfer}
+                    loading={retryingTransfer}
+                    disabled={!transferPayload?.payoutNo || String(transferOrder?.status || '').toLowerCase() !== 'failed'}
+                  >
+                    原单号重试
                   </Button>
                 </Space>
               </Space>

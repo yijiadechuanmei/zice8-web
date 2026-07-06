@@ -281,3 +281,9 @@ export function createPaymentDemoTransfer(payload) {
 export function getPaymentDemoTransfer(payoutNo) {
   return adminRequest(`/pay/demo/transfers/${encodeURIComponent(payoutNo)}`)
 }
+
+export function retryPaymentDemoTransfer(payoutNo) {
+  return adminRequest(`/pay/demo/transfers/${encodeURIComponent(payoutNo)}/retry`, {
+    method: 'POST',
+  })
+}
