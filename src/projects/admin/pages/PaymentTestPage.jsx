@@ -51,6 +51,8 @@ export default function PaymentTestPage() {
   const [transferSceneId] = useState('1000')
   const [transferPerception, setTransferPerception] = useState('现金营销奖励')
   const [transferRemark, setTransferRemark] = useState('Zice8 商家转账测试')
+  const [transferActivityName, setTransferActivityName] = useState('Zice8支付链路测试')
+  const [transferRewardDesc, setTransferRewardDesc] = useState('Zice8 商家转账测试')
   const [transferConfirmed, setTransferConfirmed] = useState(false)
   const [creatingTransfer, setCreatingTransfer] = useState(false)
   const [queryingTransfer, setQueryingTransfer] = useState(false)
@@ -219,6 +221,10 @@ export default function PaymentTestPage() {
       message.warning('请先勾选确认转账')
       return
     }
+    if (!transferActivityName.trim() || !transferRewardDesc.trim()) {
+      message.warning('请填写活动名称和奖励说明')
+      return
+    }
     setCreatingTransfer(true)
     try {
       const data = await createPaymentDemoTransfer({
@@ -227,6 +233,10 @@ export default function PaymentTestPage() {
         transferSceneId,
         userRecvPerception: transferPerception.trim(),
         remark: transferRemark.trim(),
+        sceneReportInfos: [
+          { infoType: '活动名称', infoContent: transferActivityName.trim() },
+          { infoType: '奖励说明', infoContent: transferRewardDesc.trim() },
+        ],
         confirmTransfer: true,
       })
       setTransferPayload(data)
@@ -497,6 +507,22 @@ export default function PaymentTestPage() {
                   maxLength={32}
                   value={transferRemark}
                   onChange={(event) => setTransferRemark(event.target.value)}
+                />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>活动名称</Text>
+                <Input
+                  maxLength={64}
+                  value={transferActivityName}
+                  onChange={(event) => setTransferActivityName(event.target.value)}
+                />
+              </label>
+              <label className="admin-field-block">
+                <Text strong>奖励说明</Text>
+                <Input
+                  maxLength={64}
+                  value={transferRewardDesc}
+                  onChange={(event) => setTransferRewardDesc(event.target.value)}
                 />
               </label>
               <Checkbox
