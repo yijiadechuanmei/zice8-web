@@ -249,16 +249,21 @@ export default function PaymentTestPage() {
       setTransferOrder({
         payoutNo: data.payoutNo,
         status: String(data.status || '').toLowerCase() === 'failed' ? 'failed' : 'accepted',
+        wechatState: data.status,
         amount: transferAmount,
         currency: 'CNY',
         provider: 'wechat_transfer',
+        providerMode: data.providerMode,
         providerBatchId: data.outBillNo,
         providerDetailId: data.transferBillNo,
+        packageInfo: data.packageInfo,
         failureReason: data.errorMessage || null,
         updatedAt: new Date().toISOString(),
       })
       if (String(data.status || '').toLowerCase() === 'failed') {
         message.error(data.errorMessage || '商家转账提交失败，可原单号重试')
+      } else if (data.status === 'WAIT_USER_CONFIRM') {
+        message.warning('微信等待用户确认收款，请在收款人的手机微信内确认')
       } else {
         message.success(data.providerMode === 'wechat' ? '商家转账请求已提交微信' : 'mock 商家转账已创建')
       }
@@ -694,6 +699,9 @@ export default function PaymentTestPage() {
                   </Descriptions.Item>
                   <Descriptions.Item label="wechatState">{transferOrder?.wechatState || '-'}</Descriptions.Item>
                   <Descriptions.Item label="amount">{transferOrder?.amount ?? transferAmount}</Descriptions.Item>
+                  <Descriptions.Item label="appId">{transferOrder?.appId || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="mchId">{transferOrder?.mchId || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="openid">{transferOrder?.openid || '-'}</Descriptions.Item>
                   <Descriptions.Item label="outBillNo">{transferPayload?.outBillNo || transferOrder?.providerBatchId || '-'}</Descriptions.Item>
                   <Descriptions.Item label="transferBillNo">
                     {transferPayload?.transferBillNo || transferOrder?.providerDetailId || '-'}
