@@ -72,6 +72,9 @@ export default function PaymentTestPage() {
 
   const canClose = ['pending', 'paying'].includes(order?.status || '')
   const isWechat = /MicroMessenger/i.test(window.navigator.userAgent || '')
+  const transferWechatState = transferOrder?.wechatState || transferPayload?.wechatState || ''
+  const transferPackageInfo = transferOrder?.packageInfo || transferPayload?.packageInfo || ''
+  const transferNeedsUserConfirm = transferWechatState === 'WAIT_USER_CONFIRM'
 
   useEffect(() => {
     return () => {
@@ -309,6 +312,7 @@ export default function PaymentTestPage() {
         payoutNo: data.payoutNo,
         status: data.status || current?.status,
         providerDetailId: data.transferBillNo || current?.providerDetailId,
+        packageInfo: data.packageInfo || current?.packageInfo,
         failureCode: data.failureCode || null,
         failureReason: data.failureReason || null,
         notifyReceivedAt: data.notifyReceivedAt || current?.notifyReceivedAt,
@@ -347,6 +351,7 @@ export default function PaymentTestPage() {
         status: String(data.status || '').toLowerCase() === 'failed' ? 'failed' : 'accepted',
         providerBatchId: data.outBillNo || current?.providerBatchId,
         providerDetailId: data.transferBillNo || current?.providerDetailId,
+        packageInfo: data.packageInfo || current?.packageInfo,
         failureReason: data.errorMessage || null,
         updatedAt: new Date().toISOString(),
       }))
@@ -360,6 +365,43 @@ export default function PaymentTestPage() {
     } finally {
       setRetryingTransfer(false)
     }
+  }
+
+  function handleOpenTransferConfirm() {
+    if (!transferPackageInfo) {
+      message.warning('当前单号没有可用的 packageInfo')
+      return
+    }
+    if (!isWechat) {
+      message.warning('请在收款用户的微信内打开后确认收款')
+      return
+    }
+    const payload = {
+      businessType: 'weixinPayTransfer',
+      extraData: {
+        package_info: transferPackageInfo,
+      },
+    }
+    if (window.wx?.openBusinessView) {
+      window.wx.openBusinessView({
+        ...payload,
+        success: () => message.success('已调起微信确认收款'),
+        fail: (error) => message.error(`调起微信确认收款失败：${error?.errMsg || 'unknown'}`),
+      })
+      return
+    }
+    if (window.WeixinJSBridge?.invoke) {
+      window.WeixinJSBridge.invoke('openBusinessView', payload, (res) => {
+        const errMsg = res?.err_msg || res?.errMsg || ''
+        if (/ok$/i.test(errMsg)) {
+          message.success('已调起微信确认收款')
+        } else {
+          message.error(`调起微信确认收款失败：${errMsg || 'unknown'}`)
+        }
+      })
+      return
+    }
+    message.warning('微信 JSBridge 未就绪，请刷新后重试')
   }
 
   function startPolling() {
@@ -634,6 +676,14 @@ export default function PaymentTestPage() {
             </Space.Compact>
             {transferPayload || transferOrder ? (
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                {transferNeedsUserConfirm ? (
+                  <Alert
+                    type="warning"
+                    showIcon
+                    message="微信等待用户确认收款"
+                    description="当前单号已经提交微信，但不会自动入账。需要收款 openid 对应的用户在微信内确认收款；确认后再点“同步微信状态”，本地状态才会变为 success。"
+                  />
+                ) : null}
                 <Descriptions column={1} size="small" bordered>
                   <Descriptions.Item label="payoutNo">{transferPayload?.payoutNo || transferOrder?.payoutNo}</Descriptions.Item>
                   <Descriptions.Item label="providerMode">{transferPayload?.providerMode || '-'}</Descriptions.Item>
@@ -647,6 +697,15 @@ export default function PaymentTestPage() {
                   <Descriptions.Item label="outBillNo">{transferPayload?.outBillNo || transferOrder?.providerBatchId || '-'}</Descriptions.Item>
                   <Descriptions.Item label="transferBillNo">
                     {transferPayload?.transferBillNo || transferOrder?.providerDetailId || '-'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="packageInfo">
+                    {transferPackageInfo ? (
+                      <Paragraph copyable={{ text: transferPackageInfo }} style={{ marginBottom: 0 }}>
+                        {transferPackageInfo}
+                      </Paragraph>
+                    ) : (
+                      '-'
+                    )}
                   </Descriptions.Item>
                   <Descriptions.Item label="failureCode">{transferOrder?.failureCode || '-'}</Descriptions.Item>
                   <Descriptions.Item label="failureReason">{transferOrder?.failureReason || '-'}</Descriptions.Item>
@@ -678,6 +737,13 @@ export default function PaymentTestPage() {
                     disabled={!transferPayload?.payoutNo || String(transferOrder?.status || '').toLowerCase() !== 'failed'}
                   >
                     原单号重试
+                  </Button>
+                  <Button
+                    icon={<WalletOutlined />}
+                    onClick={handleOpenTransferConfirm}
+                    disabled={!transferNeedsUserConfirm || !transferPackageInfo}
+                  >
+                    调起确认收款
                   </Button>
                 </Space>
               </Space>
