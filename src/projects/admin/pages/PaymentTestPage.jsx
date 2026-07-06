@@ -72,9 +72,16 @@ export default function PaymentTestPage() {
 
   const canClose = ['pending', 'paying'].includes(order?.status || '')
   const isWechat = /MicroMessenger/i.test(window.navigator.userAgent || '')
-  const transferWechatState = transferOrder?.wechatState || transferPayload?.wechatState || ''
+  const transferConfirmationRequired =
+    Boolean(transferOrder?.confirmationRequired ?? transferPayload?.confirmationRequired ?? false) ||
+    transferOrder?.wechatState === 'WAIT_USER_CONFIRM' ||
+    transferPayload?.wechatState === 'WAIT_USER_CONFIRM'
+  const transferWechatState =
+    transferOrder?.wechatState ||
+    transferPayload?.wechatState ||
+    (transferConfirmationRequired ? 'WAIT_USER_CONFIRM' : '')
   const transferPackageInfo = transferOrder?.packageInfo || transferPayload?.packageInfo || ''
-  const transferNeedsUserConfirm = transferWechatState === 'WAIT_USER_CONFIRM'
+  const transferNeedsUserConfirm = transferConfirmationRequired || transferWechatState === 'WAIT_USER_CONFIRM'
 
   useEffect(() => {
     return () => {
@@ -254,6 +261,10 @@ export default function PaymentTestPage() {
         currency: 'CNY',
         provider: 'wechat_transfer',
         providerMode: data.providerMode,
+        confirmationRequired: data.confirmationRequired ?? (data.status === 'WAIT_USER_CONFIRM'),
+        appId: data.appId,
+        mchId: data.mchId,
+        openid: data.openid || transferOpenid.trim(),
         providerBatchId: data.outBillNo,
         providerDetailId: data.transferBillNo,
         packageInfo: data.packageInfo,
@@ -318,6 +329,11 @@ export default function PaymentTestPage() {
         status: data.status || current?.status,
         providerDetailId: data.transferBillNo || current?.providerDetailId,
         packageInfo: data.packageInfo || current?.packageInfo,
+        confirmationRequired:
+          data.confirmationRequired ?? current?.confirmationRequired ?? (data.wechatState === 'WAIT_USER_CONFIRM'),
+        appId: data.appId || current?.appId,
+        mchId: data.mchId || current?.mchId,
+        openid: data.openid || current?.openid,
         failureCode: data.failureCode || null,
         failureReason: data.failureReason || null,
         notifyReceivedAt: data.notifyReceivedAt || current?.notifyReceivedAt,
@@ -354,9 +370,14 @@ export default function PaymentTestPage() {
         ...(current || {}),
         payoutNo: data.payoutNo,
         status: String(data.status || '').toLowerCase() === 'failed' ? 'failed' : 'accepted',
+        wechatState: data.status,
         providerBatchId: data.outBillNo || current?.providerBatchId,
         providerDetailId: data.transferBillNo || current?.providerDetailId,
         packageInfo: data.packageInfo || current?.packageInfo,
+        confirmationRequired: data.confirmationRequired ?? (data.status === 'WAIT_USER_CONFIRM'),
+        appId: data.appId || current?.appId,
+        mchId: data.mchId || current?.mchId,
+        openid: data.openid || current?.openid,
         failureReason: data.errorMessage || null,
         updatedAt: new Date().toISOString(),
       }))
@@ -685,19 +706,22 @@ export default function PaymentTestPage() {
                   <Alert
                     type="warning"
                     showIcon
-                    message="微信等待用户确认收款"
-                    description="当前单号已经提交微信，但不会自动入账。需要收款 openid 对应的用户在微信内确认收款；确认后再点“同步微信状态”，本地状态才会变为 success。"
+                    message="微信返回用户确认收款"
+                    description="当前测试链路是用户确认收款模式。若要自动入账，需要接入用户授权免确认模式，并在用户授权后发起转账。"
                   />
                 ) : null}
                 <Descriptions column={1} size="small" bordered>
                   <Descriptions.Item label="payoutNo">{transferPayload?.payoutNo || transferOrder?.payoutNo}</Descriptions.Item>
-                  <Descriptions.Item label="providerMode">{transferPayload?.providerMode || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="providerMode">
+                    {transferPayload?.providerMode || transferOrder?.providerMode || '-'}
+                  </Descriptions.Item>
                   <Descriptions.Item label="status">
                     <Tag color={transferStatusColor(transferOrder?.status || transferPayload?.status)}>
                       {transferOrder?.status || transferPayload?.status || 'unknown'}
                     </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="wechatState">{transferOrder?.wechatState || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="confirmationRequired">{transferNeedsUserConfirm ? 'true' : 'false'}</Descriptions.Item>
                   <Descriptions.Item label="amount">{transferOrder?.amount ?? transferAmount}</Descriptions.Item>
                   <Descriptions.Item label="appId">{transferOrder?.appId || '-'}</Descriptions.Item>
                   <Descriptions.Item label="mchId">{transferOrder?.mchId || '-'}</Descriptions.Item>
@@ -751,7 +775,7 @@ export default function PaymentTestPage() {
                     onClick={handleOpenTransferConfirm}
                     disabled={!transferNeedsUserConfirm || !transferPackageInfo}
                   >
-                    调起确认收款
+                    调起用户确认
                   </Button>
                 </Space>
               </Space>
