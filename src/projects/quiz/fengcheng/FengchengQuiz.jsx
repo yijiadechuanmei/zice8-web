@@ -111,7 +111,7 @@ function StageBackground({ publicConfig, children, className = '' }) {
   return (
     <main className={`fengcheng-page ${className}`}>
       <section className="fengcheng-stage-wrap">
-        <DesignStage height={1624} fitToViewport>
+        <DesignStage height={1624} fitMode="width">
           <div className="fengcheng-bg-fallback" />
           <img className="fengcheng-page-bg" src={assets.pageBackground} alt="" aria-hidden="true" />
           <img className="fengcheng-page-foreground" src={assets.pageForeground} alt="" aria-hidden="true" />
@@ -136,7 +136,7 @@ export function FengchengHomePage({
   return (
     <main className="fengcheng-page fengcheng-home-page">
       <section className="fengcheng-stage-wrap">
-        <DesignStage height={1448} fitToViewport>
+        <DesignStage height={1448} fitMode="width">
           <div className="fengcheng-bg-fallback" />
           <img className="fengcheng-home-bg" src={assets.homeBackground} alt="" aria-hidden="true" />
           <img className="fengcheng-home-foreground" src={assets.homeForeground} alt="" aria-hidden="true" />
@@ -369,7 +369,7 @@ export function FengchengRankPage({
   return (
     <main className="fengcheng-page fengcheng-rank-page">
       <section className="fengcheng-stage-wrap">
-        <DesignStage height={1448} fitToViewport>
+        <DesignStage height={1448} fitMode="width">
           <div className="fengcheng-bg-fallback" />
           <img className="fengcheng-home-bg" src={assets.homeBackground} alt="" aria-hidden="true" />
           <img className="fengcheng-home-foreground" src={assets.homeForeground} alt="" aria-hidden="true" />

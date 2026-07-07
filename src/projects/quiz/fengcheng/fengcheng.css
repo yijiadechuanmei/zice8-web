@@ -11,14 +11,15 @@
 .fengcheng-page {
   display: flex;
   height: 100vh;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow: hidden;
 }
 
 .fengcheng-stage-wrap {
-  width: 100%;
-  max-width: 750px;
+  flex: 0 0 100vw;
+  width: 100vw;
+  max-width: none;
 }
 
 .fengcheng-bg-fallback {
