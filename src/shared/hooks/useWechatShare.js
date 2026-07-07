@@ -4,6 +4,31 @@ import { getQueryParam, sanitizeUrlForWechat } from '../utils/url'
 import { loadWechatJsSdk } from '../utils/wechat'
 
 const SHARE_IMAGE_URL = 'https://web.zice8.com/share/default-share.jpg'
+const INITIAL_PAGE_URL = typeof window !== 'undefined' ? window.location.href : ''
+
+function removeHash(inputUrl) {
+  const parsed = new URL(inputUrl)
+  parsed.hash = ''
+  return parsed.toString()
+}
+
+function isIosWechat() {
+  if (typeof window === 'undefined') return false
+  const ua = window.navigator.userAgent || ''
+  return /MicroMessenger/i.test(ua) && /iP(?:hone|ad|od)/i.test(ua)
+}
+
+function uniqueUrls(urls) {
+  return urls.filter((url, index) => url && urls.indexOf(url) === index)
+}
+
+function getWechatSignatureUrls() {
+  const currentUrl = sanitizeUrlForWechat(window.location.href)
+  const initialUrl = removeHash(INITIAL_PAGE_URL || window.location.href)
+  return isIosWechat()
+    ? uniqueUrls([initialUrl, currentUrl])
+    : uniqueUrls([currentUrl, initialUrl])
+}
 
 function getShareData(activity, url) {
   return {
@@ -36,29 +61,47 @@ export function useWechatShare(activityKey, activity, onStatusChange, options = 
     if (!activityKey || !activity) return
 
     let cancelled = false
-    const url = sanitizeUrlForWechat(window.location.href)
+    const signatureUrls = getWechatSignatureUrls()
+    const shareUrl = sanitizeUrlForWechat(window.location.href)
     const wxDebug = getQueryParam('debug') === 'wx'
     const openTagList = openTagListKey ? openTagListKey.split(',') : []
 
-    async function initWechatShare() {
-      try {
-        onStatusChange?.({
-          signingUrl: url,
-          signatureStatus: 'loading',
-          wxScriptLoadStatus: window.wx ? 'success' : 'idle',
-          wxExists: Boolean(window.wx),
-          wxConfigStatus: 'idle',
-          shareConfigured: false,
+    function configureWechat(wx, signature, signingUrl, attemptIndex) {
+      return new Promise((resolve, reject) => {
+        let settled = false
+        const timeout = window.setTimeout(() => {
+          if (settled) return
+          settled = true
+          reject(new Error('微信 JS-SDK 初始化超时'))
+        }, 8000)
+
+        const settle = (fn, payload) => {
+          if (settled) return
+          settled = true
+          window.clearTimeout(timeout)
+          fn(payload)
+        }
+
+        wx.ready(() => {
+          if (cancelled || settled) return
+          const data = getShareData(activity, shareUrl)
+          configureShare(wx, data)
+          onStatusChange?.({
+            wxConfigStatus: 'success',
+            wxConfigError: '',
+            wxConfigUrl: signingUrl,
+            wxConfigAttempt: attemptIndex + 1,
+            shareConfigured: true,
+            shareTitle: data.title,
+            shareImage: data.imgUrl,
+            wxExists: true,
+          })
+          settle(resolve)
         })
 
-        const signature = await getJsSdkSignature(activityKey, url)
-        if (cancelled) return
-        onStatusChange?.({ signatureStatus: 'success', signingUrl: signature.url })
-
-        onStatusChange?.({ wxScriptLoadStatus: window.wx ? 'success' : 'loading', wxExists: Boolean(window.wx) })
-        const wx = await loadWechatJsSdk()
-        if (cancelled) return
-        onStatusChange?.({ wxScriptLoadStatus: 'success', wxExists: Boolean(wx || window.wx), wxConfigStatus: 'loading' })
+        wx.error((error) => {
+          settle(reject, error)
+        })
 
         wx.config({
           debug: wxDebug,
@@ -83,30 +126,42 @@ export function useWechatShare(activityKey, activity, onStatusChange, options = 
           ],
           ...(openTagList.length ? { openTagList } : {}),
         })
+      })
+    }
 
-        wx.ready(() => {
-          if (cancelled) return
-          const data = getShareData(activity, url)
-          configureShare(wx, data)
-          onStatusChange?.({
-            wxConfigStatus: 'success',
-            wxConfigError: '',
-            shareConfigured: true,
-            shareTitle: data.title,
-            shareImage: data.imgUrl,
-            wxExists: true,
-          })
+    async function initWechatShare() {
+      try {
+        onStatusChange?.({
+          signingUrl: signatureUrls[0],
+          signatureStatus: 'loading',
+          wxScriptLoadStatus: window.wx ? 'success' : 'idle',
+          wxExists: Boolean(window.wx),
+          wxConfigStatus: 'idle',
+          shareConfigured: false,
         })
 
-        wx.error((error) => {
-          if (cancelled) return
-          onStatusChange?.({
-            wxConfigStatus: 'failed',
-            wxConfigError: JSON.stringify(error),
-            shareConfigured: false,
-            wxExists: Boolean(window.wx),
-          })
-        })
+        onStatusChange?.({ wxScriptLoadStatus: window.wx ? 'success' : 'loading', wxExists: Boolean(window.wx) })
+        const wx = await loadWechatJsSdk()
+        if (cancelled) return
+        onStatusChange?.({ wxScriptLoadStatus: 'success', wxExists: Boolean(wx || window.wx), wxConfigStatus: 'loading' })
+
+        let lastError = null
+        for (let index = 0; index < signatureUrls.length; index += 1) {
+          const signingUrl = signatureUrls[index]
+          try {
+            onStatusChange?.({ signatureStatus: 'loading', signingUrl })
+            const signature = await getJsSdkSignature(activityKey, signingUrl)
+            if (cancelled) return
+            onStatusChange?.({ signatureStatus: 'success', signingUrl: signature.url })
+            await configureWechat(wx, signature, signature.url, index)
+            return
+          } catch (error) {
+            lastError = error
+            if (cancelled) return
+          }
+        }
+
+        throw lastError || new Error('微信 JS-SDK 初始化失败')
       } catch (error) {
         if (cancelled) return
         const isScriptError = error.message?.includes('微信 JS-SDK 脚本加载')
@@ -115,7 +170,7 @@ export function useWechatShare(activityKey, activity, onStatusChange, options = 
           signatureError: isScriptError ? '' : error.message,
           wxScriptLoadStatus: isScriptError ? 'failed' : window.wx ? 'success' : 'idle',
           wxConfigStatus: 'failed',
-          wxConfigError: isScriptError ? '微信 JS-SDK 脚本加载失败' : error.message,
+          wxConfigError: isScriptError ? '微信 JS-SDK 脚本加载失败' : (error.errMsg || error.message || JSON.stringify(error)),
           wxExists: Boolean(window.wx),
           shareConfigured: false,
         })
