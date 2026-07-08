@@ -32,6 +32,14 @@ function buildShareLink(inviteCode) {
   return url.toString()
 }
 
+function updateInviteUrl(inviteCode) {
+  if (!inviteCode) return ''
+  const url = new URL(sanitizeUrlForWechat(window.location.href))
+  url.searchParams.set('inviterUserId', inviteCode)
+  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`)
+  return url.toString()
+}
+
 function formatDateTime(value) {
   if (!value) return ''
   const date = new Date(value)
@@ -265,7 +273,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const artists = bootstrap?.artists || []
   const barrages = bootstrap?.barrages?.length ? bootstrap.barrages : [
     { id: 'demo-1', text: '快来为心动的TA打CALL!' },
-    { id: 'demo-2', text: '寻找音乐节搭子，一起抽惊喜礼品' },
+    { id: 'demo-2', text: '邀请好友助力，一起抽惊喜礼品' },
   ]
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const latestWonDraw = [...(bootstrap?.draws || [])].reverse().find((draw) => draw.won)
@@ -308,18 +316,27 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           pendingInvitation: null,
           chances: result.chances,
         }))
-        setMessage({ title: '组队成功', message: '你和搭子均已获得1次额外抽奖资格。' })
+        setMessage({ title: '助力成功', message: '你和邀请人均已获得1次额外抽奖资格。' })
         trackEvent({ activityKey, eventType: 'artist_call_team_up', extra: { activityType: 'artist_call_lottery' } })
       } catch (error) {
-        setMessage({ title: '组队失败', message: error.message || '请稍后再试' })
+        setMessage({ title: '助力失败', message: error.message || '请稍后再试' })
       } finally {
         setActionLoading(false)
       }
       return
     }
+    const inviteCode = bootstrap?.inviteCode || bootstrap?.user?.id
+    if (!inviteCode) {
+      const redirecting = reauth('artist-call-partner-share')
+      if (!redirecting) {
+        setMessage({ title: '需要登录', message: '请在微信中打开并完成登录后，再邀请好友助力。' })
+      }
+      return
+    }
+    updateInviteUrl(inviteCode)
     setMessage({
-      title: '寻找音乐节搭子',
-      message: '点击微信右上角分享给朋友，朋友打开并参与搭子组队后，你们双方都能额外获得1次抽奖资格。',
+      title: '邀请助力链接已生成',
+      message: '请点击微信右上角分享给朋友，好友打开并完成助力后，你们双方都能额外获得1次抽奖资格。',
     })
   }
 
@@ -329,7 +346,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       return
     }
     if (chances.remaining <= 0) {
-      setMessage({ title: '暂无抽奖机会', message: '分享给朋友寻找搭子，组队成功后可额外获得1次机会。' })
+      setMessage({ title: '暂无抽奖机会', message: '分享给朋友邀请助力，好友完成助力后可额外获得1次机会。' })
       return
     }
     setActionLoading(true)
@@ -339,7 +356,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       if (result.draw?.won) {
         setPrizeDraw(result.draw)
       } else {
-        setMessage({ title: '未中奖', message: '这次没有中奖。分享活动寻找搭子，组队成功后还能再抽一次。' })
+        setMessage({ title: '未中奖', message: '这次没有中奖。分享活动邀请助力，好友完成助力后还能再抽一次。' })
       }
       trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: 'artist_call_lottery' } })
     } catch (error) {
@@ -421,7 +438,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
         {bootstrap?.pendingInvitation ? (
           <div className="acl-invite-tip">
-            {bootstrap.pendingInvitation.inviterName} 邀请你成为音乐节搭子，点击“寻找搭子”完成组队。
+            {bootstrap.pendingInvitation.inviterName} 邀请你助力，点击“帮TA助力”完成助力。
           </div>
         ) : null}
 
@@ -446,11 +463,11 @@ export default function ArtistCallLotteryProject({ routeParams }) {
             className="acl-outline-btn"
             type="button"
             onClick={() => bootstrap?.myTeam
-              ? setMessage({ title: '已完成组队', message: '你已获得搭子组队额外抽奖资格。' })
+              ? setMessage({ title: '已完成助力', message: '你已获得邀请助力额外抽奖资格。' })
               : handlePartner()}
             disabled={actionLoading}
           >
-            {bootstrap?.myTeam ? '已组搭子' : (theme.partnerButtonText || '寻找搭子')}
+            {bootstrap?.myTeam ? '已助力' : bootstrap?.pendingInvitation ? '帮TA助力' : (theme.partnerButtonText || '邀请助力')}
           </button>
           <button className="acl-round-btn" type="button" onClick={handleDraw} disabled={actionLoading}>
             {actionLoading ? '处理中' : (theme.drawButtonText || '抽奖')}
@@ -466,7 +483,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           <h2>活动说明</h2>
           {(pageConfig.rules?.length ? pageConfig.rules : [
             '点击“为TA打CALL”，选择心仪艺人头像，即可获得1次抽奖资格。',
-            '分享给朋友寻找搭子，好友参与组队后双方各获得1次额外抽奖资格。',
+            '分享给朋友邀请助力，好友完成助力后双方各获得1次额外抽奖资格。',
             '每人最多获得2次抽奖机会，每人最多中奖1次。',
             '中奖后填写姓名和手机号，凭6位中奖码到现场兑换实物礼品。',
           ]).map((rule, index) => (
