@@ -2400,7 +2400,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 361px;
+  width: 435px;
   height: 150px;
   overflow: hidden;
   color: #000;
@@ -2409,6 +2409,7 @@
   text-align: center;
   line-height: normal;
   white-space: pre-wrap;
+  word-break: keep-all;
   text-overflow: ellipsis;
 }
 
