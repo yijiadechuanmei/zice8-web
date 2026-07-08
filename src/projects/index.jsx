@@ -17,6 +17,29 @@ const LongMarchStudyProject = lazy(() => import('./long-march-study/index.jsx'))
 const QuizProject = lazy(() => import('./quiz/index.jsx'))
 const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
 
+const activityTypeProjects = {
+  artist_call_lottery: ArtistCallLotteryProject,
+  'artist-call-lottery': ArtistCallLotteryProject,
+  song_wish_lottery: SongWishLotteryProject,
+  'song-wish-lottery': SongWishLotteryProject,
+}
+
+function ActivityTypeProject({ routeParams }) {
+  const activityType = String(routeParams?.activityType || '').toLowerCase()
+  const ProjectComponent = activityTypeProjects[activityType]
+  if (!ProjectComponent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">
+        <div className="rounded-2xl bg-white/10 px-8 py-6 text-center">
+          <h1 className="text-3xl font-bold text-white">项目不存在</h1>
+          <p className="mt-3 text-sm text-slate-300">请检查访问路径</p>
+        </div>
+      </div>
+    )
+  }
+  return <ProjectComponent routeParams={routeParams} />
+}
+
 export const projectRoutes = [
   {
     path: '/border-town-role-test/:activityKey',
@@ -177,6 +200,11 @@ export const projectRoutes = [
   {
     path: '/quiz',
     Component: QuizProject,
+    activityGate: true,
+  },
+  {
+    path: '/:activityType/:activityKey',
+    Component: ActivityTypeProject,
     activityGate: true,
   },
   {
