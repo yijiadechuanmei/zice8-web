@@ -2444,6 +2444,10 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
     : []
   const posterItems = [...locationPosterItems, ...extraCheckinItems, ...fallbackItems]
   const honorTitle = (certificateHonor?.title || '「盘州红色传承官」电子证书').replace('盘州红色传承官', '六盘水市红色传承官')
+  const honorTitleLines = honorTitle.includes('电子证书')
+    ? [honorTitle.replace('电子证书', ''), '电子证书']
+    : [honorTitle]
+  const honorStatusText = hasHonor ? '已获得' : '未获得'
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card" aria-label="我的荣誉">
@@ -2456,10 +2460,15 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
           aria-label={hasHonor ? `查看${honorTitle}` : `${honorTitle}未获得`}
         >
           <img src={longMarchStudyAssets.honors.badge} alt="" />
-          <strong>{hasHonor ? `已获得${honorTitle}` : `未获得${honorTitle}`}</strong>
+          <strong>
+            <span>{`${honorStatusText}${honorTitleLines[0]}`}</span>
+            {honorTitleLines.slice(1).map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </strong>
         </button>
       </section>
-      <div className="lm-honors-earned-label">{hasHonor ? '已获得' : '未获得'}</div>
+      <div className="lm-honors-earned-label">{honorStatusText}</div>
       <section className="lm-honors-poster-card" aria-label="我的海报">
         <img className="lm-honors-poster-panel" src={longMarchStudyAssets.honors.posterPanel} alt="" aria-hidden="true" />
         <h2>我的海报</h2>

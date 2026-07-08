@@ -2398,6 +2398,7 @@
   left: 178px;
   top: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 435px;
@@ -2411,6 +2412,10 @@
   white-space: pre-wrap;
   word-break: keep-all;
   text-overflow: ellipsis;
+}
+
+.lm-honors-badge-row strong span {
+  display: block;
 }
 
 .lm-honors-earned-label {
