@@ -2443,7 +2443,7 @@ function HonorsPage({ honors, checkins, locations = [], onOpen, onOpenCheckin, o
       }))
     : []
   const posterItems = [...locationPosterItems, ...extraCheckinItems, ...fallbackItems]
-  const honorTitle = certificateHonor?.title || '「盘州红色传承官」电子证书'
+  const honorTitle = (certificateHonor?.title || '「盘州红色传承官」电子证书').replace('盘州红色传承官', '六盘水市红色传承官')
   return (
     <IvxStage title="我的荣誉" className="lm-honors-page" background={longMarchStudyAssets.radio.background} onBack={onBack}>
       <section className="lm-honors-card" aria-label="我的荣誉">
