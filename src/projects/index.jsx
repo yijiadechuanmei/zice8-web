@@ -4,6 +4,8 @@ import { normalizeAppointmentActivityKey } from './appointment/appointmentSkins'
 
 const PhaseQuizLotteryProject = lazy(() => import('./phase-quiz-lottery/index.jsx'))
 const BrochureQuizLotteryProject = lazy(() => import('./brochure-quiz-lottery/index.jsx'))
+const ArtistCallLotteryProject = lazy(() => import('./artist-call-lottery/index.jsx'))
+const SongWishLotteryProject = lazy(() => import('./song-wish-lottery/index.jsx'))
 const MaterialRegistrationProject = lazy(() => import('./material-registration/index.jsx'))
 const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
@@ -69,6 +71,26 @@ export const projectRoutes = [
   {
     path: '/brochure_quiz_lottery/:activityKey',
     Component: BrochureQuizLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/artist-call-lottery/:activityKey',
+    Component: ArtistCallLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/artist_call_lottery/:activityKey',
+    Component: ArtistCallLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/song-wish-lottery/:activityKey',
+    Component: SongWishLotteryProject,
+    activityGate: true,
+  },
+  {
+    path: '/song_wish_lottery/:activityKey',
+    Component: SongWishLotteryProject,
     activityGate: true,
   },
   {
