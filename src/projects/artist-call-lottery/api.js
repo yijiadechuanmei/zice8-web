@@ -13,6 +13,19 @@ export const getBootstrap = (activityKey, inviterUserId) => {
 export const getBarrages = (activityKey, limit = 20) =>
   request(`/artist-call-lottery/activities/${encodeURIComponent(activityKey)}/barrages?limit=${encodeURIComponent(limit)}`, { skipAuth: true })
 
+export const getDebugAccess = (activityKey) =>
+  request(`/artist-call-lottery/activities/${encodeURIComponent(activityKey)}/debug-access`)
+
+export const resetDebugData = (activityKey, data) =>
+  request('/artist-call-lottery/dev/reset', {
+    method: 'POST',
+    body: JSON.stringify({
+      activityKey,
+      scope: 'me',
+      ...data,
+    }),
+  })
+
 export const callArtist = (activityKey, data) =>
   request(`/artist-call-lottery/activities/${encodeURIComponent(activityKey)}/call`, {
     method: 'POST',

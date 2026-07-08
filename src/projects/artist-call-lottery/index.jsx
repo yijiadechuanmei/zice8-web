@@ -10,12 +10,16 @@ import {
   drawPrize,
   getBarrages,
   getBootstrap,
+  getDebugAccess,
   getPublicConfig,
+  resetDebugData,
   teamUp,
 } from './api'
 import './styles.css'
 
 const DEFAULT_ACTIVITY_KEY = 'artist_call_lottery_2026'
+const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
+const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 
 function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
@@ -191,6 +195,40 @@ function MessageModal({ title, message, onClose }) {
   )
 }
 
+function DebugPanel({
+  access,
+  loading,
+  resetting,
+  onResetMine,
+  onResetAll,
+  onRefresh,
+}) {
+  if (!isDebugRequested) return null
+  if (loading) {
+    return <section className="acl-debug-panel">调试权限校验中...</section>
+  }
+  if (!access?.canDebug) {
+    return <section className="acl-debug-panel">调试面板未授权</section>
+  }
+  return (
+    <section className="acl-debug-panel" aria-label="调试面板">
+      <strong>Debug</strong>
+      <span>当前用户：{access.userId}</span>
+      <button type="button" disabled={resetting} onClick={onResetMine}>
+        重置自己
+      </button>
+      {access.allowActivityReset ? (
+        <button className="is-danger" type="button" disabled={resetting} onClick={onResetAll}>
+          重置全部
+        </button>
+      ) : null}
+      <button type="button" disabled={resetting} onClick={onRefresh}>
+        刷新数据
+      </button>
+    </section>
+  )
+}
+
 export default function ArtistCallLotteryProject({ routeParams }) {
   const activityKey = normalizeActivityKey(routeParams)
   const inviterUserId = getQueryParam('inviterUserId') || ''
@@ -203,6 +241,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
   const [message, setMessage] = useState(null)
+  const [debugAccess, setDebugAccess] = useState(null)
+  const [debugLoading, setDebugLoading] = useState(false)
+  const [debugResetting, setDebugResetting] = useState(false)
 
   useEffect(() => {
     const token = getTokenFromUrl()
@@ -231,6 +272,10 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     try {
       const data = await getBootstrap(activityKey, inviterUserId)
       setBootstrap(data)
+      if (data?.inviteAssist?.created) {
+        setMessage({ title: '助力成功', message: '你和邀请人均已获得1次额外抽奖资格。' })
+        trackEvent({ activityKey, eventType: 'artist_call_team_up_auto', extra: { activityType: 'artist_call_lottery' } })
+      }
     } catch (error) {
       setMessage({ title: '加载失败', message: error.message || '请稍后再试' })
       if (Number(error?.status) === 401) reauth('artist-call-bootstrap-401')
@@ -242,6 +287,26 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   useEffect(() => {
     loadBootstrap()
   }, [loadBootstrap])
+
+  useEffect(() => {
+    if (!isDebugRequested || !authReady || !publicConfig) return
+    let active = true
+    setDebugLoading(true)
+    getDebugAccess(activityKey)
+      .then((access) => {
+        if (active) setDebugAccess(access)
+      })
+      .catch((error) => {
+        if (Number(error?.status) === 401) reauth('artist-call-debug-access')
+        if (active) setDebugAccess(null)
+      })
+      .finally(() => {
+        if (active) setDebugLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [activityKey, authReady, publicConfig, reauth])
 
   useEffect(() => {
     trackPageView(activityKey, '/artist-call-lottery', { activityType: 'artist_call_lottery' })
@@ -341,12 +406,8 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   }
 
   const handleDraw = async () => {
-    if (!bootstrap?.myCall) {
-      setMessage({ title: '先打CALL', message: '请先选择心仪艺人完成打CALL，再参与抽奖。' })
-      return
-    }
     if (chances.remaining <= 0) {
-      setMessage({ title: '暂无抽奖机会', message: '分享给朋友邀请助力，好友完成助力后可额外获得1次机会。' })
+      setMessage({ title: '暂无抽奖机会', message: '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
       return
     }
     setActionLoading(true)
@@ -363,6 +424,33 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       setMessage({ title: '抽奖失败', message: error.message || '请稍后再试' })
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  const handleDebugReset = async (scope) => {
+    if (!debugAccess?.canDebug) return
+    if (scope === 'activity' && !debugAccess.allowActivityReset) return
+    if (scope === 'activity') {
+      const confirmed = window.confirm('确认重置 artist_call_lottery_2026 全部数据？只会清空当前抽奖项目的数据。')
+      if (!confirmed) return
+    }
+    setDebugResetting(true)
+    try {
+      await resetDebugData(activityKey, {
+        confirmToken: DEBUG_RESET_TOKEN,
+        scope,
+      })
+      const data = await getBootstrap(activityKey, '')
+      setBootstrap(data)
+      setMessage({
+        title: '重置完成',
+        message: scope === 'activity' ? '当前抽奖项目全部数据已重置。' : '你的当前抽奖项目数据已重置。',
+      })
+    } catch (error) {
+      setMessage({ title: '重置失败', message: error.message || '请稍后再试' })
+      if (Number(error?.status) === 401) reauth('artist-call-debug-reset')
+    } finally {
+      setDebugResetting(false)
     }
   }
 
@@ -478,6 +566,15 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           <span>抽奖机会：{chances.remaining}/{chances.max}</span>
           <span>已用：{chances.used}</span>
         </div>
+
+        <DebugPanel
+          access={debugAccess}
+          loading={debugLoading}
+          resetting={debugResetting}
+          onResetMine={() => handleDebugReset('me')}
+          onResetAll={() => handleDebugReset('activity')}
+          onRefresh={refreshAfterAction}
+        />
 
         <section className="acl-rules">
           <h2>活动说明</h2>
