@@ -1346,6 +1346,8 @@ function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, o
   const [startNotice, setStartNotice] = useState('')
   const [busy, setBusy] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const restoredAttemptRef = useRef('')
+  const finishingAttemptRef = useRef('')
   const questions = quizState?.questions || []
   const question = questions[index]
   const questionCount = questions.length || 5
@@ -1370,6 +1372,33 @@ function QuizPage({ activityKey, visitorId, debugDay, quizState, setQuizState, o
     }, 0)
     return () => window.clearTimeout(timer)
   }, [activityKey, debugDay, quizState, setQuizState, startNotice, visitorId])
+
+  useEffect(() => {
+    if (!quizState?.id || !questions.length || isDebugAllQuestions) return
+    if (restoredAttemptRef.current === quizState.id) return
+    const answeredQuestionIds = new Set((quizState.answers || []).map((answer) => answer.questionId))
+    const firstUnansweredIndex = questions.findIndex((item) => !answeredQuestionIds.has(item.id))
+    restoredAttemptRef.current = quizState.id
+    setIndex(firstUnansweredIndex >= 0 ? firstUnansweredIndex : Math.max(questions.length - 1, 0))
+    setSelectedOptionId('')
+    setFeedback(null)
+  }, [isDebugAllQuestions, questions, quizState?.answers, quizState?.id])
+
+  useEffect(() => {
+    if (!quizState?.id || !questions.length || isDebugAllQuestions || feedback || submitting) return
+    const answers = quizState.answers || []
+    if (answers.length < questions.length || quizState.status === 'finished') return
+    if (finishingAttemptRef.current === quizState.id) return
+    finishingAttemptRef.current = quizState.id
+    setSubmitting(true)
+    finishQuiz(activityKey, quizState.id, { visitorId, debugDay: debugDay || undefined })
+      .then((result) => onResult(result))
+      .catch((error) => {
+        finishingAttemptRef.current = ''
+        onToast?.(error.message || '提交失败，请稍后重试')
+      })
+      .finally(() => setSubmitting(false))
+  }, [activityKey, debugDay, feedback, isDebugAllQuestions, onResult, onToast, questions.length, quizState, submitting, visitorId])
 
   const submitAnswer = async () => {
     if (!question || !selectedOptionId || submitting || feedback) return
