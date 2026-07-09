@@ -127,6 +127,8 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
           ...item,
           status: recording.status || payload.status || item.status,
           featured: recording.featured ?? payload.featured ?? item.featured,
+          audioUrl: recording.audioUrl ?? item.audioUrl,
+          mediaId: recording.mediaId ?? item.mediaId,
           reviewedAt: recording.reviewedAt || new Date().toISOString(),
         } : item),
       }))
@@ -332,7 +334,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
           if (playableUrl) {
             return <audio src={playableUrl} controls preload="none" style={{ width: 210, maxWidth: '100%' }} />
           }
-          if (!value) return '-'
+          if (!value && !row.mediaId) return '-'
           return (
             <Button
               size="small"
