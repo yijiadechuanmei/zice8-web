@@ -320,6 +320,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
+  const [prizeDebugState, setPrizeDebugState] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const [debugLoading, setDebugLoading] = useState(false)
@@ -425,6 +426,36 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     const configured = pageConfig.designAssets?.[key]
     if (configured) return configured
     return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
+  }
+  const debugPrizeDraws = useMemo(() => {
+    const prizeImage = `${assetsBaseUrl.replace(/\/$/, '')}/prizes/first.png`
+    return {
+      empty: null,
+      unclaimed: {
+        id: 'debug-unclaimed-prize',
+        prizeName: '音乐节惊喜礼包',
+        prizeLevel: '一等奖',
+        prizeImage,
+        claim: null,
+      },
+      claimed: {
+        id: 'debug-claimed-prize',
+        prizeName: '音乐节惊喜礼包',
+        prizeLevel: '一等奖',
+        prizeImage,
+        claim: { redemptionCode: 'A8C6K2' },
+      },
+    }
+  }, [assetsBaseUrl])
+  const displayedPrizeDraw = prizeDebugState ? debugPrizeDraws[prizeDebugState] : latestWonDraw
+
+  const cyclePrizeDebugState = () => {
+    setPrizeDebugState((current) => {
+      if (current === 'empty') return 'unclaimed'
+      if (current === 'unclaimed') return 'claimed'
+      if (current === 'claimed') return null
+      return 'empty'
+    })
   }
 
   const refreshAfterAction = useCallback(async () => {
@@ -655,11 +686,18 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       </section>
 
       <section className="acl-prize-card">
-        <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
+        <button
+          className="acl-prize-card__title-button"
+          type="button"
+          onClick={cyclePrizeDebugState}
+          aria-label="切换礼品调试状态"
+        >
+          <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
+        </button>
         <div className="acl-prize-slot">
           <PrizeShelf
-            draw={latestWonDraw}
-            onClaim={() => setClaimDraw(latestWonDraw)}
+            draw={displayedPrizeDraw}
+            onClaim={() => setClaimDraw(displayedPrizeDraw)}
           />
         </div>
         <img className="acl-prize-card__subtitle" src={getDesignAsset('prizeSubtitle')} alt="领奖方式" />

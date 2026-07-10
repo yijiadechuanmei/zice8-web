@@ -343,8 +343,17 @@
 }
 
 .acl-prize-card__title {
+  display: block;
   width: 218px;
   height: 51px;
+}
+
+.acl-prize-card__title-button {
+  display: block;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .acl-prize-slot {
