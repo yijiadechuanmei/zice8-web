@@ -106,17 +106,18 @@
   display: flex;
   align-items: center;
   width: max-content;
+  max-width: 690px;
   height: 57px;
-  min-width: 281px;
   padding: 10px 56px 10px 15px;
   box-sizing: border-box;
-  background: url("https://assets.zice8.com/artist_call_lottery/artist_call_lottery_2026/a19c6100a937cf462d5f117323708674_3492_281_37.png") left center / 100% 37px no-repeat;
+  border-radius: 19px;
+  background: rgba(253, 207, 255, 0.9);
   white-space: nowrap;
   animation: acl-barrage-fly 16s linear infinite;
 }
 
 .acl-barrage__text {
-  max-width: 420px;
+  max-width: 619px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #161616;
