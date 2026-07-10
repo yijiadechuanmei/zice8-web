@@ -18,8 +18,23 @@ import {
 import './styles.css'
 
 const DEFAULT_ACTIVITY_KEY = 'artist_call_lottery_2026'
+const DEFAULT_ASSETS_BASE_URL = `https://assets.zice8.com/artist_call_lottery/${DEFAULT_ACTIVITY_KEY}`
 const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
+
+const DESIGN_ASSETS = {
+  topBackground: '2ec8ffc98ff52624b323a3f2a4f58a9e_129785_759_494.png',
+  contentBackground: 'c84c3fe9c07920e5305b58176609d7a4_251037_751_719.png',
+  footerBackground: '2d39e42e7cccc07d341b8ab0d43581d7_23789_750_59.png',
+  title: '7e7582285c78ef69f6d2091249ffedb6_42076_448_287.png',
+  logo: 'a8e8ec36f1b094220b0a9ce29f8e5ccc_16333_325_46.png',
+  callButton: '767c72816a0490af17df4d67c5b27b67_8381_246_57.png',
+  partnerButton: 'aedabf88c1be8865603e71ce7a001910_8211_247_57.png',
+  drawButton: '3ea0d0eef1f53d92241f9401fa49510e_6630_110_110.png',
+  chanceBadge: '7a69b6601d3e324a7c971f37436ff77b_3279_28_27.png',
+  barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
+  barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
+}
 
 function normalizeActivityKey(routeParams) {
   return routeParams?.activityKey || getQueryParam('activity_key') || DEFAULT_ACTIVITY_KEY
@@ -145,6 +160,42 @@ function PrizeModal({ draw, onClose, onClaim, claim }) {
         </button>
       )}
     </Modal>
+  )
+}
+
+function PrizeShelf({ draw, onClaim }) {
+  if (!draw) {
+    return (
+      <div className="acl-prize-shelf acl-prize-shelf--empty">
+        <p>抽中礼品后，礼品信息会显示在这里</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="acl-prize-shelf">
+      <div className="acl-prize-shelf__visual">
+        {draw.prizeImage ? (
+          <img src={draw.prizeImage} alt={draw.prizeName} />
+        ) : (
+          <span>礼品</span>
+        )}
+      </div>
+      <div className="acl-prize-shelf__info">
+        <strong>{draw.prizeName || '惊喜礼品'}</strong>
+        <span>{draw.prizeLevel || '中奖礼品'}</span>
+        {draw.claim ? (
+          <div className="acl-prize-shelf__code">
+            <small>兑换码</small>
+            <b>{draw.claim.redemptionCode}</b>
+          </div>
+        ) : (
+          <button className="acl-shelf-claim" type="button" onClick={onClaim}>
+            去领取
+          </button>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -343,6 +394,12 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const latestWonDraw = [...(bootstrap?.draws || [])].reverse().find((draw) => draw.won)
   const theme = pageConfig.theme || {}
+  const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
+  const getDesignAsset = (key) => {
+    const configured = pageConfig.designAssets?.[key]
+    if (configured) return configured
+    return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
+  }
 
   const refreshAfterAction = useCallback(async () => {
     const data = await getBootstrap(activityKey, inviterUserId)
@@ -488,78 +545,73 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
   return (
     <main className="acl-page">
-      <section className="acl-card">
-        <header className="acl-header">
-          <p className="acl-eyebrow">{theme.eyebrow || '秘境崇左音乐节'}</p>
-          <button
-            className="acl-gift-btn"
-            type="button"
-            onClick={() => latestWonDraw ? setPrizeDraw(latestWonDraw) : setMessage({ title: '我的礼品', message: '你还没有中奖礼品。' })}
-          >
-            {theme.giftBadge || '我的礼品'}
-          </button>
-        </header>
+      <div className="acl-design-stage">
+        <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
+        <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
+        <img className="acl-design-image acl-design-image--logo" src={getDesignAsset('logo')} alt="" />
+        <img className="acl-design-image acl-design-image--content" src={getDesignAsset('contentBackground')} alt="" />
+        <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />
 
-        <h1 className="acl-title">{theme.title || publicConfig?.title || '秘境惊喜，为心动而来！'}</h1>
-
-        <section className="acl-poster" aria-label="打CALL弹幕区">
-          <div className="acl-barrage-layer">
-            {[...barrages, ...barrages].slice(0, 10).map((item, index) => (
-              <span
-                className="acl-barrage"
-                key={`${item.id}-${index}`}
-                style={{ top: `${18 + (index % 5) * 13}%`, animationDelay: `${index * 1.3}s` }}
-              >
-                {item.text}
-              </span>
-            ))}
-          </div>
-          {pageConfig.posterImage ? (
-            <img className="acl-poster-image" src={pageConfig.posterImage} alt="音乐节阵容海报" />
-          ) : (
-            <div className="acl-poster-placeholder">
-              <strong>{theme.heroText || '带肖像两日阵容'}</strong>
-              <span>{bootstrap?.myCall?.commentText || 'XXX为XXX打CALL'}</span>
+        <section className="acl-barrage-area" aria-label="弹幕区">
+          {[...barrages, ...barrages].slice(0, 8).map((item, index) => (
+            <div
+              className="acl-barrage"
+              key={`${item.id}-${index}`}
+              style={{ top: `${index * 42 + 4}px`, animationDelay: `${index * 1.3}s` }}
+            >
+              <span className="acl-barrage__text">{item.text}</span>
+              <img src={getDesignAsset('barrageAvatar')} alt="" />
             </div>
-          )}
+          ))}
         </section>
 
-        {bootstrap?.pendingInvitation ? (
-          <div className="acl-invite-tip">
-            {bootstrap.pendingInvitation.inviterName} 邀请你助力，点击“帮TA助力”完成助力。
-          </div>
-        ) : null}
-
-        <div className="acl-copy">
-          点击下方按钮，<br />
-          为你心动的TA打CALL，<br />
-          就有机会抽取惊喜礼品哦！
-        </div>
-
-        <div className="acl-action-row">
+        <section className="acl-stage-actions" aria-label="活动操作">
           <button
-            className="acl-outline-btn"
+            className="acl-image-btn acl-image-btn--call"
             type="button"
             onClick={() => bootstrap?.myCall
               ? setMessage({ title: '已完成打CALL', message: bootstrap.myCall.commentText || '你已获得1次抽奖资格。' })
               : setArtistPickerOpen(true)}
             disabled={actionLoading}
           >
-            {bootstrap?.myCall ? '已打CALL' : (theme.callButtonText || '为TA打CALL')}
+            <img src={getDesignAsset('callButton')} alt={bootstrap?.myCall ? '已打CALL' : '为TA打CALL'} />
           </button>
           <button
-            className="acl-outline-btn"
+            className="acl-image-btn acl-image-btn--partner"
             type="button"
             onClick={() => bootstrap?.myTeam
               ? setMessage({ title: '已完成助力', message: '你已获得邀请助力额外抽奖资格。' })
               : handlePartner()}
             disabled={actionLoading}
           >
-            {bootstrap?.myTeam ? '已助力' : bootstrap?.pendingInvitation ? '帮TA助力' : (theme.partnerButtonText || '邀请助力')}
+            <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
           </button>
-          <button className="acl-round-btn" type="button" onClick={handleDraw} disabled={actionLoading}>
-            {actionLoading ? '处理中' : (theme.drawButtonText || '抽奖')}
+          <button className="acl-image-btn acl-image-btn--draw" type="button" onClick={handleDraw} disabled={actionLoading || chances.remaining <= 0}>
+            <img src={getDesignAsset('drawButton')} alt="抽奖" />
+            <img className="acl-chance-badge" src={getDesignAsset('chanceBadge')} alt={`${chances.remaining} 次抽奖机会`} />
+            <span className="acl-chance-badge__number" aria-hidden="true">{chances.remaining}</span>
           </button>
+        </section>
+
+        {bootstrap?.pendingInvitation ? (
+          <div className="acl-invite-tip">
+            {bootstrap.pendingInvitation.inviterName} 邀请你助力，点击“寻找搭子”完成助力。
+          </div>
+        ) : null}
+      </div>
+
+      <section className="acl-content-card">
+        <h1 className="acl-content-title">{theme.title || publicConfig?.title || '秘境惊喜，为心动而来！'}</h1>
+        <div className="acl-prize-section">
+          <h2>我的礼品</h2>
+          <PrizeShelf
+            draw={latestWonDraw}
+            onClaim={() => setClaimDraw(latestWonDraw)}
+          />
+        </div>
+
+        <div className="acl-copy">
+          点击下方按钮，为你心动的TA打CALL，就有机会抽取惊喜礼品哦！
         </div>
 
         <div className="acl-chance-bar">
