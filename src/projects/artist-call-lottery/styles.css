@@ -96,23 +96,13 @@
   left: 0;
   width: 750px;
   height: 481px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.acl-barrage-lane {
-  position: absolute;
-  top: 146px;
-  left: 78px;
-  width: 297px;
-  height: 57px;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .acl-barrage {
   position: absolute;
-  top: 0;
-  left: 297px;
+  left: 750px;
   display: flex;
   align-items: center;
   width: max-content;
@@ -122,7 +112,7 @@
   box-sizing: border-box;
   background: url("https://assets.zice8.com/artist_call_lottery/artist_call_lottery_2026/a19c6100a937cf462d5f117323708674_3492_281_37.png") left center / 100% 37px no-repeat;
   white-space: nowrap;
-  animation: acl-barrage-fly 12s linear infinite;
+  animation: acl-barrage-fly 16s linear infinite;
 }
 
 .acl-barrage__text {
@@ -145,7 +135,7 @@
 
 @keyframes acl-barrage-fly {
   from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - 297px)); }
+  to { transform: translateX(calc(-100% - 750px)); }
 }
 
 .acl-stage-actions {

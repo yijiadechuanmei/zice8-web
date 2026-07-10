@@ -65,6 +65,15 @@ function buildRequestId(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
 }
 
+function getBarrageTop(item, index) {
+  const source = `${item?.id || item?.text || 'barrage'}-${index}`
+  let hash = 0
+  for (let position = 0; position < source.length; position += 1) {
+    hash = (hash * 31 + source.charCodeAt(position)) >>> 0
+  }
+  return 8 + (hash % 416)
+}
+
 function buildShareLink(inviteCode) {
   const url = new URL(sanitizeUrlForWechat(window.location.href))
   url.searchParams.delete('inviterUserId')
@@ -574,18 +583,19 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />
 
         <section className="acl-barrage-area" aria-label="弹幕区">
-          <div className="acl-barrage-lane">
-            {barrages.slice(0, 6).map((item, index) => (
-              <div
-                className="acl-barrage"
-                key={`${item.id}-${index}`}
-                style={{ animationDelay: `${-index * 3}s` }}
-              >
-                <span className="acl-barrage__text">{item.text}</span>
-                <img src={getDesignAsset('barrageAvatar')} alt="" />
-              </div>
-            ))}
-          </div>
+          {barrages.slice(0, 6).map((item, index) => (
+            <div
+              className="acl-barrage"
+              key={`${item.id}-${index}`}
+              style={{
+                top: `${getBarrageTop(item, index)}px`,
+                animationDelay: `${-index * 2.7}s`,
+              }}
+            >
+              <span className="acl-barrage__text">{item.text}</span>
+              <img src={getDesignAsset('barrageAvatar')} alt="" />
+            </div>
+          ))}
         </section>
 
         <section className="acl-stage-actions" aria-label="活动操作">
