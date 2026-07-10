@@ -30,8 +30,7 @@ const DESIGN_ASSETS = {
   logo: 'a8e8ec36f1b094220b0a9ce29f8e5ccc_16333_325_46.png',
   callButton: '767c72816a0490af17df4d67c5b27b67_8381_246_57.png',
   partnerButton: 'aedabf88c1be8865603e71ce7a001910_8211_247_57.png',
-  drawButton: '3ea0d0eef1f53d92241f9401fa49510e_6630_110_110.png',
-  chanceBadge: '7a69b6601d3e324a7c971f37436ff77b_3279_28_27.png',
+  drawAction: '3c93de1f605650ea746b8faec0d48285_5983_92_67.png',
   barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
   barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
   infoTitle: 'ff1b18b4df585400cf9f86eae0f2e323_5297_200_42.png',
@@ -42,6 +41,8 @@ const DESIGN_ASSETS = {
   infoLineFour: '82460215240ca286b6c4b760be250d07_8863_332_75.png',
   infoSubtitleTwo: '7d8b3c7bc45969cf318f10e2d990377e_6307_129_39.png',
   infoFootnote: 'b3b00af7493139aa51962758ac02efec_5032_25.png',
+  infoTime: 'd948debb40f4c6858c7524e8db0a4847_6874_129_38.png',
+  infoRules: 'f235bd787614bce3360728768bc3bd82_15476_609_111.png',
   prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
   prizeSubtitle: 'd20b503661696539504bb2a1dbea12c5_6670_126_39.png',
   prizeFootnote: '68f6a32c6ae7107249d759c5606e0081_4143_636_60.png',
@@ -600,9 +601,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
             <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
           </button>
           <button className="acl-image-btn acl-image-btn--draw" type="button" onClick={handleDraw} disabled={actionLoading || chances.remaining <= 0}>
-            <img src={getDesignAsset('drawButton')} alt="抽奖" />
-            <img className="acl-chance-badge" src={getDesignAsset('chanceBadge')} alt={`${chances.remaining} 次抽奖机会`} />
-            <span className="acl-chance-badge__number" aria-hidden="true">{chances.remaining}</span>
+            <img src={getDesignAsset('drawAction')} alt={`抽奖，剩余 ${chances.remaining} 次`} />
           </button>
         </section>
 
@@ -622,6 +621,8 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-info-line" src={getDesignAsset('infoLineFour')} alt="" />
         <img className="acl-info-subtitle acl-info-subtitle--second" src={getDesignAsset('infoSubtitleTwo')} alt="兑奖说明" />
         <img className="acl-info-footnote" src={getDesignAsset('infoFootnote')} alt="" />
+        <img className="acl-info-time" src={getDesignAsset('infoTime')} alt="活动时间" />
+        <img className="acl-info-rules" src={getDesignAsset('infoRules')} alt="兑换规则" />
       </section>
 
       <section className="acl-prize-card">
