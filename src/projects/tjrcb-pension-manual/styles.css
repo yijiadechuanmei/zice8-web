@@ -67,6 +67,18 @@
   object-fit: cover;
 }
 
+@media (min-width: 768px) {
+  .tjrcb-pension-manual-carousel {
+    width: min(80vw, 750px);
+    height: auto;
+    aspect-ratio: 375 / 190;
+  }
+
+  .tjrcb-pension-manual-carousel__item img {
+    object-fit: contain;
+  }
+}
+
 .tjrcb-pension-manual-audio-button,
 .tjrcb-pension-manual-category-row button,
 .tjrcb-pension-manual-icon-button {
