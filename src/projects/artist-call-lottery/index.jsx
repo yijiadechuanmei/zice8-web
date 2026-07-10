@@ -21,6 +21,12 @@ const DEFAULT_ACTIVITY_KEY = 'artist_call_lottery_2026'
 const DEFAULT_ASSETS_BASE_URL = `https://assets.zice8.com/artist_call_lottery/${DEFAULT_ACTIVITY_KEY}`
 const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
+const PRESET_BARRAGES = [
+  { id: 'preset-1', text: '为心动的TA打CALL！' },
+  { id: 'preset-2', text: '音乐节现场见！' },
+  { id: 'preset-3', text: '邀请好友助力，一起抽惊喜礼品' },
+  { id: 'preset-4', text: '秘境崇左音乐节冲呀！' },
+]
 
 const DESIGN_ASSETS = {
   mainVisual: '774edde28a2e87d4356b672153b0391d_538166_461_808.png',
@@ -402,10 +408,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   useWechatShare(activityKey, shareActivity)
 
   const artists = bootstrap?.artists || []
-  const barrages = bootstrap?.barrages?.length ? bootstrap.barrages : [
-    { id: 'demo-1', text: '快来为心动的TA打CALL!' },
-    { id: 'demo-2', text: '邀请好友助力，一起抽惊喜礼品' },
-  ]
+  const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...PRESET_BARRAGES]
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const latestWonDraw = [...(bootstrap?.draws || [])].reverse().find((draw) => draw.won)
   const theme = pageConfig.theme || {}
@@ -571,16 +574,18 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />
 
         <section className="acl-barrage-area" aria-label="弹幕区">
-          {[...barrages, ...barrages].slice(0, 8).map((item, index) => (
-            <div
-              className="acl-barrage"
-              key={`${item.id}-${index}`}
-              style={{ top: `${index * 42 + 4}px`, animationDelay: `${index * 1.3}s` }}
-            >
-              <span className="acl-barrage__text">{item.text}</span>
-              <img src={getDesignAsset('barrageAvatar')} alt="" />
-            </div>
-          ))}
+          <div className="acl-barrage-lane">
+            {barrages.slice(0, 6).map((item, index) => (
+              <div
+                className="acl-barrage"
+                key={`${item.id}-${index}`}
+                style={{ animationDelay: `${-index * 3}s` }}
+              >
+                <span className="acl-barrage__text">{item.text}</span>
+                <img src={getDesignAsset('barrageAvatar')} alt="" />
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="acl-stage-actions" aria-label="活动操作">

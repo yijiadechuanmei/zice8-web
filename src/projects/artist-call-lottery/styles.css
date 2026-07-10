@@ -92,36 +92,46 @@
 
 .acl-barrage-area {
   position: absolute;
-  top: 792px;
-  left: 78px;
-  width: 594px;
-  height: 290px;
-  overflow: hidden;
+  top: 646px;
+  left: 0;
+  width: 750px;
+  height: 481px;
+  overflow: visible;
   pointer-events: none;
+}
+
+.acl-barrage-lane {
+  position: absolute;
+  top: 146px;
+  left: 78px;
+  width: 297px;
+  height: 57px;
+  overflow: hidden;
 }
 
 .acl-barrage {
   position: absolute;
-  left: 0;
+  top: 0;
+  left: 297px;
   display: flex;
   align-items: center;
   width: max-content;
-  max-width: 100%;
   height: 57px;
+  min-width: 281px;
   padding: 10px 56px 10px 15px;
-  background: url("https://assets.zice8.com/artist_call_lottery/artist_call_lottery_2026/a19c6100a937cf462d5f117323708674_3492_281_37.png") left center / auto 37px no-repeat;
+  box-sizing: border-box;
+  background: url("https://assets.zice8.com/artist_call_lottery/artist_call_lottery_2026/a19c6100a937cf462d5f117323708674_3492_281_37.png") left center / 100% 37px no-repeat;
   white-space: nowrap;
-  animation: acl-barrage-float 9s ease-in-out infinite alternate;
+  animation: acl-barrage-fly 12s linear infinite;
 }
 
 .acl-barrage__text {
   max-width: 420px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #fff;
+  color: #161616;
   font-size: 16px;
-  font-weight: 900;
-  text-shadow: 0 1px 2px rgba(30, 15, 49, 0.28);
+  font-weight: 700;
 }
 
 .acl-barrage img {
@@ -133,9 +143,9 @@
   object-fit: cover;
 }
 
-@keyframes acl-barrage-float {
+@keyframes acl-barrage-fly {
   from { transform: translateX(0); }
-  to { transform: translateX(180px); }
+  to { transform: translateX(calc(-100% - 297px)); }
 }
 
 .acl-stage-actions {
