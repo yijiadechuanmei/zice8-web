@@ -53,6 +53,26 @@ const FEEDBACK_DELAY_MS = 1500
 const FENGCHENG_FEEDBACK_DELAY_MS = 120
 const QUIZ_RANK_PAGE_SIZE = 50
 
+function parseActivityTime(value) {
+  if (!value) return null
+  const direct = Date.parse(value)
+  if (Number.isFinite(direct)) return direct
+  const normalized = Date.parse(String(value).replace(' ', 'T'))
+  return Number.isFinite(normalized) ? normalized : null
+}
+
+function resolveActivityWindowStatus(activity) {
+  const serverStatus = activity?.activityWindow?.status
+  if (serverStatus) return serverStatus
+
+  const now = Date.now()
+  const startTime = parseActivityTime(activity?.startTime)
+  const endTime = parseActivityTime(activity?.endTime)
+  if (startTime !== null && now < startTime) return 'not_started'
+  if (endTime !== null && now > endTime) return 'ended'
+  return 'active'
+}
+
 export default function QuizApp({ routeParams }) {
   const layoutPreview = getQueryParam('layout') === '1'
   if (layoutPreview) return <LayoutPreview />
@@ -312,6 +332,14 @@ function QuizMain({ routeParams }) {
     }, 1500)
   }
 
+  function showActivityEndedAndOpenRank() {
+    showToast('活动已结束', 1500)
+    setFengchengProfileOpen(false)
+    window.setTimeout(() => {
+      openRank().catch(showError)
+    }, 1500)
+  }
+
   function createFengchengLocalCurrent(index) {
     const question = FENGCHENG_LOCAL_QUESTIONS[index]
     return {
@@ -339,6 +367,10 @@ function QuizMain({ routeParams }) {
   }
 
   async function handleStart() {
+    if (fengchengSkin && resolveActivityWindowStatus(bootstrap?.activity || publicConfig) === 'ended') {
+      showActivityEndedAndOpenRank()
+      return
+    }
     if (!getToken()) return startAuthorize()
     if (!bootstrap?.profileCompleted) {
       if (fengchengSkin) {
@@ -388,6 +420,10 @@ function QuizMain({ routeParams }) {
   }
 
   async function handleProfileSubmit(profile) {
+    if (fengchengSkin && resolveActivityWindowStatus(bootstrap?.activity || publicConfig) === 'ended') {
+      showActivityEndedAndOpenRank()
+      return
+    }
     setSubmitting(true)
     try {
       const profileResult = await submitProfile(activityKey, profile)
