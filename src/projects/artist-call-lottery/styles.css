@@ -106,23 +106,28 @@
   display: flex;
   align-items: center;
   width: max-content;
-  max-width: 690px;
   height: 57px;
-  padding: 10px 56px 10px 15px;
-  box-sizing: border-box;
-  border-radius: 19px;
-  background: rgba(253, 207, 255, 0.9);
+  padding-right: 57px;
   white-space: nowrap;
   animation: acl-barrage-fly 16s linear infinite;
 }
 
 .acl-barrage__text {
+  display: block;
+  width: fit-content;
   max-width: 619px;
+  height: 37px;
+  box-sizing: border-box;
+  margin: 10px 0;
   overflow: hidden;
+  border-radius: 999px;
+  background: rgba(253, 207, 255, 0.9);
+  padding: 0 15px;
   text-overflow: ellipsis;
   color: #161616;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
+  line-height: 37px;
 }
 
 .acl-barrage img {
