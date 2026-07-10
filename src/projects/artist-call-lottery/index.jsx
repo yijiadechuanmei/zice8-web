@@ -23,6 +23,7 @@ const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 
 const DESIGN_ASSETS = {
+  mainVisual: '774edde28a2e87d4356b672153b0391d_538166_461_808.png',
   topBackground: '2ec8ffc98ff52624b323a3f2a4f58a9e_129785_759_494.png',
   contentBackground: 'c84c3fe9c07920e5305b58176609d7a4_251037_751_719.png',
   footerBackground: '2d39e42e7cccc07d341b8ab0d43581d7_23789_750_59.png',
@@ -31,6 +32,8 @@ const DESIGN_ASSETS = {
   callButton: '767c72816a0490af17df4d67c5b27b67_8381_246_57.png',
   partnerButton: 'aedabf88c1be8865603e71ce7a001910_8211_247_57.png',
   drawAction: '3c93de1f605650ea746b8faec0d48285_5983_92_67.png',
+  drawButton: '3ea0d0eef1f53d92241f9401fa49510e_6630_110_110.png',
+  chanceBadge: '7a69b6601d3e324a7c971f37436ff77b_3279_28_27.png',
   barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
   barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
   infoTitle: 'ff1b18b4df585400cf9f86eae0f2e323_5297_200_42.png',
@@ -560,6 +563,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       <div className="acl-page-viewport">
         <div className="acl-page-artboard">
       <div className="acl-design-stage">
+        <img className="acl-design-image acl-design-image--main" src={getDesignAsset('mainVisual')} alt="" />
         <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
         <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
         <img className="acl-design-image acl-design-image--logo" src={getDesignAsset('logo')} alt="" />
@@ -600,10 +604,20 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           >
             <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
           </button>
-          <button className="acl-image-btn acl-image-btn--draw" type="button" onClick={handleDraw} disabled={actionLoading || chances.remaining <= 0}>
-            <img src={getDesignAsset('drawAction')} alt={`抽奖，剩余 ${chances.remaining} 次`} />
-          </button>
+          <img className="acl-stage-actions__decor" src={getDesignAsset('drawAction')} alt="" />
         </section>
+
+        <button
+          className="acl-stage-draw"
+          type="button"
+          onClick={handleDraw}
+          disabled={actionLoading || chances.remaining <= 0}
+          aria-label={`抽奖，剩余 ${chances.remaining} 次`}
+        >
+          <img src={getDesignAsset('drawButton')} alt="" />
+          <img className="acl-stage-draw__badge" src={getDesignAsset('chanceBadge')} alt="" />
+          <span className="acl-stage-draw__count" aria-hidden="true">{chances.remaining}</span>
+        </button>
 
         {bootstrap?.pendingInvitation ? (
           <div className="acl-invite-tip">

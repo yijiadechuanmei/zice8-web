@@ -54,6 +54,13 @@
   height: 494px;
 }
 
+.acl-design-image--main {
+  top: 444px;
+  left: 154px;
+  width: 461px;
+  height: 808px;
+}
+
 .acl-design-image--title {
   top: 111px;
   left: 155px;
@@ -178,24 +185,59 @@
   height: 57px;
 }
 
-.acl-image-btn--draw {
+.acl-stage-actions__decor {
   position: absolute;
   left: 451px;
   top: 0;
   width: 92px;
   height: 67px;
+  display: block;
 }
 
-.acl-image-btn--draw img:first-child {
-  width: 92px;
-  height: 67px;
+.acl-stage-draw {
+  position: absolute;
+  top: 1324px;
+  left: 609px;
+  width: 110px;
+  height: 110px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.acl-stage-draw > img:first-child {
+  display: block;
+  width: 110px;
+  height: 110px;
+}
+
+.acl-stage-draw__badge {
+  position: absolute;
+  top: 1px;
+  left: 82px;
+  width: 28px;
+  height: 27px;
+}
+
+.acl-stage-draw__count {
+  position: absolute;
+  top: 2px;
+  left: 82px;
+  width: 28px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 23px;
+  text-align: center;
 }
 
 .acl-image-btn:disabled {
   cursor: not-allowed;
 }
 
-.acl-image-btn:disabled img:first-child {
+.acl-image-btn:disabled img:first-child,
+.acl-stage-draw:disabled > img:first-child {
   filter: grayscale(1);
   opacity: 0.62;
 }
@@ -228,7 +270,7 @@
 }
 
 .acl-info-card {
-  min-height: 1310px;
+  height: fit-content;
 }
 
 .acl-info-card > img,
@@ -281,7 +323,7 @@
 }
 
 .acl-prize-card {
-  min-height: 990px;
+  height: fit-content;
   margin-top: 20px;
   margin-bottom: 50px;
 }
