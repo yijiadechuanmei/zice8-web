@@ -304,10 +304,18 @@
   margin-top: 45px;
 }
 
-.acl-info-footnote {
+.acl-info-activity-time {
+  position: relative;
   width: 503px;
   height: 25px;
+  flex-shrink: 0;
   margin-top: 17px;
+}
+
+.acl-info-activity-time img {
+  display: block;
+  width: 503px;
+  height: 25px;
 }
 
 .acl-info-time {

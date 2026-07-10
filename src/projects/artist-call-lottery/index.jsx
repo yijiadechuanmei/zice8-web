@@ -43,7 +43,7 @@ const DESIGN_ASSETS = {
   infoLineThree: '12adbc7d0b3ad2b73895b5cca3cdfc92_10484_526_75.png',
   infoLineFour: '82460215240ca286b6c4b760be250d07_8863_332_75.png',
   infoSubtitleTwo: '7d8b3c7bc45969cf318f10e2d990377e_6307_129_39.png',
-  infoFootnote: 'b3b00af7493139aa51962758ac02efec_5032_25.png',
+  activityTime: 'b3b00af7493139aa51962758ac02efec_5032_503_25.png',
   infoTime: 'd948debb40f4c6858c7524e8db0a4847_6874_129_38.png',
   infoRules: 'f235bd787614bce3360728768bc3bd82_15476_609_111.png',
   prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
@@ -634,7 +634,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-info-line" src={getDesignAsset('infoLineThree')} alt="" />
         <img className="acl-info-line" src={getDesignAsset('infoLineFour')} alt="" />
         <img className="acl-info-subtitle acl-info-subtitle--second" src={getDesignAsset('infoSubtitleTwo')} alt="兑奖说明" />
-        <img className="acl-info-footnote" src={getDesignAsset('infoFootnote')} alt="" />
+        <div className="acl-info-activity-time">
+          <img src={getDesignAsset('activityTime')} alt="活动时间" />
+        </div>
         <img className="acl-info-time" src={getDesignAsset('infoTime')} alt="活动时间" />
         <img className="acl-info-rules" src={getDesignAsset('infoRules')} alt="兑换规则" />
       </section>
