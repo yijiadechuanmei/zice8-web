@@ -196,7 +196,7 @@ function PrizeShelf({ draw, onClaim }) {
   if (!draw) {
     return (
       <div className="acl-prize-shelf acl-prize-shelf--empty">
-        <p>抽中礼品后，礼品信息会显示在这里</p>
+        <p>尚未获得奖品</p>
       </div>
     )
   }
