@@ -213,6 +213,7 @@ function PrizeShelf({ draw, onClaim }) {
       <div className="acl-prize-shelf__info">
         <strong>{draw.prizeName || '惊喜礼品'}</strong>
         <span>{draw.prizeLevel || '中奖礼品'}</span>
+        <span className="acl-prize-shelf__time">中奖时间：{formatDateTime(draw.createdAt) || '—'}</span>
         {draw.claim ? (
           <div className="acl-prize-shelf__code">
             <small>兑换码</small>
@@ -436,6 +437,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         prizeName: '音乐节惊喜礼包',
         prizeLevel: '一等奖',
         prizeImage,
+        createdAt: '2026-07-11T10:30:00+08:00',
         claim: null,
       },
       claimed: {
@@ -443,6 +445,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         prizeName: '音乐节惊喜礼包',
         prizeLevel: '一等奖',
         prizeImage,
+        createdAt: '2026-07-11T10:30:00+08:00',
         claim: { redemptionCode: 'A8C6K2' },
       },
     }

@@ -406,16 +406,17 @@
 
 .acl-prize-shelf {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 22px;
-  width: 609px;
-  min-height: 190px;
+  justify-content: center;
+  gap: 14px;
+  width: 460px;
+  min-height: 0;
   box-sizing: border-box;
-  border: 3px solid #23133d;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  padding: 20px;
-  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: center;
 }
 
 .acl-prize-shelf--empty {
@@ -440,14 +441,13 @@
 
 .acl-prize-shelf__visual {
   display: flex;
-  width: 150px;
-  height: 150px;
-  flex: 0 0 150px;
+  width: 240px;
+  height: 240px;
+  flex: 0 0 240px;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  border-radius: 16px;
-  background: #fff;
+  overflow: visible;
+  background: transparent;
 }
 
 .acl-prize-shelf__visual img {
@@ -466,25 +466,33 @@
 .acl-prize-shelf__info {
   display: flex;
   min-width: 0;
-  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 7px;
 }
 
 .acl-prize-shelf__info strong {
   color: #23133d;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 1000;
 }
 
 .acl-prize-shelf__info > span {
   color: #76617f;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
+}
+
+.acl-prize-shelf__info > .acl-prize-shelf__time {
+  color: #8a7894;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .acl-prize-shelf__code {
   color: #23133d;
+  margin-top: 8px;
+  text-align: center;
 }
 
 .acl-prize-shelf__code small,
@@ -500,14 +508,14 @@
 }
 
 .acl-shelf-claim {
-  width: 150px;
-  min-height: 48px;
-  margin-top: 8px;
+  width: 180px;
+  min-height: 54px;
+  margin-top: 10px;
   border: 0;
-  border-radius: 24px;
+  border-radius: 27px;
   background: #f45178;
   color: #fff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 1000;
   cursor: pointer;
 }
