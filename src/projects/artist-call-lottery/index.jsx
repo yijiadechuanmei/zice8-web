@@ -34,6 +34,17 @@ const DESIGN_ASSETS = {
   chanceBadge: '7a69b6601d3e324a7c971f37436ff77b_3279_28_27.png',
   barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
   barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
+  infoTitle: 'ff1b18b4df585400cf9f86eae0f2e323_5297_200_42.png',
+  infoSubtitleOne: '63a9c412c6422b93cfe6208ae1c32acc_6843_129_39.png',
+  infoLineOne: '802f076f27cf4c72bfe43cb9f27c35af_9282_429_74.png',
+  infoLineTwo: 'eab03346d7b4c7a02f7003e535eb15a8_9873_478_75.png',
+  infoLineThree: '12adbc7d0b3ad2b73895b5cca3cdfc92_10484_526_75.png',
+  infoLineFour: '82460215240ca286b6c4b760be250d07_8863_332_75.png',
+  infoSubtitleTwo: '7d8b3c7bc45969cf318f10e2d990377e_6307_129_39.png',
+  infoFootnote: 'b3b00af7493139aa51962758ac02efec_5032_25.png',
+  prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
+  prizeSubtitle: 'd20b503661696539504bb2a1dbea12c5_6670_126_39.png',
+  prizeFootnote: '68f6a32c6ae7107249d759c5606e0081_4143_636_60.png',
 }
 
 function normalizeActivityKey(routeParams) {
@@ -545,6 +556,8 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
   return (
     <main className="acl-page">
+      <div className="acl-page-viewport">
+        <div className="acl-page-artboard">
       <div className="acl-design-stage">
         <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
         <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
@@ -600,24 +613,28 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         ) : null}
       </div>
 
-      <section className="acl-content-card">
-        <h1 className="acl-content-title">{theme.title || publicConfig?.title || '秘境惊喜，为心动而来！'}</h1>
-        <div className="acl-prize-section">
-          <h2>我的礼品</h2>
+      <section className="acl-info-card">
+        <img src={getDesignAsset('infoTitle')} alt="活动说明" />
+        <img className="acl-info-subtitle" src={getDesignAsset('infoSubtitleOne')} alt="活动参与方式" />
+        <img className="acl-info-line" src={getDesignAsset('infoLineOne')} alt="" />
+        <img className="acl-info-line" src={getDesignAsset('infoLineTwo')} alt="" />
+        <img className="acl-info-line" src={getDesignAsset('infoLineThree')} alt="" />
+        <img className="acl-info-line" src={getDesignAsset('infoLineFour')} alt="" />
+        <img className="acl-info-subtitle acl-info-subtitle--second" src={getDesignAsset('infoSubtitleTwo')} alt="兑奖说明" />
+        <img className="acl-info-footnote" src={getDesignAsset('infoFootnote')} alt="" />
+      </section>
+
+      <section className="acl-prize-card">
+        <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
+        <div className="acl-prize-slot">
           <PrizeShelf
             draw={latestWonDraw}
             onClaim={() => setClaimDraw(latestWonDraw)}
           />
         </div>
-
-        <div className="acl-copy">
-          点击下方按钮，为你心动的TA打CALL，就有机会抽取惊喜礼品哦！
-        </div>
-
-        <div className="acl-chance-bar">
-          <span>抽奖机会：{chances.remaining}/{chances.max}</span>
-          <span>已用：{chances.used}</span>
-        </div>
+        <img className="acl-prize-card__subtitle" src={getDesignAsset('prizeSubtitle')} alt="领奖方式" />
+        <img className="acl-prize-card__footnote" src={getDesignAsset('prizeFootnote')} alt="" />
+      </section>
 
         <DebugPanel
           access={debugAccess}
@@ -628,18 +645,8 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           onRefresh={refreshAfterAction}
         />
 
-        <section className="acl-rules">
-          <h2>活动说明</h2>
-          {(pageConfig.rules?.length ? pageConfig.rules : [
-            '点击“为TA打CALL”，选择心仪艺人头像，即可获得1次抽奖资格。',
-            '分享给朋友邀请助力，好友完成助力后双方各获得1次额外抽奖资格。',
-            '每人最多获得2次抽奖机会，每人最多中奖1次。',
-            '中奖后填写姓名和手机号，凭6位中奖码到现场兑换实物礼品。',
-          ]).map((rule, index) => (
-            <p key={rule}>{index + 1}. {rule}</p>
-          ))}
-        </section>
-      </section>
+      </div>
+      </div>
 
       {artistPickerOpen ? (
         <ArtistPicker
