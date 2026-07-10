@@ -39,7 +39,6 @@ const DESIGN_ASSETS = {
   partnerButton: 'aedabf88c1be8865603e71ce7a001910_8211_247_57.png',
   drawAction: '3c93de1f605650ea746b8faec0d48285_5983_92_67.png',
   drawButton: '3ea0d0eef1f53d92241f9401fa49510e_6630_110_110.png',
-  chanceBadge: '7a69b6601d3e324a7c971f37436ff77b_3279_28_27.png',
   barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
   barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
   infoTitle: 'ff1b18b4df585400cf9f86eae0f2e323_5297_200_42.png',
@@ -630,7 +629,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           aria-label={`抽奖，剩余 ${chances.remaining} 次`}
         >
           <img src={getDesignAsset('drawButton')} alt="" />
-          <img className="acl-stage-draw__badge" src={getDesignAsset('chanceBadge')} alt="" />
           <span className="acl-stage-draw__count" aria-hidden="true">{chances.remaining}</span>
         </button>
 

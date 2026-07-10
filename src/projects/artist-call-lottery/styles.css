@@ -218,23 +218,19 @@
   height: 110px;
 }
 
-.acl-stage-draw__badge {
+.acl-stage-draw__count {
   position: absolute;
   top: 1px;
   left: 82px;
   width: 28px;
-  height: 27px;
-}
-
-.acl-stage-draw__count {
-  position: absolute;
-  top: 2px;
-  left: 82px;
-  width: 28px;
-  color: #fff;
+  height: 28px;
+  border-radius: 50%;
+  background: #ef3f4f;
+  box-shadow: 0 1px 2px rgba(103, 15, 24, 0.28);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 1000;
-  line-height: 23px;
+  line-height: 28px;
   text-align: center;
 }
 
@@ -244,8 +240,12 @@
 
 .acl-image-btn:disabled img:first-child,
 .acl-stage-draw:disabled > img:first-child {
-  filter: grayscale(1);
-  opacity: 0.62;
+  filter: grayscale(1) brightness(0.68);
+  opacity: 0.78;
+}
+
+.acl-stage-draw:disabled {
+  cursor: not-allowed;
 }
 
 .acl-invite-tip {
