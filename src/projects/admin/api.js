@@ -70,6 +70,17 @@ export function updateActivityBgmConfig(activityKey, payload) {
   })
 }
 
+export function getArtistCallLotteryPrizes(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`)
+}
+
+export function saveArtistCallLotteryPrizes(activityKey, prizes) {
+  return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`, {
+    method: 'PUT',
+    body: JSON.stringify({ prizes }),
+  })
+}
+
 export function updateActivityStatus(activityKey, status) {
   return adminRequest(`/admin/activities/${activityKey}/status`, {
     method: 'PUT',
