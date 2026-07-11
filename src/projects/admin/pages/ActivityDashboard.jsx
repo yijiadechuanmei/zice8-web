@@ -81,6 +81,20 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'artist_call_lottery') {
+      const lottery = overview?.artistCallLottery || {}
+      return [
+        { label: '可选艺人', value: lottery.artistCount ?? 0 },
+        { label: '打CALL人数', value: lottery.callUserCount ?? 0 },
+        { label: '邀请助力', value: lottery.teamCount ?? 0 },
+        { label: '抽奖人数', value: lottery.drawUserCount ?? 0 },
+        { label: '抽奖次数', value: lottery.drawCount ?? 0 },
+        { label: '中奖人数', value: lottery.winUserCount ?? 0 },
+        { label: '中奖率', value: Math.round(Number(lottery.winRate ?? 0)), suffix: '%' },
+        { label: '领奖记录', value: lottery.claimCount ?? 0 },
+      ]
+    }
+
     if (activity.type === 'phase_quiz_lottery') {
       const pql = overview?.phaseQuizLottery || {}
       return [
@@ -237,6 +251,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
+          {activity.type === 'artist_call_lottery' ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="奖品库存" description="按奖品定义表统计已发与剩余数量">
+                  <LazyChart type="bar" data={overview?.artistCallLottery?.prizeStock || []} series={[{ key: 'issuedCount', name: '已发' }, { key: 'remainingCount', name: '剩余' }]} emptyText="暂无奖品库存" />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <Card className="admin-chart-card" title="业务口径">
+                  <Text type="secondary">本活动仅展示艺人、打CALL、邀请助力、抽奖、中奖、领奖和奖品库存数据，不展示通用参与资料或视频相关数据。</Text>
+                </Card>
+              </Col>
+            </Row>
+          ) : null}
+
           {activity.type === 'material_review_registration' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={12}>
@@ -256,7 +285,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment_visit' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' ? null : (
+          {activity.type === 'appointment_visit' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
