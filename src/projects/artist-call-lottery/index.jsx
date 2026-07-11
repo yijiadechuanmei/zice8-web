@@ -576,6 +576,10 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       }
       trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: 'artist_call_lottery' } })
     } catch (error) {
+      if (error.message === '您已中奖') {
+        setMessage({ title: '您已中奖', message: '您已获得奖品，不能重复中奖。' })
+        return
+      }
       setMessage({ title: '抽奖失败', message: error.message || '请稍后再试' })
     } finally {
       setActionLoading(false)
