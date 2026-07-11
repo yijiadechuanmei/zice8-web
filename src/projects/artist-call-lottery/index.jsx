@@ -20,6 +20,8 @@ import './styles.css'
 const DEFAULT_ACTIVITY_KEY = 'artist_call_lottery_2026'
 const DEFAULT_ASSETS_BASE_URL = `https://assets.zice8.com/artist_call_lottery/${DEFAULT_ACTIVITY_KEY}`
 const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
+const DESIGN_WIDTH = 750
+const DESIGN_STAGE_HEIGHT = 1448
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
@@ -54,6 +56,41 @@ const DESIGN_ASSETS = {
   prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
   prizeSubtitle: 'd20b503661696539504bb2a1dbea12c5_6670_126_39.png',
   prizeFootnote: '68f6a32c6ae7107249d759c5606e0081_4143_636_60.png',
+}
+
+function useArtboardLayout() {
+  const [scale, setScale] = useState(() => Math.min(1, (window.innerWidth || DESIGN_WIDTH) / DESIGN_WIDTH))
+  const [contentHeight, setContentHeight] = useState(DESIGN_STAGE_HEIGHT)
+  const [contentElement, setContentElement] = useState(null)
+  const contentRef = useCallback((node) => setContentElement(node), [])
+
+  useEffect(() => {
+    const updateScale = () => setScale(Math.min(1, (window.innerWidth || DESIGN_WIDTH) / DESIGN_WIDTH))
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    window.addEventListener('orientationchange', updateScale)
+    return () => {
+      window.removeEventListener('resize', updateScale)
+      window.removeEventListener('orientationchange', updateScale)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!contentElement) return undefined
+
+    const updateHeight = () => setContentHeight(contentElement.scrollHeight)
+    updateHeight()
+    if (typeof ResizeObserver === 'undefined') return undefined
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(contentElement)
+    return () => observer.disconnect()
+  }, [contentElement])
+
+  return {
+    contentRef,
+    scale,
+    height: contentHeight * scale,
+  }
 }
 
 function normalizeActivityKey(routeParams) {
@@ -311,6 +348,7 @@ function DebugPanel({
 }
 
 export default function ArtistCallLotteryProject({ routeParams }) {
+  const artboard = useArtboardLayout()
   const activityKey = normalizeActivityKey(routeParams)
   const inviterUserId = getQueryParam('inviterUserId') || ''
   const [publicConfig, setPublicConfig] = useState(null)
@@ -606,8 +644,13 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   return (
     <main className="acl-page">
       <div className="acl-page-viewport">
-        <div className="acl-page-artboard">
-      <div className="acl-design-stage">
+        <div className="acl-page-artboard" style={{ width: `${DESIGN_WIDTH * artboard.scale}px`, height: `${artboard.height}px` }}>
+          <div
+            ref={artboard.contentRef}
+            className="acl-page-artboard__content"
+            style={{ '--acl-stage-scale': artboard.scale }}
+          >
+            <div className="acl-design-stage">
         <img className="acl-design-image acl-design-image--main" src={getDesignAsset('mainVisual')} alt="" />
         <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
         <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
@@ -716,8 +759,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           onRefresh={refreshAfterAction}
         />
 
-      </div>
-      </div>
+            </div>
+          </div>
+        </div>
 
       {artistPickerOpen ? (
         <ArtistPicker

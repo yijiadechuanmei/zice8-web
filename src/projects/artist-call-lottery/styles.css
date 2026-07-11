@@ -35,9 +35,15 @@
 }
 
 .acl-page-artboard {
-  width: 750px;
+  position: relative;
   margin: 0 auto;
-  zoom: min(1, calc(100vw / 750px));
+}
+
+.acl-page-artboard__content {
+  display: flow-root;
+  width: 750px;
+  transform: scale(var(--acl-stage-scale, 1));
+  transform-origin: top left;
 }
 
 .acl-design-image {
@@ -491,8 +497,13 @@
 }
 
 .acl-prize-shelf__code {
-  color: #23133d;
-  margin-top: 8px;
+  width: 300px;
+  box-sizing: border-box;
+  margin-top: 10px;
+  border: 3px solid #f45178;
+  border-radius: 16px;
+  background: #fff6f8;
+  padding: 10px 18px 14px;
   text-align: center;
 }
 
@@ -502,10 +513,18 @@
 }
 
 .acl-prize-shelf__code b {
-  margin-top: 4px;
+  margin-top: 6px;
   color: #ea3e68;
-  font-size: 27px;
-  letter-spacing: 3px;
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: 8px;
+  padding-left: 8px;
+}
+
+.acl-prize-shelf__code small {
+  color: #9e5271;
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .acl-shelf-claim {
