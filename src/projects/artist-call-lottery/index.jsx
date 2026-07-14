@@ -102,16 +102,16 @@ const ARTIST_PICKER_ASSETS = {
 }
 
 const ARTIST_PRESENTATIONS = [
-  { name: '姚晓棠', avatar: 'b5870b4fcff839040b898858b2fceaff_9200_59_58.png', pickerAvatar: 'fcf8185620fc3ffbbbf3dd5aa805e225_21452_104_125.png' },
-  { name: '黄子弘凡', avatar: 'a163c035ec59088ec849829362376bfc_8171_59_58.png', pickerAvatar: '17c42d1e1ada57ee831837cd57358118_19845_104_125.png' },
-  { name: 'en王翊恩', avatar: 'dc463065a7b8c320c59347d6dd9dc61e_7829_59_59.png', pickerAvatar: '5cdbbba1d75b1b8987c2c692f1f275c6_17811_104_125.png' },
-  { name: '费宇涛', avatar: '3e59c09470bb26c643af5145b8ced7e3_7763_59_58.png', pickerAvatar: '6d9aea36007e9709c390a1ee1a2de517_20188_104_125.png' },
-  { name: '奔赴少年CIIU', avatar: '6dc8ceacd6781ac1c8d1e9eea01d21f9_9656_59_59.png', pickerAvatar: '78517097877b8f5714b7eeadd5af1040_26511_104_125.png' },
-  { name: '林志炫', avatar: '992ad38aa03be0ff238c839e6cddc2bb_7867_59_58.png', pickerAvatar: '2015e2de9743e21a4a4eb01f97eb90ff_21842_104_126.png' },
-  { name: '谢天笑 &OK KING', avatar: 'bfa0d977d1a020b9af98e4f80db1db2c_9726_59_58.png', pickerAvatar: '06271004097b3b1c20ee6aae0e928208_31239_125_126.png' },
-  { name: '夏日入侵企画', avatar: 'b953a49105be5a6297e39c88d03c8620_9097_59_59.png', pickerAvatar: '2b4a632ca4752bab03bd8964c9b2aa2b_29763_104_126.png' },
-  { name: '丑橘出逃', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', pickerAvatar: 'fe9413bf0c3dbb579a2c2b4c4a323070_29815_104_126.png' },
-  { name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', pickerAvatar: '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
+  { artistKey: 'yao_xiaotang', name: '姚晓棠', avatar: 'b5870b4fcff839040b898858b2fceaff_9200_59_58.png', '弹窗avatar': 'fcf8185620fc3ffbbbf3dd5aa805e225_21452_104_125.png' },
+  { artistKey: 'huang_zihongfan', name: '黄子弘凡', avatar: 'a163c035ec59088ec849829362376bfc_8171_59_58.png', '弹窗avatar': '17c42d1e1ada57ee831837cd57358118_19845_104_125.png' },
+  { artistKey: 'en_wang_yien', name: 'en王翊恩', avatar: 'dc463065a7b8c320c59347d6dd9dc61e_7829_59_59.png', '弹窗avatar': '5cdbbba1d75b1b8987c2c692f1f275c6_17811_104_125.png' },
+  { artistKey: 'fei_yutao', name: '费宇涛', avatar: '3e59c09470bb26c643af5145b8ced7e3_7763_59_58.png', '弹窗avatar': '6d9aea36007e9709c390a1ee1a2de517_20188_104_125.png' },
+  { artistKey: 'benfu_shaonian_ciiu', name: '奔赴少年CIIU', avatar: '6dc8ceacd6781ac1c8d1e9eea01d21f9_9656_59_59.png', '弹窗avatar': '78517097877b8f5714b7eeadd5af1040_26511_104_125.png' },
+  { artistKey: 'lin_zhixuan', name: '林志炫', avatar: '992ad38aa03be0ff238c839e6cddc2bb_7867_59_58.png', '弹窗avatar': '2015e2de9743e21a4a4eb01f97eb90ff_21842_104_126.png' },
+  { artistKey: 'xie_tianxiao_ok_king', name: '谢天笑 &OK KING', avatar: 'bfa0d977d1a020b9af98e4f80db1db2c_9726_59_58.png', '弹窗avatar': '06271004097b3b1c20ee6aae0e928208_31239_125_126.png' },
+  { artistKey: 'xiari_ruqin_qihua', name: '夏日入侵企画', avatar: 'b953a49105be5a6297e39c88d03c8620_9097_59_59.png', '弹窗avatar': '2b4a632ca4752bab03bd8964c9b2aa2b_29763_104_126.png' },
+  { artistKey: 'chouju_chutao', name: '丑橘出逃', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': 'fe9413bf0c3dbb579a2c2b4c4a323070_29815_104_126.png' },
+  { artistKey: 'lingdian_yuedui', name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
 ]
 
 function normalizeArtistName(name) {
@@ -129,14 +129,6 @@ function getIhxEditorAsset(filename) {
 function getArtistPresentation(artist) {
   const name = normalizeArtistName(artist?.name || artist?.artistName)
   return ARTIST_PRESENTATIONS.find((item) => normalizeArtistName(item.name) === name) || null
-}
-
-function sortArtistsForPicker(artists) {
-  return [...artists].sort((left, right) => {
-    const leftIndex = ARTIST_PRESENTATIONS.findIndex((item) => normalizeArtistName(item.name) === normalizeArtistName(left?.name))
-    const rightIndex = ARTIST_PRESENTATIONS.findIndex((item) => normalizeArtistName(item.name) === normalizeArtistName(right?.name))
-    return (leftIndex < 0 ? Number.MAX_SAFE_INTEGER : leftIndex) - (rightIndex < 0 ? Number.MAX_SAFE_INTEGER : rightIndex)
-  })
 }
 
 function useArtboardLayout() {
@@ -338,30 +330,27 @@ function ArtistShowcaseCarousel({ getAsset }) {
   )
 }
 
-function ArtistPicker({ artists, onSelect, onClose, selectedArtistId, loading }) {
-  const orderedArtists = sortArtistsForPicker(artists)
-  const [pickedArtistId, setPickedArtistId] = useState(() => selectedArtistId || '')
-  const selectedArtist = orderedArtists.find((artist) => artist.id === pickedArtistId)
+function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
+  const [pickedArtistKey, setPickedArtistKey] = useState(() => selectedArtistKey || '')
+  const selectedArtist = ARTIST_PRESENTATIONS.find((artist) => artist.artistKey === pickedArtistKey)
 
   return (
     <div className="acl-artist-picker-mask" role="dialog" aria-modal="true" aria-label="选择你心动的TA">
       <section className="acl-artist-picker" style={{ transform: `scale(${getDesignStageScale()})` }}>
         <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
         <div className="acl-artist-picker__grid">
-          {orderedArtists.map((artist) => {
-            const presentation = getArtistPresentation(artist)
-            const avatarUrl = presentation ? getArtistAsset(presentation.pickerAvatar) : artist.avatarUrl
-            const selected = artist.id === pickedArtistId
+          {ARTIST_PRESENTATIONS.map((artist) => {
+            const selected = artist.artistKey === pickedArtistKey
             return (
           <button
-            key={artist.id}
+            key={artist.artistKey}
             type="button"
             className="acl-artist-picker__artist"
-            onClick={() => setPickedArtistId(artist.id)}
+            onClick={() => setPickedArtistKey(artist.artistKey)}
             disabled={loading}
             aria-label={`选择${artist.name}`}
           >
-            {avatarUrl ? <img src={avatarUrl} alt={artist.name} /> : null}
+            <img src={getArtistAsset(artist['弹窗avatar'])} alt={artist.name} />
             {selected ? <img className="acl-artist-picker__selected" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
           </button>
             )
@@ -670,7 +659,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
   useWechatShare(activityKey, shareActivity)
 
-  const artists = bootstrap?.artists || []
   const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...PRESET_BARRAGES]
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
@@ -979,8 +967,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
       {artistPickerOpen ? (
         <ArtistPicker
-          artists={artists}
-          selectedArtistId={bootstrap?.myCall?.artist?.id}
+          selectedArtistKey={bootstrap?.myCall?.artist?.artistKey}
           loading={actionLoading}
           onSelect={handleSelectArtist}
           onClose={() => setArtistPickerOpen(false)}
