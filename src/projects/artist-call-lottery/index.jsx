@@ -117,6 +117,8 @@ const ARTIST_PRESENTATIONS = [
 ]
 
 const BARRAGE_TRACK_TOPS = [10, 76, 143, 211, 286, 354, 421]
+const BARRAGE_CYCLE_SECONDS = 16
+const BARRAGE_ENTRY_JITTER_SECONDS = 0.45
 
 function normalizeArtistName(name) {
   return String(name || '').replace(/\s+/g, '').toLowerCase()
@@ -152,11 +154,14 @@ function assignPresetBarrageAvatars(barrages) {
 function getBarrageLayouts(barrages, seed, latestUserBarrageId) {
   const random = createSeededRandom(seed)
   const laneTops = shuffle(BARRAGE_TRACK_TOPS, random)
+  const entryInterval = BARRAGE_CYCLE_SECONDS / Math.max(barrages.length, 1)
 
   return barrages.map((barrage, index) => ({
     ...barrage,
     top: laneTops[index % laneTops.length],
-    animationDelay: barrage.id === latestUserBarrageId ? '0s' : `${-(1.5 + random() * 11).toFixed(2)}s`,
+    animationDelay: barrage.id === latestUserBarrageId
+      ? '0s'
+      : `${-((index * entryInterval + (random() * 2 - 1) * BARRAGE_ENTRY_JITTER_SECONDS + BARRAGE_CYCLE_SECONDS) % BARRAGE_CYCLE_SECONDS).toFixed(2)}s`,
   }))
 }
 
