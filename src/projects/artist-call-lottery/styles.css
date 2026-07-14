@@ -804,6 +804,10 @@
   background-color: rgb(245, 243, 239);
   padding: 34px 28px 30px;
   --acl-common-modal-text-size: clamp(16px, 4vw, 30px);
+  --acl-common-modal-control-width: clamp(64px, 20vw, 150px);
+  --acl-common-modal-control-height: clamp(21px, 6.6667vw, 50px);
+  --acl-common-modal-control-padding: clamp(12px, 3.7333vw, 28px);
+  --acl-common-modal-action-gap: clamp(32px, 10.6667vw, 80px);
 }
 
 .acl-common-modal__content {
@@ -819,8 +823,8 @@
   display: inline-flex;
   align-self: center;
   flex: 0 0 auto;
-  min-width: 150px;
-  height: 50px;
+  min-width: var(--acl-common-modal-control-width);
+  height: var(--acl-common-modal-control-height);
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
@@ -828,7 +832,7 @@
   border: 1px solid #d8d8d8;
   border-radius: 100px;
   background: #97ff71;
-  padding: 0 28px;
+  padding: 0 var(--acl-common-modal-control-padding);
   color: #000000;
   font-size: var(--acl-common-modal-text-size);
   font-weight: 400;
@@ -851,13 +855,13 @@
   min-height: 50px;
   align-items: center;
   justify-content: center;
-  gap: 80px;
+  gap: var(--acl-common-modal-action-gap);
   margin-top: 36px;
 }
 
 .acl-common-modal__actions button {
-  width: 150px;
-  height: 50px;
+  width: var(--acl-common-modal-control-width);
+  height: var(--acl-common-modal-control-height);
   border: 1px solid #d8d8d8;
   border-radius: 100px;
   background: #97ff71;
