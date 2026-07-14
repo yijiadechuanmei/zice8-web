@@ -160,11 +160,9 @@ function updateInviteUrl(inviteCode) {
   return url.toString()
 }
 
-function formatDateTime(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+function getModalScale(designWidth) {
+  const viewportWidth = window.innerWidth || designWidth
+  return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
 }
 
 function mergeConfig(publicConfig, bootstrap) {
@@ -336,32 +334,23 @@ function ArtistPicker({ artists, onSelect, onClose, selectedArtistId, loading })
   )
 }
 
-function PrizeModal({ draw, onClose, onClaim, claim }) {
-  const claimed = claim || draw?.claim
+function PrizeModal({ draw, onClose, onClaim, claim, getAsset }) {
+  const won = Boolean(draw?.won)
+  const resultDraw = won ? { ...draw, claim: claim || draw?.claim } : null
   return (
-    <Modal onClose={onClose} labelledBy="acl-prize-title">
-      <p className="acl-modal-kicker">恭喜中奖</p>
-      <h2 id="acl-prize-title" className="acl-modal-title">{draw?.prizeName || '惊喜礼品'}</h2>
-      <div className="acl-prize-image-wrap">
-        {draw?.prizeImage ? (
-          <img className="acl-prize-image" src={draw.prizeImage} alt={draw.prizeName} />
-        ) : (
-          <div className="acl-prize-placeholder">PRIZE</div>
-        )}
-      </div>
-      <p className="acl-prize-meta">中奖时间：{formatDateTime(draw?.createdAt)}</p>
-      {claimed ? (
-        <div className="acl-code-box">
-          <span>中奖码</span>
-          <strong>{claimed.redemptionCode}</strong>
-          <small>请凭此码到现场兑换实物礼品</small>
-        </div>
-      ) : (
-        <button className="acl-primary-btn acl-full-btn" type="button" onClick={onClaim}>
-          领取礼品
+    <div className="acl-draw-result-mask" role="dialog" aria-modal="true" aria-label={won ? '抽奖结果：中奖' : '抽奖结果：未中奖'}>
+      <div className="acl-draw-result-modal" style={{ transform: `scale(${getModalScale(626)})` }}>
+        <PrizeShelf
+          draw={resultDraw}
+          hasDrawn
+          getAsset={getAsset}
+          onClaim={onClaim}
+        />
+        <button className="acl-draw-result-modal__close" type="button" onClick={onClose} aria-label="关闭抽奖结果">
+          ×
         </button>
-      )}
-    </Modal>
+      </div>
+    </div>
   )
 }
 
@@ -402,12 +391,46 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
   )
 }
 
+function CommonModal({
+  children,
+  labelledBy,
+  onConfirm,
+  onCancel,
+  confirmText = '确定',
+  cancelText = '取消',
+  confirmDisabled = false,
+  cancelDisabled = false,
+}) {
+  return (
+    <div className="acl-common-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
+      <section className="acl-common-modal" style={{ transform: `scale(${getModalScale(661)})` }}>
+        <div className="acl-common-modal__content">{children}</div>
+        <div className="acl-common-modal__actions">
+          {onConfirm ? (
+            <button type="button" disabled={confirmDisabled} onClick={onConfirm}>
+              {confirmText}
+            </button>
+          ) : null}
+          {onCancel ? <button type="button" disabled={cancelDisabled} onClick={onCancel}>{cancelText}</button> : null}
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function ClaimModal({ onClose, onSubmit, submitting }) {
   const [form, setForm] = useState({ recipientName: '', recipientPhone: '' })
 
   return (
-    <Modal onClose={onClose} labelledBy="acl-claim-title">
-      <h2 id="acl-claim-title" className="acl-modal-title">填写领奖信息</h2>
+    <CommonModal
+      labelledBy="acl-claim-title"
+      onConfirm={() => onSubmit(form)}
+      onCancel={onClose}
+      confirmText={submitting ? '提交中...' : '确定'}
+      confirmDisabled={submitting}
+      cancelDisabled={submitting}
+    >
+      <h2 id="acl-claim-title" className="acl-common-modal__title">填写领奖信息</h2>
       <label className="acl-field">
         <span>姓名</span>
         <input
@@ -425,27 +448,33 @@ function ClaimModal({ onClose, onSubmit, submitting }) {
           inputMode="tel"
         />
       </label>
-      <button
-        className="acl-primary-btn acl-full-btn"
-        type="button"
-        disabled={submitting}
-        onClick={() => onSubmit(form)}
-      >
-        {submitting ? '提交中...' : '提交并生成中奖码'}
-      </button>
-    </Modal>
+    </CommonModal>
   )
 }
 
 function MessageModal({ title, message, onClose }) {
   return (
-    <Modal onClose={onClose} labelledBy="acl-message-title">
-      <h2 id="acl-message-title" className="acl-modal-title">{title}</h2>
-      <p className="acl-message-text">{message}</p>
-      <button className="acl-primary-btn acl-full-btn" type="button" onClick={onClose}>
-        我知道了
-      </button>
-    </Modal>
+    <CommonModal labelledBy="acl-message-title" onConfirm={onClose} confirmText="确定">
+      <h2 id="acl-message-title" className="acl-common-modal__title">{title}</h2>
+      <p className="acl-common-modal__message">{message}</p>
+    </CommonModal>
+  )
+}
+
+function TeamInviteModal({ invitation, onAccept, onDecline, submitting }) {
+  return (
+    <CommonModal
+      labelledBy="acl-team-invite-title"
+      onConfirm={onAccept}
+      onCancel={onDecline}
+      confirmText={submitting ? '处理中...' : '同意'}
+      cancelText="不同意"
+      confirmDisabled={submitting}
+      cancelDisabled={submitting}
+    >
+      <h2 id="acl-team-invite-title" className="acl-common-modal__title">组队邀请</h2>
+      <p className="acl-common-modal__message">{invitation?.inviterName || '好友'} 邀请你一起组队，是否同意？</p>
+    </CommonModal>
   )
 }
 
@@ -495,6 +524,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
+  const [teamInvitePrompt, setTeamInvitePrompt] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const [debugLoading, setDebugLoading] = useState(false)
@@ -527,10 +557,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     try {
       const data = await getBootstrap(activityKey, inviterUserId)
       setBootstrap(data)
-      if (data?.inviteAssist?.created) {
-        setMessage({ title: '助力成功', message: '你和邀请人均已获得1次额外抽奖资格。' })
-        trackEvent({ activityKey, eventType: 'artist_call_team_up_auto', extra: { activityType: 'artist_call_lottery' } })
-      }
+      if (data?.pendingInvitation) setTeamInvitePrompt(data.pendingInvitation)
     } catch (error) {
       setMessage({ title: '加载失败', message: error.message || '请稍后再试' })
       if (Number(error?.status) === 401) reauth('artist-call-bootstrap-401')
@@ -637,25 +664,10 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     }
   }
 
-  const handlePartner = async () => {
+  const handlePartner = () => {
     const pending = bootstrap?.pendingInvitation
     if (pending?.inviterUserId) {
-      setActionLoading(true)
-      try {
-        const result = await teamUp(activityKey, { inviterUserId: pending.inviterUserId })
-        setBootstrap((prev) => ({
-          ...prev,
-          myTeam: result.team,
-          pendingInvitation: null,
-          chances: result.chances,
-        }))
-        setMessage({ title: '助力成功', message: '你和邀请人均已获得1次额外抽奖资格。' })
-        trackEvent({ activityKey, eventType: 'artist_call_team_up', extra: { activityType: 'artist_call_lottery' } })
-      } catch (error) {
-        setMessage({ title: '助力失败', message: error.message || '请稍后再试' })
-      } finally {
-        setActionLoading(false)
-      }
+      setTeamInvitePrompt(pending)
       return
     }
     const inviteCode = bootstrap?.inviteCode || bootstrap?.user?.id
@@ -673,6 +685,29 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     })
   }
 
+  const handleAcceptTeamInvite = async () => {
+    const pending = teamInvitePrompt || bootstrap?.pendingInvitation
+    if (!pending?.inviterUserId) return
+    setActionLoading(true)
+    try {
+      const result = await teamUp(activityKey, { inviterUserId: pending.inviterUserId })
+      setBootstrap((prev) => ({
+        ...prev,
+        myTeam: result.team,
+        pendingInvitation: null,
+        chances: result.chances,
+      }))
+      setTeamInvitePrompt(null)
+      setMessage({ title: '组队成功', message: '你和邀请人均已获得1次额外抽奖资格。' })
+      trackEvent({ activityKey, eventType: 'artist_call_team_up', extra: { activityType: 'artist_call_lottery' } })
+    } catch (error) {
+      setTeamInvitePrompt(null)
+      setMessage({ title: '组队失败', message: error.message || '请稍后再试' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const handleDraw = async () => {
     if (chances.remaining <= 0) {
       setMessage({ title: '暂无抽奖机会', message: '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
@@ -685,7 +720,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       if (result.draw?.won) {
         setPrizeDraw(result.draw)
       } else {
-        setMessage({ title: '未中奖', message: '这次没有中奖。分享活动邀请助力，好友完成助力后还能再抽一次。' })
+        setPrizeDraw(result.draw || { won: false })
       }
       trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: 'artist_call_lottery' } })
     } catch (error) {
@@ -830,11 +865,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           <span className="acl-stage-draw__count" aria-hidden="true">{chances.remaining}</span>
         </button>
 
-        {bootstrap?.pendingInvitation ? (
-          <div className="acl-invite-tip">
-            {bootstrap.pendingInvitation.inviterName} 邀请你助力，点击“寻找搭子”完成助力。
-          </div>
-        ) : null}
       </div>
 
       <section className="acl-info-card">
@@ -897,6 +927,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           draw={prizeDraw}
           onClose={() => setPrizeDraw(null)}
           onClaim={() => setClaimDraw(prizeDraw)}
+          getAsset={getDesignAsset}
         />
       ) : null}
       {claimDraw ? (
@@ -911,6 +942,14 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           title={message.title}
           message={message.message}
           onClose={() => setMessage(null)}
+        />
+      ) : null}
+      {teamInvitePrompt ? (
+        <TeamInviteModal
+          invitation={teamInvitePrompt}
+          submitting={actionLoading}
+          onAccept={handleAcceptTeamInvite}
+          onDecline={() => setTeamInvitePrompt(null)}
         />
       ) : null}
     </main>
