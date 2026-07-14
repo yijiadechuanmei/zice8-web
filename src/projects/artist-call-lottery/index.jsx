@@ -22,6 +22,7 @@ const DEFAULT_ASSETS_BASE_URL = `https://assets.zice8.com/artist_call_lottery/${
 const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const DESIGN_WIDTH = 750
 const DESIGN_STAGE_HEIGHT = 1448
+const CAROUSEL_VIEWPORT_WIDTH = 521
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
@@ -65,6 +66,7 @@ const DESIGN_ASSETS = {
   carouselSlide08: 'bec52f647b6fdcc0606ca42ed4d00ea1_311382_475_420.png',
   carouselSlide09: '2f2f4cb7808b9e2e59e0a0ee25872d7e_442407_472_607.png',
   carouselSlide10: 'c6fa111f625079e546cf0e60b441009d_499467_521_561.png',
+  bottomButton: '8415388794caff3828ea7f22a86f62be_1598_316_74.png',
 }
 
 const CAROUSEL_SLIDES = [
@@ -170,17 +172,44 @@ function mergeConfig(publicConfig, bootstrap) {
 
 function ArtistShowcaseCarousel({ getAsset }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
   const [pointerStartX, setPointerStartX] = useState(null)
   const slideCount = CAROUSEL_SLIDES.length
+  const visibleIndex = activeIndex % slideCount
 
   const goToSlide = useCallback((direction) => {
-    setActiveIndex((current) => (current + direction + slideCount) % slideCount)
-  }, [slideCount])
+    if (direction > 0) {
+      setIsTransitioning(true)
+      setActiveIndex((current) => current + 1)
+      return
+    }
+
+    if (activeIndex === 0) {
+      setIsTransitioning(false)
+      setActiveIndex(slideCount)
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          setIsTransitioning(true)
+          setActiveIndex(slideCount - 1)
+        })
+      })
+      return
+    }
+
+    setIsTransitioning(true)
+    setActiveIndex((current) => current - 1)
+  }, [activeIndex, slideCount])
 
   useEffect(() => {
     const timer = window.setInterval(() => goToSlide(1), 3600)
     return () => window.clearInterval(timer)
   }, [goToSlide])
+
+  const handleTransitionEnd = () => {
+    if (activeIndex !== slideCount) return
+    setIsTransitioning(false)
+    setActiveIndex(0)
+  }
 
   const handlePointerDown = (event) => {
     setPointerStartX(event.clientX)
@@ -202,30 +231,42 @@ function ArtistShowcaseCarousel({ getAsset }) {
       className="acl-artist-carousel"
       role="button"
       tabIndex={0}
-      aria-label={`艺人作品轮播，第 ${activeIndex + 1} 张，共 ${slideCount} 张。轻触切换，左右滑动浏览。`}
+      aria-label={`艺人作品轮播，第 ${visibleIndex + 1} 张，共 ${slideCount} 张。轻触切换，左右滑动浏览。`}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerCancel={() => setPointerStartX(null)}
       onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft') goToSlide(-1)
-        if (event.key === 'ArrowRight' || event.key === 'Enter' || event.key === ' ') goToSlide(1)
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault()
+          goToSlide(-1)
+        }
+        if (event.key === 'ArrowRight' || event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          goToSlide(1)
+        }
       }}
     >
-      {CAROUSEL_SLIDES.map((slide, index) => (
-        <img
-          key={slide.assetKey}
-          className={`acl-artist-carousel__image${index === activeIndex ? ' is-active' : ''}`}
-          src={getAsset(slide.assetKey)}
-          alt=""
-          draggable="false"
-          style={{
-            left: `${slide.left}px`,
-            top: `${slide.top}px`,
-            width: `${slide.width}px`,
-            height: `${slide.height}px`,
-          }}
-        />
-      ))}
+      <div
+        className={`acl-artist-carousel__track${isTransitioning ? '' : ' is-resetting'}`}
+        style={{ transform: `translate3d(${-activeIndex * CAROUSEL_VIEWPORT_WIDTH}px, 0, 0)` }}
+        onTransitionEnd={handleTransitionEnd}
+      >
+        {[...CAROUSEL_SLIDES, CAROUSEL_SLIDES[0]].map((slide, index) => (
+          <div className="acl-artist-carousel__slide" key={`${slide.assetKey}-${index}`}>
+            <img
+              src={getAsset(slide.assetKey)}
+              alt=""
+              draggable="false"
+              style={{
+                left: `${slide.left}px`,
+                top: `${slide.top}px`,
+                width: `${slide.width}px`,
+                height: `${slide.height}px`,
+              }}
+            />
+          </div>
+        ))}
+      </div>
     </section>
   )
 }
@@ -545,6 +586,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const latestWonDraw = [...(bootstrap?.draws || [])].reverse().find((draw) => draw.won)
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
+  const bottomButtonUrl = pageConfig.bottomButtonUrl || pageConfig.bottomButtonLink || ''
   const getDesignAsset = (key) => {
     const configured = pageConfig.designAssets?.[key]
     if (configured) return configured
@@ -581,6 +623,14 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       if (current === 'claimed') return null
       return 'empty'
     })
+  }
+
+  const handleBottomButtonClick = () => {
+    if (!bottomButtonUrl) {
+      setMessage({ title: '敬请期待', message: '跳转链接待定。' })
+      return
+    }
+    window.location.assign(bottomButtonUrl)
   }
 
   const refreshAfterAction = useCallback(async () => {
@@ -837,6 +887,10 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-prize-card__subtitle" src={getDesignAsset('prizeSubtitle')} alt="领奖方式" />
         <img className="acl-prize-card__footnote" src={getDesignAsset('prizeFootnote')} alt="" />
       </section>
+
+      <button className="acl-bottom-link" type="button" onClick={handleBottomButtonClick}>
+        <img src={getDesignAsset('bottomButton')} alt="查看详情" />
+      </button>
 
         <DebugPanel
           access={debugAccess}
