@@ -40,6 +40,7 @@ const DESIGN_ASSETS = {
   callButton: '767c72816a0490af17df4d67c5b27b67_8381_246_57.png',
   partnerButton: 'aedabf88c1be8865603e71ce7a001910_8211_247_57.png',
   drawAction: '3c93de1f605650ea746b8faec0d48285_5983_92_67.png',
+  teamCompleteDecor: '2d9c84389f2c826c607eb9bcaf8c7b85_1049_96_67.png',
   drawButton: '3ea0d0eef1f53d92241f9401fa49510e_6630_110_110.png',
   barrageFrame: 'a19c6100a937cf462d5f117323708674_3492_281_37.png',
   barrageAvatar: 'f34feb9cfaa2a5bac8c3224c917dbd50_9363_57_57.png',
@@ -67,6 +68,10 @@ const DESIGN_ASSETS = {
   carouselSlide09: '2f2f4cb7808b9e2e59e0a0ee25872d7e_442407_472_607.png',
   carouselSlide10: 'c6fa111f625079e546cf0e60b441009d_499467_521_561.png',
   bottomButton: '8415388794caff3828ea7f22a86f62be_1598_316_74.png',
+  prizeNotDrawn: 'ee105c305e356373ee7c90217e45cdb1_16054_637_741.png',
+  prizeNotWon: '86a282c664a27dc24dbce32e3a5cea62_15610_547_634.png',
+  prizeWon: '06812196e8f9cc62e5e96e81064221f7_10674_546_634.png',
+  prizeClaimButton: '35e07409f1d1bf0eb106448c3d17e713_1559_230_50.png',
 }
 
 const CAROUSEL_SLIDES = [
@@ -81,6 +86,12 @@ const CAROUSEL_SLIDES = [
   { assetKey: 'carouselSlide09', left: 33, top: 13, width: 472, height: 607 },
   { assetKey: 'carouselSlide10', left: 0, top: 12, width: 521, height: 561 },
 ]
+
+const PRIZE_STATE_VISUALS = {
+  notDrawn: { assetKey: 'prizeNotDrawn', left: 43, top: -18, width: 547, height: 634 },
+  notWon: { assetKey: 'prizeNotWon', left: 48, top: -18, width: 547, height: 634 },
+  won: { assetKey: 'prizeWon', left: 48, top: -18, width: 547, height: 634 },
+}
 
 function useArtboardLayout() {
   const [scale, setScale] = useState(() => Math.min(1, (window.innerWidth || DESIGN_WIDTH) / DESIGN_WIDTH))
@@ -354,39 +365,39 @@ function PrizeModal({ draw, onClose, onClaim, claim }) {
   )
 }
 
-function PrizeShelf({ draw, onClaim }) {
-  if (!draw) {
-    return (
-      <div className="acl-prize-shelf acl-prize-shelf--empty">
-        <p>尚未获得奖品</p>
-      </div>
-    )
-  }
+function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
+  const state = draw ? 'won' : hasDrawn ? 'notWon' : 'notDrawn'
+  const visual = PRIZE_STATE_VISUALS[state]
+  const claimCode = draw?.claim?.redemptionCode
 
   return (
-    <div className="acl-prize-shelf">
-      <div className="acl-prize-shelf__visual">
-        {draw.prizeImage ? (
-          <img src={draw.prizeImage} alt={draw.prizeName} />
-        ) : (
-          <span>礼品</span>
-        )}
-      </div>
-      <div className="acl-prize-shelf__info">
-        <strong>{draw.prizeName || '惊喜礼品'}</strong>
-        <span>{draw.prizeLevel || '中奖礼品'}</span>
-        <span className="acl-prize-shelf__time">中奖时间：{formatDateTime(draw.createdAt) || '—'}</span>
-        {draw.claim ? (
-          <div className="acl-prize-shelf__code">
-            <small>兑换码</small>
-            <b>{draw.claim.redemptionCode}</b>
+    <div className={`acl-prize-status acl-prize-status--${state}`} aria-live="polite">
+      <img
+        className="acl-prize-status__background"
+        src={getAsset(visual.assetKey)}
+        alt=""
+        style={{
+          left: `${visual.left}px`,
+          top: `${visual.top}px`,
+          width: `${visual.width}px`,
+          height: `${visual.height}px`,
+        }}
+      />
+      {draw ? (
+        <>
+          <strong className="acl-prize-status__name">{draw.prizeName || '惊喜礼品'}</strong>
+          <div className="acl-prize-status__image">
+            {draw.prizeImage ? <img src={draw.prizeImage} alt={draw.prizeName || '奖品'} /> : <span>礼品</span>}
           </div>
-        ) : (
-          <button className="acl-shelf-claim" type="button" onClick={onClaim}>
-            去领取
-          </button>
-        )}
-      </div>
+          {claimCode ? (
+            <div className="acl-prize-status__code">{claimCode}</div>
+          ) : (
+            <button className="acl-prize-status__claim" type="button" onClick={onClaim}>
+              <img src={getAsset('prizeClaimButton')} alt="去领取" />
+            </button>
+          )}
+        </>
+      ) : null}
     </div>
   )
 }
@@ -484,7 +495,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
-  const [prizeDebugState, setPrizeDebugState] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
   const [debugLoading, setDebugLoading] = useState(false)
@@ -583,7 +593,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const artists = bootstrap?.artists || []
   const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...PRESET_BARRAGES]
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
-  const latestWonDraw = [...(bootstrap?.draws || [])].reverse().find((draw) => draw.won)
+  const draws = bootstrap?.draws || []
+  const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
+  const hasDrawn = draws.length > 0
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
   const bottomButtonUrl = pageConfig.bottomButtonUrl || pageConfig.bottomButtonLink || ''
@@ -592,39 +604,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     if (configured) return configured
     return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
   }
-  const debugPrizeDraws = useMemo(() => {
-    const prizeImage = `${assetsBaseUrl.replace(/\/$/, '')}/prizes/first.png`
-    return {
-      empty: null,
-      unclaimed: {
-        id: 'debug-unclaimed-prize',
-        prizeName: '音乐节惊喜礼包',
-        prizeLevel: '一等奖',
-        prizeImage,
-        createdAt: '2026-07-11T10:30:00+08:00',
-        claim: null,
-      },
-      claimed: {
-        id: 'debug-claimed-prize',
-        prizeName: '音乐节惊喜礼包',
-        prizeLevel: '一等奖',
-        prizeImage,
-        createdAt: '2026-07-11T10:30:00+08:00',
-        claim: { redemptionCode: 'A8C6K2' },
-      },
-    }
-  }, [assetsBaseUrl])
-  const displayedPrizeDraw = prizeDebugState ? debugPrizeDraws[prizeDebugState] : latestWonDraw
-
-  const cyclePrizeDebugState = () => {
-    setPrizeDebugState((current) => {
-      if (current === 'empty') return 'unclaimed'
-      if (current === 'unclaimed') return 'claimed'
-      if (current === 'claimed') return null
-      return 'empty'
-    })
-  }
-
   const handleBottomButtonClick = () => {
     if (!bottomButtonUrl) {
       setMessage({ title: '敬请期待', message: '跳转链接待定。' })
@@ -833,7 +812,11 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           >
             <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
           </button>
-          <img className="acl-stage-actions__decor" src={getDesignAsset('drawAction')} alt="" />
+          <img
+            className="acl-stage-actions__decor"
+            src={getDesignAsset(bootstrap?.myTeam ? 'teamCompleteDecor' : 'drawAction')}
+            alt={bootstrap?.myTeam ? '已组队' : ''}
+          />
         </section>
 
         <button
@@ -870,18 +853,13 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       </section>
 
       <section className="acl-prize-card">
-        <button
-          className="acl-prize-card__title-button"
-          type="button"
-          onClick={cyclePrizeDebugState}
-          aria-label="切换礼品调试状态"
-        >
-          <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
-        </button>
+        <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
         <div className="acl-prize-slot">
           <PrizeShelf
-            draw={displayedPrizeDraw}
-            onClaim={() => setClaimDraw(displayedPrizeDraw)}
+            draw={latestWonDraw}
+            hasDrawn={hasDrawn}
+            getAsset={getDesignAsset}
+            onClaim={() => setClaimDraw(latestWonDraw)}
           />
         </div>
         <img className="acl-prize-card__subtitle" src={getDesignAsset('prizeSubtitle')} alt="领奖方式" />

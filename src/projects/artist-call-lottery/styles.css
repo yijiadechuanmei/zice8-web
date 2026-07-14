@@ -390,22 +390,109 @@
   height: 51px;
 }
 
-.acl-prize-card__title-button {
+.acl-prize-slot {
+  position: relative;
+  width: 626px;
+  height: 584px;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  overflow: visible;
+}
+
+.acl-prize-status {
+  position: relative;
+  width: 626px;
+  height: 584px;
+}
+
+.acl-prize-status__background {
+  position: absolute;
   display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.acl-prize-status__name {
+  position: absolute;
+  top: 141px;
+  left: 94px;
+  display: flex;
+  width: 443px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #000000;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acl-prize-status__image {
+  position: absolute;
+  top: 208px;
+  left: 230px;
+  display: flex;
+  width: 170px;
+  height: 170px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.acl-prize-status__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.acl-prize-status__image span {
+  color: #000000;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.acl-prize-status__claim {
+  position: absolute;
+  top: 424px;
+  left: 200px;
+  width: 230px;
+  height: 50px;
   border: 0;
   padding: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.acl-prize-slot {
-  display: flex;
+.acl-prize-status__claim img {
+  display: block;
   width: 100%;
-  height: 700px;
+  height: 100%;
+}
+
+.acl-prize-status__code {
+  position: absolute;
+  top: 423px;
+  left: 183px;
+  display: flex;
+  width: 268px;
+  height: 50px;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 30px;
+  overflow: hidden;
+  border-radius: 100px;
+  background: #fdeaff;
+  color: #000000;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .acl-prize-card__subtitle {
