@@ -393,7 +393,9 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
 
 function CommonModal({
   children,
+  title,
   labelledBy,
+  layout = 'message',
   onConfirm,
   onCancel,
   confirmText = '确定',
@@ -403,7 +405,8 @@ function CommonModal({
 }) {
   return (
     <div className="acl-common-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-      <section className="acl-common-modal">
+      <section className={`acl-common-modal${layout === 'form' ? ' acl-common-modal--form' : ''}`}>
+        <h2 id={labelledBy} className="acl-common-modal__title">{title}</h2>
         <div className="acl-common-modal__content">{children}</div>
         <div className="acl-common-modal__actions">
           {onConfirm ? (
@@ -423,14 +426,15 @@ function ClaimModal({ onClose, onSubmit, submitting }) {
 
   return (
     <CommonModal
+      title="填写领奖信息"
       labelledBy="acl-claim-title"
+      layout="form"
       onConfirm={() => onSubmit(form)}
       onCancel={onClose}
       confirmText={submitting ? '提交中...' : '确定'}
       confirmDisabled={submitting}
       cancelDisabled={submitting}
     >
-      <h2 id="acl-claim-title" className="acl-common-modal__title">填写领奖信息</h2>
       <label className="acl-field">
         <span>姓名</span>
         <input
@@ -454,8 +458,7 @@ function ClaimModal({ onClose, onSubmit, submitting }) {
 
 function MessageModal({ title, message, onClose }) {
   return (
-    <CommonModal labelledBy="acl-message-title" onConfirm={onClose} confirmText="确定">
-      <h2 id="acl-message-title" className="acl-common-modal__title">{title}</h2>
+    <CommonModal title={title} labelledBy="acl-message-title" onConfirm={onClose} confirmText="确定">
       <p className="acl-common-modal__message">{message}</p>
     </CommonModal>
   )
@@ -464,6 +467,7 @@ function MessageModal({ title, message, onClose }) {
 function TeamInviteModal({ invitation, onAccept, onDecline, submitting }) {
   return (
     <CommonModal
+      title="组队邀请"
       labelledBy="acl-team-invite-title"
       onConfirm={onAccept}
       onCancel={onDecline}
@@ -472,7 +476,6 @@ function TeamInviteModal({ invitation, onAccept, onDecline, submitting }) {
       confirmDisabled={submitting}
       cancelDisabled={submitting}
     >
-      <h2 id="acl-team-invite-title" className="acl-common-modal__title">组队邀请</h2>
       <p className="acl-common-modal__message">{invitation?.inviterName || '好友'} 邀请你一起组队，是否同意？</p>
     </CommonModal>
   )

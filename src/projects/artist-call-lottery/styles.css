@@ -794,12 +794,12 @@
 
 .acl-common-modal {
   position: relative;
-  display: flex;
+  display: grid;
   width: min(calc(100vw - 48px), 520px);
-  min-height: 260px;
+  height: 260px;
   box-sizing: border-box;
-  flex-direction: column;
-  justify-content: center;
+  grid-template-rows: var(--acl-common-modal-control-height) minmax(0, 1fr) var(--acl-common-modal-control-height);
+  gap: var(--acl-common-modal-row-gap);
   border-radius: 20px;
   background-color: rgb(245, 243, 239);
   padding: 34px 28px 30px;
@@ -808,6 +808,13 @@
   --acl-common-modal-control-height: clamp(21px, 6.6667vw, 50px);
   --acl-common-modal-control-padding: clamp(12px, 3.7333vw, 28px);
   --acl-common-modal-action-gap: clamp(32px, 10.6667vw, 80px);
+  --acl-common-modal-row-gap: clamp(16px, 4.8vw, 36px);
+}
+
+.acl-common-modal--form {
+  height: auto;
+  min-height: 300px;
+  grid-template-rows: var(--acl-common-modal-control-height) auto var(--acl-common-modal-control-height);
 }
 
 .acl-common-modal__content {
@@ -852,11 +859,11 @@
 
 .acl-common-modal__actions {
   display: flex;
-  min-height: 50px;
+  min-height: var(--acl-common-modal-control-height);
   align-items: center;
   justify-content: center;
   gap: var(--acl-common-modal-action-gap);
-  margin-top: 36px;
+  margin: 0;
 }
 
 .acl-common-modal__actions button {
