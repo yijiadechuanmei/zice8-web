@@ -800,6 +800,7 @@
   overflow: hidden;
   border-radius: 20px;
   background-color: rgb(245, 243, 239);
+  transform: scale(var(--acl-modal-scale, 1));
   transform-origin: center center;
 }
 

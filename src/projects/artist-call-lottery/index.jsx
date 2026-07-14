@@ -794,7 +794,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   }
 
   return (
-    <main className="acl-page">
+    <main className="acl-page" style={{ '--acl-modal-scale': artboard.scale }}>
       <div className="acl-page-viewport">
         <div className="acl-page-artboard" style={{ width: `${DESIGN_WIDTH * artboard.scale}px`, height: `${artboard.height}px` }}>
           <div
