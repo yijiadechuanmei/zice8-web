@@ -23,6 +23,7 @@ const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const DESIGN_WIDTH = 750
 const DESIGN_STAGE_HEIGHT = 1448
 const CAROUSEL_VIEWPORT_WIDTH = 521
+const IVX_EDITOR_ASSET_BASE_URL = 'https://file3.ih5.cn/v35/edt/u10013600'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
@@ -91,6 +92,51 @@ const PRIZE_STATE_VISUALS = {
   notDrawn: { assetKey: 'prizeNotDrawn', left: 43, top: -18, width: 547, height: 634 },
   notWon: { assetKey: 'prizeNotWon', left: 48, top: -18, width: 547, height: 634 },
   won: { assetKey: 'prizeWon', left: 48, top: -18, width: 547, height: 634 },
+}
+
+const ARTIST_PICKER_ASSETS = {
+  background: 'aa4de028b64e0b6b87d24ffb851177ca_124530_661_487.png',
+  confirm: 'd8c7b8eb337971b19ae09e700abb8f5f_4413_115_39.png',
+  close: '4fde127e1cb7941aa45caf540701c388_355_22_21.png',
+  selected: '588b70b436fbdade4643a269d8ab7a5d_3578_27_27.png',
+}
+
+const ARTIST_PRESENTATIONS = [
+  { name: '姚晓棠', avatar: 'b5870b4fcff839040b898858b2fceaff_9200_59_58.png', pickerAvatar: 'fcf8185620fc3ffbbbf3dd5aa805e225_21452_104_125.png' },
+  { name: '黄子弘凡', avatar: 'a163c035ec59088ec849829362376bfc_8171_59_58.png', pickerAvatar: '17c42d1e1ada57ee831837cd57358118_19845_104_125.png' },
+  { name: 'en王翊恩', avatar: 'dc463065a7b8c320c59347d6dd9dc61e_7829_59_59.png', pickerAvatar: '5cdbbba1d75b1b8987c2c692f1f275c6_17811_104_125.png' },
+  { name: '费宇涛', avatar: '3e59c09470bb26c643af5145b8ced7e3_7763_59_58.png', pickerAvatar: '6d9aea36007e9709c390a1ee1a2de517_20188_104_125.png' },
+  { name: '奔赴少年CIIU', avatar: '6dc8ceacd6781ac1c8d1e9eea01d21f9_9656_59_59.png', pickerAvatar: '78517097877b8f5714b7eeadd5af1040_26511_104_125.png' },
+  { name: '林志炫', avatar: '992ad38aa03be0ff238c839e6cddc2bb_7867_59_58.png', pickerAvatar: '2015e2de9743e21a4a4eb01f97eb90ff_21842_104_126.png' },
+  { name: '谢天笑 &OK KING', avatar: 'bfa0d977d1a020b9af98e4f80db1db2c_9726_59_58.png', pickerAvatar: '06271004097b3b1c20ee6aae0e928208_31239_125_126.png' },
+  { name: '夏日入侵企画', avatar: 'b953a49105be5a6297e39c88d03c8620_9097_59_59.png', pickerAvatar: '2b4a632ca4752bab03bd8964c9b2aa2b_29763_104_126.png' },
+  { name: '丑橘出逃', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', pickerAvatar: 'fe9413bf0c3dbb579a2c2b4c4a323070_29815_104_126.png' },
+  { name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', pickerAvatar: '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
+]
+
+function normalizeArtistName(name) {
+  return String(name || '').replace(/\s+/g, '').toLowerCase()
+}
+
+function getArtistAsset(filename) {
+  return `${DEFAULT_ASSETS_BASE_URL}/${filename}`
+}
+
+function getIhxEditorAsset(filename) {
+  return `${IVX_EDITOR_ASSET_BASE_URL}/${filename}`
+}
+
+function getArtistPresentation(artist) {
+  const name = normalizeArtistName(artist?.name || artist?.artistName)
+  return ARTIST_PRESENTATIONS.find((item) => normalizeArtistName(item.name) === name) || null
+}
+
+function sortArtistsForPicker(artists) {
+  return [...artists].sort((left, right) => {
+    const leftIndex = ARTIST_PRESENTATIONS.findIndex((item) => normalizeArtistName(item.name) === normalizeArtistName(left?.name))
+    const rightIndex = ARTIST_PRESENTATIONS.findIndex((item) => normalizeArtistName(item.name) === normalizeArtistName(right?.name))
+    return (leftIndex < 0 ? Number.MAX_SAFE_INTEGER : leftIndex) - (rightIndex < 0 ? Number.MAX_SAFE_INTEGER : rightIndex)
+  })
 }
 
 function useArtboardLayout() {
@@ -287,57 +333,49 @@ function ArtistShowcaseCarousel({ getAsset }) {
   )
 }
 
-function ArtistAvatar({ artist, selected }) {
-  if (artist?.avatarUrl) {
-    return (
-      <img
-        className="acl-artist-avatar"
-        src={artist.avatarUrl}
-        alt={artist.name}
-        loading="lazy"
-      />
-    )
-  }
-  return (
-    <div className={`acl-artist-avatar acl-artist-avatar-fallback${selected ? ' is-selected' : ''}`}>
-      {String(artist?.name || 'TA').slice(0, 2)}
-    </div>
-  )
-}
-
-function Modal({ children, onClose, labelledBy }) {
-  return (
-    <div className="acl-modal-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-      <div className="acl-modal">
-        <button className="acl-modal-close" type="button" onClick={onClose} aria-label="关闭弹窗">
-          ×
-        </button>
-        {children}
-      </div>
-    </div>
-  )
-}
-
 function ArtistPicker({ artists, onSelect, onClose, selectedArtistId, loading }) {
+  const orderedArtists = sortArtistsForPicker(artists)
+  const [pickedArtistId, setPickedArtistId] = useState(() => selectedArtistId || '')
+  const selectedArtist = orderedArtists.find((artist) => artist.id === pickedArtistId)
+
   return (
-    <Modal onClose={onClose} labelledBy="acl-artist-title">
-      <h2 id="acl-artist-title" className="acl-modal-title">选择你心动的TA</h2>
-      <div className="acl-artist-grid">
-        {artists.map((artist) => (
+    <div className="acl-artist-picker-mask" role="dialog" aria-modal="true" aria-label="选择你心动的TA">
+      <section className="acl-artist-picker" style={{ transform: `scale(${getModalScale(661)})` }}>
+        <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
+        <div className="acl-artist-picker__grid">
+          {orderedArtists.map((artist) => {
+            const presentation = getArtistPresentation(artist)
+            const avatarUrl = presentation ? getArtistAsset(presentation.pickerAvatar) : artist.avatarUrl
+            const selected = artist.id === pickedArtistId
+            return (
           <button
             key={artist.id}
             type="button"
-            className={`acl-artist-card${selectedArtistId === artist.id ? ' is-selected' : ''}`}
-            onClick={() => onSelect(artist)}
+            className="acl-artist-picker__artist"
+            onClick={() => setPickedArtistId(artist.id)}
             disabled={loading}
+            aria-label={`选择${artist.name}`}
           >
-            <ArtistAvatar artist={artist} selected={selectedArtistId === artist.id} />
-            <span className="acl-artist-name">{artist.name}</span>
-            {artist.slogan ? <span className="acl-artist-slogan">{artist.slogan}</span> : null}
+            {avatarUrl ? <img src={avatarUrl} alt={artist.name} /> : null}
+            {selected ? <img className="acl-artist-picker__selected" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
           </button>
-        ))}
-      </div>
-    </Modal>
+            )
+          })}
+        </div>
+        <button
+          className="acl-artist-picker__confirm"
+          type="button"
+          disabled={!selectedArtist || loading}
+          onClick={() => selectedArtist && onSelect(selectedArtist)}
+          aria-label="确认选择"
+        >
+          <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.confirm)} alt="确认" />
+        </button>
+        <button className="acl-artist-picker__close" type="button" onClick={onClose} aria-label="关闭头像选择">
+          <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.close)} alt="关闭" />
+        </button>
+      </section>
+    </div>
   )
 }
 
@@ -641,6 +679,10 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     if (configured) return configured
     return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
   }
+  const getBarrageAvatar = (item) => {
+    const presentation = getArtistPresentation(item)
+    return presentation ? getArtistAsset(presentation.avatar) : getDesignAsset('barrageAvatar')
+  }
   const handleBottomButtonClick = () => {
     if (!bottomButtonUrl) {
       setMessage({ title: '敬请期待', message: '跳转链接待定。' })
@@ -838,7 +880,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
               }}
             >
               <span className="acl-barrage__text">{item.text}</span>
-              <img src={getDesignAsset('barrageAvatar')} alt="" />
+              <img src={getBarrageAvatar(item)} alt="" />
             </div>
           ))}
         </section>

@@ -742,15 +742,104 @@
   font-weight: 850;
 }
 
-.acl-modal-mask {
+.acl-artist-picker-mask {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.acl-artist-picker {
+  position: relative;
+  width: 661px;
+  height: 487px;
+  transform-origin: center center;
+}
+
+.acl-artist-picker__background {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 661px;
+  height: 487px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.acl-artist-picker__grid {
+  position: absolute;
+  top: 113px;
+  left: 30px;
+  display: grid;
+  grid-template-columns: repeat(5, 104px);
+  column-gap: 20px;
+  row-gap: 20px;
+}
+
+.acl-artist-picker__artist {
+  position: relative;
+  display: block;
+  width: 104px;
+  height: 125px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.acl-artist-picker__artist > img:first-child {
+  display: block;
+  width: 104px;
+  height: 125px;
+  object-fit: contain;
+}
+
+.acl-artist-picker__selected {
+  position: absolute;
+  top: 70px;
+  left: 76px;
+  width: 27px;
+  height: 27px;
+}
+
+.acl-artist-picker__confirm,
+.acl-artist-picker__close {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.acl-artist-picker__confirm {
+  top: 416px;
+  left: 275px;
+  width: 115px;
+  height: 39px;
+}
+
+.acl-artist-picker__close {
+  top: 21px;
+  left: 616px;
+  width: 22px;
+  height: 21px;
+}
+
+.acl-artist-picker__confirm img,
+.acl-artist-picker__close img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.acl-artist-picker__artist:disabled,
+.acl-artist-picker__confirm:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .acl-draw-result-mask,
@@ -903,78 +992,6 @@
   color: #000000;
   font-size: 18px;
 }
-
-.acl-modal {
-  position: relative;
-  width: min(100%, 600px);
-  max-height: min(86vh, 760px);
-  overflow-y: auto;
-  border: 3px solid #1b1530;
-  border-radius: 8px;
-  background: #fffdf8;
-  box-shadow: 8px 8px 0 #1b1530;
-  padding: 28px 18px 22px;
-}
-
-.acl-modal-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  width: 36px;
-  height: 36px;
-  border: 2px solid #1b1530;
-  border-radius: 50%;
-  background: #fff;
-  color: #1b1530;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.acl-modal-title {
-  margin: 0 42px 18px;
-  text-align: center;
-  font-size: 28px;
-  line-height: 1.2;
-  font-weight: 1000;
-}
-
-.acl-modal-kicker {
-  margin: 4px 0 8px;
-  color: #f45178;
-  font-size: 15px;
-  font-weight: 900;
-  text-align: center;
-}
-
-.acl-artist-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-
-.acl-artist-card {
-  border: 3px solid #1b1530;
-  border-radius: 8px;
-  background: #fff;
-  padding: 12px 8px;
-  color: #1b1530;
-  cursor: pointer;
-}
-
-.acl-artist-card.is-selected { background: #dcfce7; }
-
-.acl-artist-avatar {
-  display: block;
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 10px;
-  border: 3px solid #1b1530;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #f8fafc;
-}
-
-.acl-artist-avatar-fallback { display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 1000; }
-.acl-artist-name, .acl-artist-slogan { display: block; text-align: center; }
-.acl-artist-name { font-size: 17px; font-weight: 1000; }
-.acl-artist-slogan { margin-top: 6px; color: #475569; font-size: 12px; line-height: 1.3; }
 
 .acl-prize-image-wrap { width: min(78%, 320px); aspect-ratio: 1; margin: 0 auto 14px; border: 3px solid #1b1530; border-radius: 8px; background: #fff; overflow: hidden; }
 .acl-prize-image, .acl-prize-placeholder { width: 100%; height: 100%; }
