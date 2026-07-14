@@ -23,6 +23,8 @@ const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const DESIGN_WIDTH = 750
 const DESIGN_STAGE_HEIGHT = 1448
 const CAROUSEL_VIEWPORT_WIDTH = 521
+const ARTIST_PICKER_WIDTH = 661
+const ARTIST_PICKER_HEIGHT = 487
 const IVX_EDITOR_ASSET_BASE_URL = 'https://file3.ih5.cn/v35/edt/u10013600'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
@@ -210,9 +212,10 @@ function getModalScale(designWidth) {
   return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
 }
 
-function getDesignStageScale() {
-  const viewportWidth = window.innerWidth || DESIGN_WIDTH
-  return Math.min(1, Math.max(0.1, viewportWidth / DESIGN_WIDTH))
+function getArtistPickerScale() {
+  const availableWidth = Math.max(1, (window.innerWidth || ARTIST_PICKER_WIDTH) - 32)
+  const availableHeight = Math.max(1, (window.innerHeight || ARTIST_PICKER_HEIGHT) - 32)
+  return Math.min(1, availableWidth / ARTIST_PICKER_WIDTH, availableHeight / ARTIST_PICKER_HEIGHT)
 }
 
 function mergeConfig(publicConfig, bootstrap) {
@@ -333,42 +336,48 @@ function ArtistShowcaseCarousel({ getAsset }) {
 function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
   const [pickedArtistKey, setPickedArtistKey] = useState(() => selectedArtistKey || '')
   const selectedArtist = ARTIST_PRESENTATIONS.find((artist) => artist.artistKey === pickedArtistKey)
+  const scale = getArtistPickerScale()
 
   return (
     <div className="acl-artist-picker-mask" role="dialog" aria-modal="true" aria-label="选择你心动的TA">
-      <section className="acl-artist-picker" style={{ transform: `scale(${getDesignStageScale()})` }}>
-        <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
-        <div className="acl-artist-picker__grid">
-          {ARTIST_PRESENTATIONS.map((artist) => {
-            const selected = artist.artistKey === pickedArtistKey
-            return (
+      <div
+        className="acl-artist-picker-frame"
+        style={{ width: `${ARTIST_PICKER_WIDTH * scale}px`, height: `${ARTIST_PICKER_HEIGHT * scale}px` }}
+      >
+        <section className="acl-artist-picker" style={{ transform: `scale(${scale})` }}>
+          <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
+          <div className="acl-artist-picker__grid">
+            {ARTIST_PRESENTATIONS.map((artist) => {
+              const selected = artist.artistKey === pickedArtistKey
+              return (
+                <button
+                  key={artist.artistKey}
+                  type="button"
+                  className="acl-artist-picker__artist"
+                  onClick={() => setPickedArtistKey(artist.artistKey)}
+                  disabled={loading}
+                  aria-label={`选择${artist.name}`}
+                >
+                  <img src={getArtistAsset(artist['弹窗avatar'])} alt={artist.name} />
+                  {selected ? <img className="acl-artist-picker__selected" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
+                </button>
+              )
+            })}
+          </div>
           <button
-            key={artist.artistKey}
+            className="acl-artist-picker__confirm"
             type="button"
-            className="acl-artist-picker__artist"
-            onClick={() => setPickedArtistKey(artist.artistKey)}
-            disabled={loading}
-            aria-label={`选择${artist.name}`}
+            disabled={!selectedArtist || loading}
+            onClick={() => selectedArtist && onSelect(selectedArtist)}
+            aria-label="确认选择"
           >
-            <img src={getArtistAsset(artist['弹窗avatar'])} alt={artist.name} />
-            {selected ? <img className="acl-artist-picker__selected" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
+            <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.confirm)} alt="确认" />
           </button>
-            )
-          })}
-        </div>
-        <button
-          className="acl-artist-picker__confirm"
-          type="button"
-          disabled={!selectedArtist || loading}
-          onClick={() => selectedArtist && onSelect(selectedArtist)}
-          aria-label="确认选择"
-        >
-          <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.confirm)} alt="确认" />
-        </button>
-        <button className="acl-artist-picker__close" type="button" onClick={onClose} aria-label="关闭头像选择">
-          <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.close)} alt="关闭" />
-        </button>
-      </section>
+          <button className="acl-artist-picker__close" type="button" onClick={onClose} aria-label="关闭头像选择">
+            <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.close)} alt="关闭" />
+          </button>
+        </section>
+      </div>
     </div>
   )
 }

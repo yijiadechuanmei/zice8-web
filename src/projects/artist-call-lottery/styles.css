@@ -753,11 +753,16 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
+.acl-artist-picker-frame {
+  position: relative;
+  flex: 0 0 auto;
+}
+
 .acl-artist-picker {
   position: relative;
   width: 661px;
   height: 487px;
-  transform-origin: center center;
+  transform-origin: top left;
 }
 
 .acl-artist-picker__background {
@@ -766,6 +771,10 @@
   display: block;
   width: 661px;
   height: 487px;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: 661 / 487;
+  object-fit: fill;
   pointer-events: none;
   user-select: none;
 }
