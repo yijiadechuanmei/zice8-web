@@ -19,6 +19,7 @@ import './styles.css'
 
 const DEFAULT_ACTIVITY_KEY = 'artist_call_lottery_2026'
 const DEFAULT_ASSETS_BASE_URL = `https://assets.zice8.com/artist_call_lottery/${DEFAULT_ACTIVITY_KEY}`
+const DAMAI_DETAIL_URL = 'https://detail.damai.cn/item.htm?id=1065476560358'
 const DEBUG_RESET_TOKEN = 'RESET_ACL_2026'
 const DESIGN_WIDTH = 750
 const DESIGN_STAGE_HEIGHT = 1448
@@ -715,7 +716,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const hasDrawn = draws.length > 0
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
-  const bottomButtonUrl = pageConfig.bottomButtonUrl || pageConfig.bottomButtonLink || ''
   const getDesignAsset = (key) => {
     const configured = pageConfig.designAssets?.[key]
     if (configured) return configured
@@ -726,13 +726,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     const presentation = getArtistPresentation(item)
     return presentation ? getArtistAsset(presentation.avatar) : getDesignAsset('barrageAvatar')
   }
-  const handleBottomButtonClick = () => {
-    if (!bottomButtonUrl) {
-      setMessage({ title: '敬请期待', message: '跳转链接待定。' })
-      return
-    }
-    window.location.assign(bottomButtonUrl)
-  }
+  const handleBottomButtonClick = () => window.location.assign(DAMAI_DETAIL_URL)
 
   const refreshAfterAction = useCallback(async () => {
     const data = await getBootstrap(activityKey, inviterUserId)
