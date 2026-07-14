@@ -828,7 +828,9 @@
 
 .acl-common-modal__title {
   display: inline-flex;
+  width: fit-content;
   align-self: center;
+  justify-self: center;
   flex: 0 0 auto;
   box-sizing: border-box;
   align-items: center;
