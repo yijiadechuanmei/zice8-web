@@ -60,11 +60,36 @@
   height: 494px;
 }
 
-.acl-design-image--main {
-  top: 444px;
-  left: 154px;
-  width: 461px;
-  height: 808px;
+.acl-artist-carousel {
+  position: absolute;
+  top: 453px;
+  left: 106px;
+  width: 521px;
+  height: 670px;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: pan-y;
+  outline: none;
+}
+
+.acl-artist-carousel:focus-visible {
+  outline: 3px solid #1b1530;
+  outline-offset: 5px;
+}
+
+.acl-artist-carousel__image {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transform: scale(0.985);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+.acl-artist-carousel__image.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .acl-design-image--title {
@@ -701,4 +726,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .acl-barrage { animation: none; }
+  .acl-artist-carousel__image { transition: none; }
 }

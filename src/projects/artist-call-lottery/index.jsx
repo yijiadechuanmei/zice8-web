@@ -31,7 +31,6 @@ const PRESET_BARRAGES = [
 ]
 
 const DESIGN_ASSETS = {
-  mainVisual: '774edde28a2e87d4356b672153b0391d_538166_461_808.png',
   topBackground: '2ec8ffc98ff52624b323a3f2a4f58a9e_129785_759_494.png',
   contentBackground: 'c84c3fe9c07920e5305b58176609d7a4_251037_751_719.png',
   footerBackground: '2d39e42e7cccc07d341b8ab0d43581d7_23789_750_59.png',
@@ -56,7 +55,30 @@ const DESIGN_ASSETS = {
   prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
   prizeSubtitle: 'd20b503661696539504bb2a1dbea12c5_6670_126_39.png',
   prizeFootnote: '68f6a32c6ae7107249d759c5606e0081_4143_636_60.png',
+  carouselSlide01: '3c810886872ae537fc15764fe8b7352a_383962_382_670.png',
+  carouselSlide02: '2e7a81061cf271bad435928c9c74facf_337852_450_661.png',
+  carouselSlide03: '11f82cd96ccfd8d05326eb99cbd7507c_363939_411_636.png',
+  carouselSlide04: '283bbfa23234fa3adacfef1491b66916_435983_429_661.png',
+  carouselSlide05: 'ed0fa98ec326f68880e84b9bf87396e8_448123_496_573.png',
+  carouselSlide06: '4fa715e5d9c1f3e4ee6558a8e0722f79_347778_377_669.png',
+  carouselSlide07: 'af8f59a6472d417f983ddd894cc82567_433033_471_632.png',
+  carouselSlide08: 'bec52f647b6fdcc0606ca42ed4d00ea1_311382_475_420.png',
+  carouselSlide09: '2f2f4cb7808b9e2e59e0a0ee25872d7e_442407_472_607.png',
+  carouselSlide10: 'c6fa111f625079e546cf0e60b441009d_499467_521_561.png',
 }
+
+const CAROUSEL_SLIDES = [
+  { assetKey: 'carouselSlide01', left: 63, top: 0, width: 382, height: 670 },
+  { assetKey: 'carouselSlide02', left: 51, top: 9, width: 450, height: 661 },
+  { assetKey: 'carouselSlide03', left: 90, top: 9, width: 411, height: 636 },
+  { assetKey: 'carouselSlide04', left: 53, top: 9, width: 429, height: 661 },
+  { assetKey: 'carouselSlide05', left: 21, top: 20, width: 496, height: 573 },
+  { assetKey: 'carouselSlide06', left: 96, top: 1, width: 377, height: 669 },
+  { assetKey: 'carouselSlide07', left: 45, top: 38, width: 471, height: 632 },
+  { assetKey: 'carouselSlide08', left: 34, top: 13, width: 475, height: 420 },
+  { assetKey: 'carouselSlide09', left: 33, top: 13, width: 472, height: 607 },
+  { assetKey: 'carouselSlide10', left: 0, top: 12, width: 521, height: 561 },
+]
 
 function useArtboardLayout() {
   const [scale, setScale] = useState(() => Math.min(1, (window.innerWidth || DESIGN_WIDTH) / DESIGN_WIDTH))
@@ -144,6 +166,68 @@ function mergeConfig(publicConfig, bootstrap) {
     },
     rules: config.rules || mobileConfig.rules || [],
   }
+}
+
+function ArtistShowcaseCarousel({ getAsset }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [pointerStartX, setPointerStartX] = useState(null)
+  const slideCount = CAROUSEL_SLIDES.length
+
+  const goToSlide = useCallback((direction) => {
+    setActiveIndex((current) => (current + direction + slideCount) % slideCount)
+  }, [slideCount])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => goToSlide(1), 3600)
+    return () => window.clearInterval(timer)
+  }, [goToSlide])
+
+  const handlePointerDown = (event) => {
+    setPointerStartX(event.clientX)
+  }
+
+  const handlePointerUp = (event) => {
+    if (pointerStartX === null) return
+    const offsetX = event.clientX - pointerStartX
+    setPointerStartX(null)
+    if (Math.abs(offsetX) < 24) {
+      goToSlide(1)
+      return
+    }
+    goToSlide(offsetX > 0 ? -1 : 1)
+  }
+
+  return (
+    <section
+      className="acl-artist-carousel"
+      role="button"
+      tabIndex={0}
+      aria-label={`艺人作品轮播，第 ${activeIndex + 1} 张，共 ${slideCount} 张。轻触切换，左右滑动浏览。`}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => setPointerStartX(null)}
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowLeft') goToSlide(-1)
+        if (event.key === 'ArrowRight' || event.key === 'Enter' || event.key === ' ') goToSlide(1)
+      }}
+    >
+      {CAROUSEL_SLIDES.map((slide, index) => (
+        <img
+          key={slide.assetKey}
+          className={`acl-artist-carousel__image${index === activeIndex ? ' is-active' : ''}`}
+          src={getAsset(slide.assetKey)}
+          alt=""
+          draggable="false"
+          style={{
+            left: `${slide.left}px`,
+            top: `${slide.top}px`,
+            width: `${slide.width}px`,
+            height: `${slide.height}px`,
+          }}
+        />
+      ))}
+    </section>
+  )
 }
 
 function ArtistAvatar({ artist, selected }) {
@@ -655,7 +739,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
             style={{ '--acl-stage-scale': artboard.scale }}
           >
             <div className="acl-design-stage">
-        <img className="acl-design-image acl-design-image--main" src={getDesignAsset('mainVisual')} alt="" />
+        <ArtistShowcaseCarousel getAsset={getDesignAsset} />
         <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
         <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
         <img className="acl-design-image acl-design-image--logo" src={getDesignAsset('logo')} alt="" />
