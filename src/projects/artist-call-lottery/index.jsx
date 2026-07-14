@@ -60,7 +60,7 @@ const DESIGN_ASSETS = {
   infoRules: 'f235bd787614bce3360728768bc3bd82_15476_609_111.png',
   prizeTitle: '1ad08ab0b707ffc0fdea39291497c73b_5720_218_51.png',
   prizeSubtitle: 'd20b503661696539504bb2a1dbea12c5_6670_126_39.png',
-  prizeFootnote: '68f6a32c6ae7107249d759c5606e0081_4143_636_60.png',
+  prizeFootnote: 'd13dace08f408687d8952872936cf53b_8948_636_108.png',
   carouselSlide01: '3c810886872ae537fc15764fe8b7352a_383962_382_670.png',
   carouselSlide02: '2e7a81061cf271bad435928c9c74facf_337852_450_661.png',
   carouselSlide03: '11f82cd96ccfd8d05326eb99cbd7507c_363939_411_636.png',
