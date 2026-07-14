@@ -218,6 +218,11 @@ function getModalScale(designWidth) {
   return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
 }
 
+function getDesignStageScale() {
+  const viewportWidth = window.innerWidth || DESIGN_WIDTH
+  return Math.min(1, Math.max(0.1, viewportWidth / DESIGN_WIDTH))
+}
+
 function mergeConfig(publicConfig, bootstrap) {
   const mobileConfig = publicConfig?.mobileConfig || {}
   const config = bootstrap?.config || {}
@@ -340,7 +345,7 @@ function ArtistPicker({ artists, onSelect, onClose, selectedArtistId, loading })
 
   return (
     <div className="acl-artist-picker-mask" role="dialog" aria-modal="true" aria-label="选择你心动的TA">
-      <section className="acl-artist-picker" style={{ transform: `scale(${getModalScale(661)})` }}>
+      <section className="acl-artist-picker" style={{ transform: `scale(${getDesignStageScale()})` }}>
         <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
         <div className="acl-artist-picker__grid">
           {orderedArtists.map((artist) => {
