@@ -803,6 +803,7 @@
   border-radius: 20px;
   background-color: rgb(245, 243, 239);
   padding: 34px 28px 30px;
+  --acl-common-modal-text-size: clamp(16px, 4vw, 30px);
 }
 
 .acl-common-modal__content {
@@ -829,7 +830,7 @@
   background: #97ff71;
   padding: 0 28px;
   color: #000000;
-  font-size: 30px;
+  font-size: var(--acl-common-modal-text-size);
   font-weight: 400;
   line-height: 1;
   text-align: center;
@@ -839,7 +840,7 @@
   width: 100%;
   margin: 0;
   color: #000000;
-  font-size: 30px;
+  font-size: var(--acl-common-modal-text-size);
   line-height: 1.4;
   text-align: center;
   white-space: pre-wrap;
@@ -861,7 +862,7 @@
   border-radius: 100px;
   background: #97ff71;
   color: #000000;
-  font-size: 30px;
+  font-size: var(--acl-common-modal-text-size);
   line-height: 1;
   cursor: pointer;
 }
