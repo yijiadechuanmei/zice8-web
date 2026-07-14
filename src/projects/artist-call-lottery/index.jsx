@@ -403,7 +403,7 @@ function CommonModal({
 }) {
   return (
     <div className="acl-common-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-      <section className="acl-common-modal" style={{ transform: `scale(${getModalScale(661)})` }}>
+      <section className="acl-common-modal">
         <div className="acl-common-modal__content">{children}</div>
         <div className="acl-common-modal__actions">
           {onConfirm ? (
