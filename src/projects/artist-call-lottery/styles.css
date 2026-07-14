@@ -794,26 +794,23 @@
 
 .acl-common-modal {
   position: relative;
-  width: 661px;
-  height: 487px;
+  display: flex;
+  width: min(calc(100vw - 48px), 520px);
+  min-height: 260px;
   box-sizing: border-box;
-  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
   border-radius: 20px;
   background-color: rgb(245, 243, 239);
-  transform: scale(var(--acl-common-modal-scale, 1));
-  transform-origin: center center;
+  padding: 34px 28px 30px;
 }
 
 .acl-common-modal__content {
-  position: absolute;
-  top: 90px;
-  left: 33px;
   display: flex;
-  width: 600px;
-  height: 200px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 12px;
   box-sizing: border-box;
 }
 
@@ -826,7 +823,7 @@
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  margin: 0 0 10px;
+  margin: 0;
   border: 1px solid #d8d8d8;
   border-radius: 100px;
   background: #97ff71;
@@ -849,15 +846,12 @@
 }
 
 .acl-common-modal__actions {
-  position: absolute;
-  top: 356px;
-  left: 3px;
   display: flex;
-  width: 661px;
-  height: 100px;
+  min-height: 50px;
   align-items: center;
   justify-content: center;
   gap: 80px;
+  margin-top: 36px;
 }
 
 .acl-common-modal__actions button {

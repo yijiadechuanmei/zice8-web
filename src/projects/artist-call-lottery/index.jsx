@@ -160,12 +160,9 @@ function updateInviteUrl(inviteCode) {
   return url.toString()
 }
 
-function getModalScale(designWidth, designHeight = 0) {
+function getModalScale(designWidth) {
   const viewportWidth = window.innerWidth || designWidth
-  const viewportHeight = window.innerHeight || designHeight
-  const widthScale = (viewportWidth - 40) / designWidth
-  const heightScale = designHeight ? (viewportHeight - 40) / designHeight : 1
-  return Math.max(0.1, Math.min(1, widthScale, heightScale))
+  return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
 }
 
 function mergeConfig(publicConfig, bootstrap) {
@@ -404,11 +401,9 @@ function CommonModal({
   confirmDisabled = false,
   cancelDisabled = false,
 }) {
-  const modalScale = getModalScale(661, 487)
-
   return (
     <div className="acl-common-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-      <section className="acl-common-modal" style={{ '--acl-common-modal-scale': modalScale }}>
+      <section className="acl-common-modal">
         <div className="acl-common-modal__content">{children}</div>
         <div className="acl-common-modal__actions">
           {onConfirm ? (
