@@ -116,19 +116,27 @@ const ARTIST_PRESENTATIONS = [
   { artistKey: 'lingdian_yuedui', name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
 ]
 
-const BARRAGE_TRACK_GAP = 15
+const BARRAGE_TRACK_TOPS = [10, 76, 143, 211, 286, 354, 421]
 
 function normalizeArtistName(name) {
   return String(name || '').replace(/\s+/g, '').toLowerCase()
 }
 
-function shuffle(items) {
+function shuffle(items, random = Math.random) {
   const shuffled = [...items]
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
+    const randomIndex = Math.floor(random() * (index + 1))
     ;[shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]]
   }
   return shuffled
+}
+
+function createSeededRandom(seed) {
+  let state = seed >>> 0
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0
+    return state / 4294967296
+  }
 }
 
 function assignPresetBarrageAvatars(barrages) {
@@ -138,6 +146,17 @@ function assignPresetBarrageAvatars(barrages) {
   return barrages.map((barrage, index) => ({
     ...barrage,
     avatar: shuffledAvatars[index % shuffledAvatars.length],
+  }))
+}
+
+function getBarrageLayouts(barrages, seed, latestUserBarrageId) {
+  const random = createSeededRandom(seed)
+  const laneTops = shuffle(BARRAGE_TRACK_TOPS, random)
+
+  return barrages.map((barrage, index) => ({
+    ...barrage,
+    top: laneTops[index % laneTops.length],
+    animationDelay: barrage.id === latestUserBarrageId ? '0s' : `${-(1.5 + random() * 11).toFixed(2)}s`,
   }))
 }
 
@@ -593,6 +612,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [debugLoading, setDebugLoading] = useState(false)
   const [debugResetting, setDebugResetting] = useState(false)
   const [presetBarrages] = useState(() => assignPresetBarrageAvatars(PRESET_BARRAGES))
+  const [barrageLayoutSeed] = useState(() => Math.floor(Math.random() * 4294967296))
   const [latestUserBarrageId, setLatestUserBarrageId] = useState('')
 
   useEffect(() => {
@@ -683,6 +703,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   useWechatShare(activityKey, shareActivity)
 
   const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...presetBarrages]
+  const visibleBarrages = getBarrageLayouts(barrages.slice(0, 6), barrageLayoutSeed, latestUserBarrageId)
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
@@ -888,13 +909,13 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />
 
         <section className="acl-barrage-area" aria-label="弹幕区">
-          {barrages.slice(0, 6).map((item, index) => (
+          {visibleBarrages.map((item) => (
             <div
               className={`acl-barrage${item.id === latestUserBarrageId ? ' is-user-call' : ''}`}
               key={item.id}
               style={{
-                top: `${8 + index * (57 + BARRAGE_TRACK_GAP)}px`,
-                animationDelay: item.id === latestUserBarrageId ? '0s' : `${-index * 2.7}s`,
+                top: `${item.top}px`,
+                animationDelay: item.animationDelay,
               }}
             >
               <span className="acl-barrage__text">{item.text}</span>
