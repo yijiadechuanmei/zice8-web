@@ -160,9 +160,12 @@ function updateInviteUrl(inviteCode) {
   return url.toString()
 }
 
-function getModalScale(designWidth) {
+function getModalScale(designWidth, designHeight = 0) {
   const viewportWidth = window.innerWidth || designWidth
-  return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
+  const viewportHeight = window.innerHeight || designHeight
+  const widthScale = (viewportWidth - 40) / designWidth
+  const heightScale = designHeight ? (viewportHeight - 40) / designHeight : 1
+  return Math.max(0.1, Math.min(1, widthScale, heightScale))
 }
 
 function mergeConfig(publicConfig, bootstrap) {
@@ -401,9 +404,11 @@ function CommonModal({
   confirmDisabled = false,
   cancelDisabled = false,
 }) {
+  const modalScale = getModalScale(661, 487)
+
   return (
     <div className="acl-common-mask" role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-      <section className="acl-common-modal">
+      <section className="acl-common-modal" style={{ '--acl-common-modal-scale': modalScale }}>
         <div className="acl-common-modal__content">{children}</div>
         <div className="acl-common-modal__actions">
           {onConfirm ? (
@@ -794,7 +799,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   }
 
   return (
-    <main className="acl-page" style={{ '--acl-modal-scale': artboard.scale }}>
+    <main className="acl-page">
       <div className="acl-page-viewport">
         <div className="acl-page-artboard" style={{ width: `${DESIGN_WIDTH * artboard.scale}px`, height: `${artboard.height}px` }}>
           <div
