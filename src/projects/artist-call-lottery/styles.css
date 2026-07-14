@@ -154,6 +154,10 @@
   animation: acl-barrage-fly 16s linear infinite;
 }
 
+.acl-barrage.is-user-call {
+  z-index: 2;
+}
+
 .acl-barrage__text {
   display: block;
   width: fit-content;
@@ -802,9 +806,10 @@
 
 .acl-artist-picker__artist > img:first-child {
   display: block;
-  width: 104px;
   height: 125px;
-  object-fit: contain;
+  width: auto;
+  max-width: none;
+  margin: 0 auto;
 }
 
 .acl-artist-picker__selected {

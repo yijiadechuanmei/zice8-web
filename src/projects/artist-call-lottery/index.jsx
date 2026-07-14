@@ -116,8 +116,29 @@ const ARTIST_PRESENTATIONS = [
   { artistKey: 'lingdian_yuedui', name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
 ]
 
+const BARRAGE_TRACK_GAP = 15
+
 function normalizeArtistName(name) {
   return String(name || '').replace(/\s+/g, '').toLowerCase()
+}
+
+function shuffle(items) {
+  const shuffled = [...items]
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1))
+    ;[shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]]
+  }
+  return shuffled
+}
+
+function assignPresetBarrageAvatars(barrages) {
+  const avatars = ARTIST_PRESENTATIONS.map((artist) => artist.avatar)
+  const shuffledAvatars = shuffle(avatars)
+
+  return barrages.map((barrage, index) => ({
+    ...barrage,
+    avatar: shuffledAvatars[index % shuffledAvatars.length],
+  }))
 }
 
 function getArtistAsset(filename) {
@@ -174,15 +195,6 @@ function normalizeActivityKey(routeParams) {
 
 function buildRequestId(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
-}
-
-function getBarrageTop(item, index) {
-  const source = `${item?.id || item?.text || 'barrage'}-${index}`
-  let hash = 0
-  for (let position = 0; position < source.length; position += 1) {
-    hash = (hash * 31 + source.charCodeAt(position)) >>> 0
-  }
-  return 8 + (hash % 416)
 }
 
 function buildShareLink(inviteCode) {
@@ -580,6 +592,8 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [debugAccess, setDebugAccess] = useState(null)
   const [debugLoading, setDebugLoading] = useState(false)
   const [debugResetting, setDebugResetting] = useState(false)
+  const [presetBarrages] = useState(() => assignPresetBarrageAvatars(PRESET_BARRAGES))
+  const [latestUserBarrageId, setLatestUserBarrageId] = useState('')
 
   useEffect(() => {
     const token = getTokenFromUrl()
@@ -668,7 +682,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
   useWechatShare(activityKey, shareActivity)
 
-  const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...PRESET_BARRAGES]
+  const barrages = [...(bootstrap?.barrages || []).slice(0, 2), ...presetBarrages]
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
@@ -682,6 +696,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
   }
   const getBarrageAvatar = (item) => {
+    if (item.avatar) return getArtistAsset(item.avatar)
     const presentation = getArtistPresentation(item)
     return presentation ? getArtistAsset(presentation.avatar) : getDesignAsset('barrageAvatar')
   }
@@ -709,6 +724,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         chances: result.chances,
         barrages: [result.barrage, ...(prev?.barrages || [])].filter(Boolean).slice(0, 20),
       }))
+      setLatestUserBarrageId(result.barrage?.id || '')
       setArtistPickerOpen(false)
       trackEvent({ activityKey, eventType: 'artist_call_submit', extra: { activityType: 'artist_call_lottery' } })
     } catch (error) {
@@ -874,11 +890,11 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         <section className="acl-barrage-area" aria-label="弹幕区">
           {barrages.slice(0, 6).map((item, index) => (
             <div
-              className="acl-barrage"
-              key={`${item.id}-${index}`}
+              className={`acl-barrage${item.id === latestUserBarrageId ? ' is-user-call' : ''}`}
+              key={item.id}
               style={{
-                top: `${getBarrageTop(item, index)}px`,
-                animationDelay: `${-index * 2.7}s`,
+                top: `${8 + index * (57 + BARRAGE_TRACK_GAP)}px`,
+                animationDelay: item.id === latestUserBarrageId ? '0s' : `${-index * 2.7}s`,
               }}
             >
               <span className="acl-barrage__text">{item.text}</span>
