@@ -160,6 +160,13 @@ function updateInviteUrl(inviteCode) {
   return url.toString()
 }
 
+function clearInviteUrl() {
+  const url = new URL(sanitizeUrlForWechat(window.location.href))
+  url.searchParams.delete('inviterUserId')
+  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`)
+  return url.toString()
+}
+
 function getModalScale(designWidth) {
   const viewportWidth = window.innerWidth || designWidth
   return Math.min(1, Math.max(0.1, (viewportWidth - 40) / designWidth))
@@ -518,7 +525,7 @@ function DebugPanel({
 export default function ArtistCallLotteryProject({ routeParams }) {
   const artboard = useArtboardLayout()
   const activityKey = normalizeActivityKey(routeParams)
-  const inviterUserId = getQueryParam('inviterUserId') || ''
+  const [inviterUserId, setInviterUserId] = useState(() => getQueryParam('inviterUserId') || '')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -709,6 +716,13 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     } finally {
       setActionLoading(false)
     }
+  }
+
+  const handleDeclineTeamInvite = () => {
+    setTeamInvitePrompt(null)
+    setBootstrap((prev) => (prev ? { ...prev, pendingInvitation: null } : prev))
+    setInviterUserId('')
+    clearInviteUrl()
   }
 
   const handleDraw = async () => {
@@ -952,7 +966,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           invitation={teamInvitePrompt}
           submitting={actionLoading}
           onAccept={handleAcceptTeamInvite}
-          onDecline={() => setTeamInvitePrompt(null)}
+          onDecline={handleDeclineTeamInvite}
         />
       ) : null}
     </main>
