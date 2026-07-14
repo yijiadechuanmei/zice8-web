@@ -830,8 +830,6 @@
   display: inline-flex;
   align-self: center;
   flex: 0 0 auto;
-  min-width: var(--acl-common-modal-control-width);
-  height: var(--acl-common-modal-control-height);
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
@@ -839,7 +837,7 @@
   border: 1px solid #d8d8d8;
   border-radius: 100px;
   background: #97ff71;
-  padding: 0 var(--acl-common-modal-control-padding);
+  padding: clamp(5px, 1.3333vw, 10px) var(--acl-common-modal-control-padding);
   color: #000000;
   font-size: var(--acl-common-modal-text-size);
   font-weight: 400;
