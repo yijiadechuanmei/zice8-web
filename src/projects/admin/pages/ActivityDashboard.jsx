@@ -84,6 +84,10 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     if (activity.type === 'artist_call_lottery') {
       const lottery = overview?.artistCallLottery || {}
       return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
         { label: '可选艺人', value: lottery.artistCount ?? 0 },
         { label: '打CALL人数', value: lottery.callUserCount ?? 0 },
         { label: '邀请助力', value: lottery.teamCount ?? 0 },
@@ -253,12 +257,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
           {activity.type === 'artist_call_lottery' ? (
             <Row gutter={[16, 16]}>
-              <Col xs={24} xl={12}>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
                 <ChartPanel title="奖品库存" description="按奖品定义表统计已发与剩余数量">
                   <LazyChart type="bar" data={overview?.artistCallLottery?.prizeStock || []} series={[{ key: 'issuedCount', name: '已发' }, { key: 'remainingCount', name: '剩余' }]} emptyText="暂无奖品库存" />
                 </ChartPanel>
               </Col>
-              <Col xs={24} xl={12}>
+              <Col xs={24} xl={8}>
                 <Card className="admin-chart-card" title="业务口径">
                   <Text type="secondary">本活动仅展示艺人、打CALL、邀请助力、抽奖、中奖、领奖和奖品库存数据，不展示通用参与资料或视频相关数据。</Text>
                 </Card>
