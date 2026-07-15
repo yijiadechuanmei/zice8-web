@@ -322,6 +322,9 @@
 }
 
 .acl-info-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   height: fit-content;
 }
 
