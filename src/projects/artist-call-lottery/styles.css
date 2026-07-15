@@ -347,13 +347,12 @@
 }
 
 .acl-info-line {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  align-self: flex-start;
   margin-top: 26px;
 }
-
-.acl-info-line:nth-of-type(3) { width: 429px; height: 74px; }
-.acl-info-line:nth-of-type(4) { width: 478px; height: 75px; }
-.acl-info-line:nth-of-type(5) { width: 526px; height: 75px; }
-.acl-info-line:nth-of-type(6) { width: 332px; height: 75px; }
 
 .acl-info-subtitle--second {
   margin-top: 45px;
