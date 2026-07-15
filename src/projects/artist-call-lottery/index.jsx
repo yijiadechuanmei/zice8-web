@@ -568,19 +568,12 @@ function TeamInviteModal({ invitation, onAccept, onDecline, submitting }) {
 
 function DebugPanel({
   access,
-  loading,
   resetting,
   onResetMine,
   onResetAll,
   onRefresh,
 }) {
-  if (!isDebugRequested) return null
-  if (loading) {
-    return <section className="acl-debug-panel">调试权限校验中...</section>
-  }
-  if (!access?.canDebug) {
-    return <section className="acl-debug-panel">调试面板未授权</section>
-  }
+  if (!isDebugRequested || !access?.canDebug) return null
   return (
     <section className="acl-debug-panel" aria-label="调试面板">
       <strong>Debug</strong>
@@ -615,7 +608,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [teamInvitePrompt, setTeamInvitePrompt] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
-  const [debugLoading, setDebugLoading] = useState(false)
   const [debugResetting, setDebugResetting] = useState(false)
   const [presetBarrages] = useState(() => assignPresetBarrageAvatars(PRESET_BARRAGES))
   const [barrageLayoutSeed] = useState(() => Math.floor(Math.random() * 4294967296))
@@ -664,7 +656,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   useEffect(() => {
     if (!isDebugRequested || !authReady || !publicConfig) return
     let active = true
-    setDebugLoading(true)
     getDebugAccess(activityKey)
       .then((access) => {
         if (active) setDebugAccess(access)
@@ -672,9 +663,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
       .catch((error) => {
         if (Number(error?.status) === 401) reauth('artist-call-debug-access')
         if (active) setDebugAccess(null)
-      })
-      .finally(() => {
-        if (active) setDebugLoading(false)
       })
     return () => {
       active = false
@@ -999,7 +987,6 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
         <DebugPanel
           access={debugAccess}
-          loading={debugLoading}
           resetting={debugResetting}
           onResetMine={() => handleDebugReset('me')}
           onResetAll={() => handleDebugReset('activity')}
