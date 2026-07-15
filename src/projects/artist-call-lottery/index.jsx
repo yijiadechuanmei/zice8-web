@@ -114,7 +114,7 @@ const ARTIST_PRESENTATIONS = [
   { artistKey: 'xie_tianxiao_ok_king', name: '谢天笑 &OK KING', avatar: 'bfa0d977d1a020b9af98e4f80db1db2c_9726_59_58.png', '弹窗avatar': '06271004097b3b1c20ee6aae0e928208_31239_125_126.png' },
   { artistKey: 'xiari_ruqin_qihua', name: '夏日入侵企画', avatar: 'b953a49105be5a6297e39c88d03c8620_9097_59_58.png', '弹窗avatar': '2b4a632ca4752bab03bd8964c9b2aa2b_29763_104_126.png' },
   { artistKey: 'chouju_chutao', name: '丑橘出逃', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': 'fe9413bf0c3dbb579a2c2b4c4a323070_29815_104_126.png' },
-  { artistKey: 'lingdian_yuedui', name: '零点乐队', avatar: '4fc8e8ab5edca226697815632634bc62_10312_58_59.png', '弹窗avatar': '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
+  { artistKey: 'lingdian_yuedui', name: '零点乐队', avatar: 'fc17f1750bc20e5e5c6dfe75407d247_11298_69_69.png', '弹窗avatar': '1271d7bf439b8110ba83866ede36f9d1_21566_104_127.png' },
 ]
 
 const BARRAGE_TRACK_TOPS = [10, 76, 143, 211, 286, 354, 421]
