@@ -79,8 +79,8 @@ const DESIGN_ASSETS = {
 }
 
 const CAROUSEL_SLIDES = [
-  { assetKey: 'carouselSlide01', left: 63, top: 0, width: 382, height: 670 },
   { assetKey: 'carouselSlide02', left: 51, top: 9, width: 450, height: 661 },
+  { assetKey: 'carouselSlide01', left: 63, top: 0, width: 382, height: 670 },
   { assetKey: 'carouselSlide03', left: 90, top: 9, width: 411, height: 636 },
   { assetKey: 'carouselSlide04', left: 53, top: 9, width: 429, height: 661 },
   { assetKey: 'carouselSlide05', left: 21, top: 20, width: 496, height: 573 },
