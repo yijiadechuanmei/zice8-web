@@ -632,7 +632,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     }
   }, [activityKey])
 
-  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig)
+  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(activityKey, publicConfig)
 
   const loadBootstrap = useCallback(async () => {
     if (!authReady) return
@@ -654,20 +654,19 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   }, [loadBootstrap])
 
   useEffect(() => {
-    if (!isDebugRequested || !authReady || !publicConfig) return
+    if (!isDebugRequested || !authReady || !publicConfig || !hasToken) return
     let active = true
     getDebugAccess(activityKey)
       .then((access) => {
         if (active) setDebugAccess(access)
       })
-      .catch((error) => {
-        if (Number(error?.status) === 401) reauth('artist-call-debug-access')
+      .catch(() => {
         if (active) setDebugAccess(null)
       })
     return () => {
       active = false
     }
-  }, [activityKey, authReady, publicConfig, reauth])
+  }, [activityKey, authReady, hasToken, publicConfig])
 
   useEffect(() => {
     trackPageView(activityKey, '/artist-call-lottery', { activityType: 'artist_call_lottery' })
