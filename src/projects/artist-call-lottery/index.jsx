@@ -710,7 +710,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     return `${assetsBaseUrl.replace(/\/$/, '')}/${DESIGN_ASSETS[key]}`
   }
   const getBarrageAvatar = (item) => {
-    if (item.avatar) return getArtistAsset(item.avatar)
+    if (item.avatar) {
+      return /^https?:\/\//i.test(item.avatar) ? item.avatar : getArtistAsset(item.avatar)
+    }
     const presentation = getArtistPresentation(item)
     return presentation ? getArtistAsset(presentation.avatar) : getDesignAsset('barrageAvatar')
   }
