@@ -39,7 +39,9 @@ export const getPublicConfig = (activityKey) =>
   phaseQuizLotteryRequest(`/activities/${activityKey}/public-config`, { skipAuth: true })
 
 export const getBootstrap = (activityKey) =>
-  phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/bootstrap`)
+  phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/bootstrap`, {
+    cache: 'no-store',
+  })
 
 export const startAttempt = (activityKey, phaseNo, data) =>
   phaseQuizLotteryRequest(`/phase-quiz-lottery/activities/${activityKey}/phases/${phaseNo}/start`, {
