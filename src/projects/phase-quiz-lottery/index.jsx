@@ -490,9 +490,11 @@ function EntryPage({ activityTitle, model, onStart, disabled, assets }) {
   const unavailable = model?.state === 'no_open_phase'
   const phaseNotStarted = model?.state === 'phase_not_started'
   const phaseEnded = model?.state === 'phase_ended'
-  const phaseNo = model?.currentPhase?.phaseNo || 2
+  const phaseNo = model?.currentPhase?.phaseNo || null
   const subtitle = unavailable
     ? '当前暂无开放期次'
+    : !phaseNo
+      ? '活动加载中...'
     : phaseNotStarted
       ? `第${phaseNo}期已开放`
       : phaseEnded
