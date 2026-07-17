@@ -13,6 +13,7 @@ const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index
 const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
 const LatexAllergyRiskTestProject = lazy(() => import('./latex-allergy-risk-test/index.jsx'))
 const BorderTownRoleTestProject = lazy(() => import('./border-town-role-test/index.jsx'))
+const FeatureChallengeProject = lazy(() => import('./feature-challenge/index.jsx'))
 const LongMarchStudyProject = lazy(() => import('./long-march-study/index.jsx'))
 const QuizProject = lazy(() => import('./quiz/index.jsx'))
 const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
@@ -41,6 +42,16 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/feature-challenge/:activityKey',
+    Component: FeatureChallengeProject,
+    activityGate: true,
+  },
+  {
+    path: '/feature_challenge/:activityKey',
+    Component: FeatureChallengeProject,
+    activityGate: true,
+  },
   {
     path: '/border-town-role-test/:activityKey',
     Component: BorderTownRoleTestProject,

@@ -1,0 +1,108 @@
+.feature-challenge-app {
+  min-height: 100svh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.feature-challenge-app * {
+  box-sizing: border-box;
+}
+
+.feature-challenge-home {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.feature-challenge-stage {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(100vw, 750px);
+  aspect-ratio: 750 / 1448;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fff7e8 0%, #fffdf8 63%, #fff 100%);
+}
+
+.feature-challenge-stage img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.feature-challenge-background {
+  top: -6.077%;
+  left: 0;
+  width: 100%;
+  height: 112.155%;
+}
+
+.feature-challenge-title {
+  top: 6.975%;
+  left: 8.667%;
+  width: 82.667%;
+  height: 17.748%;
+}
+
+.feature-challenge-illustration {
+  top: 27.762%;
+  left: 6.8%;
+  width: 86.533%;
+  height: 44.475%;
+}
+
+.feature-challenge-divider {
+  top: 75.483%;
+  left: 17.6%;
+  width: 64.8%;
+  height: 3.66%;
+}
+
+.feature-challenge-start {
+  position: absolute;
+  z-index: 1;
+  top: 82.873%;
+  left: 20.533%;
+  display: block;
+  width: 58.934%;
+  height: 8.356%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feature-challenge-start img {
+  position: static;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.feature-challenge-start:focus-visible {
+  outline: 3px solid #40230d;
+  outline-offset: 4px;
+}
+
+.feature-challenge-start:active {
+  transform: translateY(2px);
+}
+
+@media (min-width: 751px) {
+  .feature-challenge-home {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-challenge-start:active {
+    transform: none;
+  }
+}
