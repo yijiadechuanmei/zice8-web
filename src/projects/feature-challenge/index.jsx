@@ -130,6 +130,15 @@ export default function FeatureChallengeProject({ routeParams }) {
     });
   }
 
+  function restartQuiz() {
+    setChallenge(buildChallenge());
+    setPage("quiz");
+    setPhase(1);
+    setSelectedAnswer("");
+    setRevealed(false);
+    setAnswers({});
+  }
+
   function submitAnswer() {
     if (!selectedAnswer || revealed) return;
     setAnswers((current) => ({ ...current, [phase]: selectedAnswer }));
@@ -177,7 +186,7 @@ export default function FeatureChallengeProject({ routeParams }) {
       <ResultPage
         backgroundImage={backgroundImage}
         correctCount={correctCount}
-        onRestart={startChallenge}
+        onRestart={restartQuiz}
         onHome={goHome}
       />
     );
@@ -456,7 +465,7 @@ function ResultPage({ backgroundImage, correctCount, onRestart, onHome }) {
             type="button"
             onClick={onRestart}
           >
-            <span>重新闯关</span>
+            <span>重新答题</span>
             <RefreshIcon />
           </button>
           <button
