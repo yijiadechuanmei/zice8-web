@@ -337,6 +337,7 @@ const DONGFANG_ZHENYUE_JULY_LAYOUT = {
   },
   booking: {
     ...DONGFANG_ZHENYUE_LAYOUT.booking,
+    fixedAllowedDate: true,
     fieldImages: [
       {
         filename: '89218ac7f7da109aba0a20812c6a9e45_2479_480_119.png',

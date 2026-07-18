@@ -300,7 +300,9 @@ function AppointmentMain({ routeParams }) {
       }
       setBookingForm((current) => ({
         ...current,
-        appointmentDate: '',
+        appointmentDate: appointmentLayout.booking?.fixedAllowedDate
+          ? String(result.allowedDates?.[0] || '').trim()
+          : '',
         appointmentSlot: '',
       }))
       setStep(STEPS.BOOKING)
@@ -377,6 +379,7 @@ function AppointmentMain({ routeParams }) {
   }
 
   function openPicker(fieldKey) {
+    if (fieldKey === PICKERS.DATE && appointmentLayout.booking?.fixedAllowedDate) return
     const options = fieldKey === PICKERS.DATE ? bookingDateOptions : bookingSlotOptions
     if (!options.length) return
     const initialValue = fieldKey === PICKERS.SLOT
@@ -506,6 +509,7 @@ function AppointmentMain({ routeParams }) {
                 bookingDateOptions={bookingDateOptions}
                 bookingSlotOptions={bookingSlotOptions}
                 availableBookingSlotOptions={availableBookingSlotOptions}
+                fixedAllowedDate={Boolean(appointmentLayout.booking?.fixedAllowedDate)}
                 submitting={submitting}
                 onSubmit={handleBookingSubmit}
                 onPrev={() => setStep(STEPS.VERIFY)}
@@ -787,6 +791,7 @@ function BookingStage({
   bookingDateOptions,
   bookingSlotOptions,
   availableBookingSlotOptions,
+  fixedAllowedDate,
   submitting,
   onSubmit,
   onPrev,
@@ -818,15 +823,24 @@ function BookingStage({
         />
       ))}
 
-      <button
-        type="button"
-        className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentDate ? '' : 'is-placeholder'} ${bookingDateOptions.length ? '' : 'is-disabled'}`}
-        style={toAbsoluteStyle(bookingLayout.controls.appointmentDate)}
-        onClick={onOpenDatePicker}
-        disabled={!bookingDateOptions.length}
-      >
-        {bookingForm.appointmentDate || '请选择日期'}
-      </button>
+      {fixedAllowedDate ? (
+        <div
+          className={`appointment-picker-trigger appointment-picker-trigger--fixed flex items-center justify-center ${bookingForm.appointmentDate ? '' : 'is-placeholder'}`}
+          style={toAbsoluteStyle(bookingLayout.controls.appointmentDate)}
+        >
+          {bookingForm.appointmentDate || '白名单预约日期'}
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={`appointment-picker-trigger flex items-center justify-center ${bookingForm.appointmentDate ? '' : 'is-placeholder'} ${bookingDateOptions.length ? '' : 'is-disabled'}`}
+          style={toAbsoluteStyle(bookingLayout.controls.appointmentDate)}
+          onClick={onOpenDatePicker}
+          disabled={!bookingDateOptions.length}
+        >
+          {bookingForm.appointmentDate || '请选择日期'}
+        </button>
+      )}
 
       <button
         type="button"
