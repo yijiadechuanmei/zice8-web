@@ -31,58 +31,72 @@ const OPTIONS = {
   ],
 };
 
-const EIGENVALUES = [-4, -3, -2, 1, 2, 3, 4, 5];
+const DEMO_CHALLENGE = {
+  matrix: [
+    [1, 6],
+    [5, 2],
+  ],
+  u: [6, -5],
+  v: [3, -2],
+};
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+const USER_CHALLENGES = [
+  {
+    matrix: [
+      [5, 2],
+      [1, 6],
+    ],
+    u: [-2, 1],
+    v: [2, -2],
+  },
+  {
+    matrix: [
+      [6, 1],
+      [3, 4],
+    ],
+    u: [1, -3],
+    v: [1, -2],
+  },
+  {
+    matrix: [
+      [0, 7],
+      [7, 0],
+    ],
+    u: [1, -1],
+    v: [1, -2],
+  },
+];
+
+function resolveChallengeMode() {
+  if (typeof window === "undefined") return "user";
+  const params = new URLSearchParams(window.location.search);
+  return params.get("challenge_mode") === "demo" ? "demo" : "user";
 }
 
-function pickRandom(list) {
-  return list[randomInt(0, list.length - 1)];
+function copyChallenge(challenge) {
+  return {
+    matrix: challenge.matrix.map((row) => [...row]),
+    u: [...challenge.u],
+    v: [...challenge.v],
+  };
 }
 
-function divisors(value) {
-  const result = [];
-  for (let divisor = 1; divisor <= Math.abs(value); divisor += 1) {
-    if (value % divisor === 0) result.push(divisor);
-  }
-  return result;
-}
-
-function buildChallenge() {
-  const secondaryEigenvalue = pickRandom(EIGENVALUES);
-  const gap = 7 - secondaryEigenvalue;
-  const suitableDivisors = divisors(gap).filter(
-    (divisor) => gap / divisor <= 3,
-  );
-  const difference =
-    pickRandom(suitableDivisors) * (Math.random() > 0.5 ? 1 : -1);
-  const multiplier = gap / difference;
-  let uX = randomInt(-6, 6);
-  while (uX === 0 || uX + difference === 0) uX = randomInt(-6, 6);
-  const uY = uX + difference;
-  const matrix = [
-    [7 + uX * multiplier, -uX * multiplier],
-    [uY * multiplier, secondaryEigenvalue - uX * multiplier],
-  ];
-
-  let vX = 0;
-  let vY = 0;
-  while (vX === 0 || vY === 0 || vX === vY || vX * uY === vY * uX) {
-    vX = randomInt(-6, 6);
-    vY = randomInt(-6, 6);
-  }
-
-  return { matrix, u: [uX, uY], v: [vX, vY] };
+function buildChallenge(mode) {
+  if (mode === "demo") return copyChallenge(DEMO_CHALLENGE);
+  const index = Math.floor(Math.random() * USER_CHALLENGES.length);
+  return copyChallenge(USER_CHALLENGES[index]);
 }
 
 export default function FeatureChallengeProject({ routeParams }) {
   const activityKey =
     routeParams?.activityKey || FEATURE_CHALLENGE_ACTIVITY_KEY;
   const [publicConfig, setPublicConfig] = useState(null);
+  const [challengeMode] = useState(resolveChallengeMode);
   const [page, setPage] = useState("home");
   const [phase, setPhase] = useState(1);
-  const [challenge, setChallenge] = useState(buildChallenge);
+  const [challenge, setChallenge] = useState(() =>
+    buildChallenge(challengeMode),
+  );
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -112,7 +126,7 @@ export default function FeatureChallengeProject({ routeParams }) {
   }, [activityKey, page, phase, publicConfig, revealed]);
 
   function startChallenge() {
-    setChallenge(buildChallenge());
+    setChallenge(buildChallenge(challengeMode));
     setPage("quiz");
     setPhase(1);
     setSelectedAnswer("");
@@ -124,6 +138,7 @@ export default function FeatureChallengeProject({ routeParams }) {
       page: "/feature-challenge",
       extra: {
         activityType: FEATURE_CHALLENGE_ACTIVITY_TYPE,
+        challengeMode,
         pageKey: "home",
         eventName: "start_challenge",
       },
@@ -131,7 +146,7 @@ export default function FeatureChallengeProject({ routeParams }) {
   }
 
   function restartQuiz() {
-    setChallenge(buildChallenge());
+    setChallenge(buildChallenge(challengeMode));
     setPage("quiz");
     setPhase(1);
     setSelectedAnswer("");
