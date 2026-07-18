@@ -17,6 +17,7 @@ import './appointment.css'
 
 const STEPS = {
   INTRO: 'intro',
+  INTRODUCTION: 'introduction',
   RULE: 'rule',
   VERIFY: 'verify',
   BOOKING: 'booking',
@@ -391,6 +392,10 @@ function AppointmentMain({ routeParams }) {
 
   function goToRule() {
     if (step !== STEPS.INTRO || toastMessage || activePicker || submitting) return
+    setStep(appointmentLayout.introduction ? STEPS.INTRODUCTION : STEPS.RULE)
+  }
+
+  function handleIntroductionNext() {
     setStep(STEPS.RULE)
   }
 
@@ -466,6 +471,14 @@ function AppointmentMain({ routeParams }) {
 
             {step === STEPS.INTRO ? (
               <IntroStage layout={appointmentLayout} assetsBaseUrl={assetsBaseUrl} pageUrl={pageUrl} />
+            ) : null}
+
+            {step === STEPS.INTRODUCTION ? (
+              <IntroductionStage
+                layout={appointmentLayout}
+                assetsBaseUrl={assetsBaseUrl}
+                onNext={handleIntroductionNext}
+              />
             ) : null}
 
             {step === STEPS.RULE ? (
@@ -647,9 +660,17 @@ function IntroStage({ layout, assetsBaseUrl, pageUrl }) {
 }
 
 function RuleStage({ layout, assetsBaseUrl, onNext }) {
+  return <InformationalStage page={layout.rule} assetsBaseUrl={assetsBaseUrl} onNext={onNext} />
+}
+
+function IntroductionStage({ layout, assetsBaseUrl, onNext }) {
+  return <InformationalStage page={layout.introduction} assetsBaseUrl={assetsBaseUrl} onNext={onNext} />
+}
+
+function InformationalStage({ page, assetsBaseUrl, onNext }) {
   return (
     <>
-      {layout.rule.images.map((image) => {
+      {page.images.map((image) => {
         if (image.action === 'next' || image.filename === '4d08ba00e32fac92c7dd171992244add_1754_221_58.png') {
           return (
             <ImageButton

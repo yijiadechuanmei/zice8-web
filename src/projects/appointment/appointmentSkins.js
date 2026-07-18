@@ -12,6 +12,9 @@ export const DONGFANG_ZHENYUE_JULY_ACTIVITY_KEY = 'baoli_dongfang_zhenyue_july_d
 const DONGFANG_ZHENYUE_ASSETS_BASE_URL =
   'https://assets.zice8.com/appointment/baoli-dongfang-zhenyue-delivery-20260621'
 
+const DONGFANG_ZHENYUE_JULY_ASSETS_BASE_URL =
+  'https://assets.zice8.com/appointment/baoli_dongfang_zhenyue_july_delivery_20260718'
+
 const DONGFANG_ZHENYUE_LAYOUT = {
   common: {
     background: '98be13fdc7fe356a0a7c67a57322897b_1270758.webp',
@@ -234,6 +237,106 @@ const DONGFANG_ZHENYUE_LAYOUT = {
   },
 }
 
+const DONGFANG_ZHENYUE_JULY_LAYOUT = {
+  ...DONGFANG_ZHENYUE_LAYOUT,
+  intro: {
+    height: APPOINTMENT_STAGE_HEIGHT,
+    background: '98be13fdc7fe356a0a7c67a57322897b_1270758.webp',
+    images: [
+      {
+        filename: '5e169a7788f743be42ddbba25ea2c0fe_4066.webp',
+        left: 107,
+        top: 312,
+        width: 66,
+        height: 137,
+      },
+      {
+        filename: '111aeac15948e77efd8cf9d70c85ab24_2563_284_60.png',
+        left: 231,
+        top: 1156,
+        width: 284,
+        height: 60,
+      },
+      {
+        filename: 'ca6000727e9b81de26111ae7e2fe5319_16041_648_113.png',
+        left: 47,
+        top: 193,
+        width: 648,
+        height: 113,
+      },
+      {
+        filename: 'cab0a5ebf9bcdd5adf4981d4d2216d9e_5753_556_131.png',
+        left: 91,
+        top: 486,
+        width: 556,
+        height: 131,
+      },
+      {
+        filename: '3bcddd73bf9acb755fc058b936fbe743_9063_502_180.png',
+        left: 119,
+        top: 720,
+        width: 502,
+        height: 180,
+      },
+      {
+        filename: '517903c86adb390a93a08156063636ff_1682_204_48.png',
+        left: 269,
+        top: 348,
+        width: 204,
+        height: 48,
+      },
+    ],
+    qrcodeBox: {
+      left: 307,
+      top: 1003,
+      width: 132,
+      height: 132,
+    },
+  },
+  introduction: {
+    height: APPOINTMENT_STAGE_HEIGHT,
+    background: '29c81089bf087ef57a859bf3de02262d_1251896.webp',
+    images: [
+      {
+        filename: 'e56543e24e99ac9b875728e3512862b1_41726_607_799.png',
+        left: 65,
+        top: 232,
+        width: 607,
+        height: 799,
+      },
+      {
+        filename: '0f4ee1df38d9c2f6491e2c3487eca098_5490.webp',
+        left: 259,
+        top: 1140,
+        width: 221,
+        height: 58,
+        action: 'next',
+      },
+    ],
+  },
+  rule: {
+    height: APPOINTMENT_STAGE_HEIGHT,
+    background: '29c81089bf087ef57a859bf3de02262d_1251896.webp',
+    images: [
+      {
+        filename: '2331146ac4c1eb8887768a467cf54f1c_33384_607_743.png',
+        left: 66,
+        top: 230,
+        width: 607,
+        height: 743,
+      },
+      {
+        filename: '0f4ee1df38d9c2f6491e2c3487eca098_5490.webp',
+        left: 259,
+        top: 1140,
+        width: 221,
+        height: 58,
+        action: 'next',
+      },
+    ],
+  },
+}
+
 const MINGZHOU_ZHENYUE_SKIN = {
   key: 'baoli-mingzhou-zhenyue-delivery',
   className: 'appointment-skin-mingzhou-zhenyue',
@@ -252,12 +355,21 @@ const DONGFANG_ZHENYUE_SKIN = {
   layout: DONGFANG_ZHENYUE_LAYOUT,
 }
 
+const DONGFANG_ZHENYUE_JULY_SKIN = {
+  key: 'baoli-dongfang-zhenyue-july-delivery',
+  className: 'appointment-skin-dongfang-zhenyue',
+  assetsBaseUrl: DONGFANG_ZHENYUE_JULY_ASSETS_BASE_URL,
+  stageWidth: APPOINTMENT_STAGE_WIDTH,
+  stageHeight: APPOINTMENT_STAGE_HEIGHT,
+  layout: DONGFANG_ZHENYUE_JULY_LAYOUT,
+}
+
 export function resolveAppointmentSkin(activityKey) {
   const normalizedActivityKey = normalizeAppointmentActivityKey(activityKey)
-  if (
-    normalizedActivityKey === DONGFANG_ZHENYUE_ACTIVITY_KEY ||
-    normalizedActivityKey === DONGFANG_ZHENYUE_JULY_ACTIVITY_KEY
-  ) {
+  if (normalizedActivityKey === DONGFANG_ZHENYUE_JULY_ACTIVITY_KEY) {
+    return DONGFANG_ZHENYUE_JULY_SKIN
+  }
+  if (normalizedActivityKey === DONGFANG_ZHENYUE_ACTIVITY_KEY) {
     return DONGFANG_ZHENYUE_SKIN
   }
   return MINGZHOU_ZHENYUE_SKIN
