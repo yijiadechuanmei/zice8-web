@@ -164,7 +164,7 @@ export default function FeatureChallengeProject({ routeParams }) {
 
   const backgroundImage = assetUrl(
     config.assetsBaseUrl,
-    config.quizBackgroundImage,
+    config.homeBackgroundImage,
   );
   const correctCount = Object.values(answers).filter(
     (answer) => answer === "A",
