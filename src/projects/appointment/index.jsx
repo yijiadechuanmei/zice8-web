@@ -130,7 +130,7 @@ function AppointmentMain({ routeParams }) {
     if (!activityKey || !bootstrap || hasTrackedInitialViewRef.current) return
     hasTrackedInitialViewRef.current = true
     trackPageView(activityKey, '/appointment', {
-      activityType: 'appointment_visit',
+      activityType: 'appointment',
       pageKey: 'appointment',
     })
     trackAppointmentEvent(activityKey, 'appointment_page_view', {
@@ -1188,7 +1188,7 @@ function trackAppointmentEvent(activityKey, eventType, extra = {}) {
     page: '/appointment',
     extra: {
       activityKey,
-      activityType: 'appointment_visit',
+      activityType: 'appointment',
       eventName: eventType,
       ...sanitizeAppointmentAnalyticsExtra(extra),
     },

@@ -72,7 +72,7 @@ export function trackPageView(activityKey, page, extra) {
 
 function sanitizeExtra(extra, payload = {}) {
   if (!extra || typeof extra !== 'object') return {}
-  const appointmentOnly = payload?.eventType?.startsWith?.('appointment_') || extra.activityType === 'appointment_visit'
+  const appointmentOnly = payload?.eventType?.startsWith?.('appointment_') || extra.activityType === 'appointment'
   return Object.entries(extra).reduce((result, [key, value]) => {
     if (isSensitiveExtraKey(key)) return result
     if (appointmentOnly && !APPOINTMENT_EXTRA_KEYS.has(key)) return result

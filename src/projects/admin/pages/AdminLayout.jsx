@@ -339,7 +339,7 @@ function buildActivityUrl(activity) {
     return `${WEB_ORIGIN}/${encodeURIComponent(activity.type)}/${key}`
   }
   const pathPrefixByType = {
-    appointment_visit: '/appointment',
+    appointment: '/appointment',
     brochure_quiz_lottery: '/brochure-quiz-lottery',
     phase_quiz_lottery: '/phase-quiz-lottery',
     material_review_registration: '/material-registration',

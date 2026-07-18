@@ -64,7 +64,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '抖音点击', value: sourceOverview.outboundClicks ?? 0, tooltip: '高德来源访客点击图片跳转抖音的次数。' },
     ] : []
 
-    if (activity.type === 'appointment_visit') {
+    if (activity.type === 'appointment') {
       return [
         ...xiwuqiAmapMetrics,
         { label: '白名单总数', value: overview?.whitelistTotal ?? 0 },
@@ -298,7 +298,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment_visit' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -345,7 +345,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
               <Col xs={24} xl={8}><ChartPanel title="奖品中奖分布" description="预留环图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品中奖分布暂未接入数据源" /></ChartPanel></Col>
               <Col xs={24} xl={8}><ChartPanel title="奖品库存" description="预留柱状图"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="奖品库存暂未接入数据源" /></ChartPanel></Col>
             </Row>
-          ) : activity.type === 'appointment_visit' ? (
+          ) : activity.type === 'appointment' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>

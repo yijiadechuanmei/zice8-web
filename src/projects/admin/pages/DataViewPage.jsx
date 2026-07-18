@@ -514,7 +514,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
                   }}
                   style={{ width: 260 }}
                 />
-                {activity.type === 'appointment_visit' ? (
+                {activity.type === 'appointment' ? (
                   <>
                     <Input
                       allowClear
@@ -585,7 +585,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
 }
 
 function getKeywordPlaceholder(activity, viewKey) {
-  if (activity.type === 'appointment_visit') {
+  if (activity.type === 'appointment') {
     return viewKey === 'appointment_bookings'
       ? '搜索房号 / 姓名 / 手机号'
       : '搜索房号 / 姓名'
