@@ -211,6 +211,7 @@ export default function FeatureChallengeProject({ routeParams }) {
     <QuizPage
       backgroundImage={backgroundImage}
       challenge={challenge}
+      challengeMode={challengeMode}
       phase={phase}
       selectedAnswer={selectedAnswer}
       revealed={revealed}
@@ -274,6 +275,7 @@ function HomePage({ config, onStart }) {
 function QuizPage({
   backgroundImage,
   challenge,
+  challengeMode,
   phase,
   selectedAnswer,
   revealed,
@@ -298,6 +300,7 @@ function QuizPage({
         {revealed ? (
           <AnswerReveal
             challenge={challenge}
+            challengeMode={challengeMode}
             phase={phase}
             onContinue={onContinue}
           />
@@ -409,8 +412,10 @@ function QuestionPanel({ challenge, phase, matrixLabel }) {
   );
 }
 
-function AnswerReveal({ challenge, phase, onContinue }) {
+function AnswerReveal({ challenge, challengeMode, phase, onContinue }) {
   const firstPhase = phase === 1;
+  const answer = (firstPhase ? OPTIONS.first : OPTIONS.second)[0];
+  const isDemoMode = challengeMode === "demo";
   return (
     <section className="feature-challenge-reveal" aria-live="polite">
       <div className="feature-challenge-reveal-title">
@@ -419,28 +424,13 @@ function AnswerReveal({ challenge, phase, onContinue }) {
         <h1>正确答案：A</h1>
       </div>
       <article className="feature-challenge-reveal-card">
-        {firstPhase ? (
-          <>
-            <h2>向量 u 才是矩阵 A 的“忠诚者”</h2>
-            <p>
-              将 u = {formatVector(challenge.u)} 代入，可得 A·u ={" "}
-              {formatVector(
-                scaleVector(challenge.u, getSecondaryEigenvalue(challenge)),
-              )}
-              ，它是 u 的倍数。
-            </p>
-            <p>
-              而 v = {formatVector(challenge.v)} 不能满足 A·v =
-              λv，因此不是特征向量。
-            </p>
-          </>
-        ) : (
-          <>
-            <h2>7 的“忠诚者”方向是 (1, 1)</h2>
-            <p>A·(1, 1) = (7, 7) = 7·(1, 1)。</p>
-            <p>因此 7 确实是矩阵 A 的特征值，对应特征向量为 (1, 1)。</p>
-          </>
-        )}
+        <p className="feature-challenge-reveal-option">
+          <span>A</span>
+          <strong>{answer.text}</strong>
+        </p>
+        {isDemoMode ? (
+          <DemoAnalysis challenge={challenge} phase={phase} />
+        ) : null}
       </article>
       <button
         className="feature-challenge-submit feature-challenge-reveal-next"
@@ -451,6 +441,57 @@ function AnswerReveal({ challenge, phase, onContinue }) {
         <ArrowIcon />
       </button>
     </section>
+  );
+}
+
+function DemoAnalysis({ challenge, phase }) {
+  if (phase === 1) {
+    return (
+      <div className="feature-challenge-analysis">
+        <h2>解析</h2>
+        <p className="feature-challenge-equation">
+          Au = <Matrix values={challenge.matrix} label="演示矩阵 A" />
+          <ColumnVector values={[6, -5]} /> ={" "}
+          <ColumnVector values={[-24, 20]} />
+          = −4
+          <ColumnVector values={[6, -5]} />
+        </p>
+        <p className="feature-challenge-equation">
+          Av = <Matrix values={challenge.matrix} label="演示矩阵 A" />
+          <ColumnVector values={[3, -2]} /> = <ColumnVector values={[-9, 11]} />
+          ≠ λ<ColumnVector values={[3, -2]} />
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="feature-challenge-analysis">
+      <h2>解析</h2>
+      <p>7 是 A 的特征值，当且仅当方程 Ax = 7x 有非零解。</p>
+      <p>等价于 (A − 7I)x = 0。</p>
+      <p>考虑增广矩阵：</p>
+      <p className="feature-challenge-equation">
+        <AugmentedMatrix
+          values={[
+            [-6, 6, 0],
+            [5, -5, 0],
+          ]}
+        />
+        ∼{" "}
+        <AugmentedMatrix
+          values={[
+            [1, -1, 0],
+            [0, 0, 0],
+          ]}
+        />
+      </p>
+      <p>⟹ x₁ − x₂ = 0</p>
+      <p>⟹ 取 x₁ = x₂ = 1</p>
+      <p className="feature-challenge-equation">
+        故有非零解 <ColumnVector values={[1, 1]} />。
+      </p>
+    </div>
   );
 }
 
@@ -497,20 +538,39 @@ function ResultPage({ backgroundImage, correctCount, onRestart, onHome }) {
   );
 }
 
-function getSecondaryEigenvalue(challenge) {
-  const [firstRow] = challenge.matrix;
-  const [, secondValue] = firstRow;
-  const [uX] = challenge.u;
-  if (!uX) return 0;
-  return (firstRow[0] * uX + secondValue * challenge.u[1]) / uX;
-}
-
-function scaleVector(vector, scale) {
-  return vector.map((value) => value * scale);
-}
-
 function formatVector(vector) {
   return `(${vector.map((value) => String(value).replace("-", "−")).join(", ")})`;
+}
+
+function ColumnVector({ values }) {
+  return (
+    <span
+      className="feature-challenge-column-vector"
+      aria-label={`列向量 ${values.join("，")}`}
+    >
+      <i>(</i>
+      <span>
+        {values.map((value, index) => (
+          <b key={`${value}-${index}`}>{String(value).replace("-", "−")}</b>
+        ))}
+      </span>
+      <i>)</i>
+    </span>
+  );
+}
+
+function AugmentedMatrix({ values }) {
+  return (
+    <span className="feature-challenge-augmented-matrix" aria-label="增广矩阵">
+      <i>(</i>
+      <span>
+        {values.flat().map((value, index) => (
+          <b key={`${value}-${index}`}>{String(value).replace("-", "−")}</b>
+        ))}
+      </span>
+      <i>)</i>
+    </span>
+  );
 }
 
 function Matrix({ values, label }) {
