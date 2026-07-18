@@ -335,6 +335,26 @@ const DONGFANG_ZHENYUE_JULY_LAYOUT = {
       },
     ],
   },
+  booking: {
+    ...DONGFANG_ZHENYUE_LAYOUT.booking,
+    fieldImages: [
+      {
+        filename: '89218ac7f7da109aba0a20812c6a9e45_2479_480_119.png',
+        left: 91,
+        top: 348,
+        width: 562,
+        height: 140,
+      },
+      {
+        filename: '37ea2528839e5c72e33a0071d366db81_2455_480_120.png',
+        left: 91,
+        top: 528,
+        width: 562,
+        height: 140,
+      },
+      DONGFANG_ZHENYUE_LAYOUT.booking.fieldImages[2],
+    ],
+  },
 }
 
 const MINGZHOU_ZHENYUE_SKIN = {
