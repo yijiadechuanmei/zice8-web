@@ -67,25 +67,24 @@
   font-weight: 500;
 }
 
+.swl-copy-shell .swl-wish-form__input:focus,
 .swl-copy-shell .swl-wish-form__input:focus-visible {
-  outline: 2px solid #72f446;
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: none;
 }
 
 .swl-copy-shell .swl-wish-form__submit {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 145px;
-  height: 60px;
+  top: 4px;
+  right: 16px;
+  width: 118px;
+  height: 52px;
   border: 0;
-  padding: 0 22px 0 0;
-  border-radius: 0 30px 30px 0;
+  padding: 0;
+  border-radius: 999px;
   background: #97ff71;
   color: #171717;
   cursor: pointer;
-  font: 700 28px/60px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 700 28px/52px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .swl-copy-shell .swl-wish-form__submit:disabled {

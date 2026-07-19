@@ -746,6 +746,11 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         wishes: [...(prev.wishes || []), result.wish].filter(Boolean),
         chances: result.chances || prev.chances,
       } : prev))
+      try {
+        await refreshAfterAction()
+      } catch {
+        // The successful wish response already updates the visible chance count.
+      }
       setMessage({ title: '许愿成功', message: '已获得 1 次抽奖机会。' })
       trackEvent({ activityKey, eventType: 'song_wish_submit', extra: { activityType: 'song_wish_lottery' } })
     } catch (error) {
