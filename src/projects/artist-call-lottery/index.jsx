@@ -708,9 +708,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
   const theme = pageConfig.theme || {}
-  const assetsBaseUrl = isSongWish
-    ? IVX_EDITOR_ASSET_BASE_URL
-    : (pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL)
+  const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
   const getDesignAsset = (key) => {
     const configured = pageConfig.designAssets?.[key]
     if (configured) return configured
