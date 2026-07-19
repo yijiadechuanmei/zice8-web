@@ -26,7 +26,6 @@ const DESIGN_STAGE_HEIGHT = 1448
 const CAROUSEL_VIEWPORT_WIDTH = 521
 const ARTIST_PICKER_WIDTH = 661
 const ARTIST_PICKER_HEIGHT = 487
-const IVX_EDITOR_ASSET_BASE_URL = 'https://file3.ih5.cn/v35/edt/u10013600'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
@@ -170,8 +169,8 @@ function getArtistAsset(filename) {
   return `${DEFAULT_ASSETS_BASE_URL}/${filename}`
 }
 
-function getIhxEditorAsset(filename) {
-  return `${IVX_EDITOR_ASSET_BASE_URL}/${filename}`
+function getEditorAsset(filename) {
+  return `${DEFAULT_ASSETS_BASE_URL}/${filename}`
 }
 
 function getArtistPresentation(artist) {
@@ -382,7 +381,7 @@ function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
         style={{ width: `${ARTIST_PICKER_WIDTH * scale}px`, height: `${ARTIST_PICKER_HEIGHT * scale}px` }}
       >
         <section className="acl-artist-picker" style={{ transform: `scale(${scale})` }}>
-          <img className="acl-artist-picker__background" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
+          <img className="acl-artist-picker__background" src={getEditorAsset(ARTIST_PICKER_ASSETS.background)} alt="" />
           <div className="acl-artist-picker__grid">
             {ARTIST_PRESENTATIONS.map((artist) => {
               const selected = artist.artistKey === pickedArtistKey
@@ -396,7 +395,7 @@ function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
                   aria-label={`选择${artist.name}`}
                 >
                   <img src={getArtistAsset(artist['弹窗avatar'])} alt={artist.name} />
-                  {selected ? <img className="acl-artist-picker__selected" src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
+                  {selected ? <img className="acl-artist-picker__selected" src={getEditorAsset(ARTIST_PICKER_ASSETS.selected)} alt="已选择" /> : null}
                 </button>
               )
             })}
@@ -408,10 +407,10 @@ function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
             onClick={() => selectedArtist && onSelect(selectedArtist)}
             aria-label="确认选择"
           >
-            <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.confirm)} alt="确认" />
+            <img src={getEditorAsset(ARTIST_PICKER_ASSETS.confirm)} alt="确认" />
           </button>
           <button className="acl-artist-picker__close" type="button" onClick={onClose} aria-label="关闭头像选择">
-            <img src={getIhxEditorAsset(ARTIST_PICKER_ASSETS.close)} alt="关闭" />
+            <img src={getEditorAsset(ARTIST_PICKER_ASSETS.close)} alt="关闭" />
           </button>
         </section>
       </div>
@@ -930,21 +929,23 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <img className="acl-design-image acl-design-image--content" src={getDesignAsset('contentBackground')} alt="" />
         <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />
 
-        <section className="acl-barrage-area" aria-label="弹幕区">
-          {visibleBarrages.map((item) => (
-            <div
-              className={`acl-barrage${item.id === latestUserBarrageId ? ' is-user-call' : ''}`}
-              key={item.id}
-              style={{
-                top: `${item.top}px`,
-                animationDelay: item.animationDelay,
-              }}
-            >
-              <span className="acl-barrage__text">{item.text}</span>
-              <img src={getBarrageAvatar(item)} alt="" />
-            </div>
-          ))}
-        </section>
+        {!isSongWish ? (
+          <section className="acl-barrage-area" aria-label="弹幕区">
+            {visibleBarrages.map((item) => (
+              <div
+                className={`acl-barrage${item.id === latestUserBarrageId ? ' is-user-call' : ''}`}
+                key={item.id}
+                style={{
+                  top: `${item.top}px`,
+                  animationDelay: item.animationDelay,
+                }}
+              >
+                <span className="acl-barrage__text">{item.text}</span>
+                <img src={getBarrageAvatar(item)} alt="" />
+              </div>
+            ))}
+          </section>
+        ) : null}
 
         {isSongWish ? (
           <section className="swl-wish-area" aria-label="歌曲许愿">
