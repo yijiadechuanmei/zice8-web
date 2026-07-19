@@ -11,6 +11,7 @@ export const DEFAULT_CONFIG = {
   homeTitleImage: "4ca4cdcdc76d5a5d4ca6613fd3c8dc32_173026_620_257.png",
   homeIllustrationImage: "66b626afd7c2b5d4ed176289860b1bc5_732491_649_644.png",
   quizBackgroundImage: "feature-challenge-quiz-bg.png",
+  landscapeBackgroundImage: "feature-challenge-landscape-bg.png",
 };
 
 export function mergeConfig(publicConfig) {

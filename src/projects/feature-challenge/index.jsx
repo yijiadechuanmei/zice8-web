@@ -73,6 +73,12 @@ function resolveChallengeMode() {
   return params.get("challenge_mode") === "demo" ? "demo" : "user";
 }
 
+function resolveLayoutMode() {
+  if (typeof window === "undefined") return "portrait";
+  const params = new URLSearchParams(window.location.search);
+  return params.get("layout") === "landscape" ? "landscape" : "portrait";
+}
+
 function copyChallenge(challenge) {
   return {
     matrix: challenge.matrix.map((row) => [...row]),
@@ -92,6 +98,7 @@ export default function FeatureChallengeProject({ routeParams }) {
     routeParams?.activityKey || FEATURE_CHALLENGE_ACTIVITY_KEY;
   const [publicConfig, setPublicConfig] = useState(null);
   const [challengeMode] = useState(resolveChallengeMode);
+  const [layoutMode] = useState(resolveLayoutMode);
   const [page, setPage] = useState("home");
   const [phase, setPhase] = useState(1);
   const [challenge, setChallenge] = useState(() =>
@@ -122,8 +129,9 @@ export default function FeatureChallengeProject({ routeParams }) {
       activityType: publicConfig?.type || FEATURE_CHALLENGE_ACTIVITY_TYPE,
       pageKey:
         page === "quiz" ? `phase_${phase}${revealed ? "_reveal" : ""}` : page,
+      layoutMode,
     });
-  }, [activityKey, page, phase, publicConfig, revealed]);
+  }, [activityKey, layoutMode, page, phase, publicConfig, revealed]);
 
   function startChallenge() {
     setChallenge(buildChallenge(challengeMode));
@@ -139,6 +147,7 @@ export default function FeatureChallengeProject({ routeParams }) {
       extra: {
         activityType: FEATURE_CHALLENGE_ACTIVITY_TYPE,
         challengeMode,
+        layoutMode,
         pageKey: "home",
         eventName: "start_challenge",
       },
@@ -190,16 +199,30 @@ export default function FeatureChallengeProject({ routeParams }) {
     config.assetsBaseUrl,
     config.homeBackgroundImage,
   );
+  const landscapeBackgroundImage = assetUrl(
+    config.assetsBaseUrl,
+    config.landscapeBackgroundImage,
+  );
   const correctCount = Object.values(answers).filter(
     (answer) => answer === "A",
   ).length;
 
-  if (page === "home")
-    return <HomePage config={config} onStart={startChallenge} />;
+  if (page === "home") {
+    return layoutMode === "landscape" ? (
+      <LandscapeHome
+        backgroundImage={landscapeBackgroundImage}
+        onStart={startChallenge}
+      />
+    ) : (
+      <HomePage config={config} onStart={startChallenge} />
+    );
+  }
   if (page === "result") {
     return (
       <ResultPage
         backgroundImage={backgroundImage}
+        landscapeBackgroundImage={landscapeBackgroundImage}
+        layoutMode={layoutMode}
         correctCount={correctCount}
         onRestart={restartQuiz}
         onHome={goHome}
@@ -210,6 +233,8 @@ export default function FeatureChallengeProject({ routeParams }) {
   return (
     <QuizPage
       backgroundImage={backgroundImage}
+      landscapeBackgroundImage={landscapeBackgroundImage}
+      layoutMode={layoutMode}
       challenge={challenge}
       challengeMode={challengeMode}
       phase={phase}
@@ -219,6 +244,51 @@ export default function FeatureChallengeProject({ routeParams }) {
       onSubmit={submitAnswer}
       onContinue={continueChallenge}
     />
+  );
+}
+
+function LandscapeHome({ backgroundImage, onStart }) {
+  return (
+    <main
+      className="feature-challenge-landscape-app"
+      style={{ "--feature-landscape-background": `url("${backgroundImage}")` }}
+    >
+      <LandscapeOrientationHint />
+      <section
+        className="feature-challenge-landscape-home"
+        aria-label="特征闯关 双关挑战横版首页"
+      >
+        <div className="feature-challenge-landscape-home-copy">
+          <p className="feature-challenge-landscape-kicker">
+            LINEAR ALGEBRA QUEST
+          </p>
+          <h1>
+            特征闯关
+            <em>双关挑战</em>
+          </h1>
+          <p className="feature-challenge-landscape-description">
+            穿梭矩阵数据，找出真正的“忠诚者”。
+            <br />
+            两道单选挑战，随时重新开始。
+          </p>
+          <button
+            className="feature-challenge-landscape-start"
+            type="button"
+            onClick={onStart}
+          >
+            <span>开始闯关</span>
+            <ArrowIcon />
+          </button>
+        </div>
+        <div className="feature-challenge-landscape-orbit" aria-hidden="true">
+          <span className="feature-challenge-landscape-orbit-core" />
+          <span className="feature-challenge-landscape-orbit-line is-first" />
+          <span className="feature-challenge-landscape-orbit-line is-second" />
+          <span className="feature-challenge-landscape-orbit-line is-third" />
+          <p>λ</p>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -274,6 +344,8 @@ function HomePage({ config, onStart }) {
 
 function QuizPage({
   backgroundImage,
+  landscapeBackgroundImage,
+  layoutMode,
   challenge,
   challengeMode,
   phase,
@@ -289,9 +361,12 @@ function QuizPage({
 
   return (
     <main
-      className="feature-challenge-quiz-app"
-      style={{ "--feature-quiz-background": `url("${backgroundImage}")` }}
+      className={`feature-challenge-quiz-app${layoutMode === "landscape" ? " is-landscape" : ""}`}
+      style={{
+        "--feature-quiz-background": `url("${layoutMode === "landscape" ? landscapeBackgroundImage : backgroundImage}")`,
+      }}
     >
+      {layoutMode === "landscape" ? <LandscapeOrientationHint /> : null}
       <section
         className="feature-challenge-quiz-page"
         aria-label={`第 ${phase} 关答题页`}
@@ -495,12 +570,22 @@ function DemoAnalysis({ challenge, phase }) {
   );
 }
 
-function ResultPage({ backgroundImage, correctCount, onRestart, onHome }) {
+function ResultPage({
+  backgroundImage,
+  landscapeBackgroundImage,
+  layoutMode,
+  correctCount,
+  onRestart,
+  onHome,
+}) {
   return (
     <main
-      className="feature-challenge-quiz-app"
-      style={{ "--feature-quiz-background": `url("${backgroundImage}")` }}
+      className={`feature-challenge-quiz-app${layoutMode === "landscape" ? " is-landscape" : ""}`}
+      style={{
+        "--feature-quiz-background": `url("${layoutMode === "landscape" ? landscapeBackgroundImage : backgroundImage}")`,
+      }}
     >
+      {layoutMode === "landscape" ? <LandscapeOrientationHint /> : null}
       <section className="feature-challenge-result-page" aria-label="挑战结果">
         <div className="feature-challenge-result-halo" />
         <p className="feature-challenge-result-eyebrow">双关挑战完成</p>
@@ -535,6 +620,18 @@ function ResultPage({ backgroundImage, correctCount, onRestart, onHome }) {
         </div>
       </section>
     </main>
+  );
+}
+
+function LandscapeOrientationHint() {
+  return (
+    <div className="feature-challenge-landscape-orientation-hint" role="status">
+      <span
+        className="feature-challenge-landscape-phone-icon"
+        aria-hidden="true"
+      />
+      <strong>请横向旋转手机体验</strong>
+    </div>
   );
 }
 
