@@ -1045,6 +1045,14 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <img className="acl-prize-card__footnote" src={getDesignAsset('prizeFootnote')} alt="" />
       </section>
 
+      {isSongWish ? (
+        <img
+          className="swl-bottom-promo"
+          src="https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/eb7b8c0d5dcfda7acbdeec37e8ff0d4d_390597_703_208.png"
+          alt=""
+        />
+      ) : null}
+
       <button className="acl-bottom-link" type="button" onClick={handleBottomButtonClick}>
         <img src={getDesignAsset('bottomButton')} alt="查看详情" />
       </button>

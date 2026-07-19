@@ -91,3 +91,15 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+.swl-copy-shell .swl-bottom-promo {
+  display: block;
+  width: 703px;
+  height: 208px;
+  margin: 0 auto 50px;
+  object-fit: contain;
+}
+
+.swl-copy-shell .swl-bottom-promo + .acl-bottom-link {
+  margin-top: 0;
+}
