@@ -959,9 +959,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
                 placeholder="输入想听的歌曲"
                 maxLength={20}
                 disabled={actionLoading}
-                aria-describedby="swl-song-name-limit"
               />
-              <span id="swl-song-name-limit" className="swl-wish-form__limit">最多 20 个字符</span>
               <button className="swl-wish-form__submit" type="submit" disabled={actionLoading}>
                 发送
               </button>

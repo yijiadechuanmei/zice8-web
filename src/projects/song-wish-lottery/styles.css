@@ -50,14 +50,14 @@
 
 .swl-copy-shell .swl-wish-form__input {
   position: absolute;
-  top: 8px;
-  left: 150px;
-  width: 404px;
-  height: 44px;
+  top: 3px;
+  left: 24px;
+  width: 532px;
+  height: 54px;
   box-sizing: border-box;
   border: 0;
   outline: 0;
-  background: transparent;
+  background: #ffffff;
   color: #202020;
   font: 700 25px/44px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
@@ -81,7 +81,8 @@
   height: 60px;
   border: 0;
   padding: 0 22px 0 0;
-  background: transparent;
+  border-radius: 0 30px 30px 0;
+  background: #97ff71;
   color: #171717;
   cursor: pointer;
   font: 700 28px/60px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -90,13 +91,4 @@
 .swl-copy-shell .swl-wish-form__submit:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-.swl-copy-shell .swl-wish-form__limit {
-  position: absolute;
-  top: 61px;
-  right: 152px;
-  color: rgba(32, 32, 32, 0.68);
-  font-size: 14px;
-  line-height: 18px;
 }
