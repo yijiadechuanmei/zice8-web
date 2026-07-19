@@ -600,6 +600,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const createProjectWish = projectApi.createWish
   const drawProjectPrize = projectApi.drawPrize || drawPrize
   const claimProjectPrize = projectApi.claimPrize || claimPrize
+  const getProjectDebugAccess = projectApi.getDebugAccess || getDebugAccess
+  const resetProjectDebugData = projectApi.resetDebugData || resetDebugData
+  const debugConfirmToken = projectApi.debugConfirmToken || DEBUG_RESET_TOKEN
   const [inviterUserId, setInviterUserId] = useState(() => getQueryParam('inviterUserId') || '')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
@@ -661,7 +664,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   useEffect(() => {
     if (!isDebugRequested || !authReady || !publicConfig || !hasToken) return
     let active = true
-    getDebugAccess(activityKey)
+    getProjectDebugAccess(activityKey)
       .then((access) => {
         if (active) setDebugAccess(access)
       })
@@ -671,7 +674,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     return () => {
       active = false
     }
-  }, [activityKey, authReady, hasToken, publicConfig])
+  }, [activityKey, authReady, getProjectDebugAccess, hasToken, publicConfig])
 
   useEffect(() => {
     trackPageView(activityKey, '/artist-call-lottery', { activityType: 'artist_call_lottery' })
@@ -862,16 +865,16 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     if (!debugAccess?.canDebug) return
     if (scope === 'activity' && !debugAccess.allowActivityReset) return
     if (scope === 'activity') {
-      const confirmed = window.confirm('确认重置 artist_call_lottery_2026 全部数据？只会清空当前抽奖项目的数据。')
+      const confirmed = window.confirm(`确认重置 ${activityKey} 全部数据？只会清空当前抽奖项目的数据。`)
       if (!confirmed) return
     }
     setDebugResetting(true)
     try {
-      await resetDebugData(activityKey, {
-        confirmToken: DEBUG_RESET_TOKEN,
+      await resetProjectDebugData(activityKey, {
+        confirmToken: debugConfirmToken,
         scope,
       })
-      const data = await getBootstrap(activityKey, '')
+      const data = await getProjectBootstrap(activityKey, '')
       setBootstrap(data)
       setMessage({
         title: '重置完成',
@@ -879,7 +882,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       })
     } catch (error) {
       setMessage({ title: '重置失败', message: error.message || '请稍后再试' })
-      if (Number(error?.status) === 401) reauth('artist-call-debug-reset')
+      if (Number(error?.status) === 401) reauth(isSongWish ? 'song-wish-debug-reset' : 'artist-call-debug-reset')
     } finally {
       setDebugResetting(false)
     }

@@ -74,17 +74,17 @@
 
 .swl-copy-shell .swl-wish-form__submit {
   position: absolute;
-  top: 4px;
+  top: 5px;
   right: 16px;
   width: 118px;
-  height: 52px;
+  height: 50px;
   border: 0;
   padding: 0;
   border-radius: 999px;
   background: #97ff71;
   color: #171717;
   cursor: pointer;
-  font: 700 28px/52px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 700 28px/50px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .swl-copy-shell .swl-wish-form__submit:disabled {

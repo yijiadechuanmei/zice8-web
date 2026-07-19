@@ -21,4 +21,15 @@ export const songWishApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  getDebugAccess: (activityKey) =>
+    request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/debug-access`),
+
+  resetDebugData: (activityKey, data) =>
+    request('/song-wish-lottery/dev/reset', {
+      method: 'POST',
+      body: JSON.stringify({ activityKey, scope: 'me', ...data }),
+    }),
+
+  debugConfirmToken: 'RESET_SWL_2026',
 }
