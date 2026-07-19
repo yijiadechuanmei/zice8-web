@@ -593,9 +593,14 @@ function DebugPanel({
   )
 }
 
-export default function ArtistCallLotteryProject({ routeParams }) {
+export default function ArtistCallLotteryProject({ routeParams, variant = 'artistCall', projectApi = {} }) {
   const artboard = useArtboardLayout()
   const activityKey = normalizeActivityKey(routeParams)
+  const isSongWish = variant === 'songWish'
+  const getProjectBootstrap = projectApi.getBootstrap || getBootstrap
+  const createProjectWish = projectApi.createWish
+  const drawProjectPrize = projectApi.drawPrize || drawPrize
+  const claimProjectPrize = projectApi.claimPrize || claimPrize
   const [inviterUserId, setInviterUserId] = useState(() => getQueryParam('inviterUserId') || '')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
@@ -612,6 +617,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const [presetBarrages] = useState(() => assignPresetBarrageAvatars(PRESET_BARRAGES))
   const [barrageLayoutSeed] = useState(() => Math.floor(Math.random() * 4294967296))
   const [latestUserBarrageId, setLatestUserBarrageId] = useState('')
+  const [wishSongName, setWishSongName] = useState('')
 
   useEffect(() => {
     const token = getTokenFromUrl()
@@ -638,7 +644,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     if (!authReady) return
     setLoading(true)
     try {
-      const data = await getBootstrap(activityKey, inviterUserId)
+      const data = await getProjectBootstrap(activityKey, inviterUserId)
       setBootstrap(data)
       if (data?.pendingInvitation) setTeamInvitePrompt(data.pendingInvitation)
     } catch (error) {
@@ -647,7 +653,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, inviterUserId, reauth])
+  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, reauth])
 
   useEffect(() => {
     loadBootstrap()
@@ -673,7 +679,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   }, [activityKey])
 
   useEffect(() => {
-    if (!activityKey) return undefined
+    if (isSongWish || !activityKey) return undefined
     const timer = window.setInterval(() => {
       getBarrages(activityKey, 20)
         .then((data) => {
@@ -682,7 +688,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
         .catch(() => {})
     }, 12000)
     return () => window.clearInterval(timer)
-  }, [activityKey])
+  }, [activityKey, isSongWish])
 
   const pageConfig = useMemo(() => mergeConfig(publicConfig, bootstrap), [publicConfig, bootstrap])
   const shareActivity = useMemo(() => {
@@ -702,7 +708,9 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
   const theme = pageConfig.theme || {}
-  const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
+  const assetsBaseUrl = isSongWish
+    ? IVX_EDITOR_ASSET_BASE_URL
+    : (pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL)
   const getDesignAsset = (key) => {
     const configured = pageConfig.designAssets?.[key]
     if (configured) return configured
@@ -718,10 +726,38 @@ export default function ArtistCallLotteryProject({ routeParams }) {
   const handleBottomButtonClick = () => window.location.assign(DAMAI_DETAIL_URL)
 
   const refreshAfterAction = useCallback(async () => {
-    const data = await getBootstrap(activityKey, inviterUserId)
+    const data = await getProjectBootstrap(activityKey, inviterUserId)
     setBootstrap(data)
     return data
-  }, [activityKey, inviterUserId])
+  }, [activityKey, getProjectBootstrap, inviterUserId])
+
+  const handleSubmitWish = async (event) => {
+    event.preventDefault()
+    const songName = wishSongName.trim()
+    if (!songName) {
+      setMessage({ title: '请输入歌曲名称', message: '许下你最想在现场听到的歌曲吧。' })
+      return
+    }
+    if (!createProjectWish) return
+
+    setActionLoading(true)
+    try {
+      const result = await createProjectWish(activityKey, { songName })
+      setWishSongName('')
+      setBootstrap((prev) => (prev ? {
+        ...prev,
+        wishes: [...(prev.wishes || []), result.wish].filter(Boolean),
+        chances: result.chances || prev.chances,
+      } : prev))
+      setMessage({ title: '许愿成功', message: '已获得 1 次抽奖机会。' })
+      trackEvent({ activityKey, eventType: 'song_wish_submit', extra: { activityType: 'song_wish_lottery' } })
+    } catch (error) {
+      if (Number(error?.status) === 401) reauth('song-wish-submit-401')
+      setMessage({ title: '许愿失败', message: error.message || '请稍后再试' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   const handleSelectArtist = async (artist) => {
     setActionLoading(true)
@@ -796,19 +832,19 @@ export default function ArtistCallLotteryProject({ routeParams }) {
 
   const handleDraw = async () => {
     if (chances.remaining <= 0) {
-      setMessage({ title: '暂无抽奖机会', message: '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
+      setMessage({ title: '暂无抽奖机会', message: isSongWish ? '许愿想听的歌曲后可获得抽奖机会。' : '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
       return
     }
     setActionLoading(true)
     try {
-      const result = await drawPrize(activityKey, { requestId: buildRequestId('artist_call_draw') })
+      const result = await drawProjectPrize(activityKey, { requestId: buildRequestId(isSongWish ? 'song_wish_draw' : 'artist_call_draw') })
       await refreshAfterAction()
       if (result.draw?.won) {
         setPrizeDraw(result.draw)
       } else {
         setPrizeDraw(result.draw || { won: false })
       }
-      trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: 'artist_call_lottery' } })
+      trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: isSongWish ? 'song_wish_lottery' : 'artist_call_lottery' } })
     } catch (error) {
       if (error.message === '您已中奖') {
         setMessage({ title: '您已中奖', message: '您已获得奖品，不能重复中奖。' })
@@ -851,7 +887,7 @@ export default function ArtistCallLotteryProject({ routeParams }) {
     if (!claimDraw) return
     setClaimSubmitting(true)
     try {
-      const result = await claimPrize(activityKey, claimDraw.id, form)
+      const result = await claimProjectPrize(activityKey, claimDraw.id, form)
       setClaimDraw(null)
       const updatedDraw = { ...claimDraw, claim: result.claim }
       setPrizeDraw(updatedDraw)
@@ -912,33 +948,55 @@ export default function ArtistCallLotteryProject({ routeParams }) {
           ))}
         </section>
 
-        <section className="acl-stage-actions" aria-label="活动操作">
-          <button
-            className="acl-image-btn acl-image-btn--call"
-            type="button"
-            onClick={() => bootstrap?.myCall
-              ? setMessage({ title: '已完成打CALL', message: bootstrap.myCall.commentText || '你已获得1次抽奖资格。' })
-              : setArtistPickerOpen(true)}
-            disabled={actionLoading}
-          >
-            <img src={getDesignAsset('callButton')} alt={bootstrap?.myCall ? '已打CALL' : '为TA打CALL'} />
-          </button>
-          <button
-            className="acl-image-btn acl-image-btn--partner"
-            type="button"
-            onClick={() => bootstrap?.myTeam
-              ? setMessage({ title: '已完成助力', message: '你已获得邀请助力额外抽奖资格。' })
-              : handlePartner()}
-            disabled={actionLoading}
-          >
-            <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
-          </button>
-          <img
-            className="acl-stage-actions__decor"
-            src={getDesignAsset(bootstrap?.myTeam ? 'teamCompleteDecor' : 'drawAction')}
-            alt={bootstrap?.myTeam ? '已组队' : ''}
-          />
-        </section>
+        {isSongWish ? (
+          <section className="swl-wish-area" aria-label="歌曲许愿">
+            <form className="swl-wish-form" onSubmit={handleSubmitWish}>
+              <label className="swl-wish-form__label" htmlFor="swl-song-name">歌曲许愿</label>
+              <input
+                id="swl-song-name"
+                className="swl-wish-form__input"
+                value={wishSongName}
+                onChange={(event) => setWishSongName(event.target.value.slice(0, 20))}
+                placeholder="输入想听的歌曲"
+                maxLength={20}
+                disabled={actionLoading}
+                aria-describedby="swl-song-name-limit"
+              />
+              <span id="swl-song-name-limit" className="swl-wish-form__limit">最多 20 个字符</span>
+              <button className="swl-wish-form__submit" type="submit" disabled={actionLoading}>
+                发送
+              </button>
+            </form>
+          </section>
+        ) : (
+          <section className="acl-stage-actions" aria-label="活动操作">
+            <button
+              className="acl-image-btn acl-image-btn--call"
+              type="button"
+              onClick={() => bootstrap?.myCall
+                ? setMessage({ title: '已完成打CALL', message: bootstrap.myCall.commentText || '你已获得1次抽奖资格。' })
+                : setArtistPickerOpen(true)}
+              disabled={actionLoading}
+            >
+              <img src={getDesignAsset('callButton')} alt={bootstrap?.myCall ? '已打CALL' : '为TA打CALL'} />
+            </button>
+            <button
+              className="acl-image-btn acl-image-btn--partner"
+              type="button"
+              onClick={() => bootstrap?.myTeam
+                ? setMessage({ title: '已完成助力', message: '你已获得邀请助力额外抽奖资格。' })
+                : handlePartner()}
+              disabled={actionLoading}
+            >
+              <img src={getDesignAsset('partnerButton')} alt={bootstrap?.myTeam ? '已助力' : '邀请助力'} />
+            </button>
+            <img
+              className="acl-stage-actions__decor"
+              src={getDesignAsset(bootstrap?.myTeam ? 'teamCompleteDecor' : 'drawAction')}
+              alt={bootstrap?.myTeam ? '已组队' : ''}
+            />
+          </section>
+        )}
 
         <button
           className="acl-stage-draw"

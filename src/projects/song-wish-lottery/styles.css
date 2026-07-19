@@ -23,3 +23,80 @@
   top: 0;
   left: 90px;
 }
+
+.swl-copy-shell .swl-wish-area {
+  position: absolute;
+  top: 1325px;
+  left: 24px;
+  width: 704px;
+  height: 60px;
+  background: url('https://file3.ih5.cn/v35/edt/u10013600/60c98be89e18ee6ed51064d7071e57e2_9384_702_58.png') center / 704px 60px no-repeat;
+}
+
+.swl-copy-shell .swl-wish-form {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.swl-copy-shell .swl-wish-form__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.swl-copy-shell .swl-wish-form__input {
+  position: absolute;
+  top: 8px;
+  left: 150px;
+  width: 404px;
+  height: 44px;
+  box-sizing: border-box;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #202020;
+  font: 700 25px/44px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.swl-copy-shell .swl-wish-form__input::placeholder {
+  color: rgba(32, 32, 32, 0.42);
+  font-weight: 500;
+}
+
+.swl-copy-shell .swl-wish-form__input:focus-visible {
+  outline: 2px solid #72f446;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.swl-copy-shell .swl-wish-form__submit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 145px;
+  height: 60px;
+  border: 0;
+  padding: 0 22px 0 0;
+  background: transparent;
+  color: #171717;
+  cursor: pointer;
+  font: 700 28px/60px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.swl-copy-shell .swl-wish-form__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.swl-copy-shell .swl-wish-form__limit {
+  position: absolute;
+  top: 61px;
+  right: 152px;
+  color: rgba(32, 32, 32, 0.68);
+  font-size: 14px;
+  line-height: 18px;
+}
