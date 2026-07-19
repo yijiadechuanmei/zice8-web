@@ -210,6 +210,7 @@ export default function FeatureChallengeProject({ routeParams }) {
   if (page === "home") {
     return layoutMode === "landscape" ? (
       <LandscapeHome
+        config={config}
         backgroundImage={landscapeBackgroundImage}
         onStart={startChallenge}
       />
@@ -247,7 +248,14 @@ export default function FeatureChallengeProject({ routeParams }) {
   );
 }
 
-function LandscapeHome({ backgroundImage, onStart }) {
+function LandscapeHome({ config, backgroundImage, onStart }) {
+  const assets = {
+    title: assetUrl(config.assetsBaseUrl, config.homeTitleImage),
+    illustration: assetUrl(config.assetsBaseUrl, config.homeIllustrationImage),
+    divider: assetUrl(config.assetsBaseUrl, config.homeDividerImage),
+    button: assetUrl(config.assetsBaseUrl, config.homeButtonImage),
+  };
+
   return (
     <main
       className="feature-challenge-landscape-app"
@@ -259,33 +267,38 @@ function LandscapeHome({ backgroundImage, onStart }) {
         aria-label="特征闯关 双关挑战横版首页"
       >
         <div className="feature-challenge-landscape-home-copy">
-          <p className="feature-challenge-landscape-kicker">
-            LINEAR ALGEBRA QUEST
-          </p>
-          <h1>
-            特征闯关
-            <em>双关挑战</em>
-          </h1>
-          <p className="feature-challenge-landscape-description">
-            穿梭矩阵数据，找出真正的“忠诚者”。
-            <br />
-            两道单选挑战，随时重新开始。
-          </p>
+          <img
+            className="feature-challenge-landscape-home-title"
+            src={assets.title}
+            alt="特征闯关 双关挑战"
+          />
+          <img
+            className="feature-challenge-landscape-home-divider"
+            src={assets.divider}
+            alt=""
+          />
           <button
             className="feature-challenge-landscape-start"
             type="button"
             onClick={onStart}
+            aria-label="开始闯关"
           >
-            <span>开始闯关</span>
-            <ArrowIcon />
+            <img src={assets.button} alt="开始闯关" />
           </button>
         </div>
-        <div className="feature-challenge-landscape-orbit" aria-hidden="true">
-          <span className="feature-challenge-landscape-orbit-core" />
-          <span className="feature-challenge-landscape-orbit-line is-first" />
-          <span className="feature-challenge-landscape-orbit-line is-second" />
-          <span className="feature-challenge-landscape-orbit-line is-third" />
-          <p>λ</p>
+        <div className="feature-challenge-landscape-home-visual">
+          <img
+            className="feature-challenge-landscape-home-illustration"
+            src={assets.illustration}
+            alt=""
+          />
+          <div className="feature-challenge-landscape-orbit" aria-hidden="true">
+            <span className="feature-challenge-landscape-orbit-core" />
+            <span className="feature-challenge-landscape-orbit-line is-first" />
+            <span className="feature-challenge-landscape-orbit-line is-second" />
+            <span className="feature-challenge-landscape-orbit-line is-third" />
+            <p>λ</p>
+          </div>
         </div>
       </section>
     </main>
