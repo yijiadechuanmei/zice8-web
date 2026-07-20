@@ -851,7 +851,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       }
       setMessage({
         title: '许愿成功',
-        message: `您已完成歌曲许愿并进入抽奖池，获奖名单将在${formatSongWishPublishDate(bootstrap?.lottery?.publishAt)}于官方公众号公布，敬请期待！`,
+        message: bootstrap?.lottery?.isPublished
+          ? '您已完成歌曲许愿并进入抽奖池，感谢参与！'
+          : `您已完成歌曲许愿并进入抽奖池，获奖名单将在${formatSongWishPublishDate(bootstrap?.lottery?.publishAt)}于官方公众号公布，敬请期待！`,
       })
       trackEvent({ activityKey, eventType: 'song_wish_submit', extra: { activityType: 'song_wish_lottery' } })
     } catch (error) {
