@@ -1,27 +1,8 @@
 @import '../artist-call-lottery/styles.css';
 
-/* Song wish lottery only: no barrage panel and use the supplied draw artwork. */
+/* Song wish lottery only: no barrage panel. */
 .swl-copy-shell .acl-barrage-area {
   display: none;
-}
-
-.swl-copy-shell .acl-stage-draw {
-  top: 1118px;
-  left: 603px;
-  width: 120px;
-  height: 120px;
-  background: url('https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/f4c8a84a547ed98134df8cfc91d5b8eb_2206_120_120.png') center / 120px 120px no-repeat;
-}
-
-.swl-copy-shell .acl-stage-draw > img:first-child {
-  width: 120px;
-  height: 120px;
-  opacity: 0;
-}
-
-.swl-copy-shell .acl-stage-draw__count {
-  top: 0;
-  left: 90px;
 }
 
 .swl-copy-shell .swl-wish-area {

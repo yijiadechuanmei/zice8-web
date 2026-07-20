@@ -598,7 +598,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const isSongWish = variant === 'songWish'
   const getProjectBootstrap = projectApi.getBootstrap || getBootstrap
   const createProjectWish = projectApi.createWish
-  const drawProjectPrize = projectApi.drawPrize || drawPrize
+  const drawProjectPrize = isSongWish ? null : projectApi.drawPrize || drawPrize
   const claimProjectPrize = projectApi.claimPrize || claimPrize
   const getProjectDebugAccess = projectApi.getDebugAccess || getDebugAccess
   const resetProjectDebugData = projectApi.resetDebugData || resetDebugData
@@ -708,7 +708,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
-  const hasDrawn = draws.length > 0
+  const hasDrawn = isSongWish || draws.length > 0
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
   const getDesignAsset = (key) => {
@@ -747,14 +747,17 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       setBootstrap((prev) => (prev ? {
         ...prev,
         wishes: [...(prev.wishes || []), result.wish].filter(Boolean),
-        chances: result.chances || prev.chances,
+        entry: result.entry || prev.entry,
       } : prev))
       try {
         await refreshAfterAction()
       } catch {
-        // The successful wish response already updates the visible chance count.
+        // The successful wish response already confirms the entry state.
       }
-      setMessage({ title: '许愿成功', message: '已获得 1 次抽奖机会。' })
+      setMessage({
+        title: '许愿成功',
+        message: '您已完成歌曲许愿并进入抽奖池，获奖名单将在7月29日于官方公众号公布，敬请期待！',
+      })
       trackEvent({ activityKey, eventType: 'song_wish_submit', extra: { activityType: 'song_wish_lottery' } })
     } catch (error) {
       if (Number(error?.status) === 401) reauth('song-wish-submit-401')
@@ -836,20 +839,21 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   }
 
   const handleDraw = async () => {
+    if (!drawProjectPrize) return
     if (chances.remaining <= 0) {
-      setMessage({ title: '暂无抽奖机会', message: isSongWish ? '许愿想听的歌曲后可获得抽奖机会。' : '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
+      setMessage({ title: '暂无抽奖机会', message: '为TA打CALL或邀请好友助力后可获得抽奖机会。' })
       return
     }
     setActionLoading(true)
     try {
-      const result = await drawProjectPrize(activityKey, { requestId: buildRequestId(isSongWish ? 'song_wish_draw' : 'artist_call_draw') })
+      const result = await drawProjectPrize(activityKey, { requestId: buildRequestId('artist_call_draw') })
       await refreshAfterAction()
       if (result.draw?.won) {
         setPrizeDraw(result.draw)
       } else {
         setPrizeDraw(result.draw || { won: false })
       }
-      trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: isSongWish ? 'song_wish_lottery' : 'artist_call_lottery' } })
+      trackEvent({ activityKey, eventType: 'lottery_draw_click', extra: { activityType: 'artist_call_lottery' } })
     } catch (error) {
       if (error.message === '您已中奖') {
         setMessage({ title: '您已中奖', message: '您已获得奖品，不能重复中奖。' })
@@ -1003,16 +1007,18 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
           </section>
         )}
 
-        <button
-          className="acl-stage-draw"
-          type="button"
-          onClick={handleDraw}
-          disabled={actionLoading || chances.remaining <= 0}
-          aria-label={`抽奖，剩余 ${chances.remaining} 次`}
-        >
-          <img src={getDesignAsset('drawButton')} alt="" />
-          <span className="acl-stage-draw__count" aria-hidden="true">{chances.remaining}</span>
-        </button>
+        {!isSongWish ? (
+          <button
+            className="acl-stage-draw"
+            type="button"
+            onClick={handleDraw}
+            disabled={actionLoading || chances.remaining <= 0}
+            aria-label={`抽奖，剩余 ${chances.remaining} 次`}
+          >
+            <img src={getDesignAsset('drawButton')} alt="" />
+            <span className="acl-stage-draw__count" aria-hidden="true">{chances.remaining}</span>
+          </button>
+        ) : null}
 
       </div>
 

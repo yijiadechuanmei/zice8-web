@@ -10,12 +10,6 @@ export const songWishApi = {
       body: JSON.stringify(data),
     }),
 
-  drawPrize: (activityKey, data) =>
-    request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/draw`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-
   claimPrize: (activityKey, drawId, data) =>
     request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/draws/${encodeURIComponent(drawId)}/claim`, {
       method: 'POST',
