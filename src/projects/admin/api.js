@@ -81,6 +81,24 @@ export function saveArtistCallLotteryPrizes(activityKey, prizes) {
   })
 }
 
+export function getSongWishLotteryResultConfig(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/result-config`)
+}
+
+export function saveSongWishLotteryResultConfig(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/result-config`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function manualDrawSongWishLottery(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/manual-draw`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function updateActivityStatus(activityKey, status) {
   return adminRequest(`/admin/activities/${activityKey}/status`, {
     method: 'PUT',

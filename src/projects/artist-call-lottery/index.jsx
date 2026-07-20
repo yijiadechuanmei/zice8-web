@@ -96,6 +96,37 @@ const PRIZE_STATE_VISUALS = {
   won: { assetKey: 'prizeWon', left: 48, top: -18, width: 547, height: 634 },
 }
 
+const SONG_WISH_PRIZE_STATE_VISUALS = {
+  notParticipated: {
+    src: 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/0c59c07ff2d9e779d3ef1f1e15fcbc17_47214_546_634.png',
+    left: 40,
+    top: -18,
+    width: 546,
+    height: 634,
+  },
+  notDrawn: {
+    src: 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/fd9a939199f210cb4e7907330e6fd404_40335_547_634.png',
+    left: 40,
+    top: -18,
+    width: 547,
+    height: 634,
+  },
+  notWon: {
+    src: 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/86a282c664a27dc24dbce32e3a5cea62_15610_547_634.png',
+    left: 40,
+    top: -18,
+    width: 547,
+    height: 634,
+  },
+  won: {
+    src: 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/06812196e8f9cc62e5e96e81064221f7_10674_546_634.png',
+    left: 40,
+    top: -18,
+    width: 546,
+    height: 634,
+  },
+}
+
 const ARTIST_PICKER_ASSETS = {
   background: 'aa4de028b64e0b6b87d24ffb851177ca_124530_661_487.png',
   confirm: 'd8c7b8eb337971b19ae09e700abb8f5f_4413_115_39.png',
@@ -438,16 +469,17 @@ function PrizeModal({ draw, onClose, onClaim, claim, getAsset }) {
   )
 }
 
-function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
-  const state = draw ? 'won' : hasDrawn ? 'notWon' : 'notDrawn'
-  const visual = PRIZE_STATE_VISUALS[state]
+function PrizeShelf({ draw, hasDrawn, getAsset, onClaim, songWishState = '' }) {
+  const isSongWish = Boolean(songWishState)
+  const state = songWishState || (draw ? 'won' : hasDrawn ? 'notWon' : 'notDrawn')
+  const visual = (isSongWish ? SONG_WISH_PRIZE_STATE_VISUALS : PRIZE_STATE_VISUALS)[state]
   const claimCode = draw?.claim?.redemptionCode
 
   return (
     <div className={`acl-prize-status acl-prize-status--${state}`} aria-live="polite">
       <img
         className="acl-prize-status__background"
-        src={getAsset(visual.assetKey)}
+        src={visual.src || getAsset(visual.assetKey)}
         alt=""
         style={{
           left: `${visual.left}px`,
@@ -462,13 +494,13 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
           <div className="acl-prize-status__image">
             {draw.prizeImage ? <img src={draw.prizeImage} alt={draw.prizeName || '奖品'} /> : <span>礼品</span>}
           </div>
-          {claimCode ? (
+          {!isSongWish && claimCode ? (
             <div className="acl-prize-status__code">{claimCode}</div>
-          ) : (
+          ) : !isSongWish ? (
             <button className="acl-prize-status__claim" type="button" onClick={onClaim}>
               <img src={getAsset('prizeClaimButton')} alt="去领取" />
             </button>
-          )}
+          ) : null}
         </>
       ) : null}
     </div>
@@ -505,6 +537,12 @@ function SongWishTicker({ messages }) {
       </div>
     </section>
   )
+}
+
+function formatSongWishPublishDate(value) {
+  const matched = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!matched) return '7月29日'
+  return `${Number(matched[2])}月${Number(matched[3])}日`
 }
 
 function CommonModal({
@@ -759,7 +797,12 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
-  const hasDrawn = isSongWish || draws.length > 0
+  const hasDrawn = draws.length > 0
+  const songWishPrizeState = isSongWish
+    ? (!bootstrap?.entry
+        ? 'notParticipated'
+        : (!bootstrap?.lottery?.isPublished ? 'notDrawn' : (latestWonDraw ? 'won' : 'notWon')))
+    : ''
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
   const getDesignAsset = (key) => {
@@ -808,7 +851,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       }
       setMessage({
         title: '许愿成功',
-        message: '您已完成歌曲许愿并进入抽奖池，获奖名单将在7月29日于官方公众号公布，敬请期待！',
+        message: `您已完成歌曲许愿并进入抽奖池，获奖名单将在${formatSongWishPublishDate(bootstrap?.lottery?.publishAt)}于官方公众号公布，敬请期待！`,
       })
       trackEvent({ activityKey, eventType: 'song_wish_submit', extra: { activityType: 'song_wish_lottery' } })
     } catch (error) {
@@ -1099,6 +1142,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
             hasDrawn={hasDrawn}
             getAsset={getDesignAsset}
             onClaim={() => setClaimDraw(latestWonDraw)}
+            songWishState={songWishPrizeState}
           />
         </div>
         <img className="acl-prize-card__subtitle" src={getDesignAsset('prizeSubtitle')} alt="领奖方式" />

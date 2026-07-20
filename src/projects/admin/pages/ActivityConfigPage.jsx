@@ -1,7 +1,16 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Typography, message } from 'antd'
-import { getActivityConfig, getArtistCallLotteryPrizes, saveArtistCallLotteryPrizes, updateActivityBgmConfig, updateActivityStatus } from '../api'
+import {
+  getActivityConfig,
+  getArtistCallLotteryPrizes,
+  getSongWishLotteryResultConfig,
+  manualDrawSongWishLottery,
+  saveArtistCallLotteryPrizes,
+  saveSongWishLotteryResultConfig,
+  updateActivityBgmConfig,
+  updateActivityStatus,
+} from '../api'
 
 const { Text, Title } = Typography
 
@@ -23,6 +32,11 @@ export default function ActivityConfigPage({ activity }) {
   const [bgm, setBgm] = useState(defaultBgm)
   const [prizes, setPrizes] = useState([])
   const [prizeSaving, setPrizeSaving] = useState(false)
+  const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], entryTotal: 0, winnerTotal: 0 })
+  const [songWishSaving, setSongWishSaving] = useState(false)
+  const [manualDrawing, setManualDrawing] = useState(false)
+  const [manualPrizeId, setManualPrizeId] = useState('')
+  const [manualTargets, setManualTargets] = useState('')
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -61,10 +75,24 @@ export default function ActivityConfigPage({ activity }) {
       setPrizes([])
     }
 
+    if (activity.type === 'song_wish_lottery') {
+      getSongWishLotteryResultConfig(activity.activityKey)
+        .then((data) => {
+          if (!alive) return
+          setSongWishResult({
+            publishAt: toDateTimeInput(data?.publishAt || '2026-07-29T00:00'),
+            prizes: data?.prizes || [],
+            entryTotal: Number(data?.entryTotal || 0),
+            winnerTotal: Number(data?.winnerTotal || 0),
+          })
+        })
+        .catch((err) => { if (alive) setError(err.message || '歌曲许愿开奖配置加载失败') })
+    }
+
     return () => {
       alive = false
     }
-  }, [activity?.activityKey])
+  }, [activity?.activityKey, activity?.type])
 
   async function handleSave() {
     setSaving(true)
@@ -133,6 +161,82 @@ export default function ActivityConfigPage({ activity }) {
     }
   }
 
+  function updateSongWishPrize(index, patch) {
+    setSongWishResult((current) => ({
+      ...current,
+      prizes: current.prizes.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+    }))
+  }
+
+  function addSongWishPrize() {
+    setSongWishResult((current) => ({
+      ...current,
+      prizes: [...current.prizes, {
+        id: '', prizeLevel: '', prizeName: '', prizeImage: '', quantity: 0, issuedCount: 0, remainingCount: 0, enabled: true,
+      }],
+    }))
+  }
+
+  async function handleSaveSongWishResult() {
+    setSongWishSaving(true)
+    setError('')
+    try {
+      const data = await saveSongWishLotteryResultConfig(activity.activityKey, {
+        publishAt: songWishResult.publishAt,
+        prizes: songWishResult.prizes,
+      })
+      setSongWishResult((current) => ({
+        ...current,
+        publishAt: toDateTimeInput(data?.publishAt || current.publishAt),
+        prizes: data?.prizes || [],
+      }))
+      message.success('歌曲许愿开奖配置已保存')
+    } catch (err) {
+      const text = err.message || '歌曲许愿开奖配置保存失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setSongWishSaving(false)
+    }
+  }
+
+  async function handleManualDraw() {
+    const targets = manualTargets.split(/[\s,，;；]+/).map((item) => item.trim()).filter(Boolean)
+    if (!manualPrizeId) {
+      message.warning('请选择要发放的奖项')
+      return
+    }
+    if (!targets.length) {
+      message.warning('请输入 OpenID 或用户ID')
+      return
+    }
+    setManualDrawing(true)
+    setError('')
+    try {
+      const data = await manualDrawSongWishLottery(activity.activityKey, { prizeId: manualPrizeId, targets })
+      const skipped = Math.max(Number(data?.requested || 0) - Number(data?.awarded || 0), 0)
+      message.success(`已指定 ${data?.awarded || 0} 名中奖用户${skipped ? `，${skipped} 名未处理` : ''}`)
+      if (skipped) {
+        const detail = (data?.results || []).filter((item) => item.status !== 'awarded').slice(0, 3).map((item) => `${item.target}：${item.message}`).join('；')
+        if (detail) message.warning(detail)
+      }
+      setManualTargets('')
+      const next = await getSongWishLotteryResultConfig(activity.activityKey)
+      setSongWishResult({
+        publishAt: toDateTimeInput(next?.publishAt || songWishResult.publishAt),
+        prizes: next?.prizes || [],
+        entryTotal: Number(next?.entryTotal || 0),
+        winnerTotal: Number(next?.winnerTotal || 0),
+      })
+    } catch (err) {
+      const text = err.message || '手动开奖失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setManualDrawing(false)
+    }
+  }
+
   const prizeProbability = prizes.filter((item) => item.enabled).reduce((sum, item) => sum + Number(item.probability || 0), 0)
   const prizeColumns = [
     { title: '奖品名称', dataIndex: 'prizeName', width: 150, render: (value, _, index) => <Input value={value} onChange={(event) => updatePrize(index, { prizeName: event.target.value })} /> },
@@ -144,6 +248,16 @@ export default function ActivityConfigPage({ activity }) {
     { title: '已发/剩余', width: 92, render: (_, item) => `${item.issuedCount || 0}/${item.remainingCount || 0}` },
     { title: '启用', dataIndex: 'enabled', width: 70, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updatePrize(index, { enabled })} /> },
     { title: '', width: 62, render: (_, __, index) => <Popconfirm title="确认删除该奖项？" onConfirm={() => setPrizes((items) => items.filter((_, itemIndex) => itemIndex !== index))}><Button danger type="link">删除</Button></Popconfirm> },
+  ]
+
+  const songWishPrizeColumns = [
+    { title: '奖项等级', dataIndex: 'prizeLevel', width: 130, render: (value, _, index) => <Input value={value} placeholder="如：一等奖" onChange={(event) => updateSongWishPrize(index, { prizeLevel: event.target.value })} /> },
+    { title: '奖品名称', dataIndex: 'prizeName', width: 160, render: (value, _, index) => <Input value={value} onChange={(event) => updateSongWishPrize(index, { prizeName: event.target.value })} /> },
+    { title: '奖品图片 OSS URL', dataIndex: 'prizeImage', width: 260, render: (value, _, index) => <Input value={value} onChange={(event) => updateSongWishPrize(index, { prizeImage: event.target.value })} /> },
+    { title: '中奖名额', dataIndex: 'quantity', width: 100, render: (value, _, index) => <InputNumber min={0} precision={0} value={value} onChange={(quantity) => updateSongWishPrize(index, { quantity: Number(quantity || 0) })} /> },
+    { title: '已发/剩余', width: 100, render: (_, item) => `${item.issuedCount || 0}/${item.remainingCount || 0}` },
+    { title: '启用', dataIndex: 'enabled', width: 70, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updateSongWishPrize(index, { enabled })} /> },
+    { title: '', width: 62, render: (_, item, index) => <Popconfirm title="确认删除该奖项？" disabled={Number(item.issuedCount || 0) > 0} onConfirm={() => setSongWishResult((current) => ({ ...current, prizes: current.prizes.filter((_, itemIndex) => itemIndex !== index) }))}><Button danger type="link" disabled={Number(item.issuedCount || 0) > 0}>删除</Button></Popconfirm> },
   ]
 
   return (
@@ -226,7 +340,35 @@ export default function ActivityConfigPage({ activity }) {
             </Space>
           </Card>
         ) : null}
+
+        {activity.type === 'song_wish_lottery' ? (
+          <Card
+            size="small"
+            title="歌曲许愿开奖配置"
+            extra={<Space><Text type="secondary">入池 {songWishResult.entryTotal} 人 · 已中奖 {songWishResult.winnerTotal} 人</Text><Button type="primary" loading={songWishSaving} onClick={handleSaveSongWishResult}>保存配置</Button></Space>}
+          >
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <Alert type="info" showIcon message="定时公布，手动指定中奖" description="默认公布时间为 7 月 29 日。公布前前台只显示“未开奖”，不会泄露已指定的中奖结果；公布后未被指定的入池用户自动显示“未中奖”。" />
+              <label className="admin-field-block">
+                <Text strong>开奖公布时间（北京时间）</Text>
+                <Input type="datetime-local" value={songWishResult.publishAt} onChange={(event) => setSongWishResult((current) => ({ ...current, publishAt: event.target.value }))} style={{ maxWidth: 260, marginTop: 8 }} />
+              </label>
+              <Table rowKey={(item, index) => item.id || `song-wish-prize-${index}`} columns={songWishPrizeColumns} dataSource={songWishResult.prizes} pagination={false} size="small" scroll={{ x: 1080 }} />
+              <Button onClick={addSongWishPrize}>新增奖项</Button>
+              <Alert type="warning" showIcon message="批量手动开奖" description="请先保存奖项配置。把甲方随机抽取的 OpenID 或用户ID 粘贴到下方，支持换行、逗号或空格分隔；系统会自动跳过未入池、重复中奖和名额已满的用户。" />
+              <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                <Select value={manualPrizeId || undefined} placeholder="选择要发放的奖项" onChange={setManualPrizeId} options={songWishResult.prizes.filter((item) => item.enabled && Number(item.remainingCount || item.quantity || 0) > 0).map((item) => ({ value: item.id, label: `${item.prizeLevel} · ${item.prizeName}（剩余 ${item.remainingCount ?? item.quantity}）` }))} style={{ maxWidth: 420 }} />
+                <Input.TextArea value={manualTargets} onChange={(event) => setManualTargets(event.target.value)} rows={5} placeholder="粘贴 OpenID 或用户ID，一行一个；也支持逗号、空格分隔" />
+                <Button type="primary" loading={manualDrawing} onClick={handleManualDraw}>批量指定中奖用户</Button>
+              </Space>
+            </Space>
+          </Card>
+        ) : null}
       </Space>
     </Card>
   )
+}
+
+function toDateTimeInput(value) {
+  return String(value || '').replace(' ', 'T').slice(0, 16) || '2026-07-29T00:00'
 }
