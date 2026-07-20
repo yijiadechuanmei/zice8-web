@@ -2,10 +2,12 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Typography, message } from 'antd'
 import {
+  clearSongWishLotteryDraws,
   getActivityConfig,
   getArtistCallLotteryPrizes,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
+  revokeSongWishLotteryDraw,
   saveArtistCallLotteryPrizes,
   saveSongWishLotteryResultConfig,
   updateActivityBgmConfig,
@@ -32,11 +34,13 @@ export default function ActivityConfigPage({ activity }) {
   const [bgm, setBgm] = useState(defaultBgm)
   const [prizes, setPrizes] = useState([])
   const [prizeSaving, setPrizeSaving] = useState(false)
-  const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], entryTotal: 0, winnerTotal: 0 })
+  const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
   const [manualDrawing, setManualDrawing] = useState(false)
   const [manualPrizeId, setManualPrizeId] = useState('')
   const [manualTargets, setManualTargets] = useState('')
+  const [revokeDrawId, setRevokeDrawId] = useState('')
+  const [clearingDraws, setClearingDraws] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -82,6 +86,7 @@ export default function ActivityConfigPage({ activity }) {
           setSongWishResult({
             publishAt: toDateTimeInput(data?.publishAt || '2026-07-29T00:00'),
             prizes: data?.prizes || [],
+            winners: data?.winners || [],
             entryTotal: Number(data?.entryTotal || 0),
             winnerTotal: Number(data?.winnerTotal || 0),
           })
@@ -225,6 +230,7 @@ export default function ActivityConfigPage({ activity }) {
       setSongWishResult({
         publishAt: toDateTimeInput(next?.publishAt || songWishResult.publishAt),
         prizes: next?.prizes || [],
+        winners: next?.winners || [],
         entryTotal: Number(next?.entryTotal || 0),
         winnerTotal: Number(next?.winnerTotal || 0),
       })
@@ -234,6 +240,50 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setManualDrawing(false)
+    }
+  }
+
+  async function refreshSongWishResult() {
+    const next = await getSongWishLotteryResultConfig(activity.activityKey)
+    setSongWishResult((current) => ({
+      ...current,
+      publishAt: toDateTimeInput(next?.publishAt || current.publishAt),
+      prizes: next?.prizes || [],
+      winners: next?.winners || [],
+      entryTotal: Number(next?.entryTotal || 0),
+      winnerTotal: Number(next?.winnerTotal || 0),
+    }))
+  }
+
+  async function handleRevokeSongWishWinner(drawId) {
+    setRevokeDrawId(drawId)
+    setError('')
+    try {
+      await revokeSongWishLotteryDraw(activity.activityKey, drawId)
+      await refreshSongWishResult()
+      message.success('已撤销中奖记录，奖项名额已回补')
+    } catch (err) {
+      const text = err.message || '撤销中奖记录失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRevokeDrawId('')
+    }
+  }
+
+  async function handleClearSongWishWinners() {
+    setClearingDraws(true)
+    setError('')
+    try {
+      const data = await clearSongWishLotteryDraws(activity.activityKey)
+      await refreshSongWishResult()
+      message.success(`已清空 ${data?.cleared || 0} 条中奖记录，奖项名额已全部回补`)
+    } catch (err) {
+      const text = err.message || '清空中奖名单失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setClearingDraws(false)
     }
   }
 
@@ -258,6 +308,16 @@ export default function ActivityConfigPage({ activity }) {
     { title: '已发/剩余', width: 100, render: (_, item) => `${item.issuedCount || 0}/${item.remainingCount || 0}` },
     { title: '启用', dataIndex: 'enabled', width: 70, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updateSongWishPrize(index, { enabled })} /> },
     { title: '', width: 62, render: (_, item, index) => <Popconfirm title="确认删除该奖项？" disabled={Number(item.issuedCount || 0) > 0} onConfirm={() => setSongWishResult((current) => ({ ...current, prizes: current.prizes.filter((_, itemIndex) => itemIndex !== index) }))}><Button danger type="link" disabled={Number(item.issuedCount || 0) > 0}>删除</Button></Popconfirm> },
+  ]
+
+  const songWishWinnerColumns = [
+    { title: '用户ID', dataIndex: 'userId', width: 110 },
+    { title: '昵称', dataIndex: 'nickname', width: 130 },
+    { title: 'OpenID', dataIndex: 'openid', width: 220, ellipsis: true },
+    { title: '奖项', dataIndex: 'prizeLevel', width: 110 },
+    { title: '奖品', dataIndex: 'prizeName', width: 160 },
+    { title: '指定时间', dataIndex: 'createdAt', width: 170 },
+    { title: '操作', width: 92, fixed: 'right', render: (_, item) => <Popconfirm title="撤销后将回补该奖项名额，确认撤销？" onConfirm={() => handleRevokeSongWishWinner(item.id)}><Button danger type="link" loading={revokeDrawId === item.id}>撤销</Button></Popconfirm> },
   ]
 
   return (
@@ -361,6 +421,21 @@ export default function ActivityConfigPage({ activity }) {
                 <Input.TextArea value={manualTargets} onChange={(event) => setManualTargets(event.target.value)} rows={5} placeholder="粘贴 OpenID 或用户ID，一行一个；也支持逗号、空格分隔" />
                 <Button type="primary" loading={manualDrawing} onClick={handleManualDraw}>批量指定中奖用户</Button>
               </Space>
+              <div className="admin-page-head" style={{ marginTop: 8 }}>
+                <div>
+                  <Text strong>已指定中奖名单</Text>
+                  <Text type="secondary" style={{ marginLeft: 8 }}>撤销或清空会自动回补对应奖项名额</Text>
+                </div>
+                <Popconfirm
+                  title={`确认清空全部 ${songWishResult.winnerTotal} 条中奖记录？`}
+                  description="清空后所有用户恢复为未中奖，奖项名额会全部回补。"
+                  disabled={!songWishResult.winnerTotal}
+                  onConfirm={handleClearSongWishWinners}
+                >
+                  <Button danger disabled={!songWishResult.winnerTotal} loading={clearingDraws}>清空中奖名单</Button>
+                </Popconfirm>
+              </div>
+              <Table rowKey="id" columns={songWishWinnerColumns} dataSource={songWishResult.winners} pagination={songWishResult.winnerTotal > 500 ? { pageSize: 50 } : false} size="small" scroll={{ x: 1000 }} />
             </Space>
           </Card>
         ) : null}

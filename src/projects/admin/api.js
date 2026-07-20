@@ -99,6 +99,18 @@ export function manualDrawSongWishLottery(activityKey, payload) {
   })
 }
 
+export function revokeSongWishLotteryDraw(activityKey, drawId) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/draws/${encodeURIComponent(drawId)}/revoke`, {
+    method: 'POST',
+  })
+}
+
+export function clearSongWishLotteryDraws(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/draws/clear`, {
+    method: 'POST',
+  })
+}
+
 export function updateActivityStatus(activityKey, status) {
   return adminRequest(`/admin/activities/${activityKey}/status`, {
     method: 'PUT',
