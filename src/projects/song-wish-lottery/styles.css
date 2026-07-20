@@ -55,17 +55,17 @@
 
 .swl-copy-shell .swl-wish-form__submit {
   position: absolute;
-  top: 5px;
-  right: 16px;
-  width: 118px;
-  height: 50px;
+  top: 10px;
+  right: 20px;
+  width: 100px;
+  height: 40px;
   border: 0;
   padding: 0;
   border-radius: 999px;
   background: #97ff71;
   color: #171717;
   cursor: pointer;
-  font: 700 28px/50px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 700 24px/40px system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .swl-copy-shell .swl-wish-form__submit:disabled {
@@ -95,7 +95,7 @@
   position: relative;
   width: 706px;
   height: 447px;
-  margin: 34px auto 50px;
+  margin: 0 auto 50px;
   overflow: hidden;
   border-radius: 40px;
   background: #fdeaff;
@@ -104,7 +104,7 @@
 
 .swl-copy-shell .swl-wish-ticker__track {
   position: absolute;
-  top: 100%;
+  top: 0;
   right: 40px;
   left: 40px;
   animation-name: swl-wish-ticker-scroll;
@@ -118,6 +118,17 @@
   padding: 15px 0;
   font: 600 26px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   overflow-wrap: anywhere;
+}
+
+.swl-copy-shell .swl-wish-ticker--single {
+  display: grid;
+  box-sizing: border-box;
+  padding: 40px;
+  place-items: center;
+}
+
+.swl-copy-shell .swl-wish-ticker--single .swl-wish-ticker__item {
+  text-align: center;
 }
 
 .swl-copy-shell .swl-wish-ticker__name {

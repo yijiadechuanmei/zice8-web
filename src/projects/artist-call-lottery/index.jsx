@@ -485,10 +485,22 @@ function SongWishTicker({ messages }) {
     )
   }
 
+  if (items.length === 1) {
+    const [item] = items
+    return (
+      <section className="swl-wish-ticker swl-wish-ticker--single" aria-label="歌曲许愿滚动区">
+        <p className="swl-wish-ticker__item">
+          <span className="swl-wish-ticker__name">{item.userName || '音乐节乐迷'}：</span>
+          <span>{item.songName || item.text || ''}</span>
+        </p>
+      </section>
+    )
+  }
+
   const repeats = Math.ceil(8 / items.length)
   const cycleItems = Array.from({ length: repeats }, () => items).flat()
   const loopItems = [...cycleItems, ...cycleItems]
-  const duration = Math.max(cycleItems.length, 8)
+  const duration = Math.max(cycleItems.length * 2, 16)
   return (
     <section className="swl-wish-ticker" aria-label="歌曲许愿滚动区" aria-live="polite">
       <div className="swl-wish-ticker__track" style={{ animationDuration: `${duration}s` }}>
