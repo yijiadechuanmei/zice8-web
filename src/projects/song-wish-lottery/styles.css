@@ -103,3 +103,9 @@
 .swl-copy-shell .swl-bottom-promo + .acl-bottom-link {
   margin-top: 0;
 }
+
+/* The OSS asset is updated in place, so do not retain the former 609 × 111 crop. */
+.swl-copy-shell .acl-info-rules {
+  width: auto;
+  height: auto;
+}
