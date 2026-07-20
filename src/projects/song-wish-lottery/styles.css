@@ -104,13 +104,21 @@
 
 .swl-copy-shell .swl-wish-ticker__track {
   position: absolute;
-  top: 0;
   right: 40px;
   left: 40px;
-  animation-name: swl-wish-ticker-scroll;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   will-change: transform;
+}
+
+.swl-copy-shell .swl-wish-ticker__track--continuous {
+  top: 0;
+  animation-name: swl-wish-ticker-scroll;
+}
+
+.swl-copy-shell .swl-wish-ticker__track--restart {
+  top: 100%;
+  animation-name: swl-wish-ticker-scroll-restart;
 }
 
 .swl-copy-shell .swl-wish-ticker__item {
@@ -118,17 +126,6 @@
   padding: 15px 0;
   font: 600 26px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   overflow-wrap: anywhere;
-}
-
-.swl-copy-shell .swl-wish-ticker--single {
-  display: grid;
-  box-sizing: border-box;
-  padding: 40px;
-  place-items: center;
-}
-
-.swl-copy-shell .swl-wish-ticker--single .swl-wish-ticker__item {
-  text-align: center;
 }
 
 .swl-copy-shell .swl-wish-ticker__name {
@@ -151,6 +148,16 @@
 
   to {
     transform: translateY(-50%);
+  }
+}
+
+@keyframes swl-wish-ticker-scroll-restart {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(calc(-100% - 447px));
   }
 }
 
