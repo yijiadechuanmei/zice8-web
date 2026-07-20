@@ -485,8 +485,10 @@ function SongWishTicker({ messages }) {
     )
   }
 
-  const loopItems = [...items, ...items]
-  const duration = Math.max(items.length * 4, 18)
+  const repeats = Math.ceil(8 / items.length)
+  const cycleItems = Array.from({ length: repeats }, () => items).flat()
+  const loopItems = [...cycleItems, ...cycleItems]
+  const duration = Math.max(cycleItems.length, 8)
   return (
     <section className="swl-wish-ticker" aria-label="歌曲许愿滚动区" aria-live="polite">
       <div className="swl-wish-ticker__track" style={{ animationDuration: `${duration}s` }}>
@@ -1068,6 +1070,8 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
 
       </div>
 
+      {isSongWish ? <SongWishTicker messages={bootstrap?.messages} /> : null}
+
       <section className="acl-info-card">
         <img src={getDesignAsset('infoTitle')} alt="活动说明" />
         <img className="acl-info-subtitle" src={getDesignAsset('infoSubtitleOne')} alt="活动参与方式" />
@@ -1082,8 +1086,6 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <img className="acl-info-time" src={getDesignAsset('infoTime')} alt="活动时间" />
         <img className="acl-info-rules" src={getDesignAsset('infoRules')} alt="兑换规则" />
       </section>
-
-      {isSongWish ? <SongWishTicker messages={bootstrap?.messages} /> : null}
 
       <section className="acl-prize-card">
         <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
