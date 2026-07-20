@@ -10,6 +10,11 @@ export const songWishApi = {
       body: JSON.stringify(data),
     }),
 
+  getMessages: (activityKey, limit = 20) =>
+    request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/messages?limit=${encodeURIComponent(limit)}`, {
+      skipAuth: true,
+    }),
+
   claimPrize: (activityKey, drawId, data) =>
     request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/draws/${encodeURIComponent(drawId)}/claim`, {
       method: 'POST',

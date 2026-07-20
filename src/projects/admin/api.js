@@ -143,6 +143,12 @@ export function exportDataRows(activityKey, viewKey, params) {
   return adminRequest(`/admin/activities/${activityKey}/data/${viewKey}/export?${search.toString()}`)
 }
 
+export function retractSongWish(activityKey, wishId) {
+  return adminRequest(`/admin/activities/${activityKey}/song-wish-lottery/wishes/${wishId}/retract`, {
+    method: 'POST',
+  })
+}
+
 export function reviewLongMarchRecording(activityKey, recordingId, payload) {
   return adminRequest(`/long-march-study/admin/activities/${activityKey}/recordings/${recordingId}/review`, {
     method: 'POST',

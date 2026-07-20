@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
+import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -32,6 +32,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [loadingRecordingPlayId, setLoadingRecordingPlayId] = useState('')
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
+  const [retractingWishId, setRetractingWishId] = useState('')
   const [error, setError] = useState('')
   const phaseNo = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all' ? phaseScope : ''
 
@@ -237,6 +238,28 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     }
   }, [activity.activityKey])
 
+  const handleRetractSongWish = useCallback(async (row) => {
+    if (!row?.id) return
+    setRetractingWishId(row.id)
+    try {
+      const result = await retractSongWish(activity.activityKey, row.id)
+      const wish = result?.wish || {}
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? {
+          ...item,
+          isVisible: false,
+          retractedAt: wish.retractedAt || new Date().toISOString(),
+        } : item),
+      }))
+      message.success('已撤回该许愿内容，前台不再展示')
+    } catch (err) {
+      message.error(err.message || '撤回失败')
+    } finally {
+      setRetractingWishId('')
+    }
+  }, [activity.activityKey])
+
   const tableColumns = useMemo(() => {
     const columns = buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
       visibleColumns.map((column) => [
@@ -439,8 +462,38 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         ),
       })
     }
+    if (activity.type === 'song_wish_lottery' && activeViewKey === 'song_wish_lottery_wishes') {
+      const visibilityColumn = columns.find((column) => column.key === 'isVisible' || column.dataIndex === 'isVisible')
+      if (visibilityColumn) {
+        visibilityColumn.render = (value) => value ? <Tag color="green">展示中</Tag> : <Tag color="red">已撤回</Tag>
+      }
+      columns.push({
+        title: '展示操作',
+        key: 'songWishActions',
+        fixed: 'right',
+        width: 124,
+        render: (_, row) => row.isVisible ? (
+          <Popconfirm
+            title="确认撤回该许愿内容？"
+            description="撤回后该内容将不会在前台滚动区显示。"
+            okText="撤回展示"
+            cancelText="取消"
+            onConfirm={() => handleRetractSongWish(row)}
+          >
+            <Button
+              size="small"
+              danger
+              loading={retractingWishId === row.id}
+              disabled={Boolean(retractingWishId)}
+            >
+              撤回展示
+            </Button>
+          </Popconfirm>
+        ) : <Tag>已撤回</Tag>,
+      })
+    }
     return columns
-  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, recordingPlayUrls, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleRetractSongWish, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, recordingPlayUrls, retractingWishId, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return

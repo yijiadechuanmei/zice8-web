@@ -90,3 +90,62 @@
   width: auto;
   height: auto;
 }
+
+.swl-copy-shell .swl-wish-ticker {
+  position: relative;
+  width: 706px;
+  height: 447px;
+  margin: 34px auto 50px;
+  overflow: hidden;
+  border-radius: 40px;
+  background: #fdeaff;
+  color: #2d1b2f;
+}
+
+.swl-copy-shell .swl-wish-ticker__track {
+  position: absolute;
+  top: 100%;
+  right: 40px;
+  left: 40px;
+  animation-name: swl-wish-ticker-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.swl-copy-shell .swl-wish-ticker__item {
+  margin: 0;
+  padding: 15px 0;
+  font: 600 26px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.swl-copy-shell .swl-wish-ticker__name {
+  font-weight: 800;
+}
+
+.swl-copy-shell .swl-wish-ticker__empty {
+  display: grid;
+  height: 100%;
+  margin: 0;
+  place-items: center;
+  color: rgba(45, 27, 47, 0.54);
+  font: 600 26px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+@keyframes swl-wish-ticker-scroll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swl-copy-shell .swl-wish-ticker__track {
+    top: 0;
+    animation: none;
+  }
+}

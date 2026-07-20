@@ -475,6 +475,32 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim }) {
   )
 }
 
+function SongWishTicker({ messages }) {
+  const items = Array.isArray(messages) ? messages.filter(Boolean) : []
+  if (!items.length) {
+    return (
+      <section className="swl-wish-ticker" aria-label="歌曲许愿滚动区">
+        <p className="swl-wish-ticker__empty">期待你的歌曲许愿</p>
+      </section>
+    )
+  }
+
+  const loopItems = [...items, ...items]
+  const duration = Math.max(items.length * 4, 18)
+  return (
+    <section className="swl-wish-ticker" aria-label="歌曲许愿滚动区" aria-live="polite">
+      <div className="swl-wish-ticker__track" style={{ animationDuration: `${duration}s` }}>
+        {loopItems.map((item, index) => (
+          <p className="swl-wish-ticker__item" key={`${item.id || item.createdAt || item.songName}-${index}`}>
+            <span className="swl-wish-ticker__name">{item.userName || '音乐节乐迷'}：</span>
+            <span>{item.songName || item.text || ''}</span>
+          </p>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function CommonModal({
   children,
   title,
@@ -598,6 +624,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const isSongWish = variant === 'songWish'
   const getProjectBootstrap = projectApi.getBootstrap || getBootstrap
   const createProjectWish = projectApi.createWish
+  const getProjectMessages = projectApi.getMessages
   const drawProjectPrize = isSongWish ? null : projectApi.drawPrize || drawPrize
   const claimProjectPrize = projectApi.claimPrize || claimPrize
   const getProjectDebugAccess = projectApi.getDebugAccess || getDebugAccess
@@ -692,6 +719,24 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     return () => window.clearInterval(timer)
   }, [activityKey, isSongWish])
 
+  useEffect(() => {
+    if (!isSongWish || !activityKey || !getProjectMessages) return undefined
+    let active = true
+    const refreshMessages = () => {
+      getProjectMessages(activityKey, 20)
+        .then((data) => {
+          if (active) setBootstrap((prev) => (prev ? { ...prev, messages: data.messages || [] } : prev))
+        })
+        .catch(() => {})
+    }
+    refreshMessages()
+    const timer = window.setInterval(refreshMessages, 12000)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [activityKey, getProjectMessages, isSongWish])
+
   const pageConfig = useMemo(() => mergeConfig(publicConfig, bootstrap), [publicConfig, bootstrap])
   const shareActivity = useMemo(() => {
     if (!publicConfig) return null
@@ -748,6 +793,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         ...prev,
         wishes: [...(prev.wishes || []), result.wish].filter(Boolean),
         entry: result.entry || prev.entry,
+        messages: [result.message, ...(prev.messages || [])].filter(Boolean).slice(0, 20),
       } : prev))
       try {
         await refreshAfterAction()
@@ -1036,6 +1082,8 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <img className="acl-info-time" src={getDesignAsset('infoTime')} alt="活动时间" />
         <img className="acl-info-rules" src={getDesignAsset('infoRules')} alt="兑换规则" />
       </section>
+
+      {isSongWish ? <SongWishTicker messages={bootstrap?.messages} /> : null}
 
       <section className="acl-prize-card">
         <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
