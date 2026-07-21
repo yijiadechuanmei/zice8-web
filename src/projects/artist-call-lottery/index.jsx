@@ -26,6 +26,7 @@ const DESIGN_STAGE_HEIGHT = 1448
 const CAROUSEL_VIEWPORT_WIDTH = 521
 const ARTIST_PICKER_WIDTH = 661
 const ARTIST_PICKER_HEIGHT = 487
+const SONG_WISH_TITLE_URL = 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/a9caae637c44584b42db91b9bd5debcd_25992_475_267.png'
 const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
@@ -1033,7 +1034,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
             <div className="acl-design-stage">
         <ArtistShowcaseCarousel getAsset={getDesignAsset} />
         <img className="acl-design-image acl-design-image--top" src={getDesignAsset('topBackground')} alt="" />
-        <img className="acl-design-image acl-design-image--title" src={getDesignAsset('title')} alt="为心动的TA打CALL" />
+        <img className="acl-design-image acl-design-image--title" src={isSongWish ? SONG_WISH_TITLE_URL : getDesignAsset('title')} alt={isSongWish ? '歌曲许愿' : '为心动的TA打CALL'} />
         <img className="acl-design-image acl-design-image--logo" src={getDesignAsset('logo')} alt="" />
         <img className="acl-design-image acl-design-image--content" src={getDesignAsset('contentBackground')} alt="" />
         <img className="acl-design-image acl-design-image--footer" src={getDesignAsset('footerBackground')} alt="" />

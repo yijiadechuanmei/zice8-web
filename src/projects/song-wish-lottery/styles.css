@@ -5,6 +5,13 @@
   display: none;
 }
 
+.swl-copy-shell .acl-design-image--title {
+  top: 135px;
+  left: 136px;
+  width: 475px;
+  height: 267px;
+}
+
 .swl-copy-shell .swl-wish-area {
   position: absolute;
   top: 1325px;
