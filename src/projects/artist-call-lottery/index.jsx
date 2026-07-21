@@ -799,6 +799,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
+  const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
         ? 'notParticipated'
@@ -1006,6 +1007,17 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     }
   }
 
+  const handleClaim = () => {
+    if (claimExpired) {
+      setMessage({
+        title: '活动已截止',
+        message: '中奖码领取已于2026年8月1日23:59:59截止。',
+      })
+      return
+    }
+    setClaimDraw(latestWonDraw)
+  }
+
   if (blockedMessage) {
     return (
       <div className="acl-page acl-centered">
@@ -1144,7 +1156,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
             draw={latestWonDraw}
             hasDrawn={hasDrawn}
             getAsset={getDesignAsset}
-            onClaim={() => setClaimDraw(latestWonDraw)}
+            onClaim={handleClaim}
             songWishState={songWishPrizeState}
           />
         </div>
@@ -1194,7 +1206,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <PrizeModal
           draw={prizeDraw}
           onClose={() => setPrizeDraw(null)}
-          onClaim={() => setClaimDraw(prizeDraw)}
+          onClaim={handleClaim}
           getAsset={getDesignAsset}
         />
       ) : null}
