@@ -80,15 +80,22 @@
   opacity: 0.55;
 }
 
-.swl-copy-shell .swl-bottom-promo {
+.swl-copy-shell .swl-bottom-promo-link {
   display: block;
   width: 703px;
   height: 208px;
   margin: 0 auto 50px;
+  cursor: pointer;
+}
+
+.swl-copy-shell .swl-bottom-promo {
+  display: block;
+  width: 703px;
+  height: 208px;
   object-fit: contain;
 }
 
-.swl-copy-shell .swl-bottom-promo + .acl-bottom-link {
+.swl-copy-shell .swl-bottom-promo-link + .acl-bottom-link {
   margin-top: 0;
 }
 

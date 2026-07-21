@@ -1153,11 +1153,17 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       </section>
 
       {isSongWish ? (
-        <img
-          className="swl-bottom-promo"
-          src="https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/eb7b8c0d5dcfda7acbdeec37e8ff0d4d_390597_703_208.png"
-          alt=""
-        />
+        <a
+          className="swl-bottom-promo-link"
+          href="https://mp.weixin.qq.com/s/5h8boYq4ZzMeaUldERBtQQ"
+          aria-label="查看音乐节公众号文章"
+        >
+          <img
+            className="swl-bottom-promo"
+            src="https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/eb7b8c0d5dcfda7acbdeec37e8ff0d4d_390597_703_208.png"
+            alt=""
+          />
+        </a>
       ) : null}
 
       <button className="acl-bottom-link" type="button" onClick={handleBottomButtonClick}>
