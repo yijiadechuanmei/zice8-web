@@ -1137,7 +1137,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       <section className="acl-info-card">
         <img src={getDesignAsset('infoTitle')} alt="活动说明" />
         <img className="acl-info-subtitle" src={getDesignAsset('infoSubtitleOne')} alt="活动参与方式" />
-        <img className="acl-info-line" src={getDesignAsset('infoLineOne')} alt="" />
+        {!isSongWish ? <img className="acl-info-line" src={getDesignAsset('infoLineOne')} alt="" /> : null}
         <img className="acl-info-line" src={getDesignAsset('infoLineTwo')} alt="" />
         <img className="acl-info-line" src={getDesignAsset('infoLineThree')} alt="" />
         <img className="acl-info-line" src={getDesignAsset('infoLineFour')} alt="" />
