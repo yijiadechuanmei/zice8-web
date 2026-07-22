@@ -1077,9 +1077,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
                 id="swl-song-name"
                 className="swl-wish-form__input"
                 value={wishSongName}
-                onChange={(event) => setWishSongName(event.target.value.slice(0, 20))}
+                onChange={(event) => setWishSongName(event.target.value.slice(0, 50))}
                 placeholder="输入想听的歌曲"
-                maxLength={20}
+                maxLength={50}
                 disabled={actionLoading}
               />
               <button className="swl-wish-form__submit" type="submit" disabled={actionLoading}>
