@@ -696,7 +696,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
-  const debugPrizePromptedDrawId = useRef('')
+  const autoPrizePromptedDrawId = useRef('')
   const [teamInvitePrompt, setTeamInvitePrompt] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
@@ -811,6 +811,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const chances = bootstrap?.chances || { total: 0, used: 0, remaining: 0, max: 2 }
   const draws = bootstrap?.draws || []
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
+  const preReleaseFirstPrizeDraw = isSongWish && !bootstrap?.lottery?.isPublished
+    ? [...draws].reverse().find((draw) => draw.won && draw.status === 'won' && draw.prizeLevel === '一等奖')
+    : null
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
   const debugPrizePreviewDraw = useMemo(() => {
@@ -824,6 +827,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       prizeLevel: prizePreview.prizeLevel || DEBUG_SONG_WISH_PRIZE_DRAW.prizeLevel,
     }
   }, [debugAccess, isSongWish])
+  const autoPrizePromptDraw = preReleaseFirstPrizeDraw || debugPrizePreviewDraw
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
         ? 'notParticipated'
@@ -853,14 +857,14 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
 
   useEffect(() => {
     if (
-      !debugPrizePreviewDraw ||
-      debugPrizePreviewDraw.claim ||
-      debugPrizePromptedDrawId.current === debugPrizePreviewDraw.id
+      !autoPrizePromptDraw ||
+      autoPrizePromptDraw.claim ||
+      autoPrizePromptedDrawId.current === autoPrizePromptDraw.id
     ) return
-    debugPrizePromptedDrawId.current = debugPrizePreviewDraw.id
-    const timer = window.setTimeout(() => setPrizeDraw(debugPrizePreviewDraw), 0)
+    autoPrizePromptedDrawId.current = autoPrizePromptDraw.id
+    const timer = window.setTimeout(() => setPrizeDraw(autoPrizePromptDraw), 0)
     return () => window.clearTimeout(timer)
-  }, [debugPrizePreviewDraw])
+  }, [autoPrizePromptDraw])
 
   const handleSubmitWish = async (event) => {
     event.preventDefault()
