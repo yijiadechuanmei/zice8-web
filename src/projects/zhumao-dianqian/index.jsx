@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getZhumaoDianqianPublicConfig } from './api'
 import {
@@ -24,6 +25,7 @@ export default function ZhumaoDianqianProject({ routeParams }) {
   const touchStartY = useRef(null)
   const lastSwitchAt = useRef(0)
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || config.bgm
   const pageCount = Math.max(Number(config.pageCount) || 1, 1)
   const pageImages = useMemo(
     () => Array.from({ length: pageCount }, (_, index) =>
@@ -141,6 +143,9 @@ export default function ZhumaoDianqianProject({ routeParams }) {
           </section>
         ))}
       </div>
+      {bgmConfig?.enabled && bgmConfig?.url ? (
+        <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+      ) : null}
       <p className="sr-only" aria-live="polite">第 {currentIndex + 1} 页，共 {pageCount} 页</p>
     </main>
   )
