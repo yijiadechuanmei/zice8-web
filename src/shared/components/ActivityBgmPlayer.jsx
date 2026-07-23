@@ -45,17 +45,19 @@ const pulseAnimationName = 'activity-bgm-pulse'
 function MusicNoteIcon({ spinning }) {
   return (
     <svg
-      viewBox="0 0 20 24"
+      viewBox="0 0 24 24"
       aria-hidden="true"
       style={{
         ...iconStyle,
         animation: spinning ? `${spinAnimationName} 3s linear infinite` : 'none',
       }}
     >
-      <path
-        d="M15 3.6v10.2a3.4 3.4 0 1 1-1.6-2.9V7.1l-5.8 1.4v7a3.4 3.4 0 1 1-1.6-2.9V6.1c0-.73.5-1.36 1.22-1.54l6.2-1.5A1.6 1.6 0 0 1 15 3.6Z"
-        fill="currentColor"
-      />
+      <g transform="translate(4 0)">
+        <path
+          d="M15 3.6v10.2a3.4 3.4 0 1 1-1.6-2.9V7.1l-5.8 1.4v7a3.4 3.4 0 1 1-1.6-2.9V6.1c0-.73.5-1.36 1.22-1.54l6.2-1.5A1.6 1.6 0 0 1 15 3.6Z"
+          fill="currentColor"
+        />
+      </g>
     </svg>
   )
 }
