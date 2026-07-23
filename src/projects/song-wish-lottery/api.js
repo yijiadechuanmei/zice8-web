@@ -1,8 +1,12 @@
 import { request } from '../../shared/api/request'
 
 export const songWishApi = {
-  getBootstrap: (activityKey) =>
-    request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/bootstrap`),
+  getBootstrap: (activityKey, _inviterUserId, options = {}) => {
+    const search = new URLSearchParams()
+    if (options.previewEarlyPrize) search.set('previewEarlyPrize', '1')
+    const suffix = search.size ? `?${search.toString()}` : ''
+    return request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/bootstrap${suffix}`)
+  },
 
   createWish: (activityKey, data) =>
     request(`/song-wish-lottery/activities/${encodeURIComponent(activityKey)}/wishes`, {

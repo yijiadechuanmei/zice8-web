@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
@@ -27,7 +27,8 @@ const CAROUSEL_VIEWPORT_WIDTH = 521
 const ARTIST_PICKER_WIDTH = 661
 const ARTIST_PICKER_HEIGHT = 487
 const SONG_WISH_TITLE_URL = 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/a9caae637c44584b42db91b9bd5debcd_25992_475_267.png'
-const isDebugRequested = new URLSearchParams(window.location.search).get('debug') === '1'
+const debugQueryValue = new URLSearchParams(window.location.search).get('debug')
+const isDebugRequested = debugQueryValue === '' || debugQueryValue === '1'
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
   { id: 'preset-2', text: '音乐节现场见！' },
@@ -684,6 +685,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
+  const earlyPrizePromptedDrawId = useRef('')
   const [teamInvitePrompt, setTeamInvitePrompt] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
@@ -718,7 +720,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     if (!authReady) return
     setLoading(true)
     try {
-      const data = await getProjectBootstrap(activityKey, inviterUserId)
+      const data = await getProjectBootstrap(activityKey, inviterUserId, {
+        previewEarlyPrize: isSongWish && isDebugRequested,
+      })
       setBootstrap(data)
       if (data?.pendingInvitation) setTeamInvitePrompt(data.pendingInvitation)
     } catch (error) {
@@ -727,7 +731,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, reauth])
+  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, isSongWish, reauth])
 
   useEffect(() => {
     loadBootstrap()
@@ -800,6 +804,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
+  const earlyPrizePreviewDraw = isSongWish && bootstrap?.lottery?.earlyPrizePreview
+    ? latestWonDraw
+    : null
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
         ? 'notParticipated'
@@ -822,10 +829,22 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const handleBottomButtonClick = () => window.location.assign(DAMAI_DETAIL_URL)
 
   const refreshAfterAction = useCallback(async () => {
-    const data = await getProjectBootstrap(activityKey, inviterUserId)
+    const data = await getProjectBootstrap(activityKey, inviterUserId, {
+      previewEarlyPrize: isSongWish && isDebugRequested,
+    })
     setBootstrap(data)
     return data
-  }, [activityKey, getProjectBootstrap, inviterUserId])
+  }, [activityKey, getProjectBootstrap, inviterUserId, isSongWish])
+
+  useEffect(() => {
+    if (
+      !earlyPrizePreviewDraw ||
+      earlyPrizePreviewDraw.claim ||
+      earlyPrizePromptedDrawId.current === earlyPrizePreviewDraw.id
+    ) return
+    earlyPrizePromptedDrawId.current = earlyPrizePreviewDraw.id
+    setPrizeDraw(earlyPrizePreviewDraw)
+  }, [earlyPrizePreviewDraw])
 
   const handleSubmitWish = async (event) => {
     event.preventDefault()
@@ -977,7 +996,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         confirmToken: debugConfirmToken,
         scope,
       })
-      const data = await getProjectBootstrap(activityKey, '')
+      const data = await getProjectBootstrap(activityKey, '', {
+        previewEarlyPrize: isSongWish && isDebugRequested,
+      })
       setBootstrap(data)
       setMessage({
         title: '重置完成',
