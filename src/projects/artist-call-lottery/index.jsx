@@ -29,6 +29,17 @@ const ARTIST_PICKER_HEIGHT = 487
 const SONG_WISH_TITLE_URL = 'https://assets.zice8.com/song_wish_lottery/song_wish_lottery_2026/a9caae637c44584b42db91b9bd5debcd_25992_475_267.png'
 const debugQueryValue = new URLSearchParams(window.location.search).get('debug')
 const isDebugRequested = debugQueryValue === '' || debugQueryValue === '1'
+const DEBUG_SONG_WISH_PRIZE_DRAW = {
+  id: 'debug-song-wish-first-prize-ticket',
+  status: 'debug_preview',
+  prizeCode: 'debug_first_prize_ticket',
+  prizeName: '秘境崇左音乐节门票（测试）',
+  prizeImage: '',
+  prizeLevel: '一等奖',
+  won: true,
+  claim: null,
+  debugPreview: true,
+}
 const PRESET_BARRAGES = [
   { id: 'preset-1', text: '为心动的TA打CALL！' },
   { id: 'preset-2', text: '音乐节现场见！' },
@@ -685,7 +696,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const [prizeDraw, setPrizeDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
-  const earlyPrizePromptedDrawId = useRef('')
+  const debugPrizePromptedDrawId = useRef('')
   const [teamInvitePrompt, setTeamInvitePrompt] = useState(null)
   const [message, setMessage] = useState(null)
   const [debugAccess, setDebugAccess] = useState(null)
@@ -720,9 +731,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     if (!authReady) return
     setLoading(true)
     try {
-      const data = await getProjectBootstrap(activityKey, inviterUserId, {
-        previewEarlyPrize: isSongWish && isDebugRequested,
-      })
+      const data = await getProjectBootstrap(activityKey, inviterUserId)
       setBootstrap(data)
       if (data?.pendingInvitation) setTeamInvitePrompt(data.pendingInvitation)
     } catch (error) {
@@ -731,7 +740,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, isSongWish, reauth])
+  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, reauth])
 
   useEffect(() => {
     loadBootstrap()
@@ -804,8 +813,8 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
-  const earlyPrizePreviewDraw = isSongWish && bootstrap?.lottery?.earlyPrizePreview
-    ? latestWonDraw
+  const debugPrizePreviewDraw = isSongWish && isDebugRequested && debugAccess?.canDebug
+    ? DEBUG_SONG_WISH_PRIZE_DRAW
     : null
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
@@ -829,22 +838,21 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const handleBottomButtonClick = () => window.location.assign(DAMAI_DETAIL_URL)
 
   const refreshAfterAction = useCallback(async () => {
-    const data = await getProjectBootstrap(activityKey, inviterUserId, {
-      previewEarlyPrize: isSongWish && isDebugRequested,
-    })
+    const data = await getProjectBootstrap(activityKey, inviterUserId)
     setBootstrap(data)
     return data
-  }, [activityKey, getProjectBootstrap, inviterUserId, isSongWish])
+  }, [activityKey, getProjectBootstrap, inviterUserId])
 
   useEffect(() => {
     if (
-      !earlyPrizePreviewDraw ||
-      earlyPrizePreviewDraw.claim ||
-      earlyPrizePromptedDrawId.current === earlyPrizePreviewDraw.id
+      !debugPrizePreviewDraw ||
+      debugPrizePreviewDraw.claim ||
+      debugPrizePromptedDrawId.current === debugPrizePreviewDraw.id
     ) return
-    earlyPrizePromptedDrawId.current = earlyPrizePreviewDraw.id
-    setPrizeDraw(earlyPrizePreviewDraw)
-  }, [earlyPrizePreviewDraw])
+    debugPrizePromptedDrawId.current = debugPrizePreviewDraw.id
+    const timer = window.setTimeout(() => setPrizeDraw(debugPrizePreviewDraw), 0)
+    return () => window.clearTimeout(timer)
+  }, [debugPrizePreviewDraw])
 
   const handleSubmitWish = async (event) => {
     event.preventDefault()
@@ -996,9 +1004,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         confirmToken: debugConfirmToken,
         scope,
       })
-      const data = await getProjectBootstrap(activityKey, '', {
-        previewEarlyPrize: isSongWish && isDebugRequested,
-      })
+      const data = await getProjectBootstrap(activityKey, '')
       setBootstrap(data)
       setMessage({
         title: '重置完成',
@@ -1016,6 +1022,24 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     if (!claimDraw) return
     setClaimSubmitting(true)
     try {
+      if (claimDraw.debugPreview) {
+        const recipientName = String(form.recipientName || '').trim()
+        const recipientPhone = String(form.recipientPhone || '').trim()
+        if (!recipientName || !/^1\d{10}$/.test(recipientPhone)) {
+          throw new Error('请填写正确的姓名和手机号')
+        }
+        setClaimDraw(null)
+        setPrizeDraw({
+          ...claimDraw,
+          claim: {
+            recipientName,
+            recipientPhone,
+            redemptionCode: 'DEBUG-TICKET-2026',
+            status: 'debug_preview',
+          },
+        })
+        return
+      }
       const result = await claimProjectPrize(activityKey, claimDraw.id, form)
       setClaimDraw(null)
       const updatedDraw = { ...claimDraw, claim: result.claim }
@@ -1036,7 +1060,8 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       })
       return
     }
-    setClaimDraw(latestWonDraw)
+    const targetDraw = prizeDraw?.won ? prizeDraw : latestWonDraw
+    if (targetDraw) setClaimDraw(targetDraw)
   }
 
   if (blockedMessage) {
