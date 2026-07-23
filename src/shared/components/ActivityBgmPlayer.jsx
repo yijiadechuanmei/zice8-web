@@ -45,7 +45,7 @@ const pulseAnimationName = 'activity-bgm-pulse'
 function MusicNoteIcon({ spinning }) {
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="0 0 20 24"
       aria-hidden="true"
       style={{
         ...iconStyle,
