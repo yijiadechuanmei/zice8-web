@@ -11,6 +11,7 @@ const AudioDebugProject = lazy(() => import('./audio-debug/index.jsx'))
 const AntiFraudBoardGameProject = lazy(() => import('./anti-fraud-board-game/index.jsx'))
 const TufeCampusOpenDayProject = lazy(() => import('./tufe-campus-open-day/index.jsx'))
 const Xiwuqi99RoadNightProject = lazy(() => import('./xiwuqi-99-road-night/index.jsx'))
+const ZhumaoDianqianProject = lazy(() => import('./zhumao-dianqian/index.jsx'))
 const LatexAllergyRiskTestProject = lazy(() => import('./latex-allergy-risk-test/index.jsx'))
 const BorderTownRoleTestProject = lazy(() => import('./border-town-role-test/index.jsx'))
 const FeatureChallengeProject = lazy(() => import('./feature-challenge/index.jsx'))
@@ -90,6 +91,16 @@ export const projectRoutes = [
   {
     path: '/xiwuqi_99_road_night/:activityKey',
     Component: Xiwuqi99RoadNightProject,
+    activityGate: true,
+  },
+  {
+    path: '/zhumao-dianqian/:activityKey',
+    Component: ZhumaoDianqianProject,
+    activityGate: true,
+  },
+  {
+    path: '/zhumao_dianqian/:activityKey',
+    Component: ZhumaoDianqianProject,
     activityGate: true,
   },
   {

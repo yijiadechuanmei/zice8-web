@@ -1,0 +1,56 @@
+.zhumao-dianqian-app {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #fff;
+  outline: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zhumao-dianqian-app:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: -2px;
+}
+
+.zhumao-dianqian-track {
+  width: 100%;
+  height: 100%;
+  transition: transform 360ms ease;
+  will-change: transform;
+}
+
+.zhumao-dianqian-slide {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+}
+
+.zhumao-dianqian-image {
+  display: block;
+  width: 100vw;
+  height: auto;
+  aspect-ratio: 750 / 1311;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zhumao-dianqian-track {
+    transition: none;
+  }
+}
+
+@supports not (height: 100svh) {
+  .zhumao-dianqian-app {
+    height: 100vh;
+  }
+}
