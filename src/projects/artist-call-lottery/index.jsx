@@ -813,9 +813,17 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const latestWonDraw = [...draws].reverse().find((draw) => draw.won)
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
-  const debugPrizePreviewDraw = isSongWish && isDebugRequested && debugAccess?.canDebug
-    ? DEBUG_SONG_WISH_PRIZE_DRAW
-    : null
+  const debugPrizePreviewDraw = useMemo(() => {
+    if (!isSongWish || !isDebugRequested || !debugAccess?.canDebug) return null
+    const prizePreview = debugAccess.prizePreview || {}
+    return {
+      ...DEBUG_SONG_WISH_PRIZE_DRAW,
+      prizeCode: prizePreview.prizeCode || DEBUG_SONG_WISH_PRIZE_DRAW.prizeCode,
+      prizeName: prizePreview.prizeName || DEBUG_SONG_WISH_PRIZE_DRAW.prizeName,
+      prizeImage: prizePreview.prizeImage || DEBUG_SONG_WISH_PRIZE_DRAW.prizeImage,
+      prizeLevel: prizePreview.prizeLevel || DEBUG_SONG_WISH_PRIZE_DRAW.prizeLevel,
+    }
+  }, [debugAccess, isSongWish])
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
         ? 'notParticipated'
