@@ -22,8 +22,8 @@ const controlStyle = {
 }
 
 const iconWrapBaseStyle = {
-  width: '28px',
-  height: '28px',
+  width: '34px',
+  height: '34px',
   borderRadius: '9999px',
   display: 'flex',
   alignItems: 'center',
@@ -32,17 +32,26 @@ const iconWrapBaseStyle = {
 }
 
 const iconStyle = {
-  width: '18px',
-  height: '18px',
+  width: '25px',
+  height: '25px',
   display: 'block',
+  transformBox: 'fill-box',
+  transformOrigin: 'center',
 }
 
 const spinAnimationName = 'activity-bgm-spin'
 const pulseAnimationName = 'activity-bgm-pulse'
 
-function MusicNoteIcon() {
+function MusicNoteIcon({ spinning }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" style={iconStyle}>
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{
+        ...iconStyle,
+        animation: spinning ? `${spinAnimationName} 3s linear infinite` : 'none',
+      }}
+    >
       <path
         d="M15 3.6v10.2a3.4 3.4 0 1 1-1.6-2.9V7.1l-5.8 1.4v7a3.4 3.4 0 1 1-1.6-2.9V6.1c0-.73.5-1.36 1.22-1.54l6.2-1.5A1.6 1.6 0 0 1 15 3.6Z"
         fill="currentColor"
@@ -94,11 +103,7 @@ export default function ActivityBgmPlayer({ bgm, activityKey }) {
   const waitingGesture = state.blocked && !state.userPaused && !state.playing
   const iconWrapStyle = {
     ...iconWrapBaseStyle,
-    animation: state.playing
-      ? `${spinAnimationName} 3s linear infinite`
-      : waitingGesture
-        ? `${pulseAnimationName} 1.8s ease-in-out infinite`
-        : 'none',
+    animation: waitingGesture ? `${pulseAnimationName} 1.8s ease-in-out infinite` : 'none',
     opacity: state.ready ? 1 : 0.82,
   }
 
@@ -110,7 +115,7 @@ export default function ActivityBgmPlayer({ bgm, activityKey }) {
       aria-label={state.playing ? '暂停背景音乐' : '播放背景音乐'}
     >
       <span style={iconWrapStyle}>
-        <MusicNoteIcon />
+        <MusicNoteIcon spinning={state.playing} />
       </span>
     </button>
   )
