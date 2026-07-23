@@ -462,7 +462,7 @@ function ArtistPicker({ onSelect, onClose, selectedArtistKey, loading }) {
   )
 }
 
-function PrizeModal({ draw, onClose, onClaim, claim, getAsset }) {
+function PrizeModal({ draw, onClose, onClaim, claim, getAsset, songWishState = '' }) {
   const won = Boolean(draw?.won)
   const resultDraw = won ? { ...draw, claim: claim || draw?.claim } : null
   return (
@@ -473,6 +473,7 @@ function PrizeModal({ draw, onClose, onClaim, claim, getAsset }) {
           hasDrawn
           getAsset={getAsset}
           onClaim={onClaim}
+          songWishState={songWishState}
         />
         <button className="acl-draw-result-modal__close" type="button" onClick={onClose} aria-label="关闭抽奖结果">
           ×
@@ -1262,6 +1263,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
           onClose={() => setPrizeDraw(null)}
           onClaim={handleClaim}
           getAsset={getDesignAsset}
+          songWishState={isSongWish ? 'won' : ''}
         />
       ) : null}
       {claimDraw ? (
