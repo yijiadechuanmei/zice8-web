@@ -814,9 +814,6 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const preReleaseFirstPrizeDraw = isSongWish && !bootstrap?.lottery?.isPublished
     ? [...draws].reverse().find((draw) => draw.won && draw.status === 'won' && draw.prizeLevel === '一等奖')
     : null
-  const canShowSongWishWin = Boolean(latestWonDraw) && (
-    bootstrap?.lottery?.isPublished || latestWonDraw.prizeLevel === '一等奖'
-  )
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
   const debugPrizePreviewDraw = useMemo(() => {
@@ -831,10 +828,16 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     }
   }, [debugAccess, isSongWish])
   const autoPrizePromptDraw = preReleaseFirstPrizeDraw || debugPrizePreviewDraw
+  const songWishPrizeDraw = latestWonDraw || debugPrizePreviewDraw
+  const canShowSongWishWin = Boolean(songWishPrizeDraw) && (
+    bootstrap?.lottery?.isPublished || songWishPrizeDraw.prizeLevel === '一等奖'
+  )
   const songWishPrizeState = isSongWish
-    ? (!bootstrap?.entry
+    ? (canShowSongWishWin
+        ? 'won'
+        : !bootstrap?.entry
         ? 'notParticipated'
-        : (canShowSongWishWin ? 'won' : (!bootstrap?.lottery?.isPublished ? 'notDrawn' : 'notWon')))
+        : (!bootstrap?.lottery?.isPublished ? 'notDrawn' : 'notWon'))
     : ''
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
@@ -1214,8 +1217,8 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         <img className="acl-prize-card__title" src={getDesignAsset('prizeTitle')} alt="我的礼品" />
         <div className="acl-prize-slot">
           <PrizeShelf
-            draw={latestWonDraw}
-            hasDrawn={hasDrawn}
+            draw={isSongWish ? songWishPrizeDraw : latestWonDraw}
+            hasDrawn={isSongWish ? Boolean(songWishPrizeDraw) : hasDrawn}
             getAsset={getDesignAsset}
             onClaim={handleClaim}
             songWishState={songWishPrizeState}
