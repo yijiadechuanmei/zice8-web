@@ -143,6 +143,13 @@ export default function ZhumaoDianqianProject({ routeParams }) {
           </section>
         ))}
       </div>
+      {currentIndex === 0 && pageCount > 1 ? (
+        <div className="zhumao-dianqian-swipe-hint" aria-hidden="true">
+          <svg viewBox="0 0 24 28" focusable="false">
+            <path d="m4 11 8-8 8 8M4 23l8-8 8 8" />
+          </svg>
+        </div>
+      ) : null}
       {bgmConfig?.enabled && bgmConfig?.url ? (
         <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       ) : null}

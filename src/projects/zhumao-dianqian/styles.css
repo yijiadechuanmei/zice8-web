@@ -43,9 +43,50 @@
   -webkit-user-drag: none;
 }
 
+.zhumao-dianqian-swipe-hint {
+  position: fixed;
+  z-index: 10;
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 14px));
+  left: 50%;
+  width: 30px;
+  height: 35px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: zhumao-dianqian-swipe-hint 1.2s ease-in-out infinite;
+}
+
+.zhumao-dianqian-swipe-hint svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.8;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24));
+}
+
+@keyframes zhumao-dianqian-swipe-hint {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translateX(-50%) translateY(4px);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zhumao-dianqian-track {
     transition: none;
+  }
+
+  .zhumao-dianqian-swipe-hint {
+    animation: none;
   }
 }
 
