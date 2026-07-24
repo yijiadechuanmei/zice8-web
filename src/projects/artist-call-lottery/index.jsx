@@ -814,6 +814,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const preReleaseFirstPrizeDraw = isSongWish && !bootstrap?.lottery?.isPublished
     ? [...draws].reverse().find((draw) => draw.won && draw.status === 'won' && draw.prizeLevel === '一等奖')
     : null
+  const canShowSongWishWin = Boolean(latestWonDraw) && (
+    bootstrap?.lottery?.isPublished || latestWonDraw.prizeLevel === '一等奖'
+  )
   const hasDrawn = draws.length > 0
   const claimExpired = bootstrap?.activity?.claimWindow?.status === 'ended'
   const debugPrizePreviewDraw = useMemo(() => {
@@ -831,7 +834,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const songWishPrizeState = isSongWish
     ? (!bootstrap?.entry
         ? 'notParticipated'
-        : (!bootstrap?.lottery?.isPublished ? 'notDrawn' : (latestWonDraw ? 'won' : 'notWon')))
+        : (canShowSongWishWin ? 'won' : (!bootstrap?.lottery?.isPublished ? 'notDrawn' : 'notWon')))
     : ''
   const theme = pageConfig.theme || {}
   const assetsBaseUrl = pageConfig.assetsBaseUrl || DEFAULT_ASSETS_BASE_URL
