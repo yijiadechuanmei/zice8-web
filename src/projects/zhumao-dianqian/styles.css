@@ -46,7 +46,7 @@
 .zhumao-dianqian-swipe-hint {
   position: fixed;
   z-index: 10;
-  bottom: max(94px, calc(env(safe-area-inset-bottom) + 64px));
+  bottom: 80px;
   left: 50%;
   width: 30px;
   height: 35px;
