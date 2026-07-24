@@ -507,13 +507,13 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim, songWishState = '' }) {
           <div className="acl-prize-status__image">
             {draw.prizeImage ? <img src={draw.prizeImage} alt={draw.prizeName || '奖品'} /> : <span>礼品</span>}
           </div>
-          {!isSongWish && claimCode ? (
+          {claimCode ? (
             <div className="acl-prize-status__code">{claimCode}</div>
-          ) : !isSongWish ? (
+          ) : (
             <button className="acl-prize-status__claim" type="button" onClick={onClaim}>
               <img src={getAsset('prizeClaimButton')} alt="去领取" />
             </button>
-          ) : null}
+          )}
         </>
       ) : null}
     </div>
@@ -694,6 +694,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const [actionLoading, setActionLoading] = useState(false)
   const [artistPickerOpen, setArtistPickerOpen] = useState(false)
   const [prizeDraw, setPrizeDraw] = useState(null)
+  const [debugPrizeClaimedDraw, setDebugPrizeClaimedDraw] = useState(null)
   const [claimDraw, setClaimDraw] = useState(null)
   const [claimSubmitting, setClaimSubmitting] = useState(false)
   const autoPrizePromptedDrawId = useRef('')
@@ -828,7 +829,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     }
   }, [debugAccess, isSongWish])
   const autoPrizePromptDraw = preReleaseFirstPrizeDraw || debugPrizePreviewDraw
-  const songWishPrizeDraw = latestWonDraw || debugPrizePreviewDraw
+  const songWishPrizeDraw = latestWonDraw || debugPrizeClaimedDraw || debugPrizePreviewDraw
   const canShowSongWishWin = Boolean(songWishPrizeDraw) && (
     bootstrap?.lottery?.isPublished || songWishPrizeDraw.prizeLevel === '一等奖'
   )
@@ -1047,7 +1048,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
           throw new Error('请填写正确的姓名和手机号')
         }
         setClaimDraw(null)
-        setPrizeDraw({
+        const updatedDebugDraw = {
           ...claimDraw,
           claim: {
             recipientName,
@@ -1055,7 +1056,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
             redemptionCode: 'DEBUG-TICKET-2026',
             status: 'debug_preview',
           },
-        })
+        }
+        setDebugPrizeClaimedDraw(updatedDebugDraw)
+        setPrizeDraw(updatedDebugDraw)
         return
       }
       const result = await claimProjectPrize(activityKey, claimDraw.id, form)
@@ -1078,7 +1081,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       })
       return
     }
-    const targetDraw = prizeDraw?.won ? prizeDraw : latestWonDraw
+    const targetDraw = prizeDraw?.won
+      ? prizeDraw
+      : latestWonDraw || (isSongWish ? songWishPrizeDraw : null)
     if (targetDraw) setClaimDraw(targetDraw)
   }
 
