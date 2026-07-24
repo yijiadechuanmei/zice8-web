@@ -487,6 +487,7 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim, songWishState = '' }) {
   const state = songWishState || (draw ? 'won' : hasDrawn ? 'notWon' : 'notDrawn')
   const visual = (isSongWish ? SONG_WISH_PRIZE_STATE_VISUALS : PRIZE_STATE_VISUALS)[state]
   const claimCode = draw?.claim?.redemptionCode
+  const hasSongWishClaim = isSongWish && Boolean(draw?.claim)
 
   return (
     <div className={`acl-prize-status acl-prize-status--${state}`} aria-live="polite">
@@ -507,7 +508,7 @@ function PrizeShelf({ draw, hasDrawn, getAsset, onClaim, songWishState = '' }) {
           <div className="acl-prize-status__image">
             {draw.prizeImage ? <img src={draw.prizeImage} alt={draw.prizeName || '奖品'} /> : <span>礼品</span>}
           </div>
-          {claimCode ? (
+          {hasSongWishClaim ? null : claimCode ? (
             <div className="acl-prize-status__code">{claimCode}</div>
           ) : (
             <button className="acl-prize-status__claim" type="button" onClick={onClaim}>
@@ -1053,12 +1054,14 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
           claim: {
             recipientName,
             recipientPhone,
-            redemptionCode: 'DEBUG-TICKET-2026',
             status: 'debug_preview',
           },
         }
         setDebugPrizeClaimedDraw(updatedDebugDraw)
         setPrizeDraw(updatedDebugDraw)
+        if (isSongWish) {
+          setMessage({ title: '领取成功', message: '工作人员将尽快与您联系！' })
+        }
         return
       }
       const result = await claimProjectPrize(activityKey, claimDraw.id, form)
@@ -1066,6 +1069,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       const updatedDraw = { ...claimDraw, claim: result.claim }
       setPrizeDraw(updatedDraw)
       await refreshAfterAction()
+      if (isSongWish) {
+        setMessage({ title: '领取成功', message: '工作人员将尽快与您联系！' })
+      }
     } catch (error) {
       setMessage({ title: '提交失败', message: error.message || '请确认姓名和手机号后重试' })
     } finally {
@@ -1077,7 +1083,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     if (claimExpired) {
       setMessage({
         title: '活动已截止',
-        message: '中奖码领取已于2026年8月1日23:59:59截止。',
+        message: isSongWish
+          ? '奖品领取已于2026年8月1日23:59:59截止。'
+          : '中奖码领取已于2026年8月1日23:59:59截止。',
       })
       return
     }
