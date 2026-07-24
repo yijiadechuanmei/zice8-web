@@ -1058,7 +1058,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
           },
         }
         setDebugPrizeClaimedDraw(updatedDebugDraw)
-        setPrizeDraw(updatedDebugDraw)
+        setPrizeDraw(isSongWish ? null : updatedDebugDraw)
         if (isSongWish) {
           setMessage({ title: '领取成功', message: '工作人员将尽快与您联系！' })
         }
@@ -1067,7 +1067,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       const result = await claimProjectPrize(activityKey, claimDraw.id, form)
       setClaimDraw(null)
       const updatedDraw = { ...claimDraw, claim: result.claim }
-      setPrizeDraw(updatedDraw)
+      setPrizeDraw(isSongWish ? null : updatedDraw)
       await refreshAfterAction()
       if (isSongWish) {
         setMessage({ title: '领取成功', message: '工作人员将尽快与您联系！' })
