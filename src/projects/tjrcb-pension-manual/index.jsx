@@ -34,7 +34,7 @@ function normalizePageNumber(page, pageCount) {
 }
 
 function hasNarrationAudio(index) {
-  return index >= 2
+  return index >= 1
 }
 
 function isWechatBrowser() {

@@ -20,10 +20,10 @@ export const TJRCB_PENSION_MANUAL_DEFAULT_CONFIG = {
   nextIcon: 'next.svg',
   audioLabel: '语音讲解',
   categories: [
-    { label: '个人篇', page: 1 },
-    { label: '家庭篇', page: 7 },
+    { label: '个人篇', page: 5 },
+    { label: '家庭篇', page: 9 },
     { label: '企业篇', page: 13 },
-    { label: '服务篇', page: 19 },
+    { label: '服务篇', page: 20 },
     { label: '安全篇', page: 25 },
   ],
 }
@@ -32,6 +32,8 @@ export function mergeManualConfig(publicConfig) {
   return {
     ...TJRCB_PENSION_MANUAL_DEFAULT_CONFIG,
     ...(publicConfig?.mobileConfig || {}),
+    // 分类页码为本画册的固定目录；线上历史配置可能仍保留旧页码。
+    categories: TJRCB_PENSION_MANUAL_DEFAULT_CONFIG.categories,
   }
 }
 
