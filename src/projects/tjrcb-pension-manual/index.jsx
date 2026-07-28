@@ -371,7 +371,10 @@ export default function TjrcbPensionManualApp({ routeParams }) {
         <button
           type="button"
           className="tjrcb-pension-manual-icon-button tjrcb-pension-manual-icon-button--next"
-          onClick={() => goToIndex(safeCurrentIndex + 1, 'next')}
+          onClick={() => goToIndex(
+            safeCurrentIndex === pageCount - 1 ? 0 : safeCurrentIndex + 1,
+            'next',
+          )}
           aria-label="下一页"
         >
           <ChevronIcon direction="next" />
