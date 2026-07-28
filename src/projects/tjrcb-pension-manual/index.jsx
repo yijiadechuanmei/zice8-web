@@ -225,6 +225,17 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     })
   }, [activityKey, pageCount])
 
+  const scheduleAutoAdvance = useCallback((index, source) => {
+    if (index >= pageCount - 1) return
+
+    if (autoTimerRef.current) {
+      window.clearTimeout(autoTimerRef.current)
+    }
+    autoTimerRef.current = window.setTimeout(() => {
+      goToIndex(index + 1, source)
+    }, 3000)
+  }, [goToIndex, pageCount])
+
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || showLoading || blockedMessage || error) return undefined
@@ -238,11 +249,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     audio.currentTime = 0
 
     if (!hasNarrationAudio(safeCurrentIndex)) {
-      if (safeCurrentIndex < pageCount - 1) {
-        autoTimerRef.current = window.setTimeout(() => {
-          goToIndex(safeCurrentIndex + 1, 'auto-no-audio')
-        }, 3000)
-      }
+      scheduleAutoAdvance(safeCurrentIndex, 'auto-no-audio')
       return () => {
         if (autoTimerRef.current) {
           window.clearTimeout(autoTimerRef.current)
@@ -251,8 +258,12 @@ export default function TjrcbPensionManualApp({ routeParams }) {
       }
     }
 
-    autoTimerRef.current = window.setTimeout(() => {
-      playAudioAt(safeCurrentIndex)
+    autoTimerRef.current = window.setTimeout(async () => {
+      autoTimerRef.current = null
+      const started = await playAudioAt(safeCurrentIndex)
+      if (!started) {
+        scheduleAutoAdvance(safeCurrentIndex, 'auto-audio-unavailable')
+      }
     }, 0)
 
     return () => {
@@ -267,6 +278,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     goToIndex,
     pageCount,
     playAudioAt,
+    scheduleAutoAdvance,
     safeCurrentIndex,
     showLoading,
   ])
@@ -289,6 +301,15 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     if (safeCurrentIndex < pageCount - 1) {
       goToIndex(safeCurrentIndex + 1, 'audio-ended')
     }
+  }
+
+  function handleNarrationError() {
+    const audio = audioRef.current
+    const expectedSrc = audioUrls[safeCurrentIndex]
+    if (!audio || audio.src !== expectedSrc) return
+
+    setAudioPlaying(false)
+    scheduleAutoAdvance(safeCurrentIndex, 'auto-audio-unavailable')
   }
 
   const backgroundUrl = manualAssetUrl(manualConfig.assetsBaseUrl, manualConfig.backgroundImage)
@@ -378,6 +399,7 @@ export default function TjrcbPensionManualApp({ routeParams }) {
           onPlay={() => setAudioPlaying(true)}
           onPause={() => setAudioPlaying(false)}
           onEnded={handleNarrationEnded}
+          onError={handleNarrationError}
         />
       </div>
       {bgmConfig?.enabled && bgmConfig?.url ? (
