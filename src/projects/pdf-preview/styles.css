@@ -11,6 +11,7 @@
 }
 
 .pdf-preview-page {
+  position: relative;
   display: flex;
   min-height: 240px;
   justify-content: center;
@@ -24,6 +25,24 @@
   display: block;
   max-width: 100%;
   height: auto;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.pdf-preview-page--rendered canvas {
+  opacity: 1;
+}
+
+.pdf-preview-page__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 13px;
 }
 
 .pdf-preview-loading,
@@ -59,6 +78,11 @@
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: pdf-preview-spin 0.8s linear infinite;
+}
+
+.pdf-preview-spinner--dark {
+  border-color: rgba(107, 114, 128, 0.28);
+  border-top-color: #6b7280;
 }
 
 @keyframes pdf-preview-spin {

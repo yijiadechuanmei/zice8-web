@@ -70,6 +70,7 @@ function PdfPage({ documentProxy, pageNumber }) {
   const [nearViewport, setNearViewport] = useState(
     () => typeof IntersectionObserver === 'undefined',
   )
+  const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
     const frame = frameRef.current
@@ -92,17 +93,11 @@ function PdfPage({ documentProxy, pageNumber }) {
     if (!frame || !canvas) return undefined
 
     let disposed = false
-    let renderTask = null
 
     const render = async () => {
       if (disposed) return
 
       const page = await documentProxy.getPage(pageNumber)
-      if (disposed) return
-
-      // PDF.js v3 在仍接收绘制指令时取消任务，会导致 iOS/PC 的 Canvas 空白。
-      // 先准备完整指令，再进行一次稳定渲染。
-      await page.getOperatorList()
       if (disposed) return
 
       const baseViewport = page.getViewport({ scale: 1 })
@@ -116,11 +111,12 @@ function PdfPage({ documentProxy, pageNumber }) {
       canvas.style.width = `${Math.ceil(viewport.width / devicePixelRatio)}px`
       canvas.style.height = `${Math.ceil(viewport.height / devicePixelRatio)}px`
 
-      const canvasContext = canvas.getContext('2d', { alpha: false })
+      const canvasContext = canvas.getContext('2d')
       if (!canvasContext) throw new Error('无法创建 PDF 画布')
-      renderTask = page.render({ canvasContext, viewport })
+      const renderTask = page.render({ canvasContext, viewport })
       try {
         await renderTask.promise
+        if (!disposed) setRendered(true)
       } catch (error) {
         if (error?.name !== 'RenderingCancelledException') throw error
       }
@@ -130,17 +126,22 @@ function PdfPage({ documentProxy, pageNumber }) {
       if (!disposed) console.error('[pdf-preview] page render failed', renderError)
     })
 
-    return () => {
-      disposed = true
-      renderTask?.cancel()
-      canvas.width = 1
-      canvas.height = 1
-    }
+    return () => { disposed = true }
   }, [documentProxy, nearViewport, pageNumber])
 
   return (
-    <section className="pdf-preview-page" ref={frameRef} aria-label={`第 ${pageNumber} 页`}>
+    <section
+      className={`pdf-preview-page${rendered ? ' pdf-preview-page--rendered' : ''}`}
+      ref={frameRef}
+      aria-label={`第 ${pageNumber} 页`}
+    >
       <canvas ref={canvasRef} />
+      {!rendered && (
+        <div className="pdf-preview-page__loading" aria-hidden="true">
+          <span className="pdf-preview-spinner pdf-preview-spinner--dark" />
+          <span>正在渲染第 {pageNumber} 页</span>
+        </div>
+      )}
     </section>
   )
 }
