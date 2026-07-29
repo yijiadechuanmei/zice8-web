@@ -25,6 +25,45 @@ function resolvePdfUrl(publicConfig, fallback) {
     : fallback
 }
 
+async function fetchPdfData(url, signal, onProgress) {
+  const response = await fetch(url, {
+    signal,
+    credentials: 'omit',
+    referrerPolicy: 'no-referrer',
+  })
+  if (!response.ok) {
+    const error = new Error(`PDF 请求失败（${response.status}）`)
+    error.status = response.status
+    throw error
+  }
+
+  const total = Number(response.headers.get('content-length')) || 0
+  if (!response.body) {
+    const data = new Uint8Array(await response.arrayBuffer())
+    onProgress(data.byteLength, total || data.byteLength)
+    return data
+  }
+
+  const reader = response.body.getReader()
+  const chunks = []
+  let loaded = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    loaded += value.byteLength
+    onProgress(loaded, total)
+  }
+
+  const data = new Uint8Array(loaded)
+  let offset = 0
+  for (const chunk of chunks) {
+    data.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return data
+}
+
 function PdfPage({ documentProxy, pageNumber }) {
   const canvasRef = useRef(null)
   const frameRef = useRef(null)
@@ -54,12 +93,16 @@ function PdfPage({ documentProxy, pageNumber }) {
 
     let disposed = false
     let renderTask = null
-    let resizeObserver = null
 
     const render = async () => {
       if (disposed) return
 
       const page = await documentProxy.getPage(pageNumber)
+      if (disposed) return
+
+      // PDF.js v3 在仍接收绘制指令时取消任务，会导致 iOS/PC 的 Canvas 空白。
+      // 先准备完整指令，再进行一次稳定渲染。
+      await page.getOperatorList()
       if (disposed) return
 
       const baseViewport = page.getViewport({ scale: 1 })
@@ -73,8 +116,9 @@ function PdfPage({ documentProxy, pageNumber }) {
       canvas.style.width = `${Math.ceil(viewport.width / devicePixelRatio)}px`
       canvas.style.height = `${Math.ceil(viewport.height / devicePixelRatio)}px`
 
-      renderTask?.cancel()
-      renderTask = page.render({ canvas, viewport })
+      const canvasContext = canvas.getContext('2d', { alpha: false })
+      if (!canvasContext) throw new Error('无法创建 PDF 画布')
+      renderTask = page.render({ canvasContext, viewport })
       try {
         await renderTask.promise
       } catch (error) {
@@ -82,15 +126,12 @@ function PdfPage({ documentProxy, pageNumber }) {
       }
     }
 
-    render().catch(() => {})
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => render().catch(() => {}))
-      resizeObserver.observe(frame)
-    }
+    render().catch((renderError) => {
+      if (!disposed) console.error('[pdf-preview] page render failed', renderError)
+    })
 
     return () => {
       disposed = true
-      resizeObserver?.disconnect()
       renderTask?.cancel()
       canvas.width = 1
       canvas.height = 1
@@ -147,17 +188,20 @@ export default function PdfPreviewProject({ routeParams }) {
     if (!activityKey || configLoading || configError) return undefined
 
     let active = true
-    const loadingTask = getDocument({
-      url: pdfUrl,
-      rangeChunkSize: 256 * 1024,
-    })
-    loadingTask.onProgress = ({ loaded, total }) => {
+    let loadingTask = null
+    const abortController = new AbortController()
+
+    fetchPdfData(pdfUrl, abortController.signal, (loaded, total) => {
       if (!active || !total) return
       setProgress(Math.min(Math.round((loaded / total) * 100), 100))
-    }
-
-    loadingTask.promise
+    })
+      .then((data) => {
+        if (!active) return null
+        loadingTask = getDocument({ data })
+        return loadingTask.promise
+      })
       .then((document) => {
+        if (!document) return
         if (!active) {
           document.destroy()
           return
@@ -165,6 +209,7 @@ export default function PdfPreviewProject({ routeParams }) {
         setDocumentProxy(document)
       })
       .catch((loadError) => {
+        if (loadError?.name === 'AbortError') return
         console.error('[pdf-preview] load failed', loadError)
         if (active) setPdfError('PDF 加载失败，请检查网络后重试')
       })
@@ -174,7 +219,8 @@ export default function PdfPreviewProject({ routeParams }) {
 
     return () => {
       active = false
-      loadingTask.destroy()
+      abortController.abort()
+      loadingTask?.destroy()
     }
   }, [activityKey, configError, configLoading, pdfUrl])
 
