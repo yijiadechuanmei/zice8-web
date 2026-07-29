@@ -53,6 +53,20 @@ function getRequireUserinfo(publicConfig) {
   return Boolean(publicConfig?.requireUserinfo || publicConfig?.require_userinfo)
 }
 
+function isTokenExpired(token) {
+  const parts = String(token || '').split('.')
+  if (parts.length !== 3) return true
+  try {
+    const encodedPayload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padding = '='.repeat((4 - (encodedPayload.length % 4)) % 4)
+    const payload = JSON.parse(atob(`${encodedPayload}${padding}`))
+    const expiresAt = Number(payload?.exp)
+    return !Number.isFinite(expiresAt) || expiresAt * 1000 <= Date.now()
+  } catch {
+    return true
+  }
+}
+
 export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const [authReady, setAuthReady] = useState(false)
   const [blockedMessage, setBlockedMessage] = useState('')
@@ -181,22 +195,26 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
       requireUserinfo ||
       oauthScope === 'snsapi_userinfo'
 
+    const token = getToken()
+    const hasUsableToken = Boolean(token) && !isTokenExpired(token)
     debugLog('[QuizAuthDebug] auth decision', {
       needWechatAuth: inWechat && shouldAuthorize,
-      hasToken: Boolean(getToken()),
-      action: inWechat && shouldAuthorize && !getToken() ? 'oauth' : 'ready',
+      hasToken: Boolean(token),
+      hasUsableToken,
+      action: inWechat && shouldAuthorize && !hasUsableToken ? 'oauth' : 'ready',
     })
     setQuizAuthDebugState({
       needWechatAuth: inWechat && shouldAuthorize,
-      authHasToken: Boolean(getToken()),
+      authHasToken: Boolean(token),
+      authHasUsableToken: hasUsableToken,
     })
 
-    if (inWechat && shouldAuthorize && !getToken()) {
-      reauth('missing-token')
+    if (inWechat && shouldAuthorize && !hasUsableToken) {
+      reauth(token ? 'expired-token' : 'missing-token')
       return
     }
 
-    if (getToken()) {
+    if (hasUsableToken) {
       clearReauthAttempts(activityKey)
     }
 
