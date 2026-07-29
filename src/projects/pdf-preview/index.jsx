@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf'
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.js?url'
+import { request } from '../../shared/api/request'
 import './styles.css'
 
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
@@ -17,14 +18,24 @@ function buildPdfUrl(activityKey) {
   return `${PDF_ASSETS_ORIGIN}/pdf/${encodeURIComponent(activityKey)}.pdf`
 }
 
+function resolvePdfUrl(publicConfig, fallback) {
+  const configuredUrl = publicConfig?.mobileConfig?.pdfUrl
+  return typeof configuredUrl === 'string' && configuredUrl.trim()
+    ? configuredUrl.trim()
+    : fallback
+}
+
 function PdfPage({ documentProxy, pageNumber }) {
   const canvasRef = useRef(null)
   const frameRef = useRef(null)
-  const [nearViewport, setNearViewport] = useState(false)
+  const [nearViewport, setNearViewport] = useState(
+    () => typeof IntersectionObserver === 'undefined',
+  )
 
   useEffect(() => {
     const frame = frameRef.current
     if (!frame) return undefined
+    if (typeof IntersectionObserver === 'undefined') return undefined
 
     const observer = new IntersectionObserver(
       ([entry]) => setNearViewport(entry.isIntersecting),
@@ -95,14 +106,45 @@ function PdfPage({ documentProxy, pageNumber }) {
 
 export default function PdfPreviewProject({ routeParams }) {
   const activityKey = normalizePdfKey(routeParams?.activityKey)
-  const pdfUrl = useMemo(() => buildPdfUrl(activityKey), [activityKey])
+  const [publicConfig, setPublicConfig] = useState(null)
+  const [configLoading, setConfigLoading] = useState(Boolean(activityKey))
+  const [configError, setConfigError] = useState('')
   const [documentProxy, setDocumentProxy] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [pdfLoading, setPdfLoading] = useState(Boolean(activityKey))
   const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const [pdfError, setPdfError] = useState('')
+  const pdfUrl = useMemo(
+    () => resolvePdfUrl(publicConfig, buildPdfUrl(activityKey)),
+    [activityKey, publicConfig],
+  )
 
   useEffect(() => {
     if (!activityKey) return undefined
+
+    let active = true
+    request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
+      .then((config) => {
+        if (!active) return
+        setPublicConfig(config)
+        document.title = config?.title || 'PDF'
+      })
+      .catch(() => {
+        if (active) {
+          setConfigError('项目配置加载失败，请稍后重试')
+          setPdfLoading(false)
+        }
+      })
+      .finally(() => {
+        if (active) setConfigLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!activityKey || configLoading || configError) return undefined
 
     let active = true
     const loadingTask = getDocument({
@@ -114,8 +156,6 @@ export default function PdfPreviewProject({ routeParams }) {
       setProgress(Math.min(Math.round((loaded / total) * 100), 100))
     }
 
-    document.title = 'PDF'
-
     loadingTask.promise
       .then((document) => {
         if (!active) {
@@ -124,18 +164,22 @@ export default function PdfPreviewProject({ routeParams }) {
         }
         setDocumentProxy(document)
       })
-      .catch(() => {
-        if (active) setError('PDF 加载失败，请稍后重试')
+      .catch((loadError) => {
+        console.error('[pdf-preview] load failed', loadError)
+        if (active) setPdfError('PDF 加载失败，请检查网络后重试')
       })
       .finally(() => {
-        if (active) setLoading(false)
+        if (active) setPdfLoading(false)
       })
 
     return () => {
       active = false
       loadingTask.destroy()
     }
-  }, [activityKey, pdfUrl])
+  }, [activityKey, configError, configLoading, pdfUrl])
+
+  const loading = configLoading || pdfLoading
+  const error = configError || pdfError
 
   return (
     <main className="pdf-preview-app">

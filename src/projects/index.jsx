@@ -47,6 +47,7 @@ export const projectRoutes = [
   {
     path: '/pdf/:activityKey',
     Component: PdfPreviewProject,
+    activityGate: true,
   },
   {
     path: '/feature-challenge/:activityKey',

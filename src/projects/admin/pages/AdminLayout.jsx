@@ -343,6 +343,7 @@ function buildActivityUrl(activity) {
     brochure_quiz_lottery: '/brochure-quiz-lottery',
     phase_quiz_lottery: '/phase-quiz-lottery',
     material_review_registration: '/material-registration',
+    pdf: '/pdf',
     tjrcb_pension_manual: '/tjrcb-pension-manual',
     tufe_campus_open_day: '/tufe-campus-open-day',
     xiwuqi_99_road_night: '/xiwuqi-99-road-night',
