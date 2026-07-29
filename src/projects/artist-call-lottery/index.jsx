@@ -682,7 +682,6 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const isSongWish = variant === 'songWish'
   const getProjectBootstrap = projectApi.getBootstrap || getBootstrap
   const createProjectWish = projectApi.createWish
-  const getProjectMessages = projectApi.getMessages
   const drawProjectPrize = isSongWish ? null : projectApi.drawPrize || drawPrize
   const claimProjectPrize = projectApi.claimPrize || claimPrize
   const getProjectDebugAccess = projectApi.getDebugAccess || getDebugAccess
@@ -780,22 +779,21 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   }, [activityKey, isSongWish])
 
   useEffect(() => {
-    if (!isSongWish || !activityKey || !getProjectMessages) return undefined
+    if (!isSongWish || !activityKey || !authReady) return undefined
     let active = true
-    const refreshMessages = () => {
-      getProjectMessages(activityKey, 20)
+    const refreshSongWishLottery = () => {
+      getProjectBootstrap(activityKey, inviterUserId)
         .then((data) => {
-          if (active) setBootstrap((prev) => (prev ? { ...prev, messages: data.messages || [] } : prev))
+          if (active) setBootstrap(data)
         })
         .catch(() => {})
     }
-    refreshMessages()
-    const timer = window.setInterval(refreshMessages, 12000)
+    const timer = window.setInterval(refreshSongWishLottery, 12000)
     return () => {
       active = false
       window.clearInterval(timer)
     }
-  }, [activityKey, getProjectMessages, isSongWish])
+  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, isSongWish])
 
   const pageConfig = useMemo(() => mergeConfig(publicConfig, bootstrap), [publicConfig, bootstrap])
   const shareActivity = useMemo(() => {
@@ -829,7 +827,10 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
       prizeLevel: prizePreview.prizeLevel || DEBUG_SONG_WISH_PRIZE_DRAW.prizeLevel,
     }
   }, [debugAccess, isSongWish])
-  const autoPrizePromptDraw = preReleaseFirstPrizeDraw || debugPrizePreviewDraw
+  const publishedSongWishPrizeDraw = isSongWish && bootstrap?.lottery?.isPublished
+    ? latestWonDraw
+    : null
+  const autoPrizePromptDraw = preReleaseFirstPrizeDraw || publishedSongWishPrizeDraw || debugPrizePreviewDraw
   const songWishPrizeDraw = latestWonDraw || debugPrizeClaimedDraw || debugPrizePreviewDraw
   const canShowSongWishWin = Boolean(songWishPrizeDraw) && (
     bootstrap?.lottery?.isPublished || songWishPrizeDraw.prizeLevel === '一等奖'
