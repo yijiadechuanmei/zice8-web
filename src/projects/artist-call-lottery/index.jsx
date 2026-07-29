@@ -733,6 +733,12 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     setLoading(true)
     try {
       const data = await getProjectBootstrap(activityKey, inviterUserId)
+      // 歌曲许愿页要求微信授权。可选鉴权会把过期 JWT 静默降级为匿名请求，
+      // 此时不能把该用户误判成“未许愿”，而应重新换取有效的微信登录态。
+      if (isSongWish && hasToken && !data?.user) {
+        reauth('song-wish-bootstrap-anonymous')
+        return
+      }
       setBootstrap(data)
       if (data?.pendingInvitation) setTeamInvitePrompt(data.pendingInvitation)
     } catch (error) {
@@ -741,7 +747,7 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
     } finally {
       setLoading(false)
     }
-  }, [activityKey, authReady, getProjectBootstrap, inviterUserId, reauth])
+  }, [activityKey, authReady, getProjectBootstrap, hasToken, inviterUserId, isSongWish, reauth])
 
   useEffect(() => {
     loadBootstrap()
