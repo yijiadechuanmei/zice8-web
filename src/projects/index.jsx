@@ -18,6 +18,7 @@ const FeatureChallengeProject = lazy(() => import('./feature-challenge/index.jsx
 const LongMarchStudyProject = lazy(() => import('./long-march-study/index.jsx'))
 const QuizProject = lazy(() => import('./quiz/index.jsx'))
 const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
+const PdfPreviewProject = lazy(() => import('./pdf-preview/index.jsx'))
 
 const activityTypeProjects = {
   artist_call_lottery: ArtistCallLotteryProject,
@@ -43,6 +44,10 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/pdf/:activityKey',
+    Component: PdfPreviewProject,
+  },
   {
     path: '/feature-challenge/:activityKey',
     Component: FeatureChallengeProject,
