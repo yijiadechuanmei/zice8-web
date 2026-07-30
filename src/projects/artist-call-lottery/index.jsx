@@ -1080,7 +1080,12 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
         setMessage({ title: '领取成功', message: '工作人员将尽快与您联系！' })
       }
     } catch (error) {
-      setMessage({ title: '提交失败', message: error.message || '请确认姓名和手机号后重试' })
+      if (isSongWish && error.message === '活动已结束') {
+        setClaimDraw(null)
+        setMessage({ title: '活动已结束', message: '活动已结束' })
+      } else {
+        setMessage({ title: '提交失败', message: error.message || '请确认姓名和手机号后重试' })
+      }
     } finally {
       setClaimSubmitting(false)
     }
@@ -1089,9 +1094,9 @@ export default function ArtistCallLotteryProject({ routeParams, variant = 'artis
   const handleClaim = () => {
     if (claimExpired) {
       setMessage({
-        title: '活动已截止',
+        title: isSongWish ? '活动已结束' : '活动已截止',
         message: isSongWish
-          ? '奖品领取已于2026年8月1日23:59:59截止。'
+          ? '活动已结束'
           : '中奖码领取已于2026年8月1日23:59:59截止。',
       })
       return
