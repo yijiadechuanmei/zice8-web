@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { trackEvent, trackPageView } from '../../shared/analytics'
+import { trackPageView } from '../../shared/analytics'
 import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
@@ -210,29 +210,19 @@ export default function TjrcbPensionManualApp({ routeParams }) {
     [audioUrls],
   )
 
-  const goToIndex = useCallback((nextIndex, source) => {
+  const goToIndex = useCallback((nextIndex) => {
     const normalized = clampPageIndex(nextIndex, pageCount)
     setCurrentIndex(normalized)
-    trackEvent({
-      activityKey,
-      eventType: 'manual_page_change',
-      page: '/tjrcb-pension-manual',
-      extra: {
-        activityType: TJRCB_PENSION_MANUAL_ACTIVITY_TYPE,
-        pageNo: normalized + 1,
-        source,
-      },
-    })
-  }, [activityKey, pageCount])
+  }, [pageCount])
 
-  const scheduleAutoAdvance = useCallback((index, source) => {
+  const scheduleAutoAdvance = useCallback((index) => {
     if (index >= pageCount - 1) return
 
     if (autoTimerRef.current) {
       window.clearTimeout(autoTimerRef.current)
     }
     autoTimerRef.current = window.setTimeout(() => {
-      goToIndex(index + 1, source)
+      goToIndex(index + 1)
     }, 3000)
   }, [goToIndex, pageCount])
 

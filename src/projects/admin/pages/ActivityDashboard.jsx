@@ -11,6 +11,7 @@ const { Paragraph, Text, Title } = Typography
 const pvHint = '页面访问次数，同一访客同一页面 30 秒内重复访问只统计一次。'
 const uvHint = '按浏览器匿名访客 ID 去重统计。'
 const XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY = 'xiwuqi_99_road_night_20260624'
+const TJRCB_PENSION_MANUAL_ACTIVITY_KEY = 'tjrcb_pension_manual_20260622'
 const XIWUQI_AMAP_SOURCE_FILTER = {
   source: 'amap',
   campaign: 'xiwuqi_20260624',
@@ -25,6 +26,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
+  const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -63,6 +65,15 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '高德 UV', value: sourceOverview.uv ?? 0, tooltip: uvHint },
       { label: '抖音点击', value: sourceOverview.outboundClicks ?? 0, tooltip: '高德来源访客点击图片跳转抖音的次数。' },
     ] : []
+
+    if (isTjrcbPensionManual) {
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+      ]
+    }
 
     if (activity.type === 'appointment') {
       return [
@@ -144,7 +155,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))
@@ -217,6 +228,20 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
       {compact ? null : (
         <>
+          {isTjrcbPensionManual ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
           {activity.type === 'phase_quiz_lottery' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
@@ -298,7 +323,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || isTjrcbPensionManual ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -326,7 +351,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           )}
 
-          {activity.type === 'video-rank' ? (
+          {activity.type === 'tjrcb_pension_manual' ? null : activity.type === 'video-rank' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={12}>
                 <ChartPanel title="留言数量趋势" description="近 7 天留言提交量">
