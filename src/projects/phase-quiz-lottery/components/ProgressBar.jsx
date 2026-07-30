@@ -1,11 +1,12 @@
 export default function ProgressBar({ current, total }) {
-  const safeTotal = total > 0 ? total : 5
-  const progress = Math.min(1, Math.max(0, current / safeTotal))
+  const safeTotal = Number.isFinite(total) && total > 0 ? total : 0
+  const safeCurrent = safeTotal ? Math.min(Math.max(0, current), safeTotal) : 0
+  const progress = safeTotal ? safeCurrent / safeTotal : 0
 
   return (
     <div className="grid gap-[18px]">
       <div className="text-center text-[28px] font-bold text-slate-700">
-        题目 <span className="text-slate-900">{current}</span>
+        题目 <span className="text-slate-900">{safeCurrent}</span>
         <span className="text-slate-400">/{safeTotal}</span>
       </div>
       <div className="h-[14px] overflow-hidden rounded-full bg-slate-100">
