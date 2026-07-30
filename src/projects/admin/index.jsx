@@ -53,7 +53,15 @@ export default function AdminProject() {
       const list = await getActivities()
       setAdminUser(user)
       setActivities(list)
-      setSelectedActivityKey((current) => current || list[0]?.activityKey || '')
+      setSelectedActivityKey((current) =>
+        list.some((activity) => activity.activityKey === current)
+          ? current
+          : list[0]?.activityKey || '',
+      )
+      if (user.role !== 'super_admin') {
+        setActiveTab('overview')
+        syncAdminPath('overview')
+      }
     } catch (err) {
       removeAdminToken()
       setAdminUser(null)
@@ -78,7 +86,10 @@ export default function AdminProject() {
   }, [])
 
   const selectedActivity = useMemo(
-    () => activities.find((activity) => activity.activityKey === selectedActivityKey) || null,
+    () =>
+      activities.find((activity) => activity.activityKey === selectedActivityKey) ||
+      activities[0] ||
+      null,
     [activities, selectedActivityKey],
   )
 
