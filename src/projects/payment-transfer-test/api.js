@@ -34,6 +34,12 @@ export const createPayout = (activityKey, requestId) =>
     body: JSON.stringify({ requestId }),
   })
 
+export const drawLottery = (activityKey, requestId) =>
+  request(`${base(activityKey)}/lottery-draws`, {
+    method: 'POST',
+    body: JSON.stringify({ requestId }),
+  })
+
 export const getPayout = (activityKey, payoutNo) =>
   request(`${base(activityKey)}/payouts/${encodeURIComponent(payoutNo)}`)
 

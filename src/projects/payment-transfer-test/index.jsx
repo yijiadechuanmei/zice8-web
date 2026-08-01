@@ -8,6 +8,7 @@ import {
   createAuthorization,
   createPayment,
   createPayout,
+  drawLottery,
   getBootstrap,
   getPublicConfig,
   syncAuthorization,
@@ -36,6 +37,7 @@ function PaymentTransferTestMain({ routeParams }) {
   const [bootstrap, setBootstrap] = useState(null)
   const [payment, setPayment] = useState(null)
   const [payout, setPayout] = useState(null)
+  const [lotteryResult, setLotteryResult] = useState(null)
   const [busy, setBusy] = useState('')
   const [notice, setNotice] = useState('')
   const [events, setEvents] = useState([])
@@ -168,6 +170,29 @@ function PaymentTransferTestMain({ routeParams }) {
     }
   }
 
+  async function handleLotteryDraw() {
+    setBusy('lottery')
+    setNotice('')
+    setLotteryResult({ status: 'drawing' })
+    try {
+      const data = await drawLottery(activityKey, createRequestId('lottery'))
+      setLotteryResult({ status: 'won', ...data })
+      setPayout(data.payout)
+      appendEvent('模拟抽奖中奖', data.prizeName)
+      appendEvent('中奖转账已发起', data.payout?.payoutNo || '')
+      setNotice(data.message || '抽奖中奖，后台已直接发起转账到微信零钱。')
+      if (data.payout?.status && !PAYOUT_TERMINAL.has(data.payout.status)) {
+        startPayoutPolling(data.payout.payoutNo)
+      }
+    } catch (error) {
+      setLotteryResult({ status: 'failed' })
+      setNotice(error.message || '抽奖发起失败')
+      appendEvent('抽奖失败', error.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
   function startPaymentPolling(orderNo) {
     stopPolling(pollRef)
     let count = 0
@@ -280,6 +305,29 @@ function PaymentTransferTestMain({ routeParams }) {
             {busy === 'payout' ? '正在转账…' : '后台自动转账 0.10 元'}
           </button>
         )}
+      </section>
+
+      <section className="ptt-action ptt-action--lottery" aria-labelledby="lottery-title">
+        <div className="ptt-action-index">03</div>
+        <div className="ptt-action-copy">
+          <p className="ptt-eyebrow">LOTTERY SIMULATION</p>
+          <h2 id="lottery-title">模拟抽奖 · 中奖即到账</h2>
+          <p>测试模式为必中。点击抽奖后由后台判定中奖并直接发起零钱转账，无需再次确认收款。</p>
+        </div>
+        <div className="ptt-lottery-result" data-status={lotteryResult?.status || 'idle'}>
+          <span className="ptt-lottery-orb" aria-hidden="true">¥</span>
+          <div>
+            <strong>{lotteryResult?.status === 'won' ? lotteryResult.prizeName : lotteryResult?.status === 'drawing' ? '正在开奖…' : '待开奖'}</strong>
+            <span>{lotteryResult?.status === 'won' ? '中奖后已由后台直接转账' : '完成免确认授权后可进行测试'}</span>
+          </div>
+        </div>
+        <button
+          className="ptt-primary ptt-primary--lottery"
+          disabled={Boolean(busy) || !authorizationEffective}
+          onClick={handleLotteryDraw}
+        >
+          {busy === 'lottery' ? '正在开奖并转账…' : '点击模拟抽奖'}
+        </button>
       </section>
 
       <section className="ptt-log">

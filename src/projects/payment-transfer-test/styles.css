@@ -218,12 +218,44 @@
 }
 
 .ptt-primary--transfer { background: #f0c56c; }
+.ptt-primary--lottery { background: #d8a5ff; }
 .ptt-secondary { border: 1px solid var(--ptt-line); background: transparent; color: #cbd8d3; }
 .ptt-primary:active:not(:disabled),
 .ptt-secondary:active:not(:disabled) { transform: scale(0.985); }
 .ptt-primary:disabled,
 .ptt-secondary:disabled { cursor: not-allowed; opacity: 0.48; }
 .ptt-button-row { display: grid; gap: 10px; }
+
+.ptt-lottery-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  border: 1px solid var(--ptt-line);
+  background: rgba(216, 165, 255, 0.05);
+  padding: 14px;
+}
+
+.ptt-lottery-orb {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(216, 165, 255, 0.15);
+  color: #e3c6ff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ptt-lottery-result strong,
+.ptt-lottery-result span { display: block; }
+.ptt-lottery-result strong { color: #e8edf0; font-size: 13px; }
+.ptt-lottery-result span { margin-top: 4px; color: var(--ptt-muted); font-size: 11px; }
+.ptt-lottery-result[data-status='drawing'] .ptt-lottery-orb { animation: pttSpin 700ms linear infinite; }
+.ptt-lottery-result[data-status='won'] { border-color: rgba(216, 165, 255, 0.52); }
+.ptt-lottery-result[data-status='won'] .ptt-lottery-orb { box-shadow: 0 0 24px rgba(216, 165, 255, 0.3); }
 
 .ptt-log {
   border-top: 1px solid var(--ptt-line);
