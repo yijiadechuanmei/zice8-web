@@ -123,6 +123,7 @@ export function useWechatShare(activityKey, activity, onStatusChange, options = 
             'stopVoice',
             'onVoicePlayEnd',
             'uploadVoice',
+            'requestMerchantTransfer',
           ],
           ...(openTagList.length ? { openTagList } : {}),
         })
