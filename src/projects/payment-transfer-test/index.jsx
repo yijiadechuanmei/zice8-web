@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { setToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { isWechatBrowser } from '../../shared/utils/url'
+import { getTokenFromUrl, isWechatBrowser, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   createAuthorization,
   createPayment,
@@ -19,6 +20,17 @@ const PAYMENT_TERMINAL = new Set(['paid', 'closed', 'failed'])
 const PAYOUT_TERMINAL = new Set(['success', 'failed', 'canceled'])
 
 export default function PaymentTransferTestProject({ routeParams }) {
+  const tokenFromUrl = getTokenFromUrl()
+  if (tokenFromUrl) {
+    setToken(tokenFromUrl)
+    window.location.replace(sanitizeUrlForWechat(window.location.href))
+    return null
+  }
+
+  return <PaymentTransferTestMain routeParams={routeParams} />
+}
+
+function PaymentTransferTestMain({ routeParams }) {
   const activityKey = routeParams?.activityKey || 'payment_transfer_test_20260801'
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
