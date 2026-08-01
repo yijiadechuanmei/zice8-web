@@ -39,6 +39,7 @@ function PaymentTransferTestMain({ routeParams }) {
   const [payment, setPayment] = useState(null)
   const [payout, setPayout] = useState(null)
   const [lotteryResult, setLotteryResult] = useState(null)
+  const [lotteryDrawLocked, setLotteryDrawLocked] = useState(false)
   const [busy, setBusy] = useState('')
   const [notice, setNotice] = useState('')
   const [toast, setToast] = useState(null)
@@ -169,7 +170,7 @@ function PaymentTransferTestMain({ routeParams }) {
     setBusy('payout')
     setNotice('')
     try {
-      const data = await createPayout(activityKey, createRequestId('payout'))
+      const data = await createPayout(activityKey, createRequestId('payout'), debugMode)
       setPayout(data)
       appendEvent('后台转账已发起', data.payoutNo)
       if (data.status === 'success') {
@@ -189,9 +190,10 @@ function PaymentTransferTestMain({ routeParams }) {
     setNotice('')
     setLotteryResult({ status: 'drawing' })
     try {
-      const data = await drawLottery(activityKey, createRequestId('lottery'))
+      const data = await drawLottery(activityKey, createRequestId('lottery'), debugMode)
       setLotteryResult({ status: 'won', ...data })
       setPayout(data.payout)
+      if (!data.payout?.duplicatePrevented) setLotteryDrawLocked(true)
       appendEvent('模拟抽奖中奖', data.prizeName)
       appendEvent('中奖转账已发起', data.payout?.payoutNo || '')
       showFeedback(data.message || '抽奖中奖，后台已直接发起转账到微信零钱。')
@@ -339,10 +341,10 @@ function PaymentTransferTestMain({ routeParams }) {
         </div>
         <button
           className="ptt-primary ptt-primary--lottery"
-          disabled={Boolean(busy) || !authorizationEffective}
+          disabled={Boolean(busy) || !authorizationEffective || lotteryDrawLocked}
           onClick={handleLotteryDraw}
         >
-          {busy === 'lottery' ? '正在开奖并转账…' : '点击模拟抽奖'}
+          {lotteryDrawLocked ? '本次抽奖已完成，刷新后继续测试' : busy === 'lottery' ? '正在开奖并转账…' : '点击模拟抽奖'}
         </button>
       </section>
 

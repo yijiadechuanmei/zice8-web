@@ -28,16 +28,16 @@ export const createAuthorization = (activityKey) =>
 export const syncAuthorization = (activityKey) =>
   request(`${base(activityKey)}/transfer-authorization/sync`, { method: 'POST' })
 
-export const createPayout = (activityKey, requestId) =>
+export const createPayout = (activityKey, requestId, debug) =>
   request(`${base(activityKey)}/payouts`, {
     method: 'POST',
-    body: JSON.stringify({ requestId }),
+    body: JSON.stringify({ requestId, debug }),
   })
 
-export const drawLottery = (activityKey, requestId) =>
+export const drawLottery = (activityKey, requestId, debug) =>
   request(`${base(activityKey)}/lottery-draws`, {
     method: 'POST',
-    body: JSON.stringify({ requestId }),
+    body: JSON.stringify({ requestId, debug }),
   })
 
 export const getPayout = (activityKey, payoutNo) =>
