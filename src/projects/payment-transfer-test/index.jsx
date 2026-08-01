@@ -282,7 +282,7 @@ function PaymentTransferTestMain({ routeParams }) {
         <div className="ptt-action-copy">
           <p className="ptt-eyebrow">MERCHANT TRANSFER</p>
           <h2 id="transfer-title">0.10 元自动到零钱</h2>
-          <p>转账使用现金营销场景。免确认授权生效后，按钮只调后台转账，不再调起逐笔收款确认。每个用户限成功一次。</p>
+          <p>转账使用现金营销场景。免确认授权生效后，按钮只调后台转账，不再调起逐笔收款确认。普通用户限成功一次，指定测试账号可连续发起。</p>
         </div>
         <div className="ptt-action-meta">
           <StatusValue label="AUTH" value={authorization?.state || '未授权'} tone={authorization?.state} />
