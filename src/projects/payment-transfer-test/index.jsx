@@ -33,6 +33,7 @@ export default function PaymentTransferTestProject({ routeParams }) {
 
 function PaymentTransferTestMain({ routeParams }) {
   const activityKey = routeParams?.activityKey || 'payment_transfer_test_20260801'
+  const debugMode = new URLSearchParams(window.location.search).has('debug')
   const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [payment, setPayment] = useState(null)
@@ -40,8 +41,10 @@ function PaymentTransferTestMain({ routeParams }) {
   const [lotteryResult, setLotteryResult] = useState(null)
   const [busy, setBusy] = useState('')
   const [notice, setNotice] = useState('')
+  const [toast, setToast] = useState(null)
   const [events, setEvents] = useState([])
   const pollRef = useRef(null)
+  const toastTimerRef = useRef(null)
 
   const { authReady, blockedMessage, hasToken } = useWechatAuth(activityKey, publicConfig)
   useWechatShare(activityKey, publicConfig)
@@ -63,18 +66,32 @@ function PaymentTransferTestMain({ routeParams }) {
     return data
   }, [activityKey])
 
+  const showFeedback = useCallback((message, tone = 'info') => {
+    if (!message) return ''
+    setNotice(message)
+    setToast({ id: Date.now(), message, tone })
+    window.clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = window.setTimeout(() => setToast(null), 4600)
+    return message
+  }, [])
+
+  const showError = useCallback((error, fallback) => {
+    return showFeedback(getPaymentTransferErrorMessage(error, fallback), 'error')
+  }, [showFeedback])
+
   useEffect(() => {
     getPublicConfig(activityKey)
       .then(setPublicConfig)
-      .catch((error) => setNotice(error.message || '活动加载失败'))
-  }, [activityKey])
+      .catch((error) => showError(error, '活动加载失败'))
+  }, [activityKey, showError])
 
   useEffect(() => {
     if (!authReady || !hasToken) return
-    reloadBootstrap().catch((error) => setNotice(error.message || '链路状态加载失败'))
-  }, [authReady, hasToken, reloadBootstrap])
+    reloadBootstrap().catch((error) => showError(error, '链路状态加载失败'))
+  }, [authReady, hasToken, reloadBootstrap, showError])
 
   useEffect(() => () => stopPolling(pollRef), [])
+  useEffect(() => () => window.clearTimeout(toastTimerRef.current), [])
 
   const paymentState = payment?.status || (payment?.orderNo ? 'paying' : '未发起')
   const payoutState = payout?.status || '未发起'
@@ -94,15 +111,14 @@ function PaymentTransferTestMain({ routeParams }) {
       setPayment({ ...data, status: 'paying' })
       appendEvent('支付单已创建', data.orderNo)
       if (data.providerMode !== 'wechat') {
-        setNotice('当前是 mock/test 模式，已验证下单链路，不会真实扣款。')
+        showFeedback('当前是 mock/test 模式，已验证下单链路，不会真实扣款。')
         return
       }
       const result = await invokeWechatPay(data.payParams)
       appendEvent('微信支付面板返回', result)
       startPaymentPolling(data.orderNo)
     } catch (error) {
-      setNotice(error.message || '支付发起失败')
-      appendEvent('支付失败', error.message)
+      appendEvent('支付失败', showError(error, '支付发起失败'))
     } finally {
       setBusy('')
     }
@@ -116,7 +132,7 @@ function PaymentTransferTestMain({ routeParams }) {
       setBootstrap((current) => ({ ...(current || {}), authorization: data }))
       appendEvent('免确认授权申请已创建', data.outAuthorizationNo)
       if (data.state === 'TAKING_EFFECT') {
-        setNotice('免确认授权已生效，现在可以直接测试自动转账。')
+        showFeedback('免确认授权已生效，现在可以直接测试自动转账。')
         return
       }
       if (!data.packageInfo) {
@@ -127,8 +143,7 @@ function PaymentTransferTestMain({ routeParams }) {
       await wait(900)
       await handleSyncAuthorization()
     } catch (error) {
-      setNotice(error.message || '免确认授权失败')
-      appendEvent('授权失败', error.message)
+      appendEvent('授权失败', showError(error, '免确认授权失败'))
     } finally {
       setBusy('')
     }
@@ -140,10 +155,10 @@ function PaymentTransferTestMain({ routeParams }) {
       const data = await syncAuthorization(activityKey)
       setBootstrap((current) => ({ ...(current || {}), authorization: data }))
       appendEvent('授权状态已同步', data.state)
-      setNotice(data.effective ? '授权已生效，后续转账无需逐笔确认。' : `当前授权状态：${data.state}`)
+      showFeedback(data.effective ? '授权已生效，后续转账无需逐笔确认。' : `当前授权状态：${data.state}`)
       return data
     } catch (error) {
-      setNotice(error.message || '授权状态同步失败')
+      showError(error, '授权状态同步失败')
       throw error
     } finally {
       setBusy('')
@@ -158,13 +173,12 @@ function PaymentTransferTestMain({ routeParams }) {
       setPayout(data)
       appendEvent('后台转账已发起', data.payoutNo)
       if (data.status === 'success') {
-        setNotice('微信返回转账成功，资金已转入用户零钱。')
+        showFeedback('微信返回转账成功，资金已转入用户零钱。')
       } else {
         startPayoutPolling(data.payoutNo)
       }
     } catch (error) {
-      setNotice(error.message || '后台转账失败')
-      appendEvent('转账失败', error.message)
+      appendEvent('转账失败', showError(error, '后台转账失败'))
     } finally {
       setBusy('')
     }
@@ -180,14 +194,13 @@ function PaymentTransferTestMain({ routeParams }) {
       setPayout(data.payout)
       appendEvent('模拟抽奖中奖', data.prizeName)
       appendEvent('中奖转账已发起', data.payout?.payoutNo || '')
-      setNotice(data.message || '抽奖中奖，后台已直接发起转账到微信零钱。')
+      showFeedback(data.message || '抽奖中奖，后台已直接发起转账到微信零钱。')
       if (data.payout?.status && !PAYOUT_TERMINAL.has(data.payout.status)) {
         startPayoutPolling(data.payout.payoutNo)
       }
     } catch (error) {
       setLotteryResult({ status: 'failed' })
-      setNotice(error.message || '抽奖发起失败')
-      appendEvent('抽奖失败', error.message)
+      appendEvent('抽奖失败', showError(error, '抽奖发起失败'))
     } finally {
       setBusy('')
     }
@@ -207,7 +220,7 @@ function PaymentTransferTestMain({ routeParams }) {
         }
       } catch (error) {
         stopPolling(pollRef)
-        setNotice(error.message || '支付状态同步失败')
+        showError(error, '支付状态同步失败')
       }
     }, 2000)
   }
@@ -223,11 +236,11 @@ function PaymentTransferTestMain({ routeParams }) {
         if (PAYOUT_TERMINAL.has(data.status) || count >= 15) {
           stopPolling(pollRef)
           appendEvent('转账状态已确认', data.status)
-          if (data.status === 'success') setNotice('转账成功，资金已转入用户零钱。')
+          if (data.status === 'success') showFeedback('转账成功，资金已转入用户零钱。')
         }
       } catch (error) {
         stopPolling(pollRef)
-        setNotice(error.message || '转账状态同步失败')
+        showError(error, '转账状态同步失败')
       }
     }, 2000)
   }
@@ -240,28 +253,30 @@ function PaymentTransferTestMain({ routeParams }) {
   }
 
   return (
-    <main className="ptt-page">
-      <header className="ptt-header">
-        <div className="ptt-brand">
-          <span className="ptt-brand-mark" aria-hidden="true"><i /></span>
-          <span>ZICE8 LAB</span>
-        </div>
-        <span className={`ptt-mode ptt-mode--${providerMode}`}>{providerMode}</span>
-      </header>
+    <main className={`ptt-page ${debugMode ? 'ptt-page--debug' : 'ptt-page--lottery-only'}`}>
+      {toast ? <FeedbackToast key={toast.id} message={toast.message} tone={toast.tone} /> : null}
+      {debugMode ? <>
+        <header className="ptt-header">
+          <div className="ptt-brand">
+            <span className="ptt-brand-mark" aria-hidden="true"><i /></span>
+            <span>ZICE8 LAB</span>
+          </div>
+          <span className={`ptt-mode ptt-mode--${providerMode}`}>{providerMode} · DEBUG</span>
+        </header>
 
-      <section className="ptt-intro">
-        <p className="ptt-kicker">支付基础设施·真实用户链路</p>
-        <h1>{publicConfig.title}</h1>
-        <p className="ptt-lead">在同一个微信用户上验证小额支付与免确认转账，每一步都以后台最终状态为准。</p>
-        <div className="ptt-readiness">
-          <span className={authorizationEffective ? 'is-ready' : ''} />
-          {readiness}
-        </div>
-      </section>
+        <section className="ptt-intro">
+          <p className="ptt-kicker">支付基础设施·真实用户链路</p>
+          <h1>{publicConfig.title}</h1>
+          <p className="ptt-lead">在同一个微信用户上验证小额支付与免确认转账，每一步都以后台最终状态为准。</p>
+          <div className="ptt-readiness">
+            <span className={authorizationEffective ? 'is-ready' : ''} />
+            {readiness}
+          </div>
+        </section>
 
-      {notice ? <div className="ptt-notice" role="status">{notice}</div> : null}
+        {notice ? <div className="ptt-notice" role="status">{notice}</div> : null}
 
-      <section className="ptt-action" aria-labelledby="payment-title">
+        <section className="ptt-action" aria-labelledby="payment-title">
         <div className="ptt-action-index">01</div>
         <div className="ptt-action-copy">
           <p className="ptt-eyebrow">JSAPI PAYMENT</p>
@@ -275,9 +290,9 @@ function PaymentTransferTestMain({ routeParams }) {
         <button className="ptt-primary" disabled={Boolean(busy)} onClick={handlePay}>
           {busy === 'payment' ? '正在发起…' : '发起 0.01 元支付'}
         </button>
-      </section>
+        </section>
 
-      <section className="ptt-action ptt-action--transfer" aria-labelledby="transfer-title">
+        <section className="ptt-action ptt-action--transfer" aria-labelledby="transfer-title">
         <div className="ptt-action-index">02</div>
         <div className="ptt-action-copy">
           <p className="ptt-eyebrow">MERCHANT TRANSFER</p>
@@ -305,10 +320,11 @@ function PaymentTransferTestMain({ routeParams }) {
             {busy === 'payout' ? '正在转账…' : '后台自动转账 0.10 元'}
           </button>
         )}
-      </section>
+        </section>
+      </> : null}
 
       <section className="ptt-action ptt-action--lottery" aria-labelledby="lottery-title">
-        <div className="ptt-action-index">03</div>
+        <div className="ptt-action-index">{debugMode ? '03' : '01'}</div>
         <div className="ptt-action-copy">
           <p className="ptt-eyebrow">LOTTERY SIMULATION</p>
           <h2 id="lottery-title">模拟抽奖 · 中奖即到账</h2>
@@ -330,7 +346,8 @@ function PaymentTransferTestMain({ routeParams }) {
         </button>
       </section>
 
-      <section className="ptt-log">
+      {debugMode ? <>
+        <section className="ptt-log">
         <div className="ptt-log-head">
           <h2>本次测试记录</h2>
           <span>最新在上</span>
@@ -342,9 +359,10 @@ function PaymentTransferTestMain({ routeParams }) {
             <span>{event.detail || '—'}</span>
           </div>
         )) : <p className="ptt-empty">发起测试后，链路节点会显示在这里。</p>}
-      </section>
+        </section>
 
-      <footer>内部真实资金测试 · 请仅使用指定微信账号</footer>
+        <footer>内部真实资金测试 · 请仅使用指定微信账号</footer>
+      </> : null}
     </main>
   )
 }
@@ -366,6 +384,36 @@ function StateScreen({ title, detail, loading = false }) {
       <p>{detail}</p>
     </main>
   )
+}
+
+function FeedbackToast({ message, tone }) {
+  return (
+    <div className={`ptt-toast ptt-toast--${tone}`} role="alert">
+      <span>{tone === 'error' ? '!' : '✓'}</span>
+      <p>{message}</p>
+    </div>
+  )
+}
+
+function getPaymentTransferErrorMessage(error, fallback) {
+  const rawMessage = error?.response?.message || error?.message || ''
+  const message = Array.isArray(rawMessage) ? rawMessage.join('；') : String(rawMessage).trim()
+  const businessMessages = {
+    payment_transfer_test_payout_limit_reached: '本轮测试转账已达 20 次上限，本次没有发起转账。',
+    transfer_authorization_not_found: '未找到你的免确认授权记录，请先完成一次授权。',
+    transfer_authorization_not_effective: '免确认授权尚未生效，请先完成授权并点击“同步授权状态”。',
+    transfer_authorization_identifier_missing: '授权记录缺少微信授权编号，请重新开通免确认授权。',
+    payment_transfer_test_activity_not_found: '测试活动不存在、未启用，或活动类型配置不正确。',
+    activity_payment_not_enabled: '当前活动未启用 JSAPI 支付，无法继续测试。',
+    activity_payment_profile_not_enabled: '当前活动的支付配置未启用，请检查 payment_profile。',
+    wechat_pay_merchant_not_enabled: '微信支付商户号未启用，无法发起支付或转账。',
+    wechat_identity_does_not_match_activity: '当前微信身份与本活动绑定的小程序不一致，请从本活动链接重新进入。',
+    runtime_payment_profile_mismatch: '线上支付运行配置与活动绑定商户不一致，已阻止发起资金操作。',
+    payment_order_not_found: '未找到这笔支付订单，无法查询状态。',
+    payout_order_not_found: '未找到这笔转账订单，无法查询状态。',
+    payment_order_closed_but_wechat_success: '本地支付单已关闭，但微信显示已成功，请先在后台核对订单。',
+  }
+  return businessMessages[message] || message || fallback
 }
 
 function createRequestId(prefix) {
