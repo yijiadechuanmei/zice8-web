@@ -46,6 +46,7 @@ function PaymentTransferTestMain({ routeParams }) {
   const [events, setEvents] = useState([])
   const pollRef = useRef(null)
   const toastTimerRef = useRef(null)
+  const autoAuthorizationStartedRef = useRef(false)
 
   const { authReady, blockedMessage, hasToken } = useWechatAuth(activityKey, publicConfig)
   useWechatShare(activityKey, publicConfig)
@@ -103,6 +104,46 @@ function PaymentTransferTestMain({ routeParams }) {
     if (authorization.state === 'WAIT_USER_CONFIRM') return '等待用户确认授权'
     return `授权状态：${authorization.state}`
   }, [authorization, authorizationEffective])
+
+  const startAutomaticAuthorization = useCallback(async () => {
+    setBusy('authorization')
+    try {
+      const data = await createAuthorization(activityKey)
+      setBootstrap((current) => ({ ...(current || {}), authorization: data }))
+      appendEvent('自动发起免确认授权', data.outAuthorizationNo)
+      if (data.state === 'TAKING_EFFECT') {
+        showFeedback('免确认授权已生效，现在可以直接参与抽奖。')
+        return
+      }
+      if (!data.packageInfo) {
+        throw new Error('微信未返回授权 package_info')
+      }
+      const bridgeResult = await invokeMerchantTransferAuthorization(data)
+      appendEvent('微信免确认授权页返回', bridgeResult)
+      await wait(900)
+      const synced = await syncAuthorization(activityKey)
+      setBootstrap((current) => ({ ...(current || {}), authorization: synced }))
+      showFeedback(synced.effective ? '授权已生效，现在可以参与抽奖。' : `当前授权状态：${synced.state}`)
+    } catch (error) {
+      appendEvent('自动授权失败', showError(error, '自动授权发起失败'))
+    } finally {
+      setBusy('')
+    }
+  }, [activityKey, appendEvent, showError, showFeedback])
+
+  useEffect(() => {
+    if (
+      debugMode
+      || !authReady
+      || !hasToken
+      || !bootstrap
+      || authorizationEffective
+      || autoAuthorizationStartedRef.current
+      || !isWechatBrowser()
+    ) return
+    autoAuthorizationStartedRef.current = true
+    startAutomaticAuthorization()
+  }, [authorizationEffective, authReady, bootstrap, debugMode, hasToken, startAutomaticAuthorization])
 
   async function handlePay() {
     setBusy('payment')
