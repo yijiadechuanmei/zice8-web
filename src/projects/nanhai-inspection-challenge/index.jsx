@@ -373,7 +373,12 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
         const unlockedLock = map.unlockedLocks[index]
         return (
           <Fragment key={card[0]}>
-            <ArtLayer key={card[0]} layer={card} canvas={map.canvas} className={`nh-map-card is-${status}`} />
+            <ArtLayer
+              key={card[0]}
+              layer={card}
+              canvas={map.canvas}
+              className={`nh-map-card is-${status}${selectedLevelNo === levels[index].levelNo ? ' is-selected' : ''}`}
+            />
             {status === 'completed' ? (
               <img
                 className="nh-map-unlocked-lock"
@@ -394,7 +399,7 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
           return (
             <button
               key={level.levelNo}
-              className={`nh-map-node is-${status}${selectedLevelNo === level.levelNo ? ' is-selected' : ''}`}
+              className={`nh-map-node is-${status}`}
               style={position}
               onClick={() => status !== 'locked' && setSelectedLevelNo(level.levelNo)}
               aria-pressed={selectedLevelNo === level.levelNo}

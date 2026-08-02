@@ -113,10 +113,16 @@ button { font: inherit; }
 .nh-rules-page .nh-art-page__tap { animation: nh-button-breathe 2.2s ease-in-out .65s infinite; }
 
 .nh-map-page { min-height: 100svh; }
-.nh-map-page__nodes { position: absolute; inset: 0; z-index: 5; pointer-events: auto; }
+.nh-map-page__nodes { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
 .nh-map-card.is-locked { filter: grayscale(1); opacity: .58; }
 .nh-map-card.is-available { animation: nh-pulse 1.65s ease-in-out infinite; }
+.nh-map-card.is-selected {
+  outline: 3px solid #2d6bf6;
+  outline-offset: 2px;
+  border-radius: 10px;
+  filter: drop-shadow(0 0 7px rgba(45, 107, 246, .82));
+}
 
 .nh-map-node {
   position: absolute;
@@ -126,13 +132,10 @@ button { font: inherit; }
   border-radius: 11px;
   background: transparent;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .nh-map-node span { display: none; }
-.nh-map-node.is-selected {
-  border: 3px solid #2d6bf6;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, .86), 0 0 12px rgba(45, 107, 246, .8);
-}
 
 .nh-scene-page { position: relative; min-height: 100svh; background: #3c87f9; }
 .nh-scene-page__art {
