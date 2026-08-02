@@ -128,4 +128,5 @@ export const NANHAI_ART = {
   answerPanel: 'cf585af83b61db3e85d16c737670c1f0_103953_331_236.png',
   answerCorrect: 'f8dc7d4c10ab4f16df939d2a3a6d8537_89734_337_240.png',
   answerClose: '5e273dd7ad20a8615feb2f2163c65f20_12876_161_34.png',
+  unlockedLock: 'f912835b4cd05961ffec0eacef35e292_5312_39_36.png',
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import {
@@ -40,6 +40,8 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   const [error, setError] = useState('')
   const [wheelRotation, setWheelRotation] = useState(0)
   const [wheelSpinning, setWheelSpinning] = useState(false)
+  const [pageTransitioning, setPageTransitioning] = useState(false)
+  const pageTransitionTimer = useRef(null)
 
   const shareActivity = useMemo(() => ({
     title: bootstrap?.activity?.shareTitle || NANHAI_INSPECTION_CHALLENGE_TITLE,
@@ -64,11 +66,23 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     return () => { alive = false }
   }, [activityKey])
 
+  useEffect(() => () => window.clearTimeout(pageTransitionTimer.current), [])
+
   const progress = bootstrap?.progress
   const preview = Boolean(bootstrap?.preview)
   const correctCodes = new Set(progress?.correctQuestionCodes || [])
   const allCompleted = (progress?.completedLevels || 0) >= 5
   const segments = bootstrap?.config?.wheelSegments || FALLBACK_SEGMENTS
+
+  function navigate(nextPage) {
+    if (nextPage === page || pageTransitioning) return
+    setPageTransitioning(true)
+    window.clearTimeout(pageTransitionTimer.current)
+    pageTransitionTimer.current = window.setTimeout(() => {
+      setPage(nextPage)
+      setPageTransitioning(false)
+    }, 220)
+  }
 
   function openScene(level) {
     if (!isLevelAvailable(level, progress)) {
@@ -76,7 +90,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       return
     }
     setActiveLevel(level)
-    setPage('scene')
+    navigate('scene')
     trackEvent(activityKey, 'level_open', { levelNo: level.levelNo })
   }
 
@@ -145,7 +159,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     setActiveQuestionIndex(null)
     if (finishedAll) {
       setActiveLevel(null)
-      setPage('success')
+      navigate('success')
     }
   }
 
@@ -178,7 +192,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         ...current,
         draw: { preview: true, won: false, message: 'PC 预览不参与抽奖，不会创建红包或发放记录。' },
       }))
-      setPage('share')
+      navigate('share')
       return
     }
     if (!bootstrap?.authorization?.effective) {
@@ -194,7 +208,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       setWheelRotation((current) => current + 1440 + (360 - stopIndex * 45))
       await wait(3900)
       setBootstrap((current) => ({ ...current, draw: result }))
-      setPage('share')
+      navigate('share')
       trackEvent(activityKey, 'lottery_result', {
         won: result.won,
         controlCode: result.controlCode,
@@ -227,16 +241,17 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   return (
     <main className="nh-challenge">
-      {preview ? <button className="nh-preview-badge" onClick={() => setPage('home')}>PC 预览模式 · 不计入答题或抽奖</button> : null}
-      {page === 'home' ? <HomePage onStart={() => setPage('rules')} /> : null}
-      {page === 'rules' ? <RulesPage onEnter={() => setPage('map')} /> : null}
+      {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>PC 预览模式 · 不计入答题或抽奖</button> : null}
+      <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
+      {page === 'home' ? <HomePage onStart={() => navigate('rules')} /> : null}
+      {page === 'rules' ? <RulesPage onEnter={() => navigate('map')} /> : null}
       {page === 'map' ? (
         <MapPage
           levels={bootstrap.levels || []}
           progress={progress}
           correctCodes={correctCodes}
           onOpenLevel={openScene}
-          onBack={() => setPage(allCompleted ? 'wheel' : 'home')}
+          onBack={() => navigate(allCompleted ? 'wheel' : 'home')}
         />
       ) : null}
       {page === 'scene' && activeLevel ? (
@@ -244,10 +259,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           level={activeLevel}
           correctCodes={correctCodes}
           onOpenQuestion={openQuestion}
-          onBack={() => setPage('map')}
+          onBack={() => navigate('map')}
         />
       ) : null}
-      {page === 'success' ? <SuccessPage onBack={() => setPage('map')} /> : null}
+      {page === 'success' ? <SuccessPage onBack={() => navigate('map')} /> : null}
       {page === 'wheel' ? (
         <WheelPage
           authorization={bootstrap.authorization}
@@ -258,12 +273,13 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           preview={preview}
           onAuthorize={handleAuthorization}
           onDraw={handleDraw}
-          onBack={() => setPage('map')}
+          onBack={() => navigate('map')}
         />
       ) : null}
       {page === 'share' ? (
-        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => setPage('home')} />
+        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => navigate('home')} />
       ) : null}
+      </div>
       {activeLevel && activeQuestionIndex !== null ? (
         <QuestionDialog
           level={activeLevel}
@@ -282,11 +298,11 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 }
 
 function HomePage({ onStart }) {
-  return <ArtPage art={NANHAI_ART.home} onAction={{ start: onStart }} />
+  return <ArtPage art={NANHAI_ART.home} onAction={{ start: onStart }} className="nh-home-page" />
 }
 
 function RulesPage({ onEnter }) {
-  return <ArtPage art={NANHAI_ART.rules} onAction={{ 'enter-map': onEnter }} />
+  return <ArtPage art={NANHAI_ART.rules} onAction={{ 'enter-map': onEnter }} className="nh-rules-page" />
 }
 
 function SuccessPage({ onBack }) {
@@ -382,7 +398,8 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
                   onClick={() => onOpenQuestion(index)}
                   aria-label={`第${index + 1}题${completed ? '已解锁' : '点击答题'}`}
                 >
-                  <img src={nanhaiAsset(pin[0])} alt="" />
+                  <img className="nh-scene-pin__trigger" src={nanhaiAsset(pin[0])} alt="" />
+                  {completed ? <img className="nh-scene-pin__unlocked" src={nanhaiAsset(NANHAI_ART.unlockedLock)} alt="" /> : null}
                   {completed ? <span>已解锁</span> : null}
                 </button>
               )
