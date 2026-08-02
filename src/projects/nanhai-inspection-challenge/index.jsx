@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import {
@@ -292,7 +293,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => navigate('home')} />
       ) : null}
       </div>
-      {activeLevel && activeQuestionIndex !== null ? (
+      {activeLevel && activeQuestionIndex !== null ? createPortal(
         <QuestionDialog
           level={activeLevel}
           questionIndex={activeQuestionIndex}
@@ -301,9 +302,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           onSelect={setSelectedOption}
           onSubmit={handleAnswer}
           onClose={() => { setActiveQuestionIndex(null); setSelectedOption('') }}
-        />
+        />,
+        document.body,
       ) : null}
-      {feedback ? <AnswerFeedback feedback={feedback} onClose={closeFeedback} /> : null}
+      {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
       {error ? <button className="nh-toast" onClick={() => setError('')}>{error}</button> : null}
     </main>
   )

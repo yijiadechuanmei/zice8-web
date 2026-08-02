@@ -222,6 +222,7 @@ button { font: inherit; }
   position: fixed;
   z-index: 50;
   inset: 0;
+  container-type: inline-size;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -233,8 +234,8 @@ button { font: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(112vw, 468px);
-  height: calc(min(112vw, 468px) * 634 / 817);
+  width: min(112cqw, 468px);
+  height: calc(min(112cqw, 468px) * 634 / 817);
   min-height: 0;
   overflow: hidden;
   transform: translate(-50%, -50%) rotate(90deg);
@@ -406,8 +407,8 @@ button { font: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 44.1333cqw;
-  height: 31.4667cqw;
+  width: min(44.1333cqw, 189.773px);
+  height: min(31.4667cqw, 135.333px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
