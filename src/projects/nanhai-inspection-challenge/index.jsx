@@ -338,7 +338,7 @@ function ArtPage({ art, onAction = {}, children, rotatedChildren, className = ''
           ))}
           {rotatedChildren}
         </div>
-        <div className="nh-art-page__overlay">{children}</div>
+        {children ? <div className="nh-art-page__overlay">{children}</div> : null}
       </div>
     </section>
   )
