@@ -437,7 +437,7 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
         <button className="nh-question-dialog__submit" disabled={!selectedOption || busy} onClick={onSubmit}>
           {busy ? '提交中…' : '提交答案'}
         </button>
-        <div className="nh-question-dialog__cancel">关闭</div>
+        <button className="nh-question-dialog__cancel" onClick={onClose}>关闭</button>
       </section>
     </div>
   )

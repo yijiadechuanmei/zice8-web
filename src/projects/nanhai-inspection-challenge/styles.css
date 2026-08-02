@@ -12,6 +12,7 @@ button { font: inherit; }
 
 .nh-challenge {
   min-height: 100svh;
+  container-type: inline-size;
   color: var(--nh-ink);
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
   background: #3c87f9;
@@ -143,24 +144,24 @@ button { font: inherit; }
   z-index: 20;
   top: 50%;
   left: 0;
-  width: 64px;
-  height: 144px;
+  width: 8.5333cqw;
+  height: 19.2cqw;
   transform: translateY(-50%);
 }
 
 .nh-scene-back {
   position: absolute;
   top: 0;
-  left: 64px;
-  width: 144px;
-  height: 64px;
+  left: 8.5333cqw;
+  width: 19.2cqw;
+  height: 8.5333cqw;
   padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 1.3333cqw;
   color: #2d6bf6;
   background: #fff;
   box-shadow: 0 4px 13px rgba(0, 40, 110, .2);
-  font-size: 23px;
+  font-size: 3.0667cqw;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -170,9 +171,9 @@ button { font: inherit; }
 }
 
 .nh-scene-back::before {
-  width: 30px;
-  height: 30px;
-  margin-right: 13px;
+  width: 4cqw;
+  height: 4cqw;
+  margin-right: 1.7333cqw;
   background: #2d6bf6;
   content: "";
   mask: url("https://file3.ih5.cn/v35/edt/u10013600/7eeb53fc03a3ffb4e7d62a44adf2181a_215.svg") center / contain no-repeat;
@@ -207,7 +208,7 @@ button { font: inherit; }
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 3.467vw;
+  font-size: 3.467cqw;
   font-weight: 800;
   text-align: center;
   transform: translateX(-50%);
@@ -290,6 +291,8 @@ button { font: inherit; }
   width: 84.82%;
   height: 21.29%;
   margin: 0;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   color: #000;
   font-size: clamp(18px, 4.9vw, 21px);
@@ -354,6 +357,7 @@ button { font: inherit; }
   border-radius: 15px;
   color: #000;
   background: #f5f7fc;
+  justify-content: center;
 }
 .nh-question-options.is-judge button.is-selected { border-color: #2d6bf6; color: #2d6bf6; background: #d8e5fd; }
 .nh-question-options.is-judge span { font-size: clamp(20px, 5.2vw, 24px); font-weight: 900; }
@@ -390,6 +394,9 @@ button { font: inherit; }
   display: grid;
   width: 14.2%;
   height: 7.25%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   place-items: center;
   color: #686868;
   font-size: clamp(13px, 3.4vw, 15px);
@@ -400,8 +407,8 @@ button { font: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 331px;
-  height: 236px;
+  width: 44.1333cqw;
+  height: 31.4667cqw;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
