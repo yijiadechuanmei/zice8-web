@@ -458,6 +458,21 @@ button { font: inherit; }
 .nh-success-wheel-pointer { position: absolute; pointer-events: none; }
 
 .nh-share-page { position: relative; min-height: 100svh; background: #3c87f9; }
+.nh-share-prize-amount {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  color: rgb(249, 111, 26);
+  font-size: min(14.6667cqw, 63.067px);
+  font-weight: 700;
+  line-height: normal;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+.nh-share-prize-amount > div { width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .nh-share-page__result {
   position: absolute;
   z-index: 8;

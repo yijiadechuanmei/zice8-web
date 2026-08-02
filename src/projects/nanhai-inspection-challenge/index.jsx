@@ -118,6 +118,22 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     trackEvent(activityKey, 'preview_complete_all', { activityType: 'nanhai_inspection_challenge' })
   }
 
+  function restartPreviewExperience() {
+    if (!preview) return
+    setBootstrap((current) => ({
+      ...current,
+      draw: null,
+      progress: buildPreviewInitialProgress(current),
+    }))
+    setActiveLevel(null)
+    setActiveQuestionIndex(null)
+    setFeedback(null)
+    setSelectedOption('')
+    setWheelRotation(0)
+    navigate('map')
+    trackEvent(activityKey, 'preview_restart', { activityType: 'nanhai_inspection_challenge' })
+  }
+
   async function handleAnswer() {
     const question = activeLevel?.questions?.[activeQuestionIndex]
     if (!question || !selectedOption || busy) return
@@ -295,7 +311,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       ) : null}
       {page === 'success' ? <SuccessPage rotation={wheelRotation} onDraw={handleDraw} /> : null}
       {page === 'share' ? (
-        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => navigate('home')} />
+        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onRestart={restartPreviewExperience} onHome={() => navigate('home')} />
       ) : null}
       </div>
       {activeLevel && activeQuestionIndex !== null ? createPortal(
@@ -529,20 +545,29 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function SharePage({ draw, busy, preview, onSync, onHome }) {
+function SharePage({ draw, busy, preview, onSync, onRestart, onHome }) {
   const won = draw?.won
   const payoutSuccess = draw?.payoutStatus === 'success'
   const payoutFailed = draw?.payoutStatus === 'failed'
+  const prizeAmount = Number.isFinite(Number(draw?.prizeAmountYuan)) ? String(draw.prizeAmountYuan) : ''
   return (
     <section className="nh-share-page">
-      <ArtPage art={NANHAI_ART.share} onAction={{ share: () => {}, home: onHome }} />
-      <div className="nh-share-page__result">
-        <strong>{preview ? `测试抽中 ${draw?.prizeAmountYuan ?? '-'} 元微信红包` : won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
-        <span>{draw?.message}</span>
-        {won && !preview ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
-        {payoutFailed ? <small className="is-failed">失败原因：{draw.failureReason || draw.failureCode || '请后台核验'}</small> : null}
-        {won && !payoutSuccess && draw.payoutNo ? <button disabled={Boolean(busy)} onClick={onSync}>{busy === 'sync' ? '同步中…' : '查询发放状态'}</button> : null}
-      </div>
+      <ArtPage
+        art={NANHAI_ART.share}
+        onAction={{ share: onRestart, home: onHome }}
+        rotatedChildren={won && prizeAmount ? (
+          <div className="nh-share-prize-amount" style={sourceRect(NANHAI_ART.share.canvas, 559, 367, 261, 134)}><div>{prizeAmount}</div></div>
+        ) : null}
+      />
+      {!preview ? (
+        <div className="nh-share-page__result">
+          <strong>{won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
+          <span>{draw?.message}</span>
+          {won ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
+          {payoutFailed ? <small className="is-failed">失败原因：{draw.failureReason || draw.failureCode || '请后台核验'}</small> : null}
+          {won && !payoutSuccess && draw.payoutNo ? <button disabled={Boolean(busy)} onClick={onSync}>{busy === 'sync' ? '同步中…' : '查询发放状态'}</button> : null}
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -639,6 +664,20 @@ function buildPreviewCompletedProgress(bootstrap) {
     correctCount: correctQuestionCodes.length,
     status: 'completed',
     correctQuestionCodes,
+  }
+}
+
+function buildPreviewInitialProgress(bootstrap) {
+  const currentProgress = bootstrap?.progress || {}
+  return {
+    ...currentProgress,
+    currentLevel: 1,
+    completedLevels: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    status: 'in_progress',
+    completedAt: null,
+    correctQuestionCodes: [],
   }
 }
 
