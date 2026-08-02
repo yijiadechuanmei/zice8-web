@@ -401,7 +401,7 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
     <div className="nh-question-mask" role="presentation">
       <section className="nh-question-dialog" role="dialog" aria-modal="true" aria-label={`${level.title}第${questionIndex + 1}题`}>
         <img className="nh-question-dialog__panel" src={nanhaiAsset(NANHAI_ART.questionPanel)} alt="" />
-        <button className="nh-question-dialog__close" onClick={onClose} aria-label="关闭">×</button>
+        <button className="nh-question-dialog__dismiss" onClick={onClose} aria-label="关闭" />
         <div className="nh-question-dialog__type">{question.questionType}</div>
         <p className="nh-question-dialog__count">{level.title} · 第 {questionIndex + 1} / 6 题</p>
         <h1>{question.title}</h1>
@@ -420,17 +420,21 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
         <button className="nh-question-dialog__submit" disabled={!selectedOption || busy} onClick={onSubmit}>
           {busy ? '提交中…' : '提交答案'}
         </button>
+        <div className="nh-question-dialog__cancel">关闭</div>
       </section>
     </div>
   )
 }
 
-function AnswerFeedback({ onClose }) {
+function AnswerFeedback({ feedback, onClose }) {
   return (
     <div className="nh-answer-mask" role="presentation">
       <section className="nh-answer-feedback" role="dialog" aria-modal="true">
-        <img className="nh-answer-feedback__base" src={nanhaiAsset(NANHAI_ART.answerPanel)} alt="" />
-        <img className="nh-answer-feedback__badge" src={nanhaiAsset(NANHAI_ART.answerCorrect)} alt="" />
+        <img
+          className="nh-answer-feedback__result"
+          src={nanhaiAsset(feedback.correct ? NANHAI_ART.answerPanel : NANHAI_ART.answerCorrect)}
+          alt=""
+        />
         <button onClick={onClose} aria-label="继续答题"><img src={nanhaiAsset(NANHAI_ART.answerClose)} alt="继续" /></button>
       </section>
     </div>

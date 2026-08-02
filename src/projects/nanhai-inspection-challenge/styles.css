@@ -139,8 +139,20 @@ button { font: inherit; }
   box-shadow: 0 4px 13px rgba(0, 40, 110, .2);
   font-size: 23px;
   font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform: rotate(90deg);
   transform-origin: 0 0;
+}
+
+.nh-scene-back::before {
+  width: 30px;
+  height: 30px;
+  margin-right: 13px;
+  background: #2d6bf6;
+  content: "";
+  mask: url("https://file3.ih5.cn/v35/edt/u10013600/7eeb53fc03a3ffb4e7d62a44adf2181a_215.svg") center / contain no-repeat;
 }
 
 .nh-scene-pins { position: absolute; z-index: 8; inset: 0; }
@@ -156,14 +168,15 @@ button { font: inherit; }
 .nh-scene-pin img { display: block; width: 100%; height: 100%; filter: drop-shadow(0 3px 4px rgba(0, 25, 82, .34)); }
 .nh-scene-pin span {
   position: absolute;
-  top: calc(100% + 16px);
+  top: calc(100% + 19.51%);
   left: 50%;
-  width: 100px;
-  height: 50px;
+  width: 121.95%;
+  height: 60.98%;
   color: #fff;
-  font-size: 26px;
+  display: grid;
+  place-items: center;
+  font-size: 3.467vw;
   font-weight: 800;
-  line-height: 50px;
   text-align: center;
   transform: translateX(-50%);
 }
@@ -206,83 +219,80 @@ button { font: inherit; }
   pointer-events: none;
 }
 
-.nh-question-dialog__close {
+.nh-question-dialog__dismiss {
   position: absolute;
   z-index: 2;
-  top: 2.5%;
-  right: 2%;
-  width: 7%;
-  height: 10%;
+  top: 2.52%;
+  left: 91.19%;
+  width: 6.85%;
+  height: 9.15%;
   padding: 0;
   border: 0;
-  border-radius: 50%;
-  color: #fff;
-  background: #2d6bf6;
-  font-size: clamp(16px, 4vw, 23px);
-  line-height: 1;
+  background: transparent;
 }
 
 .nh-question-dialog__type {
   position: absolute;
-  top: 15%;
-  left: 5.6%;
-  padding: 1.5% 2%;
+  top: 14.98%;
+  left: 5.63%;
+  display: grid;
+  width: 14.2%;
+  height: 7.25%;
+  place-items: center;
+  padding: 0;
   border-radius: 8px;
   color: #2d6bf6;
   background: #d8e5fd;
-  font-size: clamp(10px, 2.8vw, 12px);
+  font-size: clamp(13px, 3.4vw, 15px);
   font-weight: 900;
 }
 
 .nh-question-dialog__count {
-  position: absolute;
-  top: 7%;
-  left: 7%;
-  margin: 0;
-  color: #71809b;
-  font-size: clamp(8px, 2.3vw, 10px);
-  font-weight: 700;
+  display: none;
 }
 
 .nh-question-dialog h1 {
   position: absolute;
-  top: 22%;
-  right: 8%;
-  left: 7%;
-  max-height: 22%;
+  top: 22.08%;
+  left: 7.1%;
+  width: 84.82%;
+  height: 21.29%;
   margin: 0;
-  overflow: auto;
-  color: #142958;
-  font-size: clamp(15px, 4vw, 20px);
-  line-height: 1.45;
+  overflow: hidden;
+  color: #000;
+  font-size: clamp(18px, 4.9vw, 21px);
+  font-weight: 900;
+  line-height: 1.28;
 }
 
 .nh-question-options {
   position: absolute;
-  top: 43%;
-  right: 6.5%;
-  left: 6.4%;
+  top: 42.43%;
+  left: 6.36%;
+  width: 73.19%;
+  height: 32.18%;
   display: grid;
-  gap: 8px;
+  gap: 1.1%;
 }
 
 .nh-question-options.is-judge {
   top: 52.21%;
   right: 6.98%;
   left: 6.12%;
+  width: auto;
   grid-template-columns: 1fr 1fr;
   gap: 2.82%;
   height: 14.2%;
 }
 .nh-question-options button {
   display: flex;
-  min-height: 15%;
   align-items: center;
-  padding: 1.5% 2%;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 9px;
-  color: #172754;
-  background: rgba(255, 255, 255, .95);
+  min-height: 0;
+  padding: 0 2.17%;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  color: #000;
+  background: transparent;
   text-align: left;
   transition: background .15s, border-color .15s, transform .15s;
 }
@@ -292,19 +302,19 @@ button { font: inherit; }
 .nh-question-options i {
   display: grid;
   flex: 0 0 auto;
-  width: clamp(18px, 5vw, 23px);
-  height: clamp(18px, 5vw, 23px);
-  margin-right: 2%;
+  width: clamp(23px, 6vw, 29px);
+  height: clamp(23px, 6vw, 29px);
+  margin-right: 13px;
   place-items: center;
   border-radius: 50%;
   color: #2d6bf6;
   background: #d8e5fd;
   font-style: normal;
-  font-size: 12px;
+  font-size: clamp(18px, 4.8vw, 23px);
   font-weight: 900;
 }
 
-.nh-question-options span { font-size: clamp(11px, 3.3vw, 14px); font-weight: 800; line-height: 1.25; }
+.nh-question-options span { font-size: clamp(15px, 4vw, 17px); font-weight: 900; line-height: 1.25; }
 .nh-question-options.is-judge button {
   min-height: 0;
   padding: 0 5.3%;
@@ -314,7 +324,7 @@ button { font: inherit; }
   background: #f5f7fc;
 }
 .nh-question-options.is-judge button.is-selected { border-color: #2d6bf6; color: #2d6bf6; background: #d8e5fd; }
-.nh-question-options.is-judge span { font-size: clamp(15px, 4vw, 29px); font-weight: 900; }
+.nh-question-options.is-judge span { font-size: clamp(20px, 5.2vw, 24px); font-weight: 900; }
 .nh-radio {
   width: clamp(19px, 4.5vw, 33px) !important;
   height: clamp(19px, 4.5vw, 33px) !important;
@@ -326,31 +336,44 @@ button { font: inherit; }
 .is-selected .nh-radio::after { width: 72%; height: 72%; border-radius: 50%; background: #2d6bf6; content: ""; }
 .nh-question-dialog__submit {
   position: absolute;
-  bottom: 12.5%;
-  left: 27.3%;
-  width: 41.7%;
-  min-height: 11.2%;
+  top: 76.18%;
+  left: 27.29%;
+  width: 41.74%;
+  height: 11.2%;
   padding: 0;
   border: 0;
   border-radius: 8px;
   color: #fff;
   background: var(--nh-orange);
   box-shadow: 0 5px 10px rgba(242, 94, 0, .24);
-  font-size: clamp(12px, 3.4vw, 15px);
+  font-size: clamp(17px, 4.5vw, 19px);
   font-weight: 900;
 }
 
 .nh-question-dialog__submit:disabled { opacity: .45; box-shadow: none; }
-
-.nh-answer-feedback {
-  position: relative;
-  width: min(80vw, 330px);
-  height: calc(min(80vw, 330px) * 236 / 331);
-  animation: nh-pop-rotate .28s cubic-bezier(.2, .8, .2, 1) both;
+.nh-question-dialog__cancel {
+  position: absolute;
+  top: 88.17%;
+  left: 41.13%;
+  display: grid;
+  width: 14.2%;
+  height: 7.25%;
+  place-items: center;
+  color: #686868;
+  font-size: clamp(13px, 3.4vw, 15px);
+  font-weight: 900;
 }
 
-.nh-answer-feedback__base,
-.nh-answer-feedback__badge {
+.nh-answer-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 331px;
+  height: 236px;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.nh-answer-feedback__result {
   position: absolute;
   top: 0;
   left: 0;
