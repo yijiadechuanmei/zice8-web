@@ -29,6 +29,14 @@ const FALLBACK_SEGMENTS = [
   { label: '20元', amount: 2000 },
 ]
 
+// 指针初始指向 20 元扇区；角度与当前五等分转盘的扇区中心一一对应。
+const WHEEL_POINTER_ANGLE_BY_AMOUNT = {
+  500: 216,
+  1000: 288,
+  2000: 0,
+  5000: 72,
+}
+
 export default function NanhaiInspectionChallenge({ routeParams }) {
   const activityKey = routeParams?.activityKey || ''
   const [bootstrap, setBootstrap] = useState(null)
@@ -218,11 +226,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     if (preview) {
       const testPrizes = segments.filter((segment) => Number(segment.amount) > 0)
       const prize = testPrizes[Math.floor(Math.random() * testPrizes.length)] || FALLBACK_SEGMENTS[0]
-      const stopIndex = Math.max(0, segments.findIndex((segment) => segment.label === prize.label && segment.amount === prize.amount))
       setWheelSpinning(true)
       setError('')
       try {
-        setWheelRotation((current) => current + 1440 + (360 - stopIndex * (360 / segments.length)))
+        setWheelRotation((current) => spinPointerToPrize(current, prize.amount))
         await wait(3800)
         setBootstrap((current) => ({
           ...current,
@@ -250,8 +257,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     setError('')
     try {
       const result = await drawPrize(activityKey, createRequestId('draw'))
-      const stopIndex = Number(result.wheelStopIndex || 0)
-      setWheelRotation((current) => current + 1440 + (360 - stopIndex * 45))
+      setWheelRotation((current) => spinPointerToPrize(current, result.prizeAmount))
       await wait(3900)
       setBootstrap((current) => ({ ...current, draw: result }))
       navigate('share')
@@ -621,6 +627,14 @@ function sourcePoint([canvasW, canvasH], left, top) {
     '--pointer-origin-x': `${(left / canvasW) * 100}%`,
     '--pointer-origin-y': `${(top / canvasH) * 100}%`,
   }
+}
+
+function spinPointerToPrize(currentRotation, prizeAmount) {
+  const targetAngle = WHEEL_POINTER_ANGLE_BY_AMOUNT[Number(prizeAmount)]
+  if (targetAngle === undefined) return currentRotation + 1440
+  const currentAngle = ((currentRotation % 360) + 360) % 360
+  const remainingAngle = (targetAngle - currentAngle + 360) % 360
+  return currentRotation + 1440 + remainingAngle
 }
 
 function payoutStatusText(status) {
