@@ -293,7 +293,7 @@ function SuccessPage({ onBack }) {
   return <ArtPage art={NANHAI_ART.success} onAction={{ 'back-map': onBack }} />
 }
 
-function ArtPage({ art, onAction = {}, children, className = '' }) {
+function ArtPage({ art, onAction = {}, children, rotatedChildren, className = '' }) {
   const [canvasW, canvasH] = art.canvas
   return (
     <section
@@ -306,6 +306,7 @@ function ArtPage({ art, onAction = {}, children, className = '' }) {
           {(art.layers || []).map((layer) => (
             <ArtLayer key={`${layer[0]}-${layer[1]}-${layer[2]}`} layer={layer} canvas={art.canvas} onAction={onAction[layer[5]]} />
           ))}
+          {rotatedChildren}
         </div>
         <div className="nh-art-page__overlay">{children}</div>
       </div>
@@ -313,7 +314,7 @@ function ArtPage({ art, onAction = {}, children, className = '' }) {
   )
 }
 
-function ArtLayer({ layer, canvas, onAction }) {
+function ArtLayer({ layer, canvas, onAction, className = '' }) {
   const [filename, left, top, width, height] = layer
   const style = {
     left: `${(left / canvas[0]) * 100}%`,
@@ -324,14 +325,21 @@ function ArtLayer({ layer, canvas, onAction }) {
   if (onAction) {
     return <button className="nh-art-page__tap" style={style} onClick={onAction} aria-label="进入下一页"><img src={nanhaiAsset(filename)} alt="" /></button>
   }
-  return <img className="nh-art-page__layer" style={style} src={nanhaiAsset(filename)} alt="" />
+  return <img className={`nh-art-page__layer ${className}`} style={style} src={nanhaiAsset(filename)} alt="" />
 }
 
 function MapPage({ levels, progress, correctCodes, onOpenLevel, onBack }) {
   const map = NANHAI_ART.map
   return (
-    <ArtPage art={map} onAction={{ back: onBack }} className="nh-map-page">
-      {map.cards.map((card) => <ArtLayer key={card[0]} layer={card} canvas={map.canvas} />)}
+    <ArtPage
+      art={map}
+      onAction={{ back: onBack }}
+      className="nh-map-page"
+      rotatedChildren={map.cards.map((card, index) => {
+        const status = levelStatus(levels[index], progress, correctCodes)
+        return <ArtLayer key={card[0]} layer={card} canvas={map.canvas} className={`nh-map-card is-${status}`} />
+      })}
+    >
       <div className="nh-map-page__nodes">
         {levels.map((level, index) => {
           const card = map.cards[index]
@@ -356,30 +364,33 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, onBack }) {
 
 function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
   const scene = NANHAI_ART.scenes[level.levelNo - 1]
-  const levelComplete = level.questions.every((question) => correctCodes.has(question.code))
   return (
     <section className="nh-scene-page">
-      <ArtPage art={scene} className="nh-scene-page__art" />
-      <button className="nh-scene-back" onClick={onBack}>返回关卡</button>
-      <div className="nh-scene-heading"><b>{level.title}</b><span>{levelComplete ? '本关已全部解锁' : '点击巡检点开始答题'}</span></div>
-      <div className="nh-scene-pins">
-        {level.questions.map((question, index) => {
-          const pin = scene.pins[index]
-          const completed = correctCodes.has(question.code)
-          return (
-            <button
-              key={question.code}
-              className={`nh-scene-pin ${completed ? 'is-completed' : ''}`}
-              style={rotatedRect(scene.canvas, pin[1], pin[2], 82, 82)}
-              onClick={() => onOpenQuestion(index)}
-              aria-label={`第${index + 1}题${completed ? '已解锁' : '点击答题'}`}
-            >
-              <img src={nanhaiAsset(pin[0])} alt="" />
-              <span>{completed ? '已解锁' : '点击答题'}</span>
-            </button>
-          )
-        })}
-      </div>
+      <ArtPage
+        art={scene}
+        className="nh-scene-page__art"
+        rotatedChildren={(
+          <div className="nh-scene-pins">
+            {level.questions.map((question, index) => {
+              const pin = scene.pins[index]
+              const completed = correctCodes.has(question.code)
+              return (
+                <button
+                  key={question.code}
+                  className={`nh-scene-pin ${completed ? 'is-completed' : ''}`}
+                  style={sourceRect(scene.canvas, pin[1], pin[2], 82, 82)}
+                  onClick={() => onOpenQuestion(index)}
+                  aria-label={`第${index + 1}题${completed ? '已解锁' : '点击答题'}`}
+                >
+                  <img src={nanhaiAsset(pin[0])} alt="" />
+                  {completed ? <span>已解锁</span> : null}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      />
+      <div className="nh-scene-back-anchor"><button className="nh-scene-back" onClick={onBack}>返回</button></div>
     </section>
   )
 }
@@ -402,7 +413,7 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
               onClick={() => onSelect(option.key)}
               disabled={busy}
             >
-              <i>{option.key}</i><span>{option.text}</span>
+              <i className={question.options.length === 2 ? 'nh-radio' : 'nh-option-key'}>{question.options.length === 2 ? null : option.key}</i><span>{option.text}</span>
             </button>
           ))}
         </div>
@@ -414,14 +425,12 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
   )
 }
 
-function AnswerFeedback({ feedback, onClose }) {
+function AnswerFeedback({ onClose }) {
   return (
     <div className="nh-answer-mask" role="presentation">
-      <section className={`nh-answer-feedback ${feedback.correct ? 'is-correct' : 'is-wrong'}`} role="dialog" aria-modal="true">
+      <section className="nh-answer-feedback" role="dialog" aria-modal="true">
         <img className="nh-answer-feedback__base" src={nanhaiAsset(NANHAI_ART.answerPanel)} alt="" />
         <img className="nh-answer-feedback__badge" src={nanhaiAsset(NANHAI_ART.answerCorrect)} alt="" />
-        <p>{feedback.correct ? '回答正确' : '回答错误，再想一想'}</p>
-        <small>{feedback.explanation}</small>
         <button onClick={onClose} aria-label="继续答题"><img src={nanhaiAsset(NANHAI_ART.answerClose)} alt="继续" /></button>
       </section>
     </div>
@@ -497,6 +506,15 @@ function rotatedRect([canvasW, canvasH], left, top, width, height) {
     top: `${(left / canvasW) * 100}%`,
     width: `${(height / canvasH) * 100}%`,
     height: `${(width / canvasW) * 100}%`,
+  }
+}
+
+function sourceRect([canvasW, canvasH], left, top, width, height) {
+  return {
+    left: `${(left / canvasW) * 100}%`,
+    top: `${(top / canvasH) * 100}%`,
+    width: `${(width / canvasW) * 100}%`,
+    height: `${(height / canvasH) * 100}%`,
   }
 }
 
