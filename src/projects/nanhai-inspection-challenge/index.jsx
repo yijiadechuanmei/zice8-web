@@ -71,7 +71,6 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   const progress = bootstrap?.progress
   const preview = Boolean(bootstrap?.preview)
   const correctCodes = new Set(progress?.correctQuestionCodes || [])
-  const allCompleted = (progress?.completedLevels || 0) >= 5
   const segments = bootstrap?.config?.wheelSegments || FALLBACK_SEGMENTS
 
   function navigate(nextPage) {
@@ -104,6 +103,18 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       levelNo: activeLevel.levelNo,
       questionCode: activeLevel.questions[index]?.code,
     })
+  }
+
+  function handlePreviewCompleteAll() {
+    if (!preview) return
+    setBootstrap((current) => ({
+      ...current,
+      progress: buildPreviewCompletedProgress(current),
+    }))
+    setActiveLevel(null)
+    setActiveQuestionIndex(null)
+    navigate('success')
+    trackEvent(activityKey, 'preview_complete_all', { activityType: 'nanhai_inspection_challenge' })
   }
 
   async function handleAnswer() {
@@ -251,7 +262,8 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           progress={progress}
           correctCodes={correctCodes}
           onOpenLevel={openScene}
-          onBack={() => navigate(allCompleted ? 'wheel' : 'home')}
+          preview={preview}
+          onDebugComplete={handlePreviewCompleteAll}
         />
       ) : null}
       {page === 'scene' && activeLevel ? (
@@ -344,12 +356,17 @@ function ArtLayer({ layer, canvas, onAction, className = '' }) {
   return <img className={`nh-art-page__layer ${className}`} style={style} src={nanhaiAsset(filename)} alt="" />
 }
 
-function MapPage({ levels, progress, correctCodes, onOpenLevel, onBack }) {
+function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebugComplete }) {
   const map = NANHAI_ART.map
+  const [selectedLevelNo, setSelectedLevelNo] = useState(null)
+  const selectedLevel = levels.find((level) => level.levelNo === selectedLevelNo)
   return (
     <ArtPage
       art={map}
-      onAction={{ back: onBack }}
+      onAction={{
+        'start-scene': selectedLevel ? () => onOpenLevel(selectedLevel) : undefined,
+        'debug-complete': preview ? onDebugComplete : undefined,
+      }}
       className="nh-map-page"
       rotatedChildren={map.cards.map((card, index) => {
         const status = levelStatus(levels[index], progress, correctCodes)
@@ -377,9 +394,10 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, onBack }) {
           return (
             <button
               key={level.levelNo}
-              className={`nh-map-node is-${status}`}
+              className={`nh-map-node is-${status}${selectedLevelNo === level.levelNo ? ' is-selected' : ''}`}
               style={position}
-              onClick={() => onOpenLevel(level)}
+              onClick={() => status !== 'locked' && setSelectedLevelNo(level.levelNo)}
+              aria-pressed={selectedLevelNo === level.levelNo}
               aria-label={`${level.title} ${status === 'completed' ? '已解锁' : status === 'available' ? '未解锁' : '未开放'}`}
             >
               <span>{status === 'completed' ? '已解锁' : status === 'available' ? '未解锁' : '暂未开放'}</span>
@@ -578,6 +596,19 @@ function buildPreviewProgress(bootstrap, newlyCorrectCode, wrongAnswer = false) 
     correctCount: correctQuestionCodes.length,
     wrongCount: (currentProgress.wrongCount || 0) + (wrongAnswer ? 1 : 0),
     status: completedLevels >= 5 ? 'completed' : 'in_progress',
+    correctQuestionCodes,
+  }
+}
+
+function buildPreviewCompletedProgress(bootstrap) {
+  const currentProgress = bootstrap?.progress || {}
+  const correctQuestionCodes = (bootstrap?.levels || []).flatMap((level) => level.questions.map((question) => question.code))
+  return {
+    ...currentProgress,
+    currentLevel: 5,
+    completedLevels: 5,
+    correctCount: correctQuestionCodes.length,
+    status: 'completed',
     correctQuestionCodes,
   }
 }

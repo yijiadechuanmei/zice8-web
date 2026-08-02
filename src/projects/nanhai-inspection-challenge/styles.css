@@ -129,6 +129,10 @@ button { font: inherit; }
 }
 
 .nh-map-node span { display: none; }
+.nh-map-node.is-selected {
+  border: 3px solid #2d6bf6;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .86), 0 0 12px rgba(45, 107, 246, .8);
+}
 
 .nh-scene-page { position: relative; min-height: 100svh; background: #3c87f9; }
 .nh-scene-page__art {
