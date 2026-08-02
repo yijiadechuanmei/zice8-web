@@ -20,6 +20,7 @@ const QuizProject = lazy(() => import('./quiz/index.jsx'))
 const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
 const PdfPreviewProject = lazy(() => import('./pdf-preview/index.jsx'))
 const PaymentTransferTestProject = lazy(() => import('./payment-transfer-test/index.jsx'))
+const NanhaiInspectionChallengeProject = lazy(() => import('./nanhai-inspection-challenge/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -46,6 +47,16 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/nanhai-inspection-challenge/:activityKey',
+    Component: NanhaiInspectionChallengeProject,
+    activityGate: true,
+  },
+  {
+    path: '/nanhai_inspection_challenge/:activityKey',
+    Component: NanhaiInspectionChallengeProject,
+    activityGate: true,
+  },
   {
     path: '/pdf/:activityKey',
     Component: PdfPreviewProject,

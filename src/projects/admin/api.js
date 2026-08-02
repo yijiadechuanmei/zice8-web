@@ -340,3 +340,16 @@ export function syncPaymentDemoTransfer(payoutNo) {
     method: 'POST',
   })
 }
+
+export function syncNanhaiChallengePayout(activityKey, drawId) {
+  return adminRequest(`/nanhai-inspection-challenge/admin/activities/${encodeURIComponent(activityKey)}/draws/${encodeURIComponent(drawId)}/payout/sync`, {
+    method: 'POST',
+  })
+}
+
+export function retryNanhaiChallengePayout(activityKey, drawId, reason) {
+  return adminRequest(`/nanhai-inspection-challenge/admin/activities/${encodeURIComponent(activityKey)}/draws/${encodeURIComponent(drawId)}/payout/retry`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  })
+}

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, reviewLongMarchRecording, reviewLongMarchShareScreenshot } from '../api'
+import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, syncNanhaiChallengePayout } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -33,6 +33,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
   const [retractingWishId, setRetractingWishId] = useState('')
+  const [nanhaiPayoutAction, setNanhaiPayoutAction] = useState('')
   const [error, setError] = useState('')
   const phaseNo = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all' ? phaseScope : ''
 
@@ -259,6 +260,54 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       setRetractingWishId('')
     }
   }, [activity.activityKey])
+
+  const updateNanhaiDrawRow = useCallback((row, result) => {
+    setData((current) => ({
+      ...current,
+      rows: current.rows.map((item) => item.id === row.id ? {
+        ...item,
+        payoutNo: result?.payoutNo ?? item.payoutNo,
+        payoutStatus: result?.payoutStatus ?? item.payoutStatus,
+        wechatState: result?.wechatState ?? item.wechatState,
+        failureCode: result?.failureCode ?? '',
+        failureReason: result?.failureReason ?? '',
+        updatedAt: new Date().toISOString(),
+      } : item),
+    }))
+  }, [])
+
+  const handleNanhaiPayoutSync = useCallback(async (row) => {
+    if (!row?.id || !row?.payoutNo) return
+    setNanhaiPayoutAction(`${row.id}:sync`)
+    try {
+      const result = await syncNanhaiChallengePayout(activity.activityKey, row.id)
+      updateNanhaiDrawRow(row, result)
+      message.success(`已同步，当前状态：${result?.payoutStatus || '-'}`)
+    } catch (err) {
+      message.error(err.message || '同步微信发放状态失败')
+    } finally {
+      setNanhaiPayoutAction('')
+    }
+  }, [activity.activityKey, updateNanhaiDrawRow])
+
+  const handleNanhaiPayoutRetry = useCallback(async (row) => {
+    if (!row?.id) return
+    const reason = (window.prompt('请输入重新发放原因（必填，将写入发放操作流水）') || '').trim()
+    if (!reason) {
+      message.warning('必须填写重新发放原因')
+      return
+    }
+    setNanhaiPayoutAction(`${row.id}:retry`)
+    try {
+      const result = await retryNanhaiChallengePayout(activity.activityKey, row.id, reason)
+      updateNanhaiDrawRow(row, result)
+      message.success(`重新发放已处理，当前状态：${result?.payoutStatus || '-'}`)
+    } catch (err) {
+      message.error(err.message || '重新发放失败')
+    } finally {
+      setNanhaiPayoutAction('')
+    }
+  }, [activity.activityKey, updateNanhaiDrawRow])
 
   const tableColumns = useMemo(() => {
     const columns = buildAdminColumnsFromSchema(null, visibleColumns, Object.fromEntries(
@@ -492,8 +541,52 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         ) : <Tag>已撤回</Tag>,
       })
     }
+    if (activity.type === 'nanhai_inspection_challenge' && activeViewKey === 'nanhai_challenge_draws') {
+      const payoutStatusColumn = columns.find((column) => column.key === 'payoutStatus' || column.dataIndex === 'payoutStatus')
+      if (payoutStatusColumn) {
+        payoutStatusColumn.render = (value) => {
+          const color = value === 'success' ? 'green' : value === 'failed' ? 'red' : value ? 'orange' : 'default'
+          return <Tag color={color}>{value || '-'}</Tag>
+        }
+      }
+      columns.push({
+        title: '发放操作',
+        key: 'nanhaiPayoutActions',
+        fixed: 'right',
+        width: 190,
+        render: (_, row) => (
+          <Space size={6} wrap>
+            <Button
+              size="small"
+              loading={nanhaiPayoutAction === `${row.id}:sync`}
+              disabled={!row.payoutNo || Boolean(nanhaiPayoutAction)}
+              onClick={() => handleNanhaiPayoutSync(row)}
+            >
+              同步微信
+            </Button>
+            {row.status === 'won' && (!row.payoutNo || row.payoutStatus === 'failed') ? (
+              <Popconfirm
+                title="系统会先核验微信终态，确认未成功后才允许重发，是否继续？"
+                okText="继续"
+                cancelText="取消"
+                onConfirm={() => handleNanhaiPayoutRetry(row)}
+              >
+                <Button
+                  size="small"
+                  danger
+                  loading={nanhaiPayoutAction === `${row.id}:retry`}
+                  disabled={Boolean(nanhaiPayoutAction)}
+                >
+                  重新发放
+                </Button>
+              </Popconfirm>
+            ) : null}
+          </Space>
+        ),
+      })
+    }
     return columns
-  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleRetractSongWish, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, recordingPlayUrls, retractingWishId, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleNanhaiPayoutRetry, handleNanhaiPayoutSync, handleRetractSongWish, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, nanhaiPayoutAction, recordingPlayUrls, retractingWishId, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return
