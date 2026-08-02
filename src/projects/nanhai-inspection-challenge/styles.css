@@ -26,8 +26,7 @@ button { font: inherit; }
 
 .nh-page-stage.is-leaving {
   opacity: 0;
-  transform: scale(.992);
-  transition: opacity .22s ease, transform .22s ease;
+  transition: opacity .22s ease;
   pointer-events: none;
 }
 
@@ -143,7 +142,8 @@ button { font: inherit; }
   position: fixed;
   z-index: 20;
   top: 50%;
-  left: 60px;
+  /* 设计稿为 750 宽画布中的 60px；旋转后的按钮视觉左边缘即此锚点。 */
+  left: 8cqw;
   width: 8.5333cqw;
   height: 19.2cqw;
   transform: translateY(-50%);
@@ -497,7 +497,7 @@ button { font: inherit; }
 @keyframes nh-pop-in { from { opacity: 0; transform: scale(.84); } to { opacity: 1; transform: scale(1); } }
 @keyframes nh-pop-rotate { from { opacity: 0; transform: rotate(90deg) scale(.84); } to { opacity: 1; transform: rotate(90deg) scale(1); } }
 @keyframes nh-question-pop { from { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) scale(.84); } to { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); } }
-@keyframes nh-page-enter { from { opacity: 0; transform: scale(.992); } to { opacity: 1; transform: scale(1); } }
+@keyframes nh-page-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes nh-art-bg-in { from { opacity: .5; transform: scale(1.015); } to { opacity: 1; transform: scale(1); } }
 @keyframes nh-art-reveal { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes nh-button-breathe { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 113, 23, 0)); transform: scale(1); } 50% { filter: drop-shadow(0 5px 10px rgba(255, 113, 23, .42)); transform: scale(1.035); } }
