@@ -444,7 +444,10 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
           </div>
         )}
       />
-      <div className="nh-scene-back-anchor"><button className="nh-scene-back" onClick={onBack}>返回</button></div>
+      {createPortal(
+        <div className="nh-scene-back-anchor"><button className="nh-scene-back" onClick={onBack}>返回</button></div>,
+        document.body,
+      )}
     </section>
   )
 }

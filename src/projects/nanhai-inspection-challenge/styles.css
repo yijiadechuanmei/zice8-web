@@ -150,25 +150,25 @@ button { font: inherit; }
   z-index: 20;
   top: 50%;
   /* 设计稿为 750 宽画布中的 60px；旋转后的按钮视觉左边缘即此锚点。 */
-  left: 8cqw;
-  width: 8.5333cqw;
-  height: 19.2cqw;
+  left: min(8vw, 34.4px);
+  width: min(8.5333vw, 36.693px);
+  height: min(19.2vw, 82.56px);
   transform: translateY(-50%);
 }
 
 .nh-scene-back {
   position: absolute;
   top: 0;
-  left: 8.5333cqw;
-  width: 19.2cqw;
-  height: 8.5333cqw;
+  left: min(8.5333vw, 36.693px);
+  width: min(19.2vw, 82.56px);
+  height: min(8.5333vw, 36.693px);
   padding: 0;
   border: 0;
-  border-radius: 1.3333cqw;
+  border-radius: min(1.3333vw, 5.733px);
   color: #2d6bf6;
   background: #fff;
   box-shadow: 0 4px 13px rgba(0, 40, 110, .2);
-  font-size: 3.0667cqw;
+  font-size: min(3.0667vw, 13.187px);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -178,9 +178,9 @@ button { font: inherit; }
 }
 
 .nh-scene-back::before {
-  width: 4cqw;
-  height: 4cqw;
-  margin-right: 1.7333cqw;
+  width: min(4vw, 17.2px);
+  height: min(4vw, 17.2px);
+  margin-right: min(1.7333vw, 7.453px);
   background: #2d6bf6;
   content: "";
   mask: url("https://file3.ih5.cn/v35/edt/u10013600/7eeb53fc03a3ffb4e7d62a44adf2181a_215.svg") center / contain no-repeat;
