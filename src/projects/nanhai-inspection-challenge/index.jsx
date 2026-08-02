@@ -293,14 +293,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           onBack={() => navigate('map')}
         />
       ) : null}
-      {page === 'success' ? <SuccessPage onBack={() => navigate('map')} /> : null}
-      {page === 'wheel' ? (
-        <WheelPage
-          rotation={wheelRotation}
-          spinning={wheelSpinning}
-          onDraw={handleDraw}
-        />
-      ) : null}
+      {page === 'success' ? <SuccessPage rotation={wheelRotation} onDraw={handleDraw} /> : null}
       {page === 'share' ? (
         <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => navigate('home')} />
       ) : null}
@@ -331,8 +324,34 @@ function RulesPage({ onEnter }) {
   return <ArtPage art={NANHAI_ART.rules} onAction={{ 'enter-map': onEnter }} className="nh-rules-page" />
 }
 
-function SuccessPage({ onBack }) {
-  return <ArtPage art={NANHAI_ART.success} onAction={{ 'back-map': onBack }} />
+function SuccessPage({ rotation, onDraw }) {
+  const success = NANHAI_ART.success
+  const [discFilename, discLeft, discTop, discWidth, discHeight] = success.wheel.disc
+  const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = success.wheel.base
+  const [ringFilename, ringLeft, ringTop, ringWidth, ringHeight] = success.wheel.ring
+  const [pointerFilename, pointerLeft, pointerTop, pointerWidth, pointerHeight] = success.wheel.pointer
+  const ringCenterX = ringLeft + ringWidth / 2
+  const ringCenterY = ringTop + ringHeight / 2
+  return (
+    <ArtPage
+      art={success}
+      onAction={{ draw: onDraw }}
+      className="nh-success-page"
+      rotatedChildren={(
+        <>
+          <img className="nh-success-wheel-disc" src={nanhaiAsset(discFilename)} style={sourceCenterRect(success.canvas, discLeft, discTop, discWidth, discHeight)} alt="" />
+          <img className="nh-success-wheel-base" src={nanhaiAsset(baseFilename)} style={sourceRect(success.canvas, baseLeft, baseTop, baseWidth, baseHeight)} alt="" />
+          <img className="nh-success-wheel-ring" src={nanhaiAsset(ringFilename)} style={sourceRect(success.canvas, ringLeft, ringTop, ringWidth, ringHeight)} alt="" />
+          <div
+            className="nh-success-wheel-pointer-spin"
+            style={{ ...sourcePoint(success.canvas, ringCenterX, ringCenterY), '--pointer-rotation': `${rotation}deg` }}
+          >
+            <img className="nh-success-wheel-pointer" src={nanhaiAsset(pointerFilename)} style={sourceRect(success.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)} alt="" />
+          </div>
+        </>
+      )}
+    />
+  )
 }
 
 function ArtPage({ art, onAction = {}, children, rotatedChildren, className = '' }) {
@@ -510,44 +529,6 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function WheelPage({ rotation, spinning, onDraw }) {
-  const wheel = NANHAI_ART.wheel
-  const [discFilename, discLeft, discTop, discWidth, discHeight] = wheel.disc
-  const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = wheel.base
-  const [pointerFilename, pointerLeft, pointerTop, pointerWidth, pointerHeight] = wheel.pointer
-  return (
-    <ArtPage
-      art={wheel}
-      className="nh-wheel-page"
-      rotatedChildren={(
-        <>
-          <button
-            className="nh-wheel-disc"
-            style={{ ...sourceCenterRect(wheel.canvas, discLeft, discTop, discWidth, discHeight), '--wheel-rotation': `${rotation}deg` }}
-            onClick={onDraw}
-            disabled={spinning}
-            aria-label={spinning ? '转盘转动中' : '点击抽奖'}
-          >
-            <img src={nanhaiAsset(discFilename)} alt="" />
-          </button>
-          <img
-            className="nh-wheel-base-art"
-            src={nanhaiAsset(baseFilename)}
-            style={sourceRect(wheel.canvas, baseLeft, baseTop, baseWidth, baseHeight)}
-            alt=""
-          />
-          <img
-            className="nh-wheel-pointer-art"
-            src={nanhaiAsset(pointerFilename)}
-            style={sourceRect(wheel.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)}
-            alt=""
-          />
-        </>
-      )}
-    />
-  )
-}
-
 function SharePage({ draw, busy, preview, onSync, onHome }) {
   const won = draw?.won
   const payoutSuccess = draw?.payoutStatus === 'success'
@@ -607,6 +588,13 @@ function sourceCenterRect([canvasW, canvasH], left, top, width, height) {
     top: `${(top / canvasH) * 100}%`,
     width: `${(width / canvasW) * 100}%`,
     height: `${(height / canvasH) * 100}%`,
+  }
+}
+
+function sourcePoint([canvasW, canvasH], left, top) {
+  return {
+    '--pointer-origin-x': `${(left / canvasW) * 100}%`,
+    '--pointer-origin-y': `${(top / canvasH) * 100}%`,
   }
 }
 
