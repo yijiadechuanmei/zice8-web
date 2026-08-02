@@ -407,8 +407,8 @@ button { font: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(44.1333cqw, 189.773px);
-  height: min(31.4667cqw, 135.333px);
+  width: min(66.2cqw, 284.66px);
+  height: min(47.2cqw, 203px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
