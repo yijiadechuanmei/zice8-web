@@ -10,6 +10,12 @@ export const submitAnswer = (activityKey, levelNo, payload) =>
     body: JSON.stringify(payload),
   })
 
+export const previewAnswer = (activityKey, levelNo, payload) =>
+  request(`${base(activityKey)}/preview/levels/${encodeURIComponent(levelNo)}/answers`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+
 export const createAuthorization = (activityKey) =>
   request(`${base(activityKey)}/transfer-authorization`, { method: 'POST' })
 

@@ -5,6 +5,7 @@ import {
   createAuthorization,
   drawPrize,
   getBootstrap,
+  previewAnswer,
   submitAnswer,
   syncAuthorization,
   syncPayout,
@@ -64,6 +65,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   }, [activityKey])
 
   const progress = bootstrap?.progress
+  const preview = Boolean(bootstrap?.preview)
   const correctCodes = new Set(progress?.correctQuestionCodes || [])
   const allCompleted = (progress?.completedLevels || 0) >= 5
   const segments = bootstrap?.config?.wheelSegments || FALLBACK_SEGMENTS
@@ -95,25 +97,34 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     if (!question || !selectedOption || busy) return
     setBusy('answer')
     try {
-      const result = await submitAnswer(activityKey, activeLevel.levelNo, {
+      const payload = {
         questionCode: question.code,
         selectedOption,
         requestId: createRequestId('answer'),
-      })
+      }
+      const result = preview
+        ? await previewAnswer(activityKey, activeLevel.levelNo, payload)
+        : await submitAnswer(activityKey, activeLevel.levelNo, payload)
+      const nextPreviewProgress = preview
+        ? buildPreviewProgress(bootstrap, result.correct ? question.code : null, !result.correct)
+        : null
       setBootstrap((current) => ({
         ...current,
         progress: {
           ...current.progress,
-          ...result.progress,
-          correctQuestionCodes: result.correct
-            ? Array.from(new Set([...(current.progress.correctQuestionCodes || []), question.code]))
-            : current.progress.correctQuestionCodes,
+          ...(nextPreviewProgress || result.progress),
+          correctQuestionCodes: preview
+            ? nextPreviewProgress.correctQuestionCodes
+            : result.correct
+              ? Array.from(new Set([...(current.progress.correctQuestionCodes || []), question.code]))
+              : current.progress.correctQuestionCodes,
         },
       }))
+      const nextProgress = nextPreviewProgress || result.progress
       setFeedback({
         correct: result.correct,
         explanation: result.explanation,
-        completedAll: (result.progress?.completedLevels || 0) >= 5,
+        completedAll: (nextProgress?.completedLevels || 0) >= 5,
       })
       trackEvent(activityKey, 'question_answer', {
         levelNo: activeLevel.levelNo,
@@ -162,6 +173,14 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   async function handleDraw() {
     if (busy || wheelSpinning) return
+    if (preview) {
+      setBootstrap((current) => ({
+        ...current,
+        draw: { preview: true, won: false, message: 'PC 预览不参与抽奖，不会创建红包或发放记录。' },
+      }))
+      setPage('share')
+      return
+    }
     if (!bootstrap?.authorization?.effective) {
       await handleAuthorization()
       return
@@ -208,6 +227,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   return (
     <main className="nh-challenge">
+      {preview ? <button className="nh-preview-badge" onClick={() => setPage('home')}>PC 预览模式 · 不计入答题或抽奖</button> : null}
       {page === 'home' ? <HomePage onStart={() => setPage('rules')} /> : null}
       {page === 'rules' ? <RulesPage onEnter={() => setPage('map')} /> : null}
       {page === 'map' ? (
@@ -235,13 +255,14 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           rotation={wheelRotation}
           spinning={wheelSpinning}
           busy={busy}
+          preview={preview}
           onAuthorize={handleAuthorization}
           onDraw={handleDraw}
           onBack={() => setPage('map')}
         />
       ) : null}
       {page === 'share' ? (
-        <SharePage draw={bootstrap.draw} busy={busy} onSync={handleSyncPayout} onHome={() => setPage('home')} />
+        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onHome={() => setPage('home')} />
       ) : null}
       {activeLevel && activeQuestionIndex !== null ? (
         <QuestionDialog
@@ -407,7 +428,7 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function WheelPage({ authorization, segments, rotation, spinning, busy, onAuthorize, onDraw, onBack }) {
+function WheelPage({ authorization, segments, rotation, spinning, busy, preview, onAuthorize, onDraw, onBack }) {
   return (
     <section className="nh-wheel-page">
       <button className="nh-wheel-page__back" onClick={onBack}>返回关卡</button>
@@ -423,17 +444,19 @@ function WheelPage({ authorization, segments, rotation, spinning, busy, onAuthor
           <b>抽奖</b>
         </div>
       </div>
-      {!authorization?.effective ? (
+      {preview ? (
+        <button className="nh-wheel-primary" onClick={onDraw}>查看预览结束页</button>
+      ) : !authorization?.effective ? (
         <button className="nh-wheel-primary" disabled={Boolean(busy)} onClick={onAuthorize}>{busy === 'authorization' ? '正在开通…' : '开通自动发放并抽奖'}</button>
       ) : (
         <button className="nh-wheel-primary" disabled={Boolean(busy) || spinning} onClick={onDraw}>{spinning ? '好运转动中…' : '立即抽奖'}</button>
       )}
-      <small>每位用户仅可抽奖一次，奖励将按微信状态自动发放。</small>
+      <small>{preview ? 'PC 预览不会创建抽奖、红包或发放流水。' : '每位用户仅可抽奖一次，奖励将按微信状态自动发放。'}</small>
     </section>
   )
 }
 
-function SharePage({ draw, busy, onSync, onHome }) {
+function SharePage({ draw, busy, preview, onSync, onHome }) {
   const won = draw?.won
   const payoutSuccess = draw?.payoutStatus === 'success'
   const payoutFailed = draw?.payoutStatus === 'failed'
@@ -441,7 +464,7 @@ function SharePage({ draw, busy, onSync, onHome }) {
     <section className="nh-share-page">
       <ArtPage art={NANHAI_ART.share} onAction={{ share: () => {}, home: onHome }} />
       <div className="nh-share-page__result">
-        <strong>{won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
+        <strong>{preview ? 'PC 预览完成' : won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
         <span>{draw?.message}</span>
         {won ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
         {payoutFailed ? <small className="is-failed">失败原因：{draw.failureReason || draw.failureCode || '请后台核验'}</small> : null}
@@ -485,6 +508,27 @@ function payoutStatusText(status) {
 function createRequestId(prefix) {
   const random = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`
   return `${prefix}-${random}`.slice(0, 100)
+}
+
+function buildPreviewProgress(bootstrap, newlyCorrectCode, wrongAnswer = false) {
+  const currentProgress = bootstrap?.progress || {}
+  const correctQuestionCodes = Array.from(new Set([
+    ...(currentProgress.correctQuestionCodes || []),
+    ...(newlyCorrectCode ? [newlyCorrectCode] : []),
+  ]))
+  const levels = bootstrap?.levels || []
+  const completedLevels = levels.reduce((count, level) => (
+    level.questions.every((question) => correctQuestionCodes.includes(question.code)) ? count + 1 : count
+  ), 0)
+  return {
+    ...currentProgress,
+    currentLevel: Math.min(completedLevels + 1, 5),
+    completedLevels,
+    correctCount: correctQuestionCodes.length,
+    wrongCount: (currentProgress.wrongCount || 0) + (wrongAnswer ? 1 : 0),
+    status: completedLevels >= 5 ? 'completed' : 'in_progress',
+    correctQuestionCodes,
+  }
 }
 
 function readError(error, fallback) {

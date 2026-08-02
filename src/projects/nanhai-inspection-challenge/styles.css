@@ -18,6 +18,22 @@ button { font: inherit; }
   overflow-x: hidden;
 }
 
+.nh-preview-badge {
+  position: fixed;
+  z-index: 120;
+  top: 12px;
+  right: 12px;
+  max-width: calc(100vw - 24px);
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(4, 48, 127, .82);
+  box-shadow: 0 4px 14px rgba(0, 33, 93, .24);
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .nh-art-page {
   position: relative;
   width: 100%;
