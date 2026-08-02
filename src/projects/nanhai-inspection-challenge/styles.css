@@ -143,7 +143,7 @@ button { font: inherit; }
   position: fixed;
   z-index: 20;
   top: 50%;
-  left: 0;
+  left: 60px;
   width: 8.5333cqw;
   height: 19.2cqw;
   transform: translateY(-50%);
@@ -190,15 +190,7 @@ button { font: inherit; }
 }
 
 .nh-scene-pin__trigger { display: block; width: 100%; height: 100%; filter: drop-shadow(0 3px 4px rgba(0, 25, 82, .34)); }
-.nh-scene-pin__unlocked {
-  position: absolute;
-  z-index: 2;
-  top: 28.05%;
-  left: 26.22%;
-  width: 47.56%;
-  height: 43.9%;
-  pointer-events: none;
-}
+.nh-map-unlocked-lock { position: absolute; z-index: 4; pointer-events: none; }
 .nh-scene-pin span {
   position: absolute;
   top: calc(100% + 19.51%);
@@ -360,7 +352,7 @@ button { font: inherit; }
   justify-content: center;
 }
 .nh-question-options.is-judge button.is-selected { border-color: #2d6bf6; color: #2d6bf6; background: #d8e5fd; }
-.nh-question-options.is-judge span { font-size: clamp(20px, 5.2vw, 24px); font-weight: 900; }
+.nh-question-options.is-judge span { font-size: clamp(15px, 4vw, 17px); font-weight: 900; }
 .nh-radio {
   width: clamp(19px, 4.5vw, 33px) !important;
   height: clamp(19px, 4.5vw, 33px) !important;

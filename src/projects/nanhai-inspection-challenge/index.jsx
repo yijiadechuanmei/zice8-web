@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import {
@@ -353,7 +353,20 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, onBack }) {
       className="nh-map-page"
       rotatedChildren={map.cards.map((card, index) => {
         const status = levelStatus(levels[index], progress, correctCodes)
-        return <ArtLayer key={card[0]} layer={card} canvas={map.canvas} className={`nh-map-card is-${status}`} />
+        const unlockedLock = map.unlockedLocks[index]
+        return (
+          <Fragment key={card[0]}>
+            <ArtLayer key={card[0]} layer={card} canvas={map.canvas} className={`nh-map-card is-${status}`} />
+            {status === 'completed' ? (
+              <img
+                className="nh-map-unlocked-lock"
+                src={nanhaiAsset(NANHAI_ART.unlockedLock)}
+                style={sourceRect(map.canvas, ...unlockedLock)}
+                alt=""
+              />
+            ) : null}
+          </Fragment>
+        )
       })}
     >
       <div className="nh-map-page__nodes">
@@ -399,7 +412,6 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
                   aria-label={`第${index + 1}题${completed ? '已解锁' : '点击答题'}`}
                 >
                   <img className="nh-scene-pin__trigger" src={nanhaiAsset(pin[0])} alt="" />
-                  {completed ? <img className="nh-scene-pin__unlocked" src={nanhaiAsset(NANHAI_ART.unlockedLock)} alt="" /> : null}
                   {completed ? <span>已解锁</span> : null}
                 </button>
               )
