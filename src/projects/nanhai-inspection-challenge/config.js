@@ -122,6 +122,13 @@ export const NANHAI_ART = {
       ['e7c1fec6c7d766a6848d6d033aef1c9a_25234_245_54.png', 616, 637, 245, 54, 'back-map'],
     ],
   },
+  wheel: {
+    canvas: [1477, 750],
+    background: '6fb3cc9d7b2812d1aea11523bea09577_1686863_1477_750.png',
+    disc: ['929e6d562afc39f8ba553208198639a9_38598_401_400.png', 999, 416, 401, 400],
+    base: ['de74ea8d96599456066d3f794398a906_29148_430_455.png', 782, 196, 430, 455],
+    pointer: ['b8117ddb70ea9d560109a72061b3896a_20481_107_141.png', 945, 341, 107, 141],
+  },
   share: {
     canvas: [1477, 750], background: '6fb3cc9d7b2812d1aea11523bea09577_1686863_1477_750.png',
     layers: [

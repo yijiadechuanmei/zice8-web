@@ -200,11 +200,29 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   async function handleDraw() {
     if (busy || wheelSpinning) return
     if (preview) {
-      setBootstrap((current) => ({
-        ...current,
-        draw: { preview: true, won: false, message: 'PC 预览不参与抽奖，不会创建红包或发放记录。' },
-      }))
-      navigate('share')
+      const testPrizes = segments.filter((segment) => Number(segment.amount) > 0)
+      const prize = testPrizes[Math.floor(Math.random() * testPrizes.length)] || FALLBACK_SEGMENTS[0]
+      const stopIndex = Math.max(0, segments.findIndex((segment) => segment.label === prize.label && segment.amount === prize.amount))
+      setWheelSpinning(true)
+      setError('')
+      try {
+        setWheelRotation((current) => current + 1440 + (360 - stopIndex * (360 / segments.length)))
+        await wait(3800)
+        setBootstrap((current) => ({
+          ...current,
+          draw: {
+            preview: true,
+            won: true,
+            prizeAmount: prize.amount,
+            prizeAmountYuan: Number(prize.amount) / 100,
+            message: `测试抽中 ${prize.label} 微信红包；不创建红包、库存或发放流水。`,
+          },
+        }))
+        await wait(1500)
+        navigate('share')
+      } finally {
+        setWheelSpinning(false)
+      }
       return
     }
     if (!bootstrap?.authorization?.effective) {
@@ -253,7 +271,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   return (
     <main className="nh-challenge">
-      {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>PC 预览模式 · 不计入答题或抽奖</button> : null}
+      {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
       {page === 'home' ? <HomePage onStart={() => navigate('rules')} /> : null}
       {page === 'rules' ? <RulesPage onEnter={() => navigate('map')} /> : null}
@@ -278,15 +296,9 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       {page === 'success' ? <SuccessPage onBack={() => navigate('map')} /> : null}
       {page === 'wheel' ? (
         <WheelPage
-          authorization={bootstrap.authorization}
-          segments={segments}
           rotation={wheelRotation}
           spinning={wheelSpinning}
-          busy={busy}
-          preview={preview}
-          onAuthorize={handleAuthorization}
           onDraw={handleDraw}
-          onBack={() => navigate('map')}
         />
       ) : null}
       {page === 'share' ? (
@@ -498,31 +510,41 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function WheelPage({ authorization, segments, rotation, spinning, busy, preview, onAuthorize, onDraw, onBack }) {
+function WheelPage({ rotation, spinning, onDraw }) {
+  const wheel = NANHAI_ART.wheel
+  const [discFilename, discLeft, discTop, discWidth, discHeight] = wheel.disc
+  const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = wheel.base
+  const [pointerFilename, pointerLeft, pointerTop, pointerWidth, pointerHeight] = wheel.pointer
   return (
-    <section className="nh-wheel-page">
-      <button className="nh-wheel-page__back" onClick={onBack}>返回关卡</button>
-      <p>全部关卡已解锁</p>
-      <h1>幸运大转盘</h1>
-      <div className="nh-wheel-stage">
-        <i className="nh-wheel-pointer" />
-        <div className="nh-wheel" style={{ transform: `rotate(${rotation}deg)` }}>
-          {segments.map((segment, index) => {
-            const angle = index * 45 + 22.5
-            return <span key={`${segment.label}-${index}`} style={{ transform: `rotate(${angle}deg) translateY(-134px) rotate(${-angle}deg)` }}>{segment.label}</span>
-          })}
-          <b>抽奖</b>
-        </div>
-      </div>
-      {preview ? (
-        <button className="nh-wheel-primary" onClick={onDraw}>查看预览结束页</button>
-      ) : !authorization?.effective ? (
-        <button className="nh-wheel-primary" disabled={Boolean(busy)} onClick={onAuthorize}>{busy === 'authorization' ? '正在开通…' : '开通自动发放并抽奖'}</button>
-      ) : (
-        <button className="nh-wheel-primary" disabled={Boolean(busy) || spinning} onClick={onDraw}>{spinning ? '好运转动中…' : '立即抽奖'}</button>
+    <ArtPage
+      art={wheel}
+      className="nh-wheel-page"
+      rotatedChildren={(
+        <>
+          <button
+            className="nh-wheel-disc"
+            style={{ ...sourceCenterRect(wheel.canvas, discLeft, discTop, discWidth, discHeight), '--wheel-rotation': `${rotation}deg` }}
+            onClick={onDraw}
+            disabled={spinning}
+            aria-label={spinning ? '转盘转动中' : '点击抽奖'}
+          >
+            <img src={nanhaiAsset(discFilename)} alt="" />
+          </button>
+          <img
+            className="nh-wheel-base-art"
+            src={nanhaiAsset(baseFilename)}
+            style={sourceRect(wheel.canvas, baseLeft, baseTop, baseWidth, baseHeight)}
+            alt=""
+          />
+          <img
+            className="nh-wheel-pointer-art"
+            src={nanhaiAsset(pointerFilename)}
+            style={sourceRect(wheel.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)}
+            alt=""
+          />
+        </>
       )}
-      <small>{preview ? 'PC 预览不会创建抽奖、红包或发放流水。' : '每位用户仅可抽奖一次，奖励将按微信状态自动发放。'}</small>
-    </section>
+    />
   )
 }
 
@@ -534,9 +556,9 @@ function SharePage({ draw, busy, preview, onSync, onHome }) {
     <section className="nh-share-page">
       <ArtPage art={NANHAI_ART.share} onAction={{ share: () => {}, home: onHome }} />
       <div className="nh-share-page__result">
-        <strong>{preview ? 'PC 预览完成' : won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
+        <strong>{preview ? `测试抽中 ${draw?.prizeAmountYuan ?? '-'} 元微信红包` : won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
         <span>{draw?.message}</span>
-        {won ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
+        {won && !preview ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
         {payoutFailed ? <small className="is-failed">失败原因：{draw.failureReason || draw.failureCode || '请后台核验'}</small> : null}
         {won && !payoutSuccess && draw.payoutNo ? <button disabled={Boolean(busy)} onClick={onSync}>{busy === 'sync' ? '同步中…' : '查询发放状态'}</button> : null}
       </div>
@@ -571,6 +593,15 @@ function rotatedRect([canvasW, canvasH], left, top, width, height) {
 }
 
 function sourceRect([canvasW, canvasH], left, top, width, height) {
+  return {
+    left: `${(left / canvasW) * 100}%`,
+    top: `${(top / canvasH) * 100}%`,
+    width: `${(width / canvasW) * 100}%`,
+    height: `${(height / canvasH) * 100}%`,
+  }
+}
+
+function sourceCenterRect([canvasW, canvasH], left, top, width, height) {
   return {
     left: `${(left / canvasW) * 100}%`,
     top: `${(top / canvasH) * 100}%`,
