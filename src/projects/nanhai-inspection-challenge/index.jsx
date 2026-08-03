@@ -197,7 +197,11 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
             return
           }
           const nextLevel = bootstrap?.levels?.find((level) => level.levelNo === activeLevel.levelNo + 1)
-          if (nextLevel) setActiveLevel(nextLevel)
+          if (nextLevel) {
+            scrollSceneToTop()
+            setActiveLevel(nextLevel)
+            window.requestAnimationFrame(scrollSceneToTop)
+          }
         }, 1500)
       }
       if (!completedCurrentLevel) {
@@ -735,6 +739,12 @@ function buildPreviewInitialProgress(bootstrap) {
 function readError(error, fallback) {
   const message = error?.response?.data?.message || error?.message
   return typeof message === 'string' && message ? message : fallback
+}
+
+function scrollSceneToTop() {
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+  window.scrollTo(0, 0)
 }
 
 function wait(ms) {
