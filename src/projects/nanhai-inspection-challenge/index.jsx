@@ -168,7 +168,8 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       const nextCorrectQuestionCodes = result.correct
         ? Array.from(new Set([...(progress?.correctQuestionCodes || []), question.code]))
         : (progress?.correctQuestionCodes || [])
-      const completedCurrentLevel = result.correct && activeLevel.questions.every(
+      const justUnlockedQuestion = result.correct && !correctCodes.has(question.code)
+      const completedCurrentLevel = justUnlockedQuestion && activeLevel.questions.every(
         (item) => nextCorrectQuestionCodes.includes(item.code),
       )
       const completedAll = completedCurrentLevel && activeLevel.levelNo === 5
