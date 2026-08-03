@@ -50,7 +50,9 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   const [wheelRotation, setWheelRotation] = useState(0)
   const [wheelSpinning, setWheelSpinning] = useState(false)
   const [pageTransitioning, setPageTransitioning] = useState(false)
+  const [levelAdvanceToast, setLevelAdvanceToast] = useState('')
   const pageTransitionTimer = useRef(null)
+  const levelAdvanceTimer = useRef(null)
 
   const shareActivity = useMemo(() => ({
     title: bootstrap?.activity?.shareTitle || NANHAI_INSPECTION_CHALLENGE_TITLE,
@@ -75,7 +77,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     return () => { alive = false }
   }, [activityKey])
 
-  useEffect(() => () => window.clearTimeout(pageTransitionTimer.current), [])
+  useEffect(() => () => {
+    window.clearTimeout(pageTransitionTimer.current)
+    window.clearTimeout(levelAdvanceTimer.current)
+  }, [])
 
   const progress = bootstrap?.progress
   const preview = Boolean(bootstrap?.preview)
@@ -98,6 +103,8 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       return
     }
     setActiveLevel(level)
+    window.clearTimeout(levelAdvanceTimer.current)
+    setLevelAdvanceToast('')
     navigate('scene')
     trackEvent(activityKey, 'level_open', { levelNo: level.levelNo })
   }
@@ -158,6 +165,13 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       const nextPreviewProgress = preview
         ? buildPreviewProgress(bootstrap, result.correct ? question.code : null, !result.correct)
         : null
+      const nextCorrectQuestionCodes = result.correct
+        ? Array.from(new Set([...(progress?.correctQuestionCodes || []), question.code]))
+        : (progress?.correctQuestionCodes || [])
+      const completedCurrentLevel = result.correct && activeLevel.questions.every(
+        (item) => nextCorrectQuestionCodes.includes(item.code),
+      )
+      const completedAll = completedCurrentLevel && activeLevel.levelNo === 5
       setBootstrap((current) => ({
         ...current,
         progress: {
@@ -165,17 +179,35 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           ...(nextPreviewProgress || result.progress),
           correctQuestionCodes: preview
             ? nextPreviewProgress.correctQuestionCodes
-            : result.correct
-              ? Array.from(new Set([...(current.progress.correctQuestionCodes || []), question.code]))
-              : current.progress.correctQuestionCodes,
+            : nextCorrectQuestionCodes,
         },
       }))
-      const nextProgress = nextPreviewProgress || result.progress
-      setFeedback({
-        correct: result.correct,
-        explanation: result.explanation,
-        completedAll: (nextProgress?.completedLevels || 0) >= 5,
-      })
+      if (completedCurrentLevel) {
+        setFeedback(null)
+        setSelectedOption('')
+        setActiveQuestionIndex(null)
+        const message = completedAll ? '恭喜完成全部关卡，闯关成功！' : '闯关成功，进入下一关'
+        setLevelAdvanceToast(message)
+        window.clearTimeout(levelAdvanceTimer.current)
+        levelAdvanceTimer.current = window.setTimeout(() => {
+          setLevelAdvanceToast('')
+          if (completedAll) {
+            setActiveLevel(null)
+            navigate('success')
+            return
+          }
+          const nextLevel = bootstrap?.levels?.find((level) => level.levelNo === activeLevel.levelNo + 1)
+          if (nextLevel) setActiveLevel(nextLevel)
+        }, 1500)
+      }
+      if (!completedCurrentLevel) {
+        setFeedback({
+          correct: result.correct,
+          explanation: result.explanation,
+          completedAll,
+          completedCurrentLevel,
+        })
+      }
       trackEvent(activityKey, 'question_answer', {
         levelNo: activeLevel.levelNo,
         questionCode: question.code,
@@ -189,14 +221,17 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   }
 
   function closeFeedback() {
-    const finishedAll = feedback?.correct && feedback?.completedAll
     setFeedback(null)
     setSelectedOption('')
     setActiveQuestionIndex(null)
-    if (finishedAll) {
-      setActiveLevel(null)
-      navigate('success')
-    }
+  }
+
+  function returnToMap() {
+    window.clearTimeout(levelAdvanceTimer.current)
+    setLevelAdvanceToast('')
+    setActiveQuestionIndex(null)
+    setFeedback(null)
+    navigate('map')
   }
 
   async function handleAuthorization() {
@@ -312,7 +347,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           level={activeLevel}
           correctCodes={correctCodes}
           onOpenQuestion={openQuestion}
-          onBack={() => navigate('map')}
+          onBack={returnToMap}
         />
       ) : null}
       {page === 'success' ? <SuccessPage rotation={wheelRotation} onDraw={handleDraw} /> : null}
@@ -333,6 +368,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         document.body,
       ) : null}
       {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
+      {levelAdvanceToast ? createPortal(<div className="nh-level-advance-toast" role="status">{levelAdvanceToast}</div>, document.body) : null}
       {error ? <button className="nh-toast" onClick={() => setError('')}>{error}</button> : null}
     </main>
   )
@@ -479,7 +515,8 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
         rotatedChildren={(
           <div className="nh-scene-pins">
             {level.questions.map((question, index) => {
-              const pin = scene.pins[index]
+              const pinIndex = Number(question.code.slice(-2)) - 1
+              const pin = scene.pins[pinIndex] || scene.pins[index]
               const completed = correctCodes.has(question.code)
               return (
                 <button
@@ -513,7 +550,7 @@ function QuestionDialog({ level, questionIndex, selectedOption, busy, onSelect, 
         <img className="nh-question-dialog__panel" src={nanhaiAsset(NANHAI_ART.questionPanel)} alt="" />
         <button className="nh-question-dialog__dismiss" onClick={onClose} aria-label="关闭" />
         <div className="nh-question-dialog__type">{question.questionType}</div>
-        <p className="nh-question-dialog__count">{level.title} · 第 {questionIndex + 1} / 6 题</p>
+        <p className="nh-question-dialog__count">{level.title} · 第 {questionIndex + 1} / {level.questions.length} 题</p>
         <h1>{question.title}</h1>
         <div className={`nh-question-options ${question.options.length === 2 ? 'is-judge' : ''}`}>
           {question.options.map((option) => (
