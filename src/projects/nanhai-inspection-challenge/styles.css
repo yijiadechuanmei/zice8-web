@@ -307,6 +307,7 @@ button { font: inherit; }
   width: 73.19%;
   height: 32.18%;
   display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 1.1%;
 }
 
@@ -316,12 +317,15 @@ button { font: inherit; }
   left: 6.12%;
   width: auto;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 2.82%;
   height: 14.2%;
 }
 .nh-question-options button {
   display: flex;
   align-items: center;
+  width: 100%;
+  height: 100%;
   min-height: 0;
   padding: 0 2.17%;
   border: 2px solid #e0e0e0;
@@ -329,10 +333,11 @@ button { font: inherit; }
   color: #000;
   background: transparent;
   text-align: left;
-  transition: background .15s, border-color .15s, transform .15s;
+  appearance: none;
+  transition: background .15s, border-color .15s, color .15s;
 }
 
-.nh-question-options button:active { transform: scale(.98); }
+.nh-question-options button:active { transform: none; }
 .nh-question-options button.is-selected { border-color: #2d6bf6; color: #2d6bf6; background: #d8e5fd; }
 .nh-question-options i {
   display: grid;
@@ -522,7 +527,7 @@ button { font: inherit; }
   line-height: 1.35;
   text-align: center;
   white-space: nowrap;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(90deg);
   animation: nh-level-toast-in .22s ease both;
 }
 
@@ -544,7 +549,7 @@ button { font: inherit; }
 @keyframes nh-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @keyframes nh-pin-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.11); } }
 @keyframes nh-spin { to { transform: rotate(360deg); } }
-@keyframes nh-level-toast-in { from { opacity: 0; transform: translate(-50%, -50%) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes nh-level-toast-in { from { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); } }
 
 @media (min-width: 680px) {
   .nh-challenge { max-width: 430px; margin: 0 auto; box-shadow: 0 0 40px rgba(0, 51, 136, .22); }
