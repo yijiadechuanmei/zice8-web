@@ -31,6 +31,7 @@ const FALLBACK_SEGMENTS = [
 
 // 指针初始指向 20 元扇区；角度与当前五等分转盘的扇区中心一一对应。
 const WHEEL_POINTER_ANGLE_BY_AMOUNT = {
+  0: 144,
   500: 216,
   1000: 288,
   2000: 0,
@@ -264,8 +265,8 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   async function handleDraw() {
     if (busy || wheelSpinning) return
     if (preview) {
-      const testPrizes = segments.filter((segment) => Number(segment.amount) > 0)
-      const prize = testPrizes[Math.floor(Math.random() * testPrizes.length)] || FALLBACK_SEGMENTS[0]
+      const prize = segments[Math.floor(Math.random() * segments.length)] || FALLBACK_SEGMENTS[0]
+      const won = Number(prize.amount) > 0
       setWheelSpinning(true)
       setError('')
       try {
@@ -275,10 +276,12 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           ...current,
           draw: {
             preview: true,
-            won: true,
-            prizeAmount: prize.amount,
-            prizeAmountYuan: Number(prize.amount) / 100,
-            message: `测试抽中 ${prize.label} 微信红包；不创建红包、库存或发放流水。`,
+            won,
+            prizeAmount: won ? prize.amount : null,
+            prizeAmountYuan: won ? Number(prize.amount) / 100 : null,
+            message: won
+              ? `测试抽中 ${prize.label} 微信红包；不创建红包、库存或发放流水。`
+              : '测试未中奖；不创建红包、库存或发放流水。',
           },
         }))
         await wait(1500)
@@ -333,6 +336,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   return (
     <main className="nh-challenge">
+      <audio autoPlay loop preload="none" src={nanhaiAsset(NANHAI_ART.home.audio)} />
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
       {page === 'home' ? <HomePage onStart={() => navigate('rules')} /> : null}
@@ -595,16 +599,22 @@ function AnswerFeedback({ feedback, onClose }) {
 
 function SharePage({ draw, busy, preview, onSync, onRestart, onHome }) {
   const won = draw?.won
+  const shareArt = won ? NANHAI_ART.share : {
+    ...NANHAI_ART.share,
+    layers: NANHAI_ART.share.layers.map((layer) => (
+      layer[5] === 'result-panel' ? [NANHAI_ART.share.noWinPanel, ...layer.slice(1)] : layer
+    )),
+  }
   const payoutSuccess = draw?.payoutStatus === 'success'
   const payoutFailed = draw?.payoutStatus === 'failed'
   const prizeAmount = Number.isFinite(Number(draw?.prizeAmountYuan)) ? String(draw.prizeAmountYuan) : ''
   return (
     <section className="nh-share-page">
       <ArtPage
-        art={NANHAI_ART.share}
+        art={shareArt}
         onAction={{ share: onRestart, home: onHome }}
         rotatedChildren={won && prizeAmount ? (
-          <div className="nh-share-prize-amount" style={sourceRect(NANHAI_ART.share.canvas, 559, 367, 261, 134)}><div>{prizeAmount}</div></div>
+          <div className="nh-share-prize-amount" style={sourceRect(shareArt.canvas, 559, 367, 261, 134)}><div>{prizeAmount}</div></div>
         ) : null}
       />
       {!preview ? (

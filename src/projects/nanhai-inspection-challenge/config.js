@@ -14,12 +14,13 @@ export function nanhaiAsset(filename) {
 export const NANHAI_ART = {
   home: {
     canvas: [1477, 750],
+    audio: 'ed271baf0e2d3da070d1ddba9f727831_435692.mp3',
     background: '04069ac0a549f3af2c0f404cafd130a6_1922556_1477_750.png',
     layers: [
       ['06f43cce3f5cd8b83c68181c77ac8ad7_252329_935_303.png', 231, 22, 935, 303],
       ['6ed44262b29dc601ba9531c9043e8911_59547_543_80.png', 467, 311, 543, 80],
-      ['f82f1f703f3cb43497cf4d52688b4b0e_75621_409_111.png', 534, 572, 409, 111, 'start'],
-      ['9d196895dd78c56ea610abfd0672b167_49015_553_52.png', 462, 686, 553, 52],
+      ['f82f1f703f3cb43497cf4d52688b4b0e_75621_409_111.png', 534, 608, 409, 111, 'start'],
+      ['e5e9bdd4a42ca7ffe6ad1b8ab4202505_24495_652_193.png', 413, 415, 652, 193],
     ],
   },
   rules: {
@@ -129,9 +130,10 @@ export const NANHAI_ART = {
   },
   share: {
     canvas: [1477, 750], background: '6fb3cc9d7b2812d1aea11523bea09577_1686863_1477_750.png',
+    noWinPanel: 'f708056c5f43d3a59296e054efc0fe77_99540_913_517.png',
     layers: [
       ['1fcd6ddf4f8eac087f67afd58556d376_72258_2106_226.png', 332, 43, 824, 90],
-      ['e36bbf5dcb5c6a98525a0a2acae8985d_366308_913_517.png', 282, 162, 913, 517],
+      ['e36bbf5dcb5c6a98525a0a2acae8985d_366308_913_517.png', 282, 162, 913, 517, 'result-panel'],
       ['08aff44d38b8933b1f028dcdf2b3a7a3_32711_276_64.png', 415, 608, 276, 64, 'share'],
       ['49f1bcb43ad7e6e493b36082bca07b6f_30863_272_64.png', 790, 608, 272, 64, 'home'],
     ],
