@@ -347,7 +347,15 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         authorization = await syncAuthorization(activityKey, debugMode)
         setBootstrap((current) => ({ ...current, authorization }))
       }
-      if (!authorization.effective) throw new Error(`授权状态：${authorization.state}`)
+      if (!authorization.effective) {
+        if (authorization.state === 'WAIT_USER_CONFIRM') {
+          setLevelAdvanceToast('授权状态同步中，请稍后再次点击抽奖')
+          window.clearTimeout(levelAdvanceTimer.current)
+          levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2200)
+          return
+        }
+        throw new Error(`授权状态：${authorization.state}`)
+      }
       setLevelAdvanceToast('授权完成，请再次点击抽奖')
       window.clearTimeout(levelAdvanceTimer.current)
       levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2200)
