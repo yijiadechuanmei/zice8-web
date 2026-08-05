@@ -5,8 +5,11 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import {
   createAuthorization,
   drawPrize,
+  getDebugState,
+  getDrawStatus,
   getBootstrap,
   previewAnswer,
+  resetDebugData,
   submitAnswer,
   syncAuthorization,
   syncPayout,
@@ -53,6 +56,7 @@ const WHEEL_STOP_INDEX_BY_AMOUNT = {
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
   const activityKey = routeParams?.activityKey || ''
+  const debugMode = new URLSearchParams(window.location.search).has('debug')
   const [bootstrap, setBootstrap] = useState(null)
   const [previewSeenQuestionCodes, setPreviewSeenQuestionCodes] = useState({})
   const [page, setPage] = useState('home')
@@ -66,6 +70,9 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   const [wheelSpinning, setWheelSpinning] = useState(false)
   const [pageTransitioning, setPageTransitioning] = useState(false)
   const [levelAdvanceToast, setLevelAdvanceToast] = useState('')
+  const [shareGuideOpen, setShareGuideOpen] = useState(false)
+  const [debugPanelOpen, setDebugPanelOpen] = useState(false)
+  const [debugState, setDebugState] = useState(null)
   const pageTransitionTimer = useRef(null)
   const levelAdvanceTimer = useRef(null)
 
@@ -79,19 +86,19 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
 
   useEffect(() => {
     let alive = true
-    getBootstrap(activityKey)
+    getBootstrap(activityKey, debugMode)
       .then((data) => {
         if (!alive) return
         setBootstrap(data)
         setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
-        if (data.draw) setPage('share')
+        if (data.state === 'lottery') setPage('success')
       })
       .catch((err) => alive && setError(readError(err, '活动加载失败')))
     trackPageView(activityKey, '/nanhai-inspection-challenge', {
       activityType: 'nanhai_inspection_challenge',
     })
     return () => { alive = false }
-  }, [activityKey])
+  }, [activityKey, debugMode])
 
   useEffect(() => () => {
     window.clearTimeout(pageTransitionTimer.current)
@@ -149,29 +156,32 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     trackEvent(activityKey, 'preview_complete_all', { activityType: 'nanhai_inspection_challenge' })
   }
 
-  function restartPreviewExperience() {
-    if (!preview || pageTransitioning) return
-    // 保留当前中奖结果直到分享页淡出完成；若此刻先清空 draw，分享页会短暂按未中奖态重绘。
+  function reviewChallenge() {
+    if (pageTransitioning) return
     setPageTransitioning(true)
     window.clearTimeout(pageTransitionTimer.current)
     pageTransitionTimer.current = window.setTimeout(() => {
       setBootstrap((current) => ({
         ...current,
-        draw: null,
-        progress: buildPreviewInitialProgress(current),
+        reviewMode: true,
+        levels: current.reviewLevels || current.levels,
+        progress: {
+          ...current.progress,
+          currentLevel: 5,
+          completedLevels: 5,
+          status: 'completed',
+          correctQuestionCodes: (current.reviewLevels || current.levels || [])
+            .flatMap((level) => level.questions.map((question) => question.code)),
+        },
       }))
-      setPreviewSeenQuestionCodes((current) => (
-        Object.keys(current).length ? current : buildPreviewSeenQuestionCodes(bootstrap?.levels)
-      ))
       setActiveLevel(null)
       setActiveQuestionIndex(null)
       setFeedback(null)
       setSelectedOption('')
-      setWheelRotation(0)
       setPage('map')
       setPageTransitioning(false)
     }, 220)
-    trackEvent(activityKey, 'preview_restart', { activityType: 'nanhai_inspection_challenge' })
+    trackEvent(activityKey, 'challenge_review', { activityType: 'nanhai_inspection_challenge' })
   }
 
   async function handleAnswer() {
@@ -193,7 +203,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       }
       const result = preview
         ? await previewAnswer(activityKey, activeLevel.levelNo, payload)
-        : await submitAnswer(activityKey, activeLevel.levelNo, payload)
+        : await submitAnswer(activityKey, activeLevel.levelNo, payload, debugMode)
       const nextPreviewProgress = preview
         ? buildPreviewProgress(bootstrap, result.correct ? question.code : null, !result.correct)
         : null
@@ -295,13 +305,13 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     setBusy('authorization')
     setError('')
     try {
-      let authorization = await createAuthorization(activityKey)
+      let authorization = await createAuthorization(activityKey, debugMode)
       setBootstrap((current) => ({ ...current, authorization }))
       if (!authorization.effective) {
         if (!authorization.packageInfo) throw new Error('微信未返回授权参数')
         await invokeMerchantTransferAuthorization(authorization)
         await wait(900)
-        authorization = await syncAuthorization(activityKey)
+        authorization = await syncAuthorization(activityKey, debugMode)
         setBootstrap((current) => ({ ...current, authorization }))
       }
       if (!authorization.effective) throw new Error(`授权状态：${authorization.state}`)
@@ -352,7 +362,15 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     setWheelSpinning(true)
     setError('')
     try {
-      const result = await drawPrize(activityKey, createRequestId('draw'))
+      let result = await drawPrize(activityKey, createRequestId('draw'), debugMode)
+      setBootstrap((current) => ({ ...current, draw: result }))
+      while (result && !result.final) {
+        await wait(1800)
+        result = await getDrawStatus(activityKey, debugMode)
+        if (result) setBootstrap((current) => ({ ...current, draw: result }))
+      }
+      if (!result) throw new Error('未查询到本次抽奖记录')
+      setWheelSpinning(false)
       setWheelRotation((current) => spinPointerToStopIndex(
         current,
         Number.isInteger(result.wheelStopIndex)
@@ -361,6 +379,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       ))
       await wait(3900)
       setBootstrap((current) => ({ ...current, draw: result }))
+      await wait(1500)
       navigate('share')
       trackEvent(activityKey, 'lottery_result', {
         won: result.won,
@@ -368,7 +387,26 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         prizeAmount: result.prizeAmount,
       })
     } catch (err) {
-      setError(readError(err, '抽奖失败'))
+      // 即使首个响应丢失，也先反查唯一抽奖记录；一旦已消费机会，继续等待微信终态。
+      try {
+        let recovered = await getDrawStatus(activityKey, debugMode)
+        while (recovered && !recovered.final) {
+          await wait(1800)
+          recovered = await getDrawStatus(activityKey, debugMode)
+        }
+        if (recovered?.final) {
+          setWheelSpinning(false)
+          setWheelRotation((current) => spinPointerToStopIndex(current, recovered.wheelStopIndex))
+          await wait(3900)
+          setBootstrap((current) => ({ ...current, draw: recovered }))
+          await wait(1500)
+          navigate('share')
+          return
+        }
+      } catch {
+        // 原始错误更能说明用户当前操作失败；后台仍会继续处理已创建的发放单。
+      }
+      setError(readError(err, '抽奖状态确认失败，请稍后重新进入活动'))
     } finally {
       setBusy('')
       setWheelSpinning(false)
@@ -380,10 +418,44 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     if (!payoutNo || busy) return
     setBusy('sync')
     try {
-      const draw = await syncPayout(activityKey, payoutNo)
+      const draw = await syncPayout(activityKey, payoutNo, debugMode)
       setBootstrap((current) => ({ ...current, draw }))
     } catch (err) {
       setError(readError(err, '发放状态同步失败'))
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function openDebugPanel() {
+    if (!debugMode || busy) return
+    setBusy('debug-state')
+    try {
+      setDebugState(await getDebugState(activityKey))
+      setDebugPanelOpen(true)
+    } catch (err) {
+      setError(readError(err, 'debug 状态加载失败'))
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function handleDebugReset() {
+    if (!debugState?.canResetAll || busy) return
+    if (!window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) return
+    setBusy('debug-reset')
+    try {
+      await resetDebugData(activityKey)
+      const data = await getBootstrap(activityKey, true)
+      setBootstrap(data)
+      setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
+      setDebugState(await getDebugState(activityKey))
+      setActiveLevel(null)
+      setActiveQuestionIndex(null)
+      setFeedback(null)
+      setPage('home')
+    } catch (err) {
+      setError(readError(err, '重置失败'))
     } finally {
       setBusy('')
     }
@@ -396,6 +468,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     <main className="nh-challenge">
       <audio autoPlay loop preload="none" src={nanhaiAsset(NANHAI_ART.home.audio)} />
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
+      {bootstrap.debug ? <button className="nh-debug-badge" onClick={openDebugPanel}>DEBUG · 真实参与数据</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
       {page === 'home' ? <HomePage onStart={() => navigate('rules')} /> : null}
       {page === 'rules' ? <RulesPage onEnter={() => navigate('map')} /> : null}
@@ -417,9 +490,9 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
           onBack={returnToMap}
         />
       ) : null}
-      {page === 'success' ? <SuccessPage rotation={wheelRotation} onDraw={handleDraw} /> : null}
+      {page === 'success' ? <SuccessPage rotation={wheelRotation} spinning={wheelSpinning} onDraw={handleDraw} /> : null}
       {page === 'share' ? (
-        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onRestart={restartPreviewExperience} onHome={() => navigate('home')} />
+        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onReview={reviewChallenge} onShare={() => setShareGuideOpen(true)} />
       ) : null}
       </div>
       {activeLevel && activeQuestionIndex !== null ? createPortal(
@@ -436,6 +509,11 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       ) : null}
       {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
       {levelAdvanceToast ? createPortal(<div className="nh-level-advance-toast" role="status">{levelAdvanceToast}</div>, document.body) : null}
+      {shareGuideOpen ? createPortal(<ShareGuide onClose={() => setShareGuideOpen(false)} />, document.body) : null}
+      {debugPanelOpen ? createPortal(
+        <DebugPanel state={debugState} busy={busy} onRefresh={openDebugPanel} onReset={handleDebugReset} onClose={() => setDebugPanelOpen(false)} />,
+        document.body,
+      ) : null}
       {error ? <button className="nh-toast" onClick={() => setError('')}>{error}</button> : null}
     </main>
   )
@@ -449,7 +527,7 @@ function RulesPage({ onEnter }) {
   return <ArtPage art={NANHAI_ART.rules} onAction={{ 'enter-map': onEnter }} className="nh-rules-page" />
 }
 
-function SuccessPage({ rotation, onDraw }) {
+function SuccessPage({ rotation, spinning, onDraw }) {
   const success = NANHAI_ART.success
   const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = success.wheel.base
   const [ringFilename, ringLeft, ringTop, ringWidth, ringHeight] = success.wheel.ring
@@ -466,7 +544,7 @@ function SuccessPage({ rotation, onDraw }) {
           <img className="nh-success-wheel-base" src={nanhaiAsset(baseFilename)} style={sourceRect(success.canvas, baseLeft, baseTop, baseWidth, baseHeight)} alt="" />
           <img className="nh-success-wheel-ring" src={nanhaiAsset(ringFilename)} style={sourceRect(success.canvas, ringLeft, ringTop, ringWidth, ringHeight)} alt="" />
           <div
-            className="nh-success-wheel-pointer-spin"
+            className={`nh-success-wheel-pointer-spin ${spinning ? 'is-spinning' : ''}`}
             style={{ ...sourcePoint(success.canvas, ringCenterX, ringCenterY), '--pointer-rotation': `${rotation}deg` }}
           >
             <img className="nh-success-wheel-pointer" src={nanhaiAsset(pointerFilename)} style={sourceRect(success.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)} alt="" />
@@ -653,7 +731,7 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function SharePage({ draw, busy, preview, onSync, onRestart, onHome }) {
+function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
   const won = draw?.won
   const shareArt = won ? NANHAI_ART.share : {
     ...NANHAI_ART.share,
@@ -668,7 +746,7 @@ function SharePage({ draw, busy, preview, onSync, onRestart, onHome }) {
     <section className="nh-share-page">
       <ArtPage
         art={shareArt}
-        onAction={{ share: onRestart, home: onHome }}
+        onAction={{ review: onReview, share: onShare }}
         rotatedChildren={won && prizeAmount ? (
           <div className="nh-share-prize-amount" style={sourceRect(shareArt.canvas, 559, 367, 261, 134)}><div>{prizeAmount}</div></div>
         ) : null}
@@ -683,6 +761,34 @@ function SharePage({ draw, busy, preview, onSync, onRestart, onHome }) {
         </div>
       ) : null}
     </section>
+  )
+}
+
+function ShareGuide({ onClose }) {
+  return (
+    <button className="nh-share-guide" onClick={onClose} aria-label="关闭分享提示">
+      <span className="nh-share-guide__card">
+        <span className="nh-share-guide__arrow">↗</span>
+        <strong>点击右上角「···」</strong>
+        <em>选择“分享给朋友”即可邀请好友参与</em>
+        <small>点击任意位置关闭</small>
+      </span>
+    </button>
+  )
+}
+
+function DebugPanel({ state, busy, onRefresh, onReset, onClose }) {
+  return (
+    <div className="nh-debug-mask">
+      <section className="nh-debug-panel" role="dialog" aria-modal="true" aria-label="真实参与调试数据">
+        <header><strong>真实参与状态 · userId={state?.userId || '-'}</strong><button onClick={onClose}>关闭</button></header>
+        <div className="nh-debug-panel__actions">
+          <button disabled={Boolean(busy)} onClick={onRefresh}>刷新数据</button>
+          {state?.canResetAll ? <button className="is-danger" disabled={Boolean(busy)} onClick={onReset}>重置全部测试数据</button> : null}
+        </div>
+        <pre>{JSON.stringify(state, null, 2)}</pre>
+      </section>
+    </div>
   )
 }
 
@@ -804,20 +910,6 @@ function buildPreviewCompletedProgress(bootstrap) {
     correctCount: correctQuestionCodes.length,
     status: 'completed',
     correctQuestionCodes,
-  }
-}
-
-function buildPreviewInitialProgress(bootstrap) {
-  const currentProgress = bootstrap?.progress || {}
-  return {
-    ...currentProgress,
-    currentLevel: 1,
-    completedLevels: 0,
-    correctCount: 0,
-    wrongCount: 0,
-    status: 'in_progress',
-    completedAt: null,
-    correctQuestionCodes: [],
   }
 }
 

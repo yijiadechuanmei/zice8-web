@@ -1,11 +1,12 @@
 import { request } from '../../shared/api/request'
 
 const base = (activityKey) => `/nanhai-inspection-challenge/activities/${encodeURIComponent(activityKey)}`
+const debugSuffix = (debug) => debug ? '?debug=1' : ''
 
-export const getBootstrap = (activityKey) => request(`${base(activityKey)}/bootstrap`)
+export const getBootstrap = (activityKey, debug = false) => request(`${base(activityKey)}/bootstrap${debugSuffix(debug)}`)
 
-export const submitAnswer = (activityKey, levelNo, payload) =>
-  request(`${base(activityKey)}/levels/${encodeURIComponent(levelNo)}/answers`, {
+export const submitAnswer = (activityKey, levelNo, payload, debug = false) =>
+  request(`${base(activityKey)}/levels/${encodeURIComponent(levelNo)}/answers${debugSuffix(debug)}`, {
     method: 'POST',
     body: JSON.stringify(payload),
   })
@@ -16,17 +17,26 @@ export const previewAnswer = (activityKey, levelNo, payload) =>
     body: JSON.stringify(payload),
   })
 
-export const createAuthorization = (activityKey) =>
-  request(`${base(activityKey)}/transfer-authorization`, { method: 'POST' })
+export const createAuthorization = (activityKey, debug = false) =>
+  request(`${base(activityKey)}/transfer-authorization${debugSuffix(debug)}`, { method: 'POST' })
 
-export const syncAuthorization = (activityKey) =>
-  request(`${base(activityKey)}/transfer-authorization/sync`, { method: 'POST' })
+export const syncAuthorization = (activityKey, debug = false) =>
+  request(`${base(activityKey)}/transfer-authorization/sync${debugSuffix(debug)}`, { method: 'POST' })
 
-export const drawPrize = (activityKey, requestId) =>
-  request(`${base(activityKey)}/draw`, {
+export const drawPrize = (activityKey, requestId, debug = false) =>
+  request(`${base(activityKey)}/draw${debugSuffix(debug)}`, {
     method: 'POST',
     body: JSON.stringify({ requestId }),
   })
 
-export const syncPayout = (activityKey, payoutNo) =>
-  request(`${base(activityKey)}/payouts/${encodeURIComponent(payoutNo)}/sync`, { method: 'POST' })
+export const syncPayout = (activityKey, payoutNo, debug = false) =>
+  request(`${base(activityKey)}/payouts/${encodeURIComponent(payoutNo)}/sync${debugSuffix(debug)}`, { method: 'POST' })
+
+export const getDrawStatus = (activityKey, debug = false) =>
+  request(`${base(activityKey)}/draw/status${debugSuffix(debug)}`)
+
+export const getDebugState = (activityKey) =>
+  request(`${base(activityKey)}/debug/state?debug=1`)
+
+export const resetDebugData = (activityKey) =>
+  request(`${base(activityKey)}/debug/reset?debug=1`, { method: 'POST' })

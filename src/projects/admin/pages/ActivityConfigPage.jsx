@@ -342,8 +342,8 @@ export default function ActivityConfigPage({ activity }) {
     { title: '红包金额', dataIndex: 'amountYuan', width: 110, render: (value) => `${Number(value || 0)} 元` },
     { title: '奖品名称', dataIndex: 'prizeName', width: 170 },
     { title: '概率 %', dataIndex: 'probability', width: 120, render: (value, _, index) => <InputNumber min={0} max={100} step={0.01} precision={2} value={value} disabled={!nanhaiPrizes[index]?.enabled} onChange={(probability) => updateNanhaiPrize(index, { probability: Number(probability || 0) })} /> },
-    { title: '总数量', dataIndex: 'quantity', width: 110, render: (value, item, index) => <InputNumber min={Number(item.issuedCount || 0)} precision={0} value={value} onChange={(quantity) => updateNanhaiPrize(index, { quantity: Number(quantity || 0) })} /> },
-    { title: '已锁定/剩余', width: 120, render: (_, item) => `${item.issuedCount || 0} / ${item.remainingCount || 0}` },
+    { title: '总数量', dataIndex: 'quantity', width: 110, render: (value, item, index) => <InputNumber min={Number(item.issuedCount || 0) + Number(item.reservedCount || 0)} precision={0} value={value} onChange={(quantity) => updateNanhaiPrize(index, { quantity: Number(quantity || 0) })} /> },
+    { title: '预占/已到账/剩余', width: 150, render: (_, item) => `${item.reservedCount || 0} / ${item.issuedCount || 0} / ${item.remainingCount || 0}` },
     { title: '启用', dataIndex: 'enabled', width: 80, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updateNanhaiPrize(index, { enabled })} /> },
   ]
 
@@ -455,7 +455,7 @@ export default function ActivityConfigPage({ activity }) {
             extra={<Space><Text type={Math.abs(nanhaiProbability - 70) < 0.001 ? 'success' : 'danger'}>红包中奖概率：{nanhaiProbability.toFixed(2)}% · 谢谢参与固定 30%</Text><Button type="primary" loading={nanhaiPrizeSaving} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
           >
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Alert type="info" showIcon message="库存与概率均由后台控制" description="红包金额固定为 0.28、0.38、0.68、0.88、1.28、1.88 元；谢谢参与固定 30%。总数量不能低于已锁定数，六档红包的概率总和必须为 70%。" />
+              <Alert type="info" showIcon message="库存、预算与概率均由后台控制" description="红包金额固定为 0.28、0.38、0.68、0.88、1.28、1.88 元；谢谢参与固定 30%。发起转账时先预占，微信 SUCCESS 后才转为已到账并计入支出；总数量不能低于预占与已到账合计。" />
               <Table rowKey="id" columns={nanhaiPrizeColumns} dataSource={nanhaiPrizes} pagination={false} size="small" scroll={{ x: 720 }} />
             </Space>
           </Card>

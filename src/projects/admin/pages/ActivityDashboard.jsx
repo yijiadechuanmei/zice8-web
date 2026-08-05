@@ -142,6 +142,28 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'nanhai_inspection_challenge') {
+      const lottery = overview?.lottery || {}
+      const budget = overview?.budget || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '参与人数', value: overview?.participantCount ?? 0 },
+        { label: '通关人数', value: overview?.completionCount ?? 0 },
+        { label: '答错流水', value: overview?.challenge?.wrongAnswerCount ?? 0 },
+        { label: '已抽奖', value: lottery.drawCount ?? 0 },
+        { label: '到账中奖', value: lottery.winCount ?? 0 },
+        { label: '未中奖', value: lottery.missCount ?? 0 },
+        { label: '等待微信终态', value: lottery.pendingFinalCount ?? 0 },
+        { label: '微信发放失败', value: lottery.payoutFailedCount ?? 0 },
+        { label: '已到账金额', value: Number(budget.spentAmountFen || 0) / 100, suffix: '元' },
+        { label: '预占金额', value: Number(budget.reservedAmountFen || 0) / 100, suffix: '元' },
+        { label: '可用预算', value: Number(budget.remainingAmountFen || 0) / 100, suffix: '元' },
+      ]
+    }
+
     const videoRank = overview?.videoRank || {}
     return [
       ...xiwuqiAmapMetrics,

@@ -133,8 +133,8 @@ export const NANHAI_ART = {
     layers: [
       ['1fcd6ddf4f8eac087f67afd58556d376_72258_2106_226.png', 332, 43, 824, 90],
       ['e36bbf5dcb5c6a98525a0a2acae8985d_366308_913_517.png', 282, 162, 913, 517, 'result-panel'],
-      ['08aff44d38b8933b1f028dcdf2b3a7a3_32711_276_64.png', 415, 608, 276, 64, 'share'],
-      ['49f1bcb43ad7e6e493b36082bca07b6f_30863_272_64.png', 790, 608, 272, 64, 'home'],
+      ['08aff44d38b8933b1f028dcdf2b3a7a3_32711_276_64.png', 415, 608, 276, 64, 'review'],
+      ['49f1bcb43ad7e6e493b36082bca07b6f_30863_272_64.png', 790, 608, 272, 64, 'share'],
     ],
   },
   questionPanel: '45465f95e491916e49e69214348347f8_188328_817_634.png',

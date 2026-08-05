@@ -564,7 +564,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
             >
               同步微信
             </Button>
-            {row.status === 'won' && (!row.payoutNo || row.payoutStatus === 'failed') ? (
+            {row.prizeAmount && row.status === 'miss' && ['failed', 'canceled'].includes(row.payoutStatus) ? (
               <Popconfirm
                 title="系统会先核验微信终态，确认未成功后才允许重发，是否继续？"
                 okText="继续"
@@ -693,6 +693,19 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
                     />
                   </>
                 ) : null}
+                {activity.type === 'nanhai_inspection_challenge' ? (
+                  <Select
+                    allowClear
+                    placeholder="筛选状态"
+                    value={status || undefined}
+                    onChange={(value) => {
+                      setStatus(value || '')
+                      setPage(1)
+                    }}
+                    style={{ width: 180 }}
+                    options={getNanhaiStatusOptions(activeViewKey)}
+                  />
+                ) : null}
               </Space>
             )}
             showColumns={Boolean(data.columns.length)}
@@ -728,6 +741,40 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       />
     </AdminDataViewShell>
   )
+}
+
+function getNanhaiStatusOptions(viewKey) {
+  if (viewKey === 'nanhai_challenge_progress') return [
+    { value: 'in_progress', label: '闯关中' },
+    { value: 'completed', label: '已通关' },
+  ]
+  if (viewKey === 'nanhai_challenge_answers') return [
+    { value: 'correct', label: '答对' },
+    { value: 'wrong', label: '答错' },
+  ]
+  if (viewKey === 'nanhai_challenge_draws') return [
+    { value: 'paying', label: '等待微信终态' },
+    { value: 'won', label: '中奖且已到账' },
+    { value: 'miss', label: '未中奖' },
+    { value: 'payout:failed', label: '微信发放失败' },
+  ]
+  if (viewKey === 'nanhai_challenge_authorizations') return [
+    { value: 'WAIT_USER_CONFIRM', label: '待用户授权' },
+    { value: 'TAKING_EFFECT', label: '授权生效' },
+    { value: 'CLOSED', label: '授权关闭' },
+  ]
+  if (viewKey === 'nanhai_challenge_payout_orders') return [
+    { value: 'pending', label: '待受理/未知' },
+    { value: 'accepted', label: 'ACCEPTED' },
+    { value: 'processing', label: 'PROCESSING / TRANSFERING' },
+    { value: 'success', label: 'SUCCESS' },
+    { value: 'failed', label: 'FAIL / CANCELLED' },
+  ]
+  if (viewKey === 'nanhai_challenge_payout_logs') return [
+    { value: 'success', label: '操作成功' },
+    { value: 'failed', label: '操作异常/失败' },
+  ]
+  return []
 }
 
 function getKeywordPlaceholder(activity, viewKey) {
