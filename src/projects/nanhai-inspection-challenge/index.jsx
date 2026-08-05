@@ -28,15 +28,27 @@ const FALLBACK_SEGMENTS = [
   { label: '1.88元红包', amount: 188, probability: 1 },
 ]
 
-// 新整盘从顶部“谢谢参与”开始顺时针共七个扇区，角度与扇区中心逐一对应。
-const WHEEL_POINTER_ANGLE_BY_AMOUNT = {
+// 新整盘从顶部“谢谢参与”开始顺时针共七个扇区。索引是抽奖结果的唯一落位依据：
+// 后端保存的 wheelStopIndex 与这里一一对应，不能再由金额反推，避免库存、未中奖等
+// 没有金额的结果沿用上一轮指针位置。
+const WHEEL_POINTER_ANGLE_BY_STOP_INDEX = [
+  0,
+  360 / 7,
+  360 / 7 * 2,
+  360 / 7 * 3,
+  360 / 7 * 4,
+  360 / 7 * 5,
+  360 / 7 * 6,
+]
+
+const WHEEL_STOP_INDEX_BY_AMOUNT = {
   0: 0,
-  28: 360 / 7,
-  38: 360 / 7 * 2,
-  68: 360 / 7 * 3,
-  88: 360 / 7 * 4,
-  128: 360 / 7 * 5,
-  188: 360 / 7 * 6,
+  28: 1,
+  38: 2,
+  68: 3,
+  88: 4,
+  128: 5,
+  188: 6,
 }
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
@@ -302,7 +314,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       setWheelSpinning(true)
       setError('')
       try {
-        setWheelRotation((current) => spinPointerToPrize(current, prize.amount))
+        setWheelRotation((current) => spinPointerToStopIndex(
+          current,
+          wheelStopIndexForAmount(prize.amount),
+        ))
         await wait(3800)
         setBootstrap((current) => ({
           ...current,
@@ -332,7 +347,12 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     setError('')
     try {
       const result = await drawPrize(activityKey, createRequestId('draw'))
-      setWheelRotation((current) => spinPointerToPrize(current, result.prizeAmount))
+      setWheelRotation((current) => spinPointerToStopIndex(
+        current,
+        Number.isInteger(result.wheelStopIndex)
+          ? result.wheelStopIndex
+          : wheelStopIndexForAmount(result.prizeAmount),
+      ))
       await wait(3900)
       setBootstrap((current) => ({ ...current, draw: result }))
       navigate('share')
@@ -702,8 +722,12 @@ function sourcePoint([canvasW, canvasH], left, top) {
   }
 }
 
-function spinPointerToPrize(currentRotation, prizeAmount) {
-  const targetAngle = WHEEL_POINTER_ANGLE_BY_AMOUNT[Number(prizeAmount)]
+function wheelStopIndexForAmount(prizeAmount) {
+  return WHEEL_STOP_INDEX_BY_AMOUNT[Number(prizeAmount)] ?? 0
+}
+
+function spinPointerToStopIndex(currentRotation, wheelStopIndex) {
+  const targetAngle = WHEEL_POINTER_ANGLE_BY_STOP_INDEX[Number(wheelStopIndex)]
   if (targetAngle === undefined) return currentRotation + 1440
   const currentAngle = ((currentRotation % 360) + 360) % 360
   const remainingAngle = (targetAngle - currentAngle + 360) % 360
