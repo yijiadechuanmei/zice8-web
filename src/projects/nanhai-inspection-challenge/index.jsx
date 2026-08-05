@@ -222,28 +222,35 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     if (!question || !selectedOption || busy) return
     setBusy('answer')
     try {
+      // 审核链接的“再次复习”会展示本关全部 6 个点位；预览接口仍以 2 个
+      // 活动题位为一组校验。因此按本次点击题目动态带上它和一个辅助题位，
+      // 而不是把展示中的全部点位误传为当前活动题位。
+      const previewActiveQuestionCodes = preview
+        ? buildPreviewActiveQuestionCodes(activeLevel, activeQuestionIndex)
+        : []
       const payload = {
         questionCode: question.code,
         selectedOption,
         requestId: createRequestId('answer'),
         ...(preview ? {
           shownQuestionCodes: previewSeenQuestionCodes[activeLevel.levelNo] || activeLevel.questions.map((item) => item.code),
-          activeQuestionCodes: activeLevel.questions.map((item) => item.code),
-          correctQuestionCodes: activeLevel.questions
-            .filter((item) => correctCodes.has(item.code))
-            .map((item) => item.code),
+          activeQuestionCodes: previewActiveQuestionCodes,
+          correctQuestionCodes: previewActiveQuestionCodes.filter((code) => correctCodes.has(code)),
         } : {}),
       }
       const result = preview
         ? await previewAnswer(activityKey, activeLevel.levelNo, payload)
         : await submitAnswer(activityKey, activeLevel.levelNo, payload, debugMode)
-      const nextPreviewProgress = preview
+      const reviewing = Boolean(bootstrap?.reviewMode)
+      const nextPreviewProgress = preview && !reviewing
         ? buildPreviewProgress(bootstrap, result.correct ? question.code : null, !result.correct)
         : null
       const nextCorrectQuestionCodes = result.correct
         ? Array.from(new Set([...(progress?.correctQuestionCodes || []), question.code]))
         : (progress?.correctQuestionCodes || [])
-      const nextLevelQuestions = Array.isArray(result.levelQuestions) && result.levelQuestions.length === 2
+      // 复习模式的 6 个点位都必须继续保留；接口返回的 2 道随机题仅用于
+      // 正常闯关时替换错误题，不能覆盖复习地图。
+      const nextLevelQuestions = !reviewing && Array.isArray(result.levelQuestions) && result.levelQuestions.length === 2
         ? result.levelQuestions
         : activeLevel.questions
       const nextActiveLevel = { ...activeLevel, questions: nextLevelQuestions }
@@ -261,9 +268,9 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         )),
         progress: {
           ...current.progress,
-          ...(nextPreviewProgress || result.progress),
+          ...(nextPreviewProgress || (!reviewing ? result.progress : {})),
           correctQuestionCodes: preview
-            ? nextPreviewProgress.correctQuestionCodes
+            ? (nextPreviewProgress?.correctQuestionCodes || current.progress.correctQuestionCodes)
             : nextCorrectQuestionCodes,
         },
       }))
@@ -963,6 +970,14 @@ function buildPreviewSeenQuestionCodes(levels) {
     level.levelNo,
     (level.questions || []).map((question) => question.code),
   ]))
+}
+
+function buildPreviewActiveQuestionCodes(level, questionIndex) {
+  const questions = level?.questions || []
+  const selectedCode = questions[questionIndex]?.code
+  const codes = Array.from(new Set(questions.map((question) => question.code).filter(Boolean)))
+  if (codes.length <= 2) return codes
+  return Array.from(new Set([selectedCode, ...codes])).filter(Boolean).slice(0, 2)
 }
 
 function buildPreviewCompletedProgress(bootstrap) {
