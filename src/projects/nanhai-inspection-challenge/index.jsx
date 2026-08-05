@@ -484,7 +484,14 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     if (!debugMode || busy) return
     setBusy('debug-state')
     try {
-      setDebugState(await getDebugState(activityKey))
+      const state = await getDebugState(activityKey)
+      setDebugState(state)
+      if (String(state?.userId || '') === '1') {
+        if (window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) {
+          await resetAllDebugData()
+        }
+        return
+      }
       setDebugPanelOpen(true)
     } catch (err) {
       setError(readError(err, 'debug 状态加载失败'))
@@ -496,17 +503,24 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   async function handleDebugReset() {
     if (String(debugState?.userId || '') !== '1' || busy) return
     if (!window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) return
+    await resetAllDebugData()
+  }
+
+  async function resetAllDebugData() {
     setBusy('debug-reset')
     try {
       await resetDebugData(activityKey)
       const data = await getBootstrap(activityKey, true)
       setBootstrap(data)
       setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
-      setDebugState(await getDebugState(activityKey))
       setActiveLevel(null)
       setActiveQuestionIndex(null)
       setFeedback(null)
+      setDebugPanelOpen(false)
       setPage('home')
+      setLevelAdvanceToast('全部测试数据已重置')
+      window.clearTimeout(levelAdvanceTimer.current)
+      levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 1800)
     } catch (err) {
       setError(readError(err, '重置失败'))
     } finally {
