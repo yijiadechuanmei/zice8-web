@@ -494,7 +494,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   }
 
   async function handleDebugReset() {
-    if (!debugState?.canResetAll || busy) return
+    if (String(debugState?.userId || '') !== '1' || busy) return
     if (!window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) return
     setBusy('debug-reset')
     try {
@@ -832,15 +832,18 @@ function ShareGuide({ onClose }) {
 }
 
 function DebugPanel({ state, busy, onRefresh, onReset, onClose }) {
+  // 用返回的真实用户 ID 决定调试入口展示；后端 reset 接口仍会再次强制校验
+  // userId=1，前端仅负责让超级测试用户看得到可执行的重置操作。
+  const canResetAll = String(state?.userId || '') === '1'
   return (
     <div className="nh-debug-mask">
       <section className="nh-debug-panel" role="dialog" aria-modal="true" aria-label="真实参与调试数据">
         <header><strong>真实参与状态 · userId={state?.userId || '-'}</strong><button onClick={onClose}>关闭</button></header>
         <div className="nh-debug-panel__actions">
           <button disabled={Boolean(busy)} onClick={onRefresh}>刷新数据</button>
-          {state?.canResetAll ? <button className="is-danger" disabled={Boolean(busy)} onClick={onReset}>重置全部测试数据</button> : null}
+          {canResetAll ? <button className="is-danger" disabled={Boolean(busy)} onClick={onReset}>重置全部测试数据</button> : null}
         </div>
-        {state?.canResetAll ? <p className="nh-debug-panel__reset-tip">userId=1 可重置本活动全部测试数据；已有到账或在途转账时会被安全拦截。</p> : null}
+        {canResetAll ? <p className="nh-debug-panel__reset-tip">仅 userId=1 可重置本活动全部测试数据；已有到账或在途转账时会被安全拦截。</p> : null}
         <pre>{JSON.stringify(state, null, 2)}</pre>
       </section>
     </div>
