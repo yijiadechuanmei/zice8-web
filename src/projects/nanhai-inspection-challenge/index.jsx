@@ -371,6 +371,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     if (preview) {
       const prize = pickPreviewSegment(segments)
       const won = Number(prize.amount) > 0
+      setBusy('preview-draw')
       setWheelSpinning(true)
       setError('')
       try {
@@ -395,6 +396,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         navigate('share')
       } finally {
         setWheelSpinning(false)
+        setBusy('')
       }
       return
     }
@@ -554,6 +556,10 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       ) : null}
       {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
       {levelAdvanceToast ? createPortal(<div className="nh-level-advance-toast" role="status">{levelAdvanceToast}</div>, document.body) : null}
+      {operationLoadingText(busy, wheelSpinning) ? createPortal(
+        <OperationLoading message={operationLoadingText(busy, wheelSpinning)} />,
+        document.body,
+      ) : null}
       {shareGuideOpen ? createPortal(<ShareGuide onClose={() => setShareGuideOpen(false)} />, document.body) : null}
       {debugPanelOpen ? createPortal(
         <DebugPanel state={debugState} busy={busy} onRefresh={openDebugPanel} onReset={handleDebugReset} onClose={() => setDebugPanelOpen(false)} />,
@@ -827,6 +833,7 @@ function DebugPanel({ state, busy, onRefresh, onReset, onClose }) {
           <button disabled={Boolean(busy)} onClick={onRefresh}>刷新数据</button>
           {state?.canResetAll ? <button className="is-danger" disabled={Boolean(busy)} onClick={onReset}>重置全部测试数据</button> : null}
         </div>
+        {state?.canResetAll ? <p className="nh-debug-panel__reset-tip">userId=1 可重置本活动全部测试数据；已有到账或在途转账时会被安全拦截。</p> : null}
         <pre>{JSON.stringify(state, null, 2)}</pre>
       </section>
     </div>
@@ -835,6 +842,23 @@ function DebugPanel({ state, busy, onRefresh, onReset, onClose }) {
 
 function LoadingView() {
   return <main className="nh-challenge nh-loading"><i /><p>正在打开幸福南海巡检图…</p></main>
+}
+
+function OperationLoading({ message }) {
+  return (
+    <div className="nh-operation-loading" role="status" aria-live="polite">
+      <span className="nh-operation-loading__content"><i />{message}</span>
+    </div>
+  )
+}
+
+function operationLoadingText(busy, wheelSpinning) {
+  if (busy === 'authorization') return '正在唤起微信授权…'
+  if (busy === 'draw' || busy === 'preview-draw') return wheelSpinning ? '正在抽取结果…' : '正在展示抽奖结果…'
+  if (busy === 'sync') return '正在查询发放状态…'
+  if (busy === 'debug-state') return '正在读取调试数据…'
+  if (busy === 'debug-reset') return '正在重置全部测试数据…'
+  return ''
 }
 
 function ErrorView({ error }) {
