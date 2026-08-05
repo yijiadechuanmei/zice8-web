@@ -19,23 +19,24 @@ import {
 import './styles.css'
 
 const FALLBACK_SEGMENTS = [
-  { label: '5元', amount: 500 },
-  { label: '10元', amount: 1000 },
-  { label: '20元', amount: 2000 },
-  { label: '50元', amount: 5000 },
-  { label: '未中奖', amount: 0 },
-  { label: '5元', amount: 500 },
-  { label: '10元', amount: 1000 },
-  { label: '20元', amount: 2000 },
+  { label: '谢谢参与', amount: 0, probability: 30 },
+  { label: '0.28元红包', amount: 28, probability: 50 },
+  { label: '0.38元红包', amount: 38, probability: 10 },
+  { label: '0.68元红包', amount: 68, probability: 4 },
+  { label: '0.88元红包', amount: 88, probability: 3 },
+  { label: '1.28元红包', amount: 128, probability: 2 },
+  { label: '1.88元红包', amount: 188, probability: 1 },
 ]
 
-// 指针初始指向 20 元扇区；角度与当前五等分转盘的扇区中心一一对应。
+// 新整盘从顶部“谢谢参与”开始顺时针共七个扇区，角度与扇区中心逐一对应。
 const WHEEL_POINTER_ANGLE_BY_AMOUNT = {
-  0: 144,
-  500: 216,
-  1000: 288,
-  2000: 0,
-  5000: 72,
+  0: 0,
+  28: 360 / 7,
+  38: 360 / 7 * 2,
+  68: 360 / 7 * 3,
+  88: 360 / 7 * 4,
+  128: 360 / 7 * 5,
+  188: 360 / 7 * 6,
 }
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
@@ -296,7 +297,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   async function handleDraw() {
     if (busy || wheelSpinning) return
     if (preview) {
-      const prize = segments[Math.floor(Math.random() * segments.length)] || FALLBACK_SEGMENTS[0]
+      const prize = pickPreviewSegment(segments)
       const won = Number(prize.amount) > 0
       setWheelSpinning(true)
       setError('')
@@ -424,7 +425,6 @@ function RulesPage({ onEnter }) {
 
 function SuccessPage({ rotation, onDraw }) {
   const success = NANHAI_ART.success
-  const [discFilename, discLeft, discTop, discWidth, discHeight] = success.wheel.disc
   const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = success.wheel.base
   const [ringFilename, ringLeft, ringTop, ringWidth, ringHeight] = success.wheel.ring
   const [pointerFilename, pointerLeft, pointerTop, pointerWidth, pointerHeight] = success.wheel.pointer
@@ -437,7 +437,6 @@ function SuccessPage({ rotation, onDraw }) {
       className="nh-success-page"
       rotatedChildren={(
         <>
-          <img className="nh-success-wheel-disc" src={nanhaiAsset(discFilename)} style={sourceCenterRect(success.canvas, discLeft, discTop, discWidth, discHeight)} alt="" />
           <img className="nh-success-wheel-base" src={nanhaiAsset(baseFilename)} style={sourceRect(success.canvas, baseLeft, baseTop, baseWidth, baseHeight)} alt="" />
           <img className="nh-success-wheel-ring" src={nanhaiAsset(ringFilename)} style={sourceRect(success.canvas, ringLeft, ringTop, ringWidth, ringHeight)} alt="" />
           <div
@@ -696,15 +695,6 @@ function sourceRect([canvasW, canvasH], left, top, width, height) {
   }
 }
 
-function sourceCenterRect([canvasW, canvasH], left, top, width, height) {
-  return {
-    left: `${(left / canvasW) * 100}%`,
-    top: `${(top / canvasH) * 100}%`,
-    width: `${(width / canvasW) * 100}%`,
-    height: `${(height / canvasH) * 100}%`,
-  }
-}
-
 function sourcePoint([canvasW, canvasH], left, top) {
   return {
     '--pointer-origin-x': `${(left / canvasW) * 100}%`,
@@ -718,6 +708,22 @@ function spinPointerToPrize(currentRotation, prizeAmount) {
   const currentAngle = ((currentRotation % 360) + 360) % 360
   const remainingAngle = (targetAngle - currentAngle + 360) % 360
   return currentRotation + 1440 + remainingAngle
+}
+
+function pickPreviewSegment(segments) {
+  const items = Array.isArray(segments) && segments.length ? segments : FALLBACK_SEGMENTS
+  const hasProbability = items.some((item) => Number.isFinite(Number(item?.probability)))
+  if (!hasProbability) {
+    return items[Math.floor(Math.random() * items.length)] || FALLBACK_SEGMENTS[0]
+  }
+  const totalProbability = items.reduce((sum, item) => sum + Math.max(Number(item?.probability) || 0, 0), 0)
+  if (totalProbability <= 0) return FALLBACK_SEGMENTS[0]
+  let cursor = Math.random() * totalProbability
+  for (const item of items) {
+    cursor -= Math.max(Number(item?.probability) || 0, 0)
+    if (cursor < 0) return item
+  }
+  return items[items.length - 1] || FALLBACK_SEGMENTS[0]
 }
 
 function payoutStatusText(status) {

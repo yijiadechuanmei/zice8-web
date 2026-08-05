@@ -70,6 +70,17 @@ export function updateActivityBgmConfig(activityKey, payload) {
   })
 }
 
+export function getNanhaiChallengePrizes(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/prizes`)
+}
+
+export function saveNanhaiChallengePrizes(activityKey, prizes) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/prizes`, {
+    method: 'PUT',
+    body: JSON.stringify({ prizes }),
+  })
+}
+
 export function getArtistCallLotteryPrizes(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`)
 }

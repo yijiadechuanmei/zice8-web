@@ -441,12 +441,6 @@ button { font: inherit; }
 
 .nh-answer-feedback button img { display: block; width: 100%; height: auto; }
 
-.nh-success-wheel-disc {
-  position: absolute;
-  z-index: 2;
-  transform: translate(-50%, -50%);
-  transform-origin: 50% 50%;
-}
 .nh-success-wheel-base { position: absolute; z-index: 3; pointer-events: none; }
 .nh-success-wheel-ring { position: absolute; z-index: 4; pointer-events: none; }
 .nh-success-wheel-pointer-spin {

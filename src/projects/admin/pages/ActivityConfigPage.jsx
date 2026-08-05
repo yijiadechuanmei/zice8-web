@@ -5,10 +5,12 @@ import {
   clearSongWishLotteryDraws,
   getActivityConfig,
   getArtistCallLotteryPrizes,
+  getNanhaiChallengePrizes,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
   revokeSongWishLotteryDraw,
   saveArtistCallLotteryPrizes,
+  saveNanhaiChallengePrizes,
   saveSongWishLotteryResultConfig,
   updateActivityBgmConfig,
   updateActivityStatus,
@@ -34,6 +36,8 @@ export default function ActivityConfigPage({ activity }) {
   const [bgm, setBgm] = useState(defaultBgm)
   const [prizes, setPrizes] = useState([])
   const [prizeSaving, setPrizeSaving] = useState(false)
+  const [nanhaiPrizes, setNanhaiPrizes] = useState([])
+  const [nanhaiPrizeSaving, setNanhaiPrizeSaving] = useState(false)
   const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
   const [manualDrawing, setManualDrawing] = useState(false)
@@ -77,6 +81,17 @@ export default function ActivityConfigPage({ activity }) {
         .catch((err) => { if (alive) setError(err.message || '奖品配置加载失败') })
     } else {
       setPrizes([])
+    }
+
+    if (activity.type === 'nanhai_inspection_challenge') {
+      getNanhaiChallengePrizes(activity.activityKey)
+        .then((data) => {
+          if (!alive) return
+          setNanhaiPrizes(data?.prizes || [])
+        })
+        .catch((err) => { if (alive) setError(err.message || '红包配置加载失败') })
+    } else {
+      setNanhaiPrizes([])
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -163,6 +178,26 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setPrizeSaving(false)
+    }
+  }
+
+  function updateNanhaiPrize(index, patch) {
+    setNanhaiPrizes((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item))
+  }
+
+  async function handleSaveNanhaiPrizes() {
+    setNanhaiPrizeSaving(true)
+    setError('')
+    try {
+      const data = await saveNanhaiChallengePrizes(activity.activityKey, nanhaiPrizes)
+      setNanhaiPrizes(data?.prizes || [])
+      message.success('红包数量与概率已保存')
+    } catch (err) {
+      const text = err.message || '红包配置保存失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanhaiPrizeSaving(false)
     }
   }
 
@@ -300,6 +335,18 @@ export default function ActivityConfigPage({ activity }) {
     { title: '', width: 62, render: (_, __, index) => <Popconfirm title="确认删除该奖项？" onConfirm={() => setPrizes((items) => items.filter((_, itemIndex) => itemIndex !== index))}><Button danger type="link">删除</Button></Popconfirm> },
   ]
 
+  const nanhaiProbability = nanhaiPrizes
+    .filter((item) => item.enabled)
+    .reduce((sum, item) => sum + Number(item.probability || 0), 0)
+  const nanhaiPrizeColumns = [
+    { title: '红包金额', dataIndex: 'amountYuan', width: 110, render: (value) => `${Number(value || 0)} 元` },
+    { title: '奖品名称', dataIndex: 'prizeName', width: 170 },
+    { title: '概率 %', dataIndex: 'probability', width: 120, render: (value, _, index) => <InputNumber min={0} max={100} step={0.01} precision={2} value={value} disabled={!nanhaiPrizes[index]?.enabled} onChange={(probability) => updateNanhaiPrize(index, { probability: Number(probability || 0) })} /> },
+    { title: '总数量', dataIndex: 'quantity', width: 110, render: (value, item, index) => <InputNumber min={Number(item.issuedCount || 0)} precision={0} value={value} onChange={(quantity) => updateNanhaiPrize(index, { quantity: Number(quantity || 0) })} /> },
+    { title: '已锁定/剩余', width: 120, render: (_, item) => `${item.issuedCount || 0} / ${item.remainingCount || 0}` },
+    { title: '启用', dataIndex: 'enabled', width: 80, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updateNanhaiPrize(index, { enabled })} /> },
+  ]
+
   const songWishPrizeColumns = [
     { title: '奖项等级', dataIndex: 'prizeLevel', width: 130, render: (value, _, index) => <Input value={value} placeholder="如：一等奖" onChange={(event) => updateSongWishPrize(index, { prizeLevel: event.target.value })} /> },
     { title: '奖品名称', dataIndex: 'prizeName', width: 160, render: (value, _, index) => <Input value={value} onChange={(event) => updateSongWishPrize(index, { prizeName: event.target.value })} /> },
@@ -397,6 +444,19 @@ export default function ActivityConfigPage({ activity }) {
               <Alert type="info" showIcon message="概率与库存独立管理" description="概率决定抽中哪个奖项；数量为可发放上限。谢谢参与也需要配置概率，启用奖项总概率必须为 100%。" />
               <Table rowKey={(item, index) => item.id || `new-${index}`} columns={prizeColumns} dataSource={prizes} pagination={false} size="small" scroll={{ x: 1120 }} />
               <Button onClick={addPrize}>新增奖项</Button>
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'nanhai_inspection_challenge' ? (
+          <Card
+            size="small"
+            title="微信红包数量与概率"
+            extra={<Space><Text type={Math.abs(nanhaiProbability - 70) < 0.001 ? 'success' : 'danger'}>红包中奖概率：{nanhaiProbability.toFixed(2)}% · 谢谢参与固定 30%</Text><Button type="primary" loading={nanhaiPrizeSaving} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
+          >
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Alert type="info" showIcon message="库存与概率均由后台控制" description="红包金额固定为 0.28、0.38、0.68、0.88、1.28、1.88 元；谢谢参与固定 30%。总数量不能低于已锁定数，六档红包的概率总和必须为 70%。" />
+              <Table rowKey="id" columns={nanhaiPrizeColumns} dataSource={nanhaiPrizes} pagination={false} size="small" scroll={{ x: 720 }} />
             </Space>
           </Card>
         ) : null}
