@@ -150,21 +150,27 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
   }
 
   function restartPreviewExperience() {
-    if (!preview) return
-    setBootstrap((current) => ({
-      ...current,
-      draw: null,
-      progress: buildPreviewInitialProgress(current),
-    }))
-    setPreviewSeenQuestionCodes((current) => (
-      Object.keys(current).length ? current : buildPreviewSeenQuestionCodes(bootstrap?.levels)
-    ))
-    setActiveLevel(null)
-    setActiveQuestionIndex(null)
-    setFeedback(null)
-    setSelectedOption('')
-    setWheelRotation(0)
-    navigate('map')
+    if (!preview || pageTransitioning) return
+    // 保留当前中奖结果直到分享页淡出完成；若此刻先清空 draw，分享页会短暂按未中奖态重绘。
+    setPageTransitioning(true)
+    window.clearTimeout(pageTransitionTimer.current)
+    pageTransitionTimer.current = window.setTimeout(() => {
+      setBootstrap((current) => ({
+        ...current,
+        draw: null,
+        progress: buildPreviewInitialProgress(current),
+      }))
+      setPreviewSeenQuestionCodes((current) => (
+        Object.keys(current).length ? current : buildPreviewSeenQuestionCodes(bootstrap?.levels)
+      ))
+      setActiveLevel(null)
+      setActiveQuestionIndex(null)
+      setFeedback(null)
+      setSelectedOption('')
+      setWheelRotation(0)
+      setPage('map')
+      setPageTransitioning(false)
+    }, 220)
     trackEvent(activityKey, 'preview_restart', { activityType: 'nanhai_inspection_challenge' })
   }
 
