@@ -538,7 +538,7 @@ button { font: inherit; }
 .nh-share-guide__arrow {
   position: absolute;
   top: 6vh;
-  left: 6vw;
+  right: 6vw;
   color: #fff;
   font-size: clamp(58px, 15vw, 96px);
   font-weight: 900;
@@ -621,7 +621,7 @@ button { font: inherit; }
 @keyframes nh-pin-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.11); } }
 @keyframes nh-spin { to { transform: rotate(360deg); } }
 @keyframes nh-wheel-live-spin { to { transform: rotate(calc(var(--pointer-rotation) + 360deg)); } }
-@keyframes nh-share-arrow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-7px, -7px); } }
+@keyframes nh-share-arrow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(7px, -7px); } }
 @keyframes nh-level-toast-in { from { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); } }
 
 @media (min-width: 680px) {

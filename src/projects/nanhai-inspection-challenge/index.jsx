@@ -348,6 +348,9 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         setBootstrap((current) => ({ ...current, authorization }))
       }
       if (!authorization.effective) throw new Error(`授权状态：${authorization.state}`)
+      setLevelAdvanceToast('授权完成，请再次点击抽奖')
+      window.clearTimeout(levelAdvanceTimer.current)
+      levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2200)
     } catch (err) {
       setError(readError(err, '微信零钱转账授权失败'))
     } finally {
@@ -801,7 +804,7 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
 function ShareGuide({ onClose }) {
   return (
     <button className="nh-share-guide" onClick={onClose} aria-label="关闭分享提示">
-      <span className="nh-share-guide__arrow" aria-hidden="true">↖</span>
+      <span className="nh-share-guide__arrow" aria-hidden="true">↗</span>
       <span className="nh-share-guide__text">点击「···」分享给好友</span>
     </button>
   )
