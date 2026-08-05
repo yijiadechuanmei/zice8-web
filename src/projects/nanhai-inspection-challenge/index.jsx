@@ -1,13 +1,17 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
   createAuthorization,
   drawPrize,
   getDebugState,
   getDrawStatus,
   getBootstrap,
+  getPublicConfig,
   previewAnswer,
   resetDebugData,
   submitAnswer,
@@ -55,8 +59,19 @@ const WHEEL_STOP_INDEX_BY_AMOUNT = {
 }
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
+  const tokenFromUrl = getTokenFromUrl()
+  if (tokenFromUrl) {
+    setToken(tokenFromUrl)
+    window.location.replace(sanitizeUrlForWechat(window.location.href))
+    return null
+  }
+  return <NanhaiInspectionChallengeMain routeParams={routeParams} />
+}
+
+function NanhaiInspectionChallengeMain({ routeParams }) {
   const activityKey = routeParams?.activityKey || ''
   const debugMode = new URLSearchParams(window.location.search).has('debug')
+  const [publicConfig, setPublicConfig] = useState(null)
   const [bootstrap, setBootstrap] = useState(null)
   const [previewSeenQuestionCodes, setPreviewSeenQuestionCodes] = useState({})
   const [page, setPage] = useState('home')
@@ -83,8 +98,20 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     shareImage: bootstrap?.activity?.shareImage || bootstrap?.config?.shareImage,
   }), [bootstrap])
   useWechatShare(activityKey, shareActivity)
+  // 审核链接仍是无账号即可反复体验的预览；只有 ?debug=1 才需要真实微信身份。
+  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(activityKey, debugMode ? publicConfig : null)
+  const readyToBootstrap = debugMode ? authReady : Boolean(publicConfig)
 
   useEffect(() => {
+    let alive = true
+    getPublicConfig(activityKey)
+      .then((data) => alive && setPublicConfig(data))
+      .catch((err) => alive && setError(readError(err, '活动配置加载失败')))
+    return () => { alive = false }
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!readyToBootstrap) return undefined
     let alive = true
     getBootstrap(activityKey, debugMode)
       .then((data) => {
@@ -93,12 +120,18 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
         if (data.state === 'lottery') setPage('success')
       })
-      .catch((err) => alive && setError(readError(err, '活动加载失败')))
+      .catch((err) => {
+        if (!alive) return
+        const message = readError(err, '活动加载失败')
+        const identityRejected = /真实参与模式需要微信登录|微信用户与活动帐号不匹配|Invalid token payload/i.test(message)
+        if (debugMode && identityRejected && reauth(hasToken ? 'nanhai-debug-token-mismatch' : 'nanhai-debug-missing-token')) return
+        setError(message)
+      })
     trackPageView(activityKey, '/nanhai-inspection-challenge', {
       activityType: 'nanhai_inspection_challenge',
     })
     return () => { alive = false }
-  }, [activityKey, debugMode])
+  }, [activityKey, debugMode, hasToken, readyToBootstrap, reauth])
 
   useEffect(() => () => {
     window.clearTimeout(pageTransitionTimer.current)
@@ -461,6 +494,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
     }
   }
 
+  if (debugMode && blockedMessage) return <ErrorView error={blockedMessage} />
   if (!bootstrap && !error) return <LoadingView />
   if (!bootstrap) return <ErrorView error={error} />
 
@@ -767,12 +801,8 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
 function ShareGuide({ onClose }) {
   return (
     <button className="nh-share-guide" onClick={onClose} aria-label="关闭分享提示">
-      <span className="nh-share-guide__card">
-        <span className="nh-share-guide__arrow">↗</span>
-        <strong>点击右上角「···」</strong>
-        <em>选择“分享给朋友”即可邀请好友参与</em>
-        <small>点击任意位置关闭</small>
-      </span>
+      <span className="nh-share-guide__arrow" aria-hidden="true">↖</span>
+      <span className="nh-share-guide__text">点击「···」分享给好友</span>
     </button>
   )
 }

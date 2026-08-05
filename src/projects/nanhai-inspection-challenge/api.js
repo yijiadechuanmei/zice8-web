@@ -5,6 +5,9 @@ const debugSuffix = (debug) => debug ? '?debug=1' : ''
 
 export const getBootstrap = (activityKey, debug = false) => request(`${base(activityKey)}/bootstrap${debugSuffix(debug)}`)
 
+export const getPublicConfig = (activityKey) =>
+  request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
+
 export const submitAnswer = (activityKey, levelNo, payload, debug = false) =>
   request(`${base(activityKey)}/levels/${encodeURIComponent(levelNo)}/answers${debugSuffix(debug)}`, {
     method: 'POST',
