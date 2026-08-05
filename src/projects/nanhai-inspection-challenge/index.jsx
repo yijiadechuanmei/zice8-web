@@ -41,6 +41,7 @@ const WHEEL_POINTER_ANGLE_BY_AMOUNT = {
 export default function NanhaiInspectionChallenge({ routeParams }) {
   const activityKey = routeParams?.activityKey || ''
   const [bootstrap, setBootstrap] = useState(null)
+  const [previewSeenQuestionCodes, setPreviewSeenQuestionCodes] = useState({})
   const [page, setPage] = useState('home')
   const [activeLevel, setActiveLevel] = useState(null)
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(null)
@@ -69,6 +70,7 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       .then((data) => {
         if (!alive) return
         setBootstrap(data)
+        setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
         if (data.draw) setPage('share')
       })
       .catch((err) => alive && setError(readError(err, '活动加载失败')))
@@ -141,6 +143,9 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       draw: null,
       progress: buildPreviewInitialProgress(current),
     }))
+    setPreviewSeenQuestionCodes((current) => (
+      Object.keys(current).length ? current : buildPreviewSeenQuestionCodes(bootstrap?.levels)
+    ))
     setActiveLevel(null)
     setActiveQuestionIndex(null)
     setFeedback(null)
@@ -159,6 +164,13 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
         questionCode: question.code,
         selectedOption,
         requestId: createRequestId('answer'),
+        ...(preview ? {
+          shownQuestionCodes: previewSeenQuestionCodes[activeLevel.levelNo] || activeLevel.questions.map((item) => item.code),
+          activeQuestionCodes: activeLevel.questions.map((item) => item.code),
+          correctQuestionCodes: activeLevel.questions
+            .filter((item) => correctCodes.has(item.code))
+            .map((item) => item.code),
+        } : {}),
       }
       const result = preview
         ? await previewAnswer(activityKey, activeLevel.levelNo, payload)
@@ -169,6 +181,10 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       const nextCorrectQuestionCodes = result.correct
         ? Array.from(new Set([...(progress?.correctQuestionCodes || []), question.code]))
         : (progress?.correctQuestionCodes || [])
+      const nextLevelQuestions = Array.isArray(result.levelQuestions) && result.levelQuestions.length === 2
+        ? result.levelQuestions
+        : activeLevel.questions
+      const nextActiveLevel = { ...activeLevel, questions: nextLevelQuestions }
       const justUnlockedQuestion = result.correct && !correctCodes.has(question.code)
       const completedCurrentLevel = justUnlockedQuestion && activeLevel.questions.every(
         (item) => nextCorrectQuestionCodes.includes(item.code),
@@ -176,6 +192,11 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
       const completedAll = completedCurrentLevel && activeLevel.levelNo === 5
       setBootstrap((current) => ({
         ...current,
+        levels: current.levels.map((level) => (
+          level.levelNo === activeLevel.levelNo
+            ? { ...level, questions: nextLevelQuestions }
+            : level
+        )),
         progress: {
           ...current.progress,
           ...(nextPreviewProgress || result.progress),
@@ -184,6 +205,16 @@ export default function NanhaiInspectionChallenge({ routeParams }) {
             : nextCorrectQuestionCodes,
         },
       }))
+      setActiveLevel(nextActiveLevel)
+      if (preview && !result.correct) {
+        setPreviewSeenQuestionCodes((current) => ({
+          ...current,
+          [activeLevel.levelNo]: Array.from(new Set([
+            ...(current[activeLevel.levelNo] || activeLevel.questions.map((item) => item.code)),
+            ...nextLevelQuestions.map((item) => item.code),
+          ])),
+        }))
+      }
       if (completedCurrentLevel) {
         setFeedback(null)
         setSelectedOption('')
@@ -718,6 +749,13 @@ function buildPreviewProgress(bootstrap, newlyCorrectCode, wrongAnswer = false) 
     status: completedLevels >= 5 ? 'completed' : 'in_progress',
     correctQuestionCodes,
   }
+}
+
+function buildPreviewSeenQuestionCodes(levels) {
+  return Object.fromEntries((levels || []).map((level) => [
+    level.levelNo,
+    (level.questions || []).map((question) => question.code),
+  ]))
 }
 
 function buildPreviewCompletedProgress(bootstrap) {
