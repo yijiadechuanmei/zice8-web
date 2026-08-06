@@ -106,6 +106,15 @@ export const NANHAI_ART = {
     },
     {
       canvas: [2109, 749], background: '6f175e72d6bc8049834fcd8a74cd57ea_3398817_2109_749.png',
+      // 校园场景触发点的对应题号非默认顺序，点位素材及坐标保持不变。
+      questionPinIndexes: {
+        CAMPUS_01: 1,
+        CAMPUS_02: 4,
+        CAMPUS_03: 2,
+        CAMPUS_04: 5,
+        CAMPUS_05: 3,
+        CAMPUS_06: 0,
+      },
       pins: [
         ['200ada254120752e6c2a155ef931fc8b_11996_82_82.png', 165, 463],
         ['4ba2b5796b094bca3ef325cd1755b341_12009_82_82.png', 351, 190],
