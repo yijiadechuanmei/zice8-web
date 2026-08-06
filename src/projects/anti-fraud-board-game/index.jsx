@@ -430,7 +430,7 @@ function PosterPage({ onReplay }) {
 
   return (
     <>
-      <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="width">
+      <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="contain">
         <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74 + POSTER_CONTENT_OFFSET_Y, width: 351, height: 530 }} />
         <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5 + POSTER_CONTENT_OFFSET_Y, width: 282, height: 170 }} />
         <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618 + POSTER_CONTENT_OFFSET_Y, width: 361, height: 85 }} />
