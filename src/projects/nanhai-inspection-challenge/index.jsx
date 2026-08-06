@@ -60,6 +60,9 @@ const WHEEL_STOP_INDEX_BY_AMOUNT = {
   188: 6,
 }
 
+const DRAW_STATUS_POLL_LIMIT = 5
+const DRAW_STATUS_POLL_INTERVAL_MS = 1800
+
 const NANHAI_BGM = {
   enabled: true,
   url: NANHAI_ART.home.audio,
@@ -484,6 +487,16 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     }
   }
 
+  async function waitForFinalDraw(initialResult) {
+    let result = initialResult
+    for (let attempt = 0; result && !result.final && attempt < DRAW_STATUS_POLL_LIMIT; attempt += 1) {
+      await wait(DRAW_STATUS_POLL_INTERVAL_MS)
+      result = await getDrawStatus(activityKey, debugMode)
+      if (result) setBootstrap((current) => ({ ...current, draw: result }))
+    }
+    return result
+  }
+
   async function handleDraw() {
     if (busy || wheelSpinning) return
     if (preview) {
@@ -532,12 +545,13 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     try {
       let result = await drawPrize(activityKey, createRequestId('draw'), debugMode)
       setBootstrap((current) => ({ ...current, draw: result }))
-      while (result && !result.final) {
-        await wait(1800)
-        result = await getDrawStatus(activityKey, debugMode)
-        if (result) setBootstrap((current) => ({ ...current, draw: result }))
-      }
+      result = await waitForFinalDraw(result)
       if (!result) throw new Error('未查询到本次抽奖记录')
+      if (!result.final) {
+        stopWheelSpin()
+        setError('微信正在确认发放结果，已停止转盘，请稍后重新进入活动查看')
+        return
+      }
       stopWheelAt(
         Number.isInteger(result.wheelStopIndex)
           ? result.wheelStopIndex
@@ -554,14 +568,16 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       // 即使首个响应丢失，也先反查唯一抽奖记录；一旦已消费机会，继续等待微信终态。
       try {
         let recovered = await getDrawStatus(activityKey, debugMode)
-        while (recovered && !recovered.final) {
-          await wait(1800)
-          recovered = await getDrawStatus(activityKey, debugMode)
-        }
+        recovered = await waitForFinalDraw(recovered)
         if (recovered?.final) {
           stopWheelAt(recovered.wheelStopIndex)
           await wait(2250)
           await revealDrawResult(recovered)
+          return
+        }
+        if (recovered) {
+          stopWheelSpin()
+          setError('微信正在确认发放结果，已停止转盘，请稍后重新进入活动查看')
           return
         }
       } catch {
