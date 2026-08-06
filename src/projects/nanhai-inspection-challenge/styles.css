@@ -13,10 +13,10 @@ button { font: inherit; }
 .nh-audio-control {
   position: fixed;
   z-index: 122;
-  /* 横向画布顺时针旋转后，其右上角映射到竖屏画布的右下角。 */
+  /* 横向画布顺时针旋转后，其右上角映射到竖屏视口的右下角。 */
   top: auto;
-  right: 12px;
-  bottom: calc(50svh - 98.4667vw + 12px);
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
   width: 44px;
   height: 44px;
   padding: 0;
