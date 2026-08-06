@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { request } from '../../shared/api/request'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import {
   ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY,
   BOARD_POINTS,
@@ -414,6 +416,7 @@ function PosterPage({ onReplay }) {
 
 export default function AntiFraudBoardGameApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY
+  const [publicConfig, setPublicConfig] = useState(null)
   const [page, setPage] = useState(PAGE.HOME)
   const [position, setPosition] = useState(0)
   const [elapsed, setElapsed] = useState(0)
@@ -424,7 +427,6 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const [questionOffset, setQuestionOffset] = useState(0)
-  const audioRef = useRef(null)
   const moveTimerRef = useRef(null)
   const rollTimerRef = useRef(null)
   const rollResultTimerRef = useRef(null)
@@ -433,10 +435,25 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     if (activityKey === ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY) return '识假防骗 从你我每一次警惕开始'
     return '识假防骗'
   }, [activityKey])
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
 
   useEffect(() => {
     document.title = title
   }, [title])
+
+  useEffect(() => {
+    let cancelled = false
+    request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
+      .then((config) => {
+        if (!cancelled) setPublicConfig(config)
+      })
+      .catch(() => {
+        if (!cancelled) setPublicConfig({})
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activityKey])
 
   useEffect(() => {
     if (page !== PAGE.GAME || success) return undefined
@@ -448,13 +465,6 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     window.clearTimeout(moveTimerRef.current)
     window.clearTimeout(rollTimerRef.current)
     window.clearTimeout(rollResultTimerRef.current)
-  }, [])
-
-  const playBgm = useCallback(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    audio.volume = 0.45
-    audio.play().catch(() => {})
   }, [])
 
   const resetGame = useCallback(() => {
@@ -475,8 +485,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const handleStart = useCallback(() => {
     resetGame()
     setPage(PAGE.GAME)
-    playBgm()
-  }, [playBgm, resetGame])
+  }, [resetGame])
 
   const showQuestionAt = useCallback((nextPosition) => {
     const bankIndex = (nextPosition + questionOffset) % QUESTION_BANK.length
@@ -570,7 +579,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
         />
       ) : null}
       {page === PAGE.POSTER ? <PosterPage onReplay={handleReplay} /> : null}
-      <audio ref={audioRef} src={antiFraudBoardAssets.bgm} loop preload="none" />
+      <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
     </>
   )
 }
