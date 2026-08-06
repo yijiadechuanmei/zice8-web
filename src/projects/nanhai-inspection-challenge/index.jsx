@@ -90,6 +90,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   const [debugState, setDebugState] = useState(null)
   const pageTransitionTimer = useRef(null)
   const levelAdvanceTimer = useRef(null)
+  const wheelSpinFrame = useRef(null)
+  const wheelSpinRotation = useRef(0)
 
   const shareActivity = useMemo(() => ({
     title: bootstrap?.activity?.shareTitle || NANHAI_INSPECTION_CHALLENGE_TITLE,
@@ -136,6 +138,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   useEffect(() => () => {
     window.clearTimeout(pageTransitionTimer.current)
     window.clearTimeout(levelAdvanceTimer.current)
+    if (wheelSpinFrame.current) window.cancelAnimationFrame(wheelSpinFrame.current)
   }, [])
 
   const progress = bootstrap?.progress
@@ -151,6 +154,37 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       setPage(nextPage)
       setPageTransitioning(false)
     }, 220)
+  }
+
+  function startWheelSpin() {
+    if (wheelSpinFrame.current) window.cancelAnimationFrame(wheelSpinFrame.current)
+    const startedAt = window.performance.now()
+    const initialRotation = wheelSpinRotation.current
+    setWheelSpinning(true)
+    const tick = (now) => {
+      // 用同一条实时角度轨迹驱动快转。停止时从当前实际角度继续向前缓停，
+      // 避免移除 CSS 无限动画后回到旧角度、再倒退到“谢谢参与”。
+      const rotation = initialRotation + (now - startedAt) * 0.9
+      wheelSpinRotation.current = rotation
+      setWheelRotation(rotation)
+      wheelSpinFrame.current = window.requestAnimationFrame(tick)
+    }
+    wheelSpinFrame.current = window.requestAnimationFrame(tick)
+  }
+
+  function stopWheelAt(wheelStopIndex) {
+    if (wheelSpinFrame.current) window.cancelAnimationFrame(wheelSpinFrame.current)
+    wheelSpinFrame.current = null
+    setWheelSpinning(false)
+    const rotation = spinPointerToStopIndex(wheelSpinRotation.current, wheelStopIndex)
+    wheelSpinRotation.current = rotation
+    setWheelRotation(rotation)
+  }
+
+  function stopWheelSpin() {
+    if (wheelSpinFrame.current) window.cancelAnimationFrame(wheelSpinFrame.current)
+    wheelSpinFrame.current = null
+    setWheelSpinning(false)
   }
 
   function openScene(level) {
@@ -385,18 +419,14 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       const prize = pickPreviewSegment(segments)
       const won = Number(prize.amount) > 0
       setBusy('preview-draw')
-      setWheelSpinning(true)
+      startWheelSpin()
       setError('')
       try {
         // 测试模式也按真实流程展示：先持续转动，再缓停到已确定奖项，
         // 最后保留结果，不会在指针仍转动时直接跳转分享页。
         await wait(950)
-        setWheelSpinning(false)
-        setWheelRotation((current) => spinPointerToStopIndex(
-          current,
-          wheelStopIndexForAmount(prize.amount),
-        ))
-        await wait(1750)
+        stopWheelAt(wheelStopIndexForAmount(prize.amount))
+        await wait(2250)
         await revealDrawResult({
           preview: true,
           won,
@@ -407,7 +437,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
             : '测试未中奖；不创建红包、库存或发放流水。',
         })
       } finally {
-        setWheelSpinning(false)
+        stopWheelSpin()
         setBusy('')
       }
       return
@@ -417,7 +447,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       return
     }
     setBusy('draw')
-    setWheelSpinning(true)
+    startWheelSpin()
     setError('')
     try {
       let result = await drawPrize(activityKey, createRequestId('draw'), debugMode)
@@ -428,14 +458,12 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         if (result) setBootstrap((current) => ({ ...current, draw: result }))
       }
       if (!result) throw new Error('未查询到本次抽奖记录')
-      setWheelSpinning(false)
-      setWheelRotation((current) => spinPointerToStopIndex(
-        current,
+      stopWheelAt(
         Number.isInteger(result.wheelStopIndex)
           ? result.wheelStopIndex
           : wheelStopIndexForAmount(result.prizeAmount),
-      ))
-      await wait(1750)
+      )
+      await wait(2250)
       await revealDrawResult(result)
       trackEvent(activityKey, 'lottery_result', {
         won: result.won,
@@ -451,9 +479,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           recovered = await getDrawStatus(activityKey, debugMode)
         }
         if (recovered?.final) {
-          setWheelSpinning(false)
-          setWheelRotation((current) => spinPointerToStopIndex(current, recovered.wheelStopIndex))
-          await wait(1750)
+          stopWheelAt(recovered.wheelStopIndex)
+          await wait(2250)
           await revealDrawResult(recovered)
           return
         }
@@ -463,7 +490,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       setError(readError(err, '抽奖状态确认失败，请稍后重新进入活动'))
     } finally {
       setBusy('')
-      setWheelSpinning(false)
+      stopWheelSpin()
     }
   }
 
@@ -499,7 +526,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       const state = await getDebugState(activityKey)
       setDebugState(state)
       if (String(state?.userId || '') === '1') {
-        if (window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) {
+        if (window.confirm('确认重置本活动全部测试数据？答题、抽奖、中奖及发放测试记录都会清空。')) {
           await resetAllDebugData()
         }
         return
@@ -514,7 +541,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
 
   async function handleDebugReset() {
     if (String(debugState?.userId || '') !== '1' || busy) return
-    if (!window.confirm('确认重置本活动全部未到账测试数据？已有真实到账流水时系统会拒绝重置。')) return
+    if (!window.confirm('确认重置本活动全部测试数据？答题、抽奖、中奖及发放测试记录都会清空。')) return
     await resetAllDebugData()
   }
 
@@ -875,7 +902,7 @@ function DebugPanel({ state, busy, onRefresh, onReset, onClose }) {
           <button disabled={Boolean(busy)} onClick={onRefresh}>刷新数据</button>
           {canResetAll ? <button className="is-danger" disabled={Boolean(busy)} onClick={onReset}>重置全部测试数据</button> : null}
         </div>
-        {canResetAll ? <p className="nh-debug-panel__reset-tip">仅 userId=1 可重置本活动全部测试数据；已有到账或在途转账时会被安全拦截。</p> : null}
+        {canResetAll ? <p className="nh-debug-panel__reset-tip">仅测试阶段的 userId=1 可重置本活动全部测试数据。</p> : null}
         <pre>{JSON.stringify(state, null, 2)}</pre>
       </section>
     </div>
