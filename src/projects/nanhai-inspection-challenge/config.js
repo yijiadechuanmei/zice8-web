@@ -60,6 +60,15 @@ export const NANHAI_ART = {
   scenes: [
     {
       canvas: [2109, 750], background: '564aa823ebedf1e0fc4117dc4b8410ee_3415240_2109_750.png',
+      // 工厂场景触发点的对应题号非默认顺序，点位素材及坐标保持不变。
+      questionPinIndexes: {
+        FACTORY_01: 3,
+        FACTORY_02: 1,
+        FACTORY_03: 2,
+        FACTORY_04: 4,
+        FACTORY_05: 5,
+        FACTORY_06: 0,
+      },
       pins: [
         ['b23df2910e469d8505bf281bcd375d75_12053_82_82.png', 327, 400],
         ['bd5cbec1077bc08e78dff14f494f0bf1_12002_82_82.png', 656, 331],
