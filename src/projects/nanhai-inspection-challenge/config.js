@@ -71,6 +71,15 @@ export const NANHAI_ART = {
     },
     {
       canvas: [2109, 750], background: '7d6cfc20aad841bc3a1473306947e825_3219228_2109_750.png',
+      // 工地场景触发点的对应题号非默认顺序，点位素材及坐标保持不变。
+      questionPinIndexes: {
+        SITE_01: 2,
+        SITE_02: 0,
+        SITE_03: 3,
+        SITE_04: 5,
+        SITE_05: 1,
+        SITE_06: 4,
+      },
       pins: [
         ['1f8afef7c577a0f88960cd5e18bb838b_12052_82_82.png', 221, 316],
         ['3452e4cabe5ff2c45dc3e9421a91daae_11993_82_82.png', 418, 429],
