@@ -279,6 +279,7 @@ function RollOverlay({ phase, value }) {
 
 function QuestionOverlay({ question, onAnswer }) {
   const [selectedIndex, setSelectedIndex] = useState(null)
+  const [referenceVisible, setReferenceVisible] = useState(false)
   const optionIcons = [
     antiFraudBoardAssets.game.optionA,
     antiFraudBoardAssets.game.optionB,
@@ -296,6 +297,15 @@ function QuestionOverlay({ question, onAnswer }) {
         <img className="afbg-question-bg" src={antiFraudBoardAssets.game.questionCard} alt="" draggable="false" />
         <div className="afbg-question-title">
           <div className="afbg-question-title-inner">{question.title}</div>
+          {question.referenceImage ? (
+            <button
+              className="afbg-question-reference-trigger"
+              type="button"
+              onClick={() => setReferenceVisible(true)}
+            >
+              （点击查看图片）
+            </button>
+          ) : null}
         </div>
         <div className="afbg-options" role="radiogroup" aria-label="请选择答案">
           {question.options.map((option, index) => (
@@ -327,6 +337,16 @@ function QuestionOverlay({ question, onAnswer }) {
           <img src={antiFraudBoardAssets.game.nextButton} alt="" draggable="false" />
         </button>
       </section>
+      {referenceVisible ? (
+        <button
+          className="afbg-question-reference-mask"
+          type="button"
+          onClick={() => setReferenceVisible(false)}
+          aria-label="关闭题目参考图片"
+        >
+          <img className="afbg-question-reference-image" src={question.referenceImage} alt="题目参考图片" draggable="false" />
+        </button>
+      ) : null}
     </div>
   )
 }
@@ -535,21 +555,18 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const handleAnswer = useCallback((answerIndex) => {
     if (!question) return
     const correct = answerIndex === question.answerIndex
-    if (question.position >= FINISH_INDEX) {
-      setQuestion(null)
-      setSuccess(true)
-      return
-    }
     setFeedback({
       correct,
       analysis: question.analysis,
+      isFinal: question.position >= FINISH_INDEX,
     })
     setQuestion(null)
   }, [question])
 
   const handleContinue = useCallback(() => {
+    if (feedback?.isFinal) setSuccess(true)
     setFeedback(null)
-  }, [])
+  }, [feedback])
 
   const handleGoPoster = useCallback(() => {
     setPage(PAGE.POSTER)

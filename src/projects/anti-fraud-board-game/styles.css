@@ -377,6 +377,48 @@
   filter: drop-shadow(#000 1px 1px 0);
 }
 
+.afbg-question-reference-trigger {
+  width: 100%;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: normal;
+  text-align: left;
+  text-decoration: underline;
+  filter: drop-shadow(#000 1px 1px 0);
+}
+
+.afbg-question-reference-mask {
+  position: fixed;
+  z-index: 2200;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.afbg-question-reference-image {
+  display: block;
+  width: 344px;
+  height: 299px;
+  object-fit: fill;
+  pointer-events: none;
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
 .afbg-options {
   position: absolute;
   left: 251px;

@@ -31,6 +31,7 @@ export const antiFraudBoardAssets = {
     optionB: `${CDN_BASE}/fed4854bf10bd15d7f19f7962265e754_5303_102_83.png`,
     optionC: `${CDN_BASE}/aa24444f1c677d329bf1eb84f9f6d01f_5257_102_83.png`,
     nextButton: `${CDN_BASE}/4fb03353a1e0ec18d66e887d28cd8553_1503_106_41.png`,
+    propCurrencyReference: `${CDN_BASE}/0605c38027d410981da37ede15a572a1_24916.webp`,
     answerPanel: `${CDN_BASE}/7829f544404d79b7731f9e45e6e499d9_96322.webp`,
     correctAnswerPanel: `${CDN_BASE}/9ed712e6dd6ba98dc36daa853ba74bb0_116348.webp`,
     diceGlow: `${CDN_BASE}/0b27563217b02a3c956f330392b9dc21_460469_663_663.png`,
@@ -90,6 +91,13 @@ export const BOARD_TILES = [
 ]
 
 export const QUESTION_BANK = [
+  {
+    title: '(单选)图片中的人民币是否属于“道具类”假币（ ）',
+    referenceImage: antiFraudBoardAssets.game.propCurrencyReference,
+    options: ['是', '否'],
+    answerIndex: 0,
+    analysis: '图片中的人民币印有“影视道具”字样，属于道具类假币，正确答案为“是”。',
+  },
   {
     title: '(单选)购买非法彩票，对自己和家庭的直接影响是（ ）',
     options: ['一定能发家致富', '可能造成巨大财产损失，破坏家庭幸福', '促进家庭和谐'],
