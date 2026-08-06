@@ -666,11 +666,17 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
   const map = NANHAI_ART.map
   const [selectedLevelNo, setSelectedLevelNo] = useState(null)
   const selectedLevel = levels.find((level) => level.levelNo === selectedLevelNo)
+  const currentAvailableLevel = levels.find((level) => (
+    levelStatus(level, progress, correctCodes) === 'available'
+  ))
+  const startLevel = selectedLevel || currentAvailableLevel
   return (
     <ArtPage
       art={map}
       onAction={{
-        'start-scene': selectedLevel ? () => onOpenLevel(selectedLevel) : undefined,
+        // 未选关卡时，开始按钮直接进入当前进度；选中已通关关卡后，
+        // 同一按钮则进入对应的复习关卡。
+        'start-scene': startLevel ? () => onOpenLevel(startLevel) : undefined,
         'debug-complete': preview ? onDebugComplete : undefined,
       }}
       className="nh-map-page"
@@ -707,13 +713,7 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
               key={level.levelNo}
               className={`nh-map-node is-${status}`}
               style={position}
-              onClick={() => {
-                if (status === 'available') {
-                  onOpenLevel(level)
-                  return
-                }
-                if (status === 'completed') setSelectedLevelNo(level.levelNo)
-              }}
+              onClick={() => status !== 'locked' && setSelectedLevelNo(level.levelNo)}
               aria-pressed={selectedLevelNo === level.levelNo}
               aria-label={`${level.title} ${status === 'completed' ? '已解锁' : status === 'available' ? '未解锁' : '未开放'}`}
             >
