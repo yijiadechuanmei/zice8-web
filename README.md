@@ -17,6 +17,10 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Deployment Checklist
 
+### Repository sync
+
+Production deployment pulls `main` from Codeup. GitHub Actions mirrors this repository to Codeup after each push; verify the **Sync to Codeup** workflow succeeds before deploying.
+
 Build the web app before any deployment:
 
 ```bash
