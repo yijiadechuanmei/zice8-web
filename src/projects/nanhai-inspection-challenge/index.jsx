@@ -837,7 +837,8 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
         rotatedChildren={(
           <div className="nh-scene-pins">
             {level.questions.map((question, index) => {
-              const pinIndex = Number(question.code.slice(-2)) - 1
+              const defaultPinIndex = Number(question.code.slice(-2)) - 1
+              const pinIndex = scene.questionPinIndexes?.[question.code] ?? defaultPinIndex
               const pin = scene.pins[pinIndex] || scene.pins[index]
               const completed = correctCodes.has(question.code)
               return (
@@ -846,7 +847,7 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
                   className={`nh-scene-pin ${completed ? 'is-completed' : ''}`}
                   style={sourceRect(scene.canvas, pin[1], pin[2], 82, 82)}
                   onClick={() => onOpenQuestion(index)}
-                  aria-label={`第${index + 1}题${completed ? '已解锁' : '点击答题'}`}
+                  aria-label={`第${pinIndex + 1}题${completed ? '已解锁' : '点击答题'}`}
                 >
                   <img className="nh-scene-pin__trigger" src={nanhaiAsset(pin[0])} alt="" />
                   {completed ? <span>已解锁</span> : null}

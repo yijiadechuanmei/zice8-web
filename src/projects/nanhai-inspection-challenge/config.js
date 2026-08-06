@@ -82,6 +82,8 @@ export const NANHAI_ART = {
     },
     {
       canvas: [2109, 750], background: 'ec8d1ceeb3748d377e07472954a0c5ed_3361439_2109_750.png',
+      // 园区场景第 5、6 个点位的题目内容对调，点位素材及坐标保持不变。
+      questionPinIndexes: { PARK_05: 5, PARK_06: 4 },
       pins: [
         ['2931d2831d2e6bd9f324f7bafb556c7b_12015_82_82.png', 244, 388],
         ['0be003e021fc7ccfc26c9b73072bb33f_11913_82_83.png', 530, 380],
