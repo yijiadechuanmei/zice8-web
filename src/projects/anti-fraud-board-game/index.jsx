@@ -18,7 +18,8 @@ const PAGE = {
 
 const DESIGN_WIDTH = 375
 const DESIGN_HEIGHT = 812
-const GAME_STAGE_HEIGHT = 1168
+// 棋盘旋转后从画布顶部上移 44px，滚动高度需扣除这段偏移，避免到底后出现空白。
+const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
@@ -394,7 +395,7 @@ function PosterPage({ onReplay }) {
 
   return (
     <>
-      <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="contain">
+      <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="width">
         <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74, width: 351, height: 530 }} />
         <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5, width: 282, height: 170 }} />
         <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618, width: 361, height: 85 }} />
