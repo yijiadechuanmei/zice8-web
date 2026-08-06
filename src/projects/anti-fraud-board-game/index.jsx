@@ -15,19 +15,22 @@ const PAGE = {
 }
 
 const DESIGN_WIDTH = 375
-const DESIGN_HEIGHT = 724
+const DESIGN_HEIGHT = 812
+const GAME_STAGE_HEIGHT = 1168
 const FINISH_INDEX = BOARD_POINTS.length - 1
-const MOVE_INTERVAL_MS = 330
-const SUCCESS_TO_POSTER_MS = 1000
+const MOVE_STEP_MS = 1500
+const ROLLING_MS = 2000
+const ROLL_RESULT_MS = 2000
 
-function useDesignScale() {
+function useDesignScale(stageHeight, fit = 'contain') {
   const [scale, setScale] = useState(1)
 
   useEffect(() => {
     function updateScale() {
       const width = window.innerWidth || DESIGN_WIDTH
       const height = window.innerHeight || DESIGN_HEIGHT
-      setScale(Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT))
+      const widthScale = width / DESIGN_WIDTH
+      setScale(fit === 'width' ? widthScale : Math.min(widthScale, height / stageHeight))
     }
 
     updateScale()
@@ -37,21 +40,30 @@ function useDesignScale() {
       window.removeEventListener('resize', updateScale)
       window.removeEventListener('orientationchange', updateScale)
     }
-  }, [])
+  }, [fit, stageHeight])
 
   return scale
 }
 
-function DesignStage({ className = '', children }) {
-  const scale = useDesignScale()
+function DesignStage({
+  className = '',
+  shellClassName = '',
+  stageHeight = DESIGN_HEIGHT,
+  fit = 'width',
+  shellRef,
+  children,
+}) {
+  const scale = useDesignScale(stageHeight, fit)
 
   return (
-    <main className="afbg-shell">
-      <div
-        className={`afbg-stage ${className}`}
-        style={{ '--afbg-scale': scale }}
-      >
-        {children}
+    <main ref={shellRef} className={`afbg-shell ${shellClassName}`}>
+      <div className="afbg-stage-frame" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
+        <div
+          className={`afbg-stage ${className}`}
+          style={{ '--afbg-scale': scale, '--afbg-stage-height': `${stageHeight}px` }}
+        >
+          {children}
+        </div>
       </div>
     </main>
   )
@@ -63,15 +75,15 @@ function LayerImage({ className = '', src, style, alt = '' }) {
 
 function HomePage({ onStart }) {
   return (
-    <DesignStage className="afbg-home">
-      <LayerImage src={antiFraudBoardAssets.home.topRibbon} style={{ left: 9, top: 18, width: 355, height: 40 }} />
-      <LayerImage src={antiFraudBoardAssets.home.title} style={{ left: 44, top: 73, width: 288, height: 213 }} />
-      <LayerImage src={antiFraudBoardAssets.home.subtitle} style={{ left: 53, top: 305, width: 267, height: 49 }} />
-      <LayerImage src={antiFraudBoardAssets.home.mascot} style={{ left: 59, top: 406, width: 252, height: 185 }} />
+    <DesignStage className="afbg-home" shellClassName="afbg-home-shell" fit="contain">
+      <LayerImage className="afbg-home-ribbon" src={antiFraudBoardAssets.home.topRibbon} style={{ left: 9, top: 18, width: 355, height: 40 }} />
+      <LayerImage className="afbg-home-title" src={antiFraudBoardAssets.home.title} style={{ left: 44, top: 73, width: 288, height: 213 }} />
+      <LayerImage className="afbg-home-subtitle" src={antiFraudBoardAssets.home.subtitle} style={{ left: 53, top: 305, width: 267, height: 49 }} />
+      <LayerImage className="afbg-home-mascot" src={antiFraudBoardAssets.home.mascot} style={{ left: 59, top: 406, width: 252, height: 185 }} />
       <button className="afbg-image-button afbg-start-button" type="button" onClick={onStart} aria-label="开始游戏">
         <LayerImage src={antiFraudBoardAssets.home.startButton} />
       </button>
-      <LayerImage src={antiFraudBoardAssets.home.footer} style={{ left: 30, top: 691, width: 313, height: 18 }} />
+      <LayerImage className="afbg-home-footer" src={antiFraudBoardAssets.home.footer} style={{ left: 30, top: 691, width: 313, height: 18 }} />
     </DesignStage>
   )
 }
@@ -86,8 +98,9 @@ function formatElapsed(seconds) {
 function BoardScene({
   position,
   moving,
-  lastRoll,
   elapsed,
+  rollPhase,
+  rollValue,
   question,
   feedback,
   success,
@@ -97,9 +110,44 @@ function BoardScene({
   onGoPoster,
 }) {
   const currentPoint = BOARD_POINTS[position] || BOARD_POINTS[0]
+  const shellRef = useRef(null)
+  const scrollAnimationRef = useRef(null)
+
+  useEffect(() => {
+    const shell = shellRef.current
+    if (!shell) return
+    window.cancelAnimationFrame(scrollAnimationRef.current)
+    const frame = shell.querySelector('.afbg-stage-frame')
+    const scale = frame ? frame.getBoundingClientRect().width / DESIGN_WIDTH : 1
+    const characterCenterY = (currentPoint.x - 44 + 60) * scale
+    const targetTop = Math.max(0, characterCenterY - shell.clientHeight / 2)
+    const maxTop = Math.max(0, shell.scrollHeight - shell.clientHeight)
+    const nextTop = Math.min(targetTop, maxTop)
+
+    if (!moving) {
+      shell.scrollTop = nextTop
+      return undefined
+    }
+
+    const startTop = shell.scrollTop
+    const distance = nextTop - startTop
+    const startTime = performance.now()
+
+    function step(now) {
+      const progress = Math.min((now - startTime) / MOVE_STEP_MS, 1)
+      shell.scrollTop = startTop + distance * progress
+      if (progress < 1) {
+        scrollAnimationRef.current = window.requestAnimationFrame(step)
+      }
+    }
+
+    scrollAnimationRef.current = window.requestAnimationFrame(step)
+    return () => window.cancelAnimationFrame(scrollAnimationRef.current)
+  }, [currentPoint.x, moving, position])
 
   return (
-    <DesignStage className="afbg-game">
+    <>
+    <DesignStage className="afbg-game" shellClassName="afbg-game-shell" stageHeight={GAME_STAGE_HEIGHT} fit="width" shellRef={shellRef}>
       <div className="afbg-board-rotator">
         <LayerImage src={antiFraudBoardAssets.game.board} style={{ left: 0, top: 0, width: 1168, height: 375 }} />
         <LayerImage src={antiFraudBoardAssets.game.startDecor} style={{ left: 55, top: 153, width: 135, height: 144 }} />
@@ -126,47 +174,101 @@ function BoardScene({
         >
           <LayerImage src={antiFraudBoardAssets.game.character} />
           {!moving && !question && !feedback && !success ? (
-            <LayerImage className="afbg-roll-hint" src={antiFraudBoardAssets.game.prompt} />
+            <div className={`afbg-roll-hint ${position >= 4 && position <= 6 ? 'is-lowered' : ''}`}>
+              <LayerImage src={antiFraudBoardAssets.game.prompt} />
+            </div>
           ) : null}
         </button>
-        <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{lastRoll || position} 步</div>
+        <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{position} 步</div>
         <div className="afbg-time-text" style={{ left: 91, top: 39 }}>{formatElapsed(elapsed)}</div>
       </div>
-
-      {question ? <QuestionOverlay question={question} onAnswer={onAnswer} /> : null}
-      {feedback ? <FeedbackOverlay feedback={feedback} onContinue={onContinue} /> : null}
-      {success ? <SuccessOverlay onGoPoster={onGoPoster} /> : null}
     </DesignStage>
+
+    {rollPhase ? <RollOverlay phase={rollPhase} value={rollValue} /> : null}
+    {question ? <QuestionOverlay question={question} onAnswer={onAnswer} /> : null}
+    {feedback ? <FeedbackOverlay feedback={feedback} onContinue={onContinue} /> : null}
+    {success ? <SuccessOverlay onGoPoster={onGoPoster} /> : null}
+    </>
+  )
+}
+
+function RollOverlay({ phase, value }) {
+  const isResult = phase === 'result'
+
+  return (
+    <div className="afbg-roll-overlay" aria-live="polite">
+      <section className="afbg-roll-stage">
+        <img className="afbg-roll-glow" src={antiFraudBoardAssets.game.diceGlow} alt="" draggable="false" />
+        {isResult ? (
+          <>
+            <div className="afbg-roll-result-wrap">
+              <img src={antiFraudBoardAssets.game.diceResult} alt="" draggable="false" />
+            </div>
+            <img className="afbg-roll-result-text" src={antiFraudBoardAssets.game.diceResultText} alt="" draggable="false" />
+            <div className="afbg-roll-value">{value}</div>
+          </>
+        ) : (
+          <>
+            <div className="afbg-roll-dice-wrap">
+              <img src={antiFraudBoardAssets.game.diceRolling} alt="" draggable="false" />
+            </div>
+            <img className="afbg-roll-wait-text" src={antiFraudBoardAssets.game.diceRollingText} alt="" draggable="false" />
+          </>
+        )}
+      </section>
+    </div>
   )
 }
 
 function QuestionOverlay({ question, onAnswer }) {
+  const [selectedIndex, setSelectedIndex] = useState(null)
+  const optionIcons = [
+    antiFraudBoardAssets.game.optionA,
+    antiFraudBoardAssets.game.optionB,
+    antiFraudBoardAssets.game.optionC,
+  ]
+
+  const submitAnswer = () => {
+    if (selectedIndex === null) return
+    onAnswer(selectedIndex)
+  }
+
   return (
     <div className="afbg-mask">
-      <section className="afbg-question-card" aria-live="polite">
-        <LayerImage className="afbg-question-bg" src={antiFraudBoardAssets.game.questionCard} />
-        <div className="afbg-question-title">{question.title}</div>
-        <div className="afbg-options">
+      <section className="afbg-question-stage" aria-live="polite">
+        <img className="afbg-question-bg" src={antiFraudBoardAssets.game.questionCard} alt="" draggable="false" />
+        <div className="afbg-question-title">
+          <div className="afbg-question-title-inner">{question.title}</div>
+        </div>
+        <div className="afbg-options" role="radiogroup" aria-label="请选择答案">
           {question.options.map((option, index) => (
             <button
               key={option}
-              className="afbg-option"
+              className={`afbg-option ${selectedIndex === index ? 'is-selected' : ''}`}
               type="button"
-              onClick={() => onAnswer(index)}
+              onClick={() => setSelectedIndex(index)}
+              role="radio"
+              aria-checked={selectedIndex === index}
             >
               <img
-                src={[
-                  antiFraudBoardAssets.game.optionA,
-                  antiFraudBoardAssets.game.optionB,
-                  antiFraudBoardAssets.game.optionC,
-                ][index] || antiFraudBoardAssets.game.optionA}
+                className="afbg-option-icon"
+                src={optionIcons[index] || antiFraudBoardAssets.game.optionA}
                 alt=""
                 draggable="false"
               />
-              <span>{option}</span>
+              <span className="afbg-option-copy">{option}</span>
             </button>
           ))}
         </div>
+        <button
+          className="afbg-question-submit"
+          type="button"
+          onClick={submitAnswer}
+          disabled={selectedIndex === null}
+          aria-label="提交答案"
+        >
+          <img src={antiFraudBoardAssets.game.nextButton} alt="" draggable="false" />
+        </button>
       </section>
     </div>
   )
@@ -175,15 +277,30 @@ function QuestionOverlay({ question, onAnswer }) {
 function FeedbackOverlay({ feedback, onContinue }) {
   return (
     <div className="afbg-mask">
-      <section className="afbg-feedback-card">
-        <div className={`afbg-feedback-status ${feedback.correct ? 'is-correct' : 'is-wrong'}`}>
-          {feedback.correct ? '答对啦' : '答错啦'}
-        </div>
-        <div className="afbg-feedback-heading">答案解析</div>
-        <p>{feedback.analysis}</p>
-        <button className="afbg-next-button" type="button" onClick={onContinue} aria-label="继续">
-          <img src={antiFraudBoardAssets.game.nextButton} alt="" draggable="false" />
-        </button>
+      <section className="afbg-feedback-stage" aria-live="polite">
+        {feedback.correct ? (
+          <img
+            className="afbg-feedback-correct-panel"
+            src={antiFraudBoardAssets.game.correctAnswerPanel}
+            alt=""
+            draggable="false"
+          />
+        ) : (
+          <>
+            <img
+              className="afbg-feedback-wrong-panel"
+              src={antiFraudBoardAssets.game.answerPanel}
+              alt=""
+              draggable="false"
+            />
+            <div className="afbg-feedback-analysis">
+              <div className="afbg-feedback-heading">答案解析</div>
+              <div className="afbg-feedback-underline" />
+              <div className="afbg-feedback-copy">{feedback.analysis}</div>
+            </div>
+          </>
+        )}
+        <button className="afbg-feedback-hitarea" type="button" onClick={onContinue} aria-label="继续" />
       </section>
     </div>
   )
@@ -192,11 +309,10 @@ function FeedbackOverlay({ feedback, onContinue }) {
 function SuccessOverlay({ onGoPoster }) {
   return (
     <div className="afbg-mask">
-      <section className="afbg-success-card">
-        <img src={antiFraudBoardAssets.game.successPanel} alt="" draggable="false" />
-        <button className="afbg-poster-button" type="button" onClick={onGoPoster} aria-label="查看海报">
-          <img src={antiFraudBoardAssets.game.posterButton} alt="" draggable="false" />
-        </button>
+      <section className="afbg-success-stage">
+        <img className="afbg-success-panel" src={antiFraudBoardAssets.game.successPanel} alt="" draggable="false" />
+        <img className="afbg-success-poster-image" src={antiFraudBoardAssets.game.posterButton} alt="" draggable="false" />
+        <button className="afbg-success-hitarea" type="button" onClick={onGoPoster} aria-label="查看海报" />
       </section>
     </div>
   )
@@ -205,7 +321,6 @@ function SuccessOverlay({ onGoPoster }) {
 function PosterPage({ onReplay }) {
   return (
     <DesignStage className="afbg-poster">
-      <div className="afbg-poster-text afbg-poster-end">答题结束<br />成绩排名敬请期待</div>
       <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74, width: 351, height: 530 }} />
       <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5, width: 282, height: 170 }} />
       <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618, width: 361, height: 85 }} />
@@ -221,15 +336,18 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const activityKey = routeParams?.activityKey || ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY
   const [page, setPage] = useState(PAGE.HOME)
   const [position, setPosition] = useState(0)
-  const [lastRoll, setLastRoll] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [moving, setMoving] = useState(false)
+  const [rollPhase, setRollPhase] = useState(null)
+  const [rollValue, setRollValue] = useState(null)
   const [question, setQuestion] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const [questionOffset, setQuestionOffset] = useState(0)
   const audioRef = useRef(null)
-  const successTimerRef = useRef(null)
+  const moveTimerRef = useRef(null)
+  const rollTimerRef = useRef(null)
+  const rollResultTimerRef = useRef(null)
 
   const title = useMemo(() => {
     if (activityKey === ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY) return '识假防骗 从你我每一次警惕开始'
@@ -246,7 +364,11 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     return () => window.clearInterval(timer)
   }, [page, success])
 
-  useEffect(() => () => window.clearTimeout(successTimerRef.current), [])
+  useEffect(() => () => {
+    window.clearTimeout(moveTimerRef.current)
+    window.clearTimeout(rollTimerRef.current)
+    window.clearTimeout(rollResultTimerRef.current)
+  }, [])
 
   const playBgm = useCallback(() => {
     const audio = audioRef.current
@@ -256,11 +378,14 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   }, [])
 
   const resetGame = useCallback(() => {
-    window.clearTimeout(successTimerRef.current)
+    window.clearTimeout(moveTimerRef.current)
+    window.clearTimeout(rollTimerRef.current)
+    window.clearTimeout(rollResultTimerRef.current)
     setPosition(0)
-    setLastRoll(0)
     setElapsed(0)
     setMoving(false)
+    setRollPhase(null)
+    setRollValue(null)
     setQuestion(null)
     setFeedback(null)
     setSuccess(false)
@@ -283,31 +408,48 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     if (moving || question || feedback || success) return
     const roll = Math.floor(Math.random() * 3) + 1
     const target = Math.min(position + roll, FINISH_INDEX)
-    setLastRoll(roll)
     setMoving(true)
+    setRollPhase('rolling')
+    setRollValue(null)
 
     let next = position
-    const timer = window.setInterval(() => {
+    const finishMove = () => {
+      setMoving(false)
+      if (target >= FINISH_INDEX) {
+        showQuestionAt(target)
+        return
+      }
+      showQuestionAt(target)
+    }
+
+    const moveOneStep = () => {
       next += 1
       setPosition(next)
       if (next >= target) {
-        window.clearInterval(timer)
-        setMoving(false)
-        if (target >= FINISH_INDEX) {
-          setSuccess(true)
-          successTimerRef.current = window.setTimeout(() => {
-            setPage(PAGE.POSTER)
-          }, SUCCESS_TO_POSTER_MS)
-          return
-        }
-        showQuestionAt(target)
+        moveTimerRef.current = window.setTimeout(finishMove, MOVE_STEP_MS)
+        return
       }
-    }, MOVE_INTERVAL_MS)
+      moveTimerRef.current = window.setTimeout(moveOneStep, MOVE_STEP_MS)
+    }
+
+    rollTimerRef.current = window.setTimeout(() => {
+      setRollValue(roll)
+      setRollPhase('result')
+      rollResultTimerRef.current = window.setTimeout(() => {
+        setRollPhase(null)
+        moveOneStep()
+      }, ROLL_RESULT_MS)
+    }, ROLLING_MS)
   }, [feedback, moving, position, question, showQuestionAt, success])
 
   const handleAnswer = useCallback((answerIndex) => {
     if (!question) return
     const correct = answerIndex === question.answerIndex
+    if (question.position >= FINISH_INDEX) {
+      setQuestion(null)
+      setSuccess(true)
+      return
+    }
     setFeedback({
       correct,
       analysis: question.analysis,
@@ -320,7 +462,6 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   }, [])
 
   const handleGoPoster = useCallback(() => {
-    window.clearTimeout(successTimerRef.current)
     setPage(PAGE.POSTER)
   }, [])
 
@@ -336,8 +477,9 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
         <BoardScene
           position={position}
           moving={moving}
-          lastRoll={lastRoll}
           elapsed={elapsed}
+          rollPhase={rollPhase}
+          rollValue={rollValue}
           question={question}
           feedback={feedback}
           success={success}

@@ -1,7 +1,7 @@
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_TYPE = 'anti_fraud_board_game'
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY = 'anti_fraud_board_game_20260623'
 
-const CDN_BASE = 'https://cdn-ali.lionwhale.cn/ivxtest/files'
+const CDN_BASE = 'https://assets.zice8.com/anti_fraud_board_game/anti_fraud_board_game_20260623'
 
 export const antiFraudBoardAssets = {
   bgm: `${CDN_BASE}/281974df63e94d666beaa1340df4fa50_853056.mp3`,
@@ -32,6 +32,12 @@ export const antiFraudBoardAssets = {
     optionC: `${CDN_BASE}/aa24444f1c677d329bf1eb84f9f6d01f_5257_102_83.png`,
     nextButton: `${CDN_BASE}/4fb03353a1e0ec18d66e887d28cd8553_1503_106_41.png`,
     answerPanel: `${CDN_BASE}/7829f544404d79b7731f9e45e6e499d9_96322.webp`,
+    correctAnswerPanel: `${CDN_BASE}/9ed712e6dd6ba98dc36daa853ba74bb0_116348.webp`,
+    diceGlow: `${CDN_BASE}/0b27563217b02a3c956f330392b9dc21_460469_663_663.png`,
+    diceRolling: `${CDN_BASE}/5baad9ebe85601da084d4f7dbd467bd9_30064.webp`,
+    diceRollingText: `${CDN_BASE}/e4cb8e659b5257432cd9e97a35bfc8c3_8216.webp`,
+    diceResult: `${CDN_BASE}/2b661a938e147dda5ff27e2637a04cfa_23686.webp`,
+    diceResultText: `${CDN_BASE}/82efdf46f46e02c2cf84313519932c02_4804.webp`,
     successPanel: `${CDN_BASE}/d372f144d683a21eb9bc690ce452afbc_56022.webp`,
     posterButton: `${CDN_BASE}/6cc8655dedb364107e6bb4f0d2761680_7652.webp`,
   },
