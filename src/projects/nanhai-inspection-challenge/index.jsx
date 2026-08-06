@@ -432,12 +432,31 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     navigate('map')
   }
 
-  async function handleAuthorization() {
+  async function resolveAuthorizationForDraw() {
+    setBusy('authorization-check')
+    try {
+      const latestBootstrap = await getBootstrap(activityKey, debugMode)
+      setBootstrap(latestBootstrap)
+      if (!latestBootstrap.authorization) return null
+
+      const authorization = await syncAuthorization(activityKey, debugMode)
+      setBootstrap((current) => ({ ...current, authorization }))
+      return authorization
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function handleAuthorization(existingAuthorization = null) {
     if (busy) return
     setBusy('authorization')
     setError('')
     try {
-      let authorization = await createAuthorization(activityKey, debugMode)
+      // 已有待确认授权时复用同一笔微信授权，避免每次点击都新建一笔并占用场景名额。
+      let authorization = existingAuthorization
+      if (!authorization || authorization.state !== 'WAIT_USER_CONFIRM') {
+        authorization = await createAuthorization(activityKey, debugMode)
+      }
       setBootstrap((current) => ({ ...current, authorization }))
       if (!authorization.effective) {
         if (!authorization.packageInfo) throw new Error('微信未返回授权参数')
@@ -494,8 +513,17 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       }
       return
     }
-    if (!bootstrap?.authorization?.effective) {
-      await handleAuthorization()
+    let authorization
+    try {
+      // 抽奖前始终从服务端查询并同步微信授权状态。已经生效的用户直接抽奖，
+      // 只有确认尚未授权时才会调起新的微信授权流程。
+      authorization = await resolveAuthorizationForDraw()
+    } catch (err) {
+      setError(readError(err, '微信授权状态查询失败，请稍后重试'))
+      return
+    }
+    if (!authorization?.effective) {
+      await handleAuthorization(authorization)
       return
     }
     setBusy('draw')
@@ -1027,6 +1055,7 @@ function OperationLoading({ message }) {
 }
 
 function operationLoadingText(busy) {
+  if (busy === 'authorization-check') return '正在核验微信授权…'
   if (busy === 'authorization') return '正在唤起微信授权…'
   if (busy === 'draw-result') return '奖品发放中'
   // 转盘本身就是抽奖中的状态反馈，不再叠加加载遮罩；授权、查单等非视觉流程
