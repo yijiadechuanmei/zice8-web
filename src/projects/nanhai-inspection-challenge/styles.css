@@ -31,7 +31,7 @@ button { font: inherit; }
   -webkit-tap-highlight-color: transparent;
 }
 
-.nh-audio-control svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+.nh-audio-control svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; transform: rotate(90deg); }
 .nh-audio-control svg > path:first-child { fill: currentColor; stroke: none; }
 .nh-audio-control.is-playing { background: rgba(8, 77, 178, .9); }
 .nh-audio-control.is-muted { color: rgba(255, 255, 255, .88); background: rgba(18, 54, 111, .76); }
