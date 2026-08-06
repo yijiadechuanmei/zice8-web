@@ -457,7 +457,9 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     try {
       // 已有待确认授权时复用同一笔微信授权，避免每次点击都新建一笔并占用场景名额。
       let authorization = existingAuthorization
-      if (!authorization || authorization.state !== 'WAIT_USER_CONFIRM') {
+      // 待确认单必须带微信 package 才能重新拉起；缺失时交给后端关闭
+      // 这笔异常原单后再新建，避免前端反复报“微信未返回授权参数”。
+      if (!authorization || authorization.state !== 'WAIT_USER_CONFIRM' || !authorization.packageInfo) {
         authorization = await createAuthorization(activityKey, debugMode)
       }
       setBootstrap((current) => ({ ...current, authorization }))
