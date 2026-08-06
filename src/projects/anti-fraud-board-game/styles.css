@@ -42,8 +42,9 @@
   height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow: hidden;
-  align-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: flex-start;
 }
 
 .afbg-home-ribbon {
@@ -77,6 +78,8 @@
   min-height: 100vh;
   align-items: flex-start;
   justify-content: center;
+  overscroll-behavior-y: none;
+  background: url("https://assets.zice8.com/anti_fraud_board_game/anti_fraud_board_game_20260623/b53a10c739b44392a5d0c5ae8da4e24a_324480_750_1624.png") center top / 100% auto repeat-y;
 }
 
 .afbg-poster {
@@ -641,26 +644,19 @@
   cursor: pointer;
 }
 
-.afbg-poster-save-layer {
-  position: fixed;
-  z-index: 3000;
+.afbg-poster-generated {
+  position: absolute;
+  z-index: 10;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: #fff6cf;
-}
-
-.afbg-poster-save-image {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  -webkit-touch-callout: default;
-  user-select: auto;
-  -webkit-user-select: auto;
+  width: 375px;
+  height: 812px;
+  object-fit: fill;
+  pointer-events: auto;
+  touch-action: auto;
+  -webkit-touch-callout: default !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
 }
 
 @keyframes afbg-pulse {

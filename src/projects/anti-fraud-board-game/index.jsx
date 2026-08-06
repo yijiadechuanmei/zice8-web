@@ -78,6 +78,7 @@ function loadPosterImage(src) {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.crossOrigin = 'anonymous'
+    image.referrerPolicy = 'no-referrer'
     image.onload = () => resolve(image)
     image.onerror = () => reject(new Error(`海报素材加载失败：${src}`))
     image.src = src
@@ -128,7 +129,7 @@ async function renderPosterImage() {
 
 function HomePage({ onStart }) {
   return (
-    <DesignStage className="afbg-home" shellClassName="afbg-home-shell" fit="contain">
+    <DesignStage className="afbg-home" shellClassName="afbg-home-shell" fit="width">
       <LayerImage className="afbg-home-ribbon" src={antiFraudBoardAssets.home.topRibbon} style={{ left: 9, top: 18, width: 355, height: 40 }} />
       <LayerImage className="afbg-home-title" src={antiFraudBoardAssets.home.title} style={{ left: 44, top: 73, width: 288, height: 213 }} />
       <LayerImage className="afbg-home-subtitle" src={antiFraudBoardAssets.home.subtitle} style={{ left: 53, top: 305, width: 267, height: 49 }} />
@@ -399,12 +400,14 @@ function PosterPage({ onReplay }) {
         <div className="afbg-poster-label" style={{ left: 224, top: 396 }}>中</div>
         <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469, width: 256, height: 40 }} />
         <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
+        {posterUrl ? (
+          <img
+            className="afbg-poster-generated"
+            src={posterUrl}
+            alt="反诈棋盘游戏海报，长按图片即可保存"
+          />
+        ) : null}
       </DesignStage>
-      {posterUrl ? (
-        <div className="afbg-poster-save-layer">
-          <img className="afbg-poster-save-image" src={posterUrl} alt="反诈棋盘游戏海报，长按图片即可保存" />
-        </div>
-      ) : null}
     </>
   )
 }
