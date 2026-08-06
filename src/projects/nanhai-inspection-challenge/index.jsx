@@ -707,7 +707,13 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
               key={level.levelNo}
               className={`nh-map-node is-${status}`}
               style={position}
-              onClick={() => status !== 'locked' && setSelectedLevelNo(level.levelNo)}
+              onClick={() => {
+                if (status === 'available') {
+                  onOpenLevel(level)
+                  return
+                }
+                if (status === 'completed') setSelectedLevelNo(level.levelNo)
+              }}
               aria-pressed={selectedLevelNo === level.levelNo}
               aria-label={`${level.title} ${status === 'completed' ? '已解锁' : status === 'available' ? '未解锁' : '未开放'}`}
             >
