@@ -641,28 +641,18 @@ button { font: inherit; }
 .nh-debug-panel button.is-danger { background: #d43d2c; }
 .nh-debug-panel pre { flex: 1; margin: 0; padding: 12px; overflow: auto; border-radius: 12px; color: #d7e6ff; background: #10234c; font: 11px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: left; }
 
-.nh-toast {
-  position: fixed;
-  z-index: 100;
-  right: 18px;
-  bottom: calc(24px + env(safe-area-inset-bottom));
-  left: 18px;
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 12px;
-  color: #fff;
-  background: rgba(19, 38, 79, .93);
-  box-shadow: 0 8px 22px rgba(0,0,0,.22);
-  font-size: 12px;
-}
-
+.nh-toast,
 .nh-level-advance-toast {
   position: fixed;
   z-index: 110;
   top: 50%;
+  right: auto;
+  bottom: auto;
   left: 50%;
-  min-width: min(74vw, 318px);
+  width: min(calc(100svh - 44px), 560px);
+  min-width: 0;
   padding: 14px 24px;
+  border: 0;
   border-radius: 999px;
   color: #fff;
   background: rgba(18, 43, 89, .94);
@@ -671,7 +661,7 @@ button { font: inherit; }
   font-weight: 800;
   line-height: 1.35;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
   transform: translate(-50%, -50%) rotate(90deg);
   animation: nh-level-toast-in .22s ease both;
 }
