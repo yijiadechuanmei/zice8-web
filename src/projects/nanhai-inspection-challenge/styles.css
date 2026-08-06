@@ -13,8 +13,10 @@ button { font: inherit; }
 .nh-audio-control {
   position: fixed;
   z-index: 122;
-  top: 12px;
+  /* 横向画布顺时针旋转后，其右上角映射到竖屏画布的右下角。 */
+  top: auto;
   right: 12px;
+  bottom: calc(50svh - 98.4667vw + 12px);
   width: 44px;
   height: 44px;
   padding: 0;
@@ -61,7 +63,7 @@ button { font: inherit; }
   position: fixed;
   z-index: 120;
   top: 12px;
-  right: 64px;
+  right: 12px;
   max-width: calc(100vw - 24px);
   padding: 7px 10px;
   border: 0;
@@ -77,7 +79,7 @@ button { font: inherit; }
   position: fixed;
   z-index: 121;
   top: 48px;
-  right: 64px;
+  right: 12px;
   padding: 7px 10px;
   border: 1px solid rgba(255,255,255,.65);
   border-radius: 14px;
