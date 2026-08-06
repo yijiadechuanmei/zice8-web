@@ -1028,10 +1028,12 @@ function wheelStopIndexForAmount(prizeAmount) {
 
 function spinPointerToStopIndex(currentRotation, wheelStopIndex) {
   const targetAngle = WHEEL_POINTER_ANGLE_BY_STOP_INDEX[Number(wheelStopIndex)]
-  if (targetAngle === undefined) return currentRotation + 1440
+  if (targetAngle === undefined) return currentRotation + 720
   const currentAngle = ((currentRotation % 360) + 360) % 360
   const remainingAngle = (targetAngle - currentAngle + 360) % 360
-  return currentRotation + 1440 + remainingAngle
+  // 两圈加上到目标扇区的余量，配合缓停曲线的初始速度与快转阶段一致，
+  // 整个过程只会向前，不会有突发加速或倒退。
+  return currentRotation + 720 + remainingAngle
 }
 
 function pickPreviewSegment(segments) {
