@@ -145,6 +145,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   const levelAdvanceTimer = useRef(null)
   const wheelSpinFrame = useRef(null)
   const wheelSpinRotation = useRef(0)
+  const canceledAuthorizationNo = useRef(null)
 
   const shareActivity = useMemo(() => ({
     title: bootstrap?.activity?.shareTitle || NANHAI_INSPECTION_CHALLENGE_TITLE,
@@ -454,13 +455,18 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     if (busy) return
     setBusy('authorization')
     setError('')
+    let authorization = existingAuthorization
     try {
       // 已有待确认授权时复用同一笔微信授权，避免每次点击都新建一笔并占用场景名额。
-      let authorization = existingAuthorization
+      const renewCanceledAuthorization = Boolean(
+        authorization?.outAuthorizationNo
+        && authorization.outAuthorizationNo === canceledAuthorizationNo.current,
+      )
       // 待确认单必须带微信 package 才能重新拉起；缺失时交给后端关闭
       // 这笔异常原单后再新建，避免前端反复报“微信未返回授权参数”。
-      if (!authorization || authorization.state !== 'WAIT_USER_CONFIRM' || !authorization.packageInfo) {
-        authorization = await createAuthorization(activityKey, debugMode)
+      if (!authorization || authorization.state !== 'WAIT_USER_CONFIRM' || !authorization.packageInfo || renewCanceledAuthorization) {
+        authorization = await createAuthorization(activityKey, debugMode, renewCanceledAuthorization)
+        canceledAuthorizationNo.current = null
       }
       setBootstrap((current) => ({ ...current, authorization }))
       if (!authorization.effective) {
@@ -483,6 +489,22 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       window.clearTimeout(levelAdvanceTimer.current)
       levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2200)
     } catch (err) {
+      if (isMerchantTransferAuthorizationCanceled(err)) {
+        // 用户关闭微信授权页是可预期行为。先尝试同步原单；下次点击会以
+        // renew=1 让后端关闭原待确认单后再创建，避免复用已取消的 package。
+        canceledAuthorizationNo.current = authorization?.outAuthorizationNo || null
+        try {
+          await wait(700)
+          const synced = await syncAuthorization(activityKey, debugMode)
+          setBootstrap((current) => ({ ...current, authorization: synced }))
+        } catch {
+          // 回调可能尚未到达；保留本次取消标记，下次点击仍会安全更新原授权单。
+        }
+        setLevelAdvanceToast('已取消授权，再次点击抽奖可重新发起授权')
+        window.clearTimeout(levelAdvanceTimer.current)
+        levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2600)
+        return
+      }
       setError(readError(err, '微信零钱转账授权失败'))
     } finally {
       setBusy('')
@@ -1241,10 +1263,20 @@ function invokeMerchantTransferAuthorization(authorization) {
       }, (result) => {
         const message = result?.err_msg || result?.errMsg || ''
         if (/:(ok|success)$/i.test(message)) resolve(result)
-        else reject(new Error(message || '微信授权未完成'))
+        else {
+          const error = new Error(message || '微信授权未完成')
+          if (/(?:cancel|user_cancel)$/i.test(message)) {
+            error.code = 'merchant_transfer_authorization_canceled'
+          }
+          reject(error)
+        }
       })
     }
     if (window.WeixinJSBridge?.invoke) invoke()
     else document.addEventListener('WeixinJSBridgeReady', invoke, { once: true })
   })
+}
+
+function isMerchantTransferAuthorizationCanceled(error) {
+  return error?.code === 'merchant_transfer_authorization_canceled'
 }

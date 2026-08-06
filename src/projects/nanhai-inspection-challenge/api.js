@@ -2,6 +2,11 @@ import { request } from '../../shared/api/request'
 
 const base = (activityKey) => `/nanhai-inspection-challenge/activities/${encodeURIComponent(activityKey)}`
 const debugSuffix = (debug) => debug ? '?debug=1' : ''
+const authorizationSuffix = (debug, renew) => {
+  if (debug && renew) return '?debug=1&renew=1'
+  if (debug) return '?debug=1'
+  return renew ? '?renew=1' : ''
+}
 
 export const getBootstrap = (activityKey, debug = false) => request(`${base(activityKey)}/bootstrap${debugSuffix(debug)}`)
 
@@ -20,8 +25,8 @@ export const previewAnswer = (activityKey, levelNo, payload) =>
     body: JSON.stringify(payload),
   })
 
-export const createAuthorization = (activityKey, debug = false) =>
-  request(`${base(activityKey)}/transfer-authorization${debugSuffix(debug)}`, { method: 'POST' })
+export const createAuthorization = (activityKey, debug = false, renew = false) =>
+  request(`${base(activityKey)}/transfer-authorization${authorizationSuffix(debug, renew)}`, { method: 'POST' })
 
 export const syncAuthorization = (activityKey, debug = false) =>
   request(`${base(activityKey)}/transfer-authorization/sync${debugSuffix(debug)}`, { method: 'POST' })
