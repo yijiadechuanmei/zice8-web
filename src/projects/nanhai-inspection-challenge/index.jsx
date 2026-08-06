@@ -388,11 +388,15 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       setWheelSpinning(true)
       setError('')
       try {
+        // 测试模式也按真实流程展示：先持续转动，再缓停到已确定奖项，
+        // 最后保留结果，不会在指针仍转动时直接跳转分享页。
+        await wait(1800)
+        setWheelSpinning(false)
         setWheelRotation((current) => spinPointerToStopIndex(
           current,
           wheelStopIndexForAmount(prize.amount),
         ))
-        await wait(3800)
+        await wait(3900)
         setBootstrap((current) => ({
           ...current,
           draw: {
@@ -583,8 +587,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       ) : null}
       {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
       {levelAdvanceToast ? createPortal(<div className="nh-level-advance-toast" role="status">{levelAdvanceToast}</div>, document.body) : null}
-      {operationLoadingText(busy, wheelSpinning) ? createPortal(
-        <OperationLoading message={operationLoadingText(busy, wheelSpinning)} />,
+      {operationLoadingText(busy) ? createPortal(
+        <OperationLoading message={operationLoadingText(busy)} />,
         document.body,
       ) : null}
       {shareGuideOpen ? createPortal(<ShareGuide onClose={() => setShareGuideOpen(false)} />, document.body) : null}
@@ -888,9 +892,11 @@ function OperationLoading({ message }) {
   )
 }
 
-function operationLoadingText(busy, wheelSpinning) {
+function operationLoadingText(busy) {
   if (busy === 'authorization') return '正在唤起微信授权…'
-  if (busy === 'draw' || busy === 'preview-draw') return wheelSpinning ? '正在抽取结果…' : '正在展示抽奖结果…'
+  // 转盘本身就是抽奖中的状态反馈，不再叠加加载遮罩；授权、查单等非视觉流程
+  // 仍保留加载提示。
+  if (busy === 'draw' || busy === 'preview-draw') return ''
   if (busy === 'sync') return '正在查询发放状态…'
   if (busy === 'debug-state') return '正在读取调试数据…'
   if (busy === 'debug-reset') return '正在重置全部测试数据…'

@@ -118,7 +118,7 @@ export const NANHAI_ART = {
     canvas: [1477, 750], background: '6fb3cc9d7b2812d1aea11523bea09577_1686863_1477_750.png',
     layers: [
       ['e9093583acd7d043ae8ca2ff71196c1f_373690_1046_547.png', 212, 172, 1046, 547],
-      ['e7c1fec6c7d766a6848d6d033aef1c9a_25234_245_54.png', 616, 637, 245, 54, 'draw'],
+      ['0d8ba70d80f5eaba10cf61ea6fd3cba4_21377_295_65.png', 349, 464, 295, 65, 'draw'],
       ['1fcd6ddf4f8eac087f67afd58556d376_72258_2106_226.png', 332, 43, 824, 90],
     ],
     wheel: {
