@@ -155,6 +155,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   const preview = Boolean(bootstrap?.preview)
   const correctCodes = new Set(progress?.correctQuestionCodes || [])
   const segments = bootstrap?.config?.wheelSegments || FALLBACK_SEGMENTS
+  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || NANHAI_BGM
 
   function navigate(nextPage) {
     if (nextPage === page || pageTransitioning) return
@@ -583,7 +584,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
 
   return (
     <main className="nh-challenge">
-      <ActivityBgmPlayer bgm={NANHAI_BGM} activityKey={activityKey} />
+      <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       {bootstrap.debug ? <button className="nh-debug-badge" onClick={openDebugPanel}>DEBUG · 真实参与数据</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
