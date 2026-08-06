@@ -14,7 +14,8 @@ export function nanhaiAsset(filename) {
 export const NANHAI_ART = {
   home: {
     canvas: [1477, 750],
-    audio: 'ed271baf0e2d3da070d1ddba9f727831_435692.mp3',
+    // OSS 同名文件尚未同步，临时使用设计稿中已验证可访问的原始音频地址。
+    audio: 'https://file3.ih5.cn/v35/edt/u10013600/ed271baf0e2d3da070d1ddba9f727831_435692.mp3',
     background: '04069ac0a549f3af2c0f404cafd130a6_1922556_1477_750.png',
     layers: [
       ['06f43cce3f5cd8b83c68181c77ac8ad7_252329_935_303.png', 231, 22, 935, 303],

@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
@@ -56,6 +57,15 @@ const WHEEL_STOP_INDEX_BY_AMOUNT = {
   88: 4,
   128: 5,
   188: 6,
+}
+
+const NANHAI_BGM = {
+  enabled: true,
+  url: NANHAI_ART.home.audio,
+  loop: true,
+  autoplay: true,
+  showControl: true,
+  volume: 0.58,
 }
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
@@ -573,7 +583,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
 
   return (
     <main className="nh-challenge">
-      <audio autoPlay loop preload="none" src={nanhaiAsset(NANHAI_ART.home.audio)} />
+      <ActivityBgmPlayer bgm={NANHAI_BGM} activityKey={activityKey} />
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       {bootstrap.debug ? <button className="nh-debug-badge" onClick={openDebugPanel}>DEBUG · 真实参与数据</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
