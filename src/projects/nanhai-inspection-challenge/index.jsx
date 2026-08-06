@@ -576,11 +576,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         setError('微信正在确认发放结果，已停止转盘，请稍后重新进入活动查看')
         return
       }
-      stopWheelAt(
-        Number.isInteger(result.wheelStopIndex)
-          ? result.wheelStopIndex
-          : wheelStopIndexForAmount(result.prizeAmount),
-      )
+      stopWheelAt(wheelStopIndexForResult(result))
       await wait(2250)
       await revealDrawResult(result)
       trackEvent(activityKey, 'lottery_result', {
@@ -602,7 +598,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         let recovered = await getDrawStatus(activityKey, debugMode)
         recovered = await waitForFinalDraw(recovered)
         if (recovered?.final) {
-          stopWheelAt(recovered.wheelStopIndex)
+          stopWheelAt(wheelStopIndexForResult(recovered))
           await wait(2250)
           await revealDrawResult(recovered)
           return
@@ -1155,6 +1151,15 @@ function sourcePoint([canvasW, canvasH], left, top) {
 
 function wheelStopIndexForAmount(prizeAmount) {
   return WHEEL_STOP_INDEX_BY_AMOUNT[Number(prizeAmount)] ?? 0
+}
+
+function wheelStopIndexForResult(result) {
+  // 兼容已存在的旧失败记录：不管后端遗留了什么候选奖品落点，只要最终未
+  // 中奖，就永远停在“谢谢参与”（索引 0）。
+  if (!result?.won) return 0
+  return Number.isInteger(result.wheelStopIndex)
+    ? result.wheelStopIndex
+    : wheelStopIndexForAmount(result.prizeAmount)
 }
 
 function spinPointerToStopIndex(currentRotation, wheelStopIndex) {
