@@ -451,8 +451,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     }
   }
 
-  async function handleAuthorization(existingAuthorization = null) {
-    if (busy) return
+  async function handleAuthorization(existingAuthorization = null, force = false) {
+    if (busy && !force) return
     setBusy('authorization')
     setError('')
     let authorization = existingAuthorization
@@ -589,6 +589,14 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         prizeAmount: result.prizeAmount,
       })
     } catch (err) {
+      if (isTransferAuthorizationRequired(err)) {
+        // 抽奖前的转账预校验发现用户已在微信侧取消授权。后端已确认原
+        // 商户单未被受理并关闭旧授权；这里直接重新拉起官方授权页，不能
+        // 继续转盘或新建第二次抽奖。
+        stopWheelSpin()
+        await handleAuthorization(null, true)
+        return
+      }
       // 即使首个响应丢失，也先反查唯一抽奖记录；一旦已消费机会，继续等待微信终态。
       try {
         let recovered = await getDrawStatus(activityKey, debugMode)
@@ -1279,4 +1287,9 @@ function invokeMerchantTransferAuthorization(authorization) {
 
 function isMerchantTransferAuthorizationCanceled(error) {
   return error?.code === 'merchant_transfer_authorization_canceled'
+}
+
+function isTransferAuthorizationRequired(error) {
+  const message = error?.response?.message || error?.message || ''
+  return String(message).includes('TRANSFER_AUTHORIZATION_REQUIRED')
 }
