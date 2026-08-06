@@ -19,7 +19,7 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ### Repository sync
 
-Production deployment pulls `main` from Codeup. GitHub Actions mirrors this repository to Codeup after each push; verify the **Sync to Codeup** workflow succeeds before deploying. If a run is cancelled by branch concurrency, rely on the newest queued run instead of deploying from Codeup. Only the newest successful run is eligible for deployment.
+Production deployment pulls `main` from Codeup. GitHub Actions mirrors this repository to Codeup after each push; verify the **Sync to Codeup** workflow succeeds before deploying. If a run is cancelled by branch concurrency, rely on the newest queued run instead of deploying from Codeup. Only the newest successful run is eligible for deployment. Keep the source commit recorded with the deployment log.
 
 Build the web app before any deployment:
 
