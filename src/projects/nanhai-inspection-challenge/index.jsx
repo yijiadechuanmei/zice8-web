@@ -390,27 +390,22 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       try {
         // 测试模式也按真实流程展示：先持续转动，再缓停到已确定奖项，
         // 最后保留结果，不会在指针仍转动时直接跳转分享页。
-        await wait(1800)
+        await wait(950)
         setWheelSpinning(false)
         setWheelRotation((current) => spinPointerToStopIndex(
           current,
           wheelStopIndexForAmount(prize.amount),
         ))
-        await wait(3900)
-        setBootstrap((current) => ({
-          ...current,
-          draw: {
-            preview: true,
-            won,
-            prizeAmount: won ? prize.amount : null,
-            prizeAmountYuan: won ? Number(prize.amount) / 100 : null,
-            message: won
-              ? `测试抽中 ${prize.label} 微信红包；不创建红包、库存或发放流水。`
-              : '测试未中奖；不创建红包、库存或发放流水。',
-          },
-        }))
-        await wait(1500)
-        navigate('share')
+        await wait(1750)
+        await revealDrawResult({
+          preview: true,
+          won,
+          prizeAmount: won ? prize.amount : null,
+          prizeAmountYuan: won ? Number(prize.amount) / 100 : null,
+          message: won
+            ? `测试抽中 ${prize.label} 微信红包；不创建红包、库存或发放流水。`
+            : '测试未中奖；不创建红包、库存或发放流水。',
+        })
       } finally {
         setWheelSpinning(false)
         setBusy('')
@@ -440,10 +435,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           ? result.wheelStopIndex
           : wheelStopIndexForAmount(result.prizeAmount),
       ))
-      await wait(3900)
-      setBootstrap((current) => ({ ...current, draw: result }))
-      await wait(1500)
-      navigate('share')
+      await wait(1750)
+      await revealDrawResult(result)
       trackEvent(activityKey, 'lottery_result', {
         won: result.won,
         controlCode: result.controlCode,
@@ -460,10 +453,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         if (recovered?.final) {
           setWheelSpinning(false)
           setWheelRotation((current) => spinPointerToStopIndex(current, recovered.wheelStopIndex))
-          await wait(3900)
-          setBootstrap((current) => ({ ...current, draw: recovered }))
-          await wait(1500)
-          navigate('share')
+          await wait(1750)
+          await revealDrawResult(recovered)
           return
         }
       } catch {
@@ -488,6 +479,17 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     } finally {
       setBusy('')
     }
+  }
+
+  async function revealDrawResult(result) {
+    setBootstrap((current) => ({ ...current, draw: result }))
+    // 只有微信已确认成功的结果才会进入中奖页；在停盘后的 1.5 秒内保留
+    // “奖品发放中”过渡，未中奖则直接展示结果页。
+    if (result?.won) {
+      setBusy('draw-result')
+      await wait(1500)
+    }
+    navigate('share')
   }
 
   async function openDebugPanel() {
@@ -894,6 +896,7 @@ function OperationLoading({ message }) {
 
 function operationLoadingText(busy) {
   if (busy === 'authorization') return '正在唤起微信授权…'
+  if (busy === 'draw-result') return '奖品发放中'
   // 转盘本身就是抽奖中的状态反馈，不再叠加加载遮罩；授权、查单等非视觉流程
   // 仍保留加载提示。
   if (busy === 'draw' || busy === 'preview-draw') return ''

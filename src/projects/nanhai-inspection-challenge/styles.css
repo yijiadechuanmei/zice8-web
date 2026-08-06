@@ -467,11 +467,11 @@ button { font: inherit; }
   pointer-events: none;
   transform: rotate(var(--pointer-rotation));
   transform-origin: var(--pointer-origin-x, 50%) var(--pointer-origin-y, 50%);
-  transition: transform 3.8s cubic-bezier(.12, .62, .08, 1);
+  transition: transform 1.65s cubic-bezier(.08, .82, .16, 1);
 }
 .nh-success-wheel-pointer-spin.is-spinning {
   transition: none;
-  animation: nh-wheel-live-spin .72s linear infinite;
+  animation: nh-wheel-live-spin .48s linear infinite;
 }
 .nh-success-wheel-pointer { position: absolute; pointer-events: none; }
 
