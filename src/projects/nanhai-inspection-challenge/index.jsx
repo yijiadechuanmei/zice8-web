@@ -635,7 +635,58 @@ function HomePage({ onStart }) {
 }
 
 function RulesPage({ onEnter }) {
-  return <ArtPage art={NANHAI_ART.rules} onAction={{ 'enter-map': onEnter }} className="nh-rules-page" />
+  return (
+    <ArtPage
+      art={NANHAI_ART.rules}
+      onAction={{ 'enter-map': onEnter }}
+      className="nh-rules-page"
+      rotatedChildren={<RulesContent />}
+    />
+  )
+}
+
+function RulesContent() {
+  return (
+    <article className="nh-rules-content" aria-label="活动规则">
+      <section>
+        <h2>一、活动介绍</h2>
+        <p>《幸福南海巡检图·工伤预防知识大闯关》是面向全民的工伤预防公益科普互动活动，依托工厂、工地、园区、社区、校园五大真实场景出题，以趣味答题闯关的形式，普及安全生产、工伤防护知识，提升各类从业人群的安全防范意识。活动全程免费参与，旨在以学促知、以考促学，筑牢职场与生活安全防线。</p>
+        <p className="nh-rules-content__time">活动时间：即日起至8月15日</p>
+      </section>
+      <section>
+        <h2>二、参与规则</h2>
+        <ol>
+          <li>参与人群：全体市民，重点覆盖制造业职工、建筑工人、园区从业者、新业态骑手、社区灵活就业人员、校园师生等群体。</li>
+          <li>参与限制：每位微信用户可多次作答闯关练习，但仅可解锁一次红包抽奖资格、参与一次抽奖，重复闯关无法再次获得抽奖机会。</li>
+          <li>参与规范：活动禁止任何作弊答题、恶意刷奖、批量操作等违规行为，一经核查发现，将直接取消用户闯关及中奖资格。</li>
+        </ol>
+      </section>
+      <section>
+        <h2>三、答题闯关流程</h2>
+        <ol>
+          <li>用户进入活动页面后，点击「开始答题」即可参与闯关，全程共10道工伤预防基础知识选择题。</li>
+          <li>题目覆盖五大核心场景，贴合日常工作与生活场景，无答题时间限制，可仔细阅读题目后作答。</li>
+          <li>逐题完成作答，依次答完全部10道题目，即可完成闯关，系统自动判定闯关成功。</li>
+        </ol>
+      </section>
+      <section>
+        <h2>四、抽奖资格说明</h2>
+        <ol>
+          <li>资格解锁条件：用户完整完成全部10道题目答题、成功通关闯关后，即可自动解锁现金红包抽奖资格。</li>
+          <li>资格有效期：用户首次闯关成功后解锁抽奖资格，资格仅限本次活动单次使用，不可累积、不可转让，多次重复闯关不叠加抽奖次数。</li>
+          <li>中奖规则：本次抽奖为随机现金红包奖励，闯关达标用户均可参与，有奖概率100%。</li>
+        </ol>
+      </section>
+      <section>
+        <h2>五、红包发放须知</h2>
+        <ol>
+          <li>红包为随机金额现金红包，抽奖成功后将自动发放至用户微信账户。</li>
+          <li>用户可通过微信服务账单、微信零钱明细查询到账情况，无需额外操作领取。</li>
+          <li>若出现红包延迟到账、发放异常等问题，可稍后重新查看，系统将统一补发处理。</li>
+        </ol>
+      </section>
+    </article>
+  )
 }
 
 function SuccessPage({ rotation, spinning, onDraw }) {
