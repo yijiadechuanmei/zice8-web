@@ -389,6 +389,19 @@
   white-space: nowrap;
 }
 
+.admin-data-json {
+  max-width: 440px;
+  max-height: 180px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #334155;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .admin-inline-error {
   margin-bottom: 12px;
   border: 1px solid #fecaca;

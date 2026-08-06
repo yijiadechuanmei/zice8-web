@@ -164,6 +164,7 @@ export function renderAdminFieldValue(field, value) {
   if (type === 'boolean') return value ? <Tag color="green">是</Tag> : <Tag>否</Tag>
   if (type === 'datetime' || /time|date|at$/i.test(key)) return formatAdminDate(value)
   if (key === 'totalTimeMs' || key === 'timeMs' || key === 'averageTimeMs') return formatAdminDuration(value)
+  if (type === 'json') return renderJsonValue(value)
   if (Array.isArray(value)) return value.length ? renderLongText(value.join(' / ')) : <Text type="secondary">-</Text>
   if (typeof value === 'string') return renderLongText(value)
   return String(value)
@@ -180,6 +181,34 @@ function renderLongText(value) {
       {value}
     </span>
   )
+}
+
+function renderJsonValue(value) {
+  const formattedValue = formatJsonValue(value)
+
+  return (
+    <pre className="admin-data-json" title={formattedValue}>
+      {formattedValue}
+    </pre>
+  )
+}
+
+function formatJsonValue(value) {
+  let parsedValue = value
+
+  if (typeof value === 'string') {
+    try {
+      parsedValue = JSON.parse(value)
+    } catch {
+      return value
+    }
+  }
+
+  try {
+    return JSON.stringify(parsedValue, null, 2)
+  } catch {
+    return String(parsedValue)
+  }
 }
 
 function formatAdminDuration(value) {
@@ -210,7 +239,7 @@ function isImageField(key, type) {
 function shouldUseEllipsis(field) {
   const key = String(field?.fieldKey || field?.key || '')
   const type = String(field?.type || '')
-  return !isImageField(key, type)
+  return !isImageField(key, type) && type !== 'json'
 }
 
 function resolveAdminColumnWidth(field) {
@@ -220,6 +249,7 @@ function resolveAdminColumnWidth(field) {
   if (/time|date|at$/i.test(key) || type === 'datetime') return 180
   if (/phone/i.test(key)) return 140
   if (isImageField(key, type)) return 88
+  if (type === 'json') return 360
   if (/title|question|content|labels/i.test(key)) return 220
   if (/name|department|category/i.test(key)) return 140
   return 140
