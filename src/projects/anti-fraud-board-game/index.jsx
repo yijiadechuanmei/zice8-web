@@ -17,6 +17,7 @@ const PAGE = {
 const DESIGN_WIDTH = 375
 const DESIGN_HEIGHT = 812
 const GAME_STAGE_HEIGHT = 1168
+const POSTER_RENDER_SCALE = 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
 const ROLLING_MS = 2000
@@ -71,6 +72,58 @@ function DesignStage({
 
 function LayerImage({ className = '', src, style, alt = '' }) {
   return <img className={`afbg-layer-image ${className}`} src={src} style={style} alt={alt} draggable="false" />
+}
+
+function loadPosterImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error(`海报素材加载失败：${src}`))
+    image.src = src
+  })
+}
+
+async function renderPosterImage() {
+  const posterAssets = antiFraudBoardAssets.poster
+  const [background, card, title, footer, badge] = await Promise.all([
+    loadPosterImage(posterAssets.background),
+    loadPosterImage(posterAssets.card),
+    loadPosterImage(posterAssets.title),
+    loadPosterImage(posterAssets.footer),
+    loadPosterImage(posterAssets.badge),
+  ])
+  const canvas = document.createElement('canvas')
+  canvas.width = DESIGN_WIDTH * POSTER_RENDER_SCALE
+  canvas.height = DESIGN_HEIGHT * POSTER_RENDER_SCALE
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('无法创建海报画布')
+
+  context.scale(POSTER_RENDER_SCALE, POSTER_RENDER_SCALE)
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+  context.drawImage(background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT)
+  context.drawImage(card, 11, 74, 351, 530)
+  context.drawImage(title, 45, 5, 282, 170)
+  context.drawImage(footer, 6, 618, 361, 85)
+  context.drawImage(badge, 61, 469, 256, 40)
+
+  context.font = '900 20px "PingFang SC", "Microsoft YaHei", sans-serif'
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  for (const { text, left } of [
+    { text: '火眼金睛', left: 56 },
+    { text: '中', left: 224 },
+  ]) {
+    const centerX = left + 58.5
+    const centerY = 411.5
+    context.fillStyle = 'rgba(255, 255, 255, 0.71)'
+    context.fillText(text, centerX + 1, centerY + 1)
+    context.fillStyle = '#ff791e'
+    context.fillText(text, centerX, centerY)
+  }
+
+  return canvas.toDataURL('image/png')
 }
 
 function HomePage({ onStart }) {
@@ -319,16 +372,40 @@ function SuccessOverlay({ onGoPoster }) {
 }
 
 function PosterPage({ onReplay }) {
+  const [posterUrl, setPosterUrl] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    renderPosterImage()
+      .then((url) => {
+        if (!cancelled) setPosterUrl(url)
+      })
+      .catch(() => {
+        // 素材生成异常时保留原页面，避免阻断用户继续游戏。
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
-    <DesignStage className="afbg-poster">
-      <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74, width: 351, height: 530 }} />
-      <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5, width: 282, height: 170 }} />
-      <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618, width: 361, height: 85 }} />
-      <div className="afbg-poster-label" style={{ left: 56, top: 396 }}>火眼金睛</div>
-      <div className="afbg-poster-label" style={{ left: 224, top: 396 }}>中</div>
-      <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469, width: 256, height: 40 }} />
-      <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
-    </DesignStage>
+    <>
+      <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="contain">
+        <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74, width: 351, height: 530 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5, width: 282, height: 170 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618, width: 361, height: 85 }} />
+        <div className="afbg-poster-label" style={{ left: 56, top: 396 }}>火眼金睛</div>
+        <div className="afbg-poster-label" style={{ left: 224, top: 396 }}>中</div>
+        <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469, width: 256, height: 40 }} />
+        <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
+      </DesignStage>
+      {posterUrl ? (
+        <div className="afbg-poster-save-layer">
+          <img className="afbg-poster-save-image" src={posterUrl} alt="反诈棋盘游戏海报，长按图片即可保存" />
+        </div>
+      ) : null}
+    </>
   )
 }
 
