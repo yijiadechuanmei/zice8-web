@@ -1034,7 +1034,6 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
     )),
   }
   const payoutSuccess = draw?.payoutStatus === 'success'
-  const payoutFailed = draw?.payoutStatus === 'failed'
   const prizeAmount = Number.isFinite(Number(draw?.prizeAmountYuan)) ? String(draw.prizeAmountYuan) : ''
   return (
     <section className="nh-share-page">
@@ -1050,7 +1049,6 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
           <strong>{won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
           <span>{draw?.message}</span>
           {won ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
-          {payoutFailed ? <small className="is-failed">失败原因：{draw.failureReason || draw.failureCode || '请后台核验'}</small> : null}
           {won && !payoutSuccess && draw.payoutNo ? <button disabled={Boolean(busy)} onClick={onSync}>{busy === 'sync' ? '同步中…' : '查询发放状态'}</button> : null}
         </div>
       ) : null}
