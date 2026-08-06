@@ -21,6 +21,9 @@ const DESIGN_HEIGHT = 812
 // 棋盘旋转后从画布顶部上移 44px，滚动高度需扣除这段偏移，避免到底后出现空白。
 const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
+const POSTER_CONTENT_OFFSET_Y = 52
+const POSTER_CROP_TOP = 44
+const POSTER_EXPORT_HEIGHT = DESIGN_HEIGHT - POSTER_CROP_TOP * 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
 const ROLLING_MS = 2000
@@ -99,18 +102,19 @@ async function renderPosterImage() {
   ])
   const canvas = document.createElement('canvas')
   canvas.width = DESIGN_WIDTH * POSTER_RENDER_SCALE
-  canvas.height = DESIGN_HEIGHT * POSTER_RENDER_SCALE
+  canvas.height = POSTER_EXPORT_HEIGHT * POSTER_RENDER_SCALE
   const context = canvas.getContext('2d')
   if (!context) throw new Error('无法创建海报画布')
 
   context.scale(POSTER_RENDER_SCALE, POSTER_RENDER_SCALE)
   context.imageSmoothingEnabled = true
   context.imageSmoothingQuality = 'high'
-  context.drawImage(background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT)
-  context.drawImage(card, 11, 74, 351, 530)
-  context.drawImage(title, 45, 5, 282, 170)
-  context.drawImage(footer, 6, 618, 361, 85)
-  context.drawImage(badge, 61, 469, 256, 40)
+  const posterY = (value) => value + POSTER_CONTENT_OFFSET_Y - POSTER_CROP_TOP
+  context.drawImage(background, 0, -POSTER_CROP_TOP, DESIGN_WIDTH, DESIGN_HEIGHT)
+  context.drawImage(card, 11, posterY(74), 351, 530)
+  context.drawImage(title, 45, posterY(5), 282, 170)
+  context.drawImage(footer, 6, posterY(618), 361, 85)
+  context.drawImage(badge, 61, posterY(469), 256, 40)
 
   context.font = '900 20px "PingFang SC", "Microsoft YaHei", sans-serif'
   context.textAlign = 'center'
@@ -120,7 +124,7 @@ async function renderPosterImage() {
     { text: '中', left: 224 },
   ]) {
     const centerX = left + 58.5
-    const centerY = 411.5
+    const centerY = posterY(411.5)
     context.fillStyle = 'rgba(255, 255, 255, 0.71)'
     context.fillText(text, centerX + 1, centerY + 1)
     context.fillStyle = '#ff791e'
@@ -128,6 +132,17 @@ async function renderPosterImage() {
   }
 
   return canvas.toDataURL('image/png')
+}
+
+function createQuestionDeck() {
+  const deck = QUESTION_BANK.map((_, index) => index)
+  for (let index = deck.length - 1; index > 0; index -= 1) {
+    const nextIndex = Math.floor(Math.random() * (index + 1))
+    const currentIndex = deck[index]
+    deck[index] = deck[nextIndex]
+    deck[nextIndex] = currentIndex
+  }
+  return deck
 }
 
 function HomePage({ onStart }) {
@@ -416,12 +431,12 @@ function PosterPage({ onReplay }) {
   return (
     <>
       <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="width">
-        <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74, width: 351, height: 530 }} />
-        <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5, width: 282, height: 170 }} />
-        <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618, width: 361, height: 85 }} />
-        <div className="afbg-poster-label" style={{ left: 56, top: 396 }}>火眼金睛</div>
-        <div className="afbg-poster-label" style={{ left: 224, top: 396 }}>中</div>
-        <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469, width: 256, height: 40 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74 + POSTER_CONTENT_OFFSET_Y, width: 351, height: 530 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5 + POSTER_CONTENT_OFFSET_Y, width: 282, height: 170 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618 + POSTER_CONTENT_OFFSET_Y, width: 361, height: 85 }} />
+        <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>火眼金睛</div>
+        <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>中</div>
+        <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
         <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
         {posterUrl ? (
           <img
@@ -447,7 +462,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [question, setQuestion] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
-  const [questionOffset, setQuestionOffset] = useState(0)
+  const questionDeckRef = useRef([])
   const moveTimerRef = useRef(null)
   const rollTimerRef = useRef(null)
   const rollResultTimerRef = useRef(null)
@@ -500,7 +515,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setQuestion(null)
     setFeedback(null)
     setSuccess(false)
-    setQuestionOffset(0)
+    questionDeckRef.current = []
   }, [])
 
   const handleStart = useCallback(() => {
@@ -509,15 +524,16 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   }, [resetGame])
 
   const showQuestionAt = useCallback((nextPosition) => {
-    const bankIndex = (nextPosition + questionOffset) % QUESTION_BANK.length
+    if (!questionDeckRef.current.length) questionDeckRef.current = createQuestionDeck()
+    const bankIndex = questionDeckRef.current.pop()
     setQuestion({ ...QUESTION_BANK[bankIndex], position: nextPosition })
-    setQuestionOffset((value) => value + 1)
-  }, [questionOffset])
+  }, [])
 
   const handleRoll = useCallback(() => {
     if (moving || question || feedback || success) return
-    const roll = Math.floor(Math.random() * 3) + 1
-    const target = Math.min(position + roll, FINISH_INDEX)
+    const remainingSteps = FINISH_INDEX - position
+    const roll = remainingSteps <= 3 ? remainingSteps : Math.floor(Math.random() * 3) + 1
+    const target = position + roll
     setMoving(true)
     setRollPhase('rolling')
     setRollValue(null)

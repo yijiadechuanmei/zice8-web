@@ -678,7 +678,7 @@
 .afbg-replay-hitarea {
   position: absolute;
   left: 6px;
-  top: 618px;
+  top: 670px;
   width: 361px;
   height: 85px;
   padding: 0;
@@ -690,10 +690,11 @@
 .afbg-poster-generated {
   position: absolute;
   z-index: 10;
-  inset: 0;
+  left: 0;
+  top: 44px;
   display: block;
   width: 375px;
-  height: 812px;
+  height: 724px;
   object-fit: fill;
   pointer-events: auto;
   touch-action: auto;
