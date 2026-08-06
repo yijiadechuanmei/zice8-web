@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { setToken } from '../../shared/api/request'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
@@ -66,6 +67,45 @@ const NANHAI_BGM = {
   autoplay: true,
   showControl: true,
   volume: 0.58,
+}
+
+function NanhaiAudioControl({ bgm }) {
+  const [audioState, setAudioState] = useState(() => activityAudioService.getState())
+  const enabled = Boolean(bgm?.enabled && bgm?.url)
+  const audible = audioState.playing && !audioState.mutedAutoplay
+
+  useEffect(() => activityAudioService.subscribe(setAudioState), [])
+
+  if (!enabled) return null
+
+  function toggleAudio() {
+    if (audioState.mutedAutoplay) {
+      activityAudioService.play('nanhai-audio-control', { manual: true, forcePrepare: true })
+      return
+    }
+    activityAudioService.toggle('nanhai-audio-control')
+  }
+
+  return (
+    <button
+      type="button"
+      className={`nh-audio-control ${audible ? 'is-playing' : 'is-muted'}`}
+      onClick={toggleAudio}
+      aria-label={audible ? '关闭背景音乐' : '打开背景音乐'}
+      aria-pressed={audible}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9.5v5h4l5 4V5.5l-5 4H4Z" />
+        {audible ? (
+          <>
+            <path d="M16 9a4 4 0 0 1 0 6" />
+            <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+          </>
+        ) : <path d="m16 9 5 5m0-5-5 5" />}
+      </svg>
+      <span className="nh-audio-control__label">{audible ? '音乐已开' : '音乐已关'}</span>
+    </button>
+  )
 }
 
 export default function NanhaiInspectionChallenge({ routeParams }) {
@@ -156,6 +196,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   const correctCodes = new Set(progress?.correctQuestionCodes || [])
   const segments = bootstrap?.config?.wheelSegments || FALLBACK_SEGMENTS
   const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || NANHAI_BGM
+  const bgmPlayerConfig = useMemo(() => ({ ...bgmConfig, showControl: false }), [bgmConfig])
 
   function navigate(nextPage) {
     if (nextPage === page || pageTransitioning) return
@@ -584,7 +625,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
 
   return (
     <main className="nh-challenge">
-      <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+      <ActivityBgmPlayer bgm={bgmPlayerConfig} activityKey={activityKey} />
+      <NanhaiAudioControl bgm={bgmConfig} />
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       {bootstrap.debug ? <button className="nh-debug-badge" onClick={openDebugPanel}>DEBUG · 真实参与数据</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
