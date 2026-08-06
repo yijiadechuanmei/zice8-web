@@ -327,9 +327,15 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   }
 
   function closeFeedback() {
+    const shouldGuideToNextPin = feedback?.correct && !bootstrap?.reviewMode
     setFeedback(null)
     setSelectedOption('')
     setActiveQuestionIndex(null)
+    if (shouldGuideToNextPin) {
+      setLevelAdvanceToast('手动滑动画面继续寻找其他安全隐患')
+      window.clearTimeout(levelAdvanceTimer.current)
+      levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2600)
+    }
   }
 
   function returnToMap() {
