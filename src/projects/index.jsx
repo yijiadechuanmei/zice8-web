@@ -21,6 +21,7 @@ const AppointmentProject = lazy(() => import('./appointment/index.jsx'))
 const PdfPreviewProject = lazy(() => import('./pdf-preview/index.jsx'))
 const PaymentTransferTestProject = lazy(() => import('./payment-transfer-test/index.jsx'))
 const NanhaiInspectionChallengeProject = lazy(() => import('./nanhai-inspection-challenge/index.jsx'))
+const NanshaOpenMicProject = lazy(() => import('./nansha-open-mic/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -28,6 +29,7 @@ const activityTypeProjects = {
   'artist-call-lottery': ArtistCallLotteryProject,
   song_wish_lottery: SongWishLotteryProject,
   'song-wish-lottery': SongWishLotteryProject,
+  nansha_open_mic: NanshaOpenMicProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
