@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
 import { trackEvent, trackPageView } from '../../shared/analytics'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import {
   getRandomQuestion,
@@ -52,8 +54,16 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
   const homeBackground = assetUrl(config.assetsBaseUrl, config.homeBackgroundImage)
   const questionBackground = assetUrl(config.assetsBaseUrl, config.questionBackgroundImage)
   const pageState = question ? 'question' : 'home'
+  const bgmConfig = publicConfig?.bgmConfig
 
   useWechatShare(activityKey, publicConfig)
+
+  useEffect(() => {
+    activityAudioService.init({ activityKey })
+    return () => {
+      activityAudioService.destroy()
+    }
+  }, [activityKey])
 
   useEffect(() => {
     let cancelled = false
@@ -173,6 +183,7 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
           {result ? <ResultDialog result={result} onClose={returnHome} onRetest={retest} /> : null}
         </div>
       </div>
+      <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
     </main>
   )
 }
