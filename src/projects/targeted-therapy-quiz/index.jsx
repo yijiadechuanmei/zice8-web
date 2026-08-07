@@ -131,7 +131,7 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
-    setCategoryDialogOpen(true)
+    setCategoryDialogOpen(false)
   }
 
   function returnHome() {
@@ -156,7 +156,6 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
             <QuestionPage
               question={question}
               selectedOption={selectedOption}
-              onBack={returnHome}
               onSelect={setSelectedOption}
               onSubmit={submitQuestion}
               submitting={submitting}
@@ -188,10 +187,9 @@ function HomePage({ onStart }) {
   )
 }
 
-function QuestionPage({ question, selectedOption, onBack, onSelect, onSubmit, submitting }) {
+function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting }) {
   return (
     <section className="ttq-question-page" aria-label={`${question.category}答题页`}>
-      <button className="ttq-back-button" type="button" onClick={onBack}>返回首页</button>
       <p className="ttq-question-category">{question.category} · 随机题</p>
       <h1>{question.title}</h1>
       <div className="ttq-options" role="radiogroup" aria-label="答案选项">
