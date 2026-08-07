@@ -125,6 +125,7 @@
   margin: 0;
   color: #333;
   font-size: 54px;
+  font-weight: 900;
   line-height: 1.1;
   text-align: center;
   letter-spacing: 3px;
@@ -206,4 +207,18 @@
 
 @keyframes ttq-overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ttq-dialog-in { from { opacity: 0; transform: translateY(24px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes ttq-button-breathe { 0%,100% { box-shadow: inset 0 5px 10px rgba(255,255,255,.38), inset 0 -6px 10px rgba(172,22,0,.25), 0 15px 24px rgba(198,63,18,.28), 0 0 0 5px rgba(255,125,43,.45); } 50% { box-shadow: inset 0 5px 10px rgba(255,255,255,.5), inset 0 -6px 10px rgba(172,22,0,.2), 0 16px 32px rgba(250,91,8,.42), 0 0 0 11px rgba(255,168,64,.18); } }
+@keyframes ttq-button-breathe {
+  0%, 34%, 100% {
+    transform: scale(1);
+    box-shadow: inset 0 5px 10px rgba(255,255,255,.38), inset 0 -6px 10px rgba(172,22,0,.25), 0 15px 24px rgba(198,63,18,.28), 0 0 0 5px rgba(255,125,43,.45);
+  }
+  9% {
+    transform: scale(1.055);
+    box-shadow: inset 0 5px 10px rgba(255,255,255,.5), inset 0 -6px 10px rgba(172,22,0,.2), 0 18px 34px rgba(250,91,8,.42), 0 0 0 13px rgba(255,168,64,.2);
+  }
+  18% { transform: scale(.988); }
+  27% {
+    transform: scale(1.035);
+    box-shadow: inset 0 5px 10px rgba(255,255,255,.46), inset 0 -6px 10px rgba(172,22,0,.22), 0 16px 30px rgba(250,91,8,.34), 0 0 0 9px rgba(255,168,64,.16);
+  }
+}
