@@ -22,6 +22,7 @@ const PdfPreviewProject = lazy(() => import('./pdf-preview/index.jsx'))
 const PaymentTransferTestProject = lazy(() => import('./payment-transfer-test/index.jsx'))
 const NanhaiInspectionChallengeProject = lazy(() => import('./nanhai-inspection-challenge/index.jsx'))
 const NanshaOpenMicProject = lazy(() => import('./nansha-open-mic/index.jsx'))
+const TargetedTherapyQuizProject = lazy(() => import('./targeted-therapy-quiz/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -49,6 +50,16 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/targeted-therapy-quiz/:activityKey',
+    Component: TargetedTherapyQuizProject,
+    activityGate: true,
+  },
+  {
+    path: '/targeted_therapy_quiz/:activityKey',
+    Component: TargetedTherapyQuizProject,
+    activityGate: true,
+  },
   {
     path: '/nanhai-inspection-challenge/:activityKey',
     Component: NanhaiInspectionChallengeProject,
@@ -237,16 +248,6 @@ export const projectRoutes = [
   },
   {
     path: '/quiz/:activityKey',
-    Component: QuizProject,
-    activityGate: true,
-  },
-  {
-    path: '/targeted-therapy-quiz/:activityKey',
-    Component: QuizProject,
-    activityGate: true,
-  },
-  {
-    path: '/targeted_therapy_quiz/:activityKey',
     Component: QuizProject,
     activityGate: true,
   },
