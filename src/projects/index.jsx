@@ -241,6 +241,16 @@ export const projectRoutes = [
     activityGate: true,
   },
   {
+    path: '/targeted-therapy-quiz/:activityKey',
+    Component: QuizProject,
+    activityGate: true,
+  },
+  {
+    path: '/targeted_therapy_quiz/:activityKey',
+    Component: QuizProject,
+    activityGate: true,
+  },
+  {
     path: '/quiz',
     Component: QuizProject,
     activityGate: true,

@@ -52,6 +52,10 @@ const DEFAULT_ACTIVITY_KEY = 'quiz_demo_dragon_boat'
 const FEEDBACK_DELAY_MS = 1500
 const FENGCHENG_FEEDBACK_DELAY_MS = 120
 const QUIZ_RANK_PAGE_SIZE = 50
+const LOCAL_DEBUG_CONFIRM_BY_ACTIVITY = {
+  fengcheng_wx_coin_partner_quiz_20260701: 'RESET_FENGCHENG_QUIZ',
+  targeted_therapy_quiz_20260807: 'DEBUG_TARGETED_THERAPY_QUIZ',
+}
 
 function parseActivityTime(value) {
   if (!value) return null
@@ -206,6 +210,7 @@ function QuizMain({ routeParams }) {
     : null
   const bgmConfig = bootstrap?.bgmConfig || publicConfig?.bgmConfig
   const fengchengSkin = isFengchengQuiz(activityKey, bootstrap, publicConfig)
+  const localDebugConfirm = LOCAL_DEBUG_CONFIRM_BY_ACTIVITY[activityKey]
 
   useWechatShare(activityKey, shareActivity, handleWechatShareStatus)
 
@@ -281,11 +286,11 @@ function QuizMain({ routeParams }) {
   useEffect(() => {
     if (!publicConfig || !authReady) return
     if (!getToken()) {
-      if (debug && fengchengSkin && !isWechatBrowser()) {
+      if (debug && import.meta.env.DEV && localDebugConfirm && !isWechatBrowser()) {
         if (debugPcLoginRef.current) return
         debugPcLoginRef.current = true
         setLoading(true)
-        debugLogin(activityKey)
+        debugLogin(activityKey, 'pc', localDebugConfirm)
           .then((data) => {
             if (!data?.token) throw new Error('调试登录失败，缺少 token')
             setToken(data.token)
