@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
+import confetti from 'canvas-confetti'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { activityAudioService } from '../../shared/audio/activityAudioService'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
@@ -23,6 +24,28 @@ const CATEGORY_ICONS = {
   肺癌: 'lung',
   肉瘤: 'sarcoma',
   消化道瘤: 'digestive',
+}
+
+function fireRealisticConfetti() {
+  const count = 200
+  const defaults = {
+    origin: { y: 0.68 },
+    zIndex: 2200,
+    disableForReducedMotion: true,
+  }
+  const fire = (particleRatio, options) => {
+    confetti({
+      ...defaults,
+      ...options,
+      particleCount: Math.floor(count * particleRatio),
+    })
+  }
+
+  fire(0.25, { spread: 26, startVelocity: 55 })
+  fire(0.2, { spread: 60 })
+  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 })
+  fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 })
+  fire(0.1, { spread: 120, startVelocity: 45 })
 }
 
 function useStageScale() {
@@ -64,6 +87,10 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
       activityAudioService.destroy()
     }
   }, [activityKey])
+
+  useEffect(() => {
+    if (result === 'correct') fireRealisticConfetti()
+  }, [result])
 
   useEffect(() => {
     let cancelled = false
