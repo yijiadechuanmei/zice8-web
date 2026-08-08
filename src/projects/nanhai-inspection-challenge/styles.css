@@ -640,14 +640,21 @@ button { font: inherit; }
 .nh-debug-panel button.is-danger { background: #d43d2c; }
 .nh-debug-panel pre { flex: 1; margin: 0; padding: 12px; overflow: auto; border-radius: 12px; color: #d7e6ff; background: #10234c; font: 11px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: left; }
 
+.nh-toast-mask {
+  position: fixed;
+  z-index: 170;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Toast 可见期间由遮罩吞掉背景的点击、触摸和滚动起始事件。 */
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .nh-toast,
 .nh-level-advance-toast {
-  position: fixed;
-  z-index: 110;
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  left: 50%;
+  position: relative;
+  z-index: 1;
   width: min(calc(100svh - 44px), 560px);
   min-width: 0;
   padding: 14px 24px;
@@ -661,7 +668,7 @@ button { font: inherit; }
   line-height: 1.35;
   text-align: center;
   white-space: normal;
-  transform: translate(-50%, -50%) rotate(90deg);
+  transform: rotate(90deg);
   animation: nh-level-toast-in .22s ease both;
 }
 
@@ -720,7 +727,7 @@ button { font: inherit; }
 @keyframes nh-pin-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.11); } }
 @keyframes nh-spin { to { transform: rotate(360deg); } }
 @keyframes nh-share-arrow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(7px, -7px); } }
-@keyframes nh-level-toast-in { from { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); } }
+@keyframes nh-level-toast-in { from { opacity: 0; transform: rotate(90deg) scale(.92); } to { opacity: 1; transform: rotate(90deg) scale(1); } }
 @keyframes nh-operation-loading-in { from { opacity: 0; transform: rotate(90deg) scale(.92); } to { opacity: 1; transform: rotate(90deg) scale(1); } }
 
 @media (min-width: 680px) {

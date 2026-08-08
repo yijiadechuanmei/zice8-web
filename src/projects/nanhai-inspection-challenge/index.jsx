@@ -741,7 +741,10 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         document.body,
       ) : null}
       {feedback ? createPortal(<AnswerFeedback feedback={feedback} onClose={closeFeedback} />, document.body) : null}
-      {levelAdvanceToast ? createPortal(<div className="nh-level-advance-toast" role="status">{levelAdvanceToast}</div>, document.body) : null}
+      {levelAdvanceToast ? createPortal(
+        <NanhaiToast text={levelAdvanceToast} />,
+        document.body,
+      ) : null}
       {operationLoadingText(busy) ? createPortal(
         <OperationLoading message={operationLoadingText(busy)} />,
         document.body,
@@ -751,7 +754,10 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         <DebugPanel state={debugState} busy={busy} onRefresh={openDebugPanel} onReset={handleDebugReset} onClose={() => setDebugPanelOpen(false)} />,
         document.body,
       ) : null}
-      {error ? <button className="nh-toast" onClick={() => setError('')}>{error}</button> : null}
+      {error ? createPortal(
+        <NanhaiToast text={error} dismissible onClose={() => setError('')} />,
+        document.body,
+      ) : null}
     </main>
   )
 }
@@ -1093,6 +1099,18 @@ function OperationLoading({ message }) {
   return (
     <div className="nh-operation-loading" role="status" aria-live="polite">
       <span className="nh-operation-loading__content"><i />{message}</span>
+    </div>
+  )
+}
+
+function NanhaiToast({ text, dismissible = false, onClose }) {
+  return (
+    <div className="nh-toast-mask" role="presentation">
+      {dismissible ? (
+        <button className="nh-toast" type="button" onClick={onClose} aria-label="关闭提示">{text}</button>
+      ) : (
+        <div className="nh-level-advance-toast" role="status" aria-live="polite">{text}</div>
+      )}
     </div>
   )
 }
