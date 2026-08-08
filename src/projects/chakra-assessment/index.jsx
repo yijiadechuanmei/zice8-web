@@ -47,6 +47,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
   const [page, setPage] = useState('home')
   const [answers, setAnswers] = useState(() => Array(56).fill(2))
   const [submitting, setSubmitting] = useState(false)
+  const [returnConfirmOpen, setReturnConfirmOpen] = useState(false)
   const submitTimerRef = useRef(null)
   const scores = useMemo(() => scoreAnswers(answers), [answers])
 
@@ -69,8 +70,12 @@ export default function ChakraAssessmentProject({ routeParams }) {
     }, 3000)
   }
 
+  function requestReturnHome() {
+    setReturnConfirmOpen(true)
+  }
+
   function returnHome() {
-    if (page === 'question' && !window.confirm('返回首页将不保存当前页面答案')) return
+    setReturnConfirmOpen(false)
     setAnswers(Array(56).fill(2))
     setPage('home')
     window.scrollTo({ top: 0 })
@@ -97,7 +102,6 @@ export default function ChakraAssessmentProject({ routeParams }) {
             </div>
           </div>
         </main>
-        <Footer />
       </>
     )
   }
@@ -105,7 +109,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
   if (page === 'question') {
     return (
       <main className="chakra-assessment chakra-question-page">
-        <header className="chakra-header"><button type="button" onClick={returnHome}>返回首页</button></header>
+        <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome} /></header>
         <section className="chakra-question-scroll">
           <div className="chakra-question-wrapper">
             <form className="chakra-form" onSubmit={submitAnswers}>
@@ -130,14 +134,15 @@ export default function ChakraAssessmentProject({ routeParams }) {
             </form>
           </div>
         </section>
-        {submitting ? <div className="chakra-loading" role="status"><i aria-hidden="true" /><span>Loading...</span></div> : null}
+        {submitting ? <div aria-label="正在提交" className="chakra-loading" role="status"><i aria-hidden="true" /></div> : null}
+        <ReturnConfirmDialog open={returnConfirmOpen} onCancel={() => setReturnConfirmOpen(false)} onConfirm={returnHome} />
       </main>
     )
   }
 
   return (
     <main className="chakra-assessment chakra-result-page">
-      <header className="chakra-header"><button type="button" onClick={returnHome}>返回首页</button></header>
+      <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome} /></header>
       <section className="chakra-result-scroll">
         <div className="chakra-result-wrapper">
           <div className="chakra-result">
@@ -154,11 +159,23 @@ export default function ChakraAssessmentProject({ routeParams }) {
           </div>
         </div>
       </section>
-      <Footer />
+      <ReturnConfirmDialog open={returnConfirmOpen} onCancel={() => setReturnConfirmOpen(false)} onConfirm={returnHome} />
     </main>
   )
 }
 
-function Footer() {
-  return <div className="chakra-footer"><a href="https://beian.miit.gov.cn/" rel="noreferrer" target="_blank">粤ICP备2024201847号</a></div>
+function ReturnConfirmDialog({ open, onCancel, onConfirm }) {
+  if (!open) return null
+
+  return (
+    <div aria-modal="true" className="chakra-return-confirm" role="dialog" aria-label="返回确认">
+      <div className="chakra-return-confirm-panel">
+        <p>返回首页将不保存当前页面答案</p>
+        <div>
+          <button className="chakra-confirm-button" type="button" onClick={onConfirm}>确定</button>
+          <button className="chakra-cancel-button" type="button" onClick={onCancel}>取消</button>
+        </div>
+      </div>
+    </div>
+  )
 }
