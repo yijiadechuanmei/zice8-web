@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import './styles.css'
 
 export const CHAKRA_ASSESSMENT_ACTIVITY_TYPE = 'chakra_assessment'
@@ -109,7 +110,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
   if (page === 'question') {
     return (
       <main className="chakra-assessment chakra-question-page">
-        <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome} /></header>
+        <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome}><ArrowLeftOutlined /></button></header>
         <section className="chakra-question-scroll">
           <div className="chakra-question-wrapper">
             <form className="chakra-form" onSubmit={submitAnswers}>
@@ -142,7 +143,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
 
   return (
     <main className="chakra-assessment chakra-result-page">
-      <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome} /></header>
+      <header className="chakra-header"><button aria-label="返回首页" className="chakra-back-button" type="button" onClick={requestReturnHome}><ArrowLeftOutlined /></button></header>
       <section className="chakra-result-scroll">
         <div className="chakra-result-wrapper">
           <div className="chakra-result">
