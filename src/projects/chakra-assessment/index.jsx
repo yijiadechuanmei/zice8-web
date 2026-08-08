@@ -5,6 +5,7 @@ import './styles.css'
 export const CHAKRA_ASSESSMENT_ACTIVITY_TYPE = 'chakra_assessment'
 export const CHAKRA_ASSESSMENT_ACTIVITY_KEY = 'qimiao_chakra_test_2026'
 const BODY_IMAGE_URL = 'https://assets.zice8.com/chakra_assessment/qimiao_chakra_test_2026/bodyall-DUz88lFR.svg'
+const CONTACT_IMAGE_URL = 'https://assets.zice8.com/chakra_assessment/qimiao_chakra_test_2026/contact.jpg'
 
 const CHAKRAS = ['海底轮', '脐轮', '太阳轮', '心轮', '喉轮', '三眼轮', '顶轮']
 const REVERSE_QUESTIONS = new Set([3, 6, 7, 13, 16, 18, 20, 26, 31, 37, 46, 47, 55, 56])
@@ -156,7 +157,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
                 <p>百分比在 -100% 到 100%之间</p>
               </div>
             </div>
-            <div className="chakra-result-right"><p>看不懂结果？没关系！</p><p><strong>长按二维码</strong>，添加其妙工作室的微信，免费为你进行专业的一对一详细解读</p></div>
+            <div className="chakra-result-right"><p>看不懂结果？没关系！</p><p><strong>长按二维码</strong>，添加其妙工作室的微信，免费为你进行专业的一对一详细解读</p><img className="chakra-result-contact" src={CONTACT_IMAGE_URL} alt="其妙工作室微信二维码" /></div>
           </div>
         </div>
       </section>
