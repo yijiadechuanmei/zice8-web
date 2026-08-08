@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import bodyall from './assets/bodyall.svg'
 import './styles.css'
 
 export const CHAKRA_ASSESSMENT_ACTIVITY_TYPE = 'chakra_assessment'
 export const CHAKRA_ASSESSMENT_ACTIVITY_KEY = 'qimiao_chakra_test_2026'
+const BODY_IMAGE_URL = 'https://assets.zice8.com/chakra_assessment/qimiao_chakra_test_2026/bodyall-DUz88lFR.svg'
 
 const CHAKRAS = ['海底轮', '脐轮', '太阳轮', '心轮', '喉轮', '三眼轮', '顶轮']
 const REVERSE_QUESTIONS = new Set([3, 6, 7, 13, 16, 18, 20, 26, 31, 37, 46, 47, 55, 56])
@@ -95,7 +95,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
                     <p>本测试共56个问题，每个问题请选择程度，从“完全没有”到“感觉强烈”，请跟着感觉凭借第一直觉回答问题，无需思考，就可以得到准确的结果</p>
                     <p>本测试预计花费你5-6分钟的时间，请找个安静的地方，坐下来，调整呼吸，让我们开始测试吧！</p>
                   </div>
-                  <div className="chakra-home-art"><img src={bodyall} alt="" /></div>
+                  <div className="chakra-home-art"><img src={BODY_IMAGE_URL} alt="" /></div>
                 </div>
                 <div className="chakra-button-wrap"><button className="chakra-button" type="button" onClick={() => setPage('question')}>让我们开始吧</button></div>
               </div>
