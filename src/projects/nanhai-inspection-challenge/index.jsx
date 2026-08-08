@@ -154,9 +154,10 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     shareImage: bootstrap?.activity?.shareImage || bootstrap?.config?.shareImage,
   }), [bootstrap])
   useWechatShare(activityKey, shareActivity)
-  // 审核链接仍是无账号即可反复体验的预览；只有 ?debug=1 才需要真实微信身份。
-  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(activityKey, debugMode ? publicConfig : null)
-  const readyToBootstrap = debugMode ? authReady : Boolean(publicConfig)
+  // 正式链接和 debug 链接都必须使用真实微信身份；debug 只决定是否展示
+  // 服务端白名单调试面板，不再把正式链接降级成无身份预览。
+  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(activityKey, publicConfig)
+  const readyToBootstrap = authReady
 
   useEffect(() => {
     let alive = true
@@ -180,7 +181,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         if (!alive) return
         const message = readError(err, '活动加载失败')
         const identityRejected = /真实参与模式需要微信登录|微信用户与活动帐号不匹配|Invalid token payload/i.test(message)
-        if (debugMode && identityRejected && reauth(hasToken ? 'nanhai-debug-token-mismatch' : 'nanhai-debug-missing-token')) return
+        if (identityRejected && reauth(hasToken ? 'nanhai-token-mismatch' : 'nanhai-missing-token')) return
         setError(message)
       })
     trackPageView(activityKey, '/nanhai-inspection-challenge', {
@@ -691,7 +692,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     }
   }
 
-  if (debugMode && blockedMessage) return <ErrorView error={blockedMessage} />
+  if (blockedMessage) return <ErrorView error={blockedMessage} />
   if (!bootstrap && !error) return <LoadingView />
   if (!bootstrap) return <ErrorView error={error} />
 

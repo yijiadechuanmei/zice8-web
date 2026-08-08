@@ -37,6 +37,7 @@ export default function ActivityConfigPage({ activity }) {
   const [prizes, setPrizes] = useState([])
   const [prizeSaving, setPrizeSaving] = useState(false)
   const [nanhaiPrizes, setNanhaiPrizes] = useState([])
+  const [nanhaiBudget, setNanhaiBudget] = useState(null)
   const [nanhaiPrizeSaving, setNanhaiPrizeSaving] = useState(false)
   const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
@@ -88,10 +89,12 @@ export default function ActivityConfigPage({ activity }) {
         .then((data) => {
           if (!alive) return
           setNanhaiPrizes(data?.prizes || [])
+          setNanhaiBudget(data?.budget || null)
         })
         .catch((err) => { if (alive) setError(err.message || '红包配置加载失败') })
     } else {
       setNanhaiPrizes([])
+      setNanhaiBudget(null)
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -191,6 +194,7 @@ export default function ActivityConfigPage({ activity }) {
     try {
       const data = await saveNanhaiChallengePrizes(activity.activityKey, nanhaiPrizes)
       setNanhaiPrizes(data?.prizes || [])
+      setNanhaiBudget(data?.budget || null)
       message.success('红包数量与概率已保存')
     } catch (err) {
       const text = err.message || '红包配置保存失败'
@@ -338,6 +342,12 @@ export default function ActivityConfigPage({ activity }) {
   const nanhaiProbability = nanhaiPrizes
     .filter((item) => item.enabled)
     .reduce((sum, item) => sum + Number(item.probability || 0), 0)
+  const nanhaiProposedBudgetYuan = nanhaiPrizes.reduce(
+    (sum, item) => sum + Number(item.amount || 0) * Number(item.quantity || 0),
+    0,
+  ) / 100
+  const nanhaiApprovedLimitYuan = Number(nanhaiBudget?.approvedLimitYuan || 5000)
+  const nanhaiBudgetOverLimit = nanhaiProposedBudgetYuan > nanhaiApprovedLimitYuan
   const nanhaiPrizeColumns = [
     { title: '红包金额', dataIndex: 'amountYuan', width: 110, render: (value) => `${Number(value || 0)} 元` },
     { title: '奖品名称', dataIndex: 'prizeName', width: 170 },
@@ -452,10 +462,10 @@ export default function ActivityConfigPage({ activity }) {
           <Card
             size="small"
             title="微信红包数量与概率"
-            extra={<Space><Text type={Math.abs(nanhaiProbability - 70) < 0.001 ? 'success' : 'danger'}>红包中奖概率：{nanhaiProbability.toFixed(2)}% · 谢谢参与固定 30%</Text><Button type="primary" loading={nanhaiPrizeSaving} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
+            extra={<Space wrap><Text type={Math.abs(nanhaiProbability - 70) < 0.001 ? 'success' : 'danger'}>红包概率 {nanhaiProbability.toFixed(2)}%</Text><Text type={nanhaiBudgetOverLimit ? 'danger' : 'success'}>本次释放 {nanhaiProposedBudgetYuan.toFixed(2)} / 上限 {nanhaiApprovedLimitYuan.toFixed(2)} 元</Text><Button type="primary" loading={nanhaiPrizeSaving} disabled={nanhaiBudgetOverLimit} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
           >
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Alert type="info" showIcon message="库存、预算与概率均由后台控制" description="红包金额固定为 0.28、0.38、0.68、0.88、1.28、1.88 元；谢谢参与固定 30%。发起转账时先预占，微信 SUCCESS 后才转为已到账并计入支出；总数量不能低于预占与已到账合计。" />
+              <Alert type={nanhaiBudgetOverLimit ? 'error' : 'info'} showIcon message="保存库存时自动同步释放预算" description={`红包金额固定；谢谢参与固定 30%。本次库存对应 ${nanhaiProposedBudgetYuan.toFixed(2)} 元，保存后即成为抽奖可消费的硬预算，且永远不能超过 ${nanhaiApprovedLimitYuan.toFixed(2)} 元。当前已支出 ${Number(nanhaiBudget?.spentAmountFen || 0) / 100} 元、预占 ${Number(nanhaiBudget?.reservedAmountFen || 0) / 100} 元。`} />
               <Table rowKey="id" columns={nanhaiPrizeColumns} dataSource={nanhaiPrizes} pagination={false} size="small" scroll={{ x: 720 }} />
             </Space>
           </Card>
