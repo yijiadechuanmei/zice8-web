@@ -157,7 +157,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
                 <p>百分比在 -100% 到 100%之间</p>
               </div>
             </div>
-            <div className="chakra-result-right"><p>看不懂结果？没关系！</p><p><strong>长按二维码</strong>，添加其妙工作室的微信，免费为你进行专业的一对一详细解读</p><img className="chakra-result-contact" src={CONTACT_IMAGE_URL} alt="其妙工作室微信二维码" /></div>
+            <div className="chakra-result-right"><p>看不懂结果？没关系！</p><p><strong>长按二维码</strong>，添加荟清水晶疗愈馆的微信，免费为你进行专业的一对一详细解读</p><img className="chakra-result-contact" src={CONTACT_IMAGE_URL} alt="荟清水晶疗愈馆微信二维码" /></div>
           </div>
         </div>
       </section>
