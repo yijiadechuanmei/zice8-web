@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import bodyall from './assets/bodyall.svg'
 import './styles.css'
 
@@ -46,11 +46,28 @@ export default function ChakraAssessmentProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || CHAKRA_ASSESSMENT_ACTIVITY_KEY
   const [page, setPage] = useState('home')
   const [answers, setAnswers] = useState(() => Array(56).fill(2))
+  const [submitting, setSubmitting] = useState(false)
+  const submitTimerRef = useRef(null)
   const scores = useMemo(() => scoreAnswers(answers), [answers])
 
   useEffect(() => {
     document.title = '脉轮测试'
   }, [activityKey])
+
+  useEffect(() => () => {
+    if (submitTimerRef.current) window.clearTimeout(submitTimerRef.current)
+  }, [])
+
+  function submitAnswers(event) {
+    event.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    submitTimerRef.current = window.setTimeout(() => {
+      setSubmitting(false)
+      setPage('result')
+      window.scrollTo({ top: 0 })
+    }, 3000)
+  }
 
   function returnHome() {
     if (page === 'question' && !window.confirm('返回首页将不保存当前页面答案')) return
@@ -91,7 +108,7 @@ export default function ChakraAssessmentProject({ routeParams }) {
         <header className="chakra-header"><button type="button" onClick={returnHome}>返回首页</button></header>
         <section className="chakra-question-scroll">
           <div className="chakra-question-wrapper">
-            <form className="chakra-form" onSubmit={(event) => { event.preventDefault(); setPage('result'); window.scrollTo({ top: 0 }) }}>
+            <form className="chakra-form" onSubmit={submitAnswers}>
               {QUESTIONS.map((question, questionIndex) => (
                 <div className="chakra-question-item" id={`question_${questionIndex + 1}`} key={question}>
                   <div className="chakra-question-title">{question}</div>
@@ -109,10 +126,11 @@ export default function ChakraAssessmentProject({ routeParams }) {
                   </div>
                 </div>
               ))}
-              <div className="chakra-question-button-wrap"><button className="chakra-button" type="submit">下一步</button></div>
+              <div className="chakra-question-button-wrap"><button className="chakra-button" disabled={submitting} type="submit">下一步</button></div>
             </form>
           </div>
         </section>
+        {submitting ? <div className="chakra-loading" role="status"><i aria-hidden="true" /><span>Loading...</span></div> : null}
       </main>
     )
   }
