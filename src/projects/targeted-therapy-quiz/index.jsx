@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons'
 import confetti from 'canvas-confetti'
 import { trackEvent, trackPageView } from '../../shared/analytics'
@@ -71,11 +71,14 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
   const [categoryError, setCategoryError] = useState('')
   const [loadingQuestion, setLoadingQuestion] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const feedbackAudiosRef = useRef({})
   const stageScale = useStageScale()
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
   const categories = config.categories || []
   const homeBackground = assetUrl(config.assetsBaseUrl, config.homeBackgroundImage)
   const questionBackground = assetUrl(config.assetsBaseUrl, config.questionBackgroundImage)
+  const correctSound = assetUrl(config.assetsBaseUrl, config.correctSound)
+  const incorrectSound = assetUrl(config.assetsBaseUrl, config.incorrectSound)
   const pageState = question ? 'question' : 'home'
   const bgmConfig = publicConfig?.bgmConfig
 
@@ -87,6 +90,33 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
       activityAudioService.destroy()
     }
   }, [activityKey])
+
+  useEffect(() => {
+    const feedbackSounds = {
+      correct: correctSound,
+      incorrect: incorrectSound,
+    }
+    const audios = Object.fromEntries(
+      Object.entries(feedbackSounds)
+        .filter(([, url]) => Boolean(url))
+        .map(([key, url]) => {
+          const audio = new Audio(url)
+          audio.preload = 'auto'
+          audio.volume = Number(config.feedbackSoundVolume) || 0.82
+          audio.load()
+          return [key, audio]
+        }),
+    )
+    feedbackAudiosRef.current = audios
+
+    return () => {
+      Object.values(audios).forEach((audio) => {
+        audio.pause()
+        audio.removeAttribute('src')
+        audio.load()
+      })
+    }
+  }, [config.feedbackSoundVolume, correctSound, incorrectSound])
 
   useEffect(() => {
     if (result === 'correct') fireRealisticConfetti()
@@ -152,6 +182,7 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     try {
       const answerResult = await submitAnswer(activityKey, question.id, selectedOption)
       const correct = Boolean(answerResult?.correct)
+      playFeedbackSound(correct ? 'correct' : 'incorrect')
       setResult(correct ? 'correct' : 'incorrect')
       trackEvent({
         activityKey,
@@ -162,6 +193,13 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function playFeedbackSound(type) {
+    const audio = feedbackAudiosRef.current[type]
+    if (!audio) return
+    audio.currentTime = 0
+    audio.play().catch(() => {})
   }
 
   function retest() {

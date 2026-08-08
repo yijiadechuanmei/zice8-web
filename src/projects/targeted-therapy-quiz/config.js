@@ -7,6 +7,9 @@ export const DEFAULT_CONFIG = {
   assetsBaseUrl: TARGETED_THERAPY_QUIZ_ASSETS_BASE_URL,
   homeBackgroundImage: 'bj1.png',
   questionBackgroundImage: 'bj2.png',
+  correctSound: 'd.mp3',
+  incorrectSound: 'c.mp3',
+  feedbackSoundVolume: 0.82,
   categories: ['肺癌', '肉瘤', '消化道瘤'],
 }
 
