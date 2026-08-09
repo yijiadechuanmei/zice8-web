@@ -147,6 +147,24 @@ export function updateActivityStatus(activityKey, status) {
   })
 }
 
+export function getNanshaOpenMicConfig(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/config`)
+}
+
+export function updateNanshaOpenMicConfig(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/config`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function reviewNanshaOpenMicEntry(activityKey, entryId, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${entryId}/review`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getCharts(activityKey, params = {}) {
   const search = new URLSearchParams(params)
   const suffix = search.toString() ? `?${search.toString()}` : ''

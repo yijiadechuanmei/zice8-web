@@ -7,6 +7,7 @@ import {
   getArtistCallLotteryPrizes,
   getNanhaiChallengeDrawControl,
   getNanhaiChallengePrizes,
+  getNanshaOpenMicConfig,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
   revokeSongWishLotteryDraw,
@@ -17,6 +18,7 @@ import {
   updateActivityBgmConfig,
   updateActivityStatus,
   updateNanhaiChallengeDrawManualControl,
+  updateNanshaOpenMicConfig,
 } from '../api'
 
 const { Text, Title } = Typography
@@ -69,6 +71,8 @@ export default function ActivityConfigPage({ activity }) {
   const [manualTargets, setManualTargets] = useState('')
   const [revokeDrawId, setRevokeDrawId] = useState('')
   const [clearingDraws, setClearingDraws] = useState(false)
+  const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10 })
+  const [nanshaConfigSaving, setNanshaConfigSaving] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -145,6 +149,18 @@ export default function ActivityConfigPage({ activity }) {
         .catch((err) => { if (alive) setError(err.message || '歌曲许愿开奖配置加载失败') })
     }
 
+    if (activity.type === 'nansha_open_mic') {
+      getNanshaOpenMicConfig(activity.activityKey)
+        .then((data) => {
+          if (!alive) return
+          setNanshaConfig({
+            currentPhase: data?.currentPhase || 'upload',
+            dailyVoteLimit: Number(data?.dailyVoteLimit || 10),
+          })
+        })
+        .catch((err) => { if (alive) setError(err.message || '南沙活动阶段配置加载失败') })
+    }
+
     return () => {
       alive = false
     }
@@ -172,6 +188,23 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSaveNanshaConfig() {
+    setNanshaConfigSaving(true)
+    setError('')
+    try {
+      const data = await updateNanshaOpenMicConfig(activity.activityKey, nanshaConfig)
+      setNanshaConfig({
+        currentPhase: data.currentPhase,
+        dailyVoteLimit: Number(data.dailyVoteLimit),
+      })
+      message.success('活动阶段与每日票数已保存')
+    } catch (err) {
+      setError(err.message || '南沙活动配置保存失败')
+    } finally {
+      setNanshaConfigSaving(false)
     }
   }
 
@@ -499,6 +532,51 @@ export default function ActivityConfigPage({ activity }) {
             </Text>
           </Space>
         </Card>
+
+        {activity.type === 'nansha_open_mic' ? (
+          <Card
+            size="small"
+            title="报名投票阶段"
+            extra={<Button type="primary" loading={nanshaConfigSaving} onClick={handleSaveNanshaConfig}>保存阶段配置</Button>}
+          >
+            <Space direction="vertical" size={14} style={{ width: '100%' }}>
+              <Alert
+                type="info"
+                showIcon
+                message="阶段由后台手动切换"
+                description="上传阶段仅允许报名；投票阶段仅展示审核通过的作品并开放投票；关闭阶段停止报名和投票。"
+              />
+              <Space wrap size={18}>
+                <label>
+                  <Text strong>当前阶段</Text>
+                  <div style={{ marginTop: 8 }}>
+                    <Select
+                      style={{ width: 180 }}
+                      value={nanshaConfig.currentPhase}
+                      options={[
+                        { label: '第一阶段：上传报名', value: 'upload' },
+                        { label: '第二阶段：作品投票', value: 'vote' },
+                        { label: '活动关闭', value: 'closed' },
+                      ]}
+                      onChange={(value) => setNanshaConfig((current) => ({ ...current, currentPhase: value }))}
+                    />
+                  </div>
+                </label>
+                <label>
+                  <Text strong>每人每天票数</Text>
+                  <div style={{ marginTop: 8 }}>
+                    <InputNumber
+                      min={1}
+                      max={100}
+                      value={nanshaConfig.dailyVoteLimit}
+                      onChange={(value) => setNanshaConfig((current) => ({ ...current, dailyVoteLimit: Number(value || 10) }))}
+                    />
+                  </div>
+                </label>
+              </Space>
+            </Space>
+          </Card>
+        ) : null}
 
         <Card size="small" title="移动端音效配置">
           <Space direction="vertical" size={14} style={{ width: '100%' }}>

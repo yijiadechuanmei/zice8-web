@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, syncNanhaiChallengePayout } from '../api'
+import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, reviewNanshaOpenMicEntry, syncNanhaiChallengePayout } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 
@@ -32,6 +32,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [loadingRecordingPlayId, setLoadingRecordingPlayId] = useState('')
   const [reviewingRecordingId, setReviewingRecordingId] = useState('')
   const [reviewingShareScreenshotId, setReviewingShareScreenshotId] = useState('')
+  const [reviewingNanshaEntryId, setReviewingNanshaEntryId] = useState('')
   const [retractingWishId, setRetractingWishId] = useState('')
   const [nanhaiPayoutAction, setNanhaiPayoutAction] = useState('')
   const [error, setError] = useState('')
@@ -181,6 +182,39 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       message.error(err.message || '审核失败')
     } finally {
       setReviewingShareScreenshotId('')
+    }
+  }, [activity.activityKey])
+
+  const handleReviewNanshaEntry = useCallback(async (row, status) => {
+    if (!row?.id) return
+    let reason = ''
+    if (status === 'rejected') {
+      const input = window.prompt('请输入驳回原因（必填）')
+      if (input === null) return
+      reason = input.trim()
+      if (!reason) {
+        message.warning('请输入驳回原因')
+        return
+      }
+    }
+    setReviewingNanshaEntryId(`${row.id}:${status}`)
+    try {
+      const result = await reviewNanshaOpenMicEntry(activity.activityKey, row.id, { status, reason })
+      const entry = result?.entry || {}
+      setData((current) => ({
+        ...current,
+        rows: current.rows.map((item) => item.id === row.id ? {
+          ...item,
+          reviewStatus: entry.reviewStatus || status,
+          rejectReason: entry.rejectReason || '',
+          reviewedAt: entry.reviewedAt || new Date().toISOString(),
+        } : item),
+      }))
+      message.success(status === 'approved' ? '作品审核通过' : '作品已驳回')
+    } catch (err) {
+      message.error(err.message || '审核失败')
+    } finally {
+      setReviewingNanshaEntryId('')
     }
   }, [activity.activityKey])
 
@@ -397,6 +431,55 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         ),
       })
     }
+    if (activity.type === 'nansha_open_mic' && activeViewKey === 'nansha_open_mic_entries') {
+      const videoColumn = columns.find((column) => column.key === 'videoUrl' || column.dataIndex === 'videoUrl')
+      if (videoColumn) {
+        videoColumn.width = 260
+        videoColumn.render = (value, row) => value ? (
+          <video src={value} poster={row.coverUrl} controls preload="none" playsInline style={{ width: 230, maxHeight: 180, borderRadius: 6, background: '#000' }} />
+        ) : '-'
+      }
+      const statusColumn = columns.find((column) => column.key === 'reviewStatus' || column.dataIndex === 'reviewStatus')
+      if (statusColumn) {
+        statusColumn.render = (value) => {
+          const statusMap = {
+            pending: { color: 'orange', text: '待审核' },
+            approved: { color: 'green', text: '已通过' },
+            rejected: { color: 'red', text: '已驳回' },
+          }
+          const item = statusMap[value] || { color: 'default', text: value || '-' }
+          return <Tag color={item.color}>{item.text}</Tag>
+        }
+      }
+      columns.push({
+        title: '审核操作',
+        key: 'nanshaReviewActions',
+        fixed: 'right',
+        width: 160,
+        render: (_, row) => (
+          <Space size={6} wrap>
+            <Button
+              size="small"
+              type={row.reviewStatus === 'approved' ? 'default' : 'primary'}
+              loading={reviewingNanshaEntryId === `${row.id}:approved`}
+              disabled={Boolean(reviewingNanshaEntryId) || row.reviewStatus === 'approved'}
+              onClick={() => handleReviewNanshaEntry(row, 'approved')}
+            >
+              通过
+            </Button>
+            <Button
+              size="small"
+              danger
+              loading={reviewingNanshaEntryId === `${row.id}:rejected`}
+              disabled={Boolean(reviewingNanshaEntryId) || row.reviewStatus === 'rejected'}
+              onClick={() => handleReviewNanshaEntry(row, 'rejected')}
+            >
+              驳回
+            </Button>
+          </Space>
+        ),
+      })
+    }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_recordings') {
       const audioColumn = columns.find((column) => column.key === 'audioUrl' || column.dataIndex === 'audioUrl')
       if (audioColumn) {
@@ -586,7 +669,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       })
     }
     return columns
-  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleNanhaiPayoutRetry, handleNanhaiPayoutSync, handleRetractSongWish, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, nanhaiPayoutAction, recordingPlayUrls, retractingWishId, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
+  }, [activity.type, activeViewKey, adjustingProfileId, handleAdjustProfile, handleLoadRecordingPlayUrl, handleNanhaiPayoutRetry, handleNanhaiPayoutSync, handleRetractSongWish, handleReviewNanshaEntry, handleReviewRecording, handleReviewShareScreenshot, loadingRecordingPlayId, nanhaiPayoutAction, recordingPlayUrls, retractingWishId, reviewingNanshaEntryId, reviewingRecordingId, reviewingShareScreenshotId, sortField, sortOrder, visibleColumns])
 
   async function handleExport() {
     if (!activeViewKey || !activeView?.canExport) return
@@ -704,6 +787,23 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
                     }}
                     style={{ width: 180 }}
                     options={getNanhaiStatusOptions(activeViewKey)}
+                  />
+                ) : null}
+                {activity.type === 'nansha_open_mic' && activeViewKey === 'nansha_open_mic_entries' ? (
+                  <Select
+                    allowClear
+                    placeholder="筛选审核状态"
+                    value={status || undefined}
+                    onChange={(value) => {
+                      setStatus(value || '')
+                      setPage(1)
+                    }}
+                    style={{ width: 180 }}
+                    options={[
+                      { label: '待审核', value: 'pending' },
+                      { label: '已通过', value: 'approved' },
+                      { label: '已驳回', value: 'rejected' },
+                    ]}
                   />
                 ) : null}
               </Space>
