@@ -20,7 +20,7 @@ export const submitAnswer = (activityKey, levelNo, payload, debug = false) =>
   })
 
 export const previewAnswer = (activityKey, levelNo, payload) =>
-  request(`${base(activityKey)}/preview/levels/${encodeURIComponent(levelNo)}/answers`, {
+  request(`${base(activityKey)}/preview/levels/${encodeURIComponent(levelNo)}/answers?debug=1`, {
     method: 'POST',
     body: JSON.stringify(payload),
   })
