@@ -225,20 +225,20 @@
 .nansha-rules-stage {
   position: relative;
   min-height: calc(var(--nansha-unit) * 226.93);
-  overflow: hidden;
+  padding-bottom: calc(var(--nansha-unit) * 7.2);
   background: #173b98;
 }
 
 .nansha-rules-paper {
   position: relative;
   width: calc(100% - (var(--nansha-unit) * 7.73));
-  height: calc(var(--nansha-unit) * 218.13);
+  min-height: calc(var(--nansha-unit) * 218.13);
   margin: calc(var(--nansha-unit) * 2) auto 0;
   overflow: hidden;
 }
 
 .nansha-rules-paper-shape { position: absolute; inset: 0; width: 100%; height: 100%; }
-.nansha-rules-content { position: relative; z-index: 1; padding: calc(var(--nansha-unit) * 11.33) calc(var(--nansha-unit) * 4.4) 0; }
+.nansha-rules-content { position: relative; z-index: 1; padding: calc(var(--nansha-unit) * 11.33) calc(var(--nansha-unit) * 4.4) calc(var(--nansha-unit) * 3.2); }
 
 .nansha-rules-title-visual {
   display: block;
@@ -289,19 +289,19 @@
 .nansha-rules-benefits li { margin: 0; color: #080808; font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif; }
 
 .nansha-rules-story { margin-top: calc(var(--nansha-unit) * 5.73); }
-.nansha-rules-story p { margin: calc(var(--nansha-unit) * 2) 0 0; font: 400 calc(var(--nansha-unit) * 2.67) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-story p { margin: calc(var(--nansha-unit) * 2) 0 0; font: 400 calc(var(--nansha-unit) * 2.93) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-rules-story .nansha-rules-themes { margin-top: calc(var(--nansha-unit) * 1.07); color: #173b98; font-weight: 800; line-height: 1.82; }
 
 .nansha-rules-extra { margin-top: calc(var(--nansha-unit) * 2.53); }
-.nansha-rules-extra p { display: grid; margin: 0 0 calc(var(--nansha-unit) * 3.47); font: 400 calc(var(--nansha-unit) * 2.67) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-extra p { display: grid; margin: 0 0 calc(var(--nansha-unit) * 3.47); font: 400 calc(var(--nansha-unit) * 2.8) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-rules-extra b { display: block; margin-bottom: calc(var(--nansha-unit) * 1.2); font-weight: 800; }
-.nansha-rules-extra strong { font-size: calc(var(--nansha-unit) * 2.8); font-weight: 800; }
+.nansha-rules-extra strong { font-size: calc(var(--nansha-unit) * 2.93); font-weight: 800; }
 .nansha-rules-extra span { display: block; }
 
 .nansha-rules-organizers { margin-top: calc(var(--nansha-unit) * 2.67); }
-.nansha-rules-organizers p { display: grid; grid-template-columns: auto 1fr; margin: 0 0 calc(var(--nansha-unit) * .67); color: #080808; font: 400 calc(var(--nansha-unit) * 2.67) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-rules-organizers p { display: grid; grid-template-columns: auto 1fr; margin: 0 0 calc(var(--nansha-unit) * .67); color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-rules-organizers b { font-weight: 800; }
-.nansha-rules-disclaimer { position: absolute; bottom: calc(var(--nansha-unit) * 1.87); left: calc(var(--nansha-unit) * 5.33); margin: 0; color: #fff; font: 400 calc(var(--nansha-unit) * 2.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-disclaimer { margin: calc(var(--nansha-unit) * 2.13) 0 0 calc(var(--nansha-unit) * 5.33); color: #fff; font: 400 calc(var(--nansha-unit) * 2.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 
 .nansha-upload-result-overlay { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: calc(var(--nansha-unit) * 3.2); background: rgb(0 0 0 / 52%); }
 
