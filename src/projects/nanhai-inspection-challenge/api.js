@@ -37,6 +37,9 @@ export const drawPrize = (activityKey, requestId, debug = false) =>
     body: JSON.stringify({ requestId }),
   })
 
+export const getDrawAvailability = (activityKey) =>
+  request(`${base(activityKey)}/draw/availability`)
+
 export const syncPayout = (activityKey, payoutNo, debug = false) =>
   request(`${base(activityKey)}/payouts/${encodeURIComponent(payoutNo)}/sync${debugSuffix(debug)}`, { method: 'POST' })
 

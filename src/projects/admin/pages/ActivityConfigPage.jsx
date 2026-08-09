@@ -1,19 +1,22 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Typography, message } from 'antd'
+import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import {
   clearSongWishLotteryDraws,
   getActivityConfig,
   getArtistCallLotteryPrizes,
+  getNanhaiChallengeDrawControl,
   getNanhaiChallengePrizes,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
   revokeSongWishLotteryDraw,
   saveArtistCallLotteryPrizes,
+  saveNanhaiChallengeDrawAutoControl,
   saveNanhaiChallengePrizes,
   saveSongWishLotteryResultConfig,
   updateActivityBgmConfig,
   updateActivityStatus,
+  updateNanhaiChallengeDrawManualControl,
 } from '../api'
 
 const { Text, Title } = Typography
@@ -25,6 +28,22 @@ const defaultBgm = {
   autoplay: true,
   showControl: true,
   volume: 0.6,
+}
+
+const defaultNanhaiDrawControl = {
+  effectiveMode: 'normal',
+  manualMode: 'normal',
+  manualReason: '',
+  autoEnabled: true,
+  windowSeconds: 180,
+  maxWinCount: 60,
+  maxWinAmountFen: 6000,
+  cooldownSeconds: 180,
+  autoPausedUntil: null,
+  autoReason: '',
+  autoTriggerCount: 0,
+  recentMetrics: { winCount: 0, winAmountFen: 0 },
+  events: [],
 }
 
 export default function ActivityConfigPage({ activity }) {
@@ -39,6 +58,10 @@ export default function ActivityConfigPage({ activity }) {
   const [nanhaiPrizes, setNanhaiPrizes] = useState([])
   const [nanhaiBudget, setNanhaiBudget] = useState(null)
   const [nanhaiPrizeSaving, setNanhaiPrizeSaving] = useState(false)
+  const [nanhaiDrawControl, setNanhaiDrawControl] = useState(defaultNanhaiDrawControl)
+  const [nanhaiControlLoaded, setNanhaiControlLoaded] = useState(false)
+  const [nanhaiControlReason, setNanhaiControlReason] = useState('')
+  const [nanhaiControlSaving, setNanhaiControlSaving] = useState(false)
   const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
   const [manualDrawing, setManualDrawing] = useState(false)
@@ -85,6 +108,7 @@ export default function ActivityConfigPage({ activity }) {
     }
 
     if (activity.type === 'nanhai_inspection_challenge') {
+      setNanhaiControlLoaded(false)
       getNanhaiChallengePrizes(activity.activityKey)
         .then((data) => {
           if (!alive) return
@@ -92,9 +116,18 @@ export default function ActivityConfigPage({ activity }) {
           setNanhaiBudget(data?.budget || null)
         })
         .catch((err) => { if (alive) setError(err.message || '红包配置加载失败') })
+      getNanhaiChallengeDrawControl(activity.activityKey)
+        .then((data) => {
+          if (!alive) return
+          setNanhaiDrawControl({ ...defaultNanhaiDrawControl, ...(data || {}) })
+          setNanhaiControlLoaded(true)
+        })
+        .catch((err) => { if (alive) setError(err.message || '抽奖控制状态加载失败') })
     } else {
       setNanhaiPrizes([])
       setNanhaiBudget(null)
+      setNanhaiDrawControl(defaultNanhaiDrawControl)
+      setNanhaiControlLoaded(false)
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -202,6 +235,53 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanhaiPrizeSaving(false)
+    }
+  }
+
+  async function handleSaveNanhaiAutoControl() {
+    setNanhaiControlSaving(true)
+    setError('')
+    try {
+      const data = await saveNanhaiChallengeDrawAutoControl(activity.activityKey, {
+        autoEnabled: Boolean(nanhaiDrawControl.autoEnabled),
+        windowSeconds: Number(nanhaiDrawControl.windowSeconds),
+        maxWinCount: Number(nanhaiDrawControl.maxWinCount),
+        maxWinAmountFen: Number(nanhaiDrawControl.maxWinAmountFen),
+        cooldownSeconds: Number(nanhaiDrawControl.cooldownSeconds),
+      })
+      setNanhaiDrawControl({ ...defaultNanhaiDrawControl, ...(data || {}) })
+      message.success('自动熔断参数已保存')
+    } catch (err) {
+      const text = err.message || '自动熔断参数保存失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanhaiControlSaving(false)
+    }
+  }
+
+  async function handleNanhaiControlAction(action) {
+    const reason = nanhaiControlReason.trim()
+    if (action !== 'resume' && reason.length < 2) {
+      message.warning('请先填写至少2个字的操作原因')
+      return
+    }
+    setNanhaiControlSaving(true)
+    setError('')
+    try {
+      const data = await updateNanhaiChallengeDrawManualControl(activity.activityKey, {
+        action,
+        reason: reason || '后台恢复正常抽奖',
+      })
+      setNanhaiDrawControl({ ...defaultNanhaiDrawControl, ...(data || {}) })
+      setNanhaiControlReason('')
+      message.success(action === 'pause' ? '抽奖已暂停' : action === 'force_loss' ? '已开启强制未中奖' : '已恢复正常抽奖')
+    } catch (err) {
+      const text = err.message || '抽奖控制操作失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanhaiControlSaving(false)
     }
   }
 
@@ -356,6 +436,19 @@ export default function ActivityConfigPage({ activity }) {
     { title: '预占/已到账/剩余', width: 150, render: (_, item) => `${item.reservedCount || 0} / ${item.issuedCount || 0} / ${item.remainingCount || 0}` },
     { title: '启用', dataIndex: 'enabled', width: 80, render: (value, _, index) => <Switch size="small" checked={value} onChange={(enabled) => updateNanhaiPrize(index, { enabled })} /> },
   ]
+  const nanhaiControlMode = {
+    normal: { label: '正常抽奖', color: 'success' },
+    paused: { label: '手动暂停', color: 'warning' },
+    force_loss: { label: '强制未中奖', color: 'error' },
+    auto_force_loss: { label: '自动强制未中奖', color: 'error' },
+  }[nanhaiDrawControl.effectiveMode] || { label: '状态异常', color: 'error' }
+  const nanhaiControlEventColumns = [
+    { title: '时间', dataIndex: 'createdAt', width: 180, render: (value) => value ? new Date(value).toLocaleString('zh-CN', { hour12: false }) : '-' },
+    { title: '来源', dataIndex: 'source', width: 90, render: (value) => value === 'admin' ? '后台' : '系统' },
+    { title: '操作', dataIndex: 'action', width: 150 },
+    { title: '状态', dataIndex: 'mode', width: 120 },
+    { title: '原因', dataIndex: 'reason' },
+  ]
 
   const songWishPrizeColumns = [
     { title: '奖项等级', dataIndex: 'prizeLevel', width: 130, render: (value, _, index) => <Input value={value} placeholder="如：一等奖" onChange={(event) => updateSongWishPrize(index, { prizeLevel: event.target.value })} /> },
@@ -447,6 +540,110 @@ export default function ActivityConfigPage({ activity }) {
             </div>
           </Space>
         </Card>
+
+        {activity.type === 'nanhai_inspection_challenge' ? (
+          <Card
+            size="small"
+            title="抽奖风控与熔断"
+            extra={<Tag color={nanhaiControlMode.color}>{nanhaiControlMode.label}</Tag>}
+          >
+            <Space direction="vertical" size={14} style={{ width: '100%' }}>
+              <Alert
+                type={nanhaiDrawControl.effectiveMode === 'normal' ? 'info' : 'warning'}
+                showIcon
+                message={`当前状态：${nanhaiControlMode.label}`}
+                description={nanhaiDrawControl.effectiveMode === 'auto_force_loss'
+                  ? `${nanhaiDrawControl.autoReason || '短时中奖异常'}。在恢复前，所有新抽奖都会固定未中奖并消耗机会；预计恢复时间：${nanhaiDrawControl.autoPausedUntil ? new Date(nanhaiDrawControl.autoPausedUntil).toLocaleString('zh-CN', { hour12: false }) : '等待系统确认'}`
+                  : nanhaiDrawControl.effectiveMode === 'paused'
+                    ? '新用户抽奖会收到“活动暂时维护中”，不会生成抽奖记录，也不会消耗抽奖机会。'
+                    : nanhaiDrawControl.effectiveMode === 'force_loss'
+                      ? '所有新抽奖都会生成未中奖记录并消耗一次机会；已产生的中奖和发放单仍继续处理。'
+                      : '按现有概率、库存、预算、IP 上限和自动熔断规则正常抽奖。'}
+              />
+
+              <Input.TextArea
+                rows={2}
+                maxLength={255}
+                showCount
+                value={nanhaiControlReason}
+                onChange={(event) => setNanhaiControlReason(event.target.value)}
+                placeholder="暂停或强制未中奖前必须填写原因，操作会写入审计日志"
+              />
+              <Space wrap>
+                <Popconfirm
+                  title="确认恢复正常抽奖？"
+                  description="恢复后，新用户将重新按概率、库存和预算参与抽奖。"
+                  onConfirm={() => handleNanhaiControlAction('resume')}
+                >
+                  <Button type="primary" disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving}>恢复正常</Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="确认暂停抽奖？"
+                  description="暂停期间不会生成抽奖记录，也不会消耗用户机会。"
+                  onConfirm={() => handleNanhaiControlAction('pause')}
+                >
+                  <Button disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving}>暂停且保留机会</Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="确认让所有新抽奖都未中奖？"
+                  description="该操作会消耗用户唯一一次抽奖机会，只建议在明确止损时使用。"
+                  onConfirm={() => handleNanhaiControlAction('force_loss')}
+                >
+                  <Button danger disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving}>强制全部未中奖</Button>
+                </Popconfirm>
+              </Space>
+
+              <Card size="small" type="inner" title="自动熔断参数">
+                <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                  <Space wrap size={20}>
+                    <label>
+                      <Text strong>启用自动熔断</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <Switch
+                          disabled={!nanhaiControlLoaded}
+                          checked={Boolean(nanhaiDrawControl.autoEnabled)}
+                          onChange={(autoEnabled) => setNanhaiDrawControl((current) => ({ ...current, autoEnabled }))}
+                        />
+                      </div>
+                    </label>
+                    <label>
+                      <Text strong>统计窗口（秒）</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <InputNumber min={60} max={3600} precision={0} value={nanhaiDrawControl.windowSeconds} onChange={(windowSeconds) => setNanhaiDrawControl((current) => ({ ...current, windowSeconds: Number(windowSeconds || 60) }))} />
+                      </div>
+                    </label>
+                    <label>
+                      <Text strong>窗口中奖人数上限</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <InputNumber min={1} max={10000} precision={0} value={nanhaiDrawControl.maxWinCount} onChange={(maxWinCount) => setNanhaiDrawControl((current) => ({ ...current, maxWinCount: Number(maxWinCount || 1) }))} />
+                      </div>
+                    </label>
+                    <label>
+                      <Text strong>窗口中奖金额上限（元）</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <InputNumber min={0.01} max={5000} precision={2} value={Number(nanhaiDrawControl.maxWinAmountFen || 0) / 100} onChange={(value) => setNanhaiDrawControl((current) => ({ ...current, maxWinAmountFen: Math.round(Number(value || 0.01) * 100) }))} />
+                      </div>
+                    </label>
+                    <label>
+                      <Text strong>自动恢复冷却（秒）</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <InputNumber min={60} max={86400} precision={0} value={nanhaiDrawControl.cooldownSeconds} onChange={(cooldownSeconds) => setNanhaiDrawControl((current) => ({ ...current, cooldownSeconds: Number(cooldownSeconds || 60) }))} />
+                      </div>
+                    </label>
+                  </Space>
+                  <Text type="secondary">
+                    最近 {nanhaiDrawControl.windowSeconds} 秒已承诺中奖 {Number(nanhaiDrawControl.recentMetrics?.winCount || 0)} 人、{(Number(nanhaiDrawControl.recentMetrics?.winAmountFen || 0) / 100).toFixed(2)} 元。达到任一阈值后自动切换为全部未中奖并消耗机会；冷却结束后自动恢复。
+                  </Text>
+                  <Button type="primary" disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving} onClick={handleSaveNanhaiAutoControl}>保存自动熔断参数</Button>
+                </Space>
+              </Card>
+
+              <Card size="small" type="inner" title={`最近控制记录（累计自动触发 ${Number(nanhaiDrawControl.autoTriggerCount || 0)} 次）`}>
+                <Table rowKey="id" columns={nanhaiControlEventColumns} dataSource={nanhaiDrawControl.events || []} pagination={false} size="small" scroll={{ x: 760 }} />
+              </Card>
+            </Space>
+          </Card>
+        ) : null}
 
         {activity.type === 'artist_call_lottery' ? (
           <Card size="small" title="抽奖奖品配置" extra={<Space><Text type={Math.abs(prizeProbability - 100) < 0.001 ? 'success' : 'danger'}>启用概率：{prizeProbability.toFixed(2)}%</Text><Button type="primary" loading={prizeSaving} onClick={handleSavePrizes}>保存奖品</Button></Space>}>

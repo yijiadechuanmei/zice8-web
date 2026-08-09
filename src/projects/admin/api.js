@@ -81,6 +81,24 @@ export function saveNanhaiChallengePrizes(activityKey, prizes) {
   })
 }
 
+export function getNanhaiChallengeDrawControl(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/draw-control`)
+}
+
+export function saveNanhaiChallengeDrawAutoControl(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/draw-control/auto-config`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateNanhaiChallengeDrawManualControl(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/draw-control/action`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getArtistCallLotteryPrizes(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`)
 }

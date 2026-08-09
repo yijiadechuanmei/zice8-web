@@ -11,6 +11,7 @@ import {
   createAuthorization,
   drawPrize,
   getDebugState,
+  getDrawAvailability,
   getDrawStatus,
   getBootstrap,
   getPublicConfig,
@@ -549,6 +550,16 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
         stopWheelSpin()
         setBusy('')
       }
+      return
+    }
+    try {
+      const availability = await getDrawAvailability(activityKey)
+      if (availability?.available === false) {
+        setError(availability.message || '抽奖暂缓，请稍后再试')
+        return
+      }
+    } catch (err) {
+      setError(readError(err, '抽奖状态检查失败，请稍后重试'))
       return
     }
     let authorization
