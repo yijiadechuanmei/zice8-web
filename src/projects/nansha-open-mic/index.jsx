@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   AudioOutlined,
+  AuditOutlined,
+  BarChartOutlined,
   CaretRightFilled,
   FullscreenOutlined,
   LeftOutlined,
@@ -9,6 +11,7 @@ import {
   UserOutlined,
   VideoCameraFilled,
 } from '@ant-design/icons'
+import { getBootstrap } from './api'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -18,6 +21,7 @@ const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260809`
 const TITLE_VISUAL_URL = `${ASSET_BASE_URL}/2.png?v=20260809`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
 const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260809-rules`
+const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 
 const RULES = [
   '从六大主题中任选其一，结合真实经历，讲述你与南沙的故事。',
@@ -27,19 +31,50 @@ const RULES = [
   '作品须为原创，所使用的音乐、图片及视频等素材须取得合法授权',
 ]
 
+const VOTE_WORKS = Array.from({ length: 6 }, (_, index) => ({ id: index + 1 }))
+
 export default function NanshaOpenMicProject() {
-  const [view, setView] = useState('home')
-  const [rulesOrigin, setRulesOrigin] = useState('home')
+  const [view, setView] = useState('vote-home')
+  const [rulesOrigin, setRulesOrigin] = useState('vote-home')
+  const [activityPhase, setActivityPhase] = useState('vote')
   const [selectedVideoName, setSelectedVideoName] = useState('')
   const [uploadDialog, setUploadDialog] = useState('')
   const [nextUploadResult, setNextUploadResult] = useState('success')
+  const [voteDialog, setVoteDialog] = useState('')
+  const [nextVoteResult, setNextVoteResult] = useState('success')
+  const [myEntry, setMyEntry] = useState(null)
+  const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
+  const homeView = activityPhase === 'upload' ? 'upload-home' : 'vote-home'
+
+  useEffect(() => {
+    let alive = true
+    getBootstrap(ACTIVITY_KEY)
+      .then((data) => {
+        const phase = data?.phase
+        if (!alive || (phase !== 'upload' && phase !== 'vote')) return
+        setActivityPhase(phase)
+        setMyEntry(data?.myEntry || null)
+        setVoteQuota(data?.voteQuota || { remaining: data?.rules?.dailyVoteLimit || 10 })
+        setView((current) => (current === 'vote-home' || current === 'upload-home' ? (phase === 'upload' ? 'upload-home' : 'vote-home') : current))
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   function goBack() {
     if (view === 'rules') {
       setView(rulesOrigin)
       return
     }
-    setView(view === 'work' ? 'my' : 'home')
+    if (view === 'my-votes') {
+      setView('my')
+      return
+    }
+    if (view === 'work-detail') {
+      setView('vote-home')
+      return
+    }
+    setView(view === 'work' ? 'my' : homeView)
   }
 
   function openRules() {
@@ -62,10 +97,27 @@ export default function NanshaOpenMicProject() {
     if (isSuccess) setView('my')
   }
 
+  function openVoteDialog() {
+    setVoteDialog('vote')
+  }
+
+  function confirmVote() {
+    setVoteDialog(nextVoteResult)
+    setNextVoteResult((current) => (current === 'success' ? 'failure' : 'success'))
+  }
+
+  function closeVoteDialog() {
+    setVoteDialog('')
+  }
+
   return (
     <main className="nansha-open-mic-page">
-      {view === 'home' ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
-      {view === 'my' ? <MyPage onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} /> : null}
+      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
+      {view === 'ranking' && activityPhase === 'vote' ? <RankingPage onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
+      {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
+      {view === 'my' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
+      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} /> : null}
       {view === 'work' ? <MyWorkPage onBack={goBack} onShowRules={openRules} /> : null}
       {view === 'upload' ? (
         <UploadPage
@@ -78,9 +130,12 @@ export default function NanshaOpenMicProject() {
       ) : null}
       {view === 'rules' ? <RulesPage onBack={goBack} /> : null}
 
-      {view === 'home' || view === 'my' ? <BottomNavigation onHome={() => setView('home')} onMy={() => setView('my')} /> : null}
+      {view === 'my' && activityPhase === 'vote' ? <VoteBottomNavigation active="my" onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
+      {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
+      {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} /> : null}
+      {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
     </main>
   )
 }
@@ -109,7 +164,80 @@ function UploadHome({ onShowRules, onUpload }) {
   )
 }
 
-function MyPage({ onBack, onShowRules, onOpenWork }) {
+function VoteHome({ onShowRules, onRanking, onMy, onWork }) {
+  return (
+    <section className="nansha-vote-home">
+      <section className="nansha-vote-visual-wrap">
+        <img className="nansha-vote-main-visual" src={MAIN_VISUAL_URL} alt="南沙新声 全民开麦" />
+        <ActivityRulesTrigger onClick={onShowRules} />
+      </section>
+      <section className="nansha-vote-heading">
+        <h1>南沙新声 · 全民开麦</h1>
+        <p>为你心仪的作品投出宝贵的一票吧</p>
+        <strong>今日剩余票数:10</strong>
+      </section>
+      <section className="nansha-vote-work-panel" aria-label="参赛作品">
+        {VOTE_WORKS.map((work) => (
+          <article className="nansha-vote-work-card" key={work.id}>
+            <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.id}`} onClick={onWork}><CaretRightFilled /></button>
+            <p>作品名称：代用名<br />作者：代用名<br />票数：0000票</p>
+          </article>
+        ))}
+      </section>
+      <nav className="nansha-vote-bottom-nav" aria-label="投票阶段底部导航">
+        <button className="is-active" type="button"><AudioOutlined aria-hidden="true" /><span>首页</span></button>
+        <button type="button" onClick={onRanking}><BarChartOutlined aria-hidden="true" /><span>排行榜</span></button>
+        <button type="button" onClick={onMy}><UserOutlined aria-hidden="true" /><span>我的</span></button>
+      </nav>
+    </section>
+  )
+}
+
+function RankingPage({ onShowRules, onHome, onMy, onWork }) {
+  return (
+    <section className="nansha-ranking-page">
+      <header className="nansha-ranking-header"><h1>排行榜</h1></header>
+      <main className="nansha-ranking-stage">
+        <img className="nansha-ranking-theme" src={RANKING_THEME_VISUAL_URL} alt="南沙新声 全民开麦" />
+        <img className="nansha-ranking-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
+        <ActivityRulesTrigger onClick={onShowRules} className="nansha-ranking-rules-trigger" />
+        <section className="nansha-ranking-board" aria-label="作品排行榜">
+          <div className="nansha-ranking-columns"><span>排行</span><span>作品</span><span>票数</span></div>
+          <div className="nansha-ranking-list">
+            {Array.from({ length: 7 }, (_, index) => <RankingRow key={index} rank={index + 1} onWork={onWork} />)}
+          </div>
+          <p className="nansha-ranking-note">(截取前50/100排名)</p>
+        </section>
+        <section className="nansha-ranking-organizers" aria-label="主办单位信息">
+          <p><b>主办单位：</b>中共广州市南沙区委宣传部、中共广州市南沙区委社会工作部</p>
+          <p><b>支持单位：</b><span>中共广州市南沙区委统战部、区人力资源社会保障局、区农业农村局、<br />区文化广电旅游体育局、开发区港澳办、区总工会、团区委</span></p>
+          <p><b>协办单位：</b>南沙区图书馆、南沙区文化馆</p>
+        </section>
+        <nav className="nansha-vote-bottom-nav nansha-ranking-bottom-nav" aria-label="排行榜底部导航">
+          <button type="button" onClick={onHome}><AudioOutlined aria-hidden="true" /><span>首页</span></button>
+          <button className="is-active" type="button"><BarChartOutlined aria-hidden="true" /><span>排行榜</span></button>
+          <button type="button" onClick={onMy}><UserOutlined aria-hidden="true" /><span>我的</span></button>
+        </nav>
+      </main>
+    </section>
+  )
+}
+
+function RankingRow({ rank, onWork }) {
+  return (
+    <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={onWork} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork() }}>
+      <span className="nansha-ranking-number">{rank}</span>
+      <p>作品名xxxx<br />作者xxxx</p>
+      <span className="nansha-ranking-votes">0000000票&nbsp; &gt;</span>
+    </div>
+  )
+}
+
+function MyPage({ activityPhase, myEntry, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
+  const isVotePhase = activityPhase === 'vote'
+  const workStatus = myEntry?.reviewStatus === 'approved' ? '审核通过' : '审核中'
+  const workVotes = String(myEntry?.voteCount ?? 0).padStart(6, '0')
+  const remainingVotes = voteQuota?.remaining ?? 10
   return (
     <section className="nansha-sub-page nansha-my-page">
       <PageHeader title="我的" onBack={onBack} />
@@ -119,12 +247,81 @@ function MyPage({ onBack, onShowRules, onOpenWork }) {
         <img className="nansha-profile-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
       </section>
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <button className="nansha-my-work-row" type="button" onClick={onOpenWork}>
-        <VideoCameraFilled className="nansha-work-icon" aria-hidden="true" />
-        <b>我的作品</b>
-        <em>审核中</em>
-        <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
-      </button>
+      {isVotePhase ? (
+        <section className="nansha-my-summary-list" aria-label="我的活动信息">
+          {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
+          <MySummaryRow icon={<AuditOutlined />} title="我的投票" detail={`今日剩余票数：${remainingVotes}票`} onClick={onOpenVotes} />
+        </section>
+      ) : (
+        <button className="nansha-my-work-row" type="button" onClick={onOpenWork}>
+          <VideoCameraFilled className="nansha-work-icon" aria-hidden="true" />
+          <b>我的作品</b>
+          <em>审核中</em>
+          <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
+        </button>
+      )}
+    </section>
+  )
+}
+
+function MySummaryRow({ icon, title, status, detail, onClick }) {
+  return (
+    <button className="nansha-my-summary-row" type="button" onClick={onClick}>
+      <span className="nansha-summary-icon" aria-hidden="true">{icon}</span>
+      <b className="nansha-summary-title">{title}</b>
+      {status ? <em className={`nansha-summary-status${status === '审核通过' ? ' is-approved' : ''}`}>{status}</em> : null}
+      <span className="nansha-summary-detail">{detail}</span>
+      <RightOutlined className="nansha-summary-chevron" aria-hidden="true" />
+    </button>
+  )
+}
+
+function MyVotesPage({ onBack, onShowRules, onHome, onRanking, onMy }) {
+  return (
+    <section className="nansha-my-votes-page">
+      <PageHeader title="我的投票" onBack={onBack} />
+      <main className="nansha-my-votes-stage">
+        <img className="nansha-my-votes-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
+        <ActivityRulesTrigger onClick={onShowRules} fixed />
+        <section className="nansha-my-votes-board" aria-label="我的投票详情">
+          <div className="nansha-my-votes-list">
+            {Array.from({ length: 7 }, (_, index) => <MyVoteRow key={index} />)}
+          </div>
+        </section>
+        <VoteBottomNavigation active="my" onHome={onHome} onRanking={onRanking} onMy={onMy} />
+      </main>
+    </section>
+  )
+}
+
+function MyVoteRow() {
+  return (
+    <button className="nansha-my-vote-row" type="button">
+      <span className="nansha-my-vote-title">投票名称</span>
+      <span className="nansha-my-vote-detail">画得票数：00000票</span>
+      <RightOutlined className="nansha-my-vote-chevron" aria-hidden="true" />
+    </button>
+  )
+}
+
+function WorkDetailPage({ onBack, onShowRules, onVote }) {
+  return (
+    <section className="nansha-sub-page nansha-work-detail-page">
+      <PageHeader title="作品名" onBack={onBack} />
+      <ActivityRulesTrigger onClick={onShowRules} fixed label="投票说明" />
+      <div className="nansha-video-placeholder" aria-label="视频将在预览时播放">
+        <span>视频将在预览时播放</span>
+        <div className="nansha-video-controls"><CaretRightFilled aria-hidden="true" /><b>0:00 / 0:00</b><SoundOutlined aria-hidden="true" /><FullscreenOutlined aria-hidden="true" /></div>
+      </div>
+      <section className="nansha-work-detail-info">
+        <h1>我的作品</h1>
+        <p>作者</p>
+        <div className="nansha-detail-description">作品简介</div>
+        <div className="nansha-detail-actions">
+          <button className="nansha-detail-vote-button" type="button" onClick={onVote}>投票</button>
+          <button className="nansha-detail-share-button" type="button">拉票</button>
+        </div>
+      </section>
     </section>
   )
 }
@@ -177,8 +374,8 @@ function PageHeader({ title, onBack, className = '' }) {
   )
 }
 
-function ActivityRulesTrigger({ onClick, fixed = false }) {
-  return <button className={`nansha-rules-trigger${fixed ? ' is-fixed' : ''}`} type="button" onClick={onClick}>活动说明</button>
+function ActivityRulesTrigger({ onClick, fixed = false, label = '活动说明', className = '' }) {
+  return <button className={`nansha-rules-trigger${fixed ? ' is-fixed' : ''} ${className}`} type="button" onClick={onClick}>{label}</button>
 }
 
 function RuleList() {
@@ -251,6 +448,61 @@ function UploadResultDialog({ status, onConfirm }) {
         <button className="nansha-upload-result-confirm" type="button" onClick={onConfirm}>确定</button>
       </div>
     </section>
+  )
+}
+
+function VoteDialog({ onConfirm }) {
+  return (
+    <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label="投票">
+      <div className="nansha-vote-dialog-card">
+        <svg className="nansha-vote-dialog-shape" viewBox="0 0 426 468" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 41H426V61C270 61 122 78 0 118Z" fill="#173b98" />
+        </svg>
+        <div className="nansha-vote-dialog-content">
+          <p className="nansha-vote-quota-label">当前拥有每日票数:</p>
+          <strong className="nansha-vote-quota-value">10票</strong>
+          <label className="nansha-vote-select-label" htmlFor="nansha-vote-count">当前视频投出票数</label>
+          <select id="nansha-vote-count" defaultValue="1" aria-label="当前视频投出票数">
+            {Array.from({ length: 10 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
+          </select>
+          <button className="nansha-vote-confirm-button" type="button" onClick={onConfirm}>确定投票</button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function VoteResultDialog({ status, onConfirm }) {
+  const isSuccess = status === 'success'
+  return (
+    <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label={isSuccess ? '投票成功' : '投票失败'}>
+      <div className={`nansha-vote-result-card ${isSuccess ? 'is-success' : 'is-failure'}`} role="button" tabIndex={0} onClick={onConfirm} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onConfirm() }}>
+        {isSuccess ? <VoteSpark /> : null}
+        <img className="nansha-vote-result-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
+        <h2>{isSuccess ? <>投票<br />成功</> : <>投票失败<br />请重新投票</>}</h2>
+        {!isSuccess ? <span className="nansha-vote-failure-bars" aria-hidden="true"><i /><i /><i /></span> : null}
+      </div>
+    </section>
+  )
+}
+
+function VoteSpark() {
+  return (
+    <svg className="nansha-vote-spark" viewBox="0 0 72 72" aria-hidden="true">
+      <path d="M13 20 44 4l6 36-34 8Z" fill="#f9c82e" />
+      <path d="M0 52 38 45 32 61 4 69Z" fill="#f9c82e" />
+      <path d="M36 0 57 2 60 25 42 16Z" fill="#f9c82e" />
+    </svg>
+  )
+}
+
+function VoteBottomNavigation({ active, onHome, onRanking, onMy }) {
+  return (
+    <nav className="nansha-vote-bottom-nav" aria-label="投票阶段底部导航">
+      <button className={active === 'home' ? 'is-active' : ''} type="button" onClick={onHome}><AudioOutlined aria-hidden="true" /><span>首页</span></button>
+      <button className={active === 'ranking' ? 'is-active' : ''} type="button" onClick={onRanking}><BarChartOutlined aria-hidden="true" /><span>排行榜</span></button>
+      <button className={active === 'my' ? 'is-active' : ''} type="button" onClick={onMy}><UserOutlined aria-hidden="true" /><span>我的</span></button>
+    </nav>
   )
 }
 
