@@ -690,24 +690,6 @@
     linear-gradient(155deg, #fff 0%, #fff8f5 100%);
 }
 
-.ttq-result-badge {
-  position: absolute;
-  top: 31px;
-  left: 33px;
-  padding: 8px 19px;
-  border-radius: 999px;
-  color: #168d62;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  background: #e5f8ef;
-}
-
-.ttq-result-dialog.is-incorrect .ttq-result-badge {
-  color: #d35a35;
-  background: #fff0e8;
-}
-
 .ttq-result-face {
   display: block;
   width: 228px;

@@ -377,7 +377,6 @@ function ResultDialog({ result, onClose, onRetest }) {
     <div className="ttq-overlay ttq-result-overlay" role="dialog" aria-modal="true" aria-labelledby="ttq-result-title">
       <section className={`ttq-result-dialog ${correct ? 'is-correct' : 'is-incorrect'}`} aria-live="polite">
         <button className="ttq-close-button" type="button" onClick={onClose} aria-label="关闭"><CloseOutlined /></button>
-        <span className="ttq-result-badge" aria-hidden="true">{correct ? '通关' : '加油'}</span>
         <img className="ttq-result-face" src={correct ? smileFace : sadFace} alt={correct ? '笑脸' : '苦脸'} />
         <h2 id="ttq-result-title">{correct ? '恭喜闯关成功！' : '差一点就成功啦'}</h2>
         <p>{correct ? '太棒了，知识能量已点亮！' : '别灰心，换个关卡再挑战吧！'}</p>
