@@ -12,7 +12,7 @@ import {
   UserOutlined,
   VideoCameraFilled,
 } from '@ant-design/icons'
-import { getBootstrap } from './api'
+import { getBootstrap, getPublicConfig } from './api'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -37,9 +37,9 @@ const RULES = [
 const VOTE_WORKS = Array.from({ length: 6 }, (_, index) => ({ id: index + 1 }))
 
 export default function NanshaOpenMicProject() {
-  const [view, setView] = useState('vote-home')
-  const [rulesOrigin, setRulesOrigin] = useState('vote-home')
-  const [activityPhase, setActivityPhase] = useState('vote')
+  const [view, setView] = useState('upload-home')
+  const [rulesOrigin, setRulesOrigin] = useState('upload-home')
+  const [activityPhase, setActivityPhase] = useState('upload')
   const [selectedVideoName, setSelectedVideoName] = useState('')
   const [uploadDialog, setUploadDialog] = useState('')
   const [nextUploadResult, setNextUploadResult] = useState('success')
@@ -54,13 +54,17 @@ export default function NanshaOpenMicProject() {
     let previousPhase = null
 
     function refreshActivityState() {
-      getBootstrap(ACTIVITY_KEY)
-        .then((data) => {
-        const phase = data?.phase
+      Promise.allSettled([getPublicConfig(ACTIVITY_KEY), getBootstrap(ACTIVITY_KEY)])
+        .then(([publicResult, bootstrapResult]) => {
+        const publicData = publicResult.status === 'fulfilled' ? publicResult.value : null
+        const bootstrapData = bootstrapResult.status === 'fulfilled' ? bootstrapResult.value : null
+        const phase = publicData?.phase || bootstrapData?.phase
         if (!alive || (phase !== 'upload' && phase !== 'vote')) return
         setActivityPhase(phase)
-        setMyEntry(data?.myEntry || null)
-        setVoteQuota(data?.voteQuota || { remaining: data?.rules?.dailyVoteLimit || 10 })
+        if (bootstrapData) {
+          setMyEntry(bootstrapData.myEntry || null)
+          setVoteQuota(bootstrapData.voteQuota || { remaining: bootstrapData.rules?.dailyVoteLimit || 10 })
+        }
         const phaseChanged = previousPhase !== null && previousPhase !== phase
         if (phaseChanged) {
           setUploadDialog('')
@@ -74,7 +78,7 @@ export default function NanshaOpenMicProject() {
           })
         }
         previousPhase = phase
-      })
+        })
         .catch(() => {})
     }
 
