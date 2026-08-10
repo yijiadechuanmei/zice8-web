@@ -10,6 +10,11 @@ export const getBootstrap = (activityKey) => request(`${base(activityKey)}/boots
 export const getEntries = (activityKey, page = 1, pageSize = 20) =>
   request(`${base(activityKey)}/entries?page=${page}&pageSize=${pageSize}`)
 
+export const getEntry = (activityKey, entryId) =>
+  request(`${base(activityKey)}/entries/${encodeURIComponent(entryId)}`)
+
+export const getMyVotes = (activityKey) => request(`${base(activityKey)}/my-votes`)
+
 export const createUploadPolicy = (activityKey, payload) =>
   request(`${base(activityKey)}/upload-policy`, {
     method: 'POST',

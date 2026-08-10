@@ -5,15 +5,13 @@ import {
   BarChartOutlined,
   CaretRightFilled,
   CloseOutlined,
-  FullscreenOutlined,
   LeftOutlined,
   RightOutlined,
-  SoundOutlined,
   UserOutlined,
   VideoCameraFilled,
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
-import { getBootstrap, getPublicConfig } from './api'
+import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, uploadFileToOss } from './api'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -28,20 +26,63 @@ const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
 const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
 
-const VOTE_WORKS = Array.from({ length: 6 }, (_, index) => ({ id: index + 1 }))
+function createRequestId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `nansha-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function captureVideoFirstFrame(file) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    const objectUrl = URL.createObjectURL(file)
+    const cleanup = () => {
+      URL.revokeObjectURL(objectUrl)
+      video.removeAttribute('src')
+      video.load()
+    }
+    video.muted = true
+    video.playsInline = true
+    video.preload = 'metadata'
+    video.onloadeddata = () => {
+      const target = Math.min(Math.max(video.duration || 0, 0.05), 0.12)
+      if (target > 0 && Math.abs(video.currentTime - target) > 0.01) video.currentTime = target
+      else draw()
+    }
+    video.onseeked = draw
+    video.onerror = () => {
+      cleanup()
+      reject(new Error('无法读取视频首帧，请更换 MP4、MOV 或 WebM 视频'))
+    }
+    function draw() {
+      if (!video.videoWidth || !video.videoHeight) return
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+      canvas.toBlob((blob) => {
+        cleanup()
+        if (!blob) return reject(new Error('视频首帧生成失败，请重新选择视频'))
+        resolve(new File([blob], `${file.name.replace(/\.[^.]+$/, '') || 'cover'}-cover.jpg`, { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.9)
+    }
+    video.src = objectUrl
+  })
+}
 
 export default function NanshaOpenMicProject() {
   const [view, setView] = useState('upload-home')
   const [rulesOrigin, setRulesOrigin] = useState('upload-home')
   const [activityPhase, setActivityPhase] = useState('upload')
-  const [selectedVideoName, setSelectedVideoName] = useState('')
+  const [selectedVideo, setSelectedVideo] = useState(null)
   const [uploadDialog, setUploadDialog] = useState('')
-  const [nextUploadResult, setNextUploadResult] = useState('success')
   const [voteDialog, setVoteDialog] = useState('')
-  const [nextVoteResult, setNextVoteResult] = useState('success')
   const [posterOpen, setPosterOpen] = useState(false)
   const [myEntry, setMyEntry] = useState(null)
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
+  const [entries, setEntries] = useState([])
+  const [myVotes, setMyVotes] = useState([])
+  const [selectedEntry, setSelectedEntry] = useState(null)
+  const [sharedEntryId, setSharedEntryId] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('entryId') || '')
   const homeView = activityPhase === 'vote'
     ? 'vote-home'
     : activityPhase === 'publicity'
@@ -52,7 +93,7 @@ export default function NanshaOpenMicProject() {
     let alive = true
     let previousPhase = null
 
-    function refreshActivityState() {
+    async function refreshActivityState() {
       Promise.allSettled([getPublicConfig(ACTIVITY_KEY), getBootstrap(ACTIVITY_KEY)])
         .then(([publicResult, bootstrapResult]) => {
         const publicData = publicResult.status === 'fulfilled' ? publicResult.value : null
@@ -63,6 +104,21 @@ export default function NanshaOpenMicProject() {
         if (bootstrapData) {
           setMyEntry(bootstrapData.myEntry || null)
           setVoteQuota(bootstrapData.voteQuota || { remaining: bootstrapData.rules?.dailyVoteLimit || 10 })
+        }
+        if (bootstrapData && ['vote', 'publicity'].includes(phase)) {
+          getEntries(ACTIVITY_KEY, 1, 50).then((result) => {
+            if (!alive) return
+            const list = result?.list || []
+            setEntries(list)
+            if (sharedEntryId && phase === 'vote') {
+              const sharedEntry = list.find((entry) => entry.id === sharedEntryId)
+              if (sharedEntry) {
+                setSelectedEntry(sharedEntry)
+                setView('work-detail')
+              }
+              setSharedEntryId('')
+            }
+          }).catch(() => {})
         }
         const phaseChanged = previousPhase !== null && previousPhase !== phase
         if (phaseChanged) {
@@ -96,7 +152,7 @@ export default function NanshaOpenMicProject() {
       window.clearInterval(intervalId)
       window.removeEventListener('focus', refreshActivityState)
     }
-  }, [])
+  }, [sharedEntryId])
 
   function goBack() {
     if (view === 'rules') {
@@ -123,9 +179,25 @@ export default function NanshaOpenMicProject() {
     setView('upload')
   }
 
-  function completeUpload() {
-    setUploadDialog(nextUploadResult)
-    setNextUploadResult((current) => (current === 'success' ? 'failure' : 'success'))
+  async function completeUpload(form) {
+    if (!selectedVideo) {
+      setUploadDialog('failure')
+      return
+    }
+    try {
+      const [videoPolicy, coverFile] = await Promise.all([
+        createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size }),
+        captureVideoFirstFrame(selectedVideo),
+      ])
+      const coverPolicy = await createUploadPolicy(ACTIVITY_KEY, { kind: 'cover', fileName: coverFile.name, contentType: coverFile.type, size: coverFile.size })
+      const [videoUrl, coverUrl] = await Promise.all([uploadFileToOss(videoPolicy, selectedVideo), uploadFileToOss(coverPolicy, coverFile)])
+      const result = await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl })
+      setMyEntry(result.entry)
+      setSelectedVideo(null)
+      setUploadDialog('success')
+    } catch {
+      setUploadDialog('failure')
+    }
   }
 
   function closeUploadDialog() {
@@ -134,13 +206,32 @@ export default function NanshaOpenMicProject() {
     if (isSuccess) setView('my')
   }
 
+  function openWork(entry) {
+    setSelectedEntry(entry)
+    setView('work-detail')
+  }
+
   function openVoteDialog() {
+    if (!selectedEntry) return
     setVoteDialog('vote')
   }
 
-  function confirmVote() {
-    setVoteDialog(nextVoteResult)
-    setNextVoteResult((current) => (current === 'success' ? 'failure' : 'success'))
+  async function confirmVote(quantity) {
+    if (!selectedEntry) return
+    try {
+      const result = await castVote(ACTIVITY_KEY, selectedEntry.id, { quantity, requestId: createRequestId() })
+      setVoteQuota((current) => ({ ...current, used: result.used, remaining: result.remaining, limit: result.limit }))
+      setEntries((current) => current.map((entry) => entry.id === selectedEntry.id ? { ...entry, voteCount: result.voteCount } : entry))
+      setSelectedEntry((current) => current ? { ...current, voteCount: result.voteCount } : current)
+      setVoteDialog('success')
+    } catch {
+      setVoteDialog('failure')
+    }
+  }
+
+  async function openMyVotes() {
+    try { setMyVotes((await getMyVotes(ACTIVITY_KEY)).list || []) } catch { setMyVotes([]) }
+    setView('my-votes')
   }
 
   function closeVoteDialog() {
@@ -149,22 +240,22 @@ export default function NanshaOpenMicProject() {
 
   return (
     <main className="nansha-open-mic-page">
-      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
-      {view === 'ranking' && activityPhase === 'vote' ? <RankingPage onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
-      {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage /> : null}
+      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={openWork} /> : null}
+      {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
+      {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
       {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
       {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
-      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
-      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
-      {view === 'work' ? <MyWorkPage onBack={goBack} onShowRules={openRules} /> : null}
+      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
+      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
+      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} onBack={goBack} onShowRules={openRules} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
           onShowRules={openRules}
-          selectedVideoName={selectedVideoName}
-          onSelectVideo={(event) => setSelectedVideoName(event.target.files?.[0]?.name || '')}
+          selectedVideoName={selectedVideo?.name || ''}
+          onSelectVideo={(event) => setSelectedVideo(event.target.files?.[0] || null)}
           onSubmit={completeUpload}
         />
       ) : null}
@@ -175,9 +266,9 @@ export default function NanshaOpenMicProject() {
       {view === 'my' && activityPhase !== 'vote' && activityPhase !== 'publicity' ? <BottomNavigation active="my" onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
-      {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
+      {voteDialog === 'vote' ? <VoteDialog remaining={voteQuota?.remaining ?? 0} onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
-      {posterOpen ? <VotePosterDialog onClose={() => setPosterOpen(false)} /> : null}
+      {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} onClose={() => setPosterOpen(false)} /> : null}
     </main>
   )
 }
@@ -249,7 +340,7 @@ function ReviewHome({ onShowRules, showReviewNotice = false }) {
   )
 }
 
-function VoteHome({ visualUrl, onShowRules, onRanking, onMy, onWork }) {
+function VoteHome({ visualUrl, entries, voteQuota, onShowRules, onRanking, onMy, onWork }) {
   return (
     <section className="nansha-vote-home">
       <header className="nansha-upload-home-header"><h1>首页</h1></header>
@@ -259,14 +350,14 @@ function VoteHome({ visualUrl, onShowRules, onRanking, onMy, onWork }) {
       </section>
       <section className="nansha-vote-stage">
         <section className="nansha-vote-heading">
-          <strong>今日剩余票数:10</strong>
+          <strong>今日剩余票数:{voteQuota?.remaining ?? 0}</strong>
           <p>请投出您宝贵的一票，选出优秀宣讲代表</p>
         </section>
         <section className="nansha-vote-work-panel" aria-label="参赛作品">
-          {VOTE_WORKS.map((work) => (
+          {entries.map((work) => (
             <article className="nansha-vote-work-card" key={work.id}>
-              <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.id}`} onClick={onWork}><CaretRightFilled /></button>
-              <p>作品名称：代用名<br />作者：代用名<br />票数：0000票</p>
+              <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.workName}`} onClick={() => onWork(work)} style={work.coverUrl ? { backgroundImage: `url(${work.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><CaretRightFilled /></button>
+              <p>作品名称：{work.workName}<br />作者：{work.authorName}<br />票数：{String(work.voteCount || 0).padStart(4, '0')}票</p>
             </article>
           ))}
         </section>
@@ -280,7 +371,7 @@ function VoteHome({ visualUrl, onShowRules, onRanking, onMy, onWork }) {
   )
 }
 
-function RankingPage({ onShowRules, onHome, onMy, onWork }) {
+function RankingPage({ entries, onShowRules, onHome, onMy, onWork }) {
   return (
     <section className="nansha-ranking-page">
       <header className="nansha-ranking-header"><h1>排行榜</h1></header>
@@ -291,7 +382,7 @@ function RankingPage({ onShowRules, onHome, onMy, onWork }) {
         <section className="nansha-ranking-board" aria-label="作品排行榜">
           <div className="nansha-ranking-columns"><span>排行</span><span>作品</span><span>票数</span></div>
           <div className="nansha-ranking-list">
-            {Array.from({ length: 7 }, (_, index) => <RankingRow key={index} rank={index + 1} onWork={onWork} />)}
+            {entries.map((entry, index) => <RankingRow key={entry.id} rank={index + 1} entry={entry} onWork={onWork} />)}
           </div>
           <p className="nansha-ranking-note">(截取前50/100排名)</p>
         </section>
@@ -310,7 +401,7 @@ function RankingPage({ onShowRules, onHome, onMy, onWork }) {
   )
 }
 
-function PublicityRankingPage() {
+function PublicityRankingPage({ entries }) {
   return (
     <section className="nansha-publicity-page">
       <header className="nansha-upload-home-header"><h1>首页</h1></header>
@@ -324,36 +415,36 @@ function PublicityRankingPage() {
       <section className="nansha-publicity-board" aria-label="投票结果排行榜">
         <div className="nansha-publicity-columns"><span>排行</span><span>作品</span><span>票数</span></div>
         <div className="nansha-publicity-list">
-          {Array.from({ length: 7 }, (_, index) => <PublicityRankingRow key={index} rank={index + 1} />)}
+          {entries.map((entry, index) => <PublicityRankingRow key={entry.id} rank={index + 1} entry={entry} />)}
         </div>
       </section>
     </section>
   )
 }
 
-function PublicityRankingRow({ rank }) {
+function PublicityRankingRow({ rank, entry }) {
   return (
     <div className={`nansha-publicity-row rank-${rank}`}>
       <span className="nansha-publicity-number">{rank}</span>
-      <p>作品名xxxx<br />作者xxxx</p>
-      <span className="nansha-publicity-votes">0000000票&nbsp; &gt;</span>
+      <p>{entry.workName}<br />{entry.authorName}</p>
+      <span className="nansha-publicity-votes">{String(entry.voteCount || 0).padStart(7, '0')}票&nbsp; &gt;</span>
     </div>
   )
 }
 
-function RankingRow({ rank, onWork }) {
+function RankingRow({ rank, entry, onWork }) {
   return (
-    <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={onWork} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork() }}>
+    <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={() => onWork(entry)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork(entry) }}>
       <span className="nansha-ranking-number">{rank}</span>
-      <p>作品名xxxx<br />作者xxxx</p>
-      <span className="nansha-ranking-votes">0000000票&nbsp; &gt;</span>
+      <p>{entry.workName}<br />{entry.authorName}</p>
+      <span className="nansha-ranking-votes">{String(entry.voteCount || 0).padStart(7, '0')}票&nbsp; &gt;</span>
     </div>
   )
 }
 
 function MyPage({ activityPhase, myEntry, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
   const isVotePhase = activityPhase === 'vote'
-  const workStatus = myEntry?.reviewStatus === 'approved' ? '审核通过' : '审核中'
+  const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
   const workVotes = String(myEntry?.voteCount ?? 0).padStart(6, '0')
   const remainingVotes = voteQuota?.remaining ?? 10
   return (
@@ -370,14 +461,14 @@ function MyPage({ activityPhase, myEntry, voteQuota, onBack, onShowRules, onOpen
           {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
           <MySummaryRow icon={<AuditOutlined />} title="我的投票" detail={`今日剩余票数：${remainingVotes}票`} onClick={onOpenVotes} />
         </section>
-      ) : (
+      ) : myEntry ? (
         <button className="nansha-my-work-row" type="button" onClick={onOpenWork}>
           <VideoCameraFilled className="nansha-work-icon" aria-hidden="true" />
           <b>我的作品</b>
-          <em>审核中</em>
+          <em>{workStatus}</em>
           <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
         </button>
-      )}
+      ) : null}
     </section>
   )
 }
@@ -387,14 +478,14 @@ function MySummaryRow({ icon, title, status, detail, onClick }) {
     <button className="nansha-my-summary-row" type="button" onClick={onClick}>
       <span className="nansha-summary-icon" aria-hidden="true">{icon}</span>
       <b className="nansha-summary-title">{title}</b>
-      {status ? <em className={`nansha-summary-status${status === '审核通过' ? ' is-approved' : ''}`}>{status}</em> : null}
+      {status ? <em className={`nansha-summary-status${status === '审核成功' ? ' is-approved' : ''}`}>{status}</em> : null}
       <span className="nansha-summary-detail">{detail}</span>
       <RightOutlined className="nansha-summary-chevron" aria-hidden="true" />
     </button>
   )
 }
 
-function MyVotesPage({ onBack, onShowRules, onHome, onRanking, onMy }) {
+function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy }) {
   return (
     <section className="nansha-my-votes-page">
       <PageHeader title="我的投票" onBack={onBack} />
@@ -403,7 +494,7 @@ function MyVotesPage({ onBack, onShowRules, onHome, onRanking, onMy }) {
         <ActivityRulesTrigger onClick={onShowRules} fixed />
         <section className="nansha-my-votes-board" aria-label="我的投票详情">
           <div className="nansha-my-votes-list">
-            {Array.from({ length: 7 }, (_, index) => <MyVoteRow key={index} />)}
+            {votes.map((vote) => <MyVoteRow key={vote.id} vote={vote} />)}
           </div>
         </section>
         <VoteBottomNavigation active="my" onHome={onHome} onRanking={onRanking} onMy={onMy} />
@@ -412,29 +503,26 @@ function MyVotesPage({ onBack, onShowRules, onHome, onRanking, onMy }) {
   )
 }
 
-function MyVoteRow() {
+function MyVoteRow({ vote }) {
   return (
     <button className="nansha-my-vote-row" type="button">
-      <span className="nansha-my-vote-title">投票名称</span>
-      <span className="nansha-my-vote-detail">画得票数：00000票</span>
+      <span className="nansha-my-vote-title">{vote.workName}</span>
+      <span className="nansha-my-vote-detail">本次投票：{vote.quantity}票</span>
       <RightOutlined className="nansha-my-vote-chevron" aria-hidden="true" />
     </button>
   )
 }
 
-function WorkDetailPage({ onBack, onShowRules, onVote, onShare }) {
+function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
   return (
     <section className="nansha-sub-page nansha-work-detail-page">
-      <PageHeader title="作品名" onBack={onBack} />
+      <PageHeader title={entry.workName} onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed label="投票说明" />
-      <div className="nansha-video-placeholder" aria-label="视频将在预览时播放">
-        <span>视频将在预览时播放</span>
-        <div className="nansha-video-controls"><CaretRightFilled aria-hidden="true" /><b>0:00 / 0:00</b><SoundOutlined aria-hidden="true" /><FullscreenOutlined aria-hidden="true" /></div>
-      </div>
+      <video className="nansha-video-placeholder" src={entry.videoUrl} poster={entry.coverUrl} controls playsInline preload="metadata" />
       <section className="nansha-work-detail-info">
-        <h1>我的作品</h1>
-        <p>作者</p>
-        <div className="nansha-detail-description">作品简介</div>
+        <h1>{entry.workName}</h1>
+        <p>{entry.authorName}</p>
+        <div className="nansha-detail-description">{entry.description}</div>
         <div className="nansha-detail-actions">
           <button className="nansha-detail-vote-button" type="button" onClick={onVote}>投票</button>
           <button className="nansha-detail-share-button" type="button" onClick={onShare}>拉票</button>
@@ -444,18 +532,18 @@ function WorkDetailPage({ onBack, onShowRules, onVote, onShare }) {
   )
 }
 
-function VotePosterDialog({ onClose }) {
-  const posterUrl = typeof window !== 'undefined' ? window.location.href : `${ASSET_BASE_URL}`
+function VotePosterDialog({ entry, onClose }) {
+  const posterUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?entryId=${encodeURIComponent(entry.id)}` : `${ASSET_BASE_URL}`
   return (
     <section className="nansha-poster-overlay" role="dialog" aria-modal="true" aria-label="拉票海报">
       <div className="nansha-poster-card" aria-label="长按图片保存海报">
         <img className="nansha-poster-background" src={POSTER_BACKGROUND_URL} alt="南沙新声全民开麦拉票海报背景" draggable="false" />
         <span className="nansha-poster-avatar" aria-hidden="true"><UserOutlined /></span>
         <div className="nansha-poster-work-info">
-          <strong>作品</strong>
-          <span>作者</span>
+          <strong>{entry.workName}</strong>
+          <span>{entry.authorName}</span>
         </div>
-        <div className="nansha-poster-video-cover" aria-label="作品封面" />
+        <div className="nansha-poster-video-cover" aria-label="作品封面" style={entry.coverUrl ? { backgroundImage: `url(${entry.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} />
         <QRCodeCanvas className="nansha-poster-qrcode" value={posterUrl} size={166} includeMargin={false} />
       </div>
       <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
@@ -463,40 +551,54 @@ function VotePosterDialog({ onClose }) {
   )
 }
 
-function MyWorkPage({ onBack, onShowRules }) {
+function MyWorkPage({ entry, onBack, onShowRules }) {
   return (
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <div className="nansha-video-placeholder" aria-label="视频将在预览时播放">
-        <span>视频将在预览时播放</span>
-        <div className="nansha-video-controls"><CaretRightFilled aria-hidden="true" /><b>0:00 / 0:00</b><SoundOutlined aria-hidden="true" /><FullscreenOutlined aria-hidden="true" /></div>
-      </div>
+      <video className="nansha-video-placeholder" src={entry.videoUrl} poster={entry.coverUrl} controls playsInline preload="metadata" />
       <section className="nansha-work-info">
-        <h1>我的作品</h1>
-        <p className="nansha-work-status">作品状态：审核中</p>
-        <p>作者</p>
-        <div className="nansha-work-description">作品简介</div>
+        <h1>{entry.workName}</h1>
+        <p className="nansha-work-status">作品状态：{entry.reviewStatus === 'published' ? '审核成功' : entry.reviewStatus === 'rejected' ? '未通过' : '审核中'}</p>
+        <p>{entry.authorName}</p>
+        <div className="nansha-work-description">{entry.description}</div>
       </section>
     </section>
   )
 }
 
 function UploadPage({ onBack, onShowRules, selectedVideoName, onSelectVideo, onSubmit }) {
+  const [submitting, setSubmitting] = useState(false)
+  async function submit(event) {
+    event.preventDefault()
+    if (submitting) return
+    const data = new FormData(event.currentTarget)
+    setSubmitting(true)
+    try {
+      await onSubmit({
+        workName: String(data.get('workName') || ''),
+        authorName: String(data.get('authorName') || ''),
+        phone: String(data.get('phone') || ''),
+        description: String(data.get('description') || ''),
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
   return (
     <section className="nansha-sub-page nansha-upload-page">
       <PageHeader title="上传视频" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <form className="nansha-upload-form" onSubmit={(event) => { event.preventDefault(); onSubmit() }}>
+      <form className="nansha-upload-form" onSubmit={submit}>
         <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}`}>
           <input type="file" accept="video/*" onChange={onSelectVideo} />
           <b>{selectedVideoName || '+'}</b>
         </label>
-        <input aria-label="作品名称" placeholder="请输入作品名称" />
-        <input aria-label="作者名称" placeholder="请输入作者名称" />
-        <input aria-label="手机号码" inputMode="tel" placeholder="请输入手机号码" />
-        <textarea aria-label="作品简介" placeholder="请输入作品简介" />
-        <button type="submit">点击确认上传</button>
+        <input name="workName" aria-label="作品名称" placeholder="请输入作品名称" required />
+        <input name="authorName" aria-label="作者名称" placeholder="请输入作者名称" required />
+        <input name="phone" aria-label="手机号码" inputMode="tel" pattern="^1[3-9]\\d{9}$" placeholder="请输入手机号码" required />
+        <textarea name="description" aria-label="作品简介" placeholder="请输入作品简介" required />
+        <button type="submit" disabled={submitting}>{submitting ? '上传中…' : '点击确认上传'}</button>
       </form>
     </section>
   )
@@ -587,7 +689,9 @@ function UploadResultDialog({ status, onConfirm }) {
   )
 }
 
-function VoteDialog({ onConfirm, onClose }) {
+function VoteDialog({ remaining, onConfirm, onClose }) {
+  const [quantity, setQuantity] = useState(1)
+  const max = Math.max(1, Number(remaining || 0))
   return (
     <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label="投票">
       <div className="nansha-vote-dialog-card">
@@ -598,15 +702,15 @@ function VoteDialog({ onConfirm, onClose }) {
         </svg>
         <div className="nansha-vote-dialog-content">
           <p className="nansha-vote-quota-label">当前拥有每日票数:</p>
-          <strong className="nansha-vote-quota-value">10票</strong>
+          <strong className="nansha-vote-quota-value">{remaining}票</strong>
           <label className="nansha-vote-select-label" htmlFor="nansha-vote-count">当前视频投出票数</label>
           <div className="nansha-vote-select-wrap">
-            <select id="nansha-vote-count" defaultValue="1" aria-label="当前视频投出票数">
-              {Array.from({ length: 10 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
+            <select id="nansha-vote-count" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} aria-label="当前视频投出票数">
+              {Array.from({ length: max }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
             </select>
             <span aria-hidden="true">⌄</span>
           </div>
-          <button className="nansha-vote-confirm-button" type="button" onClick={onConfirm}>确定投票</button>
+          <button className="nansha-vote-confirm-button" type="button" disabled={!remaining} onClick={() => onConfirm(quantity)}>确定投票</button>
         </div>
       </div>
     </section>

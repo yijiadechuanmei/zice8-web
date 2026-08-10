@@ -185,10 +185,10 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     }
   }, [activity.activityKey])
 
-  const handleReviewNanshaEntry = useCallback(async (row, status) => {
+  const handleReviewNanshaEntry = useCallback(async (row, action) => {
     if (!row?.id) return
     let reason = ''
-    if (status === 'rejected') {
+    if (action === 'reject') {
       const input = window.prompt('请输入驳回原因（必填）')
       if (input === null) return
       reason = input.trim()
@@ -197,20 +197,20 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         return
       }
     }
-    setReviewingNanshaEntryId(`${row.id}:${status}`)
+    setReviewingNanshaEntryId(`${row.id}:${action}`)
     try {
-      const result = await reviewNanshaOpenMicEntry(activity.activityKey, row.id, { status, reason })
+      const result = await reviewNanshaOpenMicEntry(activity.activityKey, row.id, { action, reason })
       const entry = result?.entry || {}
       setData((current) => ({
         ...current,
         rows: current.rows.map((item) => item.id === row.id ? {
           ...item,
-          reviewStatus: entry.reviewStatus || status,
+          reviewStatus: entry.reviewStatus || row.reviewStatus,
           rejectReason: entry.rejectReason || '',
           reviewedAt: entry.reviewedAt || new Date().toISOString(),
         } : item),
       }))
-      message.success(status === 'approved' ? '作品审核通过' : '作品已驳回')
+      message.success({ feature: '已精选作品，等待终审上架', reject: '作品已标记为不通过', publish: '作品已上架到前端', withdraw: '已撤回精选，作品回到初审' }[action])
     } catch (err) {
       message.error(err.message || '审核失败')
     } finally {
@@ -431,7 +431,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         ),
       })
     }
-    if (activity.type === 'nansha_open_mic' && activeViewKey === 'nansha_open_mic_entries') {
+    if (activity.type === 'nansha_open_mic' && ['nansha_open_mic_entries', 'nansha_open_mic_featured_entries', 'nansha_open_mic_published_entries'].includes(activeViewKey)) {
       const videoColumn = columns.find((column) => column.key === 'videoUrl' || column.dataIndex === 'videoUrl')
       if (videoColumn) {
         videoColumn.width = 260
@@ -443,41 +443,28 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       if (statusColumn) {
         statusColumn.render = (value) => {
           const statusMap = {
-            pending: { color: 'orange', text: '待审核' },
-            approved: { color: 'green', text: '已通过' },
-            rejected: { color: 'red', text: '已驳回' },
+            pending: { color: 'orange', text: '待初审' },
+            featured: { color: 'blue', text: '已精选，待终审' },
+            published: { color: 'green', text: '已上架' },
+            rejected: { color: 'red', text: '初审不通过' },
           }
           const item = statusMap[value] || { color: 'default', text: value || '-' }
           return <Tag color={item.color}>{item.text}</Tag>
         }
       }
-      columns.push({
-        title: '审核操作',
-        key: 'nanshaReviewActions',
-        fixed: 'right',
-        width: 160,
-        render: (_, row) => (
-          <Space size={6} wrap>
-            <Button
-              size="small"
-              type={row.reviewStatus === 'approved' ? 'default' : 'primary'}
-              loading={reviewingNanshaEntryId === `${row.id}:approved`}
-              disabled={Boolean(reviewingNanshaEntryId) || row.reviewStatus === 'approved'}
-              onClick={() => handleReviewNanshaEntry(row, 'approved')}
-            >
-              通过
-            </Button>
-            <Button
-              size="small"
-              danger
-              loading={reviewingNanshaEntryId === `${row.id}:rejected`}
-              disabled={Boolean(reviewingNanshaEntryId) || row.reviewStatus === 'rejected'}
-              onClick={() => handleReviewNanshaEntry(row, 'rejected')}
-            >
-              驳回
-            </Button>
-          </Space>
-        ),
+      if (activeViewKey === 'nansha_open_mic_entries') columns.push({
+        title: '初审操作', key: 'nanshaReviewActions', fixed: 'right', width: 180,
+        render: (_, row) => <Space size={6} wrap>
+          <Button size="small" type="primary" loading={reviewingNanshaEntryId === `${row.id}:feature`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'feature')}>精选</Button>
+          <Button size="small" danger loading={reviewingNanshaEntryId === `${row.id}:reject`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'reject')}>不通过</Button>
+        </Space>,
+      })
+      if (activeViewKey === 'nansha_open_mic_featured_entries') columns.push({
+        title: '终审操作', key: 'nanshaReviewActions', fixed: 'right', width: 180,
+        render: (_, row) => <Space size={6} wrap>
+          <Button size="small" type="primary" loading={reviewingNanshaEntryId === `${row.id}:publish`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'publish')}>上架</Button>
+          <Button size="small" loading={reviewingNanshaEntryId === `${row.id}:withdraw`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'withdraw')}>撤回</Button>
+        </Space>,
       })
     }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_recordings') {
@@ -787,23 +774,6 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
                     }}
                     style={{ width: 180 }}
                     options={getNanhaiStatusOptions(activeViewKey)}
-                  />
-                ) : null}
-                {activity.type === 'nansha_open_mic' && activeViewKey === 'nansha_open_mic_entries' ? (
-                  <Select
-                    allowClear
-                    placeholder="筛选审核状态"
-                    value={status || undefined}
-                    onChange={(value) => {
-                      setStatus(value || '')
-                      setPage(1)
-                    }}
-                    style={{ width: 180 }}
-                    options={[
-                      { label: '待审核', value: 'pending' },
-                      { label: '已通过', value: 'approved' },
-                      { label: '已驳回', value: 'rejected' },
-                    ]}
                   />
                 ) : null}
               </Space>
