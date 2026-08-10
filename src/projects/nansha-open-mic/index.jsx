@@ -19,6 +19,7 @@ const ACTIVITY_TYPE = 'nansha_open_mic'
 const ACTIVITY_KEY = 'nansha_new_voice_2026'
 const ASSET_BASE_URL = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`
 const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260811`
+const REVIEW_MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1-1.png?v=20260811`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
 const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260811-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
@@ -38,7 +39,7 @@ export default function NanshaOpenMicProject() {
   const [nextVoteResult, setNextVoteResult] = useState('success')
   const [myEntry, setMyEntry] = useState(null)
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
-  const homeView = activityPhase === 'upload' ? 'upload-home' : 'vote-home'
+  const homeView = activityPhase === 'vote' ? 'vote-home' : 'upload-home'
 
   useEffect(() => {
     let alive = true
@@ -50,7 +51,7 @@ export default function NanshaOpenMicProject() {
         const publicData = publicResult.status === 'fulfilled' ? publicResult.value : null
         const bootstrapData = bootstrapResult.status === 'fulfilled' ? bootstrapResult.value : null
         const phase = publicData?.phase || bootstrapData?.phase
-        if (!alive || (phase !== 'upload' && phase !== 'vote')) return
+        if (!alive || !['upload', 'vote', 'closed'].includes(phase)) return
         setActivityPhase(phase)
         if (bootstrapData) {
           setMyEntry(bootstrapData.myEntry || null)
@@ -60,12 +61,12 @@ export default function NanshaOpenMicProject() {
         if (phaseChanged) {
           setUploadDialog('')
           setVoteDialog('')
-          setView((current) => (current === 'rules' ? current : (phase === 'upload' ? 'upload-home' : 'vote-home')))
+          setView((current) => (current === 'rules' ? current : (phase === 'vote' ? 'vote-home' : 'upload-home')))
         } else {
           setView((current) => {
             if (current === 'rules') return current
-            const currentIsWrongHome = phase === 'upload' ? current === 'vote-home' || current === 'ranking' : current === 'upload-home'
-            return currentIsWrongHome ? (phase === 'upload' ? 'upload-home' : 'vote-home') : current
+            const currentIsWrongHome = phase === 'vote' ? current === 'upload-home' || current === 'ranking' : current === 'vote-home' || current === 'ranking'
+            return currentIsWrongHome ? (phase === 'vote' ? 'vote-home' : 'upload-home') : current
           })
         }
         previousPhase = phase
@@ -134,9 +135,11 @@ export default function NanshaOpenMicProject() {
 
   return (
     <main className="nansha-open-mic-page">
-      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
+      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
       {view === 'ranking' && activityPhase === 'vote' ? <RankingPage onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
-      {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
+      {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
+      {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
+      {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} /> : null}
@@ -152,9 +155,9 @@ export default function NanshaOpenMicProject() {
       ) : null}
       {view === 'rules' ? <RulesPage onBack={goBack} /> : null}
 
-      {view === 'upload-home' && activityPhase === 'upload' ? <BottomNavigation onHome={() => setView('upload-home')} onMy={() => setView('my')} /> : null}
+      {view === 'upload-home' && activityPhase !== 'vote' ? <BottomNavigation active="home" onHome={() => setView('upload-home')} onMy={() => setView('my')} /> : null}
       {view === 'my' && activityPhase === 'vote' ? <VoteBottomNavigation active="my" onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
+      {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation active="my" onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
@@ -213,25 +216,44 @@ function UploadHome({ onShowRules, onUpload }) {
   )
 }
 
-function VoteHome({ onShowRules, onRanking, onMy, onWork }) {
+function ReviewHome({ onShowRules, showReviewNotice = false }) {
   return (
-    <section className="nansha-vote-home">
-      <section className="nansha-vote-visual-wrap">
-        <img className="nansha-vote-main-visual" src={MAIN_VISUAL_URL} alt="南沙新声 全民开麦" />
+    <section className="nansha-status-home">
+      <header className="nansha-upload-home-header"><h1>首页</h1></header>
+      <section className="nansha-upload-hero">
+        <img className="nansha-main-visual" src={REVIEW_MAIN_VISUAL_URL} alt="南沙新声 全民开麦" />
         <ActivityRulesTrigger onClick={onShowRules} />
       </section>
-      <section className="nansha-vote-heading">
-        <h1>南沙新声 · 全民开麦</h1>
-        <p>为你心仪的作品投出宝贵的一票吧</p>
-        <strong>今日剩余票数:10</strong>
+      <section className="nansha-status-countdown" aria-label="报名截止">
+        <div className="nansha-countdown-label">报名已截止</div>
+        <strong>0天 00:00:00</strong>
       </section>
-      <section className="nansha-vote-work-panel" aria-label="参赛作品">
-        {VOTE_WORKS.map((work) => (
-          <article className="nansha-vote-work-card" key={work.id}>
-            <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.id}`} onClick={onWork}><CaretRightFilled /></button>
-            <p>作品名称：代用名<br />作者：代用名<br />票数：0000票</p>
-          </article>
-        ))}
+      {showReviewNotice ? <div className="nansha-status-review-notice">作品审核中<br />敬请期待</div> : null}
+    </section>
+  )
+}
+
+function VoteHome({ visualUrl, onShowRules, onRanking, onMy, onWork }) {
+  return (
+    <section className="nansha-vote-home">
+      <header className="nansha-upload-home-header"><h1>首页</h1></header>
+      <section className="nansha-vote-visual-wrap">
+        <img className="nansha-vote-main-visual" src={visualUrl} alt="南沙新声 全民开麦" />
+        <ActivityRulesTrigger onClick={onShowRules} label="投票说明" />
+      </section>
+      <section className="nansha-vote-stage">
+        <section className="nansha-vote-heading">
+          <strong>今日剩余票数:10</strong>
+          <p>请投出您宝贵的一票，选出优秀宣讲代表</p>
+        </section>
+        <section className="nansha-vote-work-panel" aria-label="参赛作品">
+          {VOTE_WORKS.map((work) => (
+            <article className="nansha-vote-work-card" key={work.id}>
+              <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.id}`} onClick={onWork}><CaretRightFilled /></button>
+              <p>作品名称：代用名<br />作者：代用名<br />票数：0000票</p>
+            </article>
+          ))}
+        </section>
       </section>
       <nav className="nansha-vote-bottom-nav" aria-label="投票阶段底部导航">
         <button className="is-active" type="button"><AudioOutlined aria-hidden="true" /><span>首页</span></button>
@@ -547,11 +569,11 @@ function VoteBottomNavigation({ active, onHome, onRanking, onMy }) {
   )
 }
 
-function BottomNavigation({ onHome, onMy }) {
+function BottomNavigation({ active, onHome, onMy }) {
   return (
     <nav className="nansha-bottom-nav" aria-label="底部导航">
-      <button className="is-active" type="button" onClick={onHome}><AudioOutlined className="nansha-nav-icon" aria-hidden="true" /><span>首页</span></button>
-      <button type="button" onClick={onMy}><UserOutlined className="nansha-nav-icon" aria-hidden="true" /><span>我的</span></button>
+      <button className={active === 'home' ? 'is-active' : ''} type="button" onClick={onHome}><AudioOutlined className="nansha-nav-icon" aria-hidden="true" /><span>首页</span></button>
+      <button className={active === 'my' ? 'is-active' : ''} type="button" onClick={onMy}><UserOutlined className="nansha-nav-icon" aria-hidden="true" /><span>我的</span></button>
     </nav>
   )
 }

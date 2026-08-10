@@ -197,6 +197,127 @@
   line-height: 1.2;
 }
 
+.nansha-status-home {
+  width: min(100%, 750px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-bottom: calc(var(--nansha-unit) * 14.2 + env(safe-area-inset-bottom));
+  background: #fff;
+}
+
+.nansha-status-home .nansha-upload-hero {
+  width: 95.47%;
+}
+
+.nansha-status-countdown {
+  margin-top: calc(var(--nansha-unit) * 14.93);
+  text-align: center;
+}
+
+.nansha-status-countdown .nansha-countdown-label {
+  width: 43%;
+  height: calc(var(--nansha-unit) * 5.87);
+  border-radius: calc(var(--nansha-unit) * 2.13);
+  font-weight: 700;
+}
+
+.nansha-status-countdown strong {
+  display: block;
+  margin-top: calc(var(--nansha-unit) * 3.2);
+  color: #050505;
+  font: 800 calc(var(--nansha-unit) * 4.8) / 1 Arial, sans-serif;
+}
+
+.nansha-status-review-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 91.47%;
+  min-height: calc(var(--nansha-unit) * 17.33);
+  margin: calc(var(--nansha-unit) * 7.47) auto 0;
+  border-radius: calc(var(--nansha-unit) * 2.4);
+  background: #173b98;
+  color: #fff;
+  text-align: center;
+  font: 400 calc(var(--nansha-unit) * 4.27) / 1.28 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 投票阶段首页 */
+.nansha-vote-home {
+  width: min(100%, 750px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 0 0 calc(var(--nansha-unit) * 14.2 + env(safe-area-inset-bottom));
+  background: #fff;
+}
+
+.nansha-vote-visual-wrap {
+  width: 95.47%;
+  margin: calc(var(--nansha-unit) * 2.13) auto 0;
+}
+
+.nansha-vote-visual-wrap .nansha-rules-trigger {
+  top: 29.2%;
+  right: calc(var(--nansha-unit) * -2);
+}
+
+.nansha-vote-stage {
+  width: 94.93%;
+  min-height: calc(100vh - (var(--nansha-unit) * 67));
+  margin: calc(var(--nansha-unit) * 7.6) auto 0;
+  padding: calc(var(--nansha-unit) * 11.47) 0 calc(var(--nansha-unit) * 15.47);
+  background: #173b98;
+}
+
+.nansha-vote-heading {
+  margin: 0;
+  text-align: center;
+}
+
+.nansha-vote-heading h1 { display: none; }
+
+.nansha-vote-heading strong {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42.67%;
+  height: calc(var(--nansha-unit) * 6.93);
+  margin: 0 auto;
+  border-radius: calc(var(--nansha-unit) * 2.4);
+  background: #df0000;
+  color: #fff;
+  font: 700 calc(var(--nansha-unit) * 4.27) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-vote-heading p {
+  margin: calc(var(--nansha-unit) * 3.47) 0 0;
+  color: #fff;
+  font: 700 calc(var(--nansha-unit) * 3.2) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-vote-work-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: calc(var(--nansha-unit) * 6.53);
+  row-gap: calc(var(--nansha-unit) * 2.13);
+  width: 100%;
+  margin: calc(var(--nansha-unit) * 14.4) 0 0;
+  padding: 0 calc(var(--nansha-unit) * 8.93);
+  border: 0;
+  background: transparent;
+}
+
+.nansha-vote-video-placeholder {
+  background: #f5f3f3;
+}
+
+.nansha-vote-work-card p {
+  color: #fff;
+  font-size: calc(var(--nansha-unit) * 2.8);
+}
+
 .nansha-main-visual-wrap { position: relative; width: 95.47%; margin-left: 2.53%; }
 .nansha-main-visual, .nansha-title-visual { display: block; height: auto; }
 .nansha-main-visual { width: 100%; }
@@ -717,3 +838,38 @@
 .nansha-vote-result-card.is-success { width: min(56.8vw, 426px); aspect-ratio: 1; }
 .nansha-vote-result-card.is-failure { width: min(73.47vw, 551px); aspect-ratio: 551 / 361; }
 .nansha-vote-result-image { display: block; width: 100%; height: 100%; object-fit: fill; }
+
+/* 投票首页覆盖默认白底卡片样式 */
+.nansha-vote-home {
+  padding: 0 0 calc(var(--nansha-unit) * 14.2 + env(safe-area-inset-bottom));
+}
+
+.nansha-vote-visual-wrap {
+  margin: calc(var(--nansha-unit) * 2.13) auto 0;
+}
+
+.nansha-vote-heading {
+  margin: 0;
+}
+
+.nansha-vote-heading h1 { display: none; }
+.nansha-vote-heading strong {
+  margin: 0 auto;
+  background: #df0000;
+}
+.nansha-vote-heading p {
+  margin: calc(var(--nansha-unit) * 3.47) 0 0;
+  color: #fff;
+  font: 700 calc(var(--nansha-unit) * 3.2) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-vote-work-panel {
+  width: 100%;
+  margin: calc(var(--nansha-unit) * 14.4) 0 0;
+  padding: 0 calc(var(--nansha-unit) * 8.93);
+  border: 0;
+  background: transparent;
+}
+
+.nansha-vote-video-placeholder { background: #f5f3f3; }
+.nansha-vote-work-card p { color: #fff; }
