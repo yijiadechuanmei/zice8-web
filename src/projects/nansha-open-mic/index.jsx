@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
 import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, uploadFileToOss } from './api'
+import { captureVideoFirstFrame } from './video-cover'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -29,44 +30,6 @@ const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
 function createRequestId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   return `nansha-${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
-
-function captureVideoFirstFrame(file) {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video')
-    const objectUrl = URL.createObjectURL(file)
-    const cleanup = () => {
-      URL.revokeObjectURL(objectUrl)
-      video.removeAttribute('src')
-      video.load()
-    }
-    video.muted = true
-    video.playsInline = true
-    video.preload = 'metadata'
-    video.onloadeddata = () => {
-      const target = Math.min(Math.max(video.duration || 0, 0.05), 0.12)
-      if (target > 0 && Math.abs(video.currentTime - target) > 0.01) video.currentTime = target
-      else draw()
-    }
-    video.onseeked = draw
-    video.onerror = () => {
-      cleanup()
-      reject(new Error('无法读取视频首帧，请更换 MP4、MOV 或 WebM 视频'))
-    }
-    function draw() {
-      if (!video.videoWidth || !video.videoHeight) return
-      const canvas = document.createElement('canvas')
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
-      canvas.toBlob((blob) => {
-        cleanup()
-        if (!blob) return reject(new Error('视频首帧生成失败，请重新选择视频'))
-        resolve(new File([blob], `${file.name.replace(/\.[^.]+$/, '') || 'cover'}-cover.jpg`, { type: 'image/jpeg' }))
-      }, 'image/jpeg', 0.9)
-    }
-    video.src = objectUrl
-  })
 }
 
 export default function NanshaOpenMicProject() {
@@ -195,7 +158,8 @@ export default function NanshaOpenMicProject() {
     setVideoError('')
     setCoverGenerating(true)
     try {
-      const coverFile = await captureVideoFirstFrame(file)
+      const coverBlob = await captureVideoFirstFrame(file)
+      const coverFile = new File([coverBlob], `${file.name.replace(/\.[^.]+$/, '') || 'cover'}-cover.jpg`, { type: 'image/jpeg' })
       setVideoCoverFile(coverFile)
       setVideoCoverPreview(URL.createObjectURL(coverFile))
     } catch (error) {

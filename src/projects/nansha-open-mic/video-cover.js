@@ -6,8 +6,10 @@ export function captureVideoFirstFrame(file) {
     const video = document.createElement('video')
     const objectUrl = URL.createObjectURL(file)
     let settled = false
+    const timeoutId = window.setTimeout(fail, 8000)
 
     function cleanup() {
+      window.clearTimeout(timeoutId)
       video.removeAttribute('src')
       video.load()
       URL.revokeObjectURL(objectUrl)
@@ -21,7 +23,7 @@ export function captureVideoFirstFrame(file) {
     }
 
     function drawFrame() {
-      if (settled || !video.videoWidth || !video.videoHeight) return fail()
+      if (settled || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !video.videoWidth || !video.videoHeight) return
       const scale = Math.min(
         COVER_MAX_WIDTH / video.videoWidth,
         COVER_MAX_HEIGHT / video.videoHeight,
@@ -45,17 +47,12 @@ export function captureVideoFirstFrame(file) {
     video.muted = true
     video.playsInline = true
     video.onerror = fail
-    video.onloadedmetadata = () => {
-      const target = Number.isFinite(video.duration) && video.duration > 0
-        ? Math.min(0.01, video.duration / 2)
-        : 0
-      if (target > 0) {
-        video.onseeked = drawFrame
-        video.currentTime = target
-      } else {
-        video.onloadeddata = drawFrame
-      }
-    }
+    // Draw at time 0 as soon as a decodable frame is available. Seeking to a
+    // later timestamp stalls on several mobile browser codecs, while the
+    // loaded-data/can-play events are reliable for a true first-frame cover.
+    video.onloadedmetadata = drawFrame
+    video.onloadeddata = drawFrame
+    video.oncanplay = drawFrame
     video.src = objectUrl
     video.load()
   })
