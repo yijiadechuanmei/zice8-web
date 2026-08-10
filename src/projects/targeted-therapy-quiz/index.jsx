@@ -206,7 +206,7 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
-    setCategoryDialogOpen(false)
+    setCategoryDialogOpen(true)
   }
 
   function returnHome() {
@@ -257,7 +257,7 @@ function HomePage({ onStart }) {
   return (
     <section className="ttq-home" aria-label="首页">
       <button className="ttq-primary-button ttq-home-start" type="button" onClick={onStart}>
-        <span>开始测试</span>
+        <span>开始闯关</span>
       </button>
     </section>
   )
@@ -266,51 +266,100 @@ function HomePage({ onStart }) {
 function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting }) {
   return (
     <section className="ttq-question-page" aria-label={`${question.category}答题页`}>
-      <p className="ttq-question-category">{question.category} · 随机题</p>
-      <h1>{question.title}</h1>
-      <div className="ttq-options" role="radiogroup" aria-label="答案选项">
-        {question.options.map((option) => {
-          const selected = option.id === selectedOption
-          return (
-            <button
-              className={`ttq-option${selected ? ' is-selected' : ''}`}
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => onSelect(option.id)}
-            >
-              <span className="ttq-option-letter">{option.id}</span>
-              <span className="ttq-option-text">{option.text}</span>
-              {selected ? <CheckOutlined className="ttq-option-check" /> : null}
-            </button>
-          )
-        })}
+      <div className="ttq-question-decoration ttq-question-decoration--one" aria-hidden="true" />
+      <div className="ttq-question-decoration ttq-question-decoration--two" aria-hidden="true" />
+      <div className="ttq-question-decoration ttq-question-decoration--three" aria-hidden="true" />
+      <div className="ttq-question-shell">
+        <header className="ttq-challenge-bar">
+          <div className="ttq-challenge-label">
+            <SparkIcon />
+            <span>知识闯关</span>
+            <strong>{question.category}关</strong>
+          </div>
+          <div className="ttq-progress-dots" aria-label="闯关进度：正在回答问题">
+            <span className="is-done" aria-hidden="true"><CheckOutlined /></span>
+            <i className="is-done" />
+            <span className="is-current" aria-hidden="true">2</span>
+            <i />
+            <span aria-hidden="true">3</span>
+          </div>
+        </header>
+
+        <article className="ttq-question-card">
+          <div className="ttq-question-heading">
+            <span className="ttq-question-number" aria-hidden="true">Q</span>
+            <div>
+              <p className="ttq-question-category">随机挑战 · 请选择正确答案</p>
+              <h1>{question.title}</h1>
+            </div>
+          </div>
+          <div className="ttq-options" role="radiogroup" aria-label="答案选项">
+            {question.options.map((option, index) => {
+              const selected = option.id === selectedOption
+              return (
+                <button
+                  className={`ttq-option${selected ? ' is-selected' : ''}`}
+                  key={option.id}
+                  style={{ '--ttq-option-index': index }}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => onSelect(option.id)}
+                >
+                  <span className="ttq-option-letter">{option.id}</span>
+                  <span className="ttq-option-text">{option.text}</span>
+                  <span className="ttq-option-status" aria-hidden="true">
+                    {selected ? <CheckOutlined /> : <ArrowIcon />}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </article>
+
+        <button className="ttq-primary-button ttq-submit-button" type="button" onClick={onSubmit} disabled={!selectedOption || submitting}>
+          <span>{submitting ? '正在判定...' : '确认闯关'}</span>
+          {!submitting ? <ArrowIcon /> : null}
+        </button>
+        <p className="ttq-submit-tip">选好答案，向闯关终点出发</p>
       </div>
-      <button className="ttq-primary-button ttq-submit-button" type="button" onClick={onSubmit} disabled={!selectedOption || submitting}>
-        <span>{submitting ? '提交中...' : '提交答案'}</span>
-      </button>
     </section>
   )
 }
 
 function CategoryDialog({ categories, error, loading, onChoose, onClose }) {
+  const dialogRef = useRef(null)
+
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
+
   return (
-    <div className="ttq-overlay" role="dialog" aria-modal="true" aria-labelledby="ttq-category-title">
-      <section className="ttq-category-dialog">
+    <div className="ttq-overlay" role="dialog" aria-modal="true" aria-labelledby="ttq-category-title" aria-describedby="ttq-category-description">
+      <section ref={dialogRef} className="ttq-category-dialog" tabIndex={-1}>
         <button className="ttq-close-button" type="button" onClick={onClose} aria-label="关闭"><CloseOutlined /></button>
-        <h2 id="ttq-category-title">请选择类别</h2>
+        <p className="ttq-category-eyebrow">准备出发</p>
+        <h2 id="ttq-category-title">请选择您的关卡</h2>
         <span className="ttq-title-decoration" aria-hidden="true" />
+        <p className="ttq-category-description" id="ttq-category-description">每个关卡都会随机出现一道知识题</p>
         <div className="ttq-category-list">
-          {categories.map((category) => (
-            <button className="ttq-category-card" key={category} type="button" onClick={() => onChoose(category)} disabled={loading}>
+          {categories.map((category, index) => (
+            <button
+              className="ttq-category-card"
+              key={category}
+              style={{ '--ttq-card-index': index }}
+              type="button"
+              onClick={() => onChoose(category)}
+              disabled={loading}
+            >
+              <span className="ttq-level-number">第 {index + 1} 关</span>
               <CategoryIcon type={CATEGORY_ICONS[category] || 'lung'} />
               <strong>{category}</strong>
-              <i />
+              <small>{loading ? '正在开启...' : '点击开启挑战'}</small>
             </button>
           ))}
         </div>
-        {error ? <p className="ttq-category-error">{error}</p> : null}
+        {error ? <p className="ttq-category-error" role="alert">{error}</p> : null}
       </section>
     </div>
   )
@@ -318,18 +367,43 @@ function CategoryDialog({ categories, error, loading, onChoose, onClose }) {
 
 function ResultDialog({ result, onClose, onRetest }) {
   const correct = result === 'correct'
+  const actionRef = useRef(null)
+
+  useEffect(() => {
+    actionRef.current?.focus()
+  }, [])
+
   return (
     <div className="ttq-overlay ttq-result-overlay" role="dialog" aria-modal="true" aria-labelledby="ttq-result-title">
-      <section className={`ttq-result-dialog ${correct ? 'is-correct' : 'is-incorrect'}`}>
+      <section className={`ttq-result-dialog ${correct ? 'is-correct' : 'is-incorrect'}`} aria-live="polite">
         <button className="ttq-close-button" type="button" onClick={onClose} aria-label="关闭"><CloseOutlined /></button>
+        <span className="ttq-result-badge" aria-hidden="true">{correct ? '通关' : '加油'}</span>
         <img className="ttq-result-face" src={correct ? smileFace : sadFace} alt={correct ? '笑脸' : '苦脸'} />
-        <h2 id="ttq-result-title">{correct ? '回答正确！' : '回答错误'}</h2>
-        <p>{correct ? '太棒了，继续加油哦！' : '别灰心，再思考一下哦！'}</p>
-        <button className="ttq-primary-button ttq-retest-button" type="button" onClick={onRetest}>
-          <span>再测一次</span>
+        <h2 id="ttq-result-title">{correct ? '恭喜闯关成功！' : '差一点就成功啦'}</h2>
+        <p>{correct ? '太棒了，知识能量已点亮！' : '别灰心，换个关卡再挑战吧！'}</p>
+        <button ref={actionRef} className="ttq-primary-button ttq-retest-button" type="button" onClick={onRetest}>
+          <span>{correct ? '再闯一关' : '重新挑战'}</span>
+          <ArrowIcon />
         </button>
       </section>
     </div>
+  )
+}
+
+function SparkIcon() {
+  return (
+    <svg className="ttq-spark-icon" viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M24 4c1.8 10.7 7.3 16.2 18 18-10.7 1.8-16.2 7.3-18 18-1.8-10.7-7.3-16.2-18-18C16.7 20.2 22.2 14.7 24 4Z" />
+      <path d="M39 4c.5 3.1 2.1 4.7 5 5.2-2.9.5-4.5 2.1-5 5.2-.5-3.1-2.1-4.7-5-5.2 2.9-.5 4.5-2.1 5-5.2Z" />
+    </svg>
+  )
+}
+
+function ArrowIcon() {
+  return (
+    <svg className="ttq-arrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m9 5 7 7-7 7" />
+    </svg>
   )
 }
 
