@@ -12,7 +12,6 @@ import {
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
 import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, uploadFileToOss } from './api'
-import { captureVideoFirstFrame } from './video-cover'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -32,12 +31,31 @@ function createRequestId() {
   return `nansha-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+function buildVideoSnapshotUrl(videoUrl) {
+  return `${videoUrl}?x-oss-process=video/snapshot,t_1000,f_jpg`
+}
+
+function waitForImage(url, timeoutMs = 30000) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    const timer = window.setTimeout(() => reject(new Error('视频封面生成超时，请重新上传')), timeoutMs)
+    image.onload = () => {
+      window.clearTimeout(timer)
+      resolve(url)
+    }
+    image.onerror = () => {
+      window.clearTimeout(timer)
+      reject(new Error('视频封面生成失败，请重新上传'))
+    }
+    image.src = url
+  })
+}
+
 export default function NanshaOpenMicProject() {
   const [view, setView] = useState('upload-home')
   const [rulesOrigin, setRulesOrigin] = useState('upload-home')
   const [activityPhase, setActivityPhase] = useState('upload')
   const [selectedVideo, setSelectedVideo] = useState(null)
-  const [videoCoverFile, setVideoCoverFile] = useState(null)
   const [videoCoverPreview, setVideoCoverPreview] = useState('')
   const [coverGenerating, setCoverGenerating] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -147,51 +165,38 @@ export default function NanshaOpenMicProject() {
     setView('upload')
   }
 
-  async function selectVideo(file) {
+  function selectVideo(file) {
     if (!file) return
-    if (!file.type.startsWith('video/')) return
-    if (videoCoverPreview) URL.revokeObjectURL(videoCoverPreview)
+    if (!file.type.startsWith('video/')) {
+      setVideoError('请选择 MP4、MOV 或 WebM 视频文件')
+      return
+    }
     setSelectedVideo(file)
-    setVideoCoverFile(null)
     setVideoCoverPreview('')
     setUploadProgress(0)
     setVideoError('')
-    setCoverGenerating(true)
-    try {
-      const coverBlob = await captureVideoFirstFrame(file)
-      const coverFile = new File([coverBlob], `${file.name.replace(/\.[^.]+$/, '') || 'cover'}-cover.jpg`, { type: 'image/jpeg' })
-      setVideoCoverFile(coverFile)
-      setVideoCoverPreview(URL.createObjectURL(coverFile))
-    } catch (error) {
-      setSelectedVideo(null)
-      setVideoError(error?.message || '视频封面生成失败，请重新选择视频')
-    } finally {
-      setCoverGenerating(false)
-    }
   }
 
   async function completeUpload(form) {
     if (!selectedVideo) return { error: '请先选择视频文件' }
-    if (!videoCoverFile) return { error: '视频封面生成中，请稍后再试' }
     try {
       setUploadProgress(1)
-      const [videoPolicy, coverPolicy] = await Promise.all([
-        createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size }),
-        createUploadPolicy(ACTIVITY_KEY, { kind: 'cover', fileName: videoCoverFile.name, contentType: videoCoverFile.type, size: videoCoverFile.size }),
-      ])
-      const [videoUrl, coverUrl] = await Promise.all([
-        uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress),
-        uploadFileToOss(coverPolicy, videoCoverFile),
-      ])
+      const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size })
+      const videoUrl = await uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress)
+      setCoverGenerating(true)
+      const coverUrl = buildVideoSnapshotUrl(videoUrl)
+      await waitForImage(coverUrl)
+      setVideoCoverPreview(coverUrl)
       const result = await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl })
       setMyEntry(result.entry)
       setSelectedVideo(null)
-      setVideoCoverFile(null)
       setUploadDialog('success')
       return { ok: true }
-    } catch {
+    } catch (error) {
       setUploadDialog('failure')
-      return { error: '上传失败，请重新上传' }
+      return { error: error?.message || '上传失败，请重新上传' }
+    } finally {
+      setCoverGenerating(false)
     }
   }
 
@@ -611,7 +616,7 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, cove
           <input type="file" accept="video/*" onChange={onSelectVideo} />
           {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
           <b>{coverGenerating ? '正在生成封面…' : selectedVideoName || '+'}</b>
-          {selectedVideoName && !coverGenerating ? <span className="nansha-video-picker-progress">{submitting ? `视频上传中 ${uploadProgress}%` : '已生成首帧封面'}</span> : null}
+          {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在生成封面…' : submitting ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '上传后自动生成封面'}</span> : null}
         </label>
         <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
         <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
