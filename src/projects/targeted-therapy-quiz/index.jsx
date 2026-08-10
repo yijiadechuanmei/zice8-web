@@ -18,6 +18,7 @@ import {
 } from './config'
 import smileFace from './assets/smile-face.png'
 import sadFace from './assets/sad-face.png'
+import quizMascot from './assets/quiz-mascot.png'
 import './styles.css'
 
 const CATEGORY_ICONS = {
@@ -269,6 +270,11 @@ function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting
       <div className="ttq-question-decoration ttq-question-decoration--one" aria-hidden="true" />
       <div className="ttq-question-decoration ttq-question-decoration--two" aria-hidden="true" />
       <div className="ttq-question-decoration ttq-question-decoration--three" aria-hidden="true" />
+      <img className="ttq-question-mascot ttq-question-mascot--one" src={quizMascot} alt="" aria-hidden="true" />
+      <img className="ttq-question-mascot ttq-question-mascot--two" src={quizMascot} alt="" aria-hidden="true" />
+      <div className="ttq-question-confetti" aria-hidden="true">
+        <i /><i /><i /><i /><i />
+      </div>
       <div className="ttq-question-shell">
         <header className="ttq-challenge-bar">
           <div className="ttq-challenge-label">
