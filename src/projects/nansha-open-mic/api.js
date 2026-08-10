@@ -21,14 +21,28 @@ export const createUploadPolicy = (activityKey, payload) =>
     body: JSON.stringify(payload),
   })
 
-export async function uploadFileToOss(policy, file) {
-  const response = await fetch(policy.uploadUrl, {
-    method: 'PUT',
-    headers: policy.headers || { 'Content-Type': file.type },
-    body: file,
+export function uploadFileToOss(policy, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', policy.uploadUrl, true)
+    Object.entries(policy.headers || { 'Content-Type': file.type }).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value)
+    })
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)))
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100)
+        resolve(policy.fileUrl)
+        return
+      }
+      reject(new Error(`文件上传失败（${xhr.status || '网络异常'}）`))
+    }
+    xhr.onerror = () => reject(new Error('文件上传失败，请检查网络后重试'))
+    xhr.onabort = () => reject(new Error('文件上传已取消'))
+    xhr.send(file)
   })
-  if (!response.ok) throw new Error(`文件上传失败（${response.status}）`)
-  return policy.fileUrl
 }
 
 export const createEntry = (activityKey, payload) =>

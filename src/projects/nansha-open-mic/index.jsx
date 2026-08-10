@@ -74,6 +74,11 @@ export default function NanshaOpenMicProject() {
   const [rulesOrigin, setRulesOrigin] = useState('upload-home')
   const [activityPhase, setActivityPhase] = useState('upload')
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [videoCoverFile, setVideoCoverFile] = useState(null)
+  const [videoCoverPreview, setVideoCoverPreview] = useState('')
+  const [coverGenerating, setCoverGenerating] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [videoError, setVideoError] = useState('')
   const [uploadDialog, setUploadDialog] = useState('')
   const [voteDialog, setVoteDialog] = useState('')
   const [posterOpen, setPosterOpen] = useState(false)
@@ -179,24 +184,50 @@ export default function NanshaOpenMicProject() {
     setView('upload')
   }
 
-  async function completeUpload(form) {
-    if (!selectedVideo) {
-      setUploadDialog('failure')
-      return
-    }
+  async function selectVideo(file) {
+    if (!file) return
+    if (!file.type.startsWith('video/')) return
+    if (videoCoverPreview) URL.revokeObjectURL(videoCoverPreview)
+    setSelectedVideo(file)
+    setVideoCoverFile(null)
+    setVideoCoverPreview('')
+    setUploadProgress(0)
+    setVideoError('')
+    setCoverGenerating(true)
     try {
-      const [videoPolicy, coverFile] = await Promise.all([
+      const coverFile = await captureVideoFirstFrame(file)
+      setVideoCoverFile(coverFile)
+      setVideoCoverPreview(URL.createObjectURL(coverFile))
+    } catch (error) {
+      setSelectedVideo(null)
+      setVideoError(error?.message || '视频封面生成失败，请重新选择视频')
+    } finally {
+      setCoverGenerating(false)
+    }
+  }
+
+  async function completeUpload(form) {
+    if (!selectedVideo) return { error: '请先选择视频文件' }
+    if (!videoCoverFile) return { error: '视频封面生成中，请稍后再试' }
+    try {
+      setUploadProgress(1)
+      const [videoPolicy, coverPolicy] = await Promise.all([
         createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size }),
-        captureVideoFirstFrame(selectedVideo),
+        createUploadPolicy(ACTIVITY_KEY, { kind: 'cover', fileName: videoCoverFile.name, contentType: videoCoverFile.type, size: videoCoverFile.size }),
       ])
-      const coverPolicy = await createUploadPolicy(ACTIVITY_KEY, { kind: 'cover', fileName: coverFile.name, contentType: coverFile.type, size: coverFile.size })
-      const [videoUrl, coverUrl] = await Promise.all([uploadFileToOss(videoPolicy, selectedVideo), uploadFileToOss(coverPolicy, coverFile)])
+      const [videoUrl, coverUrl] = await Promise.all([
+        uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress),
+        uploadFileToOss(coverPolicy, videoCoverFile),
+      ])
       const result = await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl })
       setMyEntry(result.entry)
       setSelectedVideo(null)
+      setVideoCoverFile(null)
       setUploadDialog('success')
+      return { ok: true }
     } catch {
       setUploadDialog('failure')
+      return { error: '上传失败，请重新上传' }
     }
   }
 
@@ -255,7 +286,11 @@ export default function NanshaOpenMicProject() {
           onBack={goBack}
           onShowRules={openRules}
           selectedVideoName={selectedVideo?.name || ''}
-          onSelectVideo={(event) => setSelectedVideo(event.target.files?.[0] || null)}
+          coverPreview={videoCoverPreview}
+          coverGenerating={coverGenerating}
+          uploadProgress={uploadProgress}
+          videoError={videoError}
+          onSelectVideo={(event) => selectVideo(event.target.files?.[0])}
           onSubmit={completeUpload}
         />
       ) : null}
@@ -567,20 +602,38 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
   )
 }
 
-function UploadPage({ onBack, onShowRules, selectedVideoName, onSelectVideo, onSubmit }) {
+function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, coverGenerating, uploadProgress, videoError, onSelectVideo, onSubmit }) {
+  const [form, setForm] = useState({ workName: '', authorName: '', phone: '', description: '' })
   const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
+  const update = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }))
+    setFormError('')
+  }
   async function submit(event) {
     event.preventDefault()
     if (submitting) return
-    const data = new FormData(event.currentTarget)
+    if (!selectedVideoName) {
+      setFormError('请先选择视频文件')
+      return
+    }
+    if (!form.workName.trim() || !form.authorName.trim() || !form.phone.trim() || !form.description.trim()) {
+      setFormError('请完整填写作品信息')
+      return
+    }
+    if (!/^1[3-9]\d{9}$/.test(form.phone.trim())) {
+      setFormError('请输入正确的手机号码')
+      return
+    }
     setSubmitting(true)
     try {
-      await onSubmit({
-        workName: String(data.get('workName') || ''),
-        authorName: String(data.get('authorName') || ''),
-        phone: String(data.get('phone') || ''),
-        description: String(data.get('description') || ''),
+      const result = await onSubmit({
+        workName: form.workName.trim(),
+        authorName: form.authorName.trim(),
+        phone: form.phone.trim(),
+        description: form.description.trim(),
       })
+      if (result?.error) setFormError(result.error)
     } finally {
       setSubmitting(false)
     }
@@ -590,14 +643,17 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, onSelectVideo, onS
       <PageHeader title="上传视频" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
       <form className="nansha-upload-form" onSubmit={submit}>
-        <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}`}>
+        <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}${coverPreview ? ' has-cover' : ''}`}>
           <input type="file" accept="video/*" onChange={onSelectVideo} />
-          <b>{selectedVideoName || '+'}</b>
+          {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
+          <b>{coverGenerating ? '正在生成封面…' : selectedVideoName || '+'}</b>
+          {selectedVideoName && !coverGenerating ? <span className="nansha-video-picker-progress">{submitting ? `视频上传中 ${uploadProgress}%` : '已生成首帧封面'}</span> : null}
         </label>
-        <input name="workName" aria-label="作品名称" placeholder="请输入作品名称" required />
-        <input name="authorName" aria-label="作者名称" placeholder="请输入作者名称" required />
-        <input name="phone" aria-label="手机号码" inputMode="tel" pattern="^1[3-9]\\d{9}$" placeholder="请输入手机号码" required />
-        <textarea name="description" aria-label="作品简介" placeholder="请输入作品简介" required />
+        <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
+        <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
+        <input name="phone" aria-label="手机号码" value={form.phone} onChange={(event) => update('phone', event.target.value.replace(/\D/g, '').slice(0, 11))} inputMode="tel" maxLength={11} placeholder="请输入手机号码" />
+        <textarea name="description" aria-label="作品简介" value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="请输入作品简介" maxLength={1000} />
+        {formError || videoError ? <p className="nansha-upload-form-error" role="alert">{formError || videoError}</p> : null}
         <button type="submit" disabled={submitting}>{submitting ? '上传中…' : '点击确认上传'}</button>
       </form>
     </section>

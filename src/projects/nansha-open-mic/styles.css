@@ -620,12 +620,16 @@
 .nansha-upload-form { width: 70.53%; margin: calc(var(--nansha-unit) * 12) 0 0 13.87%; }
 .nansha-video-picker { position: relative; display: flex; align-items: center; justify-content: center; width: 61.43%; height: calc(var(--nansha-unit) * 29.33); margin: 0 0 calc(var(--nansha-unit) * 7.47) 20.97%; background: #dedede; color: #b7b7b7; cursor: pointer; overflow: hidden; }
 .nansha-video-picker input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.nansha-video-picker b { width: 84%; overflow: hidden; font: 400 calc(var(--nansha-unit) * 6.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.nansha-video-picker.has-file b { font-size: calc(var(--nansha-unit) * 2.13); }
+.nansha-video-picker b { position: relative; z-index: 2; width: 84%; overflow: hidden; font: 400 calc(var(--nansha-unit) * 6.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.nansha-video-picker.has-file b { align-self: flex-end; margin-bottom: calc(var(--nansha-unit) * 2); color: #fff; font-size: calc(var(--nansha-unit) * 2.13); text-shadow: 0 1px 3px rgba(0, 0, 0, .72); }
+.nansha-video-picker.has-cover::after { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, .56)); content: ""; pointer-events: none; }
+.nansha-video-picker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.nansha-video-picker-progress { position: absolute; z-index: 2; right: calc(var(--nansha-unit) * 1.6); top: calc(var(--nansha-unit) * 1.6); padding: calc(var(--nansha-unit) * .8) calc(var(--nansha-unit) * 1.33); background: rgba(23, 59, 152, .92); color: #fff; font: 500 calc(var(--nansha-unit) * 1.87) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-upload-form input:not([type="file"]), .nansha-upload-form textarea { display: block; width: 100%; border: 1px solid #050505; border-radius: 0; color: #080808; font: 400 calc(var(--nansha-unit) * 3.6) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; outline: none; }
 .nansha-upload-form input:not([type="file"]) { height: calc(var(--nansha-unit) * 7.73); margin-bottom: calc(var(--nansha-unit) * 1.6); padding: 0 calc(var(--nansha-unit) * 2.93); }
 .nansha-upload-form textarea { height: calc(var(--nansha-unit) * 35.07); margin-top: calc(var(--nansha-unit) * 2.93); padding: calc(var(--nansha-unit) * 2.93); resize: none; }
 .nansha-upload-form input::placeholder, .nansha-upload-form textarea::placeholder { color: #080808; opacity: 1; }
+.nansha-upload-form-error { margin: calc(var(--nansha-unit) * 1.6) 0 0; color: #d90000; font: 400 calc(var(--nansha-unit) * 2.4) / 1.35 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
 .nansha-upload-form button { display: block; width: 69.01%; height: calc(var(--nansha-unit) * 14.8); margin: calc(var(--nansha-unit) * 14.93) 0 0 16.82%; border: 0; background: #173b98; color: #fff; font: 800 calc(var(--nansha-unit) * 4.53) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; }
 
 .nansha-bottom-nav { position: fixed; z-index: 5; bottom: 0; left: 50%; display: grid; grid-template-columns: 1fr 1fr; width: min(100%, 750px); height: calc(var(--nansha-unit) * 10.13 + env(safe-area-inset-bottom)); transform: translateX(-50%); }
