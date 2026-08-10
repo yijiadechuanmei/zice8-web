@@ -392,7 +392,7 @@
 .ttq-challenge-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   height: 72px;
   margin-bottom: 15px;
   padding: 0 30px 0 25px;
@@ -430,47 +430,6 @@
   fill: #ffba3d;
   filter: drop-shadow(0 3px 4px rgba(220, 116, 15, .17));
 }
-
-.ttq-progress-dots {
-  display: flex;
-  align-items: center;
-}
-
-.ttq-progress-dots span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: 2px solid #ddd6d2;
-  border-radius: 50%;
-  color: #9d9490;
-  font-size: 16px;
-  font-weight: 900;
-  background: #fff;
-}
-
-.ttq-progress-dots span.is-done {
-  border-color: #39afa4;
-  color: #fff;
-  background: #39afa4;
-}
-
-.ttq-progress-dots span.is-current {
-  border-color: #ff6b35;
-  color: #fff;
-  background: #ff6b35;
-  box-shadow: 0 0 0 6px rgba(255, 107, 53, .12);
-  animation: ttq-progress-pulse 2s ease-in-out infinite;
-}
-
-.ttq-progress-dots i {
-  width: 48px;
-  height: 3px;
-  background: #e3dcd8;
-}
-
-.ttq-progress-dots i.is-done { background: #66c6bd; }
 
 .ttq-question-card {
   position: relative;
@@ -758,11 +717,6 @@
 @keyframes ttq-face-pop {
   from { opacity: 0; transform: scale(.72) rotate(-7deg); }
   to { opacity: 1; transform: scale(1) rotate(0); }
-}
-
-@keyframes ttq-progress-pulse {
-  0%, 100% { box-shadow: 0 0 0 5px rgba(255, 107, 53, .1); }
-  50% { box-shadow: 0 0 0 10px rgba(255, 107, 53, .16); }
 }
 
 @keyframes ttq-spark-twinkle {

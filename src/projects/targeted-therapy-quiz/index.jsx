@@ -276,13 +276,6 @@ function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting
             <span>知识闯关</span>
             <strong>{question.category}关</strong>
           </div>
-          <div className="ttq-progress-dots" aria-label="闯关进度：正在回答问题">
-            <span className="is-done" aria-hidden="true"><CheckOutlined /></span>
-            <i className="is-done" />
-            <span className="is-current" aria-hidden="true">2</span>
-            <i />
-            <span aria-hidden="true">3</span>
-          </div>
         </header>
 
         <article className="ttq-question-card">
