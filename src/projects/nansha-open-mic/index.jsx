@@ -12,6 +12,7 @@ import {
   UserOutlined,
   VideoCameraFilled,
 } from '@ant-design/icons'
+import { QRCodeCanvas } from 'qrcode.react'
 import { getBootstrap, getPublicConfig } from './api'
 import './styles.css'
 
@@ -20,6 +21,7 @@ const ACTIVITY_KEY = 'nansha_new_voice_2026'
 const ASSET_BASE_URL = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`
 const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260811`
 const REVIEW_MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1-1.png?v=20260811`
+const POSTER_BACKGROUND_URL = `${ASSET_BASE_URL}/hb.png?v=20260811`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
 const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260811-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
@@ -37,6 +39,7 @@ export default function NanshaOpenMicProject() {
   const [nextUploadResult, setNextUploadResult] = useState('success')
   const [voteDialog, setVoteDialog] = useState('')
   const [nextVoteResult, setNextVoteResult] = useState('success')
+  const [posterOpen, setPosterOpen] = useState(false)
   const [myEntry, setMyEntry] = useState(null)
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
   const homeView = activityPhase === 'vote' ? 'vote-home' : 'upload-home'
@@ -65,7 +68,7 @@ export default function NanshaOpenMicProject() {
         } else {
           setView((current) => {
             if (current === 'rules') return current
-            const currentIsWrongHome = phase === 'vote' ? current === 'upload-home' || current === 'ranking' : current === 'vote-home' || current === 'ranking'
+            const currentIsWrongHome = phase === 'vote' ? current === 'upload-home' : current === 'vote-home' || current === 'ranking'
             return currentIsWrongHome ? (phase === 'vote' ? 'vote-home' : 'upload-home') : current
           })
         }
@@ -142,7 +145,7 @@ export default function NanshaOpenMicProject() {
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
       {view === 'work' ? <MyWorkPage onBack={goBack} onShowRules={openRules} /> : null}
       {view === 'upload' ? (
         <UploadPage
@@ -162,6 +165,7 @@ export default function NanshaOpenMicProject() {
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
+      {posterOpen ? <VotePosterDialog onClose={() => setPosterOpen(false)} /> : null}
     </main>
   )
 }
@@ -375,7 +379,7 @@ function MyVoteRow() {
   )
 }
 
-function WorkDetailPage({ onBack, onShowRules, onVote }) {
+function WorkDetailPage({ onBack, onShowRules, onVote, onShare }) {
   return (
     <section className="nansha-sub-page nansha-work-detail-page">
       <PageHeader title="作品名" onBack={onBack} />
@@ -390,9 +394,28 @@ function WorkDetailPage({ onBack, onShowRules, onVote }) {
         <div className="nansha-detail-description">作品简介</div>
         <div className="nansha-detail-actions">
           <button className="nansha-detail-vote-button" type="button" onClick={onVote}>投票</button>
-          <button className="nansha-detail-share-button" type="button">拉票</button>
+          <button className="nansha-detail-share-button" type="button" onClick={onShare}>拉票</button>
         </div>
       </section>
+    </section>
+  )
+}
+
+function VotePosterDialog({ onClose }) {
+  const posterUrl = typeof window !== 'undefined' ? window.location.href : `${ASSET_BASE_URL}`
+  return (
+    <section className="nansha-poster-overlay" role="dialog" aria-modal="true" aria-label="拉票海报">
+      <div className="nansha-poster-card" aria-label="长按图片保存海报">
+        <img className="nansha-poster-background" src={POSTER_BACKGROUND_URL} alt="南沙新声全民开麦拉票海报背景" draggable="false" />
+        <span className="nansha-poster-avatar" aria-hidden="true"><UserOutlined /></span>
+        <div className="nansha-poster-work-info">
+          <strong>作品</strong>
+          <span>作者</span>
+        </div>
+        <div className="nansha-poster-video-cover" aria-label="作品封面" />
+        <QRCodeCanvas className="nansha-poster-qrcode" value={posterUrl} size={166} includeMargin={false} />
+      </div>
+      <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
     </section>
   )
 }

@@ -873,3 +873,105 @@
 
 .nansha-vote-video-placeholder { background: #f5f3f3; }
 .nansha-vote-work-card p { color: #fff; }
+
+.nansha-poster-overlay {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto;
+  padding: 13.8vh calc(var(--nansha-unit) * 2.13) calc(var(--nansha-unit) * 3.2);
+  background: rgb(0 0 0 / 52%);
+}
+
+.nansha-poster-card {
+  position: relative;
+  width: min(70.27vw, 527px);
+  aspect-ratio: 527 / 1033;
+  overflow: hidden;
+  user-select: none;
+  -webkit-touch-callout: default;
+}
+
+.nansha-poster-background {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.nansha-poster-avatar {
+  position: absolute;
+  top: 21.7%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  font-size: calc(var(--nansha-unit) * 6.67);
+  transform: translateX(-50%);
+}
+
+.nansha-poster-work-info {
+  position: absolute;
+  top: 34.5%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: #050505;
+  text-align: center;
+}
+
+.nansha-poster-work-info strong {
+  font: 800 calc(var(--nansha-unit) * 4) / 1.15 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-poster-work-info span {
+  margin-top: calc(var(--nansha-unit) * .4);
+  font: 400 calc(var(--nansha-unit) * 3.2) / 1.15 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-poster-video-cover {
+  position: absolute;
+  top: 44.1%;
+  left: 10%;
+  width: 80%;
+  height: 25.7%;
+  border: 1px solid #333;
+  background: #aaa;
+}
+
+.nansha-poster-qrcode {
+  position: absolute;
+  right: 9.5%;
+  bottom: 10.6%;
+  display: block;
+  width: 31.5%;
+  height: auto;
+  background: #fff;
+}
+
+.nansha-poster-close {
+  display: grid;
+  place-items: center;
+  width: calc(var(--nansha-unit) * 5.07);
+  height: calc(var(--nansha-unit) * 5.07);
+  margin-top: calc(var(--nansha-unit) * 2.13);
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  font-size: calc(var(--nansha-unit) * 3.2);
+  line-height: 1;
+  cursor: pointer;
+}
