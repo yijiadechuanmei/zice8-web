@@ -18,21 +18,12 @@ import './styles.css'
 const ACTIVITY_TYPE = 'nansha_open_mic'
 const ACTIVITY_KEY = 'nansha_new_voice_2026'
 const ASSET_BASE_URL = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`
-const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260809`
-const TITLE_VISUAL_URL = `${ASSET_BASE_URL}/2.png?v=20260809`
+const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260811`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
-const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260809-rules`
+const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260811-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
 const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
-
-const RULES = [
-  '从六大主题中任选其一，结合真实经历，讲述你与南沙的故事。',
-  '故事完整、逻辑清楚、重点突出，展现南沙的发展变化与城市温度。',
-  '语言通俗易懂，可采用生活化、口语化表达，演讲语种不限。',
-  '遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负面炒作等内容。',
-  '作品须为原创，所使用的音乐、图片及视频等素材须取得合法授权',
-]
 
 const VOTE_WORKS = Array.from({ length: 6 }, (_, index) => ({ id: index + 1 }))
 
@@ -161,6 +152,7 @@ export default function NanshaOpenMicProject() {
       ) : null}
       {view === 'rules' ? <RulesPage onBack={goBack} /> : null}
 
+      {view === 'upload-home' && activityPhase === 'upload' ? <BottomNavigation onHome={() => setView('upload-home')} onMy={() => setView('my')} /> : null}
       {view === 'my' && activityPhase === 'vote' ? <VoteBottomNavigation active="my" onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
@@ -173,24 +165,50 @@ export default function NanshaOpenMicProject() {
 
 function UploadHome({ onShowRules, onUpload }) {
   return (
-    <div className="nansha-home-view">
-      <section className="nansha-main-visual-wrap">
+    <div className="nansha-upload-home">
+      <header className="nansha-upload-home-header"><h1>首页</h1></header>
+      <section className="nansha-upload-hero">
         <img className="nansha-main-visual" src={MAIN_VISUAL_URL} alt="南沙新声 全民开麦" />
         <ActivityRulesTrigger onClick={onShowRules} />
       </section>
-      <img className="nansha-title-visual" src={TITLE_VISUAL_URL} alt="南沙新声 全民开麦 南沙宣讲员招募中" />
-      <section className="nansha-countdown" aria-label="距离上传截止还有五天">
-        <div className="nansha-countdown-label">距离上传截止还有</div>
-        <strong>5天 00:00:00</strong>
+      <section className="nansha-upload-shell">
+        <article className="nansha-upload-paper">
+          <span className="nansha-upload-cyan-wedge" aria-hidden="true" />
+          <section className="nansha-upload-countdown" aria-label="距离上传截止还有五天">
+            <div className="nansha-countdown-label">距离上传截止还有</div>
+            <strong>5天 00:00:00</strong>
+          </section>
+          <button className="nansha-upload-button" type="button" onClick={onUpload}>上传作品</button>
+          <section className="nansha-upload-section nansha-upload-benefits" aria-label="优秀作品可获得">
+            <h2>优秀作品可获得：</h2>
+            <ul>
+              <li>√南沙特色礼品</li>
+              <li>√纳入区宣讲人才库</li>
+              <li>√登上官方舞台</li>
+              <li>√专业演讲指导与打磨</li>
+              <li>√官方流量扶持曝光</li>
+            </ul>
+          </section>
+          <section className="nansha-upload-section nansha-upload-story" aria-label="作品要求">
+            <h2>我们需要这样的作品：</h2>
+            <p>1.从上述六大主题中任选其一，结合真实经历，讲述你与南沙的故事：</p>
+            <p className="nansha-upload-themes">筑梦湾区 人人有梦 | 科创先锋 人人有为<br />文化传承 人人有责 | 乡村振兴 人人有益<br />时代青年 人人有志 | 暖心民生 人人有爱</p>
+            <p>2.使用手机或相机，录制1-2分钟宣讲视频，分辨率不低于1080P；</p>
+            <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现南沙的发展变化与城市温度；</p>
+            <p>4.不限宣讲风格及语种，含粤语、普通话、外国语（需配中文字幕）；</p>
+            <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负面炒作等内容；</p>
+            <p>6.作品须为原创，所使用的音乐、图片及视频等素材须无版权纠纷；</p>
+            <p>7.作品一经提交，即视为作者授权主办方合规使用，未经主办方许可，不得擅自对外发布。</p>
+            <p>8.我们将主动联系通过初选的视频作者，对接后续相关事宜；若未收到我方联系，则代表未通过。</p>
+          </section>
+          <section className="nansha-upload-organizers" aria-label="主办单位信息">
+            <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
+            <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、<br />开发区港澳办、区总工会、团区委</span></p>
+            <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
+          </section>
+        </article>
+        <p className="nansha-upload-disclaimer">*本次活动最终解释权归主办方所有</p>
       </section>
-      <button className="nansha-upload-button" type="button" onClick={onUpload}>上传作品</button>
-      <section className="nansha-rule-panel" aria-label="报名要求"><RuleList /></section>
-      <section className="nansha-organizer-panel" aria-label="主办单位信息">
-        <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-        <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、<br />开发区港澳办、区总工会、团区委</span></p>
-        <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
-      </section>
-      <p className="nansha-disclaimer">*本次活动最终解释权归主办方所有</p>
     </div>
   )
 }
@@ -409,10 +427,6 @@ function ActivityRulesTrigger({ onClick, fixed = false, label = '活动说明', 
   return <button className={`nansha-rules-trigger${fixed ? ' is-fixed' : ''} ${className}`} type="button" onClick={onClick}>{label}</button>
 }
 
-function RuleList() {
-  return <ol>{RULES.map((rule, index) => <li key={rule}><b>{index + 1}.</b><span>{rule}</span></li>)}</ol>
-}
-
 function RulesPage({ onBack }) {
   return (
     <section className="nansha-rules-page">
@@ -447,11 +461,7 @@ function RulesPage({ onBack }) {
               <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负面炒作等内容；</p>
               <p>6.作品须为原创，所使用的音乐、图片及视频等素材须无版权纠纷；</p>
               <p>7.作品一经提交，即视为作者授权主办方合规使用，未经主办方许可，不得擅自对外发布。</p>
-            </section>
-
-            <section className="nansha-rules-extra">
-              <p><b>报名时间：</b><strong>2026年8月13日至25日</strong></p>
-              <p><b>视频要求：</b><span>1.录制1—2分钟宣讲视频，9:16竖屏形式<br />2.MP4格式，画面清晰简洁，分辨率不低于1080P</span></p>
+              <p>8.我们将主动联系通过初选的视频作者，对接后续相关事宜；若未收到我方联系，则代表初选未通过。</p>
             </section>
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
@@ -475,7 +485,14 @@ function UploadResultDialog({ status, onConfirm }) {
       <div className={`nansha-upload-result-card ${isSuccess ? 'is-success' : 'is-failure'}`}>
         <span className="nansha-upload-result-top-arc" aria-hidden="true" />
         <h2>{isSuccess ? '上传成功!' : '上传失败...'}</h2>
-        <p>{isSuccess ? <>作品已上传，后台审核中。<br />审核成功后将显示在“我的作品”中</> : '上传失败，请重新上传'}</p>
+        <p className="nansha-upload-result-message">
+          {isSuccess ? (
+            <>
+              <span>作品已上传，可在“我的作品”中查看</span>
+              <span>我们将主动联系通过初选的视频作者，对接后续相关事宜，<br />若未收到我方联系，则代表初选未通过。</span>
+            </>
+          ) : '上传失败，请重新上传'}
+        </p>
         <button className="nansha-upload-result-confirm" type="button" onClick={onConfirm}>确定</button>
       </div>
     </section>
