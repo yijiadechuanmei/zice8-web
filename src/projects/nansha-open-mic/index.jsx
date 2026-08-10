@@ -4,6 +4,7 @@ import {
   AuditOutlined,
   BarChartOutlined,
   CaretRightFilled,
+  CloseOutlined,
   FullscreenOutlined,
   LeftOutlined,
   RightOutlined,
@@ -22,6 +23,8 @@ const TITLE_VISUAL_URL = `${ASSET_BASE_URL}/2.png?v=20260809`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
 const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260809-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
+const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
+const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
 
 const RULES = [
   '从六大主题中任选其一，结合真实经历，讲述你与南沙的故事。',
@@ -48,17 +51,41 @@ export default function NanshaOpenMicProject() {
 
   useEffect(() => {
     let alive = true
-    getBootstrap(ACTIVITY_KEY)
-      .then((data) => {
+    let previousPhase = null
+
+    function refreshActivityState() {
+      getBootstrap(ACTIVITY_KEY)
+        .then((data) => {
         const phase = data?.phase
         if (!alive || (phase !== 'upload' && phase !== 'vote')) return
         setActivityPhase(phase)
         setMyEntry(data?.myEntry || null)
         setVoteQuota(data?.voteQuota || { remaining: data?.rules?.dailyVoteLimit || 10 })
-        setView((current) => (current === 'vote-home' || current === 'upload-home' ? (phase === 'upload' ? 'upload-home' : 'vote-home') : current))
+        const phaseChanged = previousPhase !== null && previousPhase !== phase
+        if (phaseChanged) {
+          setUploadDialog('')
+          setVoteDialog('')
+          setView((current) => (current === 'rules' ? current : (phase === 'upload' ? 'upload-home' : 'vote-home')))
+        } else {
+          setView((current) => {
+            if (current === 'rules') return current
+            const currentIsWrongHome = phase === 'upload' ? current === 'vote-home' || current === 'ranking' : current === 'upload-home'
+            return currentIsWrongHome ? (phase === 'upload' ? 'upload-home' : 'vote-home') : current
+          })
+        }
+        previousPhase = phase
       })
-      .catch(() => {})
-    return () => { alive = false }
+        .catch(() => {})
+    }
+
+    refreshActivityState()
+    const intervalId = window.setInterval(refreshActivityState, 5000)
+    window.addEventListener('focus', refreshActivityState)
+    return () => {
+      alive = false
+      window.clearInterval(intervalId)
+      window.removeEventListener('focus', refreshActivityState)
+    }
   }, [])
 
   function goBack() {
@@ -134,7 +161,7 @@ export default function NanshaOpenMicProject() {
       {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
-      {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} /> : null}
+      {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
     </main>
   )
@@ -451,20 +478,25 @@ function UploadResultDialog({ status, onConfirm }) {
   )
 }
 
-function VoteDialog({ onConfirm }) {
+function VoteDialog({ onConfirm, onClose }) {
   return (
     <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label="投票">
       <div className="nansha-vote-dialog-card">
-        <svg className="nansha-vote-dialog-shape" viewBox="0 0 426 468" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 41H426V61C270 61 122 78 0 118Z" fill="#173b98" />
+        <button className="nansha-dialog-close" type="button" onClick={onClose} aria-label="关闭投票弹窗"><CloseOutlined /></button>
+        <svg className="nansha-vote-dialog-shape" viewBox="0 0 426 426" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 0H426V20C270 20 122 38 0 76Z" fill="#173b98" />
+          <path d="M0 424C180 424 316 416 426 399V426H0Z" fill="#173b98" />
         </svg>
         <div className="nansha-vote-dialog-content">
           <p className="nansha-vote-quota-label">当前拥有每日票数:</p>
           <strong className="nansha-vote-quota-value">10票</strong>
           <label className="nansha-vote-select-label" htmlFor="nansha-vote-count">当前视频投出票数</label>
-          <select id="nansha-vote-count" defaultValue="1" aria-label="当前视频投出票数">
-            {Array.from({ length: 10 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
-          </select>
+          <div className="nansha-vote-select-wrap">
+            <select id="nansha-vote-count" defaultValue="1" aria-label="当前视频投出票数">
+              {Array.from({ length: 10 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
+            </select>
+            <span aria-hidden="true">⌄</span>
+          </div>
           <button className="nansha-vote-confirm-button" type="button" onClick={onConfirm}>确定投票</button>
         </div>
       </div>
@@ -476,23 +508,11 @@ function VoteResultDialog({ status, onConfirm }) {
   const isSuccess = status === 'success'
   return (
     <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label={isSuccess ? '投票成功' : '投票失败'}>
-      <div className={`nansha-vote-result-card ${isSuccess ? 'is-success' : 'is-failure'}`} role="button" tabIndex={0} onClick={onConfirm} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onConfirm() }}>
-        {isSuccess ? <VoteSpark /> : null}
-        <img className="nansha-vote-result-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
-        <h2>{isSuccess ? <>投票<br />成功</> : <>投票失败<br />请重新投票</>}</h2>
-        {!isSuccess ? <span className="nansha-vote-failure-bars" aria-hidden="true"><i /><i /><i /></span> : null}
+      <div className={`nansha-vote-result-card ${isSuccess ? 'is-success' : 'is-failure'}`}>
+        <img className="nansha-vote-result-image" src={isSuccess ? VOTE_SUCCESS_VISUAL_URL : VOTE_FAILURE_VISUAL_URL} alt={isSuccess ? '投票成功' : '投票失败，请重新投票'} />
+        <button className="nansha-dialog-close" type="button" onClick={onConfirm} aria-label="关闭投票结果弹窗"><CloseOutlined /></button>
       </div>
     </section>
-  )
-}
-
-function VoteSpark() {
-  return (
-    <svg className="nansha-vote-spark" viewBox="0 0 72 72" aria-hidden="true">
-      <path d="M13 20 44 4l6 36-34 8Z" fill="#f9c82e" />
-      <path d="M0 52 38 45 32 61 4 69Z" fill="#f9c82e" />
-      <path d="M36 0 57 2 60 25 42 16Z" fill="#f9c82e" />
-    </svg>
   )
 }
 

@@ -521,28 +521,19 @@
 .nansha-upload-result-card.is-failure .nansha-upload-result-confirm { background: #dc0000; }
 
 .nansha-vote-overlay { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: calc(var(--nansha-unit) * 3.2); background: rgb(0 0 0 / 52%); }
-.nansha-vote-dialog-card { position: relative; width: min(56.8vw, 426px); aspect-ratio: 426 / 468; overflow: hidden; background: #fff; text-align: center; }
+.nansha-vote-dialog-card { position: relative; width: min(56.8vw, 426px); aspect-ratio: 1; overflow: visible; background: #fff; text-align: center; }
 .nansha-vote-dialog-shape { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; }
-.nansha-vote-dialog-content { position: relative; z-index: 1; padding-top: 29.7%; color: #080808; text-align: center; }
-.nansha-vote-quota-label { margin: 0; font: 700 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-vote-quota-value { display: block; margin-top: calc(var(--nansha-unit) * 1.33); font: 400 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-vote-select-label { display: block; margin-top: calc(var(--nansha-unit) * 4.13); font: 700 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-vote-dialog-content select { display: block; width: calc(var(--nansha-unit) * 14.67); height: calc(var(--nansha-unit) * 5.73); margin: calc(var(--nansha-unit) * 2.13) auto 0; padding: 0 calc(var(--nansha-unit) * 2.4); border: 1px solid #080808; border-radius: calc(var(--nansha-unit) * 1.33); background: #fff; color: #080808; font: 400 calc(var(--nansha-unit) * 2.67) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-vote-confirm-button { position: absolute; top: 76.7%; left: 24%; width: 52%; height: calc(var(--nansha-unit) * 8.53); border: 0; background: #173b98; color: #fff; font: 800 calc(var(--nansha-unit) * 3.2) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; }
+.nansha-vote-dialog-content { position: absolute; z-index: 1; inset: 0; color: #080808; text-align: center; }
+.nansha-vote-quota-label { position: absolute; top: calc(var(--nansha-unit) * 13.6); left: 0; width: 100%; margin: 0; font: 700 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-vote-quota-value { position: absolute; top: calc(var(--nansha-unit) * 18.4); left: 0; width: 100%; margin: 0; font: 400 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-vote-select-label { position: absolute; top: calc(var(--nansha-unit) * 24.9); left: 0; width: 100%; margin: 0; font: 700 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-vote-select-wrap { position: absolute; top: calc(var(--nansha-unit) * 29.87); left: 50%; width: calc(var(--nansha-unit) * 14.67); height: calc(var(--nansha-unit) * 5.73); transform: translateX(-50%); }
+.nansha-vote-select-wrap select { display: block; width: 100%; height: 100%; padding: 0 calc(var(--nansha-unit) * 2.4); border: 1px solid #080808; border-radius: calc(var(--nansha-unit) * 1.33); appearance: none; background: #fff; color: #080808; font: 400 calc(var(--nansha-unit) * 2.67) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-vote-select-wrap span { position: absolute; top: 50%; right: calc(var(--nansha-unit) * 1.6); color: #777; font: 400 calc(var(--nansha-unit) * 2.67) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; pointer-events: none; transform: translateY(-57%); }
+.nansha-vote-confirm-button { position: absolute; top: calc(var(--nansha-unit) * 42.27); left: 24.18%; width: 52.11%; height: calc(var(--nansha-unit) * 8.53); border: 0; background: #173b98; color: #fff; font: 800 calc(var(--nansha-unit) * 3.2) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; }
 
-.nansha-vote-result-card { position: relative; overflow: hidden; background: #fff; cursor: pointer; }
-.nansha-vote-result-card.is-success { width: min(56.8vw, 426px); aspect-ratio: 426 / 468; }
-.nansha-vote-result-card.is-failure { width: min(75.33vw, 565px); aspect-ratio: 565 / 403; }
-.nansha-vote-result-card::before { position: absolute; top: 8.76%; right: 0; bottom: 0; left: 0; content: ""; }
-.nansha-vote-result-card.is-success::before { background: #173b98; }
-.nansha-vote-result-card.is-failure::before { top: 10.17%; right: 2.3%; background: #ed0b0b; }
-.nansha-vote-result-microphone { position: absolute; z-index: 1; top: 10%; right: -5%; width: 42%; height: auto; pointer-events: none; }
-.nansha-vote-result-card.is-failure .nansha-vote-result-microphone { top: 3%; right: -4%; width: 35%; }
-.nansha-vote-spark { position: absolute; z-index: 2; top: 12%; left: 6%; width: 18%; height: auto; }
-.nansha-vote-result-card h2 { position: absolute; z-index: 2; inset: 23% 0 auto; margin: 0; color: #fff; text-align: center; font: 800 calc(var(--nansha-unit) * 12) / 1.05 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-vote-result-card.is-failure h2 { top: 33%; font-size: calc(var(--nansha-unit) * 8.53); line-height: 1.08; }
-.nansha-vote-failure-bars { position: absolute; z-index: 2; right: 9%; bottom: 23%; display: flex; align-items: end; gap: calc(var(--nansha-unit) * 1.2); height: 27%; }
-.nansha-vote-failure-bars i { display: block; width: calc(var(--nansha-unit) * 1.6); border-radius: calc(var(--nansha-unit) * .8); background: #e6f000; }
-.nansha-vote-failure-bars i:nth-child(1) { height: 65%; }
-.nansha-vote-failure-bars i:nth-child(2) { height: 100%; }
-.nansha-vote-failure-bars i:nth-child(3) { height: 47%; }
+.nansha-dialog-close { position: absolute; z-index: 3; top: calc(var(--nansha-unit) * -5.6); right: calc(var(--nansha-unit) * -1.73); display: grid; place-items: center; width: calc(var(--nansha-unit) * 5.07); height: calc(var(--nansha-unit) * 5.07); padding: 0; border: 2px solid #fff; border-radius: 50%; background: transparent; color: #fff; font-size: calc(var(--nansha-unit) * 3.2); line-height: 1; cursor: pointer; }
+.nansha-vote-result-card { position: relative; overflow: visible; background: #fff; }
+.nansha-vote-result-card.is-success { width: min(56.8vw, 426px); aspect-ratio: 1; }
+.nansha-vote-result-card.is-failure { width: min(73.47vw, 551px); aspect-ratio: 551 / 361; }
+.nansha-vote-result-image { display: block; width: 100%; height: 100%; object-fit: fill; }
