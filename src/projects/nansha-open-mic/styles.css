@@ -874,6 +874,46 @@
 .nansha-vote-video-placeholder { background: #f5f3f3; }
 .nansha-vote-work-card p { color: #fff; }
 
+/* 排行榜固定视口，只有排名列表滚动 */
+.nansha-ranking-page {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.nansha-ranking-stage {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - (var(--nansha-unit) * 11.2));
+  height: calc(100dvh - (var(--nansha-unit) * 11.2));
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: calc(var(--nansha-unit) * 12);
+}
+
+.nansha-ranking-board {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
+}
+
+.nansha-ranking-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.nansha-ranking-list::-webkit-scrollbar { display: none; }
+
+.nansha-ranking-organizers {
+  flex: 0 0 auto;
+}
+
 .nansha-poster-overlay {
   position: fixed;
   z-index: 60;
@@ -955,8 +995,9 @@
   right: 9.5%;
   bottom: 10.6%;
   display: block;
-  width: 31.5%;
-  height: auto;
+  width: 26% !important;
+  height: auto !important;
+  aspect-ratio: 1;
   background: #fff;
 }
 
