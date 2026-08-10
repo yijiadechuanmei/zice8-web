@@ -42,7 +42,11 @@ export default function NanshaOpenMicProject() {
   const [posterOpen, setPosterOpen] = useState(false)
   const [myEntry, setMyEntry] = useState(null)
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
-  const homeView = activityPhase === 'vote' ? 'vote-home' : 'upload-home'
+  const homeView = activityPhase === 'vote'
+    ? 'vote-home'
+    : activityPhase === 'publicity'
+      ? 'publicity-ranking'
+      : 'upload-home'
 
   useEffect(() => {
     let alive = true
@@ -54,7 +58,7 @@ export default function NanshaOpenMicProject() {
         const publicData = publicResult.status === 'fulfilled' ? publicResult.value : null
         const bootstrapData = bootstrapResult.status === 'fulfilled' ? bootstrapResult.value : null
         const phase = publicData?.phase || bootstrapData?.phase
-        if (!alive || !['upload', 'vote', 'closed'].includes(phase)) return
+        if (!alive || !['upload', 'vote', 'publicity', 'closed'].includes(phase)) return
         setActivityPhase(phase)
         if (bootstrapData) {
           setMyEntry(bootstrapData.myEntry || null)
@@ -64,9 +68,16 @@ export default function NanshaOpenMicProject() {
         if (phaseChanged) {
           setUploadDialog('')
           setVoteDialog('')
-          setView((current) => (current === 'rules' ? current : (phase === 'vote' ? 'vote-home' : 'upload-home')))
+          setView((current) => (
+            phase === 'publicity'
+              ? 'publicity-ranking'
+              : current === 'rules'
+                ? current
+                : (phase === 'vote' ? 'vote-home' : 'upload-home')
+          ))
         } else {
           setView((current) => {
+            if (phase === 'publicity') return 'publicity-ranking'
             if (current === 'rules') return current
             const currentIsWrongHome = phase === 'vote' ? current === 'upload-home' : current === 'vote-home' || current === 'ranking'
             return currentIsWrongHome ? (phase === 'vote' ? 'vote-home' : 'upload-home') : current
@@ -140,10 +151,11 @@ export default function NanshaOpenMicProject() {
     <main className="nansha-open-mic-page">
       {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
       {view === 'ranking' && activityPhase === 'vote' ? <RankingPage onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={() => setView('work-detail')} /> : null}
+      {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage /> : null}
       {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
       {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
-      {view === 'my' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
+      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={() => setView('my-votes')} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' ? <WorkDetailPage onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
       {view === 'work' ? <MyWorkPage onBack={goBack} onShowRules={openRules} /> : null}
@@ -160,7 +172,7 @@ export default function NanshaOpenMicProject() {
 
       {view === 'upload-home' && activityPhase !== 'vote' ? <BottomNavigation active="home" onHome={() => setView('upload-home')} onMy={() => setView('my')} /> : null}
       {view === 'my' && activityPhase === 'vote' ? <VoteBottomNavigation active="my" onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'my' && activityPhase !== 'vote' ? <BottomNavigation active="my" onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
+      {view === 'my' && activityPhase !== 'vote' && activityPhase !== 'publicity' ? <BottomNavigation active="my" onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
       {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
@@ -295,6 +307,37 @@ function RankingPage({ onShowRules, onHome, onMy, onWork }) {
         </nav>
       </main>
     </section>
+  )
+}
+
+function PublicityRankingPage() {
+  return (
+    <section className="nansha-publicity-page">
+      <header className="nansha-upload-home-header"><h1>首页</h1></header>
+      <section className="nansha-publicity-visual-wrap">
+        <img className="nansha-publicity-main-visual" src={REVIEW_MAIN_VISUAL_URL} alt="南沙新声 全民开麦" />
+      </section>
+      <section className="nansha-publicity-heading">
+        <h1>南沙新声 · 全民开麦</h1>
+        <p>投票结果排行榜</p>
+      </section>
+      <section className="nansha-publicity-board" aria-label="投票结果排行榜">
+        <div className="nansha-publicity-columns"><span>排行</span><span>作品</span><span>票数</span></div>
+        <div className="nansha-publicity-list">
+          {Array.from({ length: 7 }, (_, index) => <PublicityRankingRow key={index} rank={index + 1} />)}
+        </div>
+      </section>
+    </section>
+  )
+}
+
+function PublicityRankingRow({ rank }) {
+  return (
+    <div className={`nansha-publicity-row rank-${rank}`}>
+      <span className="nansha-publicity-number">{rank}</span>
+      <p>作品名xxxx<br />作者xxxx</p>
+      <span className="nansha-publicity-votes">0000000票&nbsp; &gt;</span>
+    </div>
   )
 }
 

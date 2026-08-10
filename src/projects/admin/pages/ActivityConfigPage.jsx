@@ -544,7 +544,7 @@ export default function ActivityConfigPage({ activity }) {
                 type="info"
                 showIcon
                 message="阶段由后台手动切换"
-                description="上传阶段仅允许报名；投票阶段仅展示审核通过的作品并开放投票；关闭阶段停止报名和投票。"
+                description="上传阶段仅允许报名；投票阶段展示审核通过的作品并开放投票；公示期仅展示投票结果排行榜；关闭阶段停止报名和投票。"
               />
               <Space wrap size={18}>
                 <label>
@@ -556,6 +556,7 @@ export default function ActivityConfigPage({ activity }) {
                       options={[
                         { label: '第一阶段：上传报名', value: 'upload' },
                         { label: '第二阶段：作品投票', value: 'vote' },
+                        { label: '第三阶段：投票结果公示', value: 'publicity' },
                         { label: '活动关闭', value: 'closed' },
                       ]}
                       onChange={(value) => setNanshaConfig((current) => ({ ...current, currentPhase: value }))}

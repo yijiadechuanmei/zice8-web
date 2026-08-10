@@ -1016,3 +1016,113 @@
   line-height: 1;
   cursor: pointer;
 }
+
+/* 公示期：仅展示投票结果排行榜 */
+.nansha-publicity-page {
+  width: min(100%, 750px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: #fff;
+}
+
+.nansha-publicity-visual-wrap {
+  width: 95.47%;
+  margin: calc(var(--nansha-unit) * 2.13) auto 0;
+}
+
+.nansha-publicity-main-visual {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--nansha-unit) * 4.27);
+}
+
+.nansha-publicity-heading {
+  margin-top: calc(var(--nansha-unit) * 6.4);
+  color: #050505;
+  text-align: center;
+}
+
+.nansha-publicity-heading h1 {
+  margin: 0;
+  font: 800 calc(var(--nansha-unit) * 5.33) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-publicity-heading p {
+  margin: calc(var(--nansha-unit) * 2.13) 0 0;
+  font: 400 calc(var(--nansha-unit) * 4.27) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-publicity-board {
+  width: 94.67%;
+  min-height: calc(100vh - (var(--nansha-unit) * 88));
+  min-height: calc(100dvh - (var(--nansha-unit) * 88));
+  margin: calc(var(--nansha-unit) * 5.47) auto 0;
+  padding-top: calc(var(--nansha-unit) * 4.27);
+  border-radius: calc(var(--nansha-unit) * 5.07) calc(var(--nansha-unit) * 5.07) 0 0;
+  background: #dedede;
+}
+
+.nansha-publicity-columns {
+  display: grid;
+  grid-template-columns: 28.3% 41% 30.7%;
+  width: 93.6%;
+  height: calc(var(--nansha-unit) * 8.67);
+  margin: 0 auto;
+}
+
+.nansha-publicity-columns span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #173b98;
+  color: #fff;
+  font: 700 calc(var(--nansha-unit) * 5.07) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-publicity-columns span:first-child {
+  border-right: calc(var(--nansha-unit) * .67) solid #fff;
+  border-radius: calc(var(--nansha-unit) * 4.27) 0 0 calc(var(--nansha-unit) * 4.27);
+}
+
+.nansha-publicity-columns span:nth-child(2) { border-right: calc(var(--nansha-unit) * .67) solid #fff; }
+.nansha-publicity-columns span:last-child { border-radius: 0 calc(var(--nansha-unit) * 4.27) calc(var(--nansha-unit) * 4.27) 0; }
+
+.nansha-publicity-list { margin-top: calc(var(--nansha-unit) * 8.27); }
+
+.nansha-publicity-row {
+  display: grid;
+  grid-template-columns: calc(var(--nansha-unit) * 24) 1fr calc(var(--nansha-unit) * 24);
+  align-items: center;
+  height: calc(var(--nansha-unit) * 10.13);
+}
+
+.nansha-publicity-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--nansha-unit) * 7.73);
+  height: calc(var(--nansha-unit) * 7.73);
+  margin-left: calc(var(--nansha-unit) * 7);
+  color: #fff;
+  font: 400 calc(var(--nansha-unit) * 5.07) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.nansha-publicity-row.rank-1 .nansha-publicity-number { background: #d90000; }
+.nansha-publicity-row.rank-2 .nansha-publicity-number { background: #f3a333; }
+.nansha-publicity-row.rank-3 .nansha-publicity-number { background: #27bfd4; }
+.nansha-publicity-row:nth-child(n + 4) .nansha-publicity-number { background: #aaa; }
+
+.nansha-publicity-row p {
+  margin: 0;
+  color: #080808;
+  font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif;
+  white-space: nowrap;
+}
+
+.nansha-publicity-votes {
+  color: #080808;
+  font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  white-space: nowrap;
+}
