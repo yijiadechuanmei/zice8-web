@@ -245,48 +245,16 @@
 .ttq-home-title {
   position: absolute;
   z-index: 3;
-  top: 426px;
+  top: 377px;
   left: 50%;
+  display: block;
   width: 1000px;
+  height: auto;
   margin: 0;
-  color: #fa621c;
-  font-family: "STHeiti SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 104px;
-  font-weight: 900;
-  line-height: 1.08;
-  letter-spacing: 8px;
-  text-align: center;
-  text-shadow: 0 4px 0 rgba(255, 255, 255, .95), 0 10px 20px rgba(218, 80, 24, .2);
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px rgba(217, 91, 27, .13));
   transform: translateX(-50%);
   animation: ttq-home-title-in .65s cubic-bezier(.18, .85, .26, 1) both;
-}
-
-.ttq-home-title::after {
-  position: absolute;
-  right: 178px;
-  bottom: -26px;
-  left: 178px;
-  height: 8px;
-  border-radius: 999px;
-  content: "";
-  background: linear-gradient(90deg, transparent, #ffb131 18%, #fa681e 50%, #ffb131 82%, transparent);
-  box-shadow: 0 4px 9px rgba(231, 105, 25, .18);
-}
-
-.ttq-home-tip {
-  position: absolute;
-  z-index: 3;
-  top: 573px;
-  left: 0;
-  width: 100%;
-  margin: 0;
-  color: #bd6941;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-align: center;
-  text-shadow: 0 2px 0 rgba(255, 255, 255, .82);
-  animation: ttq-home-title-in .65s .1s cubic-bezier(.18, .85, .26, 1) both;
 }
 
 .ttq-home-levels { position: absolute; inset: 0; z-index: 2; }
