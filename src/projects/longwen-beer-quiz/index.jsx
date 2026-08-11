@@ -30,6 +30,11 @@ export default function LongwenBeerQuizProject({ routeParams }) {
   const inputRef = useRef(null)
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
 
+  useEffect(() => {
+    document.body.classList.add('lw-lock-scroll')
+    return () => document.body.classList.remove('lw-lock-scroll')
+  }, [])
+
   useWechatShare(activityKey, publicConfig)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
