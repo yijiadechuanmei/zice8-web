@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import {
+  clearLongwenBeerQuizData,
   clearSongWishLotteryDraws,
   getActivityConfig,
   getArtistCallLotteryPrizes,
@@ -75,6 +76,7 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10 })
   const [nanshaConfigSaving, setNanshaConfigSaving] = useState(false)
   const [nanshaResetting, setNanshaResetting] = useState(false)
+  const [longwenClearing, setLongwenClearing] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -223,6 +225,22 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanshaResetting(false)
+    }
+  }
+
+  async function handleClearLongwenBeerQuizData() {
+    setLongwenClearing(true)
+    setError('')
+    try {
+      const result = await clearLongwenBeerQuizData(activity.activityKey)
+      const cleared = result?.cleared || {}
+      message.success(`已清空 ${cleared.records || 0} 条答题记录、${cleared.participants || 0} 条参与记录`)
+    } catch (err) {
+      const text = err.message || '清空龙文答题数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setLongwenClearing(false)
     }
   }
 
@@ -607,6 +625,23 @@ export default function ActivityConfigPage({ activity }) {
                   </Popconfirm>
                 </Space>
               </Card>
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'longwen_beer_quiz' ? (
+          <Card size="small" title="答题数据管理">
+            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+              <Text type="secondary">清空本活动的全部答题、中奖和核销记录，同时移除参与记录；操作审计会保留。清空后用户可以重新参与。</Text>
+              <Popconfirm
+                title="确认清空龙文啤酒答题数据？"
+                description="该操作不可恢复，已答题和已核销用户均可重新参与。"
+                okText="确认清空"
+                cancelText="取消"
+                onConfirm={handleClearLongwenBeerQuizData}
+              >
+                <Button danger loading={longwenClearing}>清空答题数据</Button>
+              </Popconfirm>
             </Space>
           </Card>
         ) : null}

@@ -95,7 +95,7 @@ export default function LongwenBeerQuizProject({ routeParams }) {
     setError('')
     try {
       setState(await submitLongwenBeerAnswer(activityKey, {
-        questionNo: state.currentQuestion.no,
+        questionNo: Number(state.currentQuestion.no),
         selectedOption,
       }))
     } catch (requestError) {
@@ -131,7 +131,7 @@ export default function LongwenBeerQuizProject({ routeParams }) {
         {!loading && error && !state ? <ErrorState error={error} /> : null}
         {!loading && state?.phase === 'home' ? <HomePage config={config} onStart={start} loading={submitting} /> : null}
         {!loading && state?.phase === 'quiz' ? (
-          <QuizPage state={state} selectedOption={selectedOption} onSelect={setSelectedOption} onSubmit={submitAnswer} loading={submitting} />
+          <QuizPage config={config} state={state} selectedOption={selectedOption} onSelect={setSelectedOption} onSubmit={submitAnswer} loading={submitting} />
         ) : null}
         {!loading && state?.phase === 'result' ? (
           <ResultPage config={config} state={state} onRedeem={() => setRedeemOpen(true)} />
@@ -168,11 +168,11 @@ function HomePage({ config, onStart, loading }) {
   )
 }
 
-function QuizPage({ state, selectedOption, onSelect, onSubmit, loading }) {
+function QuizPage({ config, state, selectedOption, onSelect, onSubmit, loading }) {
   const question = state.currentQuestion
   return (
     <div className="lw-content lw-quiz-content">
-      <p className="lw-eyebrow">龙文请你喝啤酒</p>
+      <ImageAsset className="lw-quiz-logo" src={assetUrl(config.assetsBaseUrl, config.homeBannerImage)} alt="百威黑金" />
       <div className="lw-progress" aria-label={`第 ${question.no} 题，共 ${state.totalQuestions} 题`}>
         <span>QUESTION {String(question.no).padStart(2, '0')}</span>
         <strong>{question.no} / {state.totalQuestions}</strong>
