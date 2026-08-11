@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useState } from 'react'
-import { API_BASE_URL, getToken, removeToken } from '../api/request'
+import { API_BASE_URL, getToken, removeToken, setToken } from '../api/request'
 import { buildTokenDebug, debugLog, setQuizAuthDebugState } from '../debug/quizAuthDebug'
-import { getQueryParam, isWechatBrowser, sanitizeUrlForWechat } from '../utils/url'
+import { getQueryParam, getTokenFromUrl, isWechatBrowser, removeQueryParam, sanitizeUrlForWechat } from '../utils/url'
 
 const REAUTH_LIMIT = 2
 const AUTH_NONCE_STORAGE_PREFIX = 'wechat_auth_nonce'
@@ -143,6 +143,17 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
+
+    // OAuth callback returns the signed session token in the query string.
+    // Persist it before any authentication decision, otherwise the returned
+    // page immediately starts a second OAuth round and eventually reports a
+    // false authorization failure.
+    const callbackToken = getTokenFromUrl()
+    if (callbackToken) {
+      setToken(callbackToken)
+      removeQueryParam('token')
+      clearReauthAttempts(activityKey)
+    }
 
     const inWechat = isWechatBrowser()
     const accessMode = getAccessMode(publicConfig)
