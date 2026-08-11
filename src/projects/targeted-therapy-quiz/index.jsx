@@ -19,6 +19,7 @@ import {
 import smileFace from './assets/smile-face.png'
 import sadFace from './assets/sad-face.png'
 import quizMascot from './assets/quiz-mascot.png'
+import homeRibbonConfetti from './assets/home-ribbon-confetti.png'
 import './styles.css'
 
 const CATEGORY_ICONS = {
@@ -65,7 +66,6 @@ function useStageScale() {
 export default function TargetedTherapyQuizProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || TARGETED_THERAPY_QUIZ_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
   const [question, setQuestion] = useState(null)
   const [selectedOption, setSelectedOption] = useState('')
   const [result, setResult] = useState(null)
@@ -143,17 +143,6 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     })
   }, [activityKey, pageState, publicConfig])
 
-  function openCategoryDialog() {
-    setCategoryError('')
-    setCategoryDialogOpen(true)
-    trackEvent({
-      activityKey,
-      eventType: 'enter_activity',
-      page: '/targeted-therapy-quiz',
-      extra: { eventName: 'open_category_dialog' },
-    })
-  }
-
   async function chooseCategory(category) {
     if (loadingQuestion) return
     setLoadingQuestion(true)
@@ -163,7 +152,6 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
       setQuestion(nextQuestion)
       setSelectedOption('')
       setResult(null)
-      setCategoryDialogOpen(false)
       trackEvent({
         activityKey,
         eventType: 'submit_profile',
@@ -207,14 +195,12 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
-    setCategoryDialogOpen(true)
   }
 
   function returnHome() {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
-    setCategoryDialogOpen(false)
   }
 
   return (
@@ -227,7 +213,14 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
             backgroundImage: `url("${pageState === 'home' ? homeBackground : questionBackground}")`,
           }}
         >
-          {pageState === 'home' ? <HomePage onStart={openCategoryDialog} /> : null}
+          {pageState === 'home' ? (
+            <HomePage
+              categories={categories}
+              error={categoryError}
+              loading={loadingQuestion}
+              onChoose={chooseCategory}
+            />
+          ) : null}
           {pageState === 'question' && question ? (
             <QuestionPage
               question={question}
@@ -235,15 +228,6 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
               onSelect={setSelectedOption}
               onSubmit={submitQuestion}
               submitting={submitting}
-            />
-          ) : null}
-          {categoryDialogOpen ? (
-            <CategoryDialog
-              categories={categories}
-              error={categoryError}
-              loading={loadingQuestion}
-              onChoose={chooseCategory}
-              onClose={() => setCategoryDialogOpen(false)}
             />
           ) : null}
           {result ? <ResultDialog result={result} onClose={returnHome} onRetest={retest} /> : null}
@@ -254,12 +238,31 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
   )
 }
 
-function HomePage({ onStart }) {
+function HomePage({ categories, error, loading, onChoose }) {
   return (
     <section className="ttq-home" aria-label="首页">
-      <button className="ttq-primary-button ttq-home-start" type="button" onClick={onStart}>
-        <span>开始闯关</span>
-      </button>
+      <img className="ttq-home-ribbon-confetti" src={homeRibbonConfetti} alt="" aria-hidden="true" />
+      <h1 className="ttq-home-title">请选择您的关卡</h1>
+      <p className="ttq-home-tip">点击图标，开启随机知识挑战</p>
+      <div className="ttq-home-levels" aria-label="选择答题关卡">
+        {categories.map((category, index) => (
+          <button
+            className={`ttq-home-level ttq-home-level--${CATEGORY_ICONS[category] || 'lung'}`}
+            key={category}
+            style={{ '--ttq-level-index': index }}
+            type="button"
+            onClick={() => onChoose(category)}
+            disabled={loading}
+            aria-label={`选择${category}关卡`}
+          >
+            <span className="ttq-home-level-badge">{index + 1}</span>
+            <CategoryIcon type={CATEGORY_ICONS[category] || 'lung'} />
+            <strong>{category}</strong>
+            <small>{loading ? '正在开启...' : '点击闯关'}</small>
+          </button>
+        ))}
+      </div>
+      {error ? <p className="ttq-home-error" role="alert">{error}</p> : null}
     </section>
   )
 }
@@ -323,44 +326,6 @@ function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting
         <p className="ttq-submit-tip">选好答案，向闯关终点出发</p>
       </div>
     </section>
-  )
-}
-
-function CategoryDialog({ categories, error, loading, onChoose, onClose }) {
-  const dialogRef = useRef(null)
-
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
-
-  return (
-    <div className="ttq-overlay" role="dialog" aria-modal="true" aria-labelledby="ttq-category-title" aria-describedby="ttq-category-description">
-      <section ref={dialogRef} className="ttq-category-dialog" tabIndex={-1}>
-        <button className="ttq-close-button" type="button" onClick={onClose} aria-label="关闭"><CloseOutlined /></button>
-        <p className="ttq-category-eyebrow">准备出发</p>
-        <h2 id="ttq-category-title">请选择您的关卡</h2>
-        <span className="ttq-title-decoration" aria-hidden="true" />
-        <p className="ttq-category-description" id="ttq-category-description">每个关卡都会随机出现一道知识题</p>
-        <div className="ttq-category-list">
-          {categories.map((category, index) => (
-            <button
-              className="ttq-category-card"
-              key={category}
-              style={{ '--ttq-card-index': index }}
-              type="button"
-              onClick={() => onChoose(category)}
-              disabled={loading}
-            >
-              <span className="ttq-level-number">第 {index + 1} 关</span>
-              <CategoryIcon type={CATEGORY_ICONS[category] || 'lung'} />
-              <strong>{category}</strong>
-              <small>{loading ? '正在开启...' : '点击开启挑战'}</small>
-            </button>
-          ))}
-        </div>
-        {error ? <p className="ttq-category-error" role="alert">{error}</p> : null}
-      </section>
-    </div>
   )
 }
 
