@@ -139,14 +139,15 @@ export default function LongwenBeerQuizProject({ routeParams }) {
           <QuizPage config={config} state={state} selectedOption={selectedOption} onSelect={setSelectedOption} onSubmit={submitAnswer} loading={submitting} />
         ) : null}
         {!loading && state?.phase === 'result' ? (
-          <ResultPage config={config} state={state} onRedeem={() => setRedeemOpen(true)} />
+          <ResultPage config={config} state={state} onRedeem={() => { setError(''); setRedeemOpen(true) }} />
         ) : null}
-        {error && state ? <p className="lw-inline-error" role="alert">{error}</p> : null}
+        {error && state && !redeemOpen ? <p className="lw-inline-error" role="alert">{error}</p> : null}
         {redeemOpen ? (
           <RedeemDialog
             code={verificationCode}
+            error={error}
             onCodeChange={setVerificationCode}
-            onClose={() => setRedeemOpen(false)}
+            onClose={() => { setError(''); setRedeemOpen(false) }}
             onSubmit={redeem}
             submitting={submitting}
             inputRef={inputRef}
@@ -241,17 +242,20 @@ function ResultPage({ config, state, onRedeem }) {
   )
 }
 
-function RedeemDialog({ code, onCodeChange, onClose, onSubmit, submitting, inputRef }) {
+function RedeemDialog({ code, error, onCodeChange, onClose, onSubmit, submitting, inputRef }) {
   return (
     <div className="lw-dialog-backdrop" role="presentation">
-      <form className="lw-dialog" onSubmit={onSubmit} role="dialog" aria-modal="true" aria-labelledby="redeem-title">
-        <button className="lw-dialog-close" type="button" onClick={onClose} aria-label="关闭核销窗口"><CloseOutlined /></button>
-        <p className="lw-eyebrow">PRIZE REDEMPTION</p>
-        <h2 id="redeem-title">核销奖品</h2>
-        <label htmlFor="longwen-verification-code">请输入工作人员提供的核销码</label>
-        <input id="longwen-verification-code" ref={inputRef} value={code} onChange={(event) => onCodeChange(event.target.value)} autoComplete="off" />
-        <button className="lw-action-button" type="submit" disabled={!code.trim() || submitting}>{submitting ? <LoadingOutlined /> : '确认核销'}</button>
-      </form>
+      <div className="lw-dialog-stack">
+        {error ? <p className="lw-dialog-error" role="alert">{error}</p> : null}
+        <form className="lw-dialog" onSubmit={onSubmit} role="dialog" aria-modal="true" aria-labelledby="redeem-title">
+          <button className="lw-dialog-close" type="button" onClick={onClose} aria-label="关闭核销窗口"><CloseOutlined /></button>
+          <p className="lw-eyebrow">PRIZE REDEMPTION</p>
+          <h2 id="redeem-title">核销奖品</h2>
+          <label htmlFor="longwen-verification-code">请输入工作人员提供的核销码</label>
+          <input id="longwen-verification-code" ref={inputRef} value={code} onChange={(event) => onCodeChange(event.target.value)} autoComplete="off" />
+          <button className="lw-action-button" type="submit" disabled={!code.trim() || submitting}>{submitting ? <LoadingOutlined /> : '确认核销'}</button>
+        </form>
+      </div>
     </div>
   )
 }
