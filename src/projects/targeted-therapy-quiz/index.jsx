@@ -19,7 +19,6 @@ import {
 import smileFace from './assets/smile-face.png'
 import sadFace from './assets/sad-face.png'
 import quizMascot from './assets/quiz-mascot.png'
-import homeRibbonConfetti from './assets/home-ribbon-confetti.png'
 import './styles.css'
 
 const CATEGORY_ICONS = {
@@ -241,7 +240,10 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
 function HomePage({ categories, error, loading, onChoose }) {
   return (
     <section className="ttq-home" aria-label="首页">
-      <img className="ttq-home-ribbon-confetti" src={homeRibbonConfetti} alt="" aria-hidden="true" />
+      <div className="ttq-home-confetti" aria-hidden="true">
+        <i /><i /><i /><i /><i /><i /><i />
+        <i /><i /><i /><i /><i /><i /><i />
+      </div>
       <h1 className="ttq-home-title">请选择您的关卡</h1>
       <p className="ttq-home-tip">点击图标，开启随机知识挑战</p>
       <div className="ttq-home-levels" aria-label="选择答题关卡">

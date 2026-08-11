@@ -76,15 +76,170 @@
   pointer-events: none;
 }
 
-.ttq-home-ribbon-confetti {
+.ttq-home-confetti {
   position: absolute;
   z-index: 1;
-  top: 115px;
-  left: 42px;
-  width: 1836px;
-  height: auto;
+  inset: 0;
   pointer-events: none;
-  animation: ttq-home-confetti-drift 8s ease-in-out infinite;
+}
+
+.ttq-home-confetti i {
+  --ttq-confetti-color: #ff8d35;
+  --ttq-confetti-rotate: 0deg;
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 34px;
+  border-radius: 4px 13px 4px 13px;
+  background: linear-gradient(135deg, #ffd06b, var(--ttq-confetti-color));
+  box-shadow: 0 5px 9px color-mix(in srgb, var(--ttq-confetti-color) 24%, transparent);
+  transform: rotate(var(--ttq-confetti-rotate));
+  animation: ttq-home-confetti-float 5.6s ease-in-out infinite;
+}
+
+.ttq-home-confetti i:nth-child(1) {
+  --ttq-confetti-color: #f36b3d;
+  --ttq-confetti-rotate: -38deg;
+  top: 140px;
+  left: 206px;
+  width: 19px;
+  height: 38px;
+}
+
+.ttq-home-confetti i:nth-child(2) {
+  --ttq-confetti-color: #58aee4;
+  --ttq-confetti-rotate: 31deg;
+  top: 144px;
+  left: 332px;
+  width: 13px;
+  height: 28px;
+  animation-delay: -1.6s;
+}
+
+.ttq-home-confetti i:nth-child(3) {
+  --ttq-confetti-color: #ffd15e;
+  --ttq-confetti-rotate: -26deg;
+  top: 183px;
+  left: 467px;
+  width: 14px;
+  height: 25px;
+  animation-delay: -3.2s;
+}
+
+.ttq-home-confetti i:nth-child(4) {
+  --ttq-confetti-color: #f25a49;
+  --ttq-confetti-rotate: -23deg;
+  top: 127px;
+  left: 760px;
+  width: 27px;
+  height: 18px;
+  animation-delay: -.7s;
+}
+
+.ttq-home-confetti i:nth-child(5) {
+  --ttq-confetti-color: #f7bb32;
+  --ttq-confetti-rotate: 38deg;
+  top: 184px;
+  left: 1040px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  animation-delay: -2.4s;
+}
+
+.ttq-home-confetti i:nth-child(6) {
+  --ttq-confetti-color: #5aabdf;
+  --ttq-confetti-rotate: 36deg;
+  top: 145px;
+  right: 294px;
+  width: 28px;
+  height: 20px;
+  animation-delay: -4.1s;
+}
+
+.ttq-home-confetti i:nth-child(7) {
+  --ttq-confetti-color: #ff9c36;
+  --ttq-confetti-rotate: 0deg;
+  top: 230px;
+  right: 206px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  animation-delay: -1.1s;
+}
+
+.ttq-home-confetti i:nth-child(8) {
+  --ttq-confetti-color: #f2b736;
+  --ttq-confetti-rotate: 0deg;
+  top: 195px;
+  right: 790px;
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 61% 35%, 100% 50%, 61% 64%, 50% 100%, 38% 64%, 0 50%, 38% 35%);
+  animation-delay: -3.7s;
+}
+
+.ttq-home-confetti i:nth-child(9) {
+  --ttq-confetti-color: #f56c36;
+  --ttq-confetti-rotate: 52deg;
+  bottom: 265px;
+  left: 134px;
+  width: 26px;
+  height: 38px;
+  animation-delay: -2.8s;
+}
+
+.ttq-home-confetti i:nth-child(10) {
+  --ttq-confetti-color: #ffd266;
+  --ttq-confetti-rotate: -32deg;
+  bottom: 137px;
+  left: 594px;
+  width: 16px;
+  height: 26px;
+  animation-delay: -.4s;
+}
+
+.ttq-home-confetti i:nth-child(11) {
+  --ttq-confetti-color: #ff9b3c;
+  --ttq-confetti-rotate: 0deg;
+  right: 365px;
+  bottom: 125px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  animation-delay: -3.6s;
+}
+
+.ttq-home-confetti i:nth-child(12) {
+  --ttq-confetti-color: #5bb6e9;
+  --ttq-confetti-rotate: 35deg;
+  right: 115px;
+  bottom: 380px;
+  width: 16px;
+  height: 28px;
+  animation-delay: -1.9s;
+}
+
+.ttq-home-confetti i:nth-child(13) {
+  --ttq-confetti-color: #f26a44;
+  --ttq-confetti-rotate: -18deg;
+  right: 480px;
+  bottom: 298px;
+  width: 18px;
+  height: 29px;
+  animation-delay: -4.6s;
+}
+
+.ttq-home-confetti i:nth-child(14) {
+  --ttq-confetti-color: #ffd157;
+  --ttq-confetti-rotate: 8deg;
+  right: 245px;
+  bottom: 160px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  animation-delay: -2.2s;
 }
 
 .ttq-home-title {
@@ -950,9 +1105,9 @@
   to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
-@keyframes ttq-home-confetti-drift {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-10px) rotate(.4deg); }
+@keyframes ttq-home-confetti-float {
+  0%, 100% { translate: 0 0; rotate: var(--ttq-confetti-rotate); }
+  50% { translate: 0 -13px; rotate: calc(var(--ttq-confetti-rotate) + 8deg); }
 }
 
 @keyframes ttq-home-level-float {
