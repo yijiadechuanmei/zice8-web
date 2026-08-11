@@ -37,9 +37,10 @@ export function uploadFileToOss(policy, file, onProgress) {
         resolve(policy.fileUrl)
         return
       }
-      reject(new Error(`文件上传失败（${xhr.status || '网络异常'}）`))
+      const requestId = xhr.getResponseHeader('x-oss-request-id')
+      reject(new Error(`视频上传失败（OSS ${xhr.status || '网络异常'}${requestId ? `，请求号：${requestId}` : ''}）`))
     }
-    xhr.onerror = () => reject(new Error('文件上传失败，请检查网络后重试'))
+    xhr.onerror = () => reject(new Error('视频上传失败，请检查网络或重新选择视频后重试'))
     xhr.onabort = () => reject(new Error('文件上传已取消'))
     xhr.send(file)
   })

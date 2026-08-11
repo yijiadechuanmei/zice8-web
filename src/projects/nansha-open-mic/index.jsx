@@ -66,6 +66,7 @@ export default function NanshaOpenMicProject() {
   const [voteDialog, setVoteDialog] = useState('')
   const [posterOpen, setPosterOpen] = useState(false)
   const [myEntry, setMyEntry] = useState(null)
+  const [myProfile, setMyProfile] = useState({ nickname: '微信用户', avatar: '' })
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
   const [entries, setEntries] = useState([])
   const [myVotes, setMyVotes] = useState([])
@@ -109,6 +110,7 @@ export default function NanshaOpenMicProject() {
         setActivityPhase(phase)
         if (bootstrapData) {
           setMyEntry(bootstrapData.myEntry || null)
+          setMyProfile(bootstrapData.profile || { nickname: '微信用户', avatar: '' })
           setVoteQuota(bootstrapData.voteQuota || { remaining: bootstrapData.rules?.dailyVoteLimit || 10 })
         }
         if (bootstrapData && ['vote', 'publicity'].includes(phase)) {
@@ -274,7 +276,7 @@ export default function NanshaOpenMicProject() {
       {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
       {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
-      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
+      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} onBack={goBack} onShowRules={openRules} /> : null}
@@ -474,7 +476,7 @@ function RankingRow({ rank, entry, onWork }) {
   )
 }
 
-function MyPage({ activityPhase, myEntry, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
+function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
   const isVotePhase = activityPhase === 'vote'
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
   const workVotes = String(myEntry?.voteCount ?? 0).padStart(6, '0')
@@ -483,8 +485,8 @@ function MyPage({ activityPhase, myEntry, voteQuota, onBack, onShowRules, onOpen
     <section className="nansha-sub-page nansha-my-page">
       <PageHeader title="我的" onBack={onBack} />
       <section className="nansha-profile-banner">
-        <span className="nansha-profile-avatar" aria-hidden="true"><i /></span>
-        <span className="nansha-profile-name">昵称</span>
+        <span className={`nansha-profile-avatar${profile?.avatar ? ' has-image' : ''}`} aria-hidden="true">{profile?.avatar ? <img src={profile.avatar} alt="" referrerPolicy="no-referrer" /> : <i />}</span>
+        <span className="nansha-profile-name">{profile?.nickname || '微信用户'}</span>
         <img className="nansha-profile-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
       </section>
       <ActivityRulesTrigger onClick={onShowRules} fixed />
@@ -645,6 +647,7 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, cove
           {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
           <b>{coverGenerating ? '正在生成封面…' : selectedVideoName || '+'}</b>
           {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在生成封面…' : submitting ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '上传后自动生成封面'}</span> : null}
+          {selectedVideoName && submitting && !coverGenerating ? <span className="nansha-video-upload-progress" role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><span>正在上传 {uploadProgress}%</span><i><em style={{ width: `${Math.max(0, Math.min(uploadProgress, 100))}%` }} /></i></span> : null}
         </label>
         <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
         <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
