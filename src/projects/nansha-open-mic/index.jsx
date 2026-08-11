@@ -471,7 +471,7 @@ function VoteHome({ visualUrl, entries, voteQuota, onShowRules, onRanking, onMy,
             <article className="nansha-vote-work-card" key={work.id}>
               <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.workName}`} onClick={() => onWork(work)} style={work.coverUrl ? { backgroundImage: `url(${work.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><CaretRightFilled /></button>
               <p>
-                <span className="nansha-work-card-title-line">作品名称：<span className="nansha-work-card-title" title={work.workName}>{work.workName}</span></span>
+                <span className="nansha-work-card-title-line"><span className="nansha-work-card-title-label">作品名称：</span><span className="nansha-work-card-title" title={work.workName}>{work.workName}</span></span>
                 <span>作者：{work.authorName}</span>
                 <span>票数：{work.voteCount || 0}票</span>
               </p>

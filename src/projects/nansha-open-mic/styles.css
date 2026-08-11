@@ -427,8 +427,8 @@
 .nansha-vote-video-placeholder .anticon { transform: translateX(8%); }
 .nansha-vote-work-card p { margin: calc(var(--nansha-unit) * 1.73) 0 0; color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-vote-work-card p > span { display: block; white-space: nowrap; }
-.nansha-vote-work-card .nansha-work-card-title-line { display: flex; min-width: 0; }
-.nansha-vote-work-card .nansha-work-card-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nansha-vote-work-card .nansha-work-card-title-line { display: grid; grid-template-columns: max-content minmax(0, 1fr); width: 100%; min-width: 0; }
+.nansha-vote-work-card .nansha-work-card-title { display: block; width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .nansha-vote-bottom-nav { position: fixed; z-index: 5; bottom: 0; left: 50%; display: grid; grid-template-columns: repeat(3, 1fr); width: min(100%, 750px); height: calc(var(--nansha-unit) * 10.13 + env(safe-area-inset-bottom)); transform: translateX(-50%); }
 .nansha-vote-bottom-nav button { display: flex; align-items: center; justify-content: center; gap: calc(var(--nansha-unit) * 1.2); min-width: 0; padding: 0 0 env(safe-area-inset-bottom); border: 0; border-right: calc(var(--nansha-unit) * .67) solid #fff; background: #b8b8b8; color: #fff; font: 700 calc(var(--nansha-unit) * 5.07) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; }
