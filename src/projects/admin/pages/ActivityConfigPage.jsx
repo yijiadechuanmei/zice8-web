@@ -11,6 +11,7 @@ import {
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
   revokeSongWishLotteryDraw,
+  resetNanshaOpenMicData,
   saveArtistCallLotteryPrizes,
   saveNanhaiChallengeDrawAutoControl,
   saveNanhaiChallengePrizes,
@@ -73,6 +74,7 @@ export default function ActivityConfigPage({ activity }) {
   const [clearingDraws, setClearingDraws] = useState(false)
   const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10 })
   const [nanshaConfigSaving, setNanshaConfigSaving] = useState(false)
+  const [nanshaResetting, setNanshaResetting] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -205,6 +207,22 @@ export default function ActivityConfigPage({ activity }) {
       setError(err.message || '南沙活动配置保存失败')
     } finally {
       setNanshaConfigSaving(false)
+    }
+  }
+
+  async function handleResetNanshaData() {
+    setNanshaResetting(true)
+    setError('')
+    try {
+      const result = await resetNanshaOpenMicData(activity.activityKey)
+      const cleared = result?.cleared || {}
+      message.success(`已清空报名 ${cleared.entries || 0} 条、投票 ${cleared.votes || 0} 条`)
+    } catch (err) {
+      const text = err.message || '清空南沙活动数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanshaResetting(false)
     }
   }
 
@@ -575,6 +593,20 @@ export default function ActivityConfigPage({ activity }) {
                   </div>
                 </label>
               </Space>
+              <Card size="small" type="inner" title="危险操作">
+                <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                  <Text type="secondary">清空本活动全部报名作品、审核记录、投票记录和每日票数；活动阶段、每日票数配置及 OSS 原始视频文件会保留。</Text>
+                  <Popconfirm
+                    title="确认清空南沙新声全部业务数据？"
+                    description="该操作不可恢复，清空后所有用户均可重新报名和投票。"
+                    okText="确认清空"
+                    cancelText="取消"
+                    onConfirm={handleResetNanshaData}
+                  >
+                    <Button danger loading={nanshaResetting}>清空活动数据</Button>
+                  </Popconfirm>
+                </Space>
+              </Card>
             </Space>
           </Card>
         ) : null}

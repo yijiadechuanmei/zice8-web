@@ -158,6 +158,13 @@ export function updateNanshaOpenMicConfig(activityKey, payload) {
   })
 }
 
+export function resetNanshaOpenMicData(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/reset-data`, {
+    method: 'POST',
+    body: JSON.stringify({ confirm: 'CLEAR_NANSHA_OPEN_MIC_DATA' }),
+  })
+}
+
 export function reviewNanshaOpenMicEntry(activityKey, entryId, payload) {
   return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${entryId}/review`, {
     method: 'POST',
