@@ -557,7 +557,7 @@ function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
     <section className="nansha-sub-page nansha-work-detail-page">
       <PageHeader title={entry.workName} onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed label="投票说明" />
-      <video className="nansha-video-placeholder" src={entry.videoUrl} poster={entry.coverUrl} controls playsInline preload="metadata" />
+      <video className="nansha-video-placeholder" poster={entry.coverUrl} controls playsInline webkit-playsinline="true" preload="metadata"><source src={entry.videoUrl} type="video/mp4" /></video>
       <section className="nansha-work-detail-info">
         <h1>{entry.workName}</h1>
         <p>{entry.authorName}</p>
@@ -595,7 +595,7 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <video className="nansha-video-placeholder" src={entry.videoUrl} poster={entry.coverUrl} controls playsInline preload="metadata" />
+      <video className="nansha-video-placeholder" poster={entry.coverUrl} controls playsInline webkit-playsinline="true" preload="metadata"><source src={entry.videoUrl} type="video/mp4" /></video>
       <section className="nansha-work-info">
         <h1>{entry.workName}</h1>
         <p className="nansha-work-status">作品状态：{entry.reviewStatus === 'published' ? '审核成功' : entry.reviewStatus === 'rejected' ? '未通过' : '审核中'}</p>
