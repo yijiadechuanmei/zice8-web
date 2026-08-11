@@ -30,7 +30,6 @@ body.lw-lock-scroll { overflow: hidden; }
 .lw-quiz-content .lw-question-title { margin-bottom: 4vh; }
 .lw-options { display: grid; width: 100%; gap: 16px; }
 .lw-option { display: flex; align-items: center; min-height: 68px; padding: 12px 19px; border: 1px solid rgba(224,183,69,.58); border-radius: 4px; background: rgba(2,9,16,.7); color: #fff; text-align: left; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
-.lw-option:hover { border-color: #ffe381; background: rgba(177,128,16,.25); }
 .lw-option.is-selected { border-color: #ffe581; background: linear-gradient(90deg, rgba(203,151,30,.72), rgba(68,44,4,.75)); box-shadow: inset 0 0 0 1px rgba(255,239,161,.44), 0 4px 20px rgba(196,142,25,.24); }
 .lw-option b { display: grid; flex: 0 0 auto; width: 30px; height: 30px; margin-right: 13px; place-items: center; border: 1px solid currentColor; border-radius: 50%; color: #f3ce5a; font-size: 14px; }
 .lw-option.is-selected b { color: #201706; background: #ffe07b; }
@@ -45,4 +44,5 @@ body.lw-lock-scroll { overflow: hidden; }
 @keyframes lw-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes lw-button-glint { 0%, 65% { transform: translateX(0) skewX(-22deg); opacity: 0; } 72% { opacity: .82; } 91%, 100% { transform: translateX(560%) skewX(-22deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .lw-content { animation: none; }.lw-option, .lw-action-button, .lw-image-start { transition: none; }.lw-image-start::after { animation: none; } }
+@media (hover: hover) and (pointer: fine) { .lw-option:hover { border-color: #ffe381; background: rgba(177,128,16,.25); } }
 @media (min-width: 751px) { .lw-page { box-shadow: 0 0 50px rgba(0,0,0,.5); } }
