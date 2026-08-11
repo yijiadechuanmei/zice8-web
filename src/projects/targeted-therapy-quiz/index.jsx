@@ -66,6 +66,7 @@ function useStageScale() {
 export default function TargetedTherapyQuizProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || TARGETED_THERAPY_QUIZ_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
+  const [screen, setScreen] = useState('landing')
   const [question, setQuestion] = useState(null)
   const [selectedOption, setSelectedOption] = useState('')
   const [result, setResult] = useState(null)
@@ -76,11 +77,12 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
   const stageScale = useStageScale()
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig])
   const categories = config.categories || []
+  const landingBackground = assetUrl(config.assetsBaseUrl, config.landingBackgroundImage)
   const homeBackground = assetUrl(config.assetsBaseUrl, config.homeBackgroundImage)
   const questionBackground = assetUrl(config.assetsBaseUrl, config.questionBackgroundImage)
   const correctSound = assetUrl(config.assetsBaseUrl, config.correctSound)
   const incorrectSound = assetUrl(config.assetsBaseUrl, config.incorrectSound)
-  const pageState = question ? 'question' : 'home'
+  const pageState = question ? 'question' : screen
   const bgmConfig = publicConfig?.bgmConfig
 
   useWechatShare(activityKey, publicConfig)
@@ -165,6 +167,17 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     }
   }
 
+  function openLevelSelect() {
+    setCategoryError('')
+    setScreen('levels')
+    trackEvent({
+      activityKey,
+      eventType: 'enter_activity',
+      page: '/targeted-therapy-quiz',
+      extra: { eventName: 'start_challenge' },
+    })
+  }
+
   async function submitQuestion() {
     if (!selectedOption || !question || submitting) return
     setSubmitting(true)
@@ -195,12 +208,14 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
+    setScreen('landing')
   }
 
   function returnHome() {
     setQuestion(null)
     setSelectedOption('')
     setResult(null)
+    setScreen('landing')
   }
 
   return (
@@ -210,10 +225,11 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
           className={`ttq-stage ttq-stage--${pageState}`}
           style={{
             transform: `scale(${stageScale})`,
-            backgroundImage: `url("${pageState === 'home' ? homeBackground : questionBackground}")`,
+            backgroundImage: `url("${pageState === 'landing' ? landingBackground : pageState === 'levels' ? homeBackground : questionBackground}")`,
           }}
         >
-          {pageState === 'home' ? (
+          {pageState === 'landing' ? <LandingPage onStart={openLevelSelect} /> : null}
+          {pageState === 'levels' ? (
             <HomePage
               categories={categories}
               error={categoryError}
@@ -235,6 +251,16 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
       </div>
       <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
     </main>
+  )
+}
+
+function LandingPage({ onStart }) {
+  return (
+    <section className="ttq-landing" aria-label="首页">
+      <button className="ttq-primary-button ttq-landing-start" type="button" onClick={onStart}>
+        <span>开始闯关</span>
+      </button>
+    </section>
   )
 }
 

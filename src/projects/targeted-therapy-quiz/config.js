@@ -5,6 +5,7 @@ export const TARGETED_THERAPY_QUIZ_ASSETS_BASE_URL =
 
 export const DEFAULT_CONFIG = {
   assetsBaseUrl: TARGETED_THERAPY_QUIZ_ASSETS_BASE_URL,
+  landingBackgroundImage: 'b11.png',
   homeBackgroundImage: 'bj1.png',
   questionBackgroundImage: 'bj2.png',
   correctSound: 'd.mp3',

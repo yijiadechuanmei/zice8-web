@@ -58,11 +58,33 @@
   background: radial-gradient(circle at 40% 38%, rgba(72, 199, 185, .16), rgba(222, 249, 245, .08) 60%, transparent 72%);
 }
 
+.ttq-landing,
 .ttq-home,
 .ttq-question-page {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.ttq-landing-start {
+  position: absolute;
+  top: 790px;
+  left: 725px;
+  min-width: 470px;
+  animation: ttq-button-breathe 4.8s ease-in-out infinite;
+}
+
+.ttq-landing-start::after {
+  position: absolute;
+  top: -19px;
+  right: -18px;
+  width: 38px;
+  height: 38px;
+  content: "";
+  background: #ffd65a;
+  clip-path: polygon(50% 0, 62% 35%, 100% 50%, 62% 63%, 50% 100%, 38% 63%, 0 50%, 38% 35%);
+  filter: drop-shadow(0 4px 6px rgba(205, 85, 10, .25));
+  animation: ttq-spark-twinkle 2.4s ease-in-out infinite;
 }
 
 .ttq-home::before {
