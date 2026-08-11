@@ -435,9 +435,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       const videoColumn = columns.find((column) => column.key === 'videoUrl' || column.dataIndex === 'videoUrl')
       if (videoColumn) {
         videoColumn.width = 260
-        videoColumn.render = (value, row) => value ? (
-          <video src={value} poster={row.coverUrl} controls preload="none" playsInline style={{ width: 230, maxHeight: 180, borderRadius: 6, background: '#000' }} />
-        ) : '-'
+        videoColumn.render = (value, row) => value ? <NanshaVideoPreview videoUrl={value} coverUrl={row.coverUrl} /> : '-'
       }
       const statusColumn = columns.find((column) => column.key === 'reviewStatus' || column.dataIndex === 'reviewStatus')
       if (statusColumn) {
@@ -810,6 +808,19 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         }}
       />
     </AdminDataViewShell>
+  )
+}
+
+function NanshaVideoPreview({ videoUrl, coverUrl }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) {
+    return <span style={{ color: '#d4380d', lineHeight: 1.5 }}>视频文件不可播放<br />请让用户重新上传视频</span>
+  }
+  return (
+    <video controls preload="metadata" playsInline webkit-playsinline="true" poster={coverUrl} onError={() => setFailed(true)} style={{ width: 230, maxHeight: 180, borderRadius: 6, background: '#000' }}>
+      <source src={videoUrl} type="video/mp4" />
+      当前浏览器不支持视频播放
+    </video>
   )
 }
 

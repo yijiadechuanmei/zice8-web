@@ -52,6 +52,34 @@ function waitForImage(url, timeoutMs = 30000) {
   })
 }
 
+async function assertVideoFileSignature(file) {
+  const bytes = new Uint8Array(await file.slice(0, 32).arrayBuffer())
+  const isIsoMedia = bytes.length >= 8 && String.fromCharCode(...bytes.slice(4, 8)) === 'ftyp'
+  const isWebm = bytes.length >= 4 && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3
+  if (!isIsoMedia && !isWebm) throw new Error('请选择真实的 MP4、MOV 或 WebM 视频文件')
+}
+
+function waitForPlayableVideo(url, timeoutMs = 30000) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    const timer = window.setTimeout(() => finish(new Error('视频校验超时，请重新选择可在微信浏览器预览的视频')), timeoutMs)
+    const finish = (error) => {
+      window.clearTimeout(timer)
+      video.removeAttribute('src')
+      video.load()
+      if (error) reject(error)
+      else resolve()
+    }
+    video.preload = 'metadata'
+    video.playsInline = true
+    video.onloadedmetadata = () => video.videoWidth > 0 && video.videoHeight > 0
+      ? finish()
+      : finish(new Error('无法读取视频信息，请重新选择可在微信浏览器预览的视频'))
+    video.onerror = () => finish(new Error('上传的视频无法播放，请重新选择可在微信浏览器预览的 MP4、MOV 或 WebM 视频'))
+    video.src = url
+  })
+}
+
 function loadCanvasImage(url) {
   return new Promise((resolve, reject) => {
     const image = new Image()
@@ -244,10 +272,16 @@ export default function NanshaOpenMicProject() {
     setView('upload')
   }
 
-  function selectVideo(file) {
+  async function selectVideo(file) {
     if (!file) return
-    if (!file.type.startsWith('video/')) {
+    if (!file.type.startsWith('video/') && !/\.(mp4|mov|webm)$/i.test(file.name || '')) {
       setVideoError('请选择 MP4、MOV 或 WebM 视频文件')
+      return
+    }
+    try {
+      await assertVideoFileSignature(file)
+    } catch (error) {
+      setVideoError(error instanceof Error ? error.message : '请选择真实的视频文件')
       return
     }
     setSelectedVideo(file)
@@ -265,6 +299,7 @@ export default function NanshaOpenMicProject() {
       setUploadProgress(1)
       const videoUrl = await uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress)
       setCoverGenerating(true)
+      await waitForPlayableVideo(videoUrl)
       const coverUrl = buildVideoSnapshotUrl(videoUrl)
       await waitForImage(coverUrl)
       setVideoCoverPreview(coverUrl)
