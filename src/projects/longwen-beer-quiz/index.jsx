@@ -209,20 +209,24 @@ function QuizPage({ config, state, selectedOption, onSelect, onSubmit, loading }
 function ResultPage({ config, state, onRedeem }) {
   const result = state.result || {}
   const prizeImage = assetUrl(config.assetsBaseUrl, config.prizeImage)
+  const logoImage = assetUrl(config.assetsBaseUrl, config.homeBannerImage)
   if (!result.won) {
     return (
       <div className="lw-content lw-result lw-result--lose">
-        <p className="lw-eyebrow">测试结果</p>
-        <h1>答对 <em>{state.correctCount}</em> / {state.totalQuestions} 题</h1>
-        <div className="lw-result-line" />
-        <h2>很遗憾未中奖</h2>
-        <p>感谢参与百威黑金啤酒消费季</p>
+        <ImageAsset className="lw-result-logo" src={logoImage} alt="百威黑金" />
+        <div className="lw-loss-board">
+          <p className="lw-loss-kicker">本次答题成绩</p>
+          <div className="lw-loss-score"><span>答对</span><strong>{state.correctCount}</strong><em>/ {state.totalQuestions} 题</em></div>
+          <div className="lw-result-line" />
+          <h1>很遗憾未中奖</h1>
+          <p>感谢参与百威黑金啤酒消费季</p>
+        </div>
       </div>
     )
   }
   return (
     <div className="lw-content lw-result lw-result--win">
-      <p className="lw-eyebrow">测试结果</p>
+      <ImageAsset className="lw-result-logo" src={logoImage} alt="百威黑金" />
       <h1>恭喜全部答对</h1>
       <p className="lw-win-subtitle">恭喜全部答对，获得：</p>
       <div className="lw-prize-image-wrap"><ImageAsset src={prizeImage} alt="百威 BUDWEISER 一组（3瓶）" /></div>
