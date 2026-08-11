@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AudioOutlined,
   AuditOutlined,
@@ -50,6 +50,62 @@ function waitForImage(url, timeoutMs = 30000) {
     }
     image.src = url
   })
+}
+
+function loadCanvasImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error(`无法加载海报素材：${url}`))
+    image.src = url
+  })
+}
+
+function drawCoverImage(context, image, x, y, width, height) {
+  if (!image) {
+    context.fillStyle = '#aaa'
+    context.fillRect(x, y, width, height)
+    context.fillStyle = '#050505'
+    context.font = 'bold 42px sans-serif'
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.fillText('▶', x + width / 2, y + height / 2)
+    return
+  }
+  const scale = Math.max(width / image.width, height / image.height)
+  const drawWidth = image.width * scale
+  const drawHeight = image.height * scale
+  context.save()
+  context.beginPath()
+  context.rect(x, y, width, height)
+  context.clip()
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+  context.restore()
+}
+
+function drawAvatarImage(context, image, centerX, centerY, radius) {
+  context.save()
+  context.beginPath()
+  context.arc(centerX, centerY, radius, 0, Math.PI * 2)
+  context.clip()
+  if (image) {
+    const scale = Math.max((radius * 2) / image.width, (radius * 2) / image.height)
+    const width = image.width * scale
+    const height = image.height * scale
+    context.drawImage(image, centerX - width / 2, centerY - height / 2, width, height)
+  } else {
+    context.fillStyle = '#000'
+    context.fillRect(centerX - radius, centerY - radius, radius * 2, radius * 2)
+    context.fillStyle = '#fff'
+    context.beginPath()
+    context.arc(centerX, centerY - radius * .28, radius * .25, 0, Math.PI * 2)
+    context.fill()
+    context.beginPath()
+    context.ellipse(centerX, centerY + radius * .39, radius * .47, radius * .33, 0, Math.PI, 0)
+    context.fill()
+  }
+  context.restore()
 }
 
 export default function NanshaOpenMicProject() {
@@ -573,17 +629,73 @@ function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
 
 function VotePosterDialog({ entry, onClose }) {
   const posterUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?entryId=${encodeURIComponent(entry.id)}` : `${ASSET_BASE_URL}`
+  const qrSourceRef = useRef(null)
+  const [posterImage, setPosterImage] = useState('')
+  const [posterError, setPosterError] = useState('')
+
+  useEffect(() => {
+    let disposed = false
+    let retryTimer = null
+    let attempts = 0
+
+    const composePoster = async () => {
+      const qrCanvas = qrSourceRef.current?.querySelector('canvas')
+      if (!qrCanvas) {
+        attempts += 1
+        if (attempts < 10) retryTimer = window.setTimeout(composePoster, 32)
+        return
+      }
+      try {
+        const [background, avatar, cover] = await Promise.all([
+          loadCanvasImage(POSTER_BACKGROUND_URL),
+          entry.authorAvatar ? loadCanvasImage(entry.authorAvatar).catch(() => null) : Promise.resolve(null),
+          entry.coverUrl ? loadCanvasImage(entry.coverUrl).catch(() => null) : Promise.resolve(null),
+        ])
+        if (disposed) return
+        const width = 527
+        const height = 1033
+        const pixelRatio = 2
+        const canvas = document.createElement('canvas')
+        canvas.width = width * pixelRatio
+        canvas.height = height * pixelRatio
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('当前浏览器不支持海报合成')
+        context.scale(pixelRatio, pixelRatio)
+        context.drawImage(background, 0, 0, width, height)
+
+        drawAvatarImage(context, avatar, 263.5, 282, 58)
+        context.fillStyle = '#050505'
+        context.textAlign = 'center'
+        context.textBaseline = 'middle'
+        context.font = '800 28px "PingFang SC", "Microsoft YaHei", sans-serif'
+        context.fillText(entry.workName.slice(0, 16), width / 2, 368)
+        context.font = '400 22px "PingFang SC", "Microsoft YaHei", sans-serif'
+        context.fillText(entry.authorName.slice(0, 20), width / 2, 400)
+        drawCoverImage(context, cover, 52.7, 455.5, 421.6, 265.5)
+        context.strokeStyle = '#333'
+        context.lineWidth = 1
+        context.strokeRect(52.7, 455.5, 421.6, 265.5)
+        context.fillStyle = '#fff'
+        context.fillRect(310.9, 757.5, 166, 166)
+        context.drawImage(qrCanvas, 310.9, 757.5, 166, 166)
+        setPosterImage(canvas.toDataURL('image/png'))
+      } catch (error) {
+        if (!disposed) setPosterError(error instanceof Error ? error.message : '海报合成失败，请稍后重试')
+      }
+    }
+
+    composePoster()
+    return () => {
+      disposed = true
+      if (retryTimer) window.clearTimeout(retryTimer)
+    }
+  }, [entry.authorAvatar, entry.authorName, entry.coverUrl, entry.workName, posterUrl])
+
   return (
     <section className="nansha-poster-overlay" role="dialog" aria-modal="true" aria-label="拉票海报">
       <div className="nansha-poster-card" aria-label="长按图片保存海报">
-        <img className="nansha-poster-background" src={POSTER_BACKGROUND_URL} alt="南沙新声全民开麦拉票海报背景" draggable="false" />
-        <span className="nansha-poster-avatar" aria-hidden="true"><UserOutlined /></span>
-        <div className="nansha-poster-work-info">
-          <strong>{entry.workName}</strong>
-          <span>{entry.authorName}</span>
-        </div>
-        <div className="nansha-poster-video-cover" aria-label="作品封面" style={entry.coverUrl ? { backgroundImage: `url(${entry.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} />
-        <QRCodeCanvas className="nansha-poster-qrcode" value={posterUrl} size={166} includeMargin={false} />
+        <div ref={qrSourceRef} className="nansha-poster-qrcode-source" aria-hidden="true"><QRCodeCanvas value={posterUrl} size={166} includeMargin={false} /></div>
+        {posterImage ? <img className="nansha-poster-composite" src={posterImage} alt="南沙新声全民开麦拉票海报，长按图片保存" draggable="false" /> : <div className="nansha-poster-generating">{posterError || '正在合成海报…'}</div>}
       </div>
       <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
     </section>

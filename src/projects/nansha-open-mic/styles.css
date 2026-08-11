@@ -957,7 +957,7 @@
   -webkit-touch-callout: default;
 }
 
-.nansha-poster-background {
+.nansha-poster-composite {
   position: absolute;
   inset: 0;
   display: block;
@@ -965,62 +965,28 @@
   height: 100%;
   user-select: none;
   -webkit-user-drag: none;
+  -webkit-touch-callout: default;
 }
 
-.nansha-poster-avatar {
+.nansha-poster-qrcode-source {
   position: absolute;
-  top: 21.7%;
-  left: 50%;
+  width: 166px;
+  height: 166px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nansha-poster-generating {
   display: grid;
   place-items: center;
-  width: 22%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #000;
-  color: #fff;
-  font-size: calc(var(--nansha-unit) * 6.67);
-  transform: translateX(-50%);
-}
-
-.nansha-poster-work-info {
-  position: absolute;
-  top: 34.5%;
-  left: 0;
-  display: flex;
-  flex-direction: column;
   width: 100%;
-  color: #050505;
+  height: 100%;
+  padding: 0 12%;
+  background: #183e99;
+  color: #fff;
+  font: 500 16px/1.5 "PingFang SC", "Microsoft YaHei", sans-serif;
   text-align: center;
-}
-
-.nansha-poster-work-info strong {
-  font: 800 calc(var(--nansha-unit) * 4) / 1.15 "PingFang SC", "Microsoft YaHei", sans-serif;
-}
-
-.nansha-poster-work-info span {
-  margin-top: calc(var(--nansha-unit) * .4);
-  font: 400 calc(var(--nansha-unit) * 3.2) / 1.15 "PingFang SC", "Microsoft YaHei", sans-serif;
-}
-
-.nansha-poster-video-cover {
-  position: absolute;
-  top: 44.1%;
-  left: 10%;
-  width: 80%;
-  height: 25.7%;
-  border: 1px solid #333;
-  background: #aaa;
-}
-
-.nansha-poster-qrcode {
-  position: absolute;
-  right: 9.5%;
-  bottom: 10.6%;
-  display: block;
-  width: 31.5% !important;
-  height: auto !important;
-  aspect-ratio: 1;
-  background: #fff;
 }
 
 .nansha-poster-close {
