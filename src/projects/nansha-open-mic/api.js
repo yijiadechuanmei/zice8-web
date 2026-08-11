@@ -52,6 +52,12 @@ export const createEntry = (activityKey, payload) =>
     body: JSON.stringify(payload),
   })
 
+export const replaceEntryVideo = (activityKey, entryId, payload) =>
+  request(`${base(activityKey)}/entries/${encodeURIComponent(entryId)}/replace-video`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+
 export const castVote = (activityKey, entryId, payload) =>
   request(`${base(activityKey)}/entries/${encodeURIComponent(entryId)}/votes`, {
     method: 'POST',

@@ -11,7 +11,7 @@ import {
   VideoCameraFilled,
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
-import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, uploadFileToOss } from './api'
+import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import './styles.css'
 
@@ -32,52 +32,11 @@ function createRequestId() {
   return `nansha-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-function buildVideoSnapshotUrl(videoUrl) {
-  return `${videoUrl}?x-oss-process=video/snapshot,t_0,f_jpg`
-}
-
-function waitForImage(url, timeoutMs = 30000) {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    const timer = window.setTimeout(() => reject(new Error('视频封面生成超时，请重新上传')), timeoutMs)
-    image.onload = () => {
-      window.clearTimeout(timer)
-      resolve(url)
-    }
-    image.onerror = () => {
-      window.clearTimeout(timer)
-      reject(new Error('视频封面生成失败，请重新上传'))
-    }
-    image.src = url
-  })
-}
-
 async function assertVideoFileSignature(file) {
   const bytes = new Uint8Array(await file.slice(0, 32).arrayBuffer())
   const isIsoMedia = bytes.length >= 8 && String.fromCharCode(...bytes.slice(4, 8)) === 'ftyp'
   const isWebm = bytes.length >= 4 && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3
   if (!isIsoMedia && !isWebm) throw new Error('请选择真实的 MP4、MOV 或 WebM 视频文件')
-}
-
-function waitForPlayableVideo(url, timeoutMs = 30000) {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video')
-    const timer = window.setTimeout(() => finish(new Error('视频校验超时，请重新选择可在微信浏览器预览的视频')), timeoutMs)
-    const finish = (error) => {
-      window.clearTimeout(timer)
-      video.removeAttribute('src')
-      video.load()
-      if (error) reject(error)
-      else resolve()
-    }
-    video.preload = 'metadata'
-    video.playsInline = true
-    video.onloadedmetadata = () => video.videoWidth > 0 && video.videoHeight > 0
-      ? finish()
-      : finish(new Error('无法读取视频信息，请重新选择可在微信浏览器预览的视频'))
-    video.onerror = () => finish(new Error('上传的视频无法播放，请重新选择可在微信浏览器预览的 MP4、MOV 或 WebM 视频'))
-    video.src = url
-  })
 }
 
 function isImageCoverUrl(url) {
@@ -151,6 +110,7 @@ export default function NanshaOpenMicProject() {
   const [uploadingVideo, setUploadingVideo] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [videoError, setVideoError] = useState('')
+  const [videoReplacementEntry, setVideoReplacementEntry] = useState(null)
   const [uploadDialog, setUploadDialog] = useState('')
   const [voteDialog, setVoteDialog] = useState('')
   const [posterOpen, setPosterOpen] = useState(false)
@@ -273,6 +233,16 @@ export default function NanshaOpenMicProject() {
   }
 
   function openUpload() {
+    setVideoReplacementEntry(null)
+    setView('upload')
+  }
+
+  function openVideoReplacement(entry) {
+    setSelectedVideo(null)
+    setVideoCoverPreview('')
+    setUploadProgress(0)
+    setVideoError('')
+    setVideoReplacementEntry(entry)
     setView('upload')
   }
 
@@ -299,17 +269,25 @@ export default function NanshaOpenMicProject() {
     try {
       setUploadingVideo(true)
       setUploadProgress(0)
-      const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size })
+      const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, {
+        kind: 'video',
+        fileName: selectedVideo.name,
+        contentType: selectedVideo.type || 'video/mp4',
+        size: selectedVideo.size,
+        replace: Boolean(videoReplacementEntry),
+      })
       setUploadProgress(1)
       const videoUrl = await uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress)
       setCoverGenerating(true)
-      await waitForPlayableVideo(videoUrl)
-      const coverUrl = buildVideoSnapshotUrl(videoUrl)
-      await waitForImage(coverUrl)
-      setVideoCoverPreview(coverUrl)
-      const result = await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl })
+      // 微信内核对部分 MOV 容器无法读取 metadata。提交后由服务端统一
+      // 转为 Fast Start MP4 并生成独立 JPG 封面，不能在这里提前拦截。
+      const result = videoReplacementEntry
+        ? await replaceEntryVideo(ACTIVITY_KEY, videoReplacementEntry.id, { videoUrl, coverUrl: videoUrl })
+        : await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl: videoUrl })
+      setVideoCoverPreview(result.entry?.coverUrl || '')
       setMyEntry(result.entry)
       setSelectedVideo(null)
+      setVideoReplacementEntry(null)
       setUploadDialog('success')
       return { ok: true }
     } catch (error) {
@@ -378,7 +356,7 @@ export default function NanshaOpenMicProject() {
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
-      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} onBack={goBack} onShowRules={openRules} /> : null}
+      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
@@ -391,6 +369,7 @@ export default function NanshaOpenMicProject() {
           videoError={videoError}
           onSelectVideo={(event) => selectVideo(event.target.files?.[0])}
           onSubmit={completeUpload}
+          replacementEntry={videoReplacementEntry}
         />
       ) : null}
       {view === 'rules' ? <RulesPage onBack={goBack} /> : null}
@@ -741,12 +720,12 @@ function VotePosterDialog({ entry, onClose }) {
   )
 }
 
-function MyWorkPage({ entry, onBack, onShowRules }) {
+function MyWorkPage({ entry, onBack, onShowRules, onReplaceVideo }) {
   return (
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <NanshaPlaybackVideo entry={entry} />
+      <NanshaPlaybackVideo entry={entry} onReplaceVideo={() => onReplaceVideo(entry)} />
       <section className="nansha-work-info">
         <h1>{entry.workName}</h1>
         <p className="nansha-work-status">作品状态：{entry.reviewStatus === 'published' ? '审核成功' : entry.reviewStatus === 'rejected' ? '未通过' : '审核中'}</p>
@@ -757,10 +736,15 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
   )
 }
 
-function NanshaPlaybackVideo({ entry }) {
+function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
   const [failed, setFailed] = useState(false)
   if (failed) {
-    return <div className="nansha-video-placeholder nansha-video-playback-error">视频加载失败，请刷新后重试</div>
+    return (
+      <div className="nansha-video-placeholder nansha-video-playback-error">
+        <p>{onReplaceVideo ? '视频文件不可播放，请重新上传视频' : '视频加载失败，请刷新后重试'}</p>
+        {onReplaceVideo ? <button type="button" onClick={onReplaceVideo}>重新上传视频</button> : null}
+      </div>
+    )
   }
   return (
     <video
@@ -781,8 +765,8 @@ function NanshaPlaybackVideo({ entry }) {
   )
 }
 
-function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, coverGenerating, uploadProgress, uploadingVideo, videoError, onSelectVideo, onSubmit }) {
-  const [form, setForm] = useState({ workName: '', authorName: '', phone: '', description: '' })
+function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, coverGenerating, uploadProgress, uploadingVideo, videoError, onSelectVideo, onSubmit, replacementEntry }) {
+  const [form, setForm] = useState({ workName: replacementEntry?.workName || '', authorName: replacementEntry?.authorName || '', phone: replacementEntry?.phone || '', description: replacementEntry?.description || '' })
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
   const update = (field, value) => {
@@ -819,7 +803,7 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, cove
   }
   return (
     <section className="nansha-sub-page nansha-upload-page">
-      <PageHeader title="上传视频" onBack={onBack} />
+      <PageHeader title={replacementEntry ? '重新上传视频' : '上传视频'} onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
       <form className="nansha-upload-form" onSubmit={submit}>
         <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}${coverPreview ? ' has-cover' : ''}`}>
