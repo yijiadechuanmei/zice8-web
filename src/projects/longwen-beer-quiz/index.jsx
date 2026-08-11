@@ -168,6 +168,7 @@ function HomePage({ config, onStart, loading }) {
         <span className="lw-image-start__meta">答对 3 题，赢百威黑金</span>
         <span className="lw-image-start__arrow" aria-hidden="true">›</span>
       </button>
+      <ImageAsset className="lw-home-marker" src={assetUrl(config.assetsBaseUrl, config.startButtonImage)} alt="活动地址" />
       <ImageAsset className="lw-home-footer" src={assetUrl(config.assetsBaseUrl, config.homeFooterImage)} alt="百威黑金啤酒消费季" />
     </div>
   )
