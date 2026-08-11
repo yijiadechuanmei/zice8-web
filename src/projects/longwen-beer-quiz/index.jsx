@@ -228,7 +228,7 @@ function ResultPage({ config, state, onRedeem }) {
     <div className="lw-content lw-result lw-result--win">
       <ImageAsset className="lw-result-logo" src={logoImage} alt="百威黑金" />
       <h1>恭喜全部答对</h1>
-      <p className="lw-win-subtitle">恭喜全部答对，获得：</p>
+      <p className="lw-win-subtitle">获得：</p>
       <div className="lw-prize-image-wrap"><ImageAsset src={prizeImage} alt="百威 BUDWEISER 一组（3瓶）" /></div>
       <h2>百威 BUDWEISER 一组（3瓶）</h2>
       {result.redeemed ? (
