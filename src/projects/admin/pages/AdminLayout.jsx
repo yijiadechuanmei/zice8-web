@@ -349,6 +349,7 @@ function buildActivityUrl(activity) {
     xiwuqi_99_road_night: '/xiwuqi-99-road-night',
     latex_allergy_risk_test: '/latex-allergy-risk-test',
     nanhai_inspection_challenge: '/nanhai-inspection-challenge',
+    longwen_beer_quiz: '/longwen-beer-quiz',
     quiz: '/quiz',
   }
   const prefix = pathPrefixByType[activity.type] || `/${encodeURIComponent(activity.type || '')}`

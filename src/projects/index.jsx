@@ -24,6 +24,7 @@ const NanhaiInspectionChallengeProject = lazy(() => import('./nanhai-inspection-
 const NanshaOpenMicProject = lazy(() => import('./nansha-open-mic/index.jsx'))
 const TargetedTherapyQuizProject = lazy(() => import('./targeted-therapy-quiz/index.jsx'))
 const ChakraAssessmentProject = lazy(() => import('./chakra-assessment/index.jsx'))
+const LongwenBeerQuizProject = lazy(() => import('./longwen-beer-quiz/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -33,6 +34,7 @@ const activityTypeProjects = {
   'song-wish-lottery': SongWishLotteryProject,
   nansha_open_mic: NanshaOpenMicProject,
   chakra_assessment: ChakraAssessmentProject,
+  longwen_beer_quiz: LongwenBeerQuizProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
@@ -52,6 +54,16 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/longwen-beer-quiz/:activityKey',
+    Component: LongwenBeerQuizProject,
+    activityGate: true,
+  },
+  {
+    path: '/longwen_beer_quiz/:activityKey',
+    Component: LongwenBeerQuizProject,
+    activityGate: true,
+  },
   {
     path: '/chakra_assessment/:activityKey',
     Component: ChakraAssessmentProject,
