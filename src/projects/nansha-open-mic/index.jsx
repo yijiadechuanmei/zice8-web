@@ -60,6 +60,7 @@ export default function NanshaOpenMicProject() {
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [videoCoverPreview, setVideoCoverPreview] = useState('')
   const [coverGenerating, setCoverGenerating] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [videoError, setVideoError] = useState('')
   const [uploadDialog, setUploadDialog] = useState('')
@@ -202,8 +203,10 @@ export default function NanshaOpenMicProject() {
   async function completeUpload(form) {
     if (!selectedVideo) return { error: '请先选择视频文件' }
     try {
-      setUploadProgress(1)
+      setUploadingVideo(true)
+      setUploadProgress(0)
       const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, { kind: 'video', fileName: selectedVideo.name, contentType: selectedVideo.type || 'video/mp4', size: selectedVideo.size })
+      setUploadProgress(1)
       const videoUrl = await uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress)
       setCoverGenerating(true)
       const coverUrl = buildVideoSnapshotUrl(videoUrl)
@@ -219,6 +222,7 @@ export default function NanshaOpenMicProject() {
       return { error: error?.message || '上传失败，请重新上传' }
     } finally {
       setCoverGenerating(false)
+      setUploadingVideo(false)
     }
   }
 
@@ -288,6 +292,7 @@ export default function NanshaOpenMicProject() {
           coverPreview={videoCoverPreview}
           coverGenerating={coverGenerating}
           uploadProgress={uploadProgress}
+          uploadingVideo={uploadingVideo}
           videoError={videoError}
           onSelectVideo={(event) => selectVideo(event.target.files?.[0])}
           onSubmit={completeUpload}
@@ -601,7 +606,7 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
   )
 }
 
-function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, coverGenerating, uploadProgress, videoError, onSelectVideo, onSubmit }) {
+function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, coverGenerating, uploadProgress, uploadingVideo, videoError, onSelectVideo, onSubmit }) {
   const [form, setForm] = useState({ workName: '', authorName: '', phone: '', description: '' })
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
@@ -646,9 +651,9 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, cove
           <input type="file" accept="video/*" onChange={onSelectVideo} />
           {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
           <b>{coverGenerating ? '正在生成封面…' : selectedVideoName || '+'}</b>
-          {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在生成封面…' : submitting ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '上传后自动生成封面'}</span> : null}
-          {selectedVideoName && submitting && !coverGenerating ? <span className="nansha-video-upload-progress" role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><span>正在上传 {uploadProgress}%</span><i><em style={{ width: `${Math.max(0, Math.min(uploadProgress, 100))}%` }} /></i></span> : null}
+          {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在生成封面…' : uploadingVideo ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '上传后自动生成封面'}</span> : null}
         </label>
+        {selectedVideoName && (submitting || uploadingVideo || coverGenerating) ? <section className="nansha-upload-progress-panel" aria-live="polite"><p>{coverGenerating ? '视频上传完成，正在生成首帧封面…' : `视频上传进度：${uploadProgress}%`}</p><div role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><i style={{ width: `${coverGenerating ? 100 : Math.max(0, Math.min(uploadProgress, 100))}%` }} /></div></section> : null}
         <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
         <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
         <input name="phone" aria-label="手机号码" value={form.phone} onChange={(event) => update('phone', event.target.value.replace(/\D/g, '').slice(0, 11))} inputMode="tel" maxLength={11} placeholder="请输入手机号码" />
