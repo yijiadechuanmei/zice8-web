@@ -12,6 +12,17 @@
 .nansha-open-mic-page *::before,
 .nansha-open-mic-page *::after { box-sizing: border-box; }
 
+.nansha-auth-message {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  color: #173b98;
+  font-size: 18px;
+  font-weight: 600;
+}
+
 .nansha-home-view,
 .nansha-sub-page {
   width: min(100%, 750px);

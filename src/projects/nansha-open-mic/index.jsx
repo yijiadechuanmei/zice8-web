@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
 import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, uploadFileToOss } from './api'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -32,7 +33,7 @@ function createRequestId() {
 }
 
 function buildVideoSnapshotUrl(videoUrl) {
-  return `${videoUrl}?x-oss-process=video/snapshot,t_1000,f_jpg`
+  return `${videoUrl}?x-oss-process=video/snapshot,t_0,f_jpg`
 }
 
 function waitForImage(url, timeoutMs = 30000) {
@@ -52,6 +53,7 @@ function waitForImage(url, timeoutMs = 30000) {
 }
 
 export default function NanshaOpenMicProject() {
+  const [publicConfig, setPublicConfig] = useState(null)
   const [view, setView] = useState('upload-home')
   const [rulesOrigin, setRulesOrigin] = useState('upload-home')
   const [activityPhase, setActivityPhase] = useState('upload')
@@ -69,6 +71,7 @@ export default function NanshaOpenMicProject() {
   const [myVotes, setMyVotes] = useState([])
   const [selectedEntry, setSelectedEntry] = useState(null)
   const [sharedEntryId, setSharedEntryId] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('entryId') || '')
+  const { authReady, blockedMessage, authStatus } = useWechatAuth(ACTIVITY_KEY, publicConfig)
   const homeView = activityPhase === 'vote'
     ? 'vote-home'
     : activityPhase === 'publicity'
@@ -76,6 +79,23 @@ export default function NanshaOpenMicProject() {
       : 'upload-home'
 
   useEffect(() => {
+    let alive = true
+    getPublicConfig(ACTIVITY_KEY)
+      .then((config) => {
+        if (!alive) return
+        setPublicConfig(config || {})
+        if (['upload', 'vote', 'publicity', 'closed'].includes(config?.phase)) {
+          setActivityPhase(config.phase)
+        }
+      })
+      .catch(() => {
+        if (alive) setPublicConfig({})
+      })
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    if (!authReady) return undefined
     let alive = true
     let previousPhase = null
 
@@ -138,7 +158,7 @@ export default function NanshaOpenMicProject() {
       window.clearInterval(intervalId)
       window.removeEventListener('focus', refreshActivityState)
     }
-  }, [sharedEntryId])
+  }, [authReady, sharedEntryId])
 
   function goBack() {
     if (view === 'rules') {
@@ -236,6 +256,14 @@ export default function NanshaOpenMicProject() {
 
   function closeVoteDialog() {
     setVoteDialog('')
+  }
+
+  if (blockedMessage) {
+    return <main className="nansha-open-mic-page"><section className="nansha-auth-message">{blockedMessage}</section></main>
+  }
+
+  if (!publicConfig || !authReady) {
+    return <main className="nansha-open-mic-page"><section className="nansha-auth-message">{authStatus === 'redirecting' ? '正在进入微信授权…' : '活动加载中…'}</section></main>
   }
 
   return (
