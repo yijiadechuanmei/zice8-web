@@ -521,6 +521,7 @@
   text-align: center;
   font: 700 calc(var(--nansha-unit) * 3.73) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
+.nansha-work-detail-page .nansha-page-header h1 { left: 50%; width: 58%; overflow: hidden; text-overflow: ellipsis; transform: translateX(-50%); white-space: nowrap; }
 
 .nansha-profile-banner { position: relative; height: calc(var(--nansha-unit) * 39.07); overflow: hidden; background: #173b98; }
 
