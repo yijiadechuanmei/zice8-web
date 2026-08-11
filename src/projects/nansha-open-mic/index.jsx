@@ -80,6 +80,10 @@ function waitForPlayableVideo(url, timeoutMs = 30000) {
   })
 }
 
+function isImageCoverUrl(url) {
+  return /\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(String(url || '')) || /\/covers\//.test(String(url || ''))
+}
+
 function loadCanvasImage(url) {
   return new Promise((resolve, reject) => {
     const image = new Image()
@@ -648,7 +652,7 @@ function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
     <section className="nansha-sub-page nansha-work-detail-page">
       <PageHeader title={entry.workName} onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed label="投票说明" />
-      <video className="nansha-video-placeholder" poster={entry.coverUrl} controls playsInline webkit-playsinline="true" preload="metadata"><source src={entry.videoUrl} type="video/mp4" /></video>
+      <NanshaPlaybackVideo entry={entry} />
       <section className="nansha-work-detail-info">
         <h1>{entry.workName}</h1>
         <p>{entry.authorName}</p>
@@ -742,7 +746,7 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
       <ActivityRulesTrigger onClick={onShowRules} fixed />
-      <video className="nansha-video-placeholder" poster={entry.coverUrl} controls playsInline webkit-playsinline="true" preload="metadata"><source src={entry.videoUrl} type="video/mp4" /></video>
+      <NanshaPlaybackVideo entry={entry} />
       <section className="nansha-work-info">
         <h1>{entry.workName}</h1>
         <p className="nansha-work-status">作品状态：{entry.reviewStatus === 'published' ? '审核成功' : entry.reviewStatus === 'rejected' ? '未通过' : '审核中'}</p>
@@ -750,6 +754,30 @@ function MyWorkPage({ entry, onBack, onShowRules }) {
         <div className="nansha-work-description">{entry.description}</div>
       </section>
     </section>
+  )
+}
+
+function NanshaPlaybackVideo({ entry }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) {
+    return <div className="nansha-video-placeholder nansha-video-playback-error">视频加载失败，请刷新后重试</div>
+  }
+  return (
+    <video
+      key={entry.id}
+      className="nansha-video-placeholder"
+      src={entry.videoUrl}
+      poster={isImageCoverUrl(entry.coverUrl) ? entry.coverUrl : undefined}
+      controls
+      playsInline
+      webkit-playsinline="true"
+      x5-playsinline="true"
+      x5-video-player-type="h5"
+      preload="metadata"
+      onError={() => setFailed(true)}
+    >
+      当前浏览器不支持视频播放
+    </video>
   )
 }
 

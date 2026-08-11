@@ -612,6 +612,12 @@
   font: 700 calc(var(--nansha-unit) * 4.27) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
+.nansha-video-playback-error {
+  padding: 0 calc(var(--nansha-unit) * 4);
+  color: #fff;
+  text-align: center;
+}
+
 .nansha-video-controls { position: absolute; right: calc(var(--nansha-unit) * 3.2); bottom: calc(var(--nansha-unit) * 2.67); left: calc(var(--nansha-unit) * 3.2); display: grid; grid-template-columns: calc(var(--nansha-unit) * 5.33) 1fr calc(var(--nansha-unit) * 5.33) calc(var(--nansha-unit) * 4); align-items: center; gap: calc(var(--nansha-unit) * 2.13); padding-top: calc(var(--nansha-unit) * 3.07); border-top: calc(var(--nansha-unit) * .8) solid #777; color: #e4e4e4; font-size: calc(var(--nansha-unit) * 3.47); }
 .nansha-video-controls .anticon:last-child { justify-self: end; }
 
