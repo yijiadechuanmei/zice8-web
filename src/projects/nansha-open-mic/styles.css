@@ -777,6 +777,7 @@
   overflow: hidden;
   background: #fff;
   text-align: center;
+  transform: translateY(-50px);
 }
 
 .nansha-upload-result-card::before,
@@ -873,7 +874,7 @@
 .nansha-vote-confirm-button { position: absolute; top: calc(var(--nansha-unit) * 42.27); left: 24.18%; width: 52.11%; height: calc(var(--nansha-unit) * 8.53); border: 0; background: #173b98; color: #fff; font: 800 calc(var(--nansha-unit) * 3.2) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; }
 
 .nansha-dialog-close { position: absolute; z-index: 3; top: calc(var(--nansha-unit) * -5.6); right: calc(var(--nansha-unit) * -1.73); display: grid; place-items: center; width: calc(var(--nansha-unit) * 5.07); height: calc(var(--nansha-unit) * 5.07); padding: 0; border: 2px solid #fff; border-radius: 50%; background: transparent; color: #fff; font-size: calc(var(--nansha-unit) * 3.2); line-height: 1; cursor: pointer; }
-.nansha-vote-result-card { position: relative; overflow: visible; background: #fff; }
+.nansha-vote-result-card { position: relative; overflow: visible; background: #fff; transform: translateY(-50px); }
 .nansha-vote-result-card.is-success { width: min(56.8vw, 426px); aspect-ratio: 1; }
 .nansha-vote-result-card.is-failure { width: min(73.47vw, 551px); aspect-ratio: 551 / 361; }
 .nansha-vote-result-image { display: block; width: 100%; height: 100%; object-fit: fill; }
