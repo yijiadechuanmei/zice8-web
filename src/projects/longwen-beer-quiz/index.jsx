@@ -158,8 +158,10 @@ function HomePage({ config, onStart, loading }) {
       <ImageAsset className="lw-home-banner" src={assetUrl(config.assetsBaseUrl, config.homeBannerImage)} alt="百威黑金" />
       <ImageAsset className="lw-home-title" src={assetUrl(config.assetsBaseUrl, config.homeTitleImage)} alt="龙文请你喝啤酒" />
       <button className="lw-image-start" type="button" onClick={onStart} disabled={loading}>
-        <ImageAsset src={assetUrl(config.assetsBaseUrl, config.startButtonImage)} alt="开始测试" />
-        {!config.startButtonImage ? '开始测试' : null}
+        <span className="lw-image-start__glint" aria-hidden="true" />
+        <span className="lw-image-start__title">开始测试</span>
+        <span className="lw-image-start__meta">答对 3 题，赢百威黑金</span>
+        <span className="lw-image-start__arrow" aria-hidden="true">›</span>
       </button>
       <ImageAsset className="lw-home-footer" src={assetUrl(config.assetsBaseUrl, config.homeFooterImage)} alt="百威黑金啤酒消费季" />
     </div>
