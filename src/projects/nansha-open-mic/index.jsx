@@ -452,7 +452,7 @@ function VoteHome({ visualUrl, entries, voteQuota, onShowRules, onRanking, onMy,
           {entries.map((work) => (
             <article className="nansha-vote-work-card" key={work.id}>
               <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.workName}`} onClick={() => onWork(work)} style={work.coverUrl ? { backgroundImage: `url(${work.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><CaretRightFilled /></button>
-              <p>作品名称：{work.workName}<br />作者：{work.authorName}<br />票数：{String(work.voteCount || 0).padStart(4, '0')}票</p>
+              <p>作品名称：{work.workName}<br />作者：{work.authorName}<br />票数：{work.voteCount || 0}票</p>
             </article>
           ))}
         </section>
@@ -522,7 +522,7 @@ function PublicityRankingRow({ rank, entry }) {
     <div className={`nansha-publicity-row rank-${rank}`}>
       <span className="nansha-publicity-number">{rank}</span>
       <p>{entry.workName}<br />{entry.authorName}</p>
-      <span className="nansha-publicity-votes">{String(entry.voteCount || 0).padStart(7, '0')}票&nbsp; &gt;</span>
+      <span className="nansha-publicity-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )
 }
@@ -532,7 +532,7 @@ function RankingRow({ rank, entry, onWork }) {
     <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={() => onWork(entry)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork(entry) }}>
       <span className="nansha-ranking-number">{rank}</span>
       <p>{entry.workName}<br />{entry.authorName}</p>
-      <span className="nansha-ranking-votes">{String(entry.voteCount || 0).padStart(7, '0')}票&nbsp; &gt;</span>
+      <span className="nansha-ranking-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )
 }
@@ -540,7 +540,7 @@ function RankingRow({ rank, entry, onWork }) {
 function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
   const isVotePhase = activityPhase === 'vote'
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
-  const workVotes = String(myEntry?.voteCount ?? 0).padStart(6, '0')
+  const workVotes = myEntry?.voteCount ?? 0
   const remainingVotes = voteQuota?.remaining ?? 10
   return (
     <section className="nansha-sub-page nansha-my-page">
