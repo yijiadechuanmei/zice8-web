@@ -761,11 +761,13 @@ function MyWorkPage({ entry, activityPhase, onBack, onShowRules, onReplaceVideo,
 
 function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
   const [failed, setFailed] = useState(false)
-  if (failed) {
+  const isProcessing = ['queued', 'processing'].includes(entry.mediaStatus)
+  const needsReplacement = entry.mediaStatus === 'failed' || failed
+  if (isProcessing || needsReplacement) {
     return (
       <div className="nansha-video-placeholder nansha-video-playback-error">
-        <p>{onReplaceVideo ? '视频文件不可播放，请重新上传视频' : '视频加载失败，请刷新后重试'}</p>
-        {onReplaceVideo ? <button type="button" onClick={onReplaceVideo}>重新上传视频</button> : null}
+        <p>{isProcessing ? '视频处理中，封面生成后即可查看' : onReplaceVideo ? (entry.mediaError || '视频文件不可播放，请重新上传视频') : '视频加载失败，请刷新后重试'}</p>
+        {!isProcessing && onReplaceVideo ? <button type="button" onClick={onReplaceVideo}>重新上传视频</button> : null}
       </div>
     )
   }
@@ -922,6 +924,7 @@ function UploadResultDialog({ status, onConfirm }) {
           {isSuccess ? (
             <>
               <span>作品已上传，可在“我的作品”中查看</span>
+              <span>视频正在处理中，封面生成后即可查看</span>
               <span>我们将主动联系通过初选的视频作者，对接后续相关事宜，<br />若未收到我方联系，则代表初选未通过。</span>
             </>
           ) : '上传失败，请重新上传'}
