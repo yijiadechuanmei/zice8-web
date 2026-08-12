@@ -310,13 +310,18 @@ export default function NanshaOpenMicProject() {
     setView('work-detail')
   }
 
-  function openVoteDialog(entry = selectedEntry) {
+  function openVoteDialog() {
+    if (!selectedEntry) return
+    setVoteDialog('vote')
+  }
+
+  function openVoteDialogForEntry(entry) {
     if (!entry) return
     setSelectedEntry(entry)
     setVoteDialog('vote')
   }
 
-  function openPoster(entry) {
+  function openPosterForEntry(entry) {
     if (!entry) return
     setSelectedEntry(entry)
     setPosterOpen(true)
@@ -362,8 +367,8 @@ export default function NanshaOpenMicProject() {
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPoster(selectedEntry)} /> : null}
-      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialog(myEntry)} onShare={() => openPoster(myEntry)} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
+      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
