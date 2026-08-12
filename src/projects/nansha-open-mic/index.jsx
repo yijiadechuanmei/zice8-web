@@ -39,6 +39,13 @@ async function assertVideoFileSignature(file) {
   if (!isIsoMedia && !isWebm) throw new Error('请选择 MP4、MOV 或 WebM 视频')
 }
 
+function getUploadVideoContentType(file) {
+  const name = String(file?.name || '').toLowerCase()
+  if (name.endsWith('.mov')) return 'video/quicktime'
+  if (name.endsWith('.webm')) return 'video/webm'
+  return 'video/mp4'
+}
+
 function isImageCoverUrl(url) {
   return /\.(?:jpe?g|png|webp)(?:[?#]|$)/i.test(String(url || '')) || /\/covers\//.test(String(url || ''))
 }
@@ -275,7 +282,10 @@ export default function NanshaOpenMicProject() {
       const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, {
         kind: 'video',
         fileName: selectedVideo.name,
-        contentType: selectedVideo.type || (selectedVideo.name.toLowerCase().endsWith('.mov') ? 'video/quicktime' : selectedVideo.name.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4'),
+        // Mobile browsers sometimes label an otherwise valid MOV/MP4 as
+        // application/octet-stream. The extension is the reliable user-facing
+        // contract; the cloud service still verifies/transcodes the payload.
+        contentType: getUploadVideoContentType(selectedVideo),
         size: selectedVideo.size,
         replace: Boolean(videoReplacementEntry),
       })
@@ -394,7 +404,7 @@ export default function NanshaOpenMicProject() {
       {view === 'my' && activityPhase === 'vote' ? <VoteBottomNavigation active="my" onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
       {view === 'my' && activityPhase !== 'vote' && activityPhase !== 'publicity' ? <BottomNavigation active="my" onHome={() => setView(homeView)} onMy={() => setView('my')} /> : null}
 
-      {uploadDialog ? <UploadResultDialog status={uploadDialog} onConfirm={closeUploadDialog} /> : null}
+      {uploadDialog ? <UploadResultDialog status={uploadDialog} errorMessage={videoError} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog remaining={voteQuota?.remaining ?? 0} onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
       {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} onClose={() => setPosterOpen(false)} /> : null}
@@ -917,7 +927,7 @@ function RulesPage({ onBack }) {
   )
 }
 
-function UploadResultDialog({ status, onConfirm }) {
+function UploadResultDialog({ status, errorMessage, onConfirm }) {
   const isSuccess = status === 'success'
   return (
     <section className="nansha-upload-result-overlay" role="dialog" aria-modal="true" aria-label={isSuccess ? '上传成功' : '上传失败'}>
@@ -931,8 +941,8 @@ function UploadResultDialog({ status, onConfirm }) {
               <span>我们将主动联系通过初选的视频作者，对接后续相关事宜，<br />若未收到我方联系，则代表初选未通过。</span>
             </>
           ) : <>
-            <span>上传失败，请重新上传</span>
-            <span className="nansha-upload-result-format-tip">请上传 H.264/AAC 编码的 MP4 视频</span>
+            <span>{errorMessage || '上传失败，请重新上传'}</span>
+            <span className="nansha-upload-result-format-tip">支持 MP4、MOV、WebM，系统将自动转码</span>
           </>}
         </p>
         <button className="nansha-upload-result-confirm" type="button" onClick={onConfirm}>确定</button>
