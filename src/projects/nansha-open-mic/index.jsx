@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
 import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getEntry, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import './styles.css'
@@ -129,6 +130,7 @@ export default function NanshaOpenMicProject() {
   const [videoReplacementEntry, setVideoReplacementEntry] = useState(null)
   const [uploadDialog, setUploadDialog] = useState('')
   const [voteDialog, setVoteDialog] = useState('')
+  const [voteToast, setVoteToast] = useState('')
   const [posterOpen, setPosterOpen] = useState(false)
   const [myEntry, setMyEntry] = useState(null)
   const [myProfile, setMyProfile] = useState({ nickname: '微信用户', avatar: '' })
@@ -171,6 +173,21 @@ export default function NanshaOpenMicProject() {
       })
     return () => { alive = false }
   }, [])
+
+  useEffect(() => {
+    if (!publicConfig) return
+    trackPageView(ACTIVITY_KEY, `/nansha-open-mic/${view}`, {
+      activityType: ACTIVITY_TYPE,
+      pageKey: view,
+      phase: activityPhase,
+    })
+  }, [activityPhase, publicConfig, view])
+
+  useEffect(() => {
+    if (!voteToast) return undefined
+    const timerId = window.setTimeout(() => setVoteToast(''), 2400)
+    return () => window.clearTimeout(timerId)
+  }, [voteToast])
 
   useEffect(() => {
     if (!authReady) return undefined
@@ -335,6 +352,11 @@ export default function NanshaOpenMicProject() {
       setSelectedVideo(null)
       setVideoReplacementEntry(null)
       setUploadDialog('success')
+      trackEvent({
+        activityKey: ACTIVITY_KEY,
+        eventType: 'nansha_entry_submit',
+        extra: { activityType: ACTIVITY_TYPE, phase: activityPhase, mediaStatus: result.entry?.mediaStatus || 'pending' },
+      })
       return { ok: true }
     } catch (error) {
       setVideoError(error?.message || '上传失败，请上传 H.264/AAC 编码的 MP4 视频')
@@ -354,6 +376,11 @@ export default function NanshaOpenMicProject() {
   function openWork(entry) {
     setSelectedEntry(entry)
     setView('work-detail')
+    trackEvent({
+      activityKey: ACTIVITY_KEY,
+      eventType: 'open_video',
+      extra: { activityType: ACTIVITY_TYPE, phase: activityPhase, entryId: entry.id },
+    })
   }
 
   async function openVotedWork(vote) {
@@ -372,14 +399,32 @@ export default function NanshaOpenMicProject() {
     }
   }
 
+  function showVoteQuotaToast() {
+    setVoteDialog('')
+    setVoteToast('今日票数已用完，明日再来投票吧')
+    trackEvent({
+      activityKey: ACTIVITY_KEY,
+      eventType: 'nansha_vote_quota_exhausted',
+      extra: { activityType: ACTIVITY_TYPE, phase: activityPhase },
+    })
+  }
+
   function openVoteDialog() {
     if (!selectedEntry) return
+    if (Number(voteQuota?.remaining || 0) <= 0) {
+      showVoteQuotaToast()
+      return
+    }
     setVoteDialog('vote')
   }
 
   function openVoteDialogForEntry(entry) {
     if (!entry) return
     setSelectedEntry(entry)
+    if (Number(voteQuota?.remaining || 0) <= 0) {
+      showVoteQuotaToast()
+      return
+    }
     setVoteDialog('vote')
   }
 
@@ -393,17 +438,35 @@ export default function NanshaOpenMicProject() {
     setShareLink(nextShareLink)
     setSelectedEntry(entry)
     setPosterOpen(true)
+    trackEvent({
+      activityKey: ACTIVITY_KEY,
+      eventType: 'nansha_share_open',
+      extra: { activityType: ACTIVITY_TYPE, phase: activityPhase, entryId: entry.id },
+    })
   }
 
   async function confirmVote(quantity) {
     if (!selectedEntry) return
+    if (Number(voteQuota?.remaining || 0) <= 0) {
+      showVoteQuotaToast()
+      return
+    }
     try {
       const result = await castVote(ACTIVITY_KEY, selectedEntry.id, { quantity, requestId: createRequestId() })
       setVoteQuota((current) => ({ ...current, used: result.used, remaining: result.remaining, limit: result.limit }))
       setEntries((current) => current.map((entry) => entry.id === selectedEntry.id ? { ...entry, voteCount: result.voteCount } : entry))
       setSelectedEntry((current) => current ? { ...current, voteCount: result.voteCount } : current)
       setVoteDialog('success')
-    } catch {
+      trackEvent({
+        activityKey: ACTIVITY_KEY,
+        eventType: 'nansha_vote_success',
+        extra: { activityType: ACTIVITY_TYPE, phase: activityPhase, entryId: selectedEntry.id, quantity },
+      })
+    } catch (error) {
+      if (/今日仅剩\s*0\s*票|今日票数已用完|每日票数已用完/.test(String(error?.message || ''))) {
+        showVoteQuotaToast()
+        return
+      }
       setVoteDialog('failure')
     }
   }
@@ -427,7 +490,7 @@ export default function NanshaOpenMicProject() {
 
   return (
     <main className="nansha-open-mic-page">
-      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={openWork} /> : null}
+      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => { setView('ranking'); trackEvent({ activityKey: ACTIVITY_KEY, eventType: 'open_rank', extra: { activityType: ACTIVITY_TYPE, phase: activityPhase } }) }} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
       {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
@@ -461,6 +524,7 @@ export default function NanshaOpenMicProject() {
       {voteDialog === 'vote' ? <VoteDialog remaining={voteQuota?.remaining ?? 0} onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
       {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} shareUrl={shareLink} onClose={() => setPosterOpen(false)} /> : null}
+      {voteToast ? <VoteQuotaToast message={voteToast} /> : null}
     </main>
   )
 }
@@ -1069,9 +1133,17 @@ function VoteDialog({ remaining, onConfirm, onClose }) {
             </select>
             <span aria-hidden="true">⌄</span>
           </div>
-          <button className="nansha-vote-confirm-button" type="button" disabled={!remaining} onClick={() => onConfirm(quantity)}>确定投票</button>
+          <button className="nansha-vote-confirm-button" type="button" onClick={() => onConfirm(quantity)}>确定投票</button>
         </div>
       </div>
+    </section>
+  )
+}
+
+function VoteQuotaToast({ message }) {
+  return (
+    <section className="nansha-vote-toast-overlay" role="alert" aria-live="assertive" aria-label={message}>
+      <p className="nansha-vote-toast-message">{message}</p>
     </section>
   )
 }
