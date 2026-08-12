@@ -618,6 +618,19 @@
   font: 700 calc(var(--nansha-unit) * 4.27) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
+video.nansha-video-placeholder {
+  display: block;
+}
+
+video.nansha-video-placeholder.is-portrait {
+  width: min(55%, 420px);
+  aspect-ratio: var(--nansha-video-aspect-ratio, 9 / 16);
+  height: auto;
+  margin: calc(var(--nansha-unit) * 7.47) auto 0;
+  background: #000;
+  object-fit: cover;
+}
+
 .nansha-video-playback-error {
   display: flex;
   flex-direction: column;

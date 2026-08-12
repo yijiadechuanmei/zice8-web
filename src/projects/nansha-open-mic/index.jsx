@@ -829,8 +829,20 @@ function MyWorkPage({ entry, activityPhase, onBack, onShowRules, onReplaceVideo,
 
 function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
   const [failed, setFailed] = useState(false)
+  const [videoSize, setVideoSize] = useState(null)
   const isProcessing = ['queued', 'processing', 'cover_submitting', 'cover_processing'].includes(entry.mediaStatus)
   const needsReplacement = entry.mediaStatus === 'failed' || failed
+
+  useEffect(() => {
+    setFailed(false)
+    setVideoSize(null)
+  }, [entry.id, entry.videoUrl])
+
+  const isPortrait = Boolean(videoSize && videoSize.height > videoSize.width)
+  const videoStyle = videoSize
+    ? { '--nansha-video-aspect-ratio': `${videoSize.width} / ${videoSize.height}` }
+    : undefined
+
   if (isProcessing || needsReplacement) {
     return (
       <div className="nansha-video-placeholder nansha-video-playback-error">
@@ -842,7 +854,8 @@ function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
   return (
     <video
       key={entry.id}
-      className="nansha-video-placeholder"
+      className={`nansha-video-placeholder${isPortrait ? ' is-portrait' : ''}`}
+      style={videoStyle}
       src={entry.videoUrl}
       poster={isImageCoverUrl(entry.coverUrl) ? entry.coverUrl : undefined}
       controls
@@ -851,6 +864,12 @@ function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
       x5-playsinline="true"
       x5-video-player-type="h5"
       preload="metadata"
+      onLoadedMetadata={(event) => {
+        const { videoWidth, videoHeight } = event.currentTarget
+        if (videoWidth > 0 && videoHeight > 0) {
+          setVideoSize({ width: videoWidth, height: videoHeight })
+        }
+      }}
       onError={() => setFailed(true)}
     >
       当前浏览器不支持视频播放
