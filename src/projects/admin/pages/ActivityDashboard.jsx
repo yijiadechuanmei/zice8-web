@@ -142,6 +142,39 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'nansha_open_mic') {
+      const nansha = overview?.nanshaOpenMic || {}
+      const phaseLabel = {
+        upload: '报名阶段',
+        vote: '投票阶段',
+        publicity: '公示阶段',
+        closed: '已关闭',
+      }[nansha.currentPhase] || '报名阶段'
+      return [
+        { label: '当前阶段', value: phaseLabel },
+        { label: '每日票额', value: nansha.dailyVoteLimit ?? 10, suffix: '票' },
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '参与用户', value: overview?.participantCount ?? 0, tooltip: '进入活动并完成身份识别的去重微信用户数。' },
+        { label: '报名作品', value: nansha.entryCount ?? 0, tooltip: '每个用户仅能提交一件作品，等同于报名人数。' },
+        { label: '审核完成率', value: Math.round(Number(nansha.reviewRate ?? 0)), suffix: '%', tooltip: '已完成初审处理（精选、不通过）或最终上架的作品占报名作品的比例。' },
+        { label: '今日报名', value: nansha.todayEntryCount ?? 0 },
+        { label: '待初审', value: nansha.pendingEntryCount ?? 0 },
+        { label: '已精选', value: nansha.featuredEntryCount ?? 0, tooltip: '初审精选、待终审上架的作品。' },
+        { label: '不通过', value: nansha.rejectedEntryCount ?? 0 },
+        { label: '已上架', value: nansha.publishedEntryCount ?? 0, tooltip: '终审上架的作品总数。' },
+        { label: '前端可展示', value: nansha.readyPublishedEntryCount ?? 0, tooltip: '已上架且视频转码、封面生成均完成的作品。' },
+        { label: '投票用户', value: nansha.voteUserCount ?? 0, tooltip: '至少成功投出过一次票的去重用户数。' },
+        { label: '投票操作', value: nansha.voteRecordCount ?? 0, tooltip: '成功提交投票的操作笔数；一次可投多票。' },
+        { label: '总票数', value: nansha.totalVotes ?? 0, tooltip: '所有成功投票的票数合计，不是投票操作笔数。' },
+        { label: '今日投票', value: nansha.todayVotes ?? 0 },
+        { label: '转码处理中', value: nansha.processingEntryCount ?? 0 },
+        { label: '转码失败', value: nansha.failedEntryCount ?? 0 },
+      ]
+    }
+
     if (activity.type === 'nanhai_inspection_challenge') {
       const lottery = overview?.lottery || {}
       const budget = overview?.budget || {}
@@ -200,6 +233,17 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     label: `第${item.phaseNo}期`,
     stockRemaining: Math.max(Number(item.stockTotal || 0) - Number(item.stockUsed || 0), 0),
   }))
+  const nanshaLifecycleTrend = mergeNanshaLifecycleTrend(
+    charts?.nanshaOpenMic?.registrationTrend,
+    charts?.nanshaOpenMic?.reviewTrend,
+    charts?.nanshaOpenMic?.publishedTrend,
+  )
+  const nanshaVoteTrend = mergeNanshaVoteTrend(
+    charts?.nanshaOpenMic?.voteQuantityTrend,
+    charts?.nanshaOpenMic?.voteUserTrend,
+  )
+  const nanshaReviewStatus = charts?.nanshaOpenMic?.reviewStatusDistribution || []
+  const nanshaTopWorks = charts?.nanshaOpenMic?.topWorks || []
 
   if (loading) {
     return (
@@ -345,7 +389,60 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || isTjrcbPensionManual ? null : (
+          {activity.type === 'nansha_open_mic' ? (
+            <>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} xl={8}>
+                  <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                    {charts?.access?.dataAvailable ? (
+                      <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                    ) : (
+                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                    )}
+                  </ChartPanel>
+                </Col>
+                <Col xs={24} xl={8}>
+                  <ChartPanel title="近 7 天报名与审核" description="按报名提交、审核操作、最终上架时间统计">
+                    <LazyChart
+                      type="line"
+                      data={nanshaLifecycleTrend}
+                      series={[
+                        { key: 'registrations', name: '报名作品' },
+                        { key: 'reviews', name: '审核操作' },
+                        { key: 'published', name: '上架作品' },
+                      ]}
+                    />
+                  </ChartPanel>
+                </Col>
+                <Col xs={24} xl={8}>
+                  <ChartPanel title="近 7 天投票趋势" description="按成功投出的票数和投票用户统计">
+                    <LazyChart
+                      type="line"
+                      data={nanshaVoteTrend}
+                      series={[
+                        { key: 'votes', name: '投出票数' },
+                        { key: 'voters', name: '投票用户' },
+                      ]}
+                    />
+                  </ChartPanel>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} xl={8}>
+                  <ChartPanel title="作品审核状态" description="当前有效报名作品的审核分布">
+                    <LazyChart type="donut" data={nanshaReviewStatus} series={[{ key: 'value', name: '作品数' }]} emptyText="暂无报名作品" />
+                  </ChartPanel>
+                </Col>
+                <Col xs={24} xl={16}>
+                  <ChartPanel title="作品票数 Top 10" description="仅统计已上架且可在前端播放的作品">
+                    <LazyChart type="horizontalBar" data={nanshaTopWorks} series={[{ key: 'voteCount', name: '票数' }]} height={300} emptyText="暂无可展示作品" />
+                  </ChartPanel>
+                </Col>
+              </Row>
+            </>
+          ) : null}
+
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || isTjrcbPensionManual ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -423,7 +520,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : (
+          ) : activity.type === 'nansha_open_mic' ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>
@@ -476,6 +573,31 @@ function mergePhaseQuizLotteryTrend(attempts = [], completed = [], fullScore = [
   fullScore.forEach((item) => { ensure(item.date).fullScore = item.value || 0 })
   draws.forEach((item) => { ensure(item.date).draws = item.value || 0 })
   wins.forEach((item) => { ensure(item.date).wins = item.value || 0 })
+  return Array.from(map.values()).sort((left, right) => String(left.date).localeCompare(String(right.date)))
+}
+
+function mergeNanshaLifecycleTrend(registrations = [], reviews = [], published = []) {
+  const map = new Map()
+  const ensure = (date) => {
+    const current = map.get(date) || { date, registrations: 0, reviews: 0, published: 0 }
+    map.set(date, current)
+    return current
+  }
+  registrations.forEach((item) => { ensure(item.date).registrations = item.value || 0 })
+  reviews.forEach((item) => { ensure(item.date).reviews = item.value || 0 })
+  published.forEach((item) => { ensure(item.date).published = item.value || 0 })
+  return Array.from(map.values()).sort((left, right) => String(left.date).localeCompare(String(right.date)))
+}
+
+function mergeNanshaVoteTrend(votes = [], voters = []) {
+  const map = new Map()
+  const ensure = (date) => {
+    const current = map.get(date) || { date, votes: 0, voters: 0 }
+    map.set(date, current)
+    return current
+  }
+  votes.forEach((item) => { ensure(item.date).votes = item.value || 0 })
+  voters.forEach((item) => { ensure(item.date).voters = item.value || 0 })
   return Array.from(map.values()).sort((left, right) => String(left.date).localeCompare(String(right.date)))
 }
 
