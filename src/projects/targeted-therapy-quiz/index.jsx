@@ -122,7 +122,7 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
   }, [config.feedbackSoundVolume, correctSound, incorrectSound])
 
   useEffect(() => {
-    if (result === 'correct') fireRealisticConfetti()
+    if (result?.correct) fireRealisticConfetti()
   }, [result])
 
   useEffect(() => {
@@ -185,7 +185,10 @@ export default function TargetedTherapyQuizProject({ routeParams }) {
       const answerResult = await submitAnswer(activityKey, question.id, selectedOption)
       const correct = Boolean(answerResult?.correct)
       playFeedbackSound(correct ? 'correct' : 'incorrect')
-      setResult(correct ? 'correct' : 'incorrect')
+      setResult({
+        correct,
+        correctAnswer: correct ? null : answerResult?.correctAnswer || null,
+      })
       trackEvent({
         activityKey,
         eventType: 'submit_profile',
@@ -358,7 +361,8 @@ function QuestionPage({ question, selectedOption, onSelect, onSubmit, submitting
 }
 
 function ResultDialog({ result, onClose, onRetest }) {
-  const correct = result === 'correct'
+  const correct = Boolean(result?.correct)
+  const correctAnswer = result?.correctAnswer
   const actionRef = useRef(null)
 
   useEffect(() => {
@@ -372,6 +376,12 @@ function ResultDialog({ result, onClose, onRetest }) {
         <img className="ttq-result-face" src={correct ? smileFace : sadFace} alt={correct ? '笑脸' : '苦脸'} />
         <h2 id="ttq-result-title">{correct ? '恭喜闯关成功！' : '差一点就成功啦'}</h2>
         <p>{correct ? '太棒了，知识能量已点亮！' : '别灰心，换个关卡再挑战吧！'}</p>
+        {!correct && correctAnswer ? (
+          <div className="ttq-correct-answer" aria-label={`正确答案：${correctAnswer.id}，${correctAnswer.text}`}>
+            <span>正确答案</span>
+            <strong><b>{correctAnswer.id}</b>{correctAnswer.text}</strong>
+          </div>
+        ) : null}
         <button ref={actionRef} className="ttq-primary-button ttq-retest-button" type="button" onClick={onRetest}>
           <span>{correct ? '再闯一关' : '重新挑战'}</span>
           <ArrowIcon />
