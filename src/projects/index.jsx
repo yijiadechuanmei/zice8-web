@@ -79,6 +79,12 @@ export const projectRoutes = [
     Component: TargetedTherapyQuizProject,
     activityGate: true,
   },
+  // 兼容已流出的早期幸福南海连字符链接；Admin 统一使用 /{type}/{key}。
+  {
+    path: '/nanhai-inspection-challenge/:activityKey',
+    Component: NanhaiInspectionChallengeProject,
+    activityGate: true,
+  },
   {
     path: '/pdf/:activityKey',
     Component: PdfPreviewProject,
