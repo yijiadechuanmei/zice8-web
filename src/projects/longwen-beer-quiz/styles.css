@@ -1,6 +1,6 @@
 body.lw-lock-scroll { overflow: hidden; }
 .lw-app { display: grid; width: 100vw; height: 100svh; min-height: 0; overflow: hidden; place-items: center; background: #030b12; color: #fff; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-.lw-page { position: relative; isolation: isolate; width: min(100vw, calc(100svh * 750 / 1624)); height: min(100svh, calc(100vw * 1624 / 750)); min-height: 0; overflow: hidden; background-color: #04101a; background-repeat: no-repeat; background-position: center; background-size: cover; }
+.lw-page { position: relative; isolation: isolate; width: 100vw; height: 100svh; min-height: 0; overflow: hidden; background-color: #04101a; background-repeat: no-repeat; background-position: center; background-size: cover; }
 .lw-shade { position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgba(1,9,17,.2) 0%, rgba(1,8,14,.05) 31%, rgba(0,0,0,.28) 100%); pointer-events: none; }
 .lw-home { position: relative; height: 100%; min-height: 0; aspect-ratio: 750 / 1624; }
 .lw-home img { display: block; max-width: none; }
