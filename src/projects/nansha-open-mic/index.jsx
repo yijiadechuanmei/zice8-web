@@ -622,7 +622,7 @@ function PublicityRankingRow({ rank, entry }) {
   return (
     <div className={`nansha-publicity-row rank-${rank}`}>
       <span className="nansha-publicity-number">{rank}</span>
-      <p><span className="nansha-publicity-work-name" title={entry.workName}>{entry.workName}</span><br /><span>{entry.authorName}</span></p>
+      <p><span className="nansha-publicity-work-name" title={entry.workName}>{entry.workName}</span><span className="nansha-publicity-author-name">{entry.authorName}</span></p>
       <span className="nansha-publicity-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )

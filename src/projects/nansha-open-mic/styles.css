@@ -1149,14 +1149,18 @@
 .nansha-publicity-row:nth-child(n + 4) .nansha-publicity-number { background: #aaa; }
 
 .nansha-publicity-row p {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
   margin: 0;
   color: #080808;
-  font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 400 calc(var(--nansha-unit) * 2.8) / 1.18 "PingFang SC", "Microsoft YaHei", sans-serif;
   white-space: nowrap;
 }
 
 .nansha-publicity-work-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nansha-publicity-author-name { display: block; }
 
 .nansha-publicity-votes {
   color: #080808;
