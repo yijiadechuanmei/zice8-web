@@ -141,7 +141,9 @@ export default function LongwenBeerQuizProject({ routeParams }) {
         {!loading && state?.phase === 'result' ? (
           <ResultPage config={config} state={state} onRedeem={() => { setError(''); setRedeemOpen(true) }} />
         ) : null}
-        {error && state && !redeemOpen ? <p className="lw-inline-error" role="alert">{error}</p> : null}
+        {error && state && !redeemOpen ? (
+          <p className={`lw-inline-error${state.phase === 'quiz' ? ' lw-inline-error--quiz' : ''}`} role="alert">{error}</p>
+        ) : null}
         {redeemOpen ? (
           <RedeemDialog
             code={verificationCode}
