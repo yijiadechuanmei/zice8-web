@@ -989,12 +989,12 @@
 .nansha-poster-save-tip {
   position: absolute;
   right: 0;
-  bottom: calc(var(--nansha-unit) * 2.13);
+  bottom: calc(var(--nansha-unit) * 4.53);
   left: 0;
   z-index: 2;
   margin: 0;
-  color: #fff;
-  font: 400 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #e3e3e3;
+  font: 400 calc(var(--nansha-unit) * 3.07) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
   text-align: center;
   pointer-events: none;
 }
