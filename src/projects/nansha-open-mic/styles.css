@@ -670,6 +670,9 @@ video.nansha-video-placeholder.is-portrait {
 .nansha-video-picker.has-file b { align-self: flex-end; margin-bottom: calc(var(--nansha-unit) * 2); color: #fff; font-size: calc(var(--nansha-unit) * 2.13); text-shadow: 0 1px 3px rgba(0, 0, 0, .72); }
 .nansha-video-picker.has-cover::after { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, .56)); content: ""; pointer-events: none; }
 .nansha-video-picker img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.nansha-video-picker-reselect { position: absolute; z-index: 2; top: 50%; left: 0; display: flex; width: 100%; flex-direction: column; align-items: center; gap: calc(var(--nansha-unit) * 1.07); pointer-events: none; transform: translateY(-47%); }
+.nansha-video-picker-reselect i { color: #b7b7b7; font: 400 calc(var(--nansha-unit) * 7.47) / .8 "PingFang SC", "Microsoft YaHei", sans-serif; font-style: normal; }
+.nansha-video-picker-reselect strong { color: #173b98; font: 700 calc(var(--nansha-unit) * 3.47) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-video-picker-progress { position: absolute; z-index: 2; right: calc(var(--nansha-unit) * 1.6); top: calc(var(--nansha-unit) * 1.6); padding: calc(var(--nansha-unit) * .8) calc(var(--nansha-unit) * 1.33); background: rgba(23, 59, 152, .92); color: #fff; font: 500 calc(var(--nansha-unit) * 1.87) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-upload-progress-panel { width: 100%; margin: calc(var(--nansha-unit) * -5.6) 0 calc(var(--nansha-unit) * 4.27); padding: calc(var(--nansha-unit) * 1.6) calc(var(--nansha-unit) * 2.13); border: 1px solid #173b98; background: #eef4ff; color: #173b98; }
 .nansha-upload-progress-panel p { margin: 0 0 calc(var(--nansha-unit) * 1.2); font: 600 calc(var(--nansha-unit) * 2.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }

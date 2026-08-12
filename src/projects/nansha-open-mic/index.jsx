@@ -921,7 +921,10 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, uplo
         <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}${coverPreview ? ' has-cover' : ''}`}>
           <input type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" onChange={onSelectVideo} />
           {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
-          <b>{selectedVideoName || '+'}</b>
+          {selectedVideoName ? <>
+            <span className="nansha-video-picker-reselect" aria-hidden="true"><i>+</i><strong>点击可重新上传</strong></span>
+            <b>{selectedVideoName}</b>
+          </> : <b>+</b>}
           {selectedVideoName ? <span className="nansha-video-picker-progress">{uploadingVideo ? `视频上传中 ${uploadProgress}%` : '上传后自动适配并生成封面'}</span> : null}
         </label>
         {selectedVideoName && (submitting || uploadingVideo) ? <section className="nansha-upload-progress-panel" aria-live="polite"><p>视频上传进度：{uploadProgress}%</p><div role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><i style={{ width: `${Math.max(0, Math.min(uploadProgress, 100))}%` }} /></div></section> : null}
