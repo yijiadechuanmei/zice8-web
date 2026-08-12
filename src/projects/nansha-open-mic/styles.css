@@ -383,6 +383,7 @@
   font: 800 calc(var(--nansha-unit) * 4.53) / 1 "PingFang SC", "Microsoft YaHei", sans-serif;
   cursor: pointer;
 }
+.nansha-upload-button:disabled { cursor: not-allowed; opacity: .55; }
 
 .nansha-vote-home {
   width: min(100%, 750px);

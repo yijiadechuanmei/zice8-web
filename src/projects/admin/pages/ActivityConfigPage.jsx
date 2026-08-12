@@ -73,7 +73,7 @@ export default function ActivityConfigPage({ activity }) {
   const [manualTargets, setManualTargets] = useState('')
   const [revokeDrawId, setRevokeDrawId] = useState('')
   const [clearingDraws, setClearingDraws] = useState(false)
-  const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10 })
+  const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10, uploadStartAt: '', uploadEndAt: '' })
   const [nanshaConfigSaving, setNanshaConfigSaving] = useState(false)
   const [nanshaResetting, setNanshaResetting] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
@@ -160,6 +160,8 @@ export default function ActivityConfigPage({ activity }) {
           setNanshaConfig({
             currentPhase: data?.currentPhase || 'upload',
             dailyVoteLimit: Number(data?.dailyVoteLimit || 10),
+            uploadStartAt: toOptionalDateTimeInput(data?.uploadStartAt),
+            uploadEndAt: toOptionalDateTimeInput(data?.uploadEndAt),
           })
         })
         .catch((err) => { if (alive) setError(err.message || '南沙活动阶段配置加载失败') })
@@ -199,12 +201,18 @@ export default function ActivityConfigPage({ activity }) {
     setNanshaConfigSaving(true)
     setError('')
     try {
-      const data = await updateNanshaOpenMicConfig(activity.activityKey, nanshaConfig)
+      const data = await updateNanshaOpenMicConfig(activity.activityKey, {
+        ...nanshaConfig,
+        uploadStartAt: toOptionalDateTimeISOString(nanshaConfig.uploadStartAt),
+        uploadEndAt: toOptionalDateTimeISOString(nanshaConfig.uploadEndAt),
+      })
       setNanshaConfig({
         currentPhase: data.currentPhase,
         dailyVoteLimit: Number(data.dailyVoteLimit),
+        uploadStartAt: toOptionalDateTimeInput(data.uploadStartAt),
+        uploadEndAt: toOptionalDateTimeInput(data.uploadEndAt),
       })
-      message.success('活动阶段与每日票数已保存')
+      message.success('活动阶段、报名时间与每日票数已保存')
     } catch (err) {
       setError(err.message || '南沙活动配置保存失败')
     } finally {
@@ -218,7 +226,7 @@ export default function ActivityConfigPage({ activity }) {
     try {
       const result = await resetNanshaOpenMicData(activity.activityKey)
       const cleared = result?.cleared || {}
-      message.success(`已清空报名 ${cleared.entries || 0} 条、投票 ${cleared.votes || 0} 条`)
+      message.success(`已清空报名 ${cleared.entries || 0} 条、投票 ${cleared.votes || 0} 条、参与用户 ${cleared.participants || 0} 条`)
     } catch (err) {
       const text = err.message || '清空南沙活动数据失败'
       setError(text)
@@ -580,7 +588,7 @@ export default function ActivityConfigPage({ activity }) {
                 type="info"
                 showIcon
                 message="阶段由后台手动切换"
-                description="上传阶段仅允许报名；投票阶段展示审核通过的作品并开放投票；公示期仅展示投票结果排行榜；关闭阶段停止报名和投票。"
+                description="上传阶段仅在报名时间范围内允许报名；投票阶段展示审核通过的作品并开放投票；公示期仅展示投票结果排行榜；关闭阶段停止报名和投票。"
               />
               <Space wrap size={18}>
                 <label>
@@ -600,6 +608,28 @@ export default function ActivityConfigPage({ activity }) {
                   </div>
                 </label>
                 <label>
+                  <Text strong>报名开始时间</Text>
+                  <div style={{ marginTop: 8 }}>
+                    <Input
+                      style={{ width: 210 }}
+                      type="datetime-local"
+                      value={nanshaConfig.uploadStartAt}
+                      onChange={(event) => setNanshaConfig((current) => ({ ...current, uploadStartAt: event.target.value }))}
+                    />
+                  </div>
+                </label>
+                <label>
+                  <Text strong>报名结束时间（首页倒计时）</Text>
+                  <div style={{ marginTop: 8 }}>
+                    <Input
+                      style={{ width: 210 }}
+                      type="datetime-local"
+                      value={nanshaConfig.uploadEndAt}
+                      onChange={(event) => setNanshaConfig((current) => ({ ...current, uploadEndAt: event.target.value }))}
+                    />
+                  </div>
+                </label>
+                <label>
                   <Text strong>每人每天票数</Text>
                   <div style={{ marginTop: 8 }}>
                     <InputNumber
@@ -613,7 +643,7 @@ export default function ActivityConfigPage({ activity }) {
               </Space>
               <Card size="small" type="inner" title="危险操作">
                 <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                  <Text type="secondary">清空本活动全部报名作品、审核记录、投票记录和每日票数；活动阶段、每日票数配置及 OSS 原始视频文件会保留。</Text>
+                  <Text type="secondary">清空本活动全部报名作品、审核记录、投票记录、每日票数和参与用户；活动阶段、报名时间、每日票数配置及 OSS 原始视频文件会保留。</Text>
                   <Popconfirm
                     title="确认清空南沙新声全部业务数据？"
                     description="该操作不可恢复，清空后所有用户均可重新报名和投票。"
@@ -859,4 +889,18 @@ export default function ActivityConfigPage({ activity }) {
 
 function toDateTimeInput(value) {
   return String(value || '').replace(' ', 'T').slice(0, 16) || '2026-07-29T00:00'
+}
+
+function toOptionalDateTimeInput(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+  return local.toISOString().slice(0, 16)
+}
+
+function toOptionalDateTimeISOString(value) {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }

@@ -430,7 +430,7 @@ export default function NanshaOpenMicProject() {
       {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => setView('ranking')} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
-      {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} /> : null}
+      {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
       {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
@@ -465,7 +465,19 @@ export default function NanshaOpenMicProject() {
   )
 }
 
-function UploadHome({ onShowRules, onUpload }) {
+function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+  const startAt = uploadStartAt ? new Date(uploadStartAt).getTime() : null
+  const endAt = uploadEndAt ? new Date(uploadEndAt).getTime() : null
+  const isBeforeStart = Number.isFinite(startAt) && now < startAt
+  const isEnded = Number.isFinite(endAt) && now >= endAt
+  const countdownTarget = isBeforeStart ? startAt : endAt
+  const countdownText = Number.isFinite(countdownTarget) ? formatCountdown(Math.max(0, countdownTarget - now)) : '--天 --:--:--'
+  const countdownLabel = isBeforeStart ? '距离报名开始还有' : isEnded ? '报名已截止' : endAt ? '距离上传截止还有' : '报名时间待公布'
   return (
     <div className="nansha-upload-home">
       <header className="nansha-upload-home-header"><h1>首页</h1></header>
@@ -476,11 +488,11 @@ function UploadHome({ onShowRules, onUpload }) {
       <section className="nansha-upload-shell">
         <article className="nansha-upload-paper">
           <span className="nansha-upload-cyan-wedge" aria-hidden="true" />
-          <section className="nansha-upload-countdown" aria-label="距离上传截止还有五天">
-            <div className="nansha-countdown-label">距离上传截止还有</div>
-            <strong>5天 00:00:00</strong>
+          <section className="nansha-upload-countdown" aria-label={countdownLabel}>
+            <div className="nansha-countdown-label">{countdownLabel}</div>
+            <strong>{countdownText}</strong>
           </section>
-          <button className="nansha-upload-button" type="button" onClick={onUpload}>上传作品</button>
+          <button className="nansha-upload-button" type="button" onClick={onUpload} disabled={isBeforeStart || isEnded}>上传作品</button>
           <section className="nansha-upload-section nansha-upload-benefits" aria-label="优秀作品可获得">
             <h2>优秀作品可获得：</h2>
             <ul>
@@ -513,6 +525,15 @@ function UploadHome({ onShowRules, onUpload }) {
       </section>
     </div>
   )
+}
+
+function formatCountdown(remainingMs) {
+  const totalSeconds = Math.floor(remainingMs / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${days}天 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 function ReviewHome({ onShowRules, showReviewNotice = false }) {
@@ -928,10 +949,10 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, uplo
           {selectedVideoName ? <span className="nansha-video-picker-progress">{uploadingVideo ? `视频上传中 ${uploadProgress}%` : '上传后自动适配并生成封面'}</span> : null}
         </label>
         {selectedVideoName && (submitting || uploadingVideo) ? <section className="nansha-upload-progress-panel" aria-live="polite"><p>视频上传进度：{uploadProgress}%</p><div role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><i style={{ width: `${Math.max(0, Math.min(uploadProgress, 100))}%` }} /></div></section> : null}
-        <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
-        <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
+        <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称（最多12个字）" maxLength={12} />
+        <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称（最多12个字）" maxLength={12} />
         <input name="phone" aria-label="手机号码" value={form.phone} onChange={(event) => update('phone', event.target.value.replace(/\D/g, '').slice(0, 11))} inputMode="tel" maxLength={11} placeholder="请输入手机号码" />
-        <textarea name="description" aria-label="作品简介" value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="请输入作品简介" maxLength={1000} />
+        <textarea name="description" aria-label="作品简介" value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="请输入作品简介（最多100个字）" maxLength={100} />
         {formError || videoError ? <p className="nansha-upload-form-error" role="alert">{formError || videoError}</p> : null}
         <button type="submit" disabled={submitting}>{submitting ? '上传中…' : '点击确认上传'}</button>
       </form>
