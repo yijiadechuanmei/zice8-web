@@ -31,6 +31,7 @@ const activityTypeProjects = {
   artist_call_lottery: ArtistCallLotteryProject,
   'artist-call-lottery': ArtistCallLotteryProject,
   song_wish_lottery: SongWishLotteryProject,
+  nanhai_inspection_challenge: NanhaiInspectionChallengeProject,
   'song-wish-lottery': SongWishLotteryProject,
   nansha_open_mic: NanshaOpenMicProject,
   chakra_assessment: ChakraAssessmentProject,
@@ -76,16 +77,6 @@ export const projectRoutes = [
   {
     path: '/targeted_therapy_quiz/:activityKey',
     Component: TargetedTherapyQuizProject,
-    activityGate: true,
-  },
-  {
-    path: '/nanhai-inspection-challenge/:activityKey',
-    Component: NanhaiInspectionChallengeProject,
-    activityGate: true,
-  },
-  {
-    path: '/nanhai_inspection_challenge/:activityKey',
-    Component: NanhaiInspectionChallengeProject,
     activityGate: true,
   },
   {
