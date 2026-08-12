@@ -160,8 +160,9 @@ export default function LongwenBeerQuizProject({ routeParams }) {
 
 function HomePage({ config, onStart, loading }) {
   return (
-    <div className="lw-home">
+    <>
       <ImageAsset className="lw-home-banner" src={assetUrl(config.assetsBaseUrl, config.homeBannerImage)} alt="百威黑金" />
+      <div className="lw-home">
       <ImageAsset className="lw-home-title" src={assetUrl(config.assetsBaseUrl, config.homeTitleImage)} alt="龙文请你喝啤酒" />
       <button className="lw-image-start" type="button" onClick={onStart} disabled={loading}>
         <span className="lw-image-start__glint" aria-hidden="true" />
@@ -171,7 +172,8 @@ function HomePage({ config, onStart, loading }) {
       </button>
       <ImageAsset className="lw-home-marker" src={assetUrl(config.assetsBaseUrl, config.startButtonImage)} alt="活动地址" />
       <ImageAsset className="lw-home-footer" src={assetUrl(config.assetsBaseUrl, config.homeFooterImage)} alt="百威黑金啤酒消费季" />
-    </div>
+      </div>
+    </>
   )
 }
 
