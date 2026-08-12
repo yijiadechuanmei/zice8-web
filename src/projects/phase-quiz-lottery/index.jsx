@@ -432,7 +432,7 @@ function DebugPanel({
         </button>
         {allowActivityReset ? (
           <button className="min-h-10 rounded-xl bg-red-700 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onResetAll}>
-            重置第4期测试数据
+            重置第5期测试数据
           </button>
         ) : null}
         <button className="min-h-10 rounded-xl bg-slate-900 px-3 py-2 text-[18px] font-bold text-white" type="button" onClick={onGoQuestion}>
@@ -1156,11 +1156,11 @@ function PhaseQuizLotteryMain({ routeParams }) {
 
   async function handleDebugResetAll() {
     if (!canDebug || !canResetAllDebugData) return
-    const confirmed = window.confirm('确认重置第4期测试数据？会清空第4期所有用户的答题、抽奖、兑奖记录，并恢复第4期奖品库存。')
+    const confirmed = window.confirm('确认重置第5期测试数据？会清空第5期所有用户的答题、抽奖、兑奖记录，并恢复第5期奖品库存。')
     if (!confirmed) return
 
     setLoading(true)
-    setLoadingText('正在重置第4期测试数据...')
+    setLoadingText('正在重置第5期测试数据...')
     try {
       const result = await handleProtectedRequest(() => resetDebugData(activityKey, {
         confirmToken: DEBUG_RESET_TOKEN,
@@ -1169,8 +1169,8 @@ function PhaseQuizLotteryMain({ routeParams }) {
       if (!result) {
         return
       }
-      console.log('[phase-quiz-lottery debug reset phase 4]', result)
-      showToast('第4期测试数据已重置')
+      console.log('[phase-quiz-lottery debug reset phase 5]', result)
+      showToast('第5期测试数据已重置')
       setQuestions([])
       setCurrentIndex(0)
       setAnswers([])
