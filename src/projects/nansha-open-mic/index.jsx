@@ -924,7 +924,6 @@ function UploadResultDialog({ status, onConfirm }) {
           {isSuccess ? (
             <>
               <span>作品已上传，可在“我的作品”中查看</span>
-              <span>视频正在处理中，封面生成后即可查看</span>
               <span>我们将主动联系通过初选的视频作者，对接后续相关事宜，<br />若未收到我方联系，则代表初选未通过。</span>
             </>
           ) : '上传失败，请重新上传'}
