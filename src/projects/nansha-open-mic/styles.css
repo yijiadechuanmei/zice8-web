@@ -457,8 +457,9 @@
 .nansha-ranking-row.rank-2 .nansha-ranking-number { background: #f3a333; }
 .nansha-ranking-row.rank-3 .nansha-ranking-number { background: #27bfd4; }
 .nansha-ranking-row:nth-child(n + 4) .nansha-ranking-number { background: #aaa; }
-.nansha-ranking-row p { min-width: 0; margin: 0; color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-ranking-row p { display: flex; flex-direction: column; justify-content: center; min-width: 0; margin: 0; color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.18 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-work-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nansha-ranking-author-name { display: block; }
 .nansha-ranking-votes { color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-note { position: absolute; bottom: calc(var(--nansha-unit) * 3.73); left: 0; width: 100%; margin: 0; color: #777; text-align: center; font-size: calc(var(--nansha-unit) * 2.13); }
 

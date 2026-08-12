@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AudioOutlined,
   AuditOutlined,
@@ -11,8 +11,9 @@ import {
   VideoCameraFilled,
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
-import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
+import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getEntry, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -106,6 +107,15 @@ function drawAvatarImage(context, image, centerX, centerY, radius) {
   context.restore()
 }
 
+function buildEntryShareUrl(entryId) {
+  if (typeof window === 'undefined') return ASSET_BASE_URL
+  const url = new URL(window.location.href)
+  url.searchParams.delete('token')
+  url.searchParams.set('entryId', entryId)
+  url.searchParams.set('from', 'share')
+  return url.toString()
+}
+
 export default function NanshaOpenMicProject() {
   const [publicConfig, setPublicConfig] = useState(null)
   const [view, setView] = useState('upload-home')
@@ -127,7 +137,19 @@ export default function NanshaOpenMicProject() {
   const [myVotes, setMyVotes] = useState([])
   const [selectedEntry, setSelectedEntry] = useState(null)
   const [sharedEntryId, setSharedEntryId] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('entryId') || '')
+  const [shareLink, setShareLink] = useState(() => {
+    const entryId = typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('entryId')
+    return entryId ? buildEntryShareUrl(entryId) : ''
+  })
   const { authReady, blockedMessage, authStatus } = useWechatAuth(ACTIVITY_KEY, publicConfig)
+  const shareActivity = useMemo(() => ({
+    title: publicConfig?.title || '南沙新声·全民开麦',
+    shareTitle: publicConfig?.shareTitle || '南沙新声·全民开麦',
+    shareDesc: publicConfig?.shareDesc || '邀请你为优秀作品投票',
+    shareImage: publicConfig?.shareImage || MAIN_VISUAL_URL,
+    shareLink: shareLink || undefined,
+  }), [publicConfig, shareLink])
+  useWechatShare(ACTIVITY_KEY, shareActivity)
   const homeView = activityPhase === 'vote'
     ? 'vote-home'
     : activityPhase === 'publicity'
@@ -169,12 +191,21 @@ export default function NanshaOpenMicProject() {
           setVoteQuota(bootstrapData.voteQuota || { remaining: bootstrapData.rules?.dailyVoteLimit || 10 })
         }
         if (bootstrapData && ['vote', 'publicity'].includes(phase)) {
-          getEntries(ACTIVITY_KEY, 1, 50).then((result) => {
+          getEntries(ACTIVITY_KEY, 1, 50).then(async (result) => {
             if (!alive) return
             const list = result?.list || []
             setEntries(list)
             if (sharedEntryId && phase === 'vote') {
-              const sharedEntry = list.find((entry) => entry.id === sharedEntryId)
+              let sharedEntry = list.find((entry) => entry.id === sharedEntryId)
+              if (!sharedEntry) {
+                try {
+                  const detail = await getEntry(ACTIVITY_KEY, sharedEntryId)
+                  sharedEntry = detail?.entry || null
+                } catch {
+                  sharedEntry = null
+                }
+              }
+              if (!alive) return
               if (sharedEntry) {
                 setSelectedEntry(sharedEntry)
                 setView('work-detail')
@@ -325,6 +356,22 @@ export default function NanshaOpenMicProject() {
     setView('work-detail')
   }
 
+  async function openVotedWork(vote) {
+    const cachedEntry = entries.find((entry) => entry.id === vote.entryId)
+    if (cachedEntry) {
+      openWork(cachedEntry)
+      return
+    }
+
+    try {
+      const result = await getEntry(ACTIVITY_KEY, vote.entryId)
+      if (result?.entry) openWork(result.entry)
+    } catch {
+      // The work may have been withdrawn after the vote. Keep the vote record
+      // readable rather than navigating to a non-existent detail page.
+    }
+  }
+
   function openVoteDialog() {
     if (!selectedEntry) return
     setVoteDialog('vote')
@@ -338,6 +385,12 @@ export default function NanshaOpenMicProject() {
 
   function openPosterForEntry(entry) {
     if (!entry) return
+    const nextShareLink = buildEntryShareUrl(entry.id)
+    if (typeof window !== 'undefined') {
+      const url = new URL(nextShareLink)
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+    }
+    setShareLink(nextShareLink)
     setSelectedEntry(entry)
     setPosterOpen(true)
   }
@@ -381,7 +434,7 @@ export default function NanshaOpenMicProject() {
       {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
-      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
+      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
       {view === 'upload' ? (
@@ -407,7 +460,7 @@ export default function NanshaOpenMicProject() {
       {uploadDialog ? <UploadResultDialog status={uploadDialog} errorMessage={videoError} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog remaining={voteQuota?.remaining ?? 0} onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
-      {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} onClose={() => setPosterOpen(false)} /> : null}
+      {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} shareUrl={shareLink} onClose={() => setPosterOpen(false)} /> : null}
     </main>
   )
 }
@@ -579,7 +632,7 @@ function RankingRow({ rank, entry, onWork }) {
   return (
     <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={() => onWork(entry)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork(entry) }}>
       <span className="nansha-ranking-number">{rank}</span>
-      <p><span className="nansha-ranking-work-name" title={entry.workName}>{entry.workName}</span><br /><span>{entry.authorName}</span></p>
+      <p><span className="nansha-ranking-work-name" title={entry.workName}>{entry.workName}</span><span className="nansha-ranking-author-name">{entry.authorName}</span></p>
       <span className="nansha-ranking-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )
@@ -628,7 +681,7 @@ function MySummaryRow({ icon, title, status, detail, onClick }) {
   )
 }
 
-function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy }) {
+function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy, onOpenWork }) {
   return (
     <section className="nansha-my-votes-page">
       <PageHeader title="我的投票" onBack={onBack} />
@@ -637,7 +690,7 @@ function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy }) {
         <ActivityRulesTrigger onClick={onShowRules} fixed />
         <section className="nansha-my-votes-board" aria-label="我的投票详情">
           <div className="nansha-my-votes-list">
-            {votes.map((vote) => <MyVoteRow key={vote.id} vote={vote} />)}
+            {votes.map((vote) => <MyVoteRow key={vote.id} vote={vote} onOpenWork={onOpenWork} />)}
           </div>
         </section>
         <VoteBottomNavigation active="my" onHome={onHome} onRanking={onRanking} onMy={onMy} />
@@ -646,9 +699,9 @@ function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy }) {
   )
 }
 
-function MyVoteRow({ vote }) {
+function MyVoteRow({ vote, onOpenWork }) {
   return (
-    <button className="nansha-my-vote-row" type="button">
+    <button className="nansha-my-vote-row" type="button" onClick={() => onOpenWork(vote)}>
       <span className="nansha-my-vote-title">{vote.workName}</span>
       <span className="nansha-my-vote-detail">本次投票：{vote.quantity}票</span>
       <RightOutlined className="nansha-my-vote-chevron" aria-hidden="true" />
@@ -675,8 +728,8 @@ function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
   )
 }
 
-function VotePosterDialog({ entry, onClose }) {
-  const posterUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?entryId=${encodeURIComponent(entry.id)}` : `${ASSET_BASE_URL}`
+function VotePosterDialog({ entry, shareUrl, onClose }) {
+  const posterUrl = shareUrl || buildEntryShareUrl(entry.id)
   const qrSourceRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
