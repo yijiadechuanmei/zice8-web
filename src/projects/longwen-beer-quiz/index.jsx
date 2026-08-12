@@ -214,7 +214,6 @@ function QuizPage({ config, state, selectedOption, onSelect, onSubmit, loading }
       <button className="lw-action-button" type="button" disabled={!selectedOption || loading} onClick={onSubmit}>
         {loading ? <LoadingOutlined /> : '确认答案'}
       </button>
-      <p className="lw-tip">提交后不可修改，请确认后继续</p>
     </div>
   )
 }
