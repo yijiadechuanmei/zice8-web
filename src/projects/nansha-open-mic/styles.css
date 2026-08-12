@@ -457,7 +457,8 @@
 .nansha-ranking-row.rank-2 .nansha-ranking-number { background: #f3a333; }
 .nansha-ranking-row.rank-3 .nansha-ranking-number { background: #27bfd4; }
 .nansha-ranking-row:nth-child(n + 4) .nansha-ranking-number { background: #aaa; }
-.nansha-ranking-row p { margin: 0; color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-ranking-row p { min-width: 0; margin: 0; color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-ranking-work-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nansha-ranking-votes { color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-note { position: absolute; bottom: calc(var(--nansha-unit) * 3.73); left: 0; width: 100%; margin: 0; color: #777; text-align: center; font-size: calc(var(--nansha-unit) * 2.13); }
 
@@ -862,7 +863,7 @@
 .nansha-upload-result-card.is-failure .nansha-upload-result-confirm { background: #173b98; }
 
 .nansha-vote-overlay { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: calc(var(--nansha-unit) * 3.2); background: rgb(0 0 0 / 52%); }
-.nansha-vote-dialog-card { position: relative; width: min(56.8vw, 426px); aspect-ratio: 1; overflow: visible; background: #fff; text-align: center; }
+.nansha-vote-dialog-card { position: relative; width: min(56.8vw, 426px); aspect-ratio: 1; overflow: visible; background: #fff; text-align: center; transform: translateY(-10vh); }
 .nansha-vote-dialog-shape { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; }
 .nansha-vote-dialog-content { position: absolute; z-index: 1; inset: 0; color: #080808; text-align: center; }
 .nansha-vote-quota-label { position: absolute; top: calc(var(--nansha-unit) * 13.6); left: 0; width: 100%; margin: 0; font: 700 calc(var(--nansha-unit) * 2.67) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; }
@@ -958,18 +959,25 @@
   position: fixed;
   z-index: 60;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   overflow: auto;
-  padding: 13.8vh calc(var(--nansha-unit) * 2.13) calc(var(--nansha-unit) * 3.2);
+  padding: calc(var(--nansha-unit) * 2.13);
   background: rgb(0 0 0 / 52%);
+}
+
+.nansha-poster-positioner {
+  position: absolute;
+  top: 40vh;
+  top: 40dvh;
+  left: 50%;
+  width: min(70.27vw, 527px);
+  aspect-ratio: 527 / 1033;
+  transform: translate(-50%, -50%);
 }
 
 .nansha-poster-card {
   position: relative;
-  width: min(70.27vw, 527px);
-  aspect-ratio: 527 / 1033;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   user-select: none;
   -webkit-touch-callout: default;
@@ -1008,11 +1016,13 @@
 }
 
 .nansha-poster-close {
+  position: absolute;
+  top: calc(100% + (var(--nansha-unit) * 2.13));
+  left: 50%;
   display: grid;
   place-items: center;
   width: calc(var(--nansha-unit) * 5.07);
   height: calc(var(--nansha-unit) * 5.07);
-  margin-top: calc(var(--nansha-unit) * 2.13);
   padding: 0;
   border: 2px solid #fff;
   border-radius: 50%;
@@ -1021,6 +1031,7 @@
   font-size: calc(var(--nansha-unit) * 3.2);
   line-height: 1;
   cursor: pointer;
+  transform: translateX(-50%);
 }
 
 /* 公示期：仅展示投票结果排行榜 */
@@ -1121,11 +1132,14 @@
 .nansha-publicity-row:nth-child(n + 4) .nansha-publicity-number { background: #aaa; }
 
 .nansha-publicity-row p {
+  min-width: 0;
   margin: 0;
   color: #080808;
   font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif;
   white-space: nowrap;
 }
+
+.nansha-publicity-work-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .nansha-publicity-votes {
   color: #080808;

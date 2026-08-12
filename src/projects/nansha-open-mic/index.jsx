@@ -310,9 +310,16 @@ export default function NanshaOpenMicProject() {
     setView('work-detail')
   }
 
-  function openVoteDialog() {
-    if (!selectedEntry) return
+  function openVoteDialog(entry = selectedEntry) {
+    if (!entry) return
+    setSelectedEntry(entry)
     setVoteDialog('vote')
+  }
+
+  function openPoster(entry) {
+    if (!entry) return
+    setSelectedEntry(entry)
+    setPosterOpen(true)
   }
 
   async function confirmVote(quantity) {
@@ -355,8 +362,8 @@ export default function NanshaOpenMicProject() {
       {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} /> : null}
-      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => setPosterOpen(true)} /> : null}
-      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPoster(selectedEntry)} /> : null}
+      {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialog(myEntry)} onShare={() => openPoster(myEntry)} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
@@ -543,7 +550,7 @@ function PublicityRankingRow({ rank, entry }) {
   return (
     <div className={`nansha-publicity-row rank-${rank}`}>
       <span className="nansha-publicity-number">{rank}</span>
-      <p>{entry.workName}<br />{entry.authorName}</p>
+      <p><span className="nansha-publicity-work-name" title={entry.workName}>{entry.workName}</span><br /><span>{entry.authorName}</span></p>
       <span className="nansha-publicity-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )
@@ -553,7 +560,7 @@ function RankingRow({ rank, entry, onWork }) {
   return (
     <div className={`nansha-ranking-row rank-${rank}`} role="button" tabIndex={0} onClick={() => onWork(entry)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onWork(entry) }}>
       <span className="nansha-ranking-number">{rank}</span>
-      <p>{entry.workName}<br />{entry.authorName}</p>
+      <p><span className="nansha-ranking-work-name" title={entry.workName}>{entry.workName}</span><br /><span>{entry.authorName}</span></p>
       <span className="nansha-ranking-votes">{entry.voteCount || 0}票&nbsp; &gt;</span>
     </div>
   )
@@ -715,16 +722,19 @@ function VotePosterDialog({ entry, onClose }) {
 
   return (
     <section className="nansha-poster-overlay" role="dialog" aria-modal="true" aria-label="拉票海报">
-      <div className="nansha-poster-card" aria-label="长按图片保存海报">
-        <div ref={qrSourceRef} className="nansha-poster-qrcode-source" aria-hidden="true"><QRCodeCanvas value={posterUrl} size={166} includeMargin={false} /></div>
-        {posterImage ? <img className="nansha-poster-composite" src={posterImage} alt="南沙新声全民开麦拉票海报，长按图片保存" draggable="false" /> : <div className="nansha-poster-generating">{posterError || '正在合成海报…'}</div>}
+      <div className="nansha-poster-positioner">
+        <div className="nansha-poster-card" aria-label="长按图片保存海报">
+          <div ref={qrSourceRef} className="nansha-poster-qrcode-source" aria-hidden="true"><QRCodeCanvas value={posterUrl} size={166} includeMargin={false} /></div>
+          {posterImage ? <img className="nansha-poster-composite" src={posterImage} alt="南沙新声全民开麦拉票海报，长按图片保存" draggable="false" /> : <div className="nansha-poster-generating">{posterError || '正在合成海报…'}</div>}
+        </div>
+        <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
       </div>
-      <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
     </section>
   )
 }
 
-function MyWorkPage({ entry, onBack, onShowRules, onReplaceVideo }) {
+function MyWorkPage({ entry, activityPhase, onBack, onShowRules, onReplaceVideo, onVote, onShare }) {
+  const isApprovedForVoting = activityPhase === 'vote' && entry.reviewStatus === 'published'
   return (
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
@@ -735,6 +745,10 @@ function MyWorkPage({ entry, onBack, onShowRules, onReplaceVideo }) {
         <p className="nansha-work-status">作品状态：{entry.reviewStatus === 'published' ? '审核成功' : entry.reviewStatus === 'rejected' ? '未通过' : '审核中'}</p>
         <p>{entry.authorName}</p>
         <div className="nansha-work-description">{entry.description}</div>
+        {isApprovedForVoting ? <div className="nansha-detail-actions nansha-my-work-actions">
+          <button className="nansha-detail-vote-button" type="button" onClick={onVote}>投票</button>
+          <button className="nansha-detail-share-button" type="button" onClick={onShare}>拉票</button>
+        </div> : null}
       </section>
     </section>
   )
