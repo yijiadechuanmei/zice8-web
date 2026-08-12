@@ -134,10 +134,10 @@ export const NANHAI_ART = {
       // 校园场景触发点的对应题号非默认顺序，点位素材及坐标保持不变。
       questionPinIndexes: {
         CAMPUS_01: 1,
-        CAMPUS_02: 4,
+        CAMPUS_02: 3,
         CAMPUS_03: 2,
         CAMPUS_04: 5,
-        CAMPUS_05: 3,
+        CAMPUS_05: 4,
         CAMPUS_06: 0,
       },
       pins: [
