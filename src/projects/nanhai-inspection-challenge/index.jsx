@@ -981,7 +981,7 @@ function ScenePage({ level, correctCodes, onOpenQuestion, onBack }) {
                   onClick={() => onOpenQuestion(index)}
                   aria-label={`第${pinIndex + 1}题${completed ? '已解锁' : '点击答题'}`}
                 >
-                  <img className="nh-scene-pin__trigger" src={nanhaiAsset(pin[0])} alt="" />
+                  <img className="nh-scene-pin__trigger" src={nanhaiAsset(completed ? 'green.png' : pin[0])} alt="" />
                   {completed ? <span>已解锁</span> : null}
                 </button>
               )
