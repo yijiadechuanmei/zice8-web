@@ -746,6 +746,7 @@ function VotePosterDialog({ entry, onClose }) {
           <div ref={qrSourceRef} className="nansha-poster-qrcode-source" aria-hidden="true"><QRCodeCanvas value={posterUrl} size={166} includeMargin={false} /></div>
           {posterImage ? <img className="nansha-poster-composite" src={posterImage} alt="南沙新声全民开麦拉票海报，长按图片保存" draggable="false" /> : <div className="nansha-poster-generating">{posterError || '正在合成海报…'}</div>}
         </div>
+        <p className="nansha-poster-save-tip" aria-hidden="true">长按图片可保存</p>
         <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
       </div>
     </section>
