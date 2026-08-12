@@ -35,8 +35,55 @@ function createRequestId() {
 async function assertVideoFileSignature(file) {
   const bytes = new Uint8Array(await file.slice(0, 32).arrayBuffer())
   const isIsoMedia = bytes.length >= 8 && String.fromCharCode(...bytes.slice(4, 8)) === 'ftyp'
-  const isWebm = bytes.length >= 4 && bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3
-  if (!isIsoMedia && !isWebm) throw new Error('请选择真实的 MP4、MOV 或 WebM 视频文件')
+  if (!isIsoMedia) throw new Error('请上传 H.264/AAC 编码的 MP4 视频；苹果手机请使用“兼容性最佳”格式录制或导出')
+}
+
+async function createVideoCover(file) {
+  const objectUrl = URL.createObjectURL(file)
+  const video = document.createElement('video')
+  video.muted = true
+  video.playsInline = true
+  video.preload = 'metadata'
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = window.setTimeout(() => reject(new Error('视频预览超时')), 12000)
+      const finish = (callback) => (event) => {
+        window.clearTimeout(timer)
+        video.removeEventListener('loadeddata', onLoaded)
+        video.removeEventListener('error', onError)
+        callback(event)
+      }
+      const onLoaded = finish(resolve)
+      const onError = finish(() => reject(new Error('视频无法在当前微信浏览器预览')))
+      video.addEventListener('loadeddata', onLoaded, { once: true })
+      video.addEventListener('error', onError, { once: true })
+      video.src = objectUrl
+      video.load()
+    })
+    const captureAt = Number.isFinite(video.duration) && video.duration > 0.2 ? 0.1 : 0
+    if (captureAt > 0) {
+      await new Promise((resolve, reject) => {
+        const timer = window.setTimeout(() => reject(new Error('视频首帧读取超时')), 8000)
+        video.addEventListener('seeked', () => { window.clearTimeout(timer); resolve() }, { once: true })
+        video.addEventListener('error', () => { window.clearTimeout(timer); reject(new Error('视频首帧读取失败')) }, { once: true })
+        video.currentTime = captureAt
+      })
+    }
+    if (!video.videoWidth || !video.videoHeight) throw new Error('视频首帧读取失败')
+    const maxSide = 960
+    const ratio = Math.min(1, maxSide / Math.max(video.videoWidth, video.videoHeight))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(2, Math.round(video.videoWidth * ratio))
+    canvas.height = Math.max(2, Math.round(video.videoHeight * ratio))
+    canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86))
+    if (!blob) throw new Error('封面生成失败')
+    return new File([blob], `${file.name.replace(/\.mp4$/i, '') || 'cover'}.jpg`, { type: 'image/jpeg' })
+  } finally {
+    video.removeAttribute('src')
+    video.load()
+    URL.revokeObjectURL(objectUrl)
+  }
 }
 
 function isImageCoverUrl(url) {
@@ -105,6 +152,7 @@ export default function NanshaOpenMicProject() {
   const [rulesOrigin, setRulesOrigin] = useState('upload-home')
   const [activityPhase, setActivityPhase] = useState('upload')
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [selectedCover, setSelectedCover] = useState(null)
   const [videoCoverPreview, setVideoCoverPreview] = useState('')
   const [coverGenerating, setCoverGenerating] = useState(false)
   const [uploadingVideo, setUploadingVideo] = useState(false)
@@ -234,11 +282,16 @@ export default function NanshaOpenMicProject() {
 
   function openUpload() {
     setVideoReplacementEntry(null)
+    setSelectedVideo(null)
+    setSelectedCover(null)
+    setVideoCoverPreview('')
+    setVideoError('')
     setView('upload')
   }
 
   function openVideoReplacement(entry) {
     setSelectedVideo(null)
+    setSelectedCover(null)
     setVideoCoverPreview('')
     setUploadProgress(0)
     setVideoError('')
@@ -248,49 +301,71 @@ export default function NanshaOpenMicProject() {
 
   async function selectVideo(file) {
     if (!file) return
-    if (!file.type.startsWith('video/') && !/\.(mp4|mov|webm)$/i.test(file.name || '')) {
-      setVideoError('请选择 MP4、MOV 或 WebM 视频文件')
-      return
-    }
-    try {
-      await assertVideoFileSignature(file)
-    } catch (error) {
-      setVideoError(error instanceof Error ? error.message : '请选择真实的视频文件')
+    if (!/\.mp4$/i.test(file.name || '') || (file.type && file.type !== 'video/mp4')) {
+      setVideoError('请上传 H.264/AAC 编码的 MP4 视频；苹果手机请使用“兼容性最佳”格式录制或导出')
       return
     }
     setSelectedVideo(file)
+    setSelectedCover(null)
     setVideoCoverPreview('')
     setUploadProgress(0)
     setVideoError('')
+    setCoverGenerating(true)
+    try {
+      await assertVideoFileSignature(file)
+      const cover = await createVideoCover(file)
+      setSelectedCover(cover)
+      setVideoCoverPreview(URL.createObjectURL(cover))
+      setUploadProgress(0)
+      setVideoError('')
+    } catch (error) {
+      setSelectedVideo(null)
+      setSelectedCover(null)
+      setVideoCoverPreview('')
+      setVideoError(error instanceof Error ? `${error.message}。请上传 H.264/AAC 编码的 MP4 视频` : '视频无法预览，请上传 H.264/AAC 编码的 MP4 视频')
+    } finally {
+      setCoverGenerating(false)
+    }
   }
 
   async function completeUpload(form) {
-    if (!selectedVideo) return { error: '请先选择视频文件' }
+    if (!selectedVideo || !selectedCover) return { error: '请先选择可预览的 H.264/AAC MP4 视频' }
     try {
       setUploadingVideo(true)
       setUploadProgress(0)
-      const videoPolicy = await createUploadPolicy(ACTIVITY_KEY, {
-        kind: 'video',
-        fileName: selectedVideo.name,
-        contentType: selectedVideo.type || 'video/mp4',
-        size: selectedVideo.size,
-        replace: Boolean(videoReplacementEntry),
-      })
+      const [videoPolicy, coverPolicy] = await Promise.all([
+        createUploadPolicy(ACTIVITY_KEY, {
+          kind: 'video',
+          fileName: selectedVideo.name,
+          contentType: 'video/mp4',
+          size: selectedVideo.size,
+          replace: Boolean(videoReplacementEntry),
+        }),
+        createUploadPolicy(ACTIVITY_KEY, {
+          kind: 'cover',
+          fileName: selectedCover.name,
+          contentType: 'image/jpeg',
+          size: selectedCover.size,
+          replace: Boolean(videoReplacementEntry),
+        }),
+      ])
       setUploadProgress(1)
-      const videoUrl = await uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress)
-      setCoverGenerating(true)
-      // 微信内核对部分 MOV 容器无法读取 metadata。提交后由服务端统一
-      // 转为 Fast Start MP4 并生成独立 JPG 封面，不能在这里提前拦截。
+      const [videoUrl, coverUrl] = await Promise.all([
+        uploadFileToOss(videoPolicy, selectedVideo, setUploadProgress),
+        uploadFileToOss(coverPolicy, selectedCover),
+      ])
       const result = videoReplacementEntry
-        ? await replaceEntryVideo(ACTIVITY_KEY, videoReplacementEntry.id, { videoUrl, coverUrl: videoUrl })
-        : await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl: videoUrl })
+        ? await replaceEntryVideo(ACTIVITY_KEY, videoReplacementEntry.id, { videoUrl, coverUrl })
+        : await createEntry(ACTIVITY_KEY, { ...form, videoUrl, coverUrl })
       setVideoCoverPreview(result.entry?.coverUrl || '')
       setMyEntry(result.entry)
       setSelectedVideo(null)
+      setSelectedCover(null)
       setVideoReplacementEntry(null)
       setUploadDialog('success')
       return { ok: true }
     } catch (error) {
+      setVideoError(error?.message || '上传失败，请上传 H.264/AAC 编码的 MP4 视频')
       setUploadDialog('failure')
       return { error: error?.message || '上传失败，请重新上传' }
     } finally {
@@ -832,12 +907,12 @@ function UploadPage({ onBack, onShowRules, selectedVideoName, coverPreview, cove
       <ActivityRulesTrigger onClick={onShowRules} fixed />
       <form className="nansha-upload-form" onSubmit={submit}>
         <label className={`nansha-video-picker${selectedVideoName ? ' has-file' : ''}${coverPreview ? ' has-cover' : ''}`}>
-          <input type="file" accept="video/*" onChange={onSelectVideo} />
+          <input type="file" accept="video/mp4,.mp4" onChange={onSelectVideo} />
           {coverPreview ? <img src={coverPreview} alt="视频首帧封面预览" /> : null}
           <b>{coverGenerating ? '正在生成封面…' : selectedVideoName || '+'}</b>
-          {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在生成封面…' : uploadingVideo ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '上传后自动生成封面'}</span> : null}
+          {selectedVideoName ? <span className="nansha-video-picker-progress">{coverGenerating ? '正在验证视频并生成首帧…' : uploadingVideo ? `视频上传中 ${uploadProgress}%` : coverPreview ? '已生成首帧封面' : '请选择 H.264/AAC 编码的 MP4 视频'}</span> : null}
         </label>
-        {selectedVideoName && (submitting || uploadingVideo || coverGenerating) ? <section className="nansha-upload-progress-panel" aria-live="polite"><p>{coverGenerating ? '视频上传完成，正在生成首帧封面…' : `视频上传进度：${uploadProgress}%`}</p><div role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><i style={{ width: `${coverGenerating ? 100 : Math.max(0, Math.min(uploadProgress, 100))}%` }} /></div></section> : null}
+        {selectedVideoName && (submitting || uploadingVideo || coverGenerating) ? <section className="nansha-upload-progress-panel" aria-live="polite"><p>{coverGenerating ? '正在验证视频并生成首帧封面…' : `视频上传进度：${uploadProgress}%`}</p><div role="progressbar" aria-label="视频上传进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={uploadProgress}><i style={{ width: `${coverGenerating ? 100 : Math.max(0, Math.min(uploadProgress, 100))}%` }} /></div></section> : null}
         <input name="workName" aria-label="作品名称" value={form.workName} onChange={(event) => update('workName', event.target.value)} placeholder="请输入作品名称" maxLength={100} />
         <input name="authorName" aria-label="作者名称" value={form.authorName} onChange={(event) => update('authorName', event.target.value)} placeholder="请输入作者名称" maxLength={100} />
         <input name="phone" aria-label="手机号码" value={form.phone} onChange={(event) => update('phone', event.target.value.replace(/\D/g, '').slice(0, 11))} inputMode="tel" maxLength={11} placeholder="请输入手机号码" />
@@ -926,7 +1001,10 @@ function UploadResultDialog({ status, onConfirm }) {
               <span>作品已上传，可在“我的作品”中查看</span>
               <span>我们将主动联系通过初选的视频作者，对接后续相关事宜，<br />若未收到我方联系，则代表初选未通过。</span>
             </>
-          ) : '上传失败，请重新上传'}
+          ) : <>
+            <span>上传失败，请重新上传</span>
+            <span className="nansha-upload-result-format-tip">请上传 H.264/AAC 编码的 MP4 视频</span>
+          </>}
         </p>
         <button className="nansha-upload-result-confirm" type="button" onClick={onConfirm}>确定</button>
       </div>

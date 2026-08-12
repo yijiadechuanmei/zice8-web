@@ -845,6 +845,7 @@
   font-size: calc(var(--nansha-unit) * 2.13);
   white-space: nowrap;
 }
+.nansha-upload-result-message .nansha-upload-result-format-tip { color: #d90000; }
 
 .nansha-upload-result-confirm {
   position: absolute;
