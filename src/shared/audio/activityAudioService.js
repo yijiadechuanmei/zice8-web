@@ -143,8 +143,7 @@ class ActivityAudioService {
     this.context = { ...this.context, ...context }
     const nextConfig = normalizeConfig(bgmConfig)
     const previousUrl = this.config.url
-    const hasExplicitConfig = Boolean(nextConfig.url)
-    this.config = hasExplicitConfig ? nextConfig : this.config
+    this.config = nextConfig
     this.reasonAttempts = {}
 
     if (nextConfig.enabled && nextConfig.url && this.context.activityKey) {
@@ -156,12 +155,12 @@ class ActivityAudioService {
     }
 
     this.patchState({
-      enabled: hasExplicitConfig ? nextConfig.enabled : this.config.enabled,
-      url: hasExplicitConfig ? nextConfig.url : this.config.url,
+      enabled: nextConfig.enabled,
+      url: nextConfig.url,
       blocked: false,
       lastError: '',
-      volume: hasExplicitConfig ? nextConfig.volume : this.config.volume,
-      loop: hasExplicitConfig ? nextConfig.loop : this.config.loop,
+      volume: nextConfig.volume,
+      loop: nextConfig.loop,
       activityKey: this.context.activityKey || '',
     })
     debugLog('[ActivityAudio] setConfig', {
@@ -172,15 +171,15 @@ class ActivityAudioService {
       volume: nextConfig.volume,
     })
 
-    if (hasExplicitConfig && (!nextConfig.enabled || !nextConfig.url)) {
+    if (!nextConfig.enabled || !nextConfig.url) {
       this.pause('disabled')
       this.clearAudioSource()
       return
     }
 
-    const targetUrl = hasExplicitConfig ? nextConfig.url : this.config.url
+    const targetUrl = nextConfig.url
     this.prepareAudio('set-config', { force: previousUrl !== targetUrl, url: targetUrl })
-    if ((hasExplicitConfig ? nextConfig.autoplay : this.config.autoplay) && !this.state.userPaused) {
+    if (nextConfig.autoplay && !this.state.userPaused) {
       if (isWechatBrowser()) {
         if (window.WeixinJSBridge?.invoke) {
           this.runBridgeUnlock('set-config-wechat-bridge')
