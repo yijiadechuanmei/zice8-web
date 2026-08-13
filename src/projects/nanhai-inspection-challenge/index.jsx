@@ -727,7 +727,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           onOpenLevel={openScene}
           preview={preview}
           onDebugComplete={handlePreviewCompleteAll}
-          canEnterLottery={Boolean(progress?.status === 'completed' && !bootstrap?.reviewMode)}
+          canEnterLottery={Boolean(progress?.status === 'completed')}
           onEnterLottery={() => navigate('success')}
         />
       ) : null}
@@ -915,8 +915,9 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
         // 未选关卡时，开始按钮直接进入当前进度；选中已通关关卡后，
         // 同一按钮则进入对应的复习关卡。
         'start-scene': startLevel ? () => onOpenLevel(startLevel) : undefined,
-        // 关卡合集右侧终点：普通通关用户点击后进入抽奖页；测试预览仍保留
-        // 一键完成所有关卡的测试行为。已经中奖的复习状态不开放该入口。
+        // 关卡合集右侧终点：所有已通关用户均可进入抽奖页；每日次数、
+        // 已中奖等限制只在点击抽奖按钮时由服务端反馈。测试预览仍保留
+        // 一键完成所有关卡的测试行为。
         'debug-complete': preview ? onDebugComplete : canEnterLottery ? onEnterLottery : undefined,
       }}
       className="nh-map-page"
