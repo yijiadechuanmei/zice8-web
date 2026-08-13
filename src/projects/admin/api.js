@@ -99,6 +99,16 @@ export function updateNanhaiChallengeDrawManualControl(activityKey, payload) {
   })
 }
 
+export function resetNanhaiChallengeData(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/reset-data`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'CLEAR_NANHAI_CHALLENGE_DATA',
+    }),
+  })
+}
+
 export function getArtistCallLotteryPrizes(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`)
 }

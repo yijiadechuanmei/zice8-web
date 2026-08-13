@@ -10,6 +10,9 @@ const authorizationSuffix = (debug, renew) => {
 
 export const getBootstrap = (activityKey, debug = false) => request(`${base(activityKey)}/bootstrap${debugSuffix(debug)}`)
 
+export const checkRegionAccess = (activityKey) =>
+  request(`${base(activityKey)}/access/region`, { method: 'POST' })
+
 export const getPublicConfig = (activityKey) =>
   request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
 

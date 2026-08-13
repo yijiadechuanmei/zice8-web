@@ -16,6 +16,7 @@ import {
   saveArtistCallLotteryPrizes,
   saveNanhaiChallengeDrawAutoControl,
   saveNanhaiChallengePrizes,
+  resetNanhaiChallengeData,
   saveSongWishLotteryResultConfig,
   updateActivityBgmConfig,
   updateActivityStatus,
@@ -66,6 +67,8 @@ export default function ActivityConfigPage({ activity }) {
   const [nanhaiControlLoaded, setNanhaiControlLoaded] = useState(false)
   const [nanhaiControlReason, setNanhaiControlReason] = useState('')
   const [nanhaiControlSaving, setNanhaiControlSaving] = useState(false)
+  const [nanhaiResetUserId, setNanhaiResetUserId] = useState('')
+  const [nanhaiResetting, setNanhaiResetting] = useState(false)
   const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
   const [manualDrawing, setManualDrawing] = useState(false)
@@ -359,6 +362,34 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanhaiControlSaving(false)
+    }
+  }
+
+  async function handleResetNanhaiData(scope) {
+    const userId = nanhaiResetUserId.trim()
+    if (scope === 'user' && !/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要清除的正整数用户ID')
+      return
+    }
+    setNanhaiResetting(true)
+    setError('')
+    try {
+      const result = await resetNanhaiChallengeData(activity.activityKey, {
+        scope,
+        ...(scope === 'user' ? { userId } : {}),
+      })
+      const cleared = result?.cleared || {}
+      setNanhaiResetUserId('')
+      const config = await getNanhaiChallengePrizes(activity.activityKey)
+      setNanhaiPrizes(config?.prizes || [])
+      setNanhaiBudget(config?.budget || null)
+      message.success(`已清除抽奖 ${cleared.draws || 0} 条、答题 ${cleared.answers || 0} 条、授权 ${cleared.authorizations || 0} 条`)
+    } catch (err) {
+      const text = err.message || '清除幸福南海活动数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanhaiResetting(false)
     }
   }
 
@@ -840,6 +871,45 @@ export default function ActivityConfigPage({ activity }) {
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Alert type={nanhaiBudgetOverLimit ? 'error' : 'info'} showIcon message="保存库存时自动同步释放预算" description={`红包金额固定；谢谢参与固定 30%。本次库存对应 ${nanhaiProposedBudgetYuan.toFixed(2)} 元，保存后即成为抽奖可消费的硬预算，且永远不能超过 ${nanhaiApprovedLimitYuan.toFixed(2)} 元。当前已支出 ${Number(nanhaiBudget?.spentAmountFen || 0) / 100} 元、预占 ${Number(nanhaiBudget?.reservedAmountFen || 0) / 100} 元。`} />
               <Table rowKey="id" columns={nanhaiPrizeColumns} dataSource={nanhaiPrizes} pagination={false} size="small" scroll={{ x: 720 }} />
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'nanhai_inspection_challenge' ? (
+          <Card size="small" title="参与数据重置" style={{ borderColor: '#ffccc7' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Alert
+                type="warning"
+                showIcon
+                message="仅清除本活动范围内的本地参与、答题、抽奖和商家转账授权记录"
+                description="不会影响其他用户或其他项目。若目标范围存在发放中或已成功发放的红包，系统会拒绝清除，避免无法查单或重复发放；删除本地授权记录不会撤回微信侧已经完成的授权。"
+              />
+              <Space wrap>
+                <Input
+                  value={nanhaiResetUserId}
+                  onChange={(event) => setNanhaiResetUserId(event.target.value.replace(/\D/g, ''))}
+                  placeholder="输入指定用户ID"
+                  style={{ width: 200 }}
+                />
+                <Popconfirm
+                  title="确认清除该用户的幸福南海数据？"
+                  description="将清除该用户的答题、抽奖、本地转账授权与参与记录；其他用户及其他项目不受影响。"
+                  okText="确认清除"
+                  cancelText="取消"
+                  onConfirm={() => handleResetNanhaiData('user')}
+                >
+                  <Button danger loading={nanhaiResetting} disabled={!/^[1-9]\d*$/.test(nanhaiResetUserId.trim())}>清除指定用户</Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="确认清除本活动所有参与数据？"
+                  description="将清除幸福南海活动全部用户的答题、抽奖、本地转账授权与参与记录。其他项目不受影响。"
+                  okText="确认全部清除"
+                  cancelText="取消"
+                  onConfirm={() => handleResetNanhaiData('all')}
+                >
+                  <Button danger type="primary" loading={nanhaiResetting}>清除本活动全部数据</Button>
+                </Popconfirm>
+              </Space>
             </Space>
           </Card>
         ) : null}

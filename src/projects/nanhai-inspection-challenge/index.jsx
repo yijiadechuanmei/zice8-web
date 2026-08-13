@@ -8,6 +8,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import {
+  checkRegionAccess,
   createAuthorization,
   drawPrize,
   getDebugState,
@@ -212,6 +213,28 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       setPage(nextPage)
       setPageTransitioning(false)
     }, 220)
+  }
+
+  async function handleHomeStart() {
+    if (busy || pageTransitioning) return
+    setBusy('region-check')
+    setError('')
+    try {
+      await checkRegionAccess(activityKey)
+      navigate('rules')
+      trackEvent(activityKey, 'region_access_allowed', {
+        activityType: 'nanhai_inspection_challenge',
+      })
+    } catch (err) {
+      const message = readError(err, '地区校验失败，请稍后重试')
+      setError(message)
+      trackEvent(activityKey, 'region_access_denied', {
+        activityType: 'nanhai_inspection_challenge',
+        reason: message,
+      })
+    } finally {
+      setBusy('')
+    }
   }
 
   function startWheelSpin() {
@@ -717,7 +740,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       {preview ? <button className="nh-preview-badge" onClick={() => navigate('home')}>测试模式 · 不计入答题或抽奖</button> : null}
       {bootstrap.debug ? <button className="nh-debug-badge" onClick={openDebugPanel}>DEBUG · 真实参与数据</button> : null}
       <div key={page} className={`nh-page-stage ${pageTransitioning ? 'is-leaving' : ''}`}>
-      {page === 'home' ? <HomePage onStart={() => navigate('rules')} /> : null}
+      {page === 'home' ? <HomePage onStart={handleHomeStart} /> : null}
       {page === 'rules' ? <RulesPage onEnter={() => navigate('map')} /> : null}
       {page === 'map' ? (
         <MapPage
@@ -1135,6 +1158,7 @@ function NanhaiToast({ text, dismissible = false, onClose }) {
 }
 
 function operationLoadingText(busy) {
+  if (busy === 'region-check') return '正在验证参与地区…'
   if (busy === 'authorization-check') return '正在核验微信授权…'
   if (busy === 'authorization') return '正在唤起微信授权…'
   if (busy === 'draw-result') return '奖品发放中'
