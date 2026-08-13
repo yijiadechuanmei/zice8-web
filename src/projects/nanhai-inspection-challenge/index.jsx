@@ -547,7 +547,11 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
   }
 
   async function handleDraw() {
-    if (busy || wheelSpinning) return
+    if (busy || wheelSpinning) {
+      // 转盘已经进入流程后禁止重复请求，并给出可随时关闭的明确反馈。
+      setError(wheelSpinning ? '正在抽奖，请勿频繁点击' : '操作处理中，请勿频繁点击')
+      return
+    }
     if (preview) {
       const prize = pickPreviewSegment(segments)
       const won = Number(prize.amount) > 0
@@ -1146,10 +1150,13 @@ function OperationLoading({ message }) {
 }
 
 function NanhaiToast({ text, dismissible = false, onClose }) {
+  const close = () => {
+    if (dismissible) onClose?.()
+  }
   return (
-    <div className="nh-toast-mask" role="presentation">
+    <div className={`nh-toast-mask${dismissible ? ' is-dismissible' : ''}`} role="presentation" onClick={close}>
       {dismissible ? (
-        <button className="nh-toast" type="button" onClick={onClose} aria-label="关闭提示">{text}</button>
+        <button className="nh-toast" type="button" onClick={close} aria-label="关闭提示">{text}</button>
       ) : (
         <div className="nh-level-advance-toast" role="status" aria-live="polite">{text}</div>
       )}

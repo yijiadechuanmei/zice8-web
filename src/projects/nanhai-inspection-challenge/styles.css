@@ -651,6 +651,11 @@ button { font: inherit; }
   touch-action: none;
 }
 
+.nh-toast-mask.is-dismissible {
+  background: rgba(0, 0, 0, .22);
+  animation: nh-mask-in .18s ease both;
+}
+
 .nh-toast,
 .nh-level-advance-toast {
   position: relative;
