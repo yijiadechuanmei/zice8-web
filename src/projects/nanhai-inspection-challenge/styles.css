@@ -276,6 +276,16 @@ button { font: inherit; }
   mask: url("https://file3.ih5.cn/v35/edt/u10013600/7eeb53fc03a3ffb4e7d62a44adf2181a_215.svg") center / contain no-repeat;
 }
 
+/* 抽奖页沿用关卡页同款返回按钮，只调整为横向画面的左上安全边距。 */
+.nh-success-back-anchor {
+  position: fixed;
+  z-index: 20;
+  top: min(8vw, 34.4px);
+  left: min(8vw, 34.4px);
+  width: min(8.5333vw, 36.693px);
+  height: min(19.2vw, 82.56px);
+}
+
 .nh-scene-pins { position: absolute; z-index: 8; inset: 0; }
 .nh-scene-pin {
   position: absolute;

@@ -768,7 +768,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           onBack={returnToMap}
         />
       ) : null}
-      {page === 'success' ? <SuccessPage rotation={wheelRotation} spinning={wheelSpinning} onDraw={handleDraw} /> : null}
+      {page === 'success' ? <SuccessPage rotation={wheelRotation} spinning={wheelSpinning} onDraw={handleDraw} onBack={() => navigate('map')} /> : null}
       {page === 'share' ? (
         <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onReview={reviewChallenge} onShare={() => setShareGuideOpen(true)} />
       ) : null}
@@ -866,7 +866,7 @@ function RulesContent() {
   )
 }
 
-function SuccessPage({ rotation, spinning, onDraw }) {
+function SuccessPage({ rotation, spinning, onDraw, onBack }) {
   const success = NANHAI_ART.success
   const [baseFilename, baseLeft, baseTop, baseWidth, baseHeight] = success.wheel.base
   const [ringFilename, ringLeft, ringTop, ringWidth, ringHeight] = success.wheel.ring
@@ -874,23 +874,29 @@ function SuccessPage({ rotation, spinning, onDraw }) {
   const ringCenterX = ringLeft + ringWidth / 2
   const ringCenterY = ringTop + ringHeight / 2
   return (
-    <ArtPage
-      art={success}
-      onAction={{ draw: onDraw }}
-      className="nh-success-page"
-      rotatedChildren={(
-        <>
-          <img className="nh-success-wheel-base" src={nanhaiAsset(baseFilename)} style={sourceRect(success.canvas, baseLeft, baseTop, baseWidth, baseHeight)} alt="" />
-          <img className="nh-success-wheel-ring" src={nanhaiAsset(ringFilename)} style={sourceRect(success.canvas, ringLeft, ringTop, ringWidth, ringHeight)} alt="" />
-          <div
-            className={`nh-success-wheel-pointer-spin ${spinning ? 'is-spinning' : ''}`}
-            style={{ ...sourcePoint(success.canvas, ringCenterX, ringCenterY), '--pointer-rotation': `${rotation}deg` }}
-          >
-            <img className="nh-success-wheel-pointer" src={nanhaiAsset(pointerFilename)} style={sourceRect(success.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)} alt="" />
-          </div>
-        </>
+    <>
+      <ArtPage
+        art={success}
+        onAction={{ draw: onDraw }}
+        className="nh-success-page"
+        rotatedChildren={(
+          <>
+            <img className="nh-success-wheel-base" src={nanhaiAsset(baseFilename)} style={sourceRect(success.canvas, baseLeft, baseTop, baseWidth, baseHeight)} alt="" />
+            <img className="nh-success-wheel-ring" src={nanhaiAsset(ringFilename)} style={sourceRect(success.canvas, ringLeft, ringTop, ringWidth, ringHeight)} alt="" />
+            <div
+              className={`nh-success-wheel-pointer-spin ${spinning ? 'is-spinning' : ''}`}
+              style={{ ...sourcePoint(success.canvas, ringCenterX, ringCenterY), '--pointer-rotation': `${rotation}deg` }}
+            >
+              <img className="nh-success-wheel-pointer" src={nanhaiAsset(pointerFilename)} style={sourceRect(success.canvas, pointerLeft, pointerTop, pointerWidth, pointerHeight)} alt="" />
+            </div>
+          </>
+        )}
+      />
+      {createPortal(
+        <div className="nh-success-back-anchor"><button className="nh-scene-back" onClick={onBack}>返回</button></div>,
+        document.body,
       )}
-    />
+    </>
   )
 }
 
