@@ -959,12 +959,12 @@ export default function ActivityConfigPage({ activity }) {
         ) : null}
 
         {activity.type === 'nanhai_inspection_challenge' ? (
-          <Card size="small" title="佛山地区人工放行" style={{ borderColor: '#91caff' }}>
+          <Card size="small" title="广东地区人工放行" style={{ borderColor: '#91caff' }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Alert
                 type="info"
                 showIcon
-                message="仅在核验用户确属佛山参与者、但 IP 归属地异常时使用"
+                message="仅在核验用户确属广东省参与者、但 IP 归属地异常时使用"
                 description="输入用户ID和核验原因后可一键放行。放行只对该用户、该活动有效；IP仍会继续记录。授权与撤销均写入后台审计日志。"
               />
               <Space wrap align="start">
@@ -977,13 +977,13 @@ export default function ActivityConfigPage({ activity }) {
                 <Input
                   value={nanhaiRegionReason}
                   onChange={(event) => setNanhaiRegionReason(event.target.value)}
-                  placeholder="核验原因，例如：电话确认佛山单位员工"
+                  placeholder="核验原因，例如：电话确认广东省单位员工"
                   maxLength={255}
                   style={{ width: 300 }}
                 />
                 <Popconfirm
                   title="确认人工放行该用户？"
-                  description="该用户将绕过佛山 IP 限制，但其他风控和抽奖限制仍然有效。"
+                  description="该用户将绕过广东省 IP 限制，但其他风控和抽奖限制仍然有效。"
                   okText="确认放行"
                   cancelText="取消"
                   onConfirm={() => handleNanhaiRegionAccess('allow')}
