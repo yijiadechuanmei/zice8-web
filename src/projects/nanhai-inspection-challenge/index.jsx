@@ -410,7 +410,9 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           setLevelAdvanceToast('')
           if (completedAll) {
             setActiveLevel(null)
-            navigate('success')
+            // 当天通关只解锁关卡合集右侧终点；用户重新回到关卡合集后
+            // 主动点击终点才进入抽奖页面，不能从最后一道题直接跳转抽奖。
+            navigate('map')
             return
           }
           const nextLevel = bootstrap?.levels?.find((level) => level.levelNo === activeLevel.levelNo + 1)
