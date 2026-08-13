@@ -239,6 +239,14 @@
   gap: 16px;
 }
 
+.admin-overview-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-height: 28px;
+}
+
 .admin-page-head {
   display: flex;
   align-items: flex-start;

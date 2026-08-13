@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { Component, Suspense, lazy, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Col, Empty, Row, Spin, Statistic, Tooltip, Typography } from 'antd'
-import { InfoCircleOutlined } from '@ant-design/icons'
+import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Card, Col, Empty, Row, Select, Space, Spin, Statistic, Tooltip, Typography } from 'antd'
+import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 
@@ -18,12 +18,22 @@ const XIWUQI_AMAP_SOURCE_FILTER = {
   page: '/xiwuqi-99-road-night',
   days: '7',
 }
+const OVERVIEW_AUTO_REFRESH_OPTIONS = [
+  { value: 0, label: '不自动刷新' },
+  { value: 60_000, label: '每 1 分钟' },
+  { value: 5 * 60_000, label: '每 5 分钟' },
+  { value: 10 * 60_000, label: '每 10 分钟' },
+]
 
 export default function ActivityDashboard({ activity, compact = false, phaseScope = 'all' }) {
   const [overview, setOverview] = useState(null)
   const [charts, setCharts] = useState(null)
   const [sourceAccess, setSourceAccess] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [refreshNonce, setRefreshNonce] = useState(0)
+  const [autoRefreshMs, setAutoRefreshMs] = useState(0)
+  const [updatedAt, setUpdatedAt] = useState(null)
   const [error, setError] = useState('')
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
@@ -32,9 +42,13 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     : {}
   const phaseScopeLabel = phaseScope === 'all' ? '总览' : `第${phaseScope}期`
 
+  const refreshOverview = useCallback(() => {
+    setRefreshing(true)
+    setRefreshNonce((value) => value + 1)
+  }, [])
+
   useEffect(() => {
     let alive = true
-    setLoading(true)
     setError('')
     setSourceAccess(null)
     const sourceAccessRequest = isXiwuqiRoadNight
@@ -46,17 +60,27 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         setOverview(overviewData)
         setCharts(chartData)
         setSourceAccess(sourceAccessData)
+        setUpdatedAt(new Date())
       })
       .catch((err) => {
         if (alive) setError(err.message || '加载失败')
       })
       .finally(() => {
-        if (alive) setLoading(false)
+        if (alive) {
+          setLoading(false)
+          setRefreshing(false)
+        }
       })
     return () => {
       alive = false
     }
-  }, [activity.activityKey, isXiwuqiRoadNight, phaseScope])
+  }, [activity.activityKey, isXiwuqiRoadNight, phaseScope, refreshNonce])
+
+  useEffect(() => {
+    if (!compact || !autoRefreshMs) return undefined
+    const timerId = window.setInterval(refreshOverview, autoRefreshMs)
+    return () => window.clearInterval(timerId)
+  }, [autoRefreshMs, compact, refreshOverview])
 
   const metrics = useMemo(() => {
     const sourceOverview = sourceAccess?.overview || {}
@@ -256,13 +280,36 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   if (error) {
     return (
       <Card className="admin-card">
-        <Empty description={error} />
+        <Empty
+          description={error}
+          extra={<Button icon={<ReloadOutlined />} loading={refreshing} onClick={refreshOverview}>重新刷新</Button>}
+        />
       </Card>
     )
   }
 
   return (
     <div className="admin-stack">
+      {compact ? (
+        <div className="admin-overview-refresh">
+          <Text type="secondary">
+            {updatedAt ? `更新于 ${updatedAt.toLocaleTimeString('zh-CN', { hour12: false })}` : '等待首次加载'}
+          </Text>
+          <Space size={8} wrap>
+            <Select
+              aria-label="概览自动刷新频率"
+              value={autoRefreshMs}
+              options={OVERVIEW_AUTO_REFRESH_OPTIONS}
+              onChange={setAutoRefreshMs}
+              style={{ width: 126 }}
+              size="small"
+            />
+            <Button size="small" icon={<ReloadOutlined />} loading={refreshing} onClick={refreshOverview}>
+              刷新
+            </Button>
+          </Space>
+        </div>
+      ) : null}
       <Row gutter={[16, 16]}>
         {metrics.map((card) => (
           <Col xs={24} sm={12} lg={compact ? 6 : 6} xl={compact ? 6 : 4} key={card.label}>
