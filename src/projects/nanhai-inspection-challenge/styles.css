@@ -698,7 +698,6 @@ button { font: inherit; }
   font-size: clamp(13px, 3.7vw, 16px);
   font-weight: 700;
   letter-spacing: .03em;
-  transform: rotate(90deg);
   animation: nh-operation-loading-in .2s ease both;
 }
 
