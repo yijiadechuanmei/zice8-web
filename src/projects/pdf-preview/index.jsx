@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf'
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.js?url'
 import { API_BASE_URL, request } from '../../shared/api/request'
+import { trackPageView } from '../../shared/analytics'
 import './styles.css'
 
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
@@ -195,6 +196,11 @@ export default function PdfPreviewProject({ routeParams }) {
       active = false
     }
   }, [activityKey])
+
+  useEffect(() => {
+    if (!activityKey || !publicConfig) return
+    trackPageView(activityKey, '/pdf', { activityType: 'pdf' })
+  }, [activityKey, publicConfig])
 
   useEffect(() => {
     if (!activityKey || configLoading || configError) return undefined
