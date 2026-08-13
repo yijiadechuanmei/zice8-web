@@ -280,7 +280,7 @@ button { font: inherit; }
   position: fixed;
   z-index: 20;
   top: min(8vw, 34.4px);
-  left: min(8vw, 34.4px);
+  right: min(8vw, 34.4px);
   width: min(8.5333vw, 36.693px);
   height: min(19.2vw, 82.56px);
 }
