@@ -109,6 +109,17 @@ export function resetNanhaiChallengeData(activityKey, payload) {
   })
 }
 
+export function getNanhaiChallengeRegionAccessExemptions(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/region-access-exemptions`)
+}
+
+export function updateNanhaiChallengeRegionAccessExemption(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/region-access-exemptions`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getArtistCallLotteryPrizes(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/artist-call-lottery/prizes`)
 }

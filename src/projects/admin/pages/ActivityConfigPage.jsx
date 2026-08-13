@@ -8,6 +8,7 @@ import {
   getArtistCallLotteryPrizes,
   getNanhaiChallengeDrawControl,
   getNanhaiChallengePrizes,
+  getNanhaiChallengeRegionAccessExemptions,
   getNanshaOpenMicConfig,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
@@ -21,6 +22,7 @@ import {
   updateActivityBgmConfig,
   updateActivityStatus,
   updateNanhaiChallengeDrawManualControl,
+  updateNanhaiChallengeRegionAccessExemption,
   updateNanshaOpenMicConfig,
 } from '../api'
 
@@ -69,6 +71,10 @@ export default function ActivityConfigPage({ activity }) {
   const [nanhaiControlSaving, setNanhaiControlSaving] = useState(false)
   const [nanhaiResetUserId, setNanhaiResetUserId] = useState('')
   const [nanhaiResetting, setNanhaiResetting] = useState(false)
+  const [nanhaiRegionExemptions, setNanhaiRegionExemptions] = useState([])
+  const [nanhaiRegionUserId, setNanhaiRegionUserId] = useState('')
+  const [nanhaiRegionReason, setNanhaiRegionReason] = useState('')
+  const [nanhaiRegionSaving, setNanhaiRegionSaving] = useState(false)
   const [songWishResult, setSongWishResult] = useState({ publishAt: '2026-07-29T00:00', prizes: [], winners: [], entryTotal: 0, winnerTotal: 0 })
   const [songWishSaving, setSongWishSaving] = useState(false)
   const [manualDrawing, setManualDrawing] = useState(false)
@@ -134,11 +140,15 @@ export default function ActivityConfigPage({ activity }) {
           setNanhaiControlLoaded(true)
         })
         .catch((err) => { if (alive) setError(err.message || '抽奖控制状态加载失败') })
+      getNanhaiChallengeRegionAccessExemptions(activity.activityKey)
+        .then((data) => { if (alive) setNanhaiRegionExemptions(data?.exemptions || []) })
+        .catch((err) => { if (alive) setError(err.message || '地区人工放行记录加载失败') })
     } else {
       setNanhaiPrizes([])
       setNanhaiBudget(null)
       setNanhaiDrawControl(defaultNanhaiDrawControl)
       setNanhaiControlLoaded(false)
+      setNanhaiRegionExemptions([])
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -390,6 +400,40 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanhaiResetting(false)
+    }
+  }
+
+  async function handleNanhaiRegionAccess(action, targetUserId = nanhaiRegionUserId) {
+    const userId = String(targetUserId || '').trim()
+    const reason = nanhaiRegionReason.trim()
+    if (!/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要人工放行的正整数用户ID')
+      return
+    }
+    if (action === 'allow' && reason.length < 2) {
+      message.warning('请填写至少2个字的核验原因')
+      return
+    }
+    setNanhaiRegionSaving(true)
+    setError('')
+    try {
+      const data = await updateNanhaiChallengeRegionAccessExemption(activity.activityKey, {
+        action,
+        userId,
+        reason: action === 'allow' ? reason : '撤销人工放行',
+      })
+      setNanhaiRegionExemptions(data?.exemptions || [])
+      if (action === 'allow') {
+        setNanhaiRegionUserId('')
+        setNanhaiRegionReason('')
+      }
+      message.success(action === 'allow' ? '已人工放行该用户' : '已撤销该用户的人工放行')
+    } catch (err) {
+      const text = err.message || '地区人工放行操作失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanhaiRegionSaving(false)
     }
   }
 
@@ -910,6 +954,56 @@ export default function ActivityConfigPage({ activity }) {
                   <Button danger type="primary" loading={nanhaiResetting}>清除本活动全部数据</Button>
                 </Popconfirm>
               </Space>
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'nanhai_inspection_challenge' ? (
+          <Card size="small" title="佛山地区人工放行" style={{ borderColor: '#91caff' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Alert
+                type="info"
+                showIcon
+                message="仅在核验用户确属佛山参与者、但 IP 归属地异常时使用"
+                description="输入用户ID和核验原因后可一键放行。放行只对该用户、该活动有效；IP仍会继续记录。授权与撤销均写入后台审计日志。"
+              />
+              <Space wrap align="start">
+                <Input
+                  value={nanhaiRegionUserId}
+                  onChange={(event) => setNanhaiRegionUserId(event.target.value.replace(/\D/g, ''))}
+                  placeholder="用户ID"
+                  style={{ width: 180 }}
+                />
+                <Input
+                  value={nanhaiRegionReason}
+                  onChange={(event) => setNanhaiRegionReason(event.target.value)}
+                  placeholder="核验原因，例如：电话确认佛山单位员工"
+                  maxLength={255}
+                  style={{ width: 300 }}
+                />
+                <Popconfirm
+                  title="确认人工放行该用户？"
+                  description="该用户将绕过佛山 IP 限制，但其他风控和抽奖限制仍然有效。"
+                  okText="确认放行"
+                  cancelText="取消"
+                  onConfirm={() => handleNanhaiRegionAccess('allow')}
+                >
+                  <Button type="primary" loading={nanhaiRegionSaving} disabled={!/^[1-9]\d*$/.test(nanhaiRegionUserId.trim()) || nanhaiRegionReason.trim().length < 2}>一键放行</Button>
+                </Popconfirm>
+              </Space>
+              <Table
+                rowKey="userId"
+                size="small"
+                pagination={false}
+                scroll={{ x: 760 }}
+                dataSource={nanhaiRegionExemptions}
+                columns={[
+                  { title: '用户ID', dataIndex: 'userId', width: 130 },
+                  { title: '核验原因', dataIndex: 'reason' },
+                  { title: '授权时间', dataIndex: 'approvedAt', width: 190 },
+                  { title: '操作', width: 120, render: (_, row) => <Popconfirm title="确认撤销该用户的人工放行？" onConfirm={() => handleNanhaiRegionAccess('revoke', row.userId)}><Button danger size="small" loading={nanhaiRegionSaving}>撤销</Button></Popconfirm> },
+                ]}
+              />
             </Space>
           </Card>
         ) : null}
