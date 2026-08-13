@@ -834,8 +834,8 @@ function RulesContent() {
         <h2>参与规则</h2>
         <ol>
           <li><div>参与人群：全体市民，重点覆盖制造业职工、建筑工人、园区从业者、新业态骑手、社区灵活就业人员、校园师生等群体。</div></li>
-          <li><div>参与限制：每位微信用户可多次作答闯关练习，但<span className="nh-rules-content__emphasis">每天</span>仅可解锁一次随机抽奖资格、参与一次抽奖，重复闯关无法再次获得抽奖机会。</div></li>
-          <li><div>参与规范：活动<span className="nh-rules-content__emphasis">禁止</span>任何作弊答题、恶意刷奖、批量操作等违规行为，一经核查发现，将直接取消用户闯关及中奖资格。</div></li>
+          <li><div>参与限制：每位微信用户可多次作答闯关练习，但每天仅可解锁一次随机抽奖资格、参与一次抽奖，重复闯关无法再次获得抽奖机会。</div></li>
+          <li><div>参与规范：活动禁止任何作弊答题、恶意刷奖、批量操作等违规行为，一经核查发现，将直接取消用户闯关及中奖资格。</div></li>
         </ol>
       </section>
       <section>
@@ -850,7 +850,7 @@ function RulesContent() {
         <h2>抽奖资格说明</h2>
         <ol>
           <li><div>资格解锁条件：用户完整完成全部10道题目答题、成功通关闯关后，即可自动解锁随机抽奖资格。</div></li>
-          <li><div>资格有效期：<span className="nh-rules-content__emphasis">仅限佛山ID用户参与</span>，首次闯关成功后解锁抽奖资格，资格仅限本次活动单次使用，不可累积、不可转让，<span className="nh-rules-content__emphasis">当天多次重复闯关不叠加抽奖次数</span>。</div></li>
+          <li><div>资格有效期：仅限佛山ID用户参与，首次闯关成功后解锁抽奖资格，资格仅限本次活动单次使用，不可累积、不可转让，当天多次重复闯关不叠加抽奖次数。</div></li>
           <li><div>中奖规则：本次抽奖为随机抽奖奖励，闯关达标用户均可参与。</div></li>
         </ol>
       </section>
