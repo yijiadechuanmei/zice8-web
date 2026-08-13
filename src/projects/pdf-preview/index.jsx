@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf'
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.js?url'
-import { request } from '../../shared/api/request'
+import { API_BASE_URL, request } from '../../shared/api/request'
 import './styles.css'
 
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
@@ -18,11 +18,22 @@ function buildPdfUrl(activityKey) {
   return `${PDF_ASSETS_ORIGIN}/pdf/${encodeURIComponent(activityKey)}.pdf`
 }
 
+function buildPdfProxyUrl() {
+  return `${API_BASE_URL}/activities/1/pdf`
+}
+
 function resolvePdfUrl(publicConfig, fallback) {
   const configuredUrl = publicConfig?.mobileConfig?.pdfUrl
   return typeof configuredUrl === 'string' && configuredUrl.trim()
     ? configuredUrl.trim()
     : fallback
+}
+
+function resolveActivityPdfUrl(activityKey, publicConfig) {
+  if (activityKey === '1') {
+    return buildPdfProxyUrl()
+  }
+  return resolvePdfUrl(publicConfig, buildPdfUrl(activityKey))
 }
 
 async function fetchPdfData(url, signal, onProgress) {
@@ -156,7 +167,7 @@ export default function PdfPreviewProject({ routeParams }) {
   const [progress, setProgress] = useState(0)
   const [pdfError, setPdfError] = useState('')
   const pdfUrl = useMemo(
-    () => resolvePdfUrl(publicConfig, buildPdfUrl(activityKey)),
+    () => resolveActivityPdfUrl(activityKey, publicConfig),
     [activityKey, publicConfig],
   )
 
