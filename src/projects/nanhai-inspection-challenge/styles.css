@@ -191,6 +191,7 @@ button { font: inherit; }
 }
 .nh-rules-content p { margin: 0; }
 .nh-rules-content__time { margin-top: .45em !important; color: #e96719; font-weight: 900; }
+.nh-rules-content__emphasis { color: #e53935; font-weight: 900; }
 .nh-rules-content ol { margin: 0; padding: 0; list-style: none; counter-reset: rule-item; }
 .nh-rules-content li {
   display: grid;
