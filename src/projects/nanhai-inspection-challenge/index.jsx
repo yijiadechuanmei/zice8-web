@@ -727,6 +727,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
           onOpenLevel={openScene}
           preview={preview}
           onDebugComplete={handlePreviewCompleteAll}
+          canEnterLottery={Boolean(progress?.status === 'completed' && !bootstrap?.reviewMode)}
+          onEnterLottery={() => navigate('success')}
         />
       ) : null}
       {page === 'scene' && activeLevel ? (
@@ -898,7 +900,7 @@ function ArtLayer({ layer, canvas, onAction, className = '' }) {
   return <img className={`nh-art-page__layer ${className}`} style={style} src={nanhaiAsset(filename)} alt="" />
 }
 
-function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebugComplete }) {
+function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebugComplete, canEnterLottery, onEnterLottery }) {
   const map = NANHAI_ART.map
   const [selectedLevelNo, setSelectedLevelNo] = useState(null)
   const selectedLevel = levels.find((level) => level.levelNo === selectedLevelNo)
@@ -913,7 +915,9 @@ function MapPage({ levels, progress, correctCodes, onOpenLevel, preview, onDebug
         // 未选关卡时，开始按钮直接进入当前进度；选中已通关关卡后，
         // 同一按钮则进入对应的复习关卡。
         'start-scene': startLevel ? () => onOpenLevel(startLevel) : undefined,
-        'debug-complete': preview ? onDebugComplete : undefined,
+        // 关卡合集右侧终点：普通通关用户点击后进入抽奖页；测试预览仍保留
+        // 一键完成所有关卡的测试行为。已经中奖的复习状态不开放该入口。
+        'debug-complete': preview ? onDebugComplete : canEnterLottery ? onEnterLottery : undefined,
       }}
       className="nh-map-page"
       rotatedChildren={map.cards.map((card, index) => {
