@@ -20,7 +20,6 @@ import {
   resetDebugData,
   submitAnswer,
   syncAuthorization,
-  syncPayout,
 } from './api'
 import {
   NANHAI_ART,
@@ -662,20 +661,6 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     }
   }
 
-  async function handleSyncPayout() {
-    const payoutNo = bootstrap?.draw?.payoutNo
-    if (!payoutNo || busy) return
-    setBusy('sync')
-    try {
-      const draw = await syncPayout(activityKey, payoutNo, debugMode)
-      setBootstrap((current) => ({ ...current, draw }))
-    } catch (err) {
-      setError(readError(err, '发放状态同步失败'))
-    } finally {
-      setBusy('')
-    }
-  }
-
   async function revealDrawResult(result) {
     setBootstrap((current) => ({ ...current, draw: result }))
     // 只有微信已确认成功的结果才会进入中奖页；在停盘后的 1.5 秒内保留
@@ -770,7 +755,7 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
       ) : null}
       {page === 'success' ? <SuccessPage rotation={wheelRotation} spinning={wheelSpinning} onDraw={handleDraw} onBack={() => navigate('map')} /> : null}
       {page === 'share' ? (
-        <SharePage draw={bootstrap.draw} busy={busy} preview={preview} onSync={handleSyncPayout} onReview={reviewChallenge} onShare={() => setShareGuideOpen(true)} />
+        <SharePage draw={bootstrap.draw} onReview={reviewChallenge} onShare={() => setShareGuideOpen(true)} />
       ) : null}
       </div>
       {activeLevel && activeQuestionIndex !== null ? createPortal(
@@ -1086,7 +1071,7 @@ function AnswerFeedback({ feedback, onClose }) {
   )
 }
 
-function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
+function SharePage({ draw, onReview, onShare }) {
   const won = draw?.won
   const shareArt = won ? NANHAI_ART.share : {
     ...NANHAI_ART.share,
@@ -1094,7 +1079,6 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
       layer[5] === 'result-panel' ? [NANHAI_ART.share.noWinPanel, ...layer.slice(1)] : layer
     )),
   }
-  const payoutSuccess = draw?.payoutStatus === 'success'
   const prizeAmount = Number.isFinite(Number(draw?.prizeAmountYuan)) ? String(draw.prizeAmountYuan) : ''
   return (
     <section className="nh-share-page">
@@ -1105,14 +1089,6 @@ function SharePage({ draw, busy, preview, onSync, onReview, onShare }) {
           <div className="nh-share-prize-amount" style={sourceRect(shareArt.canvas, 559, 367, 261, 134)}><div>{prizeAmount}</div></div>
         ) : null}
       />
-      {!preview ? (
-        <div className="nh-share-page__result">
-          <strong>{won ? `恭喜抽中 ${draw.prizeAmountYuan} 元微信红包` : '本次未中奖'}</strong>
-          <span>{draw?.message}</span>
-          {won ? <small>发放状态：{payoutStatusText(draw.payoutStatus)}{draw.wechatState ? ` · ${draw.wechatState}` : ''}</small> : null}
-          {won && !payoutSuccess && draw.payoutNo ? <button disabled={Boolean(busy)} onClick={onSync}>{busy === 'sync' ? '同步中…' : '查询发放状态'}</button> : null}
-        </div>
-      ) : null}
     </section>
   )
 }
@@ -1261,11 +1237,6 @@ function pickPreviewSegment(segments) {
     if (cursor < 0) return item
   }
   return items[items.length - 1] || FALLBACK_SEGMENTS[0]
-}
-
-function payoutStatusText(status) {
-  const labels = { pending: '待发起', accepted: '已受理', processing: '发放中', success: '已到账', failed: '发放失败' }
-  return labels[status] || status || '-'
 }
 
 function createRequestId(prefix) {
