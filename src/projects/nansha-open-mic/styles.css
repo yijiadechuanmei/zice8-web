@@ -443,7 +443,7 @@
 .nansha-ranking-stage { position: relative; min-height: calc(100vh - (var(--nansha-unit) * 11.2)); overflow: hidden; padding-top: calc(var(--nansha-unit) * 38.53); background: #173b98; }
 .nansha-ranking-theme { position: absolute; top: calc(var(--nansha-unit) * 4.27); left: 50%; width: calc(var(--nansha-unit) * 68); height: auto; transform: translateX(-50%); }
 .nansha-ranking-microphone { position: absolute; z-index: 2; top: calc(var(--nansha-unit) * 4.27); right: calc(var(--nansha-unit) * -.8); width: calc(var(--nansha-unit) * 34.13); height: calc(var(--nansha-unit) * 36.67); object-fit: contain; pointer-events: none; }
-.nansha-ranking-rules-trigger { top: calc(var(--nansha-unit) * 16); right: calc(var(--nansha-unit) * -2); }
+.nansha-ranking-rules-trigger { top: calc(var(--nansha-unit) * 16); right: 0; }
 
 .nansha-ranking-board { position: relative; width: 94.27%; height: calc(var(--nansha-unit) * 157.47); margin-left: 2.8%; border-radius: calc(var(--nansha-unit) * 5.07); background: #fff; }
 .nansha-ranking-columns { display: grid; grid-template-columns: 28.3% 41% 30.7%; width: 93.6%; height: calc(var(--nansha-unit) * 12.94); margin: 0 auto; padding-top: calc(var(--nansha-unit) * 4.27); }
