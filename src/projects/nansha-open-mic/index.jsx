@@ -581,7 +581,7 @@ function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
           </section>
           <section className="nansha-upload-organizers" aria-label="主办单位信息">
             <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-            <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、<br />开发区港澳办、区总工会、团区委</span></p>
+            <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办、<br />区总工会、团区委</span></p>
             <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
           </section>
         </article>
@@ -669,7 +669,7 @@ function RankingPage({ entries, onShowRules, onHome, onMy, onWork }) {
         </section>
         <section className="nansha-ranking-organizers" aria-label="主办单位信息">
           <p><b>主办单位：</b>中共广州市南沙区委宣传部、中共广州市南沙区委社会工作部</p>
-          <p><b>支持单位：</b><span>中共广州市南沙区委统战部、区人力资源社会保障局、区农业农村局、<br />区文化广电旅游体育局、开发区港澳办、区总工会、团区委</span></p>
+          <p><b>支持单位：</b><span>中共广州市南沙区委统战部、区人力资源社会保障局、区农业农村局、区文化广电旅游体育局、开发区港澳办、区总工会、团区委</span></p>
           <p><b>协办单位：</b>南沙区图书馆、南沙区文化馆</p>
         </section>
         <nav className="nansha-vote-bottom-nav nansha-ranking-bottom-nav" aria-label="排行榜底部导航">
@@ -1075,8 +1075,8 @@ function RulesPage({ onBack }) {
             </section>
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
-              <p><b>主办单位：</b><span>中共广州市南沙区委宣传部、<br />中共广州市南沙区委社会工作部</span></p>
-              <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、<br />开发区港澳办、区总工会、团区委</span></p>
+              <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
+              <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办、<br />区总工会、团区委</span></p>
               <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
             </section>
           </div>
