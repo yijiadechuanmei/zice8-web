@@ -44,6 +44,7 @@ const defaultNanhaiDrawControl = {
   autoEnabled: true,
   windowSeconds: 180,
   maxWinCount: 60,
+  maxWinsPerIp: 20,
   maxWinAmountFen: 6000,
   cooldownSeconds: 180,
   autoPausedUntil: null,
@@ -336,6 +337,7 @@ export default function ActivityConfigPage({ activity }) {
         autoEnabled: Boolean(nanhaiDrawControl.autoEnabled),
         windowSeconds: Number(nanhaiDrawControl.windowSeconds),
         maxWinCount: Number(nanhaiDrawControl.maxWinCount),
+        maxWinsPerIp: Number(nanhaiDrawControl.maxWinsPerIp),
         maxWinAmountFen: Number(nanhaiDrawControl.maxWinAmountFen),
         cooldownSeconds: Number(nanhaiDrawControl.cooldownSeconds),
       })
@@ -870,6 +872,12 @@ export default function ActivityConfigPage({ activity }) {
                       </div>
                     </label>
                     <label>
+                      <Text strong>单 IP 中奖上限</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <InputNumber min={1} max={1000} precision={0} value={nanhaiDrawControl.maxWinsPerIp} onChange={(maxWinsPerIp) => setNanhaiDrawControl((current) => ({ ...current, maxWinsPerIp: Number(maxWinsPerIp || 1) }))} />
+                      </div>
+                    </label>
+                    <label>
                       <Text strong>窗口中奖金额上限（元）</Text>
                       <div style={{ marginTop: 8 }}>
                         <InputNumber min={0.01} max={5000} precision={2} value={Number(nanhaiDrawControl.maxWinAmountFen || 0) / 100} onChange={(value) => setNanhaiDrawControl((current) => ({ ...current, maxWinAmountFen: Math.round(Number(value || 0.01) * 100) }))} />
@@ -883,9 +891,9 @@ export default function ActivityConfigPage({ activity }) {
                     </label>
                   </Space>
                   <Text type="secondary">
-                    最近 {nanhaiDrawControl.windowSeconds} 秒已承诺中奖 {Number(nanhaiDrawControl.recentMetrics?.winCount || 0)} 人、{(Number(nanhaiDrawControl.recentMetrics?.winAmountFen || 0) / 100).toFixed(2)} 元。达到任一阈值后自动切换为全部未中奖并消耗机会；冷却结束后自动恢复。
+                    同一出口网络累计中奖满 {Number(nanhaiDrawControl.maxWinsPerIp || 0)} 人后，该 IP 后续只会未中奖；最近 {nanhaiDrawControl.windowSeconds} 秒已承诺中奖 {Number(nanhaiDrawControl.recentMetrics?.winCount || 0)} 人、{(Number(nanhaiDrawControl.recentMetrics?.winAmountFen || 0) / 100).toFixed(2)} 元。达到自动熔断任一阈值后会切换为全部未中奖并消耗机会；冷却结束后自动恢复。
                   </Text>
-                  <Button type="primary" disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving} onClick={handleSaveNanhaiAutoControl}>保存自动熔断参数</Button>
+                  <Button type="primary" disabled={!nanhaiControlLoaded} loading={nanhaiControlSaving} onClick={handleSaveNanhaiAutoControl}>保存风控参数</Button>
                 </Space>
               </Card>
 
