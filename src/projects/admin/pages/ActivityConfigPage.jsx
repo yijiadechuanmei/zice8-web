@@ -377,9 +377,9 @@ export default function ActivityConfigPage({ activity }) {
     }
   }
 
-  async function handleResetNanhaiData(scope) {
+  async function handleResetNanhaiData() {
     const userId = nanhaiResetUserId.trim()
-    if (scope === 'user' && !/^[1-9]\d*$/.test(userId)) {
+    if (!/^[1-9]\d*$/.test(userId)) {
       message.warning('请输入要清除的正整数用户ID')
       return
     }
@@ -387,8 +387,8 @@ export default function ActivityConfigPage({ activity }) {
     setError('')
     try {
       const result = await resetNanhaiChallengeData(activity.activityKey, {
-        scope,
-        ...(scope === 'user' ? { userId } : {}),
+        scope: 'user',
+        userId,
       })
       const cleared = result?.cleared || {}
       setNanhaiResetUserId('')
@@ -582,6 +582,8 @@ export default function ActivityConfigPage({ activity }) {
   ) / 100
   const nanhaiApprovedLimitYuan = Number(nanhaiBudget?.approvedLimitYuan || 5000)
   const nanhaiBudgetOverLimit = nanhaiProposedBudgetYuan > nanhaiApprovedLimitYuan
+  const nanhaiProbabilityOverLimit = nanhaiProbability > 100.0001
+  const nanhaiMissProbability = Math.max(0, 100 - nanhaiProbability)
   const nanhaiPrizeColumns = [
     { title: '红包金额', dataIndex: 'amountYuan', width: 110, render: (value) => `${Number(value || 0)} 元` },
     { title: '奖品名称', dataIndex: 'prizeName', width: 170 },
@@ -918,10 +920,10 @@ export default function ActivityConfigPage({ activity }) {
           <Card
             size="small"
             title="微信红包数量与概率"
-            extra={<Space wrap><Text type={Math.abs(nanhaiProbability - 70) < 0.001 ? 'success' : 'danger'}>红包概率 {nanhaiProbability.toFixed(2)}%</Text><Text type={nanhaiBudgetOverLimit ? 'danger' : 'success'}>本次释放 {nanhaiProposedBudgetYuan.toFixed(2)} / 上限 {nanhaiApprovedLimitYuan.toFixed(2)} 元</Text><Button type="primary" loading={nanhaiPrizeSaving} disabled={nanhaiBudgetOverLimit} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
+            extra={<Space wrap><Text type={nanhaiProbabilityOverLimit ? 'danger' : 'success'}>红包概率 {nanhaiProbability.toFixed(2)}%</Text><Text type={nanhaiProbabilityOverLimit ? 'danger' : 'secondary'}>谢谢参与 {nanhaiMissProbability.toFixed(2)}%</Text><Text type={nanhaiBudgetOverLimit ? 'danger' : 'success'}>本次释放 {nanhaiProposedBudgetYuan.toFixed(2)} / 上限 {nanhaiApprovedLimitYuan.toFixed(2)} 元</Text><Button type="primary" loading={nanhaiPrizeSaving} disabled={nanhaiBudgetOverLimit || nanhaiProbabilityOverLimit} onClick={handleSaveNanhaiPrizes}>保存红包配置</Button></Space>}
           >
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Alert type={nanhaiBudgetOverLimit ? 'error' : 'info'} showIcon message="保存库存时自动同步释放预算" description={`红包金额固定；谢谢参与固定 30%。本次库存对应 ${nanhaiProposedBudgetYuan.toFixed(2)} 元，保存后即成为抽奖可消费的硬预算，且永远不能超过 ${nanhaiApprovedLimitYuan.toFixed(2)} 元。当前已支出 ${Number(nanhaiBudget?.spentAmountFen || 0) / 100} 元、预占 ${Number(nanhaiBudget?.reservedAmountFen || 0) / 100} 元。`} />
+              <Alert type={nanhaiBudgetOverLimit || nanhaiProbabilityOverLimit ? 'error' : 'info'} showIcon message="保存库存时自动同步释放预算" description={`红包概率可配置为 0–100%，剩余 ${nanhaiMissProbability.toFixed(2)}% 自动为谢谢参与。红包金额固定；本次库存对应 ${nanhaiProposedBudgetYuan.toFixed(2)} 元，保存后即成为抽奖可消费的硬预算，且永远不能超过 ${nanhaiApprovedLimitYuan.toFixed(2)} 元。当前已支出 ${Number(nanhaiBudget?.spentAmountFen || 0) / 100} 元、预占 ${Number(nanhaiBudget?.reservedAmountFen || 0) / 100} 元。`} />
               <Table rowKey="id" columns={nanhaiPrizeColumns} dataSource={nanhaiPrizes} pagination={false} size="small" scroll={{ x: 720 }} />
             </Space>
           </Card>
@@ -948,18 +950,9 @@ export default function ActivityConfigPage({ activity }) {
                   description="将清除该用户的答题、抽奖、本地转账授权与参与记录；其他用户及其他项目不受影响。"
                   okText="确认清除"
                   cancelText="取消"
-                  onConfirm={() => handleResetNanhaiData('user')}
+                  onConfirm={handleResetNanhaiData}
                 >
                   <Button danger loading={nanhaiResetting} disabled={!/^[1-9]\d*$/.test(nanhaiResetUserId.trim())}>清除指定用户</Button>
-                </Popconfirm>
-                <Popconfirm
-                  title="确认清除本活动所有参与数据？"
-                  description="将清除幸福南海活动全部用户的答题、抽奖、本地转账授权与参与记录。其他项目不受影响。"
-                  okText="确认全部清除"
-                  cancelText="取消"
-                  onConfirm={() => handleResetNanhaiData('all')}
-                >
-                  <Button danger type="primary" loading={nanhaiResetting}>清除本活动全部数据</Button>
                 </Popconfirm>
               </Space>
             </Space>
