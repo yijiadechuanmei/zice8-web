@@ -1076,7 +1076,7 @@ function RulesPage({ onBack }) {
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
               <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-              <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办、<br />区总工会、团区委</span></p>
+              <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办<br />区总工会、团区委</span></p>
               <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
             </section>
           </div>
