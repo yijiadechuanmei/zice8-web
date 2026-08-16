@@ -25,6 +25,7 @@ const NanshaOpenMicProject = lazy(() => import('./nansha-open-mic/index.jsx'))
 const TargetedTherapyQuizProject = lazy(() => import('./targeted-therapy-quiz/index.jsx'))
 const ChakraAssessmentProject = lazy(() => import('./chakra-assessment/index.jsx'))
 const LongwenBeerQuizProject = lazy(() => import('./longwen-beer-quiz/index.jsx'))
+const BocTianjinBranchProject = lazy(() => import('./boc-tianjin-branch/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -36,6 +37,7 @@ const activityTypeProjects = {
   nansha_open_mic: NanshaOpenMicProject,
   chakra_assessment: ChakraAssessmentProject,
   longwen_beer_quiz: LongwenBeerQuizProject,
+  boc_tianjin_branch: BocTianjinBranchProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
