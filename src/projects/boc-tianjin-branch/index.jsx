@@ -106,7 +106,7 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add('is-visible')
       })
-    }, { root, threshold: 0.08 })
+    }, { root, rootMargin: '0px 0px -9% 0px', threshold: 0.1 })
     root.querySelectorAll('.boc-asset').forEach((element) => observer.observe(element))
     return () => observer.disconnect()
   }, [assets, pageNo, pageRef])
@@ -114,7 +114,7 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
       <div className={`boc-canvas boc-canvas--${pageNo}`} style={{ height, transform: `scale(${scale})` }}>
         {assets.map(([left, top, assetWidth, assetHeight, fileName], index) => (
-          <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${index === 0 ? 'boc-asset--cover' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${Math.min(index % 7, 6) * 55}ms` }}>
+          <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${index === 0 ? 'boc-asset--cover' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms` }}>
             <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" />
           </div>
         ))}
