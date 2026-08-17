@@ -128,7 +128,20 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
       })
     }, { root, rootMargin: '0px 0px -9% 0px', threshold: 0.1 })
     root.querySelectorAll('.boc-asset').forEach((element) => observer.observe(element))
-    return () => observer.disconnect()
+    const revealFinalAssets = () => {
+      if (pageNo !== 2) return
+      const distanceToBottom = root.scrollHeight - root.clientHeight - root.scrollTop
+      if (distanceToBottom > Math.max(24, root.clientHeight * 0.2)) return
+      root.querySelectorAll('.boc-asset:not(.is-visible)').forEach((element) => {
+        element.classList.add('is-visible')
+      })
+    }
+    root.addEventListener('scroll', revealFinalAssets, { passive: true })
+    revealFinalAssets()
+    return () => {
+      observer.disconnect()
+      root.removeEventListener('scroll', revealFinalAssets)
+    }
   }, [assets, pageNo, pageRef])
   return (
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
