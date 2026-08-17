@@ -115,11 +115,12 @@ function useCanvasWidth() {
   return width
 }
 
-function PageCanvas({ assets, height, pageRef, pageNo }) {
+function PageCanvas({ assets, height, isActive, pageRef, pageNo }) {
   const width = useCanvasWidth()
   const scale = width / 750
   const [cover, ...contentAssets] = assets
   useEffect(() => {
+    if (!isActive) return undefined
     const root = pageRef.current
     if (!root) return undefined
     const observer = new IntersectionObserver((entries) => {
@@ -129,7 +130,7 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
     }, { root, rootMargin: '0px 0px -9% 0px', threshold: 0.1 })
     root.querySelectorAll('.boc-asset').forEach((element) => observer.observe(element))
     return () => observer.disconnect()
-  }, [assets, pageNo, pageRef])
+  }, [assets, isActive, pageNo, pageRef])
   return (
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
       <div className={`boc-canvas boc-canvas--${pageNo}`} style={{ height, transform: `scale(${scale})` }}>
@@ -188,7 +189,12 @@ export default function BocTianjinBranchProject() {
   return (
     <main className="boc-project" aria-label="中国银行天津市分行">
       <section className="boc-page" ref={pageRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-        <PageCanvas key={isLast ? 'second-page' : 'first-page'} pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={isLast ? secondPage : firstPage} />
+        <div className={`boc-page-layer ${isLast ? 'is-hidden' : 'is-active'}`} aria-hidden={isLast}>
+          <PageCanvas isActive={!isLast} pageRef={pageRef} pageNo={1} height={7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={firstPage} />
+        </div>
+        <div className={`boc-page-layer ${isLast ? 'is-active' : 'is-hidden'}`} aria-hidden={!isLast}>
+          <PageCanvas isActive={isLast} pageRef={pageRef} pageNo={2} height={10460} assets={secondPage} />
+        </div>
       </section>
       <button className={`boc-page-cue ${isLast ? 'is-last' : ''}`} type="button" onClick={() => changePage(isLast ? 0 : 1)} aria-label={isLast ? '返回第一页' : '前往下一页'}>
         <span>{isLast ? '继续下滑 返回首页' : '滑至底部 继续上滑'}</span><i aria-hidden="true" />
