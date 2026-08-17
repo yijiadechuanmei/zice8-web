@@ -118,6 +118,7 @@ function useCanvasWidth() {
 function PageCanvas({ assets, height, pageRef, pageNo }) {
   const width = useCanvasWidth()
   const scale = width / 750
+  const [cover, ...contentAssets] = assets
   useEffect(() => {
     const root = pageRef.current
     if (!root) return undefined
@@ -132,11 +133,14 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
   return (
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
       <div className={`boc-canvas boc-canvas--${pageNo}`} style={{ height, transform: `scale(${scale})` }}>
-        {assets.map(([left, top, assetWidth, assetHeight, fileName], index) => {
-          const isCover = index === 0
+        <div className="boc-page-cover" style={{ left: cover[0], top: cover[1], width: cover[2], height: cover[3] }}>
+          <img src={asset(cover[4])} alt="" draggable="false" referrerPolicy="no-referrer" loading="eager" fetchPriority="high" decoding="sync" />
+        </div>
+        {contentAssets.map(([left, top, assetWidth, assetHeight, fileName], index) => {
+          const originalIndex = index + 1
           return (
-            <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${isCover ? 'boc-asset--cover boc-asset--instant is-visible' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms`, ...(isCover ? { opacity: 1, transform: 'none', transition: 'none' } : {}) }}>
-              <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" loading={isCover ? 'eager' : 'auto'} fetchPriority={isCover ? 'high' : 'auto'} decoding={isCover ? 'sync' : 'async'} />
+            <div className={`boc-asset boc-asset--${getAssetMotion(originalIndex, assetWidth, assetHeight)}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (originalIndex % 5) * 110}ms` }}>
+              <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" />
             </div>
           )
         })}
@@ -184,7 +188,7 @@ export default function BocTianjinBranchProject() {
   return (
     <main className="boc-project" aria-label="中国银行天津市分行">
       <section className="boc-page" ref={pageRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-        <PageCanvas pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={isLast ? secondPage : firstPage} />
+        <PageCanvas key={isLast ? 'second-page' : 'first-page'} pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={isLast ? secondPage : firstPage} />
       </section>
       <button className={`boc-page-cue ${isLast ? 'is-last' : ''}`} type="button" onClick={() => changePage(isLast ? 0 : 1)} aria-label={isLast ? '返回第一页' : '前往下一页'}>
         <span>{isLast ? '继续下滑 返回首页' : '滑至底部 继续上滑'}</span><i aria-hidden="true" />
