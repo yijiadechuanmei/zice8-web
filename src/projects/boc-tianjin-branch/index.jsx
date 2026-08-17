@@ -11,7 +11,9 @@ function getAssetMotion(index, width, height) {
   return index % 2 === 0 ? 'panel-left' : 'panel-right'
 }
 
-const firstPage = [
+const HOME_TOP_HEIGHT = 1126
+
+const firstPageContent = [
   [0, 0, 750, 1673, '955952c176e1a67f4c447731a3284c2f_2272669_750_1673.png'],
   [18, 1687, 709, 5966, '468fad85f3fcd726c97d06fe38a16a6d_4778892_709_5966.png'],
   [82, 1759, 559, 76, '91a449ab9e4921d6603e28338e644818_52590_559_76.png'],
@@ -35,6 +37,17 @@ const firstPage = [
   [63, 6634, 398, 41, '060b1ef8396fcfb899b99759fec57ac7_10974_398_41.png'],
   [54, 6707, 637, 351, '1741ce7187f3e261dfa31e4cb03a0a0f_302684_637_351.png'],
   [54, 7181, 637, 362, '575a6cc35dfe9c1ca3f51fc649e03c24_329087_637_362.png'],
+]
+
+const firstPage = [
+  [0, 0, 750, HOME_TOP_HEIGHT, '0.png'],
+  ...firstPageContent.map(([left, top, width, height, fileName]) => [
+    left,
+    top + HOME_TOP_HEIGHT,
+    width,
+    height,
+    fileName,
+  ]),
 ]
 
 const secondPage = [
@@ -155,7 +168,7 @@ export default function BocTianjinBranchProject() {
   return (
     <main className="boc-project" aria-label="中国银行天津市分行">
       <section className="boc-page" ref={pageRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-        <PageCanvas pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712} assets={isLast ? secondPage : firstPage} />
+        <PageCanvas pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT} assets={isLast ? secondPage : firstPage} />
       </section>
       <button className={`boc-page-cue ${isLast ? 'is-last' : ''}`} type="button" onClick={() => changePage(isLast ? 0 : 1)} aria-label={isLast ? '返回第一页' : '前往下一页'}>
         <span>{isLast ? '继续下滑 返回首页' : '滑至底部 继续上滑'}</span><i aria-hidden="true" />
