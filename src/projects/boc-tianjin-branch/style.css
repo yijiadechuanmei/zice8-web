@@ -6,6 +6,8 @@
   background: var(--boc-mint);
 }
 
+.boc-project--second { --boc-mint: #f9e39f; }
+
 .boc-page {
   position: absolute;
   inset: 0;

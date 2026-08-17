@@ -187,7 +187,7 @@ export default function BocTianjinBranchProject() {
   }
   const isLast = pageNo === 1
   return (
-    <main className="boc-project" aria-label="中国银行天津市分行">
+    <main className={`boc-project ${isLast ? 'boc-project--second' : ''}`} aria-label="中国银行天津市分行">
       <section className="boc-page" ref={pageRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
         <div className={`boc-page-layer ${isLast ? 'is-hidden' : 'is-active'}`} aria-hidden={isLast}>
           <PageCanvas isActive={!isLast} pageRef={pageRef} pageNo={1} height={7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={firstPage} />
