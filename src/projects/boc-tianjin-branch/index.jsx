@@ -133,7 +133,7 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
       <div className={`boc-canvas boc-canvas--${pageNo}`} style={{ height, transform: `scale(${scale})` }}>
         {assets.map(([left, top, assetWidth, assetHeight, fileName], index) => (
-          <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${index === 0 ? 'boc-asset--cover' : ''} ${pageNo === 2 && index === 0 ? 'boc-asset--instant is-visible' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms` }}>
+          <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${index === 0 ? 'boc-asset--cover boc-asset--instant is-visible' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms` }}>
             <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" />
           </div>
         ))}
