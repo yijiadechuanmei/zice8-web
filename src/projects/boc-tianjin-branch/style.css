@@ -63,6 +63,7 @@
 .boc-asset--figure.is-visible { transform: translate3d(0, 0, 0) scale(1); }
 
 .boc-asset--cover { z-index: 2; }
+.boc-asset--instant { opacity: 1; transform: none; transition: none; }
 
 .boc-page-cue {
   position: fixed;
