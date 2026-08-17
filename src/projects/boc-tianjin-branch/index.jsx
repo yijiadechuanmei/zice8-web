@@ -132,11 +132,14 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
   return (
     <div className="boc-canvas-wrap" style={{ width, height: height * scale }}>
       <div className={`boc-canvas boc-canvas--${pageNo}`} style={{ height, transform: `scale(${scale})` }}>
-        {assets.map(([left, top, assetWidth, assetHeight, fileName], index) => (
-          <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${index === 0 ? 'boc-asset--cover boc-asset--instant is-visible' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms` }}>
-            <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" />
-          </div>
-        ))}
+        {assets.map(([left, top, assetWidth, assetHeight, fileName], index) => {
+          const isCover = index === 0
+          return (
+            <div className={`boc-asset boc-asset--${getAssetMotion(index, assetWidth, assetHeight)} ${isCover ? 'boc-asset--cover boc-asset--instant is-visible' : ''}`} key={fileName} style={{ left, top, width: assetWidth, height: assetHeight, '--delay': `${220 + (index % 5) * 110}ms`, ...(isCover ? { opacity: 1, transform: 'none', transition: 'none' } : {}) }}>
+              <img src={asset(fileName)} alt="" draggable="false" referrerPolicy="no-referrer" loading={isCover ? 'eager' : 'auto'} fetchPriority={isCover ? 'high' : 'auto'} decoding={isCover ? 'sync' : 'async'} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -146,6 +149,13 @@ export default function BocTianjinBranchProject() {
   const [pageNo, setPageNo] = useState(0)
   const pageRef = useRef(null)
   const touchStartY = useRef(null)
+  useEffect(() => {
+    const secondPageCover = new Image()
+    secondPageCover.referrerPolicy = 'no-referrer'
+    secondPageCover.fetchPriority = 'high'
+    secondPageCover.decoding = 'sync'
+    secondPageCover.src = asset(secondPage[0][4])
+  }, [])
   const changePage = useCallback((nextPage) => {
     setPageNo(nextPage)
     requestAnimationFrame(() => pageRef.current?.scrollTo({ top: 0, behavior: 'auto' }))
