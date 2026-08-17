@@ -12,10 +12,16 @@ function getAssetMotion(index, width, height) {
 }
 
 const HOME_TOP_HEIGHT = 1126
+const INSERT_IMAGE_TOP = 4687
+const INSERT_IMAGE_HEIGHT = 650
+const INSERT_IMAGE_GAP = 34
+const CONTENT_SHIFT_AFTER_INSERT = INSERT_IMAGE_HEIGHT + INSERT_IMAGE_GAP
 
 const firstPageContent = [
   [0, 0, 750, 1673, '955952c176e1a67f4c447731a3284c2f_2272669_750_1673.png'],
-  [18, 1687, 709, 5966, '468fad85f3fcd726c97d06fe38a16a6d_4778892_709_5966.png'],
+  [18, 1687, 709, 2966, 'a5bdc671f942c3728d6d75a68a2274a9_272247_709_2966.png'],
+  [20, INSERT_IMAGE_TOP, 710, INSERT_IMAGE_HEIGHT, '1.png'],
+  [18, INSERT_IMAGE_TOP + CONTENT_SHIFT_AFTER_INSERT, 709, 2965, 'f03215ed0ca1d0699df59435ecfeb1e7_270529_709_2965.png'],
   [82, 1759, 559, 76, '91a449ab9e4921d6603e28338e644818_52590_559_76.png'],
   [90, 1899, 396, 42, '7c58bf52962d922092e3422d8e9b6b87_10669_396_42.png'],
   [54, 1966, 637, 288, 'd62b0a06fb2686496c2ed094cb51360c_197774_637_288.png'],
@@ -26,17 +32,17 @@ const firstPageContent = [
   [58, 3370, 617, 214, '2fc075535ebd7bf5706fdb33510247ba_231461_617_214.png'],
   [47, 3717, 637, 481, '664275248c39a9d7d1bd9285b0bfee90_367391_637_481.png'],
   [52, 4215, 646, 346, 'fd0d3696d73bbe677e84a46486c569b1_223143_646_346.png'],
-  [62, 4759, 634, 77, '505a168b303b16356b53f0e9a1064d09_65490_634_77.png'],
-  [97, 4900, 396, 42, 'e2532463556e19dc970c61f80e358fe7_10255_396_42.png'],
-  [61, 4967, 637, 288, 'c33fb8b1390bd84a154d875aaa84649e_144959_637_288.png'],
-  [76, 5158, 605, 279, '4ac5be3d98c513bfe2cf1071e67658b2_288195_605_279.png'],
-  [61, 5507, 637, 288, 'b968a13abaf8cc7a19d76b31cfd745da_170551_637_288.png'],
-  [70, 5760, 616, 310, 'f1c7afa79b53620bf8bb5285fcce5012_345562_616_310.png'],
-  [54, 6154, 637, 288, 'afdc11b64b169f402bf529150f87b807_148709_637_288.png'],
-  [61, 6364, 617, 226, '670f213a8af81a4ba245dd9aff7006fa_295949_617_226.png'],
-  [63, 6634, 398, 41, '060b1ef8396fcfb899b99759fec57ac7_10974_398_41.png'],
-  [54, 6707, 637, 351, '1741ce7187f3e261dfa31e4cb03a0a0f_302684_637_351.png'],
-  [54, 7181, 637, 362, '575a6cc35dfe9c1ca3f51fc649e03c24_329087_637_362.png'],
+  [62, 4759 + CONTENT_SHIFT_AFTER_INSERT, 634, 77, '505a168b303b16356b53f0e9a1064d09_65490_634_77.png'],
+  [97, 4900 + CONTENT_SHIFT_AFTER_INSERT, 396, 42, 'e2532463556e19dc970c61f80e358fe7_10255_396_42.png'],
+  [61, 4967 + CONTENT_SHIFT_AFTER_INSERT, 637, 288, 'c33fb8b1390bd84a154d875aaa84649e_144959_637_288.png'],
+  [76, 5158 + CONTENT_SHIFT_AFTER_INSERT, 605, 279, '4ac5be3d98c513bfe2cf1071e67658b2_288195_605_279.png'],
+  [61, 5507 + CONTENT_SHIFT_AFTER_INSERT, 637, 288, 'b968a13abaf8cc7a19d76b31cfd745da_170551_637_288.png'],
+  [70, 5760 + CONTENT_SHIFT_AFTER_INSERT, 616, 310, 'f1c7afa79b53620bf8bb5285fcce5012_345562_616_310.png'],
+  [54, 6154 + CONTENT_SHIFT_AFTER_INSERT, 637, 288, 'afdc11b64b169f402bf529150f87b807_148709_637_288.png'],
+  [61, 6364 + CONTENT_SHIFT_AFTER_INSERT, 617, 226, '670f213a8af81a4ba245dd9aff7006fa_295949_617_226.png'],
+  [63, 6634 + CONTENT_SHIFT_AFTER_INSERT, 398, 41, '060b1ef8396fcfb899b99759fec57ac7_10974_398_41.png'],
+  [54, 6707 + CONTENT_SHIFT_AFTER_INSERT, 637, 351, '1741ce7187f3e261dfa31e4cb03a0a0f_302684_637_351.png'],
+  [54, 7181 + CONTENT_SHIFT_AFTER_INSERT, 637, 362, '575a6cc35dfe9c1ca3f51fc649e03c24_329087_637_362.png'],
 ]
 
 const firstPage = [
@@ -168,7 +174,7 @@ export default function BocTianjinBranchProject() {
   return (
     <main className="boc-project" aria-label="中国银行天津市分行">
       <section className="boc-page" ref={pageRef} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-        <PageCanvas pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT} assets={isLast ? secondPage : firstPage} />
+        <PageCanvas pageRef={pageRef} pageNo={pageNo + 1} height={isLast ? 10460 : 7712 + HOME_TOP_HEIGHT + CONTENT_SHIFT_AFTER_INSERT} assets={isLast ? secondPage : firstPage} />
       </section>
       <button className={`boc-page-cue ${isLast ? 'is-last' : ''}`} type="button" onClick={() => changePage(isLast ? 0 : 1)} aria-label={isLast ? '返回第一页' : '前往下一页'}>
         <span>{isLast ? '继续下滑 返回首页' : '滑至底部 继续上滑'}</span><i aria-hidden="true" />
