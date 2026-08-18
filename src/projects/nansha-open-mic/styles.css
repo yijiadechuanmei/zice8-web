@@ -491,7 +491,7 @@
 .nansha-ranking-votes { color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-note { position: absolute; bottom: calc(var(--nansha-unit) * 3.73); left: 0; width: 100%; margin: 0; color: #777; text-align: center; font-size: calc(var(--nansha-unit) * 2.13); }
 
-.nansha-ranking-organizers { width: 74.13%; margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
+.nansha-ranking-organizers { width: max-content; max-width: calc(100% - (var(--nansha-unit) * 4.27)); margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
 .nansha-ranking-organizers p { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0 0 calc(var(--nansha-unit) * .67); font: 400 calc(var(--nansha-unit) * 2.4) / 1.46 "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: -.04em; white-space: nowrap; }
 .nansha-ranking-organizers b { font-weight: 800; }
 .nansha-ranking-organizers span { display: block; }
