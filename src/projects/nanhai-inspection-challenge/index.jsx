@@ -303,31 +303,27 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     trackEvent(activityKey, 'preview_complete_all', { activityType: 'nanhai_inspection_challenge' })
   }
 
-  function reviewChallenge() {
-    if (pageTransitioning) return
+  async function reviewChallenge() {
+    if (pageTransitioning || busy) return
     setPageTransitioning(true)
-    window.clearTimeout(pageTransitionTimer.current)
-    pageTransitionTimer.current = window.setTimeout(() => {
-      setBootstrap((current) => ({
-        ...current,
-        reviewMode: true,
-        levels: current.reviewLevels || current.levels,
-        progress: {
-          ...current.progress,
-          currentLevel: 5,
-          completedLevels: 5,
-          status: 'completed',
-          correctQuestionCodes: (current.reviewLevels || current.levels || [])
-            .flatMap((level) => level.questions.map((question) => question.code)),
-        },
-      }))
+    setBusy('challenge-restart')
+    try {
+      // 每一轮通关后的“再次闯关”都向服务端领取新的两题点位；服务端仅在
+      // 上一轮已经抽过奖时重置本轮进度，未抽奖的通关资格不会被误清空。
+      const data = await getBootstrap(activityKey, debugMode)
+      setBootstrap(data)
+      setPreviewSeenQuestionCodes(buildPreviewSeenQuestionCodes(data.levels))
       setActiveLevel(null)
       setActiveQuestionIndex(null)
       setFeedback(null)
       setSelectedOption('')
       setPage('map')
+    } catch (err) {
+      setError(readError(err, '重新开始闯关失败'))
+    } finally {
       setPageTransitioning(false)
-    }, 220)
+      setBusy('')
+    }
     trackEvent(activityKey, 'challenge_review', { activityType: 'nanhai_inspection_challenge' })
   }
 
@@ -583,7 +579,8 @@ function NanhaiInspectionChallengeMain({ routeParams }) {
     try {
       const availability = await getDrawAvailability(activityKey)
       if (availability?.available === false) {
-        // 每日限制属于正常参与反馈，使用横屏居中的 toast，不展示成错误弹窗。
+        // 本轮闯关资格、发放确认等正常参与反馈，使用横屏居中的 toast，
+        // 不展示成错误弹窗。
         setLevelAdvanceToast(availability.message || '抽奖暂缓，请稍后再试')
         window.clearTimeout(levelAdvanceTimer.current)
         levelAdvanceTimer.current = window.setTimeout(() => setLevelAdvanceToast(''), 2600)
