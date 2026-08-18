@@ -124,9 +124,10 @@
 }
 
 .nansha-upload-section {
+  margin-inline: calc(var(--nansha-unit) * 3.2);
   color: #4a4a4a;
-  font-size: calc(var(--nansha-unit) * 2.93);
-  line-height: 1.48;
+  font-size: calc(var(--nansha-unit) * 3.2);
+  line-height: 1.46;
 }
 
 .nansha-upload-section h2 {
@@ -135,7 +136,7 @@
   z-index: 0;
   margin: 0 0 calc(var(--nansha-unit) * 2.4);
   color: #17439c;
-  font: 800 calc(var(--nansha-unit) * 3.2) / 1.05 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .nansha-upload-section h2::after {
@@ -165,42 +166,44 @@
   padding: 0 0 calc(var(--nansha-unit) * .67);
   border-bottom: 1px solid #777;
   color: #080808;
-  font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 700 calc(var(--nansha-unit) * 3.2) / 1.65 "PingFang SC", "Microsoft YaHei", sans-serif;
   white-space: nowrap;
 }
 
 .nansha-upload-benefits h2 {
   margin-bottom: calc(var(--nansha-unit) * 3.47);
-  font: 800 calc(var(--nansha-unit) * 3.87) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .nansha-upload-benefits h2::after {
   right: auto;
   bottom: calc(var(--nansha-unit) * -.4);
   left: calc(var(--nansha-unit) * -1.73);
-  width: calc(var(--nansha-unit) * 32.4);
+  width: calc(var(--nansha-unit) * 28.27);
 }
 
 .nansha-upload-story {
-  margin-top: calc(var(--nansha-unit) * 7.2);
+  margin-top: calc(var(--nansha-unit) * 8.53);
 }
 
 .nansha-upload-story p {
-  margin: 0 0 calc(var(--nansha-unit) * 3.47);
+  margin: 0 0 calc(var(--nansha-unit) * 2.13);
 }
 
 .nansha-upload-story .nansha-upload-themes {
-  margin-top: calc(var(--nansha-unit) * -1.2);
+  margin-top: 0;
   color: #17439c;
   font-weight: 600;
   line-height: 1.6;
 }
 
 .nansha-upload-organizers {
+  margin-right: calc(var(--nansha-unit) * 3.2);
+  margin-left: calc(var(--nansha-unit) * 3.2);
   margin-top: calc(var(--nansha-unit) * 8.27);
   color: #353535;
-  font-size: calc(var(--nansha-unit) * 2.53);
-  line-height: 1.5;
+  font-size: calc(var(--nansha-unit) * 2.67);
+  line-height: 1.48;
 }
 
 .nansha-upload-organizers p {
@@ -760,7 +763,7 @@ video.nansha-video-placeholder.is-portrait {
   font: 400 calc(var(--nansha-unit) * 3.47) / 1.52 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-.nansha-rules-section { margin-left: 0; }
+.nansha-rules-section { margin-inline: calc(var(--nansha-unit) * 1.6); }
 .nansha-rules-benefits { margin-top: calc(var(--nansha-unit) * 6.67); }
 .nansha-rules-section-title {
   position: relative;
@@ -768,7 +771,7 @@ video.nansha-video-placeholder.is-portrait {
   display: inline-block;
   margin: 0;
   color: #173b98;
-  font: 800 calc(var(--nansha-unit) * 3.87) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .nansha-rules-section-title::after {
   position: absolute;
@@ -782,10 +785,11 @@ video.nansha-video-placeholder.is-portrait {
 }
 
 .nansha-rules-benefits ul { margin: calc(var(--nansha-unit) * 3.47) 0 0; padding: 0; list-style: none; }
-.nansha-rules-benefits li { display: table; margin: 0; padding-bottom: calc(var(--nansha-unit) * .67); border-bottom: 1px solid #777; color: #080808; font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-benefits li { display: table; margin: 0; padding-bottom: calc(var(--nansha-unit) * .67); border-bottom: 1px solid #777; color: #080808; font: 700 calc(var(--nansha-unit) * 3.2) / 1.65 "PingFang SC", "Microsoft YaHei", sans-serif; }
 
 .nansha-rules-story { margin-top: calc(var(--nansha-unit) * 5.73); }
-.nansha-rules-story p { margin: calc(var(--nansha-unit) * 2) 0 0; font: 400 calc(var(--nansha-unit) * 2.93) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-story p { margin: calc(var(--nansha-unit) * 1.07) 0 0; font: 400 calc(var(--nansha-unit) * 2.8) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-story .nansha-rules-section-title { font-size: calc(var(--nansha-unit) * 3.73); }
 .nansha-rules-story .nansha-rules-themes { margin-top: calc(var(--nansha-unit) * 1.07); color: #173b98; font-weight: 800; line-height: 1.82; }
 
 .nansha-rules-extra { margin-top: calc(var(--nansha-unit) * 2.53); }
@@ -794,8 +798,8 @@ video.nansha-video-placeholder.is-portrait {
 .nansha-rules-extra strong { font-size: calc(var(--nansha-unit) * 2.93); font-weight: 800; }
 .nansha-rules-extra span { display: block; }
 
-.nansha-rules-organizers { margin-top: calc(var(--nansha-unit) * 8.27); }
-.nansha-rules-organizers p { display: grid; grid-template-columns: auto 1fr; margin: 0 0 calc(var(--nansha-unit) * .67); color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-rules-organizers { margin: calc(var(--nansha-unit) * 8.27) calc(var(--nansha-unit) * 1.6) 0; }
+.nansha-rules-organizers p { display: grid; grid-template-columns: auto 1fr; margin: 0 0 calc(var(--nansha-unit) * .67); color: #080808; font: 400 calc(var(--nansha-unit) * 2.67) / 1.48 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-rules-organizers b { font-weight: 800; }
 .nansha-rules-disclaimer { margin: calc(var(--nansha-unit) * 2.13) 0 0 calc(var(--nansha-unit) * 5.33); color: #fff; font: 400 calc(var(--nansha-unit) * 2.4) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 

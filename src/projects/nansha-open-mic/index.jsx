@@ -1052,7 +1052,7 @@ function RulesPage({ onBack }) {
             <p className="nansha-rules-intro">每人1-2分钟，拿起手机开拍<br />分享你的南沙故事</p>
 
             <section className="nansha-rules-section nansha-rules-benefits">
-              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 32.4)' }}>优秀作品可获得：</h2>
+              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 30.4)' }}>优秀作品可获得：</h2>
               <ul>
                 <li>√&nbsp;“南沙优秀宣讲员”证书</li>
                 <li>√&nbsp;纳入区级宣讲人才队伍</li>
@@ -1065,15 +1065,15 @@ function RulesPage({ onBack }) {
 
             <section className="nansha-rules-section nansha-rules-story">
               <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 38)' }}>我们需要这样的作品：</h2>
-              <p>1.从六大主题中任选其一，结合真实经历，讲述<br />你与南沙的故事:</p>
+              <p>1.从六大主题中任选其一，结合真实经历，讲述你与南沙<br />的故事:</p>
               <p className="nansha-rules-themes">筑梦湾区 人人有梦<br />科创先锋 人人有为<br />文化传承 人人有责<br />乡村振兴 人人有益<br />时代青年 人人有志<br />暖心民生 人人有爱</p>
-              <p>2.使用手机或相机，录制宣讲视频，推荐时长1-2分钟，<br />不超过6分钟，画面清晰，分辨率不低于1080P;</p>
-              <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现<br />南沙的发展变化与城市温度</p>
-              <p>4.宣讲风格与语种不限，鼓励大胆发挥、自由表达<br />（外国语需配中文字幕）</p>
-              <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚<br />假表述及负面炒作等内容；</p>
-              <p>6.不能使用AI软件，生成人物形象、视频录制、配音<br />等;作品须为原创，所使用的音乐、图片及视频等素材<br />须无版权纠纷；</p>
-              <p>7.作品一经提交，即视为作者授权主办方合规使用，<br />未经主办方许可，不得擅自对外发布。</p>
-              <p>8.我们将主动联系通过初选的视频作者，对接后续<br />相关事宜；若未收到我方联系，则代表初选未通过。</p>
+              <p>2.使用手机或相机，录制宣讲视频，推荐时长1-2分钟，不超过<br />6分钟，画面清晰，分辨率不低于1080P;</p>
+              <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现南沙的发展<br />变化与城市温度</p>
+              <p>4.宣讲风格与语种不限，鼓励大胆发挥、自由表达（外国语需配<br />中文字幕）</p>
+              <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负<br />面炒作等内容；</p>
+              <p>6.不能使用AI软件，生成人物形象、视频录制、配音等;作品须<br />为原创，所使用的音乐、图片及视频等素材须无版权纠纷；</p>
+              <p>7.作品一经提交，即视为作者授权主办方合规使用，未经主办方<br />许可，不得擅自对外发布。</p>
+              <p>8.我们将主动联系通过初选的视频作者，对接后续相关事宜；若<br />未收到我方联系，则代表初选未通过。</p>
             </section>
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
