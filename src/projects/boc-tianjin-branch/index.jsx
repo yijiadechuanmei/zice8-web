@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { trackPageView } from '../../shared/analytics'
 import './style.css'
 
 const ASSET_BASE = 'https://assets.zice8.com/boc_tianjin_branch/boc_tianjin_branch_20260816'
+const ACTIVITY_TYPE = 'boc_tianjin_branch'
 const asset = (name) => `${ASSET_BASE}/${name}`
 
 function getAssetMotion(index, width, height) {
@@ -162,10 +164,15 @@ function PageCanvas({ assets, height, pageRef, pageNo }) {
   )
 }
 
-export default function BocTianjinBranchProject() {
+export default function BocTianjinBranchProject({ routeParams }) {
+  const activityKey = routeParams?.activityKey
   const [pageNo, setPageNo] = useState(0)
   const pageRef = useRef(null)
   const touchStartY = useRef(null)
+  useEffect(() => {
+    if (!activityKey) return
+    trackPageView(activityKey, '/boc-tianjin-branch', { activityType: ACTIVITY_TYPE })
+  }, [activityKey])
   useEffect(() => {
     const secondPageCover = new Image()
     secondPageCover.referrerPolicy = 'no-referrer'
