@@ -162,7 +162,7 @@
 .nansha-upload-benefits li {
   display: table;
   margin: 0;
-  padding: 0 0 calc(var(--nansha-unit) * .4);
+  padding: 0 0 calc(var(--nansha-unit) * .67);
   border-bottom: 1px solid #777;
   color: #080808;
   font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -782,7 +782,7 @@ video.nansha-video-placeholder.is-portrait {
 }
 
 .nansha-rules-benefits ul { margin: calc(var(--nansha-unit) * 3.47) 0 0; padding: 0; list-style: none; }
-.nansha-rules-benefits li { display: table; margin: 0; padding-bottom: calc(var(--nansha-unit) * .4); border-bottom: 1px solid #777; color: #080808; font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-rules-benefits li { display: table; margin: 0; padding-bottom: calc(var(--nansha-unit) * .67); border-bottom: 1px solid #777; color: #080808; font: 700 calc(var(--nansha-unit) * 3.47) / 1.38 "PingFang SC", "Microsoft YaHei", sans-serif; }
 
 .nansha-rules-story { margin-top: calc(var(--nansha-unit) * 5.73); }
 .nansha-rules-story p { margin: calc(var(--nansha-unit) * 2) 0 0; font: 400 calc(var(--nansha-unit) * 2.93) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
