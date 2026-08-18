@@ -136,7 +136,7 @@
   z-index: 0;
   margin: 0 0 calc(var(--nansha-unit) * 2.4);
   color: #17439c;
-  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.47) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .nansha-upload-section h2::after {
@@ -172,7 +172,7 @@
 
 .nansha-upload-benefits h2 {
   margin-bottom: calc(var(--nansha-unit) * 3.47);
-  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.47) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .nansha-upload-benefits h2::after {
@@ -771,7 +771,7 @@ video.nansha-video-placeholder.is-portrait {
   display: inline-block;
   margin: 0;
   color: #173b98;
-  font: 800 calc(var(--nansha-unit) * 3.2) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 800 calc(var(--nansha-unit) * 3.47) / 1.1 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .nansha-rules-section-title::after {
   position: absolute;
@@ -789,7 +789,6 @@ video.nansha-video-placeholder.is-portrait {
 
 .nansha-rules-story { margin-top: calc(var(--nansha-unit) * 5.73); }
 .nansha-rules-story p { margin: calc(var(--nansha-unit) * 1.07) 0 0; font: 400 calc(var(--nansha-unit) * 2.8) / 1.72 "PingFang SC", "Microsoft YaHei", sans-serif; }
-.nansha-rules-story .nansha-rules-section-title { font-size: calc(var(--nansha-unit) * 3.73); }
 .nansha-rules-story .nansha-rules-themes { margin-top: calc(var(--nansha-unit) * 1.07); color: #173b98; font-weight: 800; line-height: 1.82; }
 
 .nansha-rules-extra { margin-top: calc(var(--nansha-unit) * 2.53); }
