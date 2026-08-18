@@ -23,10 +23,11 @@ const DESIGN_HEIGHT = 812
 const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
 const POSTER_CONTENT_OFFSET_Y = 52
-const POSTER_QR_LEFT = 296
-const POSTER_QR_TOP = 596
-const POSTER_QR_SIZE = 32
-const POSTER_QR_BORDER = 3
+const POSTER_QR_LEFT = 280
+const POSTER_QR_TOP = 580
+// 海报导出宽度为 750px，设计稿 63.5px 对应最终二维码外框 127px。
+const POSTER_QR_SIZE = 63.5
+const POSTER_QR_BORDER = 4
 const POSTER_QR_CONTENT_SIZE = POSTER_QR_SIZE - POSTER_QR_BORDER * 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
@@ -530,15 +531,13 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
         <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.left}</div>
         <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.right}</div>
         <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
-        <div className="afbg-poster-qrcode" style={{ left: POSTER_QR_LEFT, top: POSTER_QR_TOP }}>
+        <div className="afbg-poster-qrcode-source" aria-hidden="true">
           <QRCodeCanvas
             ref={qrCanvasRef}
             value={activityUrl}
-            size={128}
+            size={256}
             level="M"
             includeMargin={false}
-            style={{ width: POSTER_QR_CONTENT_SIZE, height: POSTER_QR_CONTENT_SIZE }}
-            aria-label="活动二维码"
           />
         </div>
         <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
