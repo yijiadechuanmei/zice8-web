@@ -751,16 +751,20 @@
   z-index: 3;
   box-sizing: border-box;
   display: flex;
-  width: 56px;
-  height: 56px;
-  padding: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 3px;
   background: #fff;
 }
 
 .afbg-poster-qrcode canvas {
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 26px !important;
+  height: 26px !important;
+  max-width: 26px;
+  max-height: 26px;
+  min-width: 0;
+  min-height: 0;
 }
 
 .afbg-poster-generated {

@@ -23,10 +23,10 @@ const DESIGN_HEIGHT = 812
 const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
 const POSTER_CONTENT_OFFSET_Y = 52
-const POSTER_QR_LEFT = 284
-const POSTER_QR_TOP = 584
-const POSTER_QR_SIZE = 56
-const POSTER_QR_BORDER = 4
+const POSTER_QR_LEFT = 296
+const POSTER_QR_TOP = 596
+const POSTER_QR_SIZE = 32
+const POSTER_QR_BORDER = 3
 const POSTER_QR_CONTENT_SIZE = POSTER_QR_SIZE - POSTER_QR_BORDER * 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
@@ -534,9 +534,10 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
           <QRCodeCanvas
             ref={qrCanvasRef}
             value={activityUrl}
-            size={256}
+            size={128}
             level="M"
             includeMargin={false}
+            style={{ width: POSTER_QR_CONTENT_SIZE, height: POSTER_QR_CONTENT_SIZE }}
             aria-label="活动二维码"
           />
         </div>
