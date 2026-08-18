@@ -130,14 +130,23 @@ function LayerImage({ className = '', src, style, alt = '' }) {
 }
 
 function loadPosterImage(src) {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.crossOrigin = 'anonymous'
-    image.referrerPolicy = 'no-referrer'
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error(`海报素材加载失败：${src}`))
-    image.src = src
-  })
+  return fetch(src, { cache: 'force-cache', mode: 'cors', referrerPolicy: 'no-referrer' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`海报素材加载失败：${response.status}`)
+      return response.blob()
+    })
+    .then((blob) => new Promise((resolve, reject) => {
+      const image = new Image()
+      const objectUrl = URL.createObjectURL(blob)
+      image.onload = () => {
+        resolve(image)
+      }
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error(`海报素材解码失败：${src}`))
+      }
+      image.src = objectUrl
+    }))
 }
 
 function getPosterActivityUrl(activityKey) {
@@ -261,6 +270,7 @@ function BoardScene({
   onAnswer,
   onContinue,
   onGoPoster,
+  onPreviewPoster,
   showLandscapePrompt,
 }) {
   const currentPoint = BOARD_POINTS[position] || BOARD_POINTS[0]
@@ -334,7 +344,9 @@ function BoardScene({
           ) : null}
         </button>
         <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{position} 步</div>
-        <div className="afbg-time-text" style={{ left: 91, top: 39 }}>{formatElapsed(elapsed)}</div>
+        <div className="afbg-time-text afbg-time-test-trigger" style={{ left: 91, top: 39 }} onClick={onPreviewPoster} role="button" tabIndex={0}>
+          {formatElapsed(elapsed)}
+        </div>
       </div>
     </DesignStage>
 
@@ -495,6 +507,8 @@ function SuccessOverlay({ onGoPoster }) {
 
 function PosterPage({ activityKey, allCorrect, onReplay }) {
   const [posterUrl, setPosterUrl] = useState('')
+  const [posterError, setPosterError] = useState('')
+  const [composeVersion, setComposeVersion] = useState(0)
   const qrCanvasRef = useRef(null)
   const activityUrl = useMemo(() => getPosterActivityUrl(activityKey), [activityKey])
   const labels = useMemo(() => (
@@ -505,22 +519,41 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
 
   useEffect(() => {
     let cancelled = false
-    renderPosterImage({
-      leftLabel: labels.left,
-      rightLabel: labels.right,
-      qrCanvas: qrCanvasRef.current,
+    let secondFrame = 0
+
+    function composePoster() {
+      const qrCanvas = qrCanvasRef.current
+      if (!qrCanvas || !qrCanvas.width || !qrCanvas.height) {
+        if (!cancelled) setPosterError('二维码生成失败，请点击重试')
+        return
+      }
+      renderPosterImage({
+        leftLabel: labels.left,
+        rightLabel: labels.right,
+        qrCanvas,
+      })
+        .then((url) => {
+          if (!cancelled) {
+            setPosterUrl(url)
+            setPosterError('')
+          }
+        })
+        .catch((error) => {
+          console.error('反诈棋盘海报合成失败', error)
+          if (!cancelled) setPosterError('海报生成失败，点击重试')
+        })
+    }
+
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(composePoster)
     })
-      .then((url) => {
-        if (!cancelled) setPosterUrl(url)
-      })
-      .catch(() => {
-        // 素材生成异常时保留原页面，避免阻断用户继续游戏。
-      })
 
     return () => {
       cancelled = true
+      window.cancelAnimationFrame(firstFrame)
+      window.cancelAnimationFrame(secondFrame)
     }
-  }, [labels])
+  }, [composeVersion, labels])
 
   return (
     <>
@@ -546,8 +579,10 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
             className="afbg-poster-generated"
             src={posterUrl}
             alt="反诈棋盘游戏海报，长按图片即可保存"
+            draggable="false"
           />
         ) : null}
+        {posterError ? <button className="afbg-poster-retry" type="button" onClick={() => setComposeVersion((value) => value + 1)}>{posterError}</button> : null}
       </DesignStage>
     </>
   )
@@ -726,6 +761,19 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setPage(PAGE.POSTER)
   }, [])
 
+  const handlePreviewPoster = useCallback(() => {
+    window.clearTimeout(moveTimerRef.current)
+    window.clearTimeout(rollTimerRef.current)
+    window.clearTimeout(rollResultTimerRef.current)
+    setMoving(false)
+    setRollPhase(null)
+    setQuestion(null)
+    setFeedback(null)
+    setSuccess(false)
+    setHasWrongAnswer(true)
+    setPage(PAGE.POSTER)
+  }, [])
+
   const handleReplay = useCallback(() => {
     resetGame()
     setShowHomeOrientationPrompt(false)
@@ -754,6 +802,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           onAnswer={handleAnswer}
           onContinue={handleContinue}
           onGoPoster={handleGoPoster}
+          onPreviewPoster={handlePreviewPoster}
           showLandscapePrompt={isLandscape}
         />
       ) : null}

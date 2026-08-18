@@ -207,6 +207,12 @@
   width: 79px;
 }
 
+.afbg-time-test-trigger {
+  z-index: 3;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 .afbg-mask {
   position: fixed;
   inset: 0;
@@ -770,6 +776,23 @@
   -webkit-touch-callout: default !important;
   user-select: auto !important;
   -webkit-user-select: auto !important;
+}
+
+.afbg-poster-retry {
+  position: absolute;
+  z-index: 11;
+  left: 86px;
+  top: 728px;
+  width: 203px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 17px;
+  color: #fff;
+  background: rgba(14, 84, 216, 0.88);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 @keyframes afbg-pulse {
