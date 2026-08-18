@@ -620,6 +620,24 @@
 .nansha-work-icon { font-size: calc(var(--nansha-unit) * 5.07); }
 .nansha-row-chevron { justify-self: end; font-size: calc(var(--nansha-unit) * 4); }
 
+.nansha-my-certificate-row {
+  display: grid;
+  grid-template-columns: calc(var(--nansha-unit) * 6.67) 1fr calc(var(--nansha-unit) * 3.2);
+  gap: calc(var(--nansha-unit) * 2.13);
+  align-items: center;
+  width: 95.73%;
+  height: calc(var(--nansha-unit) * 13.87);
+  margin: calc(var(--nansha-unit) * 3.47) auto 0;
+  padding: 0 calc(var(--nansha-unit) * 3.33);
+  border: 1px solid #050505;
+  background: #fff;
+  color: #080808;
+}
+
+.nansha-my-certificate-row.is-in-summary { width: 100%; }
+.nansha-my-certificate-row b { font: 800 calc(var(--nansha-unit) * 4.53) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-certificate-icon { width: calc(var(--nansha-unit) * 5.07); height: calc(var(--nansha-unit) * 5.07); }
+
 .nansha-video-placeholder {
   position: relative;
   display: flex;

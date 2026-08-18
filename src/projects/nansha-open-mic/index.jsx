@@ -493,9 +493,8 @@ export default function NanshaOpenMicProject() {
       {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => { setView('ranking'); trackEvent({ activityKey: ACTIVITY_KEY, eventType: 'open_rank', extra: { activityType: ACTIVITY_TYPE, phase: activityPhase } }) }} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
-      {view === 'upload-home' && activityPhase === 'upload' && !myEntry ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
-      {view === 'upload-home' && activityPhase !== 'vote' && myEntry ? <ReviewHome onShowRules={openRules} showReviewNotice /> : null}
-      {view === 'upload-home' && activityPhase === 'closed' && !myEntry ? <ReviewHome onShowRules={openRules} /> : null}
+      {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
+      {view === 'upload-home' && activityPhase === 'closed' ? <ReviewHome onShowRules={openRules} showReviewNotice={Boolean(myEntry)} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
@@ -726,6 +725,7 @@ function RankingRow({ rank, entry, onWork }) {
 
 function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
   const isVotePhase = activityPhase === 'vote'
+  const hasCertificate = myEntry?.reviewStatus === 'published'
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
   const workVotes = myEntry?.voteCount ?? 0
   const remainingVotes = voteQuota?.remaining ?? 10
@@ -741,17 +741,41 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
       {isVotePhase ? (
         <section className="nansha-my-summary-list" aria-label="我的活动信息">
           {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
+          {hasCertificate ? <MyCertificateRow inSummary /> : null}
           <MySummaryRow icon={<AuditOutlined />} title="我的投票" detail={`今日剩余票数：${remainingVotes}票`} onClick={onOpenVotes} />
         </section>
       ) : myEntry ? (
-        <button className="nansha-my-work-row" type="button" onClick={onOpenWork}>
-          <VideoCameraFilled className="nansha-work-icon" aria-hidden="true" />
-          <b>我的作品</b>
-          <em>{workStatus}</em>
-          <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
-        </button>
+        <>
+          <button className="nansha-my-work-row" type="button" onClick={onOpenWork}>
+            <VideoCameraFilled className="nansha-work-icon" aria-hidden="true" />
+            <b>我的作品</b>
+            <em>{workStatus}</em>
+            <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
+          </button>
+          {hasCertificate ? <MyCertificateRow /> : null}
+        </>
       ) : null}
     </section>
+  )
+}
+
+function MyCertificateRow({ inSummary = false }) {
+  return (
+    <div className={`nansha-my-certificate-row${inSummary ? ' is-in-summary' : ''}`} aria-label="我的证书">
+      <MyCertificateIcon className="nansha-certificate-icon" aria-hidden="true" />
+      <b>我的证书</b>
+      <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
+    </div>
+  )
+}
+
+function MyCertificateIcon({ className, ...props }) {
+  return (
+    <svg className={className} viewBox="0 0 40 40" fill="none" {...props}>
+      <rect x="2" y="1" width="36" height="38" rx="5" fill="#080808" />
+      <path d="M20 7.2l2.1 4.22 4.66.68-3.37 3.29.8 4.64L20 17.82l-4.19 2.21.8-4.64-3.37-3.29 4.66-.68L20 7.2z" fill="#fff" />
+      <path d="M11.5 27.2h17M11.5 32h17" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
   )
 }
 
