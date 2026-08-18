@@ -560,28 +560,29 @@ function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
           <section className="nansha-upload-section nansha-upload-benefits" aria-label="优秀作品可获得">
             <h2>优秀作品可获得：</h2>
             <ul>
-              <li>√南沙特色礼品</li>
-              <li>√纳入区宣讲人才库</li>
-              <li>√登上官方舞台</li>
-              <li>√专业演讲指导与打磨</li>
-              <li>√官方流量扶持曝光</li>
+              <li>√&nbsp;“南沙优秀宣讲员”证书</li>
+              <li>√&nbsp;纳入区级宣讲人才队伍</li>
+              <li>√&nbsp;南沙特色礼品</li>
+              <li>√&nbsp;专业演讲指导与打磨</li>
+              <li>√&nbsp;官方流量扶持曝光</li>
+              <li>√&nbsp;推荐参加上级宣讲活动</li>
             </ul>
           </section>
           <section className="nansha-upload-section nansha-upload-story" aria-label="作品要求">
             <h2>我们需要这样的作品：</h2>
-            <p>1.从上述六大主题中任选其一，结合真实经历，讲述你与南沙的故事：</p>
-            <p className="nansha-upload-themes">筑梦湾区 人人有梦 | 科创先锋 人人有为<br />文化传承 人人有责 | 乡村振兴 人人有益<br />时代青年 人人有志 | 暖心民生 人人有爱</p>
-            <p>2.使用手机或相机，录制1-2分钟宣讲视频，分辨率不低于1080P；</p>
-            <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现南沙的发展变化与城市温度；</p>
-            <p>4.不限宣讲风格及语种，含粤语、普通话、外国语（需配中文字幕）；</p>
-            <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负面炒作等内容；</p>
-            <p>6.作品须为原创，所使用的音乐、图片及视频等素材须无版权纠纷；</p>
-            <p>7.作品一经提交，即视为作者授权主办方合规使用，未经主办方许可，不得擅自对外发布。</p>
-            <p>8.我们将主动联系通过初选的视频作者，对接后续相关事宜；若未收到我方联系，则代表未通过。</p>
+            <p>1.从六大主题中任选其一，结合真实经历，讲述<br />你与南沙的故事:</p>
+            <p className="nansha-upload-themes">筑梦湾区 人人有梦<br />科创先锋 人人有为<br />文化传承 人人有责<br />乡村振兴 人人有益<br />时代青年 人人有志<br />暖心民生 人人有爱</p>
+            <p>2.使用手机或相机，录制宣讲视频，推荐时长1-2分钟，<br />不超过6分钟，画面清晰，分辨率不低于1080P;</p>
+            <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现<br />南沙的发展变化与城市温度</p>
+            <p>4.宣讲风格与语种不限，鼓励大胆发挥、自由表达<br />（外国语需配中文字幕）</p>
+            <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚<br />假表述及负面炒作等内容；</p>
+            <p>6.不能使用AI软件，生成人物形象、视频录制、配音<br />等;作品须为原创，所使用的音乐、图片及视频等素材<br />须无版权纠纷；</p>
+            <p>7.作品一经提交，即视为作者授权主办方合规使用，<br />未经主办方许可，不得擅自对外发布。</p>
+            <p>8.我们将主动联系通过初选的视频作者，对接后续<br />相关事宜；若未收到我方联系，则代表初选未通过。</p>
           </section>
           <section className="nansha-upload-organizers" aria-label="主办单位信息">
             <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-            <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办<br />区总工会、团区委</span></p>
+            <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />区文化广电旅游体育局、开发区港澳办<br />区总工会、团区委</span></p>
             <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
           </section>
         </article>
@@ -1051,32 +1052,33 @@ function RulesPage({ onBack }) {
             <p className="nansha-rules-intro">每人1-2分钟，拿起手机开拍<br />分享你的南沙故事</p>
 
             <section className="nansha-rules-section nansha-rules-benefits">
-              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 30.4)' }}>优秀作品可获得</h2>
+              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 32.4)' }}>优秀作品可获得：</h2>
               <ul>
-                <li>√&nbsp; 南沙特色礼品</li>
-                <li>√&nbsp; 纳入区宣讲人才库</li>
-                <li>√&nbsp; 登上官方舞台</li>
+                <li>√&nbsp;“南沙优秀宣讲员”证书</li>
+                <li>√&nbsp;纳入区级宣讲人才队伍</li>
+                <li>√&nbsp;南沙特色礼品</li>
                 <li>√&nbsp; 专业演讲指导与打磨</li>
                 <li>√&nbsp; 官方流量扶持曝光</li>
+                <li>√&nbsp;推荐参加上级宣讲活动</li>
               </ul>
             </section>
 
             <section className="nansha-rules-section nansha-rules-story">
-              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 40.8)' }}>你的故事 可以这样表达</h2>
-              <p>1.从下方六大主题中任选其一，结合真实经历，讲述你与南沙的故事；</p>
-              <p className="nansha-rules-themes">筑梦湾区 人人有梦 | 科创先锋 人人有为<br />文化传承 人人有责 | 乡村振兴 人人有益<br />时代青年 人人有志 | 暖心民生 人人有爱</p>
-              <p>2.使用手机或相机，录制1-2分钟宣讲视频，分辨率不低于1080P；</p>
-              <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现南沙的发展变化与城市温度；</p>
-              <p>4.不限宣讲风格及语种，含粤语、普通话、外国语（需配中文字幕）；</p>
-              <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚假表述及负面炒作等内容；</p>
-              <p>6.作品须为原创，所使用的音乐、图片及视频等素材须无版权纠纷；</p>
-              <p>7.作品一经提交，即视为作者授权主办方合规使用，未经主办方许可，不得擅自对外发布。</p>
-              <p>8.我们将主动联系通过初选的视频作者，对接后续相关事宜；若未收到我方联系，则代表初选未通过。</p>
+              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 38)' }}>我们需要这样的作品：</h2>
+              <p>1.从六大主题中任选其一，结合真实经历，讲述<br />你与南沙的故事:</p>
+              <p className="nansha-rules-themes">筑梦湾区 人人有梦<br />科创先锋 人人有为<br />文化传承 人人有责<br />乡村振兴 人人有益<br />时代青年 人人有志<br />暖心民生 人人有爱</p>
+              <p>2.使用手机或相机，录制宣讲视频，推荐时长1-2分钟，<br />不超过6分钟，画面清晰，分辨率不低于1080P;</p>
+              <p>3.故事完整、逻辑清楚、重点突出、真实生动，展现<br />南沙的发展变化与城市温度</p>
+              <p>4.宣讲风格与语种不限，鼓励大胆发挥、自由表达<br />（外国语需配中文字幕）</p>
+              <p>5.遵守法律法规及公序良俗，不得出现低俗恶搞、虚<br />假表述及负面炒作等内容；</p>
+              <p>6.不能使用AI软件，生成人物形象、视频录制、配音<br />等;作品须为原创，所使用的音乐、图片及视频等素材<br />须无版权纠纷；</p>
+              <p>7.作品一经提交，即视为作者授权主办方合规使用，<br />未经主办方许可，不得擅自对外发布。</p>
+              <p>8.我们将主动联系通过初选的视频作者，对接后续<br />相关事宜；若未收到我方联系，则代表初选未通过。</p>
             </section>
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
               <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-              <p><b>支持单位：</b><span>区委统战部、区人社局、区农业农村局、开发区港澳办<br />区总工会、团区委</span></p>
+              <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />区文化广电旅游体育局、开发区港澳办<br />区总工会、团区委</span></p>
               <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
             </section>
           </div>
