@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { request } from '../../shared/api/request'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import {
@@ -22,8 +23,11 @@ const DESIGN_HEIGHT = 812
 const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
 const POSTER_CONTENT_OFFSET_Y = 52
-const POSTER_CROP_TOP = 44
-const POSTER_EXPORT_HEIGHT = DESIGN_HEIGHT - POSTER_CROP_TOP * 2
+const POSTER_QR_LEFT = 284
+const POSTER_QR_TOP = 584
+const POSTER_QR_SIZE = 56
+const POSTER_QR_BORDER = 4
+const POSTER_QR_CONTENT_SIZE = POSTER_QR_SIZE - POSTER_QR_BORDER * 2
 const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
 const ROLLING_MS = 2000
@@ -135,7 +139,13 @@ function loadPosterImage(src) {
   })
 }
 
-async function renderPosterImage() {
+function getPosterActivityUrl(activityKey) {
+  return `https://web.zice8.com/anti_fraud_board_game/${encodeURIComponent(activityKey)}`
+}
+
+async function renderPosterImage({ leftLabel, rightLabel, qrCanvas }) {
+  if (!qrCanvas) throw new Error('二维码尚未生成')
+
   const posterAssets = antiFraudBoardAssets.poster
   const [background, card, title, footer, badge] = await Promise.all([
     loadPosterImage(posterAssets.background),
@@ -146,15 +156,15 @@ async function renderPosterImage() {
   ])
   const canvas = document.createElement('canvas')
   canvas.width = DESIGN_WIDTH * POSTER_RENDER_SCALE
-  canvas.height = POSTER_EXPORT_HEIGHT * POSTER_RENDER_SCALE
+  canvas.height = DESIGN_HEIGHT * POSTER_RENDER_SCALE
   const context = canvas.getContext('2d')
   if (!context) throw new Error('无法创建海报画布')
 
   context.scale(POSTER_RENDER_SCALE, POSTER_RENDER_SCALE)
   context.imageSmoothingEnabled = true
   context.imageSmoothingQuality = 'high'
-  const posterY = (value) => value + POSTER_CONTENT_OFFSET_Y - POSTER_CROP_TOP
-  context.drawImage(background, 0, -POSTER_CROP_TOP, DESIGN_WIDTH, DESIGN_HEIGHT)
+  const posterY = (value) => value + POSTER_CONTENT_OFFSET_Y
+  context.drawImage(background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT)
   context.drawImage(card, 11, posterY(74), 351, 530)
   context.drawImage(title, 45, posterY(5), 282, 170)
   context.drawImage(footer, 6, posterY(618), 361, 85)
@@ -164,8 +174,8 @@ async function renderPosterImage() {
   context.textAlign = 'center'
   context.textBaseline = 'middle'
   for (const { text, left } of [
-    { text: '火眼金睛', left: 56 },
-    { text: '中', left: 224 },
+    { text: leftLabel, left: 56 },
+    { text: rightLabel, left: 224 },
   ]) {
     const centerX = left + 58.5
     const centerY = posterY(411.5)
@@ -174,6 +184,17 @@ async function renderPosterImage() {
     context.fillStyle = '#ff791e'
     context.fillText(text, centerX, centerY)
   }
+
+  context.fillStyle = '#fff'
+  context.fillRect(POSTER_QR_LEFT, POSTER_QR_TOP, POSTER_QR_SIZE, POSTER_QR_SIZE)
+  context.imageSmoothingEnabled = false
+  context.drawImage(
+    qrCanvas,
+    POSTER_QR_LEFT + POSTER_QR_BORDER,
+    POSTER_QR_TOP + POSTER_QR_BORDER,
+    POSTER_QR_CONTENT_SIZE,
+    POSTER_QR_CONTENT_SIZE,
+  )
 
   return canvas.toDataURL('image/png')
 }
@@ -471,12 +492,23 @@ function SuccessOverlay({ onGoPoster }) {
   )
 }
 
-function PosterPage({ onReplay }) {
+function PosterPage({ activityKey, allCorrect, onReplay }) {
   const [posterUrl, setPosterUrl] = useState('')
+  const qrCanvasRef = useRef(null)
+  const activityUrl = useMemo(() => getPosterActivityUrl(activityKey), [activityKey])
+  const labels = useMemo(() => (
+    allCorrect
+      ? { left: '所向披靡', right: '高' }
+      : { left: '火眼金睛', right: '中' }
+  ), [allCorrect])
 
   useEffect(() => {
     let cancelled = false
-    renderPosterImage()
+    renderPosterImage({
+      leftLabel: labels.left,
+      rightLabel: labels.right,
+      qrCanvas: qrCanvasRef.current,
+    })
       .then((url) => {
         if (!cancelled) setPosterUrl(url)
       })
@@ -487,7 +519,7 @@ function PosterPage({ onReplay }) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [labels])
 
   return (
     <>
@@ -495,9 +527,19 @@ function PosterPage({ onReplay }) {
         <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74 + POSTER_CONTENT_OFFSET_Y, width: 351, height: 530 }} />
         <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5 + POSTER_CONTENT_OFFSET_Y, width: 282, height: 170 }} />
         <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618 + POSTER_CONTENT_OFFSET_Y, width: 361, height: 85 }} />
-        <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>火眼金睛</div>
-        <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>中</div>
+        <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.left}</div>
+        <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.right}</div>
         <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
+        <div className="afbg-poster-qrcode" style={{ left: POSTER_QR_LEFT, top: POSTER_QR_TOP }}>
+          <QRCodeCanvas
+            ref={qrCanvasRef}
+            value={activityUrl}
+            size={256}
+            level="M"
+            includeMargin={false}
+            aria-label="活动二维码"
+          />
+        </div>
         <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
         {posterUrl ? (
           <img
@@ -524,6 +566,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const [rollCount, setRollCount] = useState(0)
+  const [hasWrongAnswer, setHasWrongAnswer] = useState(false)
   const [showHomeOrientationPrompt, setShowHomeOrientationPrompt] = useState(false)
   const isLandscape = useIsLandscape()
   const questionDeckRef = useRef([])
@@ -596,6 +639,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setFeedback(null)
     setSuccess(false)
     setRollCount(0)
+    setHasWrongAnswer(false)
     questionDeckRef.current = []
     questionTargetRef.current = getQuestionTarget()
   }, [])
@@ -664,6 +708,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     if (!question) return
     const correct = answerIndex === question.answerIndex
     playAnswerSound(correct)
+    if (!correct) setHasWrongAnswer(true)
     setFeedback({
       correct,
       analysis: question.analysis,
@@ -712,7 +757,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           showLandscapePrompt={isLandscape}
         />
       ) : null}
-      {page === PAGE.POSTER ? <PosterPage onReplay={handleReplay} /> : null}
+      {page === PAGE.POSTER ? <PosterPage activityKey={activityKey} allCorrect={!hasWrongAnswer} onReplay={handleReplay} /> : null}
       <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       <audio ref={correctSoundRef} src={antiFraudBoardAssets.game.correctSound} preload="auto" aria-hidden="true" />
       <audio ref={wrongSoundRef} src={antiFraudBoardAssets.game.wrongSound} preload="auto" aria-hidden="true" />
