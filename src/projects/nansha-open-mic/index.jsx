@@ -582,7 +582,7 @@ function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
           </section>
           <section className="nansha-upload-organizers" aria-label="主办单位信息">
             <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-            <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />区文化广电旅游体育局、开发区港澳办<br />区总工会、团区委</span></p>
+            <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />开发区港澳办、区总工会、团区委</span></p>
             <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
           </section>
         </article>
@@ -1049,7 +1049,7 @@ function RulesPage({ onBack }) {
           </svg>
           <div className="nansha-rules-content">
             <img className="nansha-rules-title-visual" src={RULES_TITLE_VISUAL_URL} alt="南沙新声 全民开麦 我们需要这样的作品" />
-            <p className="nansha-rules-intro">每人1-2分钟，拿起手机开拍<br />分享你的南沙故事</p>
+            <p className="nansha-rules-intro">拿起手机开拍<br />分享你的南沙故事</p>
 
             <section className="nansha-rules-section nansha-rules-benefits">
               <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 30.4)' }}>优秀作品可获得：</h2>
@@ -1064,7 +1064,7 @@ function RulesPage({ onBack }) {
             </section>
 
             <section className="nansha-rules-section nansha-rules-story">
-              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 38)' }}>我们需要这样的作品：</h2>
+              <h2 className="nansha-rules-section-title" style={{ '--highlight-width': 'calc(var(--nansha-unit) * 38)' }}>你的故事 可以这样表达</h2>
               <p>1.从六大主题中任选其一，结合真实经历，讲述<br />你与南沙的故事:</p>
               <p className="nansha-rules-themes">筑梦湾区 人人有梦<br />科创先锋 人人有为<br />文化传承 人人有责<br />乡村振兴 人人有益<br />时代青年 人人有志<br />暖心民生 人人有爱</p>
               <p>2.使用手机或相机，录制宣讲视频，推荐时长1-2分钟，<br />不超过6分钟，画面清晰，分辨率不低于1080P;</p>
@@ -1078,7 +1078,7 @@ function RulesPage({ onBack }) {
 
             <section className="nansha-rules-organizers" aria-label="主办单位信息">
               <p><b>主办单位：</b><span>中共广州市南沙区委宣传部<br />中共广州市南沙区委社会工作部</span></p>
-              <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />区文化广电旅游体育局、开发区港澳办<br />区总工会、团区委</span></p>
+              <p><b>支持单位：</b><span>中共广州市南沙区委统战部<br />区人力资源和社会保障局、区农业农村局<br />开发区港澳办、区总工会、团区委</span></p>
               <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
             </section>
           </div>
