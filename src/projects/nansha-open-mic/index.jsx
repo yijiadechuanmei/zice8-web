@@ -385,7 +385,7 @@ export default function NanshaOpenMicProject() {
   function closeUploadDialog() {
     const isSuccess = uploadDialog === 'success'
     setUploadDialog('')
-    if (isSuccess) setView('my')
+    if (isSuccess) setView('upload-home')
   }
 
   function openWork(entry) {
@@ -505,14 +505,14 @@ export default function NanshaOpenMicProject() {
 
   return (
     <main className="nansha-open-mic-page">
-      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onShowRules={openRules} onRanking={() => { setView('ranking'); trackEvent({ activityKey: ACTIVITY_KEY, eventType: 'open_rank', extra: { activityType: ACTIVITY_TYPE, phase: activityPhase } }) }} onMy={() => setView('my')} onWork={openWork} /> : null}
-      {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onShowRules={openRules} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
+      {view === 'vote-home' && activityPhase === 'vote' ? <VoteHome visualUrl={REVIEW_MAIN_VISUAL_URL} entries={entries} voteQuota={voteQuota} onRanking={() => { setView('ranking'); trackEvent({ activityKey: ACTIVITY_TYPE, eventType: 'open_rank', extra: { activityType: ACTIVITY_TYPE, phase: activityPhase } }) }} onMy={() => setView('my')} onWork={openWork} /> : null}
+      {view === 'ranking' && activityPhase === 'vote' ? <RankingPage entries={entries} onHome={() => setView('vote-home')} onMy={() => setView('my')} onWork={openWork} /> : null}
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
-      {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
+      {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome myEntry={myEntry} onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
       {view === 'upload-home' && activityPhase === 'closed' ? <ReviewHome onShowRules={openRules} showReviewNotice={Boolean(myEntry)} /> : null}
       {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} onOpenCertificate={() => setView('certificate')} /> : null}
-      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
-      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
+      {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
+      {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
       {view === 'certificate' && activityPhase !== 'publicity' && myEntry?.reviewStatus === 'published' ? <MyCertificatePage entry={myEntry} profile={myProfile} onBack={goBack} /> : null}
       {view === 'upload' ? (
@@ -544,7 +544,7 @@ export default function NanshaOpenMicProject() {
   )
 }
 
-function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
+function UploadHome({ myEntry, onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
@@ -571,7 +571,11 @@ function UploadHome({ onShowRules, onUpload, uploadStartAt, uploadEndAt }) {
             <div className="nansha-countdown-label">{countdownLabel}</div>
             <strong>{countdownText}</strong>
           </section>
-          <button className="nansha-upload-button" type="button" onClick={onUpload} disabled={isBeforeStart || isEnded}>上传作品</button>
+          {myEntry ? (
+            <div className="nansha-upload-review-notice">作品审核中<br />敬请期待</div>
+          ) : (
+            <button className="nansha-upload-button" type="button" onClick={onUpload} disabled={isBeforeStart || isEnded}>上传作品</button>
+          )}
           <section className="nansha-upload-section nansha-upload-benefits" aria-label="优秀作品可获得">
             <h2>优秀作品可获得：</h2>
             <ul>
@@ -633,13 +637,12 @@ function ReviewHome({ onShowRules, showReviewNotice = false }) {
   )
 }
 
-function VoteHome({ visualUrl, entries, voteQuota, onShowRules, onRanking, onMy, onWork }) {
+function VoteHome({ visualUrl, entries, voteQuota, onRanking, onMy, onWork }) {
   return (
     <section className="nansha-vote-home">
       <header className="nansha-upload-home-header"><h1>首页</h1></header>
       <section className="nansha-vote-visual-wrap">
         <img className="nansha-vote-main-visual" src={visualUrl} alt="南沙新声 全民开麦" />
-        <ActivityRulesTrigger onClick={onShowRules} label="投票说明" />
       </section>
       <section className="nansha-vote-stage">
         <section className="nansha-vote-heading">
@@ -668,14 +671,13 @@ function VoteHome({ visualUrl, entries, voteQuota, onShowRules, onRanking, onMy,
   )
 }
 
-function RankingPage({ entries, onShowRules, onHome, onMy, onWork }) {
+function RankingPage({ entries, onHome, onMy, onWork }) {
   return (
     <section className="nansha-ranking-page">
       <header className="nansha-ranking-header"><h1>排行榜</h1></header>
       <main className="nansha-ranking-stage">
         <img className="nansha-ranking-theme" src={RANKING_THEME_VISUAL_URL} alt="南沙新声 全民开麦" />
         <img className="nansha-ranking-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
-        <ActivityRulesTrigger onClick={onShowRules} className="nansha-ranking-rules-trigger" />
         <section className="nansha-ranking-board" aria-label="作品排行榜">
           <div className="nansha-ranking-columns"><span>排行</span><span>作品</span><span>票数</span></div>
           <div className="nansha-ranking-list">
@@ -684,9 +686,9 @@ function RankingPage({ entries, onShowRules, onHome, onMy, onWork }) {
           <p className="nansha-ranking-note">(截取前50/100排名)</p>
         </section>
         <section className="nansha-ranking-organizers" aria-label="主办单位信息">
-          <p><b>主办单位：</b>中共广州市南沙区委宣传部、中共广州市南沙区委社会工作部</p>
-          <p><b>支持单位：</b><span>中共广州市南沙区委统战部、区人力资源社会保障局、区农业农村局、区文化广电旅游体育局、开发区港澳办、区总工会、团区委</span></p>
-          <p><b>协办单位：</b>南沙区图书馆、南沙区文化馆</p>
+          <p><b>主办单位：</b><span>中共广州市南沙区委宣传部、中共广州市南沙区委社会工作部</span></p>
+          <p><b>支持单位：</b><span>中共广州市南沙区委统战部、区人力资源和社会保障局、区农业农村局<br />区文化广电旅游体育局、开发区港澳办、区总工会、团区委</span></p>
+          <p><b>协办单位：</b><span>南沙区图书馆、南沙区文化馆</span></p>
         </section>
         <nav className="nansha-vote-bottom-nav nansha-ranking-bottom-nav" aria-label="排行榜底部导航">
           <button type="button" onClick={onHome}><AudioOutlined aria-hidden="true" /><span>首页</span></button>
@@ -753,7 +755,7 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
         <span className="nansha-profile-name">{profile?.nickname || '微信用户'}</span>
         <img className="nansha-profile-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
       </section>
-      <ActivityRulesTrigger onClick={onShowRules} fixed />
+      {!isVotePhase ? <ActivityRulesTrigger onClick={onShowRules} fixed /> : null}
       {isVotePhase ? (
         <section className="nansha-my-summary-list" aria-label="我的活动信息">
           {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
@@ -807,13 +809,12 @@ function MySummaryRow({ icon, title, status, detail, onClick }) {
   )
 }
 
-function MyVotesPage({ votes, onBack, onShowRules, onHome, onRanking, onMy, onOpenWork }) {
+function MyVotesPage({ votes, onBack, onHome, onRanking, onMy, onOpenWork }) {
   return (
     <section className="nansha-my-votes-page">
       <PageHeader title="我的投票" onBack={onBack} />
       <main className="nansha-my-votes-stage">
         <img className="nansha-my-votes-microphone" src={MICROPHONE_VISUAL_URL} alt="" />
-        <ActivityRulesTrigger onClick={onShowRules} fixed />
         <section className="nansha-my-votes-board" aria-label="我的投票详情">
           <div className="nansha-my-votes-list">
             {votes.map((vote) => <MyVoteRow key={vote.id} vote={vote} onOpenWork={onOpenWork} />)}
@@ -835,11 +836,10 @@ function MyVoteRow({ vote, onOpenWork }) {
   )
 }
 
-function WorkDetailPage({ entry, onBack, onShowRules, onVote, onShare }) {
+function WorkDetailPage({ entry, onBack, onVote, onShare }) {
   return (
     <section className="nansha-sub-page nansha-work-detail-page">
       <PageHeader title={entry.workName} onBack={onBack} />
-      <ActivityRulesTrigger onClick={onShowRules} fixed label="投票说明" />
       <NanshaPlaybackVideo entry={entry} />
       <section className="nansha-work-detail-info">
         <h1>{entry.workName}</h1>
@@ -943,15 +943,14 @@ function MyCertificatePage({ entry, profile, onBack }) {
 
     async function composeCertificate() {
       try {
-        const [background, posterBackground, avatar] = await Promise.all([
-          loadCanvasImage(CERTIFICATE_BACKGROUND_URL),
+        const [posterBackground, avatar] = await Promise.all([
           loadCanvasImage(CERTIFICATE_POSTER_BACKGROUND_URL),
           authorAvatar ? loadCanvasImage(authorAvatar).catch(() => null) : Promise.resolve(null),
         ])
         if (disposed) return
 
         const width = 750
-        const height = 1703
+        const height = 1257
         const pixelRatio = 2
         const canvas = document.createElement('canvas')
         canvas.width = width * pixelRatio
@@ -960,8 +959,7 @@ function MyCertificatePage({ entry, profile, onBack }) {
         if (!context) throw new Error('当前浏览器不支持证书海报生成')
 
         context.scale(pixelRatio, pixelRatio)
-        context.drawImage(background, 0, 0, width, height)
-        context.drawImage(posterBackground, 0, 0, width, 1257)
+        context.drawImage(posterBackground, 0, 0, width, height)
 
         drawAvatarImage(context, avatar, 374.5, 306.5, 52.5)
         context.fillStyle = '#000'
@@ -988,14 +986,14 @@ function MyCertificatePage({ entry, profile, onBack }) {
   return (
     <section className="nansha-sub-page nansha-certificate-page">
       <PageHeader title="我的证书" onBack={onBack} />
-      <section className="nansha-certificate-stage" aria-label="我的证书海报">
+      <section className="nansha-certificate-stage" aria-label="我的证书海报" style={{ backgroundImage: `url(${CERTIFICATE_BACKGROUND_URL})` }}>
         {certificateImage ? (
           <img className="nansha-certificate-composite" src={certificateImage} alt={`${entry.authorName}的南沙新声全民开麦证书，长按图片可保存`} draggable="false" />
         ) : (
           <div className="nansha-certificate-generating">{certificateError || '正在生成证书…'}</div>
         )}
+        <p className="nansha-certificate-save-tip">长按图片可保存</p>
       </section>
-      <p className="nansha-certificate-save-tip">长按图片可保存</p>
     </section>
   )
 }
@@ -1005,7 +1003,7 @@ function MyWorkPage({ entry, activityPhase, onBack, onShowRules, onReplaceVideo,
   return (
     <section className="nansha-sub-page nansha-work-page">
       <PageHeader title="我的作品" onBack={onBack} />
-      <ActivityRulesTrigger onClick={onShowRules} fixed />
+      {activityPhase !== 'vote' ? <ActivityRulesTrigger onClick={onShowRules} fixed /> : null}
       <NanshaPlaybackVideo entry={entry} onReplaceVideo={() => onReplaceVideo(entry)} />
       <section className="nansha-work-info">
         <h1>{entry.workName}</h1>
@@ -1023,19 +1021,33 @@ function MyWorkPage({ entry, activityPhase, onBack, onShowRules, onReplaceVideo,
 
 function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
   const [failed, setFailed] = useState(false)
-  const [videoSize, setVideoSize] = useState(null)
+  const [mediaSize, setMediaSize] = useState(null)
   const isProcessing = ['queued', 'processing', 'cover_submitting', 'cover_processing'].includes(entry.mediaStatus)
   const needsReplacement = entry.mediaStatus === 'failed' || failed
 
   useEffect(() => {
     setFailed(false)
-    setVideoSize(null)
-  }, [entry.id, entry.videoUrl])
+    setMediaSize(null)
+    if (!isImageCoverUrl(entry.coverUrl)) return undefined
+    let active = true
+    const cover = new Image()
+    cover.onload = () => {
+      if (active && cover.naturalWidth > 0 && cover.naturalHeight > 0) {
+        setMediaSize({ width: cover.naturalWidth, height: cover.naturalHeight })
+      }
+    }
+    cover.src = entry.coverUrl
+    return () => { active = false }
+  }, [entry.coverUrl, entry.id, entry.videoUrl])
 
-  const isPortrait = Boolean(videoSize && videoSize.height > videoSize.width)
-  const videoStyle = videoSize
-    ? { '--nansha-video-aspect-ratio': `${videoSize.width} / ${videoSize.height}` }
+  const isPortrait = Boolean(mediaSize && mediaSize.height > mediaSize.width)
+  const videoStyle = mediaSize
+    ? { '--nansha-video-aspect-ratio': `${mediaSize.width} / ${mediaSize.height}` }
     : undefined
+  const updateVideoSize = (event) => {
+    const { videoWidth, videoHeight } = event.currentTarget
+    if (videoWidth > 0 && videoHeight > 0) setMediaSize({ width: videoWidth, height: videoHeight })
+  }
 
   if (isProcessing || needsReplacement) {
     return (
@@ -1058,12 +1070,8 @@ function NanshaPlaybackVideo({ entry, onReplaceVideo }) {
       x5-playsinline="true"
       x5-video-player-type="h5"
       preload="metadata"
-      onLoadedMetadata={(event) => {
-        const { videoWidth, videoHeight } = event.currentTarget
-        if (videoWidth > 0 && videoHeight > 0) {
-          setVideoSize({ width: videoWidth, height: videoHeight })
-        }
-      }}
+      onLoadedMetadata={updateVideoSize}
+      onLoadedData={updateVideoSize}
       onError={() => setFailed(true)}
     >
       当前浏览器不支持视频播放

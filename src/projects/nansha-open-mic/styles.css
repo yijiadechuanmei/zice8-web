@@ -399,6 +399,18 @@
   cursor: pointer;
 }
 .nansha-upload-button:disabled { cursor: not-allowed; opacity: .55; }
+.nansha-upload-review-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80.53%;
+  min-height: calc(var(--nansha-unit) * 19.2);
+  margin: calc(var(--nansha-unit) * 3.67) auto 0;
+  background: #173b98;
+  color: #fff;
+  text-align: center;
+  font: 400 calc(var(--nansha-unit) * 4.53) / 1.28 "PingFang SC", "Microsoft YaHei", sans-serif;
+}
 
 .nansha-vote-home {
   width: min(100%, 750px);
@@ -479,10 +491,10 @@
 .nansha-ranking-votes { color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-note { position: absolute; bottom: calc(var(--nansha-unit) * 3.73); left: 0; width: 100%; margin: 0; color: #777; text-align: center; font-size: calc(var(--nansha-unit) * 2.13); }
 
-.nansha-ranking-organizers { width: 74.13%; margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
-.nansha-ranking-organizers p { margin: 0 0 calc(var(--nansha-unit) * .67); font: 400 calc(var(--nansha-unit) * 2.13) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; }
+.nansha-ranking-organizers { width: 94%; margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
+.nansha-ranking-organizers p { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0 0 calc(var(--nansha-unit) * .67); font: 400 calc(var(--nansha-unit) * 2.13) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-organizers b { font-weight: 800; }
-.nansha-ranking-organizers span { display: inline; }
+.nansha-ranking-organizers span { display: block; }
 .nansha-ranking-bottom-nav { height: calc(var(--nansha-unit) * 10.53); }
 
 .nansha-rule-panel, .nansha-organizer-panel { width: 90.67%; margin-inline: auto; border-radius: calc(var(--nansha-unit) * 2.4); background: #f8eddd; }
@@ -640,26 +652,45 @@
 .nansha-my-certificate-row b { font: 800 calc(var(--nansha-unit) * 4.53) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-certificate-icon { width: calc(var(--nansha-unit) * 5.07); height: calc(var(--nansha-unit) * 5.07); }
 
-.nansha-certificate-page { background: #fff; }
+.nansha-certificate-page {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  background: #173b98;
+}
 .nansha-certificate-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
   width: 100%;
-  background: #fff;
+  height: calc(100vh - (var(--nansha-unit) * 11.2));
+  height: calc(100dvh - (var(--nansha-unit) * 11.2));
+  padding: calc(var(--nansha-unit) * 2.13) calc(var(--nansha-unit) * 3.2) calc(var(--nansha-unit) * 8.27);
+  overflow: hidden;
+  background-color: #173b98;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   line-height: 0;
   user-select: none;
   -webkit-touch-callout: default;
 }
 .nansha-certificate-composite {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 100%;
   user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: default;
 }
 .nansha-certificate-generating {
   display: grid;
-  width: 100%;
-  aspect-ratio: 750 / 1703;
+  width: min(100%, calc(var(--nansha-unit) * 68));
+  aspect-ratio: 750 / 1257;
   place-items: center;
   padding: 0 12%;
   background: #173b98;
@@ -669,10 +700,16 @@
   text-align: center;
 }
 .nansha-certificate-save-tip {
-  margin: calc(var(--nansha-unit) * 2.13) auto 0;
-  color: #777;
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--nansha-unit) * 2.4);
+  left: 0;
+  z-index: 1;
+  margin: 0;
+  color: #e3e3e3;
   font: 400 calc(var(--nansha-unit) * 3.07) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
   text-align: center;
+  pointer-events: none;
 }
 
 .nansha-video-placeholder {
@@ -691,6 +728,9 @@
 
 video.nansha-video-placeholder {
   display: block;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
 }
 
 video.nansha-video-placeholder.is-portrait {
