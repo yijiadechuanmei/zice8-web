@@ -28,6 +28,26 @@ const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
 const ROLLING_MS = 2000
 const ROLL_RESULT_MS = 2000
+const MIN_QUESTION_COUNT = 4
+const MAX_QUESTION_COUNT = 5
+const DICE_MIN = 1
+const DICE_MAX = 6
+
+function getRandomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function getQuestionTarget() {
+  return getRandomInteger(MIN_QUESTION_COUNT, MAX_QUESTION_COUNT)
+}
+
+function getConstrainedRoll(remainingSteps, remainingQuestions) {
+  const futureQuestions = remainingQuestions - 1
+  const minimumRoll = Math.max(DICE_MIN, remainingSteps - futureQuestions * DICE_MAX)
+  const maximumRoll = Math.min(DICE_MAX, remainingSteps - futureQuestions * DICE_MIN)
+
+  return getRandomInteger(minimumRoll, maximumRoll)
+}
 
 function useDesignScale(stageHeight, fit = 'contain') {
   const [scale, setScale] = useState(1)
@@ -462,7 +482,9 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [question, setQuestion] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
+  const [rollCount, setRollCount] = useState(0)
   const questionDeckRef = useRef([])
+  const questionTargetRef = useRef(MIN_QUESTION_COUNT)
   const correctSoundRef = useRef(null)
   const wrongSoundRef = useRef(null)
   const moveTimerRef = useRef(null)
@@ -517,7 +539,9 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setQuestion(null)
     setFeedback(null)
     setSuccess(false)
+    setRollCount(0)
     questionDeckRef.current = []
+    questionTargetRef.current = getQuestionTarget()
   }, [])
 
   const playAnswerSound = useCallback((correct) => {
@@ -541,7 +565,8 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const handleRoll = useCallback(() => {
     if (moving || question || feedback || success) return
     const remainingSteps = FINISH_INDEX - position
-    const roll = remainingSteps <= 3 ? remainingSteps : Math.floor(Math.random() * 3) + 1
+    const remainingQuestions = questionTargetRef.current - rollCount
+    const roll = getConstrainedRoll(remainingSteps, remainingQuestions)
     const target = position + roll
     setMoving(true)
     setRollPhase('rolling')
@@ -550,10 +575,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     let next = position
     const finishMove = () => {
       setMoving(false)
-      if (target >= FINISH_INDEX) {
-        showQuestionAt(target)
-        return
-      }
+      setRollCount((count) => count + 1)
       showQuestionAt(target)
     }
 
@@ -575,7 +597,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
         moveOneStep()
       }, ROLL_RESULT_MS)
     }, ROLLING_MS)
-  }, [feedback, moving, position, question, showQuestionAt, success])
+  }, [feedback, moving, position, question, rollCount, showQuestionAt, success])
 
   const handleAnswer = useCallback((answerIndex) => {
     if (!question) return
