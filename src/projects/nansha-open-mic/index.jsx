@@ -1057,8 +1057,8 @@ function RulesPage({ onBack }) {
                 <li>√&nbsp;“南沙优秀宣讲员”证书</li>
                 <li>√&nbsp;纳入区级宣讲人才队伍</li>
                 <li>√&nbsp;南沙特色礼品</li>
-                <li>√&nbsp; 专业演讲指导与打磨</li>
-                <li>√&nbsp; 官方流量扶持曝光</li>
+                <li>√&nbsp;专业演讲指导与打磨</li>
+                <li>√&nbsp;官方流量扶持曝光</li>
                 <li>√&nbsp;推荐参加上级宣讲活动</li>
               </ul>
             </section>
