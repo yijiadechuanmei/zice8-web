@@ -1115,8 +1115,16 @@ function UploadResultDialog({ status, errorMessage, onConfirm }) {
 }
 
 function VoteDialog({ remaining, onConfirm, onClose }) {
-  const [quantity, setQuantity] = useState(1)
-  const max = Math.max(1, Number(remaining || 0))
+  const max = Math.max(0, Math.floor(Number(remaining) || 0))
+  const [quantity, setQuantity] = useState(() => max > 0 ? 1 : 0)
+  const canDecrease = quantity > 0
+  const canIncrease = quantity < max
+  const canConfirm = max > 0 && quantity > 0 && quantity <= max
+
+  useEffect(() => {
+    setQuantity((current) => Math.max(0, Math.min(current, max)))
+  }, [max])
+
   return (
     <section className="nansha-vote-overlay" role="dialog" aria-modal="true" aria-label="投票">
       <div className="nansha-vote-dialog-card">
@@ -1126,16 +1134,15 @@ function VoteDialog({ remaining, onConfirm, onClose }) {
           <path d="M0 424C180 424 316 416 426 399V426H0Z" fill="#173b98" />
         </svg>
         <div className="nansha-vote-dialog-content">
-          <p className="nansha-vote-quota-label">当前拥有每日票数:</p>
-          <strong className="nansha-vote-quota-value">{remaining}票</strong>
-          <label className="nansha-vote-select-label" htmlFor="nansha-vote-count">当前视频投出票数</label>
-          <div className="nansha-vote-select-wrap">
-            <select id="nansha-vote-count" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} aria-label="当前视频投出票数">
-              {Array.from({ length: max }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}
-            </select>
-            <span aria-hidden="true">⌄</span>
+          <p className="nansha-vote-quota-label">今日剩余票数:</p>
+          <strong className="nansha-vote-quota-value">{max}票</strong>
+          <p className="nansha-vote-select-label">本次投票数</p>
+          <div className="nansha-vote-counter" aria-label={`本次投票数 ${quantity} 票`}>
+            <button className="nansha-vote-counter-button is-minus" type="button" onClick={() => setQuantity((current) => Math.max(0, current - 1))} disabled={!canDecrease} aria-label="减少一票"><span aria-hidden="true" /></button>
+            <output className="nansha-vote-counter-value" aria-live="polite">{quantity}</output>
+            <button className="nansha-vote-counter-button is-plus" type="button" onClick={() => setQuantity((current) => Math.min(max, current + 1))} disabled={!canIncrease} aria-label="增加一票"><span aria-hidden="true" /></button>
           </div>
-          <button className="nansha-vote-confirm-button" type="button" onClick={() => onConfirm(quantity)}>确定投票</button>
+          <button className="nansha-vote-confirm-button" type="button" onClick={() => onConfirm(quantity)} disabled={!canConfirm}>确定投票</button>
         </div>
       </div>
     </section>
