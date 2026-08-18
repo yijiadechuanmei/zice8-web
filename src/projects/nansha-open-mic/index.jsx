@@ -28,6 +28,8 @@ const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260811-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
 const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
+const CERTIFICATE_BACKGROUND_URL = `${ASSET_BASE_URL}/169b88cd244b61e561cbc94de896bb5f_138135_750_1703.png`
+const CERTIFICATE_POSTER_BACKGROUND_URL = `${ASSET_BASE_URL}/a3fbf1326721d36d07d601c5f503a394_97038_750_1257.png`
 
 function createRequestId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
@@ -106,6 +108,19 @@ function drawAvatarImage(context, image, centerX, centerY, radius) {
     context.fill()
   }
   context.restore()
+}
+
+function drawCenteredFittedText(context, text, centerX, centerY, maxWidth, fontSize, fontWeight = '700') {
+  const value = String(text || '')
+  let size = fontSize
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  do {
+    context.font = `${fontWeight} ${size}px "PingFang SC", "Microsoft YaHei", sans-serif`
+    if (context.measureText(value).width <= maxWidth || size <= 18) break
+    size -= 1
+  } while (size > 18)
+  context.fillText(value, centerX, centerY)
 }
 
 function buildEntryShareUrl(entryId) {
@@ -278,7 +293,7 @@ export default function NanshaOpenMicProject() {
       setView('vote-home')
       return
     }
-    setView(view === 'work' ? 'my' : homeView)
+    setView(view === 'work' || view === 'certificate' ? 'my' : homeView)
   }
 
   function openRules() {
@@ -495,10 +510,11 @@ export default function NanshaOpenMicProject() {
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
       {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
       {view === 'upload-home' && activityPhase === 'closed' ? <ReviewHome onShowRules={openRules} showReviewNotice={Boolean(myEntry)} /> : null}
-      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} /> : null}
+      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} onOpenCertificate={() => setView('certificate')} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onShowRules={openRules} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onShowRules={openRules} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
+      {view === 'certificate' && activityPhase !== 'publicity' && myEntry?.reviewStatus === 'published' ? <MyCertificatePage entry={myEntry} profile={myProfile} onBack={goBack} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
@@ -723,7 +739,7 @@ function RankingRow({ rank, entry, onWork }) {
   )
 }
 
-function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes }) {
+function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes, onOpenCertificate }) {
   const isVotePhase = activityPhase === 'vote'
   const hasCertificate = myEntry?.reviewStatus === 'published'
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
@@ -741,7 +757,7 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
       {isVotePhase ? (
         <section className="nansha-my-summary-list" aria-label="我的活动信息">
           {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
-          {hasCertificate ? <MyCertificateRow inSummary /> : null}
+          {hasCertificate ? <MyCertificateRow inSummary onClick={onOpenCertificate} /> : null}
           <MySummaryRow icon={<AuditOutlined />} title="我的投票" detail={`今日剩余票数：${remainingVotes}票`} onClick={onOpenVotes} />
         </section>
       ) : myEntry ? (
@@ -752,20 +768,20 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
             <em>{workStatus}</em>
             <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
           </button>
-          {hasCertificate ? <MyCertificateRow /> : null}
+          {hasCertificate ? <MyCertificateRow onClick={onOpenCertificate} /> : null}
         </>
       ) : null}
     </section>
   )
 }
 
-function MyCertificateRow({ inSummary = false }) {
+function MyCertificateRow({ inSummary = false, onClick }) {
   return (
-    <div className={`nansha-my-certificate-row${inSummary ? ' is-in-summary' : ''}`} aria-label="我的证书">
+    <button className={`nansha-my-certificate-row${inSummary ? ' is-in-summary' : ''}`} type="button" onClick={onClick} aria-label="查看我的证书">
       <MyCertificateIcon className="nansha-certificate-icon" aria-hidden="true" />
       <b>我的证书</b>
       <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
-    </div>
+    </button>
   )
 }
 
@@ -912,6 +928,74 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
         <p className="nansha-poster-save-tip" aria-hidden="true">长按图片可保存</p>
         <button className="nansha-poster-close" type="button" onClick={onClose} aria-label="关闭拉票海报"><CloseOutlined /></button>
       </div>
+    </section>
+  )
+}
+
+function MyCertificatePage({ entry, profile, onBack }) {
+  const [certificateImage, setCertificateImage] = useState('')
+  const [certificateError, setCertificateError] = useState('')
+  const certificateNo = entry.certificateNo || 'TG-00000000'
+  const authorAvatar = entry.authorAvatar || profile?.avatar || ''
+
+  useEffect(() => {
+    let disposed = false
+
+    async function composeCertificate() {
+      try {
+        const [background, posterBackground, avatar] = await Promise.all([
+          loadCanvasImage(CERTIFICATE_BACKGROUND_URL),
+          loadCanvasImage(CERTIFICATE_POSTER_BACKGROUND_URL),
+          authorAvatar ? loadCanvasImage(authorAvatar).catch(() => null) : Promise.resolve(null),
+        ])
+        if (disposed) return
+
+        const width = 750
+        const height = 1703
+        const pixelRatio = 2
+        const canvas = document.createElement('canvas')
+        canvas.width = width * pixelRatio
+        canvas.height = height * pixelRatio
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('当前浏览器不支持证书海报生成')
+
+        context.scale(pixelRatio, pixelRatio)
+        context.drawImage(background, 0, 0, width, height)
+        context.drawImage(posterBackground, 0, 0, width, 1257)
+
+        drawAvatarImage(context, avatar, 374.5, 306.5, 52.5)
+        context.fillStyle = '#000'
+        drawCenteredFittedText(context, entry.authorName, 376, 383, 350, 34, '700')
+
+        context.font = '400 16px "PingFang SC", "Microsoft YaHei", sans-serif'
+        context.textAlign = 'right'
+        context.textBaseline = 'middle'
+        context.fillText('二〇二六年八月', 707, 1127)
+        context.font = '400 18px "PingFang SC", "Microsoft YaHei", sans-serif'
+        context.textAlign = 'left'
+        context.fillText(`编号：${certificateNo}`, 50, 1185)
+
+        if (!disposed) setCertificateImage(canvas.toDataURL('image/png'))
+      } catch (error) {
+        if (!disposed) setCertificateError(error instanceof Error ? error.message : '证书生成失败，请稍后重试')
+      }
+    }
+
+    composeCertificate()
+    return () => { disposed = true }
+  }, [authorAvatar, certificateNo, entry.authorName])
+
+  return (
+    <section className="nansha-sub-page nansha-certificate-page">
+      <PageHeader title="我的证书" onBack={onBack} />
+      <section className="nansha-certificate-stage" aria-label="我的证书海报">
+        {certificateImage ? (
+          <img className="nansha-certificate-composite" src={certificateImage} alt={`${entry.authorName}的南沙新声全民开麦证书，长按图片可保存`} draggable="false" />
+        ) : (
+          <div className="nansha-certificate-generating">{certificateError || '正在生成证书…'}</div>
+        )}
+      </section>
+      <p className="nansha-certificate-save-tip">长按图片可保存</p>
     </section>
   )
 }

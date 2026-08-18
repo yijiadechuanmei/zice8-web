@@ -632,11 +632,48 @@
   border: 1px solid #050505;
   background: #fff;
   color: #080808;
+  text-align: left;
+  cursor: pointer;
 }
 
 .nansha-my-certificate-row.is-in-summary { width: 100%; }
 .nansha-my-certificate-row b { font: 800 calc(var(--nansha-unit) * 4.53) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; }
 .nansha-certificate-icon { width: calc(var(--nansha-unit) * 5.07); height: calc(var(--nansha-unit) * 5.07); }
+
+.nansha-certificate-page { background: #fff; }
+.nansha-certificate-stage {
+  width: 100%;
+  background: #fff;
+  line-height: 0;
+  user-select: none;
+  -webkit-touch-callout: default;
+}
+.nansha-certificate-composite {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: default;
+}
+.nansha-certificate-generating {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 750 / 1703;
+  place-items: center;
+  padding: 0 12%;
+  background: #173b98;
+  color: #fff;
+  font: 500 calc(var(--nansha-unit) * 3.2) / 1.5 "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.5;
+  text-align: center;
+}
+.nansha-certificate-save-tip {
+  margin: calc(var(--nansha-unit) * 2.13) auto 0;
+  color: #777;
+  font: 400 calc(var(--nansha-unit) * 3.07) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+  text-align: center;
+}
 
 .nansha-video-placeholder {
   position: relative;
