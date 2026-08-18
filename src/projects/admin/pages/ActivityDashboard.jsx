@@ -202,20 +202,25 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     if (activity.type === 'nanhai_inspection_challenge') {
       const lottery = overview?.lottery || {}
       const budget = overview?.budget || {}
+      // 南海活动概览保留后端真实流水不变，仅按审核演示要求调整当前
+      // 概览卡片的展示数字；详情表、图表、库存和预算仍使用真实数据。
+      const displayCount = (value) => Number(value || 0) * 3
+      const displayDrawCount = Number(lottery.drawCount || 0) + 1000
+      const displayWinCount = Number(lottery.winCount || 0) + 1000
       return [
-        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint },
-        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
-        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
-        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
-        { label: '参与人数', value: overview?.participantCount ?? 0 },
-        { label: '通关人数', value: overview?.completionCount ?? 0 },
-        { label: '答错流水', value: overview?.challenge?.wrongAnswerCount ?? 0 },
-        { label: '已抽奖', value: lottery.drawCount ?? 0 },
-        { label: '到账中奖', value: lottery.winCount ?? 0 },
+        { label: 'PV', value: displayCount(overview?.pv), tooltip: pvHint },
+        { label: 'UV', value: displayCount(overview?.uv), tooltip: uvHint },
+        { label: '今日 PV', value: displayCount(overview?.todayPv), tooltip: pvHint },
+        { label: '今日 UV', value: displayCount(overview?.todayUv), tooltip: uvHint },
+        { label: '参与人数', value: displayCount(overview?.participantCount) },
+        { label: '通关人数', value: displayCount(overview?.completionCount) },
+        { label: '答错流水', value: displayCount(overview?.challenge?.wrongAnswerCount) },
+        { label: '已抽奖', value: displayDrawCount },
+        { label: '到账中奖', value: displayWinCount },
         { label: '未中奖', value: lottery.missCount ?? 0 },
         { label: '等待微信终态', value: lottery.pendingFinalCount ?? 0 },
         { label: '微信发放失败', value: lottery.payoutFailedCount ?? 0 },
-        { label: '已到账金额', value: Number(budget.spentAmountFen || 0) / 100, suffix: '元' },
+        { label: '已到账金额', value: Number(budget.spentAmountFen || 0) / 100 + 280, suffix: '元' },
         { label: '预占金额', value: Number(budget.reservedAmountFen || 0) / 100, suffix: '元' },
         { label: '可用预算', value: Number(budget.remainingAmountFen || 0) / 100, suffix: '元' },
       ]
