@@ -491,8 +491,8 @@
 .nansha-ranking-votes { color: #080808; font: 400 calc(var(--nansha-unit) * 2.8) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
 .nansha-ranking-note { position: absolute; bottom: calc(var(--nansha-unit) * 3.73); left: 0; width: 100%; margin: 0; color: #777; text-align: center; font-size: calc(var(--nansha-unit) * 2.13); }
 
-.nansha-ranking-organizers { width: 94%; margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
-.nansha-ranking-organizers p { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0 0 calc(var(--nansha-unit) * .67); font: 400 calc(var(--nansha-unit) * 2.13) / 1.42 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.nansha-ranking-organizers { width: 100%; margin: calc(var(--nansha-unit) * 4.27) auto calc(var(--nansha-unit) * 10.4); color: #fff; }
+.nansha-ranking-organizers p { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0 0 calc(var(--nansha-unit) * .67); font: 400 calc(var(--nansha-unit) * 2.4) / 1.46 "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: -.04em; white-space: nowrap; }
 .nansha-ranking-organizers b { font-weight: 800; }
 .nansha-ranking-organizers span { display: block; }
 .nansha-ranking-bottom-nav { height: calc(var(--nansha-unit) * 10.53); }
@@ -660,14 +660,16 @@
   overflow: hidden;
   background: #173b98;
 }
+.nansha-certificate-page > .nansha-page-header { background: #fff; }
 .nansha-certificate-stage {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
   height: calc(100vh - (var(--nansha-unit) * 11.2));
   height: calc(100dvh - (var(--nansha-unit) * 11.2));
-  padding: calc(var(--nansha-unit) * 2.13) calc(var(--nansha-unit) * 3.2) calc(var(--nansha-unit) * 8.27);
+  padding: 0 calc(var(--nansha-unit) * 3.2) calc(var(--nansha-unit) * 8.27);
   overflow: hidden;
   background-color: #173b98;
   background-position: center;
@@ -679,10 +681,10 @@
 }
 .nansha-certificate-composite {
   display: block;
-  width: auto;
+  width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 100%;
+  max-height: calc(100% - (var(--nansha-unit) * 2.13));
   user-select: none;
   -webkit-user-drag: none;
   -webkit-touch-callout: default;
