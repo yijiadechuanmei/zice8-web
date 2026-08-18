@@ -463,6 +463,8 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const questionDeckRef = useRef([])
+  const correctSoundRef = useRef(null)
+  const wrongSoundRef = useRef(null)
   const moveTimerRef = useRef(null)
   const rollTimerRef = useRef(null)
   const rollResultTimerRef = useRef(null)
@@ -518,6 +520,13 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     questionDeckRef.current = []
   }, [])
 
+  const playAnswerSound = useCallback((correct) => {
+    const audio = correct ? correctSoundRef.current : wrongSoundRef.current
+    if (!audio) return
+    audio.currentTime = 0
+    audio.play().catch(() => {})
+  }, [])
+
   const handleStart = useCallback(() => {
     resetGame()
     setPage(PAGE.GAME)
@@ -571,13 +580,14 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const handleAnswer = useCallback((answerIndex) => {
     if (!question) return
     const correct = answerIndex === question.answerIndex
+    playAnswerSound(correct)
     setFeedback({
       correct,
       analysis: question.analysis,
       isFinal: question.position >= FINISH_INDEX,
     })
     setQuestion(null)
-  }, [question])
+  }, [playAnswerSound, question])
 
   const handleContinue = useCallback(() => {
     if (feedback?.isFinal) setSuccess(true)
@@ -614,6 +624,8 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
       ) : null}
       {page === PAGE.POSTER ? <PosterPage onReplay={handleReplay} /> : null}
       <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+      <audio ref={correctSoundRef} src={antiFraudBoardAssets.game.correctSound} preload="auto" aria-hidden="true" />
+      <audio ref={wrongSoundRef} src={antiFraudBoardAssets.game.wrongSound} preload="auto" aria-hidden="true" />
     </>
   )
 }

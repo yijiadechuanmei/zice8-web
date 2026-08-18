@@ -41,6 +41,8 @@ export const antiFraudBoardAssets = {
     diceResultText: `${CDN_BASE}/82efdf46f46e02c2cf84313519932c02_4804.webp`,
     successPanel: `${CDN_BASE}/d372f144d683a21eb9bc690ce452afbc_56022.webp`,
     posterButton: `${CDN_BASE}/6cc8655dedb364107e6bb4f0d2761680_7652.webp`,
+    correctSound: `${CDN_BASE}/d.mp3`,
+    wrongSound: `${CDN_BASE}/c.mp3`,
   },
   poster: {
     background: `${CDN_BASE}/048ca6d4e07c419d9d03e6ed59de067d_32465_750_1624.png`,
