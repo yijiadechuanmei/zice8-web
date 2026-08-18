@@ -270,7 +270,6 @@ function BoardScene({
   onAnswer,
   onContinue,
   onGoPoster,
-  onPreviewPoster,
   showLandscapePrompt,
 }) {
   const currentPoint = BOARD_POINTS[position] || BOARD_POINTS[0]
@@ -344,9 +343,7 @@ function BoardScene({
           ) : null}
         </button>
         <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{position} 步</div>
-        <div className="afbg-time-text afbg-time-test-trigger" style={{ left: 91, top: 39 }} onClick={onPreviewPoster} role="button" tabIndex={0}>
-          {formatElapsed(elapsed)}
-        </div>
+        <div className="afbg-time-text" style={{ left: 91, top: 39 }}>{formatElapsed(elapsed)}</div>
       </div>
     </DesignStage>
 
@@ -771,19 +768,6 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setPage(PAGE.POSTER)
   }, [])
 
-  const handlePreviewPoster = useCallback(() => {
-    window.clearTimeout(moveTimerRef.current)
-    window.clearTimeout(rollTimerRef.current)
-    window.clearTimeout(rollResultTimerRef.current)
-    setMoving(false)
-    setRollPhase(null)
-    setQuestion(null)
-    setFeedback(null)
-    setSuccess(false)
-    setHasWrongAnswer(true)
-    setPage(PAGE.POSTER)
-  }, [])
-
   const handleReplay = useCallback(() => {
     resetGame()
     setShowHomeOrientationPrompt(false)
@@ -812,7 +796,6 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           onAnswer={handleAnswer}
           onContinue={handleContinue}
           onGoPoster={handleGoPoster}
-          onPreviewPoster={handlePreviewPoster}
           showLandscapePrompt={isLandscape}
         />
       ) : null}

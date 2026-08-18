@@ -207,12 +207,6 @@
   width: 79px;
 }
 
-.afbg-time-test-trigger {
-  z-index: 3;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
 .afbg-mask {
   position: fixed;
   inset: 0;
