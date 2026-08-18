@@ -33,6 +33,8 @@ const MIN_QUESTION_COUNT = 4
 const MAX_QUESTION_COUNT = 5
 const DICE_MIN = 1
 const DICE_MAX = 6
+const ANTI_FRAUD_BGM_VOLUME = 0.22
+const ANSWER_SOUND_VOLUME = 1
 
 function getRandomInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -537,7 +539,17 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     if (activityKey === ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY) return '识假防骗 从你我每一次警惕开始'
     return '识假防骗'
   }, [activityKey])
-  const bgmConfig = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
+  const bgmConfig = useMemo(() => {
+    const configuredBgm = publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm
+    if (!configuredBgm || typeof configuredBgm !== 'object') return configuredBgm
+
+    const configuredVolume = Number(configuredBgm.volume)
+    const volume = configuredBgm.volume == null || !Number.isFinite(configuredVolume) ? 1 : configuredVolume
+    return {
+      ...configuredBgm,
+      volume: Math.min(Math.max(volume, 0), ANTI_FRAUD_BGM_VOLUME),
+    }
+  }, [publicConfig])
 
   useEffect(() => {
     document.title = title
@@ -592,6 +604,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     const audio = correct ? correctSoundRef.current : wrongSoundRef.current
     if (!audio) return
     audio.currentTime = 0
+    audio.volume = ANSWER_SOUND_VOLUME
     audio.play().catch(() => {})
   }, [])
 

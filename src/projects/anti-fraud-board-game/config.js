@@ -2,7 +2,6 @@ export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_TYPE = 'anti_fraud_board_game'
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY = 'anti_fraud_board_game_20260623'
 
 const CDN_BASE = 'https://assets.zice8.com/anti_fraud_board_game/anti_fraud_board_game_20260623'
-const FEEDBACK_SOUND_BASE = 'https://assets.zice8.com/targeted_therapy_quiz/targeted_therapy_quiz_20260807'
 
 export const antiFraudBoardAssets = {
   bgm: `${CDN_BASE}/281974df63e94d666beaa1340df4fa50_853056.mp3`,
@@ -42,8 +41,8 @@ export const antiFraudBoardAssets = {
     diceResultText: `${CDN_BASE}/82efdf46f46e02c2cf84313519932c02_4804.webp`,
     successPanel: `${CDN_BASE}/d372f144d683a21eb9bc690ce452afbc_56022.webp`,
     posterButton: `${CDN_BASE}/6cc8655dedb364107e6bb4f0d2761680_7652.webp`,
-    correctSound: `${FEEDBACK_SOUND_BASE}/d.mp3`,
-    wrongSound: `${FEEDBACK_SOUND_BASE}/c.mp3`,
+    correctSound: `${CDN_BASE}/d.mp3`,
+    wrongSound: `${CDN_BASE}/c.mp3`,
   },
   poster: {
     background: `${CDN_BASE}/048ca6d4e07c419d9d03e6ed59de067d_32465_750_1624.png`,
