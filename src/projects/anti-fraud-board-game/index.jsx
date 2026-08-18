@@ -28,6 +28,7 @@ const FINISH_INDEX = BOARD_POINTS.length - 1
 const MOVE_STEP_MS = 1500
 const ROLLING_MS = 2000
 const ROLL_RESULT_MS = 2000
+const HOME_ORIENTATION_PROMPT_MS = 2100
 const MIN_QUESTION_COUNT = 4
 const MAX_QUESTION_COUNT = 5
 const DICE_MIN = 1
@@ -47,6 +48,27 @@ function getConstrainedRoll(remainingSteps, remainingQuestions) {
   const maximumRoll = Math.min(DICE_MAX, remainingSteps - futureQuestions * DICE_MIN)
 
   return getRandomInteger(minimumRoll, maximumRoll)
+}
+
+function useIsLandscape() {
+  const getValue = () => typeof window !== 'undefined' && window.innerWidth > window.innerHeight
+  const [isLandscape, setIsLandscape] = useState(getValue)
+
+  useEffect(() => {
+    function updateOrientation() {
+      setIsLandscape(getValue())
+    }
+
+    updateOrientation()
+    window.addEventListener('resize', updateOrientation)
+    window.addEventListener('orientationchange', updateOrientation)
+    return () => {
+      window.removeEventListener('resize', updateOrientation)
+      window.removeEventListener('orientationchange', updateOrientation)
+    }
+  }, [])
+
+  return isLandscape
 }
 
 function useDesignScale(stageHeight, fit = 'contain') {
@@ -180,6 +202,15 @@ function HomePage({ onStart }) {
   )
 }
 
+function OrientationPrompt({ black = false }) {
+  return (
+    <div className={`afbg-orientation-prompt ${black ? 'afbg-orientation-prompt-black' : ''}`} role="status" aria-live="polite">
+      <div className="afbg-orientation-phone" aria-hidden="true"><span /></div>
+      <div className="afbg-orientation-copy">请您把手机翻转<br />横屏进行游戏</div>
+    </div>
+  )
+}
+
 function formatElapsed(seconds) {
   const safeSeconds = Math.max(0, Math.floor(seconds))
   const minutes = Math.floor(safeSeconds / 60)
@@ -200,6 +231,7 @@ function BoardScene({
   onAnswer,
   onContinue,
   onGoPoster,
+  showLandscapePrompt,
 }) {
   const currentPoint = BOARD_POINTS[position] || BOARD_POINTS[0]
   const shellRef = useRef(null)
@@ -280,6 +312,7 @@ function BoardScene({
     {question ? <QuestionOverlay question={question} onAnswer={onAnswer} /> : null}
     {feedback ? <FeedbackOverlay feedback={feedback} onContinue={onContinue} /> : null}
     {success ? <SuccessOverlay onGoPoster={onGoPoster} /> : null}
+    {showLandscapePrompt ? <OrientationPrompt black /> : null}
     </>
   )
 }
@@ -483,6 +516,8 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const [rollCount, setRollCount] = useState(0)
+  const [showHomeOrientationPrompt, setShowHomeOrientationPrompt] = useState(false)
+  const isLandscape = useIsLandscape()
   const questionDeckRef = useRef([])
   const questionTargetRef = useRef(MIN_QUESTION_COUNT)
   const correctSoundRef = useRef(null)
@@ -490,6 +525,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const moveTimerRef = useRef(null)
   const rollTimerRef = useRef(null)
   const rollResultTimerRef = useRef(null)
+  const homeOrientationTimerRef = useRef(null)
 
   const title = useMemo(() => {
     if (activityKey === ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY) return '识假防骗 从你我每一次警惕开始'
@@ -525,12 +561,14 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     window.clearTimeout(moveTimerRef.current)
     window.clearTimeout(rollTimerRef.current)
     window.clearTimeout(rollResultTimerRef.current)
+    window.clearTimeout(homeOrientationTimerRef.current)
   }, [])
 
   const resetGame = useCallback(() => {
     window.clearTimeout(moveTimerRef.current)
     window.clearTimeout(rollTimerRef.current)
     window.clearTimeout(rollResultTimerRef.current)
+    window.clearTimeout(homeOrientationTimerRef.current)
     setPosition(0)
     setElapsed(0)
     setMoving(false)
@@ -553,7 +591,11 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
 
   const handleStart = useCallback(() => {
     resetGame()
-    setPage(PAGE.GAME)
+    setShowHomeOrientationPrompt(true)
+    homeOrientationTimerRef.current = window.setTimeout(() => {
+      setShowHomeOrientationPrompt(false)
+      setPage(PAGE.GAME)
+    }, HOME_ORIENTATION_PROMPT_MS)
   }, [resetGame])
 
   const showQuestionAt = useCallback((nextPosition) => {
@@ -622,12 +664,18 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
 
   const handleReplay = useCallback(() => {
     resetGame()
+    setShowHomeOrientationPrompt(false)
     setPage(PAGE.HOME)
   }, [resetGame])
 
   return (
     <>
-      {page === PAGE.HOME ? <HomePage onStart={handleStart} /> : null}
+      {page === PAGE.HOME ? (
+        <>
+          <HomePage onStart={handleStart} />
+          {showHomeOrientationPrompt ? <OrientationPrompt /> : null}
+        </>
+      ) : null}
       {page === PAGE.GAME ? (
         <BoardScene
           position={position}
@@ -642,6 +690,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           onAnswer={handleAnswer}
           onContinue={handleContinue}
           onGoPoster={handleGoPoster}
+          showLandscapePrompt={isLandscape}
         />
       ) : null}
       {page === PAGE.POSTER ? <PosterPage onReplay={handleReplay} /> : null}
