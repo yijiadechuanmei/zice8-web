@@ -203,10 +203,16 @@ function HomePage({ onStart }) {
 }
 
 function OrientationPrompt({ black = false }) {
+  const copy = black ? (
+    <>请竖置手机锁定方向后<br />再横屏参与游戏</>
+  ) : (
+    <>请您把手机翻转<br />横屏进行游戏</>
+  )
+
   return (
     <div className={`afbg-orientation-prompt ${black ? 'afbg-orientation-prompt-black' : ''}`} role="status" aria-live="polite">
       <div className="afbg-orientation-phone" aria-hidden="true"><span /></div>
-      <div className="afbg-orientation-copy">请您把手机翻转<br />横屏进行游戏</div>
+      <div className="afbg-orientation-copy">{copy}</div>
     </div>
   )
 }
