@@ -564,13 +564,23 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
         <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.left}</div>
         <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.right}</div>
         <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
-        <div className="afbg-poster-qrcode-source" aria-hidden="true">
+        <div
+          className="afbg-poster-qrcode"
+          style={{
+            left: POSTER_QR_LEFT,
+            top: POSTER_QR_TOP,
+            width: POSTER_QR_SIZE,
+            height: POSTER_QR_SIZE,
+            padding: POSTER_QR_BORDER,
+          }}
+        >
           <QRCodeCanvas
             ref={qrCanvasRef}
             value={activityUrl}
             size={256}
             level="M"
             includeMargin={false}
+            style={{ width: POSTER_QR_CONTENT_SIZE, height: POSTER_QR_CONTENT_SIZE }}
           />
         </div>
         <button className="afbg-replay-hitarea" type="button" onClick={onReplay} aria-label="再玩一次" />
