@@ -210,7 +210,13 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
           reviewedAt: entry.reviewedAt || new Date().toISOString(),
         } : item),
       }))
-      message.success({ feature: '已精选作品，等待终审上架', reject: '作品已标记为不通过', publish: '作品已上架到前端', withdraw: '已撤回精选，作品回到初审' }[action])
+      message.success({
+        feature: '已精选作品，等待终审上架',
+        reject: '作品已标记为不通过',
+        publish: '作品已上架到前端',
+        withdraw: '已撤回精选，作品回到初审',
+        withdraw_published: '已撤回上架作品，作品回到终审精选',
+      }[action])
     } catch (err) {
       message.error(err.message || '审核失败')
     } finally {
@@ -463,6 +469,26 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
           <Button size="small" type="primary" loading={reviewingNanshaEntryId === `${row.id}:publish`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'publish')}>上架</Button>
           <Button size="small" loading={reviewingNanshaEntryId === `${row.id}:withdraw`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'withdraw')}>撤回</Button>
         </Space>,
+      })
+      if (activeViewKey === 'nansha_open_mic_published_entries') columns.push({
+        title: '操作', key: 'nanshaReviewActions', fixed: 'right', width: 120,
+        render: (_, row) => (
+          <Popconfirm
+            title="确认撤回该已上架作品？"
+            description="撤回后作品将回到终审精选，不再在前端展示。"
+            okText="撤回"
+            cancelText="取消"
+            onConfirm={() => handleReviewNanshaEntry(row, 'withdraw_published')}
+          >
+            <Button
+              size="small"
+              loading={reviewingNanshaEntryId === `${row.id}:withdraw_published`}
+              disabled={Boolean(reviewingNanshaEntryId)}
+            >
+              撤回
+            </Button>
+          </Popconfirm>
+        ),
       })
     }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_recordings') {
