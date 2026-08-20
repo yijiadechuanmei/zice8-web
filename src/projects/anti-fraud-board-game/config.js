@@ -1,9 +1,13 @@
+import posterBackground from './assets/poster-background.png'
+import posterCard from './assets/poster-card.png'
+import posterTitle from './assets/poster-title.png'
+import posterFooter from './assets/poster-footer.png'
+import posterBadge from './assets/poster-badge.png'
+
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_TYPE = 'anti_fraud_board_game'
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY = 'anti_fraud_board_game_20260623'
 
 const CDN_BASE = 'https://assets.zice8.com/anti_fraud_board_game/anti_fraud_board_game_20260623'
-// assets.zice8.com 会返回重复的 CORS 头，Canvas 合成海报须使用 OSS 原始端点。
-const POSTER_OSS_BASE = 'https://zice8-assets.oss-cn-shanghai.aliyuncs.com/anti_fraud_board_game/anti_fraud_board_game_20260623'
 
 export const antiFraudBoardAssets = {
   bgm: `${CDN_BASE}/281974df63e94d666beaa1340df4fa50_853056.mp3`,
@@ -47,11 +51,11 @@ export const antiFraudBoardAssets = {
     wrongSound: `${CDN_BASE}/c.mp3`,
   },
   poster: {
-    background: `${POSTER_OSS_BASE}/048ca6d4e07c419d9d03e6ed59de067d_32465_750_1624.png`,
-    card: `${POSTER_OSS_BASE}/db14ca26676a66a7cc9a4c627bf2df16_73943_717_1076.png`,
-    title: `${POSTER_OSS_BASE}/b8e726dad612d1db94107d7c55b752af_38189_565_341.png`,
-    footer: `${POSTER_OSS_BASE}/1d5be33eeaa6f3cd227c2079cb1f67c7_7308_718_169.png`,
-    badge: `${POSTER_OSS_BASE}/c842cfa43a02860f4ecd170f7dd46071_8993_519_81.png`,
+    background: posterBackground,
+    card: posterCard,
+    title: posterTitle,
+    footer: posterFooter,
+    badge: posterBadge,
   },
 }
 

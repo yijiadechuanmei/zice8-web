@@ -333,7 +333,7 @@ function BoardScene({
           ) : null}
         </button>
         <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{position} 步</div>
-        <div className="afbg-time-text" style={{ left: 91, top: 39 }}>{formatElapsed(elapsed)}</div>
+        <div className="afbg-time-text" style={{ left: 91, top: 39 }} onDoubleClick={onGoPoster}>{formatElapsed(elapsed)}</div>
       </div>
     </DesignStage>
 
