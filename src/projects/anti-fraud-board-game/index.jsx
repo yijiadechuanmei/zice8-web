@@ -133,7 +133,6 @@ function loadPosterImage(src) {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.crossOrigin = 'anonymous'
-    image.referrerPolicy = 'no-referrer'
     image.onload = () => resolve(image)
     image.onerror = () => reject(new Error(`海报素材加载失败：${src}`))
     image.src = src
@@ -497,7 +496,7 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
   const [posterUrl, setPosterUrl] = useState('')
   const [posterError, setPosterError] = useState('')
   const [composeVersion, setComposeVersion] = useState(0)
-  const qrCanvasRef = useRef(null)
+  const qrSourceRef = useRef(null)
   const activityUrl = useMemo(() => getPosterActivityUrl(activityKey), [activityKey])
   const labels = useMemo(() => (
     allCorrect
@@ -507,12 +506,18 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
 
   useEffect(() => {
     let cancelled = false
-    let secondFrame = 0
+    let retryTimer = null
+    let attempts = 0
 
     function composePoster() {
-      const qrCanvas = qrCanvasRef.current
+      const qrCanvas = qrSourceRef.current?.querySelector('canvas')
       if (!qrCanvas || !qrCanvas.width || !qrCanvas.height) {
-        if (!cancelled) setPosterError('二维码生成失败，请点击重试')
+        attempts += 1
+        if (attempts < 30) {
+          retryTimer = window.setTimeout(composePoster, 50)
+        } else if (!cancelled) {
+          setPosterError('二维码生成失败，请点击重试')
+        }
         return
       }
       renderPosterImage({
@@ -532,14 +537,11 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
         })
     }
 
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(composePoster)
-    })
+    composePoster()
 
     return () => {
       cancelled = true
-      window.cancelAnimationFrame(firstFrame)
-      window.cancelAnimationFrame(secondFrame)
+      if (retryTimer) window.clearTimeout(retryTimer)
     }
   }, [composeVersion, labels])
 
@@ -553,6 +555,7 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
         <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.right}</div>
         <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
         <div
+          ref={qrSourceRef}
           className="afbg-poster-qrcode"
           style={{
             left: POSTER_QR_LEFT,
@@ -563,7 +566,6 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
           }}
         >
           <QRCodeCanvas
-            ref={qrCanvasRef}
             value={activityUrl}
             size={256}
             level="M"
@@ -580,7 +582,19 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
             draggable="false"
           />
         ) : null}
-        {posterError ? <button className="afbg-poster-retry" type="button" onClick={() => setComposeVersion((value) => value + 1)}>{posterError}</button> : null}
+        {posterError ? (
+          <button
+            className="afbg-poster-retry"
+            type="button"
+            onClick={() => {
+              setPosterUrl('')
+              setPosterError('')
+              setComposeVersion((value) => value + 1)
+            }}
+          >
+            {posterError}
+          </button>
+        ) : null}
       </DesignStage>
     </>
   )
