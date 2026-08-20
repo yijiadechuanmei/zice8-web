@@ -19,6 +19,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
+  const [dataRefreshKey, setDataRefreshKey] = useState(0)
   const [sortField, setSortField] = useState('')
   const [sortOrder, setSortOrder] = useState('desc')
   const [appointmentDate, setAppointmentDate] = useState('')
@@ -97,7 +98,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     return () => {
       alive = false
     }
-  }, [activity.activityKey, activeViewKey, appointmentDate, appointmentSlot, page, keyword, sortField, sortOrder, status, phaseNo])
+  }, [activity.activityKey, activeViewKey, appointmentDate, appointmentSlot, page, keyword, sortField, sortOrder, status, phaseNo, dataRefreshKey])
 
   useEffect(() => {
     setPage(1)
@@ -199,17 +200,12 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
     }
     setReviewingNanshaEntryId(`${row.id}:${action}`)
     try {
-      const result = await reviewNanshaOpenMicEntry(activity.activityKey, row.id, { action, reason })
-      const entry = result?.entry || {}
+      await reviewNanshaOpenMicEntry(activity.activityKey, row.id, { action, reason })
       setData((current) => ({
         ...current,
-        rows: current.rows.map((item) => item.id === row.id ? {
-          ...item,
-          reviewStatus: entry.reviewStatus || row.reviewStatus,
-          rejectReason: entry.rejectReason || '',
-          reviewedAt: entry.reviewedAt || new Date().toISOString(),
-        } : item),
+        rows: current.rows.filter((item) => item.id !== row.id),
       }))
+      setDataRefreshKey((current) => current + 1)
       message.success({
         feature: '已精选作品，等待终审上架',
         reject: '作品已标记为不通过',
