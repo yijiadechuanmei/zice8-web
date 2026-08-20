@@ -123,6 +123,13 @@ function drawCenteredFittedText(context, text, centerX, centerY, maxWidth, fontS
   context.fillText(value, centerX, centerY)
 }
 
+function formatCertificateIssueDate(createdAt) {
+  const date = createdAt ? new Date(createdAt) : null
+  const month = date && !Number.isNaN(date.getTime()) ? date.getMonth() + 1 : 8
+  const chineseMonths = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二']
+  return `二〇二六年${chineseMonths[month] || '八'}月`
+}
+
 function buildEntryShareUrl(entryId) {
   if (typeof window === 'undefined') return ASSET_BASE_URL
   const url = new URL(window.location.href)
@@ -533,7 +540,7 @@ export default function NanshaOpenMicProject() {
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
-      {view === 'certificate' && activityPhase !== 'publicity' && myEntry?.reviewStatus === 'published' ? <MyCertificatePage entry={myEntry} profile={myProfile} onBack={goBack} /> : null}
+      {view === 'certificate' && activityPhase !== 'publicity' && myEntry && myEntry.mediaStatus !== 'failed' ? <MyCertificatePage entry={myEntry} profile={myProfile} onBack={goBack} /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
@@ -762,7 +769,7 @@ function RankingRow({ rank, entry, onWork }) {
 
 function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes, onOpenCertificate }) {
   const isVotePhase = activityPhase === 'vote'
-  const hasCertificate = myEntry?.reviewStatus === 'published'
+  const hasCertificate = Boolean(myEntry && myEntry.mediaStatus !== 'failed')
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
   const workVotes = myEntry?.voteCount ?? 0
   const remainingVotes = voteQuota?.remaining ?? 10
@@ -956,6 +963,7 @@ function MyCertificatePage({ entry, profile, onBack }) {
   const [certificateError, setCertificateError] = useState('')
   const certificateNo = entry.certificateNo || 'TG-00000000'
   const authorAvatar = entry.authorAvatar || profile?.avatar || ''
+  const certificateIssueDate = formatCertificateIssueDate(entry.createdAt)
 
   useEffect(() => {
     let disposed = false
@@ -987,7 +995,7 @@ function MyCertificatePage({ entry, profile, onBack }) {
         context.font = '400 16px "PingFang SC", "Microsoft YaHei", sans-serif'
         context.textAlign = 'right'
         context.textBaseline = 'middle'
-        context.fillText('二〇二六年八月', 707, 1127)
+        context.fillText(certificateIssueDate, 707, 1127)
         context.font = '400 18px "PingFang SC", "Microsoft YaHei", sans-serif'
         context.textAlign = 'left'
         context.fillText(`编号：${certificateNo}`, 50, 1185)
@@ -1000,7 +1008,7 @@ function MyCertificatePage({ entry, profile, onBack }) {
 
     composeCertificate()
     return () => { disposed = true }
-  }, [authorAvatar, certificateNo, entry.authorName])
+  }, [authorAvatar, certificateIssueDate, certificateNo, entry.authorName])
 
   return (
     <section className="nansha-sub-page nansha-certificate-page">
