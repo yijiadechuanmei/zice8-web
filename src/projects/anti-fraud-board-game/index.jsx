@@ -130,23 +130,14 @@ function LayerImage({ className = '', src, style, alt = '' }) {
 }
 
 function loadPosterImage(src) {
-  return fetch(src, { cache: 'force-cache', mode: 'cors', referrerPolicy: 'no-referrer' })
-    .then((response) => {
-      if (!response.ok) throw new Error(`海报素材加载失败：${response.status}`)
-      return response.blob()
-    })
-    .then((blob) => new Promise((resolve, reject) => {
-      const image = new Image()
-      const objectUrl = URL.createObjectURL(blob)
-      image.onload = () => {
-        resolve(image)
-      }
-      image.onerror = () => {
-        URL.revokeObjectURL(objectUrl)
-        reject(new Error(`海报素材解码失败：${src}`))
-      }
-      image.src = objectUrl
-    }))
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.referrerPolicy = 'no-referrer'
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error(`海报素材加载失败：${src}`))
+    image.src = src
+  })
 }
 
 function getPosterActivityUrl(activityKey) {
