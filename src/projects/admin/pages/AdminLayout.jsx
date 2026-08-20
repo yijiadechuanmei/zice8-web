@@ -22,6 +22,7 @@ import {
   DashboardOutlined,
   DatabaseOutlined,
   LinkOutlined,
+  LoginOutlined,
   LogoutOutlined,
   QrcodeOutlined,
   SearchOutlined,
@@ -36,6 +37,7 @@ import AccountPage from './AccountPage'
 import ActivityConfigPage from './ActivityConfigPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
+import LoginLogPage from './LoginLogPage'
 import OperationLogPage from './OperationLogPage'
 import PaymentTestPage from './PaymentTestPage'
 import PermissionPage from './PermissionPage'
@@ -54,6 +56,7 @@ const tabs = [
   { key: 'quizImport', label: '题库导入', icon: <UploadOutlined />, activityTypes: ['quiz'] },
   { key: 'permissions', label: '权限配置', icon: <TeamOutlined /> },
   { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
+  { key: 'loginLogs', label: '登录日志', icon: <LoginOutlined /> },
   { key: 'logs', label: '操作日志', icon: <DatabaseOutlined /> },
   { key: 'paymentTest', label: '支付链路测试', icon: <ToolOutlined /> },
 ]
@@ -118,7 +121,7 @@ export default function AdminLayout({
   const selectedActivityUrl = selectedActivity ? buildActivityUrl(selectedActivity) : ''
 
   const visibleTabs = tabs.filter((tab) => {
-    if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'logs', 'paymentTest'].includes(tab.key)) return false
+    if (adminUser.role !== 'super_admin' && ['accounts', 'permissions', 'loginLogs', 'logs', 'paymentTest'].includes(tab.key)) return false
     if (tab.key === 'activityConfig' && !canManageActivityConfig) return false
     if (tab.activityTypes?.length && selectedActivity && !tab.activityTypes.includes(selectedActivity.type)) return false
     if (tab.key === 'quizImport' && selectedActivity?.type === 'quiz' && !canAccessQuizImport) return false
@@ -227,7 +230,7 @@ export default function AdminLayout({
         </Sider>
 
         <Content className="admin-content">
-          {selectedActivity && activeTab !== 'paymentTest' ? (
+          {selectedActivity && !['loginLogs', 'paymentTest'].includes(activeTab) ? (
             <Card className="admin-activity-card" size="small">
               <div className={`admin-activity-summary ${selectedActivity.type === 'phase_quiz_lottery' ? 'is-phase-scoped' : ''}`}>
                 <div>
@@ -296,7 +299,7 @@ export default function AdminLayout({
             items={visibleTabs.map((tab) => ({ key: tab.key, label: <Space size={6}>{tab.icon}{tab.label}</Space> }))}
           />
 
-          {!selectedActivity && activeTab !== 'paymentTest' ? <Card><Empty description="请选择左侧活动" /></Card> : null}
+          {!selectedActivity && !['loginLogs', 'paymentTest'].includes(activeTab) ? <Card><Empty description="请选择左侧活动" /></Card> : null}
           {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && canManageActivityConfig ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && !canManageActivityConfig ? <Card><Empty description="无权修改活动配置" /></Card> : null}
@@ -305,6 +308,7 @@ export default function AdminLayout({
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport ? <Card><Empty description="无权访问题库导入，请联系管理员授权。" /></Card> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
+          {activeTab === 'loginLogs' && adminUser.role === 'super_admin' ? <LoginLogPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
           {selectedActivity && activeTab === 'logs' ? <OperationLogPage activity={selectedActivity} /> : null}
           {activeTab === 'paymentTest' && adminUser.role === 'super_admin' ? <PaymentTestPage /> : null}

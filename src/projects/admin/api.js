@@ -291,6 +291,11 @@ export function getOperationLogs(params = {}) {
   return adminRequest(`/admin/operation-logs?${search.toString()}`)
 }
 
+export function getLoginLogs(params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/login-logs?${search.toString()}`)
+}
+
 export function getAccounts() {
   return adminRequest('/admin/accounts')
 }
