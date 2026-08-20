@@ -147,6 +147,8 @@ export default function NanshaOpenMicProject() {
   const [voteDialog, setVoteDialog] = useState('')
   const [voteToast, setVoteToast] = useState('')
   const [posterOpen, setPosterOpen] = useState(false)
+  const posterOriginUrlRef = useRef('')
+  const posterOriginShareLinkRef = useRef('')
   const [myEntry, setMyEntry] = useState(null)
   const [myProfile, setMyProfile] = useState({ nickname: '微信用户', avatar: '' })
   const [voteQuota, setVoteQuota] = useState({ remaining: 10 })
@@ -447,6 +449,8 @@ export default function NanshaOpenMicProject() {
     if (!entry) return
     const nextShareLink = buildEntryShareUrl(entry.id)
     if (typeof window !== 'undefined') {
+      posterOriginUrlRef.current = window.location.href
+      posterOriginShareLinkRef.current = shareLink
       const url = new URL(nextShareLink)
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
     }
@@ -458,6 +462,21 @@ export default function NanshaOpenMicProject() {
       eventType: 'nansha_share_open',
       extra: { activityType: ACTIVITY_TYPE, phase: activityPhase, entryId: entry.id },
     })
+  }
+
+  function closePoster() {
+    setPosterOpen(false)
+    setShareLink(posterOriginShareLinkRef.current)
+    if (typeof window !== 'undefined' && posterOriginUrlRef.current) {
+      try {
+        const originUrl = new URL(posterOriginUrlRef.current)
+        window.history.replaceState(null, '', `${originUrl.pathname}${originUrl.search}${originUrl.hash}`)
+      } catch {
+        // Keep the current address if the captured origin is no longer valid.
+      }
+    }
+    posterOriginUrlRef.current = ''
+    posterOriginShareLinkRef.current = ''
   }
 
   async function confirmVote(quantity) {
@@ -538,7 +557,7 @@ export default function NanshaOpenMicProject() {
       {uploadDialog ? <UploadResultDialog status={uploadDialog} errorMessage={videoError} onConfirm={closeUploadDialog} /> : null}
       {voteDialog === 'vote' ? <VoteDialog remaining={voteQuota?.remaining ?? 0} onConfirm={confirmVote} onClose={closeVoteDialog} /> : null}
       {voteDialog === 'success' || voteDialog === 'failure' ? <VoteResultDialog status={voteDialog} onConfirm={closeVoteDialog} /> : null}
-      {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} shareUrl={shareLink} onClose={() => setPosterOpen(false)} /> : null}
+      {posterOpen && selectedEntry ? <VotePosterDialog entry={selectedEntry} shareUrl={shareLink} onClose={closePoster} /> : null}
       {voteToast ? <VoteQuotaToast message={voteToast} /> : null}
     </main>
   )
