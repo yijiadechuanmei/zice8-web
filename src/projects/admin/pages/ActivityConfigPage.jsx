@@ -4,6 +4,7 @@ import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Swi
 import {
   clearLongwenBeerQuizData,
   clearSongWishLotteryDraws,
+  deleteNanshaOpenMicEntry,
   getActivityConfig,
   getArtistCallLotteryPrizes,
   getNanhaiChallengeDrawControl,
@@ -86,6 +87,8 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaConfig, setNanshaConfig] = useState({ currentPhase: 'upload', dailyVoteLimit: 10, uploadStartAt: '', uploadEndAt: '' })
   const [nanshaConfigSaving, setNanshaConfigSaving] = useState(false)
   const [nanshaResetting, setNanshaResetting] = useState(false)
+  const [nanshaDeleteEntryId, setNanshaDeleteEntryId] = useState('')
+  const [nanshaDeletingEntry, setNanshaDeletingEntry] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
 
   useEffect(() => {
@@ -247,6 +250,28 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanshaResetting(false)
+    }
+  }
+
+  async function handleDeleteNanshaEntry() {
+    const entryId = nanshaDeleteEntryId.trim()
+    if (!/^\d+$/.test(entryId)) {
+      message.warning('请输入正确的作品ID')
+      return
+    }
+    setNanshaDeletingEntry(true)
+    setError('')
+    try {
+      const result = await deleteNanshaOpenMicEntry(activity.activityKey, entryId)
+      const deleted = result?.deleted || {}
+      setNanshaDeleteEntryId('')
+      message.success(`已删除作品 ${deleted.entryId || entryId} 的上传记录，可重新报名`)
+    } catch (err) {
+      const text = err.message || '删除指定作品上传记录失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanshaDeletingEntry(false)
     }
   }
 
@@ -722,6 +747,24 @@ export default function ActivityConfigPage({ activity }) {
               </Space>
               <Card size="small" type="inner" title="危险操作">
                 <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                  <Text strong>删除指定作品上传记录</Text>
+                  <Text type="secondary">用于处理单个用户上传失败或需要重新报名的情况。请输入数据表中的作品ID；仅删除该作品的报名记录、审核记录和关联投票，不影响其他用户、微信用户及活动配置。</Text>
+                  <Space.Compact style={{ maxWidth: 420 }}>
+                    <Input
+                      placeholder="请输入作品ID"
+                      value={nanshaDeleteEntryId}
+                      onChange={(event) => setNanshaDeleteEntryId(event.target.value.replace(/\D/g, ''))}
+                    />
+                    <Popconfirm
+                      title="确认删除该作品上传记录？"
+                      description="删除后该用户可以重新上传，操作不可恢复。"
+                      okText="确认删除"
+                      cancelText="取消"
+                      onConfirm={handleDeleteNanshaEntry}
+                    >
+                      <Button danger loading={nanshaDeletingEntry} disabled={!/^\d+$/.test(nanshaDeleteEntryId.trim())}>删除指定作品</Button>
+                    </Popconfirm>
+                  </Space.Compact>
                   <Text type="secondary">清空本活动全部报名作品、审核记录、投票记录、每日票数和参与用户；活动阶段、报名时间、每日票数配置及 OSS 原始视频文件会保留。</Text>
                   <Popconfirm
                     title="确认清空南沙新声全部业务数据？"

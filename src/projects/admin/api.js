@@ -186,6 +186,13 @@ export function resetNanshaOpenMicData(activityKey) {
   })
 }
 
+export function deleteNanshaOpenMicEntry(activityKey, entryId) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${encodeURIComponent(entryId)}/delete`, {
+    method: 'POST',
+    body: JSON.stringify({ confirm: 'DELETE_NANSHA_OPEN_MIC_ENTRY' }),
+  })
+}
+
 export function clearLongwenBeerQuizData(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/longwen-beer-quiz/clear-data`, {
     method: 'POST',
