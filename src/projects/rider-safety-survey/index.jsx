@@ -549,11 +549,11 @@ function invokeMerchantTransferAuthorization(authorization) {
 function paintPoster(canvas, result, scores) {
   const ctx = canvas.getContext("2d");
   const gradient = ctx.createLinearGradient(0, 0, 750, 1100);
-  gradient.addColorStop(0, "#071b1b");
-  gradient.addColorStop(1, "#0d2924");
+  gradient.addColorStop(0, "#62c7f7");
+  gradient.addColorStop(1, "#087edc");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 750, 1100);
-  ctx.strokeStyle = "rgba(204,255,53,.16)";
+  ctx.strokeStyle = "rgba(255,255,255,.22)";
   ctx.lineWidth = 2;
   for (let y = -250; y < 1200; y += 84) {
     ctx.beginPath();
@@ -561,16 +561,16 @@ function paintPoster(canvas, result, scores) {
     ctx.lineTo(750, y + 360);
     ctx.stroke();
   }
-  ctx.fillStyle = "#ccff35";
+  ctx.fillStyle = "#e7f8ff";
   ctx.font = "700 24px Arial";
   ctx.fillText("RIDER SAFETY REPORT / 2026", 62, 78);
-  ctx.fillStyle = "#f4f7e9";
+  ctx.fillStyle = "#ffffff";
   ctx.font = "900 68px Arial";
   ctx.fillText(result.title, 58, 205);
-  ctx.fillStyle = "#ccff35";
+  ctx.fillStyle = "#ffffff";
   ctx.font = "700 29px Arial";
   ctx.fillText("★".repeat(result.stars), 62, 258);
-  ctx.fillStyle = "#91a69d";
+  ctx.fillStyle = "#d6f2ff";
   ctx.font = "26px Arial";
   wrapCanvasText(ctx, result.subtitle, 62, 324, 620, 40);
   const metrics = [
@@ -580,29 +580,29 @@ function paintPoster(canvas, result, scores) {
   ];
   metrics.forEach(([label, value, max], i) => {
     const y = 430 + i * 102;
-    ctx.fillStyle = "#f4f7e9";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "700 25px Arial";
     ctx.fillText(label, 62, y);
-    ctx.fillStyle = "#173d35";
+    ctx.fillStyle = "rgba(255,255,255,.28)";
     ctx.fillRect(62, y + 22, 520, 14);
-    ctx.fillStyle = "#ccff35";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(62, y + 22, (520 * value) / max, 14);
-    ctx.fillStyle = "#ccff35";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "800 24px Arial";
     ctx.fillText(`${value}/${max}`, 610, y + 9);
   });
-  ctx.fillStyle = "#f4f7e9";
+  ctx.fillStyle = "#ffffff";
   ctx.font = "700 25px Arial";
   ctx.fillText("专属忠告", 62, 765);
-  ctx.fillStyle = "#bfd0c7";
+  ctx.fillStyle = "#d6f2ff";
   ctx.font = "25px Arial";
   wrapCanvasText(ctx, result.advice, 62, 818, 620, 39);
-  ctx.fillStyle = "#ccff35";
+  ctx.fillStyle = "rgba(255,255,255,.78)";
   ctx.fillRect(62, 990, 626, 2);
   ctx.font = "700 21px Arial";
   ctx.fillText("跑得快，更要稳稳到家。", 62, 1040);
   ctx.textAlign = "right";
-  ctx.fillStyle = "#91a69d";
+  ctx.fillStyle = "#d6f2ff";
   ctx.fillText(`${scores.total} / 14`, 688, 1040);
   ctx.textAlign = "left";
 }

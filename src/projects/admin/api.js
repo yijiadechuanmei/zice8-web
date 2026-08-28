@@ -200,6 +200,16 @@ export function clearLongwenBeerQuizData(activityKey) {
   })
 }
 
+export function clearRiderSafetySurveyData(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/clear-data`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'CLEAR_RIDER_SAFETY_SURVEY_DATA',
+    }),
+  })
+}
+
 export function reviewNanshaOpenMicEntry(activityKey, entryId, payload) {
   return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${entryId}/review`, {
     method: 'POST',

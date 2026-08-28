@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import {
   clearLongwenBeerQuizData,
+  clearRiderSafetySurveyData,
   clearSongWishLotteryDraws,
   deleteNanshaOpenMicEntry,
   getActivityConfig,
@@ -90,6 +91,9 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaDeleteEntryId, setNanshaDeleteEntryId] = useState('')
   const [nanshaDeletingEntry, setNanshaDeletingEntry] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
+  const [riderSafetyClearScope, setRiderSafetyClearScope] = useState('user')
+  const [riderSafetyUserId, setRiderSafetyUserId] = useState('')
+  const [riderSafetyClearing, setRiderSafetyClearing] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -288,6 +292,32 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setLongwenClearing(false)
+    }
+  }
+
+  async function handleClearRiderSafetySurveyData() {
+    const scope = riderSafetyClearScope
+    const userId = riderSafetyUserId.trim()
+    if (scope === 'user' && !/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要清除的正整数用户ID')
+      return
+    }
+    setRiderSafetyClearing(true)
+    setError('')
+    try {
+      const result = await clearRiderSafetySurveyData(activity.activityKey, {
+        scope,
+        ...(scope === 'user' ? { userId } : {}),
+      })
+      const cleared = result?.cleared || {}
+      if (scope === 'user') setRiderSafetyUserId('')
+      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条、红包预占 ${cleared.cashGrants || 0} 条`)
+    } catch (err) {
+      const text = err.message || '清除骑手安全问卷数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRiderSafetyClearing(false)
     }
   }
 
@@ -794,6 +824,46 @@ export default function ActivityConfigPage({ activity }) {
               >
                 <Button danger loading={longwenClearing}>清空答题数据</Button>
               </Popconfirm>
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'rider_safety_survey' ? (
+          <Card size="small" title="问卷测试数据清除" style={{ borderColor: '#ffccc7' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Alert
+                type="warning"
+                showIcon
+                message="仅限超级管理员；操作不可恢复"
+                description="指定用户仅清除该用户在本活动的问卷、抽奖、未发放红包预占、参与和授权记录；清除全部只影响本活动。存在已成功或发放中的现金红包、已登记收货的实物奖品时，服务端会拒绝清除，避免影响真实资金和履约。"
+              />
+              <Space wrap>
+                <Select
+                  value={riderSafetyClearScope}
+                  style={{ width: 150 }}
+                  options={[{ value: 'user', label: '清除指定用户' }, { value: 'all', label: '清除全部数据' }]}
+                  onChange={setRiderSafetyClearScope}
+                />
+                {riderSafetyClearScope === 'user' ? (
+                  <Input
+                    style={{ width: 230 }}
+                    placeholder="请输入用户ID"
+                    value={riderSafetyUserId}
+                    onChange={(event) => setRiderSafetyUserId(event.target.value.replace(/\D/g, ''))}
+                  />
+                ) : null}
+                <Popconfirm
+                  title={riderSafetyClearScope === 'all' ? '确认清除本活动全部问卷数据？' : '确认清除该用户的问卷数据？'}
+                  description={riderSafetyClearScope === 'all' ? '已发放或发放中的红包不能清除；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；不会影响其他用户和其他活动。`}
+                  okText="确认清除"
+                  cancelText="取消"
+                  onConfirm={handleClearRiderSafetySurveyData}
+                >
+                  <Button danger loading={riderSafetyClearing} disabled={riderSafetyClearScope === 'user' && !/^[1-9]\d*$/.test(riderSafetyUserId.trim())}>
+                    {riderSafetyClearScope === 'all' ? '清除全部数据' : '清除指定用户'}
+                  </Button>
+                </Popconfirm>
+              </Space>
             </Space>
           </Card>
         ) : null}

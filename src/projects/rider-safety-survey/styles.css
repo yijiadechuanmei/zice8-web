@@ -8,9 +8,7 @@
   --muted: #91a69d;
   min-height: 100svh;
   color: var(--paper);
-  background:
-    radial-gradient(circle at 80% -10%, #17493e 0, transparent 37%),
-    linear-gradient(155deg, #071714, #030a09 72%);
+  background: linear-gradient(165deg, #56bdf6 0%, #0ca1fe 52%, #078be8 100%);
   font-family: "Noto Sans SC", sans-serif;
   position: relative;
   overflow-x: hidden;
@@ -26,17 +24,7 @@
   z-index: 1;
 }
 .rss-road-lines {
-  position: fixed;
-  inset: 0;
-  opacity: 0.16;
-  background: repeating-linear-gradient(
-    122deg,
-    transparent 0 110px,
-    rgba(204, 255, 53, 0.25) 111px 113px,
-    transparent 114px 180px
-  );
-  transform: translateX(35%);
-  pointer-events: none;
+  display: none;
 }
 .rss-preview-flag {
   position: sticky;
@@ -124,9 +112,11 @@
 }
 .rss-home-background {
   width: 116.5334%;
+  max-width: none;
   height: auto;
-  left: -10%;
+  left: 50%;
   top: 8.2873%;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 .rss-home-title {
@@ -273,7 +263,7 @@
 .rss-category-title {
   margin: 0;
   color: #2067c4;
-  font-size: 3.15vw;
+  font-size: calc(3.15vw + 2px);
   font-weight: 900;
   line-height: 1.18;
   letter-spacing: -0.035em;
@@ -634,6 +624,120 @@
   margin: 32px 0 4px;
   color: var(--acid);
   font-size: 24px;
+}
+
+/* 结果、抽奖、领奖与加载页统一使用首页的明亮蓝色视觉。 */
+.rss-result-scene,
+.rss-lottery,
+.rss-prize-result,
+.rss-status {
+  width: 100vw;
+  min-height: 100svh;
+  margin-left: calc(50% - 50vw);
+  color: #fff;
+  background:
+    radial-gradient(circle at 10% 6%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.5px) 0 0 / 13px 18px,
+    linear-gradient(165deg, #69c7f8 0%, #0ca1fe 52%, #078be8 100%);
+}
+.rss-result-scene {
+  padding: 38px max(20px, calc((100vw - 520px) / 2)) 44px;
+}
+.rss-result-scene > h1,
+.rss-result-scene > .rss-section-kicker,
+.rss-result-scene > .rss-poster-wrap,
+.rss-result-scene > .rss-score-lines,
+.rss-result-scene > .rss-comment,
+.rss-result-scene > .rss-advice,
+.rss-result-scene > .rss-result-actions {
+  width: min(100%, 520px);
+  margin-left: auto;
+  margin-right: auto;
+}
+.rss-result-scene > h1,
+.rss-prize-result h1,
+.rss-status h1 {
+  color: #fff;
+}
+.rss-section-kicker {
+  color: #e8f8ff;
+}
+.rss-poster-wrap {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: #0a92ed;
+  box-shadow: 0 22px 48px rgba(0, 92, 180, 0.34);
+}
+.rss-score-lines i {
+  background: rgba(255, 255, 255, 0.32);
+}
+.rss-score-lines i b {
+  background: #fff;
+}
+.rss-score-lines strong,
+.rss-advice span {
+  color: #fff;
+}
+.rss-comment,
+.rss-advice,
+.rss-prize-result > p:not(.rss-section-kicker),
+.rss-lottery small,
+.rss-status p {
+  color: #e8f8ff;
+}
+.rss-advice {
+  border-left-color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+.rss-result-actions > button:first-child,
+.rss-text-button {
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+.rss-result-actions .rss-primary,
+.rss-claim-form .rss-primary {
+  color: #fff;
+  background: linear-gradient(100deg, #0f9bec 0%, #096fc8 64%, #075cac 100%);
+  box-shadow: 0 12px 24px rgba(0, 75, 158, 0.25);
+}
+.rss-radar {
+  border-color: rgba(255, 255, 255, 0.74);
+  background: repeating-radial-gradient(circle, rgba(15, 142, 225, 0.35) 0 1px, transparent 2px 37px);
+  box-shadow: 0 0 70px rgba(255, 255, 255, 0.18);
+}
+.rss-radar:before,
+.rss-radar:after {
+  background: rgba(255, 255, 255, 0.55);
+}
+.rss-radar i {
+  background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.48), transparent 45deg);
+}
+.rss-radar b,
+.rss-prize-orbit,
+.rss-prize-result h1,
+.rss-prize-orbit.is-win {
+  color: #fff;
+  border-color: #fff;
+}
+.rss-prize-orbit:before,
+.rss-prize-orbit:after {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+.rss-prize-orbit.is-win {
+  box-shadow: 0 0 55px rgba(255, 255, 255, 0.28);
+}
+.rss-claim-form input,
+.rss-claim-form textarea {
+  border-color: rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  color: #075fac;
+  background: #fff;
+}
+.rss-claim-form input:focus,
+.rss-claim-form textarea:focus {
+  border-color: #075fac;
+}
+.rss-claimed {
+  color: #075fac;
+  background: #fff;
 }
 @keyframes rss-enter {
   from {
