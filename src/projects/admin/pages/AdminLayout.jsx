@@ -30,6 +30,7 @@ import {
   TableOutlined,
   TeamOutlined,
   ToolOutlined,
+  SafetyCertificateOutlined,
   UserOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
@@ -42,6 +43,7 @@ import OperationLogPage from './OperationLogPage'
 import PaymentTestPage from './PaymentTestPage'
 import PermissionPage from './PermissionPage'
 import QuizQuestionImportPage from './QuizQuestionImportPage'
+import QualityMonthAdminPage from './QualityMonthAdminPage'
 import { getDataSchema } from '../api'
 
 const { Header, Sider, Content } = Layout
@@ -54,6 +56,7 @@ const tabs = [
   { key: 'dashboard', label: '数据看板', icon: <BarChartOutlined /> },
   { key: 'data', label: '数据表', icon: <TableOutlined /> },
   { key: 'quizImport', label: '题库导入', icon: <UploadOutlined />, activityTypes: ['quiz'] },
+  { key: 'qualityMonth', label: '质量月管理', icon: <SafetyCertificateOutlined />, activityTypes: ['otsuka_quality_month_quiz'] },
   { key: 'permissions', label: '权限配置', icon: <TeamOutlined /> },
   { key: 'accounts', label: '账号管理', icon: <TeamOutlined /> },
   { key: 'loginLogs', label: '登录日志', icon: <LoginOutlined /> },
@@ -307,6 +310,7 @@ export default function AdminLayout({
           {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport ? <Card><Empty description="无权访问题库导入，请联系管理员授权。" /></Card> : null}
+          {selectedActivity && activeTab === 'qualityMonth' && selectedActivity.type === 'otsuka_quality_month_quiz' ? <QualityMonthAdminPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'accounts' && adminUser.role === 'super_admin' ? <AccountPage /> : null}
           {activeTab === 'loginLogs' && adminUser.role === 'super_admin' ? <LoginLogPage /> : null}
           {selectedActivity && activeTab === 'permissions' && adminUser.role === 'super_admin' ? <PermissionPage activity={selectedActivity} activities={activities} /> : null}
@@ -353,6 +357,7 @@ function buildActivityUrl(activity) {
     xiwuqi_99_road_night: '/xiwuqi-99-road-night',
     latex_allergy_risk_test: '/latex-allergy-risk-test',
     longwen_beer_quiz: '/longwen-beer-quiz',
+    otsuka_quality_month_quiz: '/quality-month',
     quiz: '/quiz',
   }
   const prefix = pathPrefixByType[activity.type] || `/${encodeURIComponent(activity.type || '')}`

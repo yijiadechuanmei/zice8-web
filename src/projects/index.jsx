@@ -27,6 +27,7 @@ const ChakraAssessmentProject = lazy(() => import('./chakra-assessment/index.jsx
 const LongwenBeerQuizProject = lazy(() => import('./longwen-beer-quiz/index.jsx'))
 const BocTianjinBranchProject = lazy(() => import('./boc-tianjin-branch/index.jsx'))
 const RiderSafetySurveyProject = lazy(() => import('./rider-safety-survey/index.jsx'))
+const QualityMonthProject = lazy(() => import('./quality-month/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -40,6 +41,7 @@ const activityTypeProjects = {
   longwen_beer_quiz: LongwenBeerQuizProject,
   boc_tianjin_branch: BocTianjinBranchProject,
   rider_safety_survey: RiderSafetySurveyProject,
+  otsuka_quality_month_quiz: QualityMonthProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
@@ -59,6 +61,11 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/quality-month/:activityKey',
+    Component: QualityMonthProject,
+    activityGate: true,
+  },
   {
     path: '/rider_safety_survey/:activityKey',
     Component: RiderSafetySurveyProject,

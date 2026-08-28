@@ -210,6 +210,27 @@ export function clearRiderSafetySurveyData(activityKey, payload) {
   })
 }
 
+export function getQualityMonthSettings(activityKey) {
+  return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/settings`)
+}
+
+export function updateQualityMonthCurrentWeek(activityKey, weekNo) {
+  return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/current-week`, {
+    method: 'PUT',
+    body: JSON.stringify({ weekNo }),
+  })
+}
+
+export function clearQualityMonthData(activityKey, payload) {
+  return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/clear-data`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'CLEAR_OTSUKA_QUALITY_MONTH_DATA',
+    }),
+  })
+}
+
 export function reviewNanshaOpenMicEntry(activityKey, entryId, payload) {
   return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${entryId}/review`, {
     method: 'POST',
