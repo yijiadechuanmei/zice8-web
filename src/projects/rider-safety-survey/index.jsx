@@ -33,11 +33,28 @@ const categoryTitles = {
   保险与金融素养: "四、保险与金融素养（3题，痛点+反诈）",
 };
 
-function hideWechatToolbar() {
-  const hide = () => window.WeixinJSBridge?.call?.("hideToolbar");
-  hide();
-  document.addEventListener("WeixinJSBridgeReady", hide, false);
-  return () => document.removeEventListener("WeixinJSBridgeReady", hide, false);
+function syncVisibleViewportInset() {
+  const sync = () => {
+    const viewport = window.visualViewport;
+    const visibleBottom = viewport
+      ? viewport.offsetTop + viewport.height
+      : window.innerHeight;
+    const inset = Math.max(0, window.innerHeight - visibleBottom);
+    document.documentElement.style.setProperty(
+      "--rss-visible-bottom-inset",
+      `${Math.ceil(inset)}px`,
+    );
+  };
+  sync();
+  window.addEventListener("resize", sync);
+  window.visualViewport?.addEventListener("resize", sync);
+  window.visualViewport?.addEventListener("scroll", sync);
+  return () => {
+    window.removeEventListener("resize", sync);
+    window.visualViewport?.removeEventListener("resize", sync);
+    window.visualViewport?.removeEventListener("scroll", sync);
+    document.documentElement.style.removeProperty("--rss-visible-bottom-inset");
+  };
 }
 
 export default function RiderSafetySurveyProject({ routeParams }) {
@@ -68,7 +85,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   );
   useWechatShare(activityKey, publicConfig);
 
-  useEffect(() => hideWechatToolbar(), []);
+  useEffect(() => syncVisibleViewportInset(), []);
 
   useEffect(() => {
     if (preview) return;

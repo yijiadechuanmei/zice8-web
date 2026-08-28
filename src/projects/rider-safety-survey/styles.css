@@ -105,8 +105,7 @@
   position: relative;
 }
 .rss-home-background,
-.rss-home-title,
-.rss-home-start {
+.rss-home-title {
   position: absolute;
   display: block;
 }
@@ -127,10 +126,16 @@
   pointer-events: none;
 }
 .rss-home-start {
-  width: 60.8%;
+  position: fixed;
+  z-index: 10;
+  width: min(60.8vw, 456px);
   height: auto;
-  left: 19.6%;
-  top: 85.8425%;
+  left: 50%;
+  bottom: calc(
+    24px + env(safe-area-inset-bottom, 0px) +
+      var(--rss-visible-bottom-inset, 0px)
+  );
+  transform: translateX(-50%);
   padding: 0;
   border: 0;
   background: transparent;
@@ -142,7 +147,7 @@
   height: auto;
 }
 .rss-home-start:active {
-  transform: scale(0.975);
+  transform: translateX(-50%) scale(0.975);
   transform-origin: center;
 }
 .rss-home-start:focus-visible {
