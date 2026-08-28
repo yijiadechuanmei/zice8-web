@@ -184,14 +184,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     drawPoster();
   }, [drawPoster]);
 
-  const savePoster = () => {
-    drawPoster();
-    const link = document.createElement("a");
-    link.download = `${result?.title || "骑手安全诊断书"}.png`;
-    link.href = canvasRef.current.toDataURL("image/png");
-    link.click();
-  };
-
   if (!preview && blockedMessage)
     return (
       <Shell>
@@ -305,9 +297,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
             {result.advice}
           </div>
           <div className="rss-result-actions">
-            <button type="button" onClick={savePoster}>
-              保存海报
-            </button>
             <button
               className="rss-primary"
               type="button"
