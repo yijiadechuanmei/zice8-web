@@ -57,6 +57,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const { authReady, blockedMessage, hasToken } = useWechatAuth(
     activityKey,
     publicConfig,
+    { replaceOAuthCallback: true },
   );
   useWechatShare(activityKey, publicConfig);
 

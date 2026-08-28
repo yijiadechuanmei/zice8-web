@@ -76,6 +76,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const configuredOauthScope = getOauthScope(publicConfig)
   const configuredRequireUserinfo = getRequireUserinfo(publicConfig)
   const blockSnapshotUser = Boolean(options.blockSnapshotUser)
+  const replaceOAuthCallback = Boolean(options.replaceOAuthCallback)
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
@@ -151,8 +152,12 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     const callbackToken = getTokenFromUrl()
     if (callbackToken) {
       setToken(callbackToken)
-      removeQueryParam('token')
       clearReauthAttempts(activityKey)
+      if (replaceOAuthCallback) {
+        window.location.replace(sanitizeUrlForWechat(window.location.href))
+        return
+      }
+      removeQueryParam('token')
     }
 
     const inWechat = isWechatBrowser()
@@ -234,7 +239,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     setAuthReady(true)
     setAuthStatus('ready')
-  }, [activityKey, blockSnapshotUser, configuredOauthScope, configuredRequireUserinfo, publicConfig, reauth])
+  }, [activityKey, blockSnapshotUser, configuredOauthScope, configuredRequireUserinfo, publicConfig, reauth, replaceOAuthCallback])
 
   return { authReady, blockedMessage, hasToken: Boolean(getToken()), autoAuthStarted, authStatus, reauth, clearToken: removeToken }
 }
