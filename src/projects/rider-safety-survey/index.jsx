@@ -33,6 +33,13 @@ const categoryTitles = {
   保险与金融素养: "四、保险与金融素养（3题，痛点+反诈）",
 };
 
+function hideWechatToolbar() {
+  const hide = () => window.WeixinJSBridge?.call?.("hideToolbar");
+  hide();
+  document.addEventListener("WeixinJSBridgeReady", hide, false);
+  return () => document.removeEventListener("WeixinJSBridgeReady", hide, false);
+}
+
 export default function RiderSafetySurveyProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || ACTIVITY_KEY;
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -60,6 +67,8 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     { replaceOAuthCallback: true },
   );
   useWechatShare(activityKey, publicConfig);
+
+  useEffect(() => hideWechatToolbar(), []);
 
   useEffect(() => {
     if (preview) return;
