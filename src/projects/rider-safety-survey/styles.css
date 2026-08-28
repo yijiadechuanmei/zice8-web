@@ -102,15 +102,18 @@
 }
 .rss-intro {
   width: 100vw;
-  min-height: max(100svh, 193.0667vw);
   margin-left: calc(50% - 50vw);
-  overflow: hidden;
+  min-height: 100svh;
+  padding-block: max(0px, calc((100svh - min(193.0667vw, 1448px)) / 2));
+  display: flex;
+  justify-content: center;
+  overflow: auto hidden;
   background: #0ca1fe;
 }
 .rss-home-canvas {
   width: min(100vw, 750px);
   height: min(193.0667vw, 1448px);
-  margin: 0 auto;
+  flex: 0 0 auto;
   position: relative;
 }
 .rss-home-background,
