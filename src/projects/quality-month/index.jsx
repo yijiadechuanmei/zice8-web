@@ -13,6 +13,17 @@ import './styles.css'
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E']
 
+const HOME_ART = {
+  background: 'https://file3.ih5.cn/v35/edt/u10013600/7c3ce8c0e0c1e5286db805d23d2f0a0b_25307_750_1624.png',
+  left: 'https://file3.ih5.cn/v35/edt/u10013600/b1879bb493dc516c8820fb177d9ee055_2335_75_104.png',
+  title: 'https://file3.ih5.cn/v35/edt/u10013600/78c1f885d3321cd4dd0c48f2028a9532_8657_500_377.png',
+  sparkle: 'https://file3.ih5.cn/v35/edt/u10013600/c6356e646a7afee9da7ed6319ef53530_4002_105_110.png',
+  right: 'https://file3.ih5.cn/v35/edt/u10013600/bbd68fb58e09e4b420dcefa56d179e6e_21848_274_385.png',
+  character: 'https://file3.ih5.cn/v35/edt/u10013600/a2dd0b608707e00035bba13d84390872_18781_279_340.png',
+  bottom: 'https://file3.ih5.cn/v35/edt/u10013600/b4fda631befaf174cd9969c74e00e789_23238_349_369.png',
+  corner: 'https://file3.ih5.cn/v35/edt/u10013600/36372445f37b0d8b966cee0039160b24_4579_312_145.png',
+}
+
 export default function QualityMonthProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || 'china_otsuka_quality_month_2026'
   const previewMode = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('preview') : ''
@@ -165,7 +176,7 @@ export default function QualityMonthProject({ routeParams }) {
 
   return (
     <QualityShell>
-      <Header state={state} />
+      {state.phase !== 'home' ? <Header state={state} /> : null}
       {error ? <div className="qm-alert" role="alert">{error}</div> : null}
       {state.phase === 'home' ? <Home state={state} loading={submitting} onStart={start} /> : null}
       {state.phase === 'quiz' && currentQuestion ? (
@@ -254,25 +265,29 @@ function Header({ state }) {
 function Home({ state, loading, onStart }) {
   return (
     <section className="qm-home">
-      <div className="qm-home-copy">
-        <p className="qm-kicker">2026 · QUALITY MONTH</p>
-        <h2>质量意识在心中<br /><em>规范操作在行动</em></h2>
-        <p className="qm-lead">本周共 {state.totalQuestions} 题。每位用户每周仅可提交一次，请确认全部答案后再完成提交。</p>
-      </div>
-      <div className="qm-current-week">
-        <span>当前答题</span>
-        <strong>第 {state.currentWeek} 周</strong>
-        <p>{state.weekTitle}</p>
-      </div>
-      <button className="qm-primary" type="button" onClick={onStart} disabled={loading}>
-        <span>{loading ? '正在开始…' : '开始答题'}</span><b>→</b>
-      </button>
-      <div className="qm-week-track" aria-label={`共${state.totalWeeks}周，当前第${state.currentWeek}周`}>
-        {Array.from({ length: state.totalWeeks }, (_, index) => (
-          <span key={index} className={index + 1 === state.currentWeek ? 'is-current' : index + 1 < state.currentWeek ? 'is-past' : ''}>
-            {String(index + 1).padStart(2, '0')}
-          </span>
-        ))}
+      <h1 className="qm-sr-only">{state.activity.title}</h1>
+      <div className="qm-home-scene">
+        <img className="qm-home-art qm-home-art--background" src={HOME_ART.background} alt="" />
+        <img className="qm-home-art qm-home-art--character" src={HOME_ART.character} alt="" />
+        <img className="qm-home-art qm-home-art--corner" src={HOME_ART.corner} alt="" />
+        <img className="qm-home-art qm-home-art--sparkle" src={HOME_ART.sparkle} alt="" />
+        <img className="qm-home-art qm-home-art--title" src={HOME_ART.title} alt="质量月 Quality Belongs To All" />
+        <img className="qm-home-art qm-home-art--left" src={HOME_ART.left} alt="" />
+        <img className="qm-home-art qm-home-art--right" src={HOME_ART.right} alt="" />
+        <img className="qm-home-art qm-home-art--bottom" src={HOME_ART.bottom} alt="" />
+        <div className="qm-home-cta-wrap">
+          <p>第 {state.currentWeek} 周 · {state.weekTitle}</p>
+          <button className="qm-primary qm-primary--home" type="button" onClick={onStart} disabled={loading}>
+            <span>{loading ? '正在进入…' : '开始本周答题'}</span><b>→</b>
+          </button>
+          <div className="qm-week-track" aria-label={`共${state.totalWeeks}周，当前第${state.currentWeek}周`}>
+            {Array.from({ length: state.totalWeeks }, (_, index) => (
+              <span key={index} className={index + 1 === state.currentWeek ? 'is-current' : index + 1 < state.currentWeek ? 'is-past' : ''}>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )
