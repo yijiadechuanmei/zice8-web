@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackEvent, trackPageView } from '../../shared/analytics'
@@ -37,6 +37,22 @@ export default function QualityMonthProject({ routeParams }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
   useWechatShare(activityKey, publicConfig)
+
+  function restoreDraft(data) {
+    if (data?.phase !== 'quiz' || !data.attemptId) {
+      setAnswers({})
+      setQuestionIndex(0)
+      return
+    }
+    try {
+      const draft = JSON.parse(localStorage.getItem(draftKey(data.attemptId)) || '{}')
+      setAnswers(draft.answers || {})
+      setQuestionIndex(Math.min(Number(draft.questionIndex || 0), Math.max(data.questions.length - 1, 0)))
+    } catch {
+      setAnswers({})
+      setQuestionIndex(0)
+    }
+  }
 
   useEffect(() => {
     if (previewMode) return undefined
@@ -95,28 +111,9 @@ export default function QualityMonthProject({ routeParams }) {
     return () => window.clearInterval(timer)
   }, [state?.phase, state?.startedAt])
 
-  const questions = useMemo(() => state?.questions || [], [state?.questions])
+  const questions = state?.questions || []
   const currentQuestion = questions[questionIndex]
-  const answeredCount = useMemo(
-    () => questions.filter((question) => Number.isInteger(answers[question.id])).length,
-    [answers, questions],
-  )
-
-  function restoreDraft(data) {
-    if (data?.phase !== 'quiz' || !data.attemptId) {
-      setAnswers({})
-      setQuestionIndex(0)
-      return
-    }
-    try {
-      const draft = JSON.parse(localStorage.getItem(draftKey(data.attemptId)) || '{}')
-      setAnswers(draft.answers || {})
-      setQuestionIndex(Math.min(Number(draft.questionIndex || 0), Math.max(data.questions.length - 1, 0)))
-    } catch {
-      setAnswers({})
-      setQuestionIndex(0)
-    }
-  }
+  const answeredCount = questions.filter((question) => Number.isInteger(answers[question.id])).length
 
   function choose(questionId, selectedOption) {
     const next = { ...answers, [questionId]: selectedOption }
@@ -135,8 +132,11 @@ export default function QualityMonthProject({ routeParams }) {
     setError('')
     try {
       const data = await startQualityMonthQuiz(activityKey)
+      clearDraft(data.attemptId)
       setState(data)
-      restoreDraft(data)
+      setAnswers({})
+      setQuestionIndex(0)
+      setElapsedSeconds(0)
       if (!previewMode) {
         trackEvent({ activityKey, eventType: 'quality_month_start', page: '/quality-month', extra: { activityType: 'otsuka_quality_month_quiz', weekNo: data.currentWeek } })
       }
@@ -377,6 +377,11 @@ function formatNumber(value) {
 
 function draftKey(attemptId) {
   return `quality_month_draft:${attemptId}`
+}
+
+function clearDraft(attemptId) {
+  if (!attemptId) return
+  localStorage.removeItem(draftKey(attemptId))
 }
 
 function saveDraft(attemptId, answers, questionIndex) {
