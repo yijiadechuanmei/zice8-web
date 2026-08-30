@@ -28,6 +28,7 @@ const LongwenBeerQuizProject = lazy(() => import('./longwen-beer-quiz/index.jsx'
 const BocTianjinBranchProject = lazy(() => import('./boc-tianjin-branch/index.jsx'))
 const RiderSafetySurveyProject = lazy(() => import('./rider-safety-survey/index.jsx'))
 const QualityMonthProject = lazy(() => import('./quality-month/index.jsx'))
+const LvyuanFruitfulGamesProject = lazy(() => import('./lvyuan-fruitful-games/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -42,6 +43,7 @@ const activityTypeProjects = {
   boc_tianjin_branch: BocTianjinBranchProject,
   rider_safety_survey: RiderSafetySurveyProject,
   otsuka_quality_month_quiz: QualityMonthProject,
+  lvyuan_consumer_game_collection: LvyuanFruitfulGamesProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
@@ -294,6 +296,7 @@ export const projectRoutes = [
     path: '/:activityType/:activityKey',
     Component: ActivityTypeProject,
     activityGate: true,
+    activityGateExcludedKeys: ['lvyuan_fruitful_heart_2026'],
   },
   {
     path: '/admin',
