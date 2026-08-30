@@ -21,13 +21,13 @@ import "./styles.css";
 
 const previewConfig = {
   accessMode: "public",
-  oauthScope: "snsapi_base",
-  requireUserinfo: false,
+  oauthScope: "snsapi_userinfo",
+  requireUserinfo: true,
 };
 const activityAssetsBaseUrl = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`;
 
 const categoryTitles = {
-  基础信息: "一、基础信息（2题，点选即可）",
+  基础信息: "一、基础信息（2题）",
   交通安全: "二、交通安全（2题，情景判断）",
   职业伤害保障: "三、职业伤害保障（3题，认知+行为）",
   保险与金融素养: "四、保险与金融素养（3题，痛点+反诈）",
@@ -78,7 +78,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     recipientAddress: "",
   });
   const canvasRef = useRef(null);
-  const { authReady, blockedMessage, hasToken } = useWechatAuth(
+  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(
     activityKey,
     publicConfig,
     { replaceOAuthCallback: true },
@@ -98,6 +98,10 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     if (preview || !authReady || !hasToken) return;
     getBootstrap(activityKey)
       .then((data) => {
+        if (data.profileIncomplete) {
+          reauth("missing-user-profile");
+          return;
+        }
         setBootstrap(data);
         if (data.draw) {
           setDraw(data.draw);
@@ -108,7 +112,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
         }
       })
       .catch((error) => setNotice(readError(error, "问卷加载失败")));
-  }, [activityKey, authReady, hasToken, preview]);
+  }, [activityKey, authReady, hasToken, preview, reauth]);
 
   const question = questions[index];
   const currentAnswer = answers[question?.id];
