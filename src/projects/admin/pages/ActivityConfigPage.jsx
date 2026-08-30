@@ -854,7 +854,7 @@ export default function ActivityConfigPage({ activity }) {
                 ) : null}
                 <Popconfirm
                   title={riderSafetyClearScope === 'all' ? '确认清除本活动全部问卷数据？' : '确认清除该用户的问卷数据？'}
-                  description={riderSafetyClearScope === 'all' ? '已发放或发放中的红包不能清除；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；不会影响其他用户和其他活动。`}
+                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；无论是否中奖均可清除，且不会影响其他用户和其他活动。`}
                   okText="确认清除"
                   cancelText="取消"
                   onConfirm={handleClearRiderSafetySurveyData}

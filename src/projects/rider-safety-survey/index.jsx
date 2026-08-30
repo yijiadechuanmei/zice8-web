@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
 import {
-  claimPrize,
   createAuthorization,
   drawPrize,
   getBootstrap,
@@ -72,11 +71,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const [draw, setDraw] = useState(null);
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
-  const [claim, setClaim] = useState({
-    recipientName: "",
-    recipientPhone: "",
-    recipientAddress: "",
-  });
   const canvasRef = useRef(null);
   const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(
     activityKey,
@@ -184,23 +178,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     } catch (error) {
       setStage("result");
       setNotice(readError(error, "抽奖未完成，请稍后重试"));
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const submitClaim = async (event) => {
-    event.preventDefault();
-    if (busy) return;
-    setBusy("claim");
-    try {
-      const data = preview
-        ? { ...draw, claimed: true, status: "claimed" }
-        : await claimPrize(activityKey, claim);
-      setDraw(data);
-      setNotice("领奖信息已登记，请留意后续联系。");
-    } catch (error) {
-      setNotice(readError(error, "领奖信息提交失败"));
     } finally {
       setBusy("");
     }
@@ -343,10 +320,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
       {stage === "prize" ? (
         <PrizeResult
           draw={draw}
-          claim={claim}
-          setClaim={setClaim}
-          submitClaim={submitClaim}
-          busy={busy}
           onPoster={() => setStage("result")}
         />
       ) : null}
@@ -423,9 +396,8 @@ function LotteryAnimation() {
   );
 }
 
-function PrizeResult({ draw, claim, setClaim, submitClaim, busy, onPoster }) {
-  const won = draw?.status === "won" || draw?.status === "claimed";
-  const physical = won && draw?.prizeType === "physical";
+function PrizeResult({ draw, onPoster }) {
+  const won = draw?.status === "won";
   return (
     <section className="rss-prize-result">
       <p className="rss-section-kicker">DRAW RESULT</p>
@@ -435,45 +407,7 @@ function PrizeResult({ draw, claim, setClaim, submitClaim, busy, onPoster }) {
       <h1>{won ? "恭喜中奖" : "谢谢参与"}</h1>
       <h2>{won ? draw.prizeName : "平安到家就是今天的头奖"}</h2>
       {draw?.prizeType === "cash" && won ? (
-        <p>现金红包将按微信最终状态发放，请留意微信零钱通知。</p>
-      ) : null}
-      {physical && !draw.claimed ? (
-        <form className="rss-claim-form" onSubmit={submitClaim}>
-          <input
-            required
-            maxLength="100"
-            placeholder="收件人姓名"
-            value={claim.recipientName}
-            onChange={(e) =>
-              setClaim({ ...claim, recipientName: e.target.value })
-            }
-          />
-          <input
-            required
-            pattern="1\d{10}"
-            placeholder="手机号码"
-            value={claim.recipientPhone}
-            onChange={(e) =>
-              setClaim({ ...claim, recipientPhone: e.target.value })
-            }
-          />
-          <textarea
-            required
-            minLength="5"
-            maxLength="500"
-            placeholder="收件地址"
-            value={claim.recipientAddress}
-            onChange={(e) =>
-              setClaim({ ...claim, recipientAddress: e.target.value })
-            }
-          />
-          <button className="rss-primary" disabled={busy === "claim"}>
-            {busy === "claim" ? "登记中…" : "登记领奖信息"}
-          </button>
-        </form>
-      ) : null}
-      {draw?.claimed ? (
-        <div className="rss-claimed">✓ 领奖信息已登记</div>
+        <p>测试阶段仅记录抽奖结果，不会发起真实红包发放。</p>
       ) : null}
       <button type="button" className="rss-text-button" onClick={onPoster}>
         返回查看诊断海报
@@ -501,23 +435,24 @@ function normalizeSubmission(data) {
 }
 
 function previewPrize(forced) {
-  const type = ["cash", "physical", "none"].includes(forced)
+  const type = ["cash", "cash_200", "cash_6800", "none"].includes(forced)
     ? forced
-    : ["cash", "physical", "none"][Math.floor(Math.random() * 3)];
-  if (type === "cash")
+    : ["cash_200", "cash_6800", "none"][Math.floor(Math.random() * 3)];
+  if (type === "cash" || type === "cash_200")
     return {
-      id: "preview-cash",
+      id: "preview-cash-200",
       status: "won",
       prizeType: "cash",
-      prizeName: "0.30元微信现金红包",
-      prizeAmount: 30,
+      prizeName: "2元微信现金红包",
+      prizeAmount: 200,
     };
-  if (type === "physical")
+  if (type === "cash_6800")
     return {
-      id: "preview-physical",
+      id: "preview-cash-6800",
       status: "won",
-      prizeType: "physical",
-      prizeName: "防晒冰袖",
+      prizeType: "cash",
+      prizeName: "68元微信现金红包",
+      prizeAmount: 6800,
     };
   return {
     id: "preview-none",
