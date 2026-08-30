@@ -153,6 +153,25 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'otsuka_quality_month_quiz') {
+      const qualityMonth = overview?.qualityMonth || {}
+      const currentWeek = qualityMonth.currentWeekStats || {}
+      return [
+        { label: '当前周期', value: qualityMonth.currentWeek ?? 1, suffix: '周' },
+        { label: '当前周开始答题', value: currentWeek.startedCount ?? 0 },
+        { label: '当前周完成答题', value: currentWeek.finishedCount ?? 0 },
+        { label: '当前周完成率', value: Math.round(Number(currentWeek.completionRate ?? 0)), suffix: '%' },
+        { label: '累计开始答题', value: qualityMonth.startedCount ?? 0 },
+        { label: '累计完成答题', value: qualityMonth.finishedCount ?? 0 },
+        { label: '累计完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
+        { label: '平均正确率', value: Math.round(Number(qualityMonth.averageAccuracy ?? 0)), suffix: '%' },
+        { label: '平均答对题数', value: Number(qualityMonth.averageCorrectCount ?? 0).toFixed(1) },
+        { label: '平均答题用时', value: Math.round(Number(qualityMonth.averageDurationSeconds ?? 0)), suffix: '秒' },
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+      ]
+    }
+
     if (activity.type === 'material_review_registration') {
       const materialRegistration = overview?.materialRegistration || {}
       return [
@@ -261,6 +280,10 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     ...item,
     label: `第${item.phaseNo}期`,
     stockRemaining: Math.max(Number(item.stockTotal || 0) - Number(item.stockUsed || 0), 0),
+  }))
+  const qualityMonthWeekStats = (overview?.qualityMonth?.weeks || []).map((item) => ({
+    ...item,
+    label: `第${item.weekNo}周`,
   }))
   const nanshaLifecycleTrend = mergeNanshaLifecycleTrend(
     charts?.nanshaOpenMic?.registrationTrend,
@@ -398,6 +421,35 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
+          {activity.type === 'otsuka_quality_month_quiz' ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="各周答题情况" description="按用户在每周的最后一条答题记录统计">
+                  <LazyChart
+                    type="bar"
+                    data={qualityMonthWeekStats}
+                    series={[
+                      { key: 'startedCount', name: '开始答题' },
+                      { key: 'finishedCount', name: '完成答题' },
+                    ]}
+                  />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="各周答题质量" description="仅统计已完成提交的答题结果">
+                  <LazyChart
+                    type="bar"
+                    data={qualityMonthWeekStats}
+                    series={[
+                      { key: 'averageAccuracy', name: '平均正确率（%）' },
+                      { key: 'averageCorrectCount', name: '平均答对题数' },
+                    ]}
+                  />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
           {activity.type === 'artist_call_lottery' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
@@ -494,7 +546,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || isTjrcbPensionManual ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || isTjrcbPensionManual ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
