@@ -102,131 +102,179 @@ function createSnakeFromTrail(trail, segmentCount) {
   ))
 }
 
-function SnakeBoard({ snake, fruit }) {
-  const head = snake[0]
+function drawSnakeBall(context, x, y, radius, hue, label) {
+  const shine = context.createRadialGradient(x - radius * 0.35, y - radius * 0.4, radius * 0.08, x, y, radius)
+  shine.addColorStop(0, 'rgba(255,255,255,0.94)')
+  shine.addColorStop(0.16, `hsla(${hue}, 100%, 75%, 0.88)`)
+  shine.addColorStop(0.5, `hsl(${hue}, 88%, 54%)`)
+  shine.addColorStop(1, `hsl(${hue}, 80%, 36%)`)
+  context.fillStyle = shine
+  context.strokeStyle = `hsla(${hue}, 76%, 26%, 0.82)`
+  context.lineWidth = Math.max(1, radius * 0.08)
+  context.beginPath()
+  context.arc(x, y, radius, 0, Math.PI * 2)
+  context.fill()
+  context.stroke()
+  context.fillStyle = 'rgba(7, 40, 20, 0.25)'
+  context.beginPath()
+  context.ellipse(x + radius * 0.2, y + radius * 0.55, radius * 0.6, radius * 0.16, 0, 0, Math.PI * 2)
+  context.fill()
+  if (!label) return
+  context.fillStyle = '#7a2119'
+  context.font = `900 ${Math.max(10, radius * 1.05)}px PingFang SC, Microsoft YaHei, sans-serif`
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  context.fillText(label, x, y + 1)
+}
 
+function drawSnakeHead(context, x, y, radius, direction) {
+  context.save()
+  context.translate(x, y)
+  context.rotate(Math.atan2(direction.y, direction.x) + Math.PI / 2)
+  const skin = context.createRadialGradient(-radius * 0.36, -radius * 0.42, radius * 0.08, 0, 0, radius)
+  skin.addColorStop(0, '#fff3e0')
+  skin.addColorStop(0.15, '#ff8b6d')
+  skin.addColorStop(0.52, '#e5482e')
+  skin.addColorStop(1, '#a9261c')
+  context.fillStyle = skin
+  context.strokeStyle = '#8b291d'
+  context.lineWidth = Math.max(1, radius * 0.08)
+  context.beginPath()
+  context.arc(0, 0, radius * 1.12, 0, Math.PI * 2)
+  context.fill()
+  context.stroke()
+  context.fillStyle = '#76a83e'
+  context.beginPath()
+  context.ellipse(radius * 0.18, -radius * 1.16, radius * 0.42, radius * 0.18, -0.34, 0, Math.PI * 2)
+  context.fill()
+  context.fillStyle = '#f7f1d6'
+  for (const eyeX of [-radius * 0.42, radius * 0.42]) {
+    context.beginPath()
+    context.ellipse(eyeX, -radius * 0.2, radius * 0.26, radius * 0.34, 0, 0, Math.PI * 2)
+    context.fill()
+    context.fillStyle = '#152b1e'
+    context.beginPath()
+    context.arc(eyeX, -radius * 0.16, radius * 0.15, 0, Math.PI * 2)
+    context.fill()
+    context.fillStyle = '#fff'
+    context.beginPath()
+    context.arc(eyeX - radius * 0.05, -radius * 0.22, radius * 0.045, 0, Math.PI * 2)
+    context.fill()
+    context.fillStyle = '#f7f1d6'
+  }
+  context.strokeStyle = '#6d1d18'
+  context.lineWidth = Math.max(1.3, radius * 0.1)
+  context.beginPath()
+  context.arc(0, radius * 0.2, radius * 0.33, 0.1, Math.PI - 0.1)
+  context.stroke()
+  context.restore()
+}
+
+function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d')
+    if (!canvas || !context) return undefined
+    let frameId = 0
+    let width = 0
+    let height = 0
+    let pixelRatio = 1
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect()
+      width = rect.width
+      height = rect.height
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.max(1, Math.round(width * pixelRatio))
+      canvas.height = Math.max(1, Math.round(height * pixelRatio))
+    }
+
+    const draw = (time) => {
+      if (!width || !height) resize()
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+      context.clearRect(0, 0, width, height)
+      const cell = Math.min(width / GRID_WIDTH, height / GRID_HEIGHT)
+      const snake = snakeRef.current
+      const fruit = fruitRef.current
+      const pulse = 1 + Math.sin(time / 175) * 0.06
+      const fruitX = (fruit.x / GRID_WIDTH) * width
+      const fruitY = (fruit.y / GRID_HEIGHT) * height
+      context.save()
+      context.translate(fruitX, fruitY)
+      context.scale(pulse, pulse)
+      context.font = `${Math.max(20, cell * 1.1)}px Apple Color Emoji, PingFang SC, sans-serif`
+      context.textAlign = 'center'
+      context.textBaseline = 'middle'
+      context.shadowColor = 'rgba(10, 37, 19, 0.34)'
+      context.shadowBlur = 3
+      context.shadowOffsetY = 2
+      context.fillText(fruit.emoji, 0, 0)
+      context.restore()
+
+      for (let index = snake.length - 1; index >= 1; index -= 1) {
+        const part = snake[index]
+        drawSnakeBall(
+          context,
+          (part.x / GRID_WIDTH) * width,
+          (part.y / GRID_HEIGHT) * height,
+          cell * SNAKE_RADIUS,
+          SNAKE_BALL_HUES[index % SNAKE_BALL_HUES.length],
+          index > 1 ? SNAKE_BODY_TEXT[(index - 2) % SNAKE_BODY_TEXT.length] : '',
+        )
+      }
+      const head = snake[0]
+      drawSnakeHead(
+        context,
+        (head.x / GRID_WIDTH) * width,
+        (head.y / GRID_HEIGHT) * height,
+        cell * SNAKE_RADIUS,
+        directionRef.current,
+      )
+      frameId = window.requestAnimationFrame(draw)
+    }
+
+    resize()
+    const observer = new ResizeObserver(resize)
+    observer.observe(canvas)
+    frameId = window.requestAnimationFrame(draw)
+    return () => {
+      observer.disconnect()
+      window.cancelAnimationFrame(frameId)
+    }
+  }, [directionRef, fruitRef, snakeRef])
+
+  return <canvas ref={canvasRef} className="lyfg-snake-canvas" aria-hidden="true" />
+}
+
+function SnakeBoard({ snakeRef, fruitRef, directionRef, snakeLength }) {
   return (
     <div
       className="lyfg-board"
       role="img"
-      aria-label={`贪吃蛇游戏区，当前蛇身长度 ${snake.length}`}
+      aria-label={`贪吃蛇游戏区，当前蛇身长度 ${snakeLength}`}
       style={{ '--lyfg-columns': GRID_WIDTH, '--lyfg-rows': GRID_HEIGHT }}
     >
-      <div
-        className={`lyfg-fruit lyfg-fruit--${fruit.id}`}
-        style={{
-          '--lyfg-left': `${(fruit.x / GRID_WIDTH) * 100}%`,
-          '--lyfg-top': `${(fruit.y / GRID_HEIGHT) * 100}%`,
-        }}
-        title={`${fruit.label} +${fruit.score}`}
-      >
-        <span>{fruit.emoji}</span>
-      </div>
-
-      {snake.map((part, index) => (
-        <span
-          key={index}
-          className={`lyfg-snake-part ${index === 0 ? 'lyfg-snake-part--head' : ''}`}
-          style={{
-            '--lyfg-left': `${(part.x / GRID_WIDTH) * 100}%`,
-            '--lyfg-top': `${(part.y / GRID_HEIGHT) * 100}%`,
-            '--lyfg-body-index': index,
-            '--lyfg-ball-hue': SNAKE_BALL_HUES[index % SNAKE_BALL_HUES.length],
-          }}
-        >
-          {index === 0 ? (
-            <i className="lyfg-snake-face" aria-hidden="true">
-              <span /><span /><b />
-            </i>
-          ) : index > 1 ? (
-            <b className="lyfg-snake-character" aria-hidden="true">
-              {SNAKE_BODY_TEXT[(index - 2) % SNAKE_BODY_TEXT.length]}
-            </b>
-          ) : null}
-        </span>
-      ))}
-
       <span className="lyfg-board-sun" aria-hidden="true" />
       <span className="lyfg-board-leaf lyfg-board-leaf--one" aria-hidden="true" />
       <span className="lyfg-board-leaf lyfg-board-leaf--two" aria-hidden="true" />
-      <span
-        className="lyfg-head-location"
-        style={{
-          '--lyfg-left': `${(head.x / GRID_WIDTH) * 100}%`,
-          '--lyfg-top': `${(head.y / GRID_HEIGHT) * 100}%`,
-        }}
-        aria-hidden="true"
-      />
+      <SnakeCanvas snakeRef={snakeRef} fruitRef={fruitRef} directionRef={directionRef} />
     </div>
   )
 }
 
-function Joystick({ onDirection }) {
-  const baseRef = useRef(null)
-  const [knob, setKnob] = useState({ x: 0, y: 0 })
-  const [active, setActive] = useState(false)
-
-  const updateFromPointer = useCallback((event) => {
-    const rect = baseRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const rawX = event.clientX - (rect.left + rect.width / 2)
-    const rawY = event.clientY - (rect.top + rect.height / 2)
-    const distance = Math.hypot(rawX, rawY)
-    const scale = distance > JOYSTICK_LIMIT ? JOYSTICK_LIMIT / distance : 1
-    const x = rawX * scale
-    const y = rawY * scale
-    setKnob({ x, y })
-
-    if (distance > 14) onDirection(normalizeVector({ x: rawX, y: rawY }))
-  }, [onDirection])
-
-  const handlePointerDown = (event) => {
-    event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
-    setActive(true)
-    updateFromPointer(event)
-  }
-
-  const handlePointerMove = (event) => {
-    if (!active) return
-    event.preventDefault()
-    updateFromPointer(event)
-  }
-
-  const resetKnob = () => {
-    setActive(false)
-    setKnob({ x: 0, y: 0 })
-  }
-
+function FloatingJoystick({ joystickRef }) {
   return (
-    <div className="lyfg-joystick-wrap">
-      <p><span />360° 拖动摇杆 · 自由转向</p>
-      <div
-        ref={baseRef}
-        className={`lyfg-joystick ${active ? 'is-active' : ''}`}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={resetKnob}
-        onPointerCancel={resetKnob}
-      >
-        <span className="lyfg-joystick-direction lyfg-joystick-direction--up">↑</span>
-        <span className="lyfg-joystick-direction lyfg-joystick-direction--right">→</span>
-        <span className="lyfg-joystick-direction lyfg-joystick-direction--down">↓</span>
-        <span className="lyfg-joystick-direction lyfg-joystick-direction--left">←</span>
-        <span
-          className="lyfg-joystick-knob"
-          style={{ transform: `translate3d(${knob.x}px, ${knob.y}px, 0)` }}
-        >
-          <i />
-        </span>
-      </div>
+    <div ref={joystickRef} className="lyfg-floating-joystick" aria-hidden="true">
+      <span className="lyfg-floating-joystick__ring" />
+      <span className="lyfg-floating-joystick__knob"><i /></span>
     </div>
   )
 }
 
 function SnakeGame({ activityKey, onBack }) {
-  const [snake, setSnake] = useState(INITIAL_SNAKE)
+  const [snakeLength, setSnakeLength] = useState(INITIAL_SNAKE.length)
   const [fruit, setFruit] = useState(() => getRandomFruit(INITIAL_SNAKE))
   const [score, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(() => Number(localStorage.getItem(`${activityKey}:snake-best`)) || 0)
@@ -238,10 +286,9 @@ function SnakeGame({ activityKey, onBack }) {
   const fruitRef = useRef(fruit)
   const scoreRef = useRef(0)
   const bestScoreRef = useRef(bestScore)
-
-  useEffect(() => {
-    snakeRef.current = snake
-  }, [snake])
+  const joystickRef = useRef(null)
+  const activePointerRef = useRef(null)
+  const joystickOriginRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     fruitRef.current = fruit
@@ -260,11 +307,54 @@ function SnakeGame({ activityKey, onBack }) {
     trailRef.current = createInitialTrail()
     fruitRef.current = nextFruit
     scoreRef.current = 0
-    setSnake(INITIAL_SNAKE)
+    setSnakeLength(INITIAL_SNAKE.length)
     setFruit(nextFruit)
     setScore(0)
     setGameState('playing')
   }, [])
+
+  const updateFloatingJoystick = useCallback((event) => {
+    const joystick = joystickRef.current
+    if (!joystick) return
+    const origin = joystickOriginRef.current
+    const rawX = event.clientX - origin.x
+    const rawY = event.clientY - origin.y
+    const distance = Math.hypot(rawX, rawY)
+    const scale = distance > JOYSTICK_LIMIT ? JOYSTICK_LIMIT / distance : 1
+    const x = rawX * scale
+    const y = rawY * scale
+    joystick.querySelector('.lyfg-floating-joystick__knob').style.transform = `translate3d(${x}px, ${y}px, 0)`
+    if (distance > 12) chooseDirection(normalizeVector({ x: rawX, y: rawY }))
+  }, [chooseDirection])
+
+  const releaseFloatingJoystick = useCallback((event) => {
+    if (activePointerRef.current !== event.pointerId) return
+    activePointerRef.current = null
+    const joystick = joystickRef.current
+    if (!joystick) return
+    joystick.classList.remove('is-active')
+    joystick.querySelector('.lyfg-floating-joystick__knob').style.transform = 'translate3d(0, 0, 0)'
+  }, [])
+
+  const handleControlPointerDown = useCallback((event) => {
+    if (gameState !== 'playing' || event.target.closest('button')) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    activePointerRef.current = event.pointerId
+    joystickOriginRef.current = { x: event.clientX, y: event.clientY }
+    const joystick = joystickRef.current
+    if (!joystick) return
+    joystick.style.left = `${event.clientX}px`
+    joystick.style.top = `${event.clientY}px`
+    joystick.classList.add('is-active')
+    updateFloatingJoystick(event)
+  }, [gameState, updateFloatingJoystick])
+
+  const handleControlPointerMove = useCallback((event) => {
+    if (activePointerRef.current !== event.pointerId) return
+    event.preventDefault()
+    updateFloatingJoystick(event)
+  }, [updateFloatingJoystick])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -330,7 +420,6 @@ function SnakeGame({ activityKey, onBack }) {
 
       snakeRef.current = nextSnake
       trailRef.current = nextTrail
-      setSnake(nextSnake)
 
       if (!ateFruit) {
         frameId = window.requestAnimationFrame(moveSnake)
@@ -338,6 +427,7 @@ function SnakeGame({ activityKey, onBack }) {
       }
 
       const nextScore = scoreRef.current + currentFruit.score
+      setSnakeLength(nextLength)
       scoreRef.current = nextScore
       setScore(nextScore)
       if (nextScore > bestScoreRef.current) {
@@ -366,9 +456,13 @@ function SnakeGame({ activityKey, onBack }) {
 
   return (
     <main
-      className="lyfg-page"
+      className="lyfg-page lyfg-snake-game-page"
       data-activity-type={LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE}
       data-activity-key={activityKey}
+      onPointerDown={handleControlPointerDown}
+      onPointerMove={handleControlPointerMove}
+      onPointerUp={releaseFloatingJoystick}
+      onPointerCancel={releaseFloatingJoystick}
     >
       <section className="lyfg-game-shell">
         <header className="lyfg-header">
@@ -400,7 +494,12 @@ function SnakeGame({ activityKey, onBack }) {
 
         <div className="lyfg-board-frame">
           <div className="lyfg-board-label"><span>贪吃蛇</span><i>{gameState === 'paused' ? '已暂停' : '碰墙即失败'}</i></div>
-          <SnakeBoard snake={snake} fruit={fruit} />
+          <SnakeBoard
+            snakeRef={snakeRef}
+            fruitRef={fruitRef}
+            directionRef={directionRef}
+            snakeLength={snakeLength}
+          />
 
           {overlayVisible ? (
             <div className="lyfg-game-overlay">
@@ -432,7 +531,7 @@ function SnakeGame({ activityKey, onBack }) {
               {gameState === 'paused' ? '继续' : '暂停'}
             </button>
           ) : null}
-          <Joystick onDirection={chooseDirection} />
+          <div className="lyfg-touch-hint"><span />任意位置按住拖动 · 浮动摇杆自由转向</div>
           <div className="lyfg-fruit-legend" aria-label="果实分值">
             {LVYUAN_SNAKE_FRUITS.map((item) => (
               <span key={item.id}>{item.emoji}<small>+{item.score}</small></span>
@@ -440,6 +539,7 @@ function SnakeGame({ activityKey, onBack }) {
           </div>
         </div>
       </section>
+      <FloatingJoystick joystickRef={joystickRef} />
     </main>
   )
 }
