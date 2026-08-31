@@ -4,7 +4,7 @@ export const ACTIVITY_KEY = "rider_safety_survey_20260827";
 export const questions = [
   {
     id: "q1",
-    section: "基础信息",
+    section: "一、基础信息",
     title: "你跑单多久了？",
     options: [
       ["new", "新手（<1年）"],
@@ -14,7 +14,7 @@ export const questions = [
   },
   {
     id: "q2",
-    section: "基础信息",
+    section: "一、基础信息",
     title: "你是全职还是兼职？",
     options: [
       ["full_time", "全职"],
@@ -23,7 +23,7 @@ export const questions = [
   },
   {
     id: "q3",
-    section: "交通安全",
+    section: "二、交通安全",
     title: "送单时突然要接单/看导航，你会怎么操作？",
     options: [
       ["stop_safely", "靠边停稳再看"],
@@ -34,7 +34,7 @@ export const questions = [
   },
   {
     id: "q4",
-    section: "交通安全",
+    section: "二、交通安全",
     title: "下雨天，在斑马线滑倒了，你第一反应是？",
     options: [
       ["continue", "赶紧爬起来继续送，收工再说"],
@@ -44,7 +44,7 @@ export const questions = [
   },
   {
     id: "q5",
-    section: "职业伤害保障",
+    section: "三、职业伤害保障",
     title: "福建给外卖骑手上了“职业伤害保险”，你了解吗？",
     options: [
       ["never_heard", "完全没听过"],
@@ -55,7 +55,7 @@ export const questions = [
   },
   {
     id: "q6",
-    section: "职业伤害保障",
+    section: "三、职业伤害保障",
     title: "如果跑单时受伤了，你会优先走哪个？",
     options: [
       ["commercial", "平台商业意外险"],
@@ -66,7 +66,7 @@ export const questions = [
   },
   {
     id: "q7",
-    section: "职业伤害保障",
+    section: "三、职业伤害保障",
     title: "有人说“给点抽成，我帮你多报点赔款”，你会？",
     options: [
       ["reject", "直接拒绝，自己走官方"],
@@ -76,7 +76,7 @@ export const questions = [
   },
   {
     id: "q8",
-    section: "金融素养",
+    section: "四、金融素养",
     title: "你最怕骑手保险哪一点？",
     hint: "可多选",
     multiple: true,
@@ -90,7 +90,7 @@ export const questions = [
   },
   {
     id: "q9",
-    section: "金融素养",
+    section: "四、金融素养",
     title: "遇到保险纠纷，你会怎么办？",
     options: [
       ["insurer", "打保险公司电话"],
@@ -101,7 +101,7 @@ export const questions = [
   },
   {
     id: "q10",
-    section: "金融素养",
+    section: "四、金融素养",
     title: "下面哪些是骗局？",
     hint: "多选，全对才有效",
     multiple: true,
