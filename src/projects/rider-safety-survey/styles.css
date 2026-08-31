@@ -105,7 +105,8 @@
   position: relative;
 }
 .rss-home-background,
-.rss-home-title {
+.rss-home-title,
+.rss-home-organizer {
   position: absolute;
   display: block;
 }
@@ -119,10 +120,23 @@
   pointer-events: none;
 }
 .rss-home-title {
-  width: 85.2%;
+  width: 73.3334%;
   height: auto;
-  left: 7.7334%;
-  top: 2.6934%;
+  left: 13.2%;
+  top: 1.6575%;
+  pointer-events: none;
+}
+.rss-home-organizer {
+  width: min(68vw, 510px);
+  height: auto;
+  position: fixed;
+  z-index: 10;
+  left: 50%;
+  bottom: calc(
+    5.3334vw + env(safe-area-inset-bottom, 0px) +
+      var(--rss-visible-bottom-inset, 0px)
+  );
+  transform: translateX(-50%);
   pointer-events: none;
 }
 .rss-home-start {
@@ -132,7 +146,8 @@
   height: auto;
   left: 50%;
   bottom: calc(
-    24px + env(safe-area-inset-bottom, 0px) +
+    5.3334vw + min(16.8vw, 126px) + min(0.8vw, 6px) +
+      env(safe-area-inset-bottom, 0px) +
       var(--rss-visible-bottom-inset, 0px)
   );
   transform: translateX(-50%);

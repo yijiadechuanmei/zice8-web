@@ -414,8 +414,14 @@ function Intro({ onStart }) {
         />
         <img
           className="rss-home-title"
-          src={`${activityAssetsBaseUrl}/home-title.png`}
+          src={`${activityAssetsBaseUrl}/c118bfc922cfec85d93da4220135ef3d_12255_550_355.png`}
           alt="护商行动 安商问卷"
+          referrerPolicy="no-referrer"
+        />
+        <img
+          className="rss-home-organizer"
+          src={`${activityAssetsBaseUrl}/2f1a775078dbb7bc8f07a2fc83fee458_5019_510_126.png`}
+          alt="主办单位"
           referrerPolicy="no-referrer"
         />
         <button
