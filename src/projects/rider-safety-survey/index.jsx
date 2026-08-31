@@ -119,6 +119,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const result = submission?.resultCode
     ? results[submission.resultCode]
     : submission?.result;
+  const hasDraw = Boolean(draw?.id);
   const categoryQuestions = questions.filter(
     (item) => item.section === question?.section,
   );
@@ -334,15 +335,17 @@ export default function RiderSafetySurveyProject({ routeParams }) {
             <button
               className="rss-result-draw"
               type="button"
-              onClick={startDraw}
+              onClick={hasDraw ? () => setStage("prize") : startDraw}
               disabled={busy === "draw"}
-              aria-label={busy === "draw" ? "正在准备抽奖" : "立即抽奖"}
+              aria-label={
+                busy === "draw"
+                  ? "正在准备抽奖"
+                  : hasDraw
+                    ? "查看奖品"
+                    : "立即抽奖"
+              }
             >
-              <img
-                src={`${activityAssetsBaseUrl}/99f4cd96cc98a974b16e14ddeb6b1f4f_8277_676_116.png`}
-                alt="立即抽奖"
-                referrerPolicy="no-referrer"
-              />
+              {busy === "draw" ? "正在准备抽奖…" : hasDraw ? "查看奖品" : "立即抽奖"}
             </button>
           </div>
         </section>
