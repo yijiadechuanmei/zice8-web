@@ -41,6 +41,7 @@ body:has(.qm-app) { margin: 0; background: var(--qm-lavender); }
 .qm-home-art--corner { width: 41.6%; height: 10.014%; left: 68.8%; top: 9.53%; }
 .qm-home-cta-wrap { position: absolute; z-index: 2; width: 53.333%; left: 13.333%; top: 59.945%; text-align: center; }
 .qm-home-cta-wrap > p { margin: 0 0 12px; color: var(--qm-deep); font-size: clamp(9px, 2.2vw, 14px); font-weight: 900; line-height: 1.35; text-shadow: 0 1px rgba(255,255,255,.65); }
+.qm-home-cta-wrap > .qm-home-schedule { margin: -5px 0 12px; color: var(--qm-purple); font-size: clamp(8px, 1.9vw, 12px); letter-spacing: .02em; }
 
 .qm-primary { width: 100%; min-height: 56px; padding: 0 20px 0 23px; display: flex; align-items: center; justify-content: space-between; color: #fff; background: var(--qm-purple); border: 3px solid #fff; border-radius: 999px; box-shadow: 0 7px 0 rgba(53,35,111,.22), 0 14px 26px rgba(82,59,166,.23); font: 900 16px/1 inherit; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease; }
 .qm-primary b { font-size: 24px; line-height: 1; transition: transform .18s ease; }

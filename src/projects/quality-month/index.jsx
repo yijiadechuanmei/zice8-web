@@ -295,6 +295,7 @@ function Home({ state, loading, onStart }) {
         <img className="qm-home-art qm-home-art--bottom" src={HOME_ART.bottom} alt="" />
         <div className="qm-home-cta-wrap">
           <p>第 {state.currentWeek} 周 · {state.weekTitle}</p>
+          {state.currentWeek === 1 ? <p className="qm-home-schedule">答题时间：9月1日 08:00—9月4日 16:30</p> : null}
           <button className="qm-primary qm-primary--home" type="button" onClick={onStart} disabled={loading}>
             <span>{loading ? '正在进入…' : '开始本周答题'}</span><b>→</b>
           </button>
