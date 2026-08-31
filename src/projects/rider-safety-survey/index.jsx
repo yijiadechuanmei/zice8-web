@@ -543,15 +543,15 @@ function PrizeWheel({ draw, onComplete }) {
                 className="rss-wheel-label"
                 key={`${label}-${index}`}
                 style={{
-                  transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-31vw) rotate(${-angle}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(calc(-1 * min(31vw, 155px))) rotate(-90deg)`,
                 }}
               >
                 {label}
               </span>
             );
           })}
-          <div className="rss-wheel-center">抽奖中</div>
         </div>
+        <div className="rss-wheel-center">抽奖中</div>
       </div>
       <small>请稍候，转盘停止后公布结果</small>
     </section>
