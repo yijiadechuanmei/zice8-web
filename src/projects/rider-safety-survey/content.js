@@ -76,7 +76,7 @@ export const questions = [
   },
   {
     id: "q8",
-    section: "保险与金融素养",
+    section: "金融素养",
     title: "你最怕骑手保险哪一点？",
     hint: "可多选",
     multiple: true,
@@ -90,18 +90,18 @@ export const questions = [
   },
   {
     id: "q9",
-    section: "保险与金融素养",
+    section: "金融素养",
     title: "遇到保险纠纷，你会怎么办？",
     options: [
       ["insurer", "打保险公司电话"],
       ["third_party", "找第三方维权代理"],
-      ["hotline_12378", "打12378（金融热线）"],
+      ["hotline_968133", "打968133（维权热线）"],
       ["give_up", "自认倒霉"],
     ],
   },
   {
     id: "q10",
-    section: "保险与金融素养",
+    section: "金融素养",
     title: "下面哪些是骗局？",
     hint: "多选，全对才有效",
     multiple: true,
@@ -110,7 +110,6 @@ export const questions = [
       ["claim_refund", "理赔双倍退款"],
       ["credit_repair", "低息贷款消除征信"],
       ["police_transfer", "公检法要求转账"],
-      ["all", "这些都是"],
     ],
   },
 ];
@@ -155,7 +154,7 @@ export const results = {
     subtitle: "主打一个“随缘”，维权靠运气",
     comment:
       "“私了也行”“自认倒霉”“条款看不懂”……咱跑单挣的是辛苦钱，不是“随缘钱”！咱不惹事，但也别怕事，保险公司和社保局是给你撑腰的。",
-    advice: "把手机里“12378（金融热线）”存上，比存“前任号码”有用。",
+    advice: "把手机里“968133（维权热线）”存上，比存“前任号码”有用。",
   },
   hesitation_loses: {
     title: "犹豫就会败北",
@@ -176,14 +175,15 @@ export function scoreSurvey(answers) {
   const policy =
     (["understand", "expert"].includes(answers.q5) ? 2 : 0) +
     (answers.q6 === "occupational" ? 2 : answers.q6 === "commercial" ? 1 : 0);
-  const allScams =
-    q10.includes("all") ||
-    ["rebate_scam", "claim_refund", "credit_repair", "police_transfer"].every(
-      (item) => q10.includes(item),
-    );
+  const allScams = [
+    "rebate_scam",
+    "claim_refund",
+    "credit_repair",
+    "police_transfer",
+  ].every((item) => q10.includes(item));
   const fraud =
     (answers.q7 === "reject" ? 2 : 0) +
-    (["insurer", "hotline_12378"].includes(answers.q9) ? 2 : 0) +
+    (["insurer", "hotline_968133"].includes(answers.q9) ? 2 : 0) +
     (allScams ? 2 : 0);
   const total = safety + policy + fraud;
   const unclear = [
