@@ -184,6 +184,67 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: '今日报名人数', value: materialRegistration.todayRegistrationTotal ?? overview?.todayRegistrationTotal ?? 0 },
       ]
     }
+    if (activity.type === "rider_safety_survey") {
+      const riderSurvey = overview?.riderSafetySurvey || {};
+      const averageScores = riderSurvey.averageScores || {};
+      return [
+        {
+          label: "当前模式",
+          value: riderSurvey.testMode ? "测试（不发放）" : "正式发放",
+          tooltip: riderSurvey.testMode
+            ? "当前抽奖只记录测试结果，不会调用微信现金红包发放。"
+            : "当前按活动配置执行现金红包发放。",
+        },
+        {
+          label: "PV",
+          value: overview?.pv ?? 0,
+          tooltip: pvHint,
+          hint:
+            overview?.accessStats?.dataAvailable === false
+              ? "暂无访问埋点数据"
+              : "",
+        },
+        {
+          label: "UV",
+          value: overview?.uv ?? 0,
+          tooltip: uvHint,
+          hint:
+            overview?.accessStats?.dataAvailable === false
+              ? "暂无访问埋点数据"
+              : "",
+        },
+        { label: "今日 PV", value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: "今日 UV", value: overview?.todayUv ?? 0, tooltip: uvHint },
+        {
+          label: "已填写资料",
+          value: overview?.participantCount ?? 0,
+          tooltip: "已提交姓名和手机号的去重参与用户数。",
+        },
+        { label: "完成问卷", value: riderSurvey.submissionCount ?? 0 },
+        { label: "今日完成", value: riderSurvey.todaySubmissionCount ?? 0 },
+        {
+          label: "问卷完成率",
+          value: Math.round(Number(overview?.completionRate ?? 0)),
+          suffix: "%",
+        },
+        {
+          label: "平均总分",
+          value: averageScores.total ?? 0,
+          suffix: "分",
+          tooltip: "满分 14 分。",
+        },
+        { label: "抽奖次数", value: riderSurvey.drawCount ?? 0 },
+        {
+          label: "测试中奖",
+          value: riderSurvey.winCount ?? 0,
+          tooltip: riderSurvey.testMode
+            ? "仅为测试库存扣减和页面结果，不表示真实红包已发放。"
+            : "",
+        },
+        { label: "谢谢参与", value: riderSurvey.missCount ?? 0 },
+        { label: "待确认", value: riderSurvey.pendingCount ?? 0 },
+      ];
+    }
 
     if (activity.type === 'nansha_open_mic') {
       const nansha = overview?.nanshaOpenMic || {}
@@ -296,6 +357,15 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   )
   const nanshaReviewStatus = charts?.nanshaOpenMic?.reviewStatusDistribution || []
   const nanshaTopWorks = charts?.nanshaOpenMic?.topWorks || []
+  const riderSafetySurveyTrend = mergeRiderSafetySurveyTrend(
+    charts?.riderSafetySurvey?.submissionTrend,
+    charts?.riderSafetySurvey?.drawTrend,
+    charts?.riderSafetySurvey?.winTrend,
+  );
+  const riderSafetySurveyResultDistribution =
+    overview?.riderSafetySurvey?.resultDistribution || [];
+  const riderSafetySurveyPrizeStock =
+    overview?.riderSafetySurvey?.prizeStock || [];
 
   if (loading) {
     return (
@@ -545,8 +615,81 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
               </Row>
             </>
           ) : null}
+          {activity.type === "rider_safety_survey" ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={6}>
+                <ChartPanel
+                  title="近 7 天 PV/UV 趋势"
+                  description={charts?.access?.message}
+                >
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart
+                      type="line"
+                      data={charts.access.pvUvTrend || []}
+                      series={[
+                        { key: "pv", name: "PV" },
+                        { key: "uv", name: "UV" },
+                      ]}
+                    />
+                  ) : (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={
+                        charts?.access?.message || "暂无访问埋点数据"
+                      }
+                    />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={6}>
+                <ChartPanel
+                  title="近 7 天问卷与抽奖"
+                  description="按问卷提交、抽奖结果和中奖确认时间统计"
+                >
+                  <LazyChart
+                    type="line"
+                    data={riderSafetySurveyTrend}
+                    series={[
+                      { key: "submissions", name: "完成问卷" },
+                      { key: "draws", name: "抽奖" },
+                      { key: "wins", name: "中奖" },
+                    ]}
+                  />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={6}>
+                <ChartPanel
+                  title="测评结果分布"
+                  description="按已提交问卷的最终测评结果统计"
+                >
+                  <LazyChart
+                    type="donut"
+                    data={riderSafetySurveyResultDistribution}
+                    series={[{ key: "value", name: "人数" }]}
+                    emptyText="暂无问卷结果"
+                  />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={6}>
+                <ChartPanel
+                  title="红包库存"
+                  description="测试期的已抽中仅用于验证库存和转盘结果，不代表真实发放"
+                >
+                  <LazyChart
+                    type="bar"
+                    data={riderSafetySurveyPrizeStock}
+                    series={[
+                      { key: "issuedCount", name: "已抽中" },
+                      { key: "remainingCount", name: "剩余" },
+                    ]}
+                    emptyText="暂无红包库存"
+                  />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || isTjrcbPensionManual ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -624,7 +767,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : activity.type === 'nansha_open_mic' ? null : (
+          ) : activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>
@@ -703,6 +846,31 @@ function mergeNanshaVoteTrend(votes = [], voters = []) {
   votes.forEach((item) => { ensure(item.date).votes = item.value || 0 })
   voters.forEach((item) => { ensure(item.date).voters = item.value || 0 })
   return Array.from(map.values()).sort((left, right) => String(left.date).localeCompare(String(right.date)))
+}
+function mergeRiderSafetySurveyTrend(submissions = [], draws = [], wins = []) {
+  const map = new Map();
+  const ensure = (date) => {
+    const current = map.get(date) || {
+      date,
+      submissions: 0,
+      draws: 0,
+      wins: 0,
+    };
+    map.set(date, current);
+    return current;
+  };
+  submissions.forEach((item) => {
+    ensure(item.date).submissions = item.value || 0;
+  });
+  draws.forEach((item) => {
+    ensure(item.date).draws = item.value || 0;
+  });
+  wins.forEach((item) => {
+    ensure(item.date).wins = item.value || 0;
+  });
+  return Array.from(map.values()).sort((left, right) =>
+    String(left.date).localeCompare(String(right.date)),
+  );
 }
 
 function formatMetric(value) {
