@@ -9,6 +9,11 @@ export const getPublicConfig = (activityKey) =>
   });
 export const getBootstrap = (activityKey) =>
   request(`${base(activityKey)}/bootstrap`);
+export const submitParticipantProfile = (activityKey, payload) =>
+  request(`${base(activityKey)}/profile`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 export const submitSurvey = (activityKey, answers) =>
   request(`${base(activityKey)}/submissions`, {
     method: "POST",

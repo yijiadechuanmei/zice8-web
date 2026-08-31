@@ -6,6 +6,7 @@ import {
   drawPrize,
   getBootstrap,
   getPublicConfig,
+  submitParticipantProfile,
   submitSurvey,
   syncAuthorization,
 } from "./api";
@@ -25,11 +26,10 @@ const previewConfig = {
 };
 const activityAssetsBaseUrl = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`;
 
-const categoryTitles = {
-  基础信息: "一、基础信息（2题）",
-  交通安全: "二、交通安全（2题，情景判断）",
-  职业伤害保障: "三、职业伤害保障（3题，认知+行为）",
-  保险与金融素养: "四、保险与金融素养（3题，痛点+反诈）",
+const WHEEL_SEGMENTS = ["谢谢参与", "2元红包", "谢谢参与", "68元红包", "谢谢参与", "2元红包"];
+const WHEEL_STOP_INDEX_BY_PRIZE = {
+  cash_200: 1,
+  cash_6800: 3,
 };
 
 function syncVisibleViewportInset() {
@@ -71,6 +71,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const [draw, setDraw] = useState(null);
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
+  const [participant, setParticipant] = useState({ name: "", phone: "" });
   const canvasRef = useRef(null);
   const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(
     activityKey,
@@ -97,7 +98,13 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           return;
         }
         setBootstrap(data);
-        if (data.draw) {
+        setParticipant({
+          name: data.participant?.name || "",
+          phone: data.participant?.phone || "",
+        });
+        if (!data.participant?.completed) {
+          setStage("profile");
+        } else if (data.draw) {
           setDraw(data.draw);
           setStage("prize");
         } else if (data.submission) {
@@ -161,23 +168,65 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     }
   };
 
+  const submitParticipant = async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    const name = participant.name.trim();
+    const phone = participant.phone.trim();
+    if (!name) {
+      setNotice("请输入姓名");
+      return;
+    }
+    if (!/^1\d{10}$/.test(phone)) {
+      setNotice("请输入正确的手机号码");
+      return;
+    }
+    setBusy("profile");
+    setNotice("");
+    try {
+      const data = preview
+        ? { name, phone, completed: true }
+        : await submitParticipantProfile(activityKey, { name, phone });
+      setParticipant({ name: data.name, phone: data.phone });
+      setBootstrap((current) => ({ ...current, participant: data }));
+      if (bootstrap?.draw) setDraw(bootstrap.draw);
+      if (bootstrap?.submission)
+        setSubmission(normalizeSubmission(bootstrap.submission));
+      setStage(
+        bootstrap?.draw ? "prize" : bootstrap?.submission ? "result" : "survey",
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      setNotice(readError(error, "资料提交失败，请稍后重试"));
+    } finally {
+      setBusy("");
+    }
+  };
+
   const startDraw = async () => {
     if (busy) return;
     setBusy("draw");
     setNotice("");
+    setStage("dispatch");
     try {
       if (!preview)
         await ensureAuthorization(activityKey, bootstrap?.authorization);
-      setStage("lottery");
-      await wait(1800);
       const data = preview
         ? previewPrize(query.get("prize"))
         : await drawPrize(activityKey, createRequestId());
       setDraw(data);
-      setStage("prize");
+      await wait(720);
+      setStage("wheel");
     } catch (error) {
-      setStage("result");
-      setNotice(readError(error, "抽奖未完成，请稍后重试"));
+      setDraw({
+        id: "dispatch-failed",
+        status: "miss",
+        prizeType: "none",
+        prizeName: null,
+      });
+      setNotice(readError(error, "红包发放未成功，本次为谢谢参与"));
+      await wait(720);
+      setStage("wheel");
     } finally {
       setBusy("");
     }
@@ -187,6 +236,8 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     if (!result || !submission || !canvasRef.current) return;
     paintPoster(canvasRef.current, result, submission.scores);
   }, [result, submission]);
+
+  const completeWheel = useCallback(() => setStage("prize"), []);
 
   useEffect(() => {
     drawPoster();
@@ -217,12 +268,26 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           本地流程预览 · 不写数据 / 不发红包
         </div>
       ) : null}
-      {stage === "intro" ? <Intro onStart={() => setStage("survey")} /> : null}
+      {stage === "intro" ? (
+        <Intro
+          onStart={() =>
+            setStage(bootstrap?.participant?.completed ? "survey" : "profile")
+          }
+        />
+      ) : null}
+      {stage === "profile" ? (
+        <ParticipantProfile
+          value={participant}
+          onChange={setParticipant}
+          onSubmit={submitParticipant}
+          busy={busy === "profile"}
+        />
+      ) : null}
       {stage === "survey" ? (
         <section className="rss-question-page" key={question.id}>
           <div className="rss-question-card">
             <p className="rss-category-title">
-              {categoryTitles[question.section] || question.section}
+              {`${question.section}（${categoryQuestions.length}题）`}
             </p>
             <div
               className="rss-reference-progress"
@@ -316,7 +381,10 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           </div>
         </section>
       ) : null}
-      {stage === "lottery" ? <LotteryAnimation /> : null}
+      {stage === "dispatch" ? <PrizeDispatching /> : null}
+      {stage === "wheel" ? (
+        <PrizeWheel draw={draw} onComplete={completeWheel} />
+      ) : null}
       {stage === "prize" ? (
         <PrizeResult
           draw={draw}
@@ -383,21 +451,117 @@ function ScoreLine({ label, value, max }) {
   );
 }
 
-function LotteryAnimation() {
+function ParticipantProfile({ value, onChange, onSubmit, busy }) {
   return (
-    <section className="rss-lottery">
-      <div className="rss-radar">
+    <section className="rss-profile-page">
+      <form className="rss-profile-card" onSubmit={onSubmit}>
+        <p className="rss-section-kicker">JOIN THE SURVEY</p>
+        <h1>填写参与资料</h1>
+        <p>请先填写姓名和手机号码，再开始答题。</p>
+        <label>
+          <span>姓名</span>
+          <input
+            required
+            maxLength="100"
+            autoComplete="name"
+            placeholder="请输入姓名"
+            value={value.name}
+            onChange={(event) =>
+              onChange((current) => ({ ...current, name: event.target.value }))
+            }
+          />
+        </label>
+        <label>
+          <span>手机号码</span>
+          <input
+            required
+            inputMode="tel"
+            pattern="1\d{10}"
+            maxLength="11"
+            autoComplete="tel"
+            placeholder="请输入手机号码"
+            value={value.phone}
+            onChange={(event) =>
+              onChange((current) => ({
+                ...current,
+                phone: event.target.value.replace(/\D/g, "").slice(0, 11),
+              }))
+            }
+          />
+        </label>
+        <button className="rss-primary" type="submit" disabled={busy}>
+          {busy ? "正在进入问卷…" : "开始答题"}
+        </button>
+        <small>仅用于本次问卷参与与活动联络。</small>
+      </form>
+    </section>
+  );
+}
+
+function PrizeDispatching() {
+  return (
+    <section className="rss-dispatch" aria-live="polite">
+      <div className="rss-dispatch-icon" aria-hidden="true">
         <i />
-        <b>LUCK</b>
+        <b>¥</b>
       </div>
-      <p>正在扫描你的幸运路段</p>
-      <small>奖品由服务端库存与预算共同锁定</small>
+      <p>正在确认抽奖结果</p>
+      <small>奖品由服务端库存与发放状态决定</small>
+    </section>
+  );
+}
+
+function PrizeWheel({ draw, onComplete }) {
+  const targetIndex = wheelStopIndexForDraw(draw);
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setRotation(1440 - targetIndex * 60);
+    });
+    const timer = window.setTimeout(onComplete, 3900);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [onComplete, targetIndex]);
+
+  return (
+    <section className="rss-wheel-page" aria-live="polite">
+      <p className="rss-section-kicker">LUCKY WHEEL</p>
+      <h1>幸运转盘</h1>
+      <p className="rss-wheel-tip">结果已确定，正在转向本次抽奖结果</p>
+      <div className="rss-wheel-stage">
+        <div className="rss-wheel-pointer" aria-hidden="true" />
+        <div
+          className="rss-wheel"
+          style={{ transform: `rotate(${rotation}deg)` }}
+          aria-label="抽奖转盘"
+        >
+          {WHEEL_SEGMENTS.map((label, index) => {
+            const angle = index * 60;
+            return (
+              <span
+                className="rss-wheel-label"
+                key={`${label}-${index}`}
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-31vw) rotate(${-angle}deg)`,
+                }}
+              >
+                {label}
+              </span>
+            );
+          })}
+          <div className="rss-wheel-center">抽奖中</div>
+        </div>
+      </div>
+      <small>请稍候，转盘停止后公布结果</small>
     </section>
   );
 }
 
 function PrizeResult({ draw, onPoster }) {
-  const won = draw?.status === "won";
+  const won = isWinningDraw(draw);
   return (
     <section className="rss-prize-result">
       <p className="rss-section-kicker">DRAW RESULT</p>
@@ -414,6 +578,17 @@ function PrizeResult({ draw, onPoster }) {
       </button>
     </section>
   );
+}
+
+function isWinningDraw(draw) {
+  return Boolean(
+    draw?.status === "won" &&
+      Object.prototype.hasOwnProperty.call(WHEEL_STOP_INDEX_BY_PRIZE, draw.prizeCode),
+  );
+}
+
+function wheelStopIndexForDraw(draw) {
+  return isWinningDraw(draw) ? WHEEL_STOP_INDEX_BY_PRIZE[draw.prizeCode] : 0;
 }
 
 function Status({ title, text }) {
@@ -443,6 +618,7 @@ function previewPrize(forced) {
       id: "preview-cash-200",
       status: "won",
       prizeType: "cash",
+      prizeCode: "cash_200",
       prizeName: "2元微信现金红包",
       prizeAmount: 200,
     };
@@ -451,6 +627,7 @@ function previewPrize(forced) {
       id: "preview-cash-6800",
       status: "won",
       prizeType: "cash",
+      prizeCode: "cash_6800",
       prizeName: "68元微信现金红包",
       prizeAmount: 6800,
     };
