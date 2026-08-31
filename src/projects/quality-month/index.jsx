@@ -413,10 +413,10 @@ function Result({ state }) {
       <details className="qm-review">
         <summary>查看答题明细</summary>
         <div>
-          {state.answers.map((answer) => (
+          {state.answers.map((answer, index) => (
             <article key={answer.questionId} className={answer.isCorrect ? 'is-correct' : 'is-wrong'}>
               <span>{answer.isCorrect ? '正确' : '错误'}</span>
-              <h3>{answer.sort}. {answer.title}</h3>
+              <h3>{index + 1}. {answer.title}</h3>
               <p>你的答案：{LETTERS[answer.selectedOption]} · 正确答案：{LETTERS[answer.correctOption]}</p>
             </article>
           ))}
