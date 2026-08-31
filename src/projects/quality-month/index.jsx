@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackEvent, trackPageView } from '../../shared/analytics'
@@ -36,6 +36,8 @@ export default function QualityMonthProject({ routeParams }) {
   const [answers, setAnswers] = useState({})
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [profileDialogOpen, setProfileDialogOpen] = useState(false)
+  const [toast, setToast] = useState('')
+  const toastTimerRef = useRef(null)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
   useWechatShare(activityKey, publicConfig)
 
@@ -112,6 +114,10 @@ export default function QualityMonthProject({ routeParams }) {
     return () => window.clearInterval(timer)
   }, [state?.phase, state?.startedAt])
 
+  useEffect(() => () => {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+  }, [])
+
   const questions = state?.questions || []
   const currentQuestion = questions[questionIndex]
   const answeredCount = questions.filter((question) => Number.isInteger(answers[question.id])).length
@@ -150,12 +156,26 @@ export default function QualityMonthProject({ routeParams }) {
   }
 
   function requestStart() {
+    const activityWindowMessage = getActivityWindowMessage(publicConfig)
+    if (activityWindowMessage) {
+      showToast(activityWindowMessage)
+      return
+    }
     if (!state?.profileCompleted) {
       setError('')
       setProfileDialogOpen(true)
       return
     }
     start()
+  }
+
+  function showToast(message) {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+    setToast(message)
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast('')
+      toastTimerRef.current = null
+    }, 1800)
   }
 
   async function finish() {
@@ -206,6 +226,7 @@ export default function QualityMonthProject({ routeParams }) {
         />
       ) : null}
       {state.phase === 'result' ? <Result state={state} /> : null}
+      {toast ? <div className="qm-toast" role="status">{toast}</div> : null}
       <ProfileDialog
         open={profileDialogOpen}
         loading={submitting}
@@ -437,6 +458,17 @@ function formatDuration(seconds) {
 function formatNumber(value) {
   const number = Number(value) || 0
   return Number.isInteger(number) ? String(number) : number.toFixed(2)
+}
+
+function getActivityWindowMessage(publicConfig) {
+  const now = Date.now()
+  const startTime = publicConfig?.startTime ? new Date(publicConfig.startTime).getTime() : NaN
+  const endTime = publicConfig?.endTime ? new Date(publicConfig.endTime).getTime() : NaN
+  if (Number.isFinite(startTime) && now < startTime) return '活动未开始'
+  if (Number.isFinite(endTime) && now > endTime) return '活动已结束'
+  if (publicConfig?.activityWindow?.status === 'not_started') return '活动未开始'
+  if (publicConfig?.activityWindow?.status === 'ended') return '活动已结束'
+  return ''
 }
 
 function draftKey(attemptId) {
