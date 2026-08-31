@@ -45,7 +45,7 @@ export const questions = [
   {
     id: "q5",
     section: "三、职业伤害保障",
-    title: "福建给外卖骑手上了“职业伤害保险”，你了解吗？",
+    title: "平台给外卖骑手上了“职业伤害保障”，你了解吗？",
     options: [
       ["never_heard", "完全没听过"],
       ["heard", "听过名字"],
@@ -59,7 +59,7 @@ export const questions = [
     title: "如果跑单时受伤了，你会优先走哪个？",
     options: [
       ["commercial", "平台商业意外险"],
-      ["occupational", "政府职伤保险"],
+      ["occupational", "职业伤害保障"],
       ["both", "两个都报"],
       ["unknown", "不知道选哪个"],
     ],
