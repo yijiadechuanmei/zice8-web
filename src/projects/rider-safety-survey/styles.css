@@ -133,7 +133,7 @@
   z-index: 10;
   left: 50%;
   bottom: calc(
-    5.3334vw + env(safe-area-inset-bottom, 0px) +
+    10vw + env(safe-area-inset-bottom, 0px) +
       var(--rss-visible-bottom-inset, 0px)
   );
   transform: translateX(-50%);
@@ -146,7 +146,7 @@
   height: auto;
   left: 50%;
   bottom: calc(
-    5.3334vw + min(16.8vw, 126px) + min(0.8vw, 6px) +
+    10vw + min(16.8vw, 126px) + min(0.8vw, 6px) +
       env(safe-area-inset-bottom, 0px) +
       var(--rss-visible-bottom-inset, 0px)
   );
