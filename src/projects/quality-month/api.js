@@ -7,8 +7,9 @@ export const getQualityMonthPublicConfig = (activityKey) =>
 
 export const getQualityMonthState = (activityKey) => request(`${base(activityKey)}/bootstrap`)
 
-export const startQualityMonthQuiz = (activityKey) => request(`${base(activityKey)}/start`, {
+export const startQualityMonthQuiz = (activityKey, profile) => request(`${base(activityKey)}/start`, {
   method: 'POST',
+  body: JSON.stringify(profile || {}),
 })
 
 export const submitQualityMonthQuiz = (activityKey, attemptId, answers) =>

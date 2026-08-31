@@ -35,6 +35,7 @@ export default function QualityMonthProject({ routeParams }) {
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
   useWechatShare(activityKey, publicConfig)
 
@@ -126,17 +127,18 @@ export default function QualityMonthProject({ routeParams }) {
     saveDraft(state.attemptId, answers, index)
   }
 
-  async function start() {
+  async function start(profile) {
     if (submitting) return
     setSubmitting(true)
     setError('')
     try {
-      const data = await startQualityMonthQuiz(activityKey)
+      const data = await startQualityMonthQuiz(activityKey, profile)
       clearDraft(data.attemptId)
       setState(data)
       setAnswers({})
       setQuestionIndex(0)
       setElapsedSeconds(0)
+      setProfileDialogOpen(false)
       if (!previewMode) {
         trackEvent({ activityKey, eventType: 'quality_month_start', page: '/quality-month', extra: { activityType: 'otsuka_quality_month_quiz', weekNo: data.currentWeek } })
       }
@@ -145,6 +147,15 @@ export default function QualityMonthProject({ routeParams }) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function requestStart() {
+    if (!state?.profileCompleted) {
+      setError('')
+      setProfileDialogOpen(true)
+      return
+    }
+    start()
   }
 
   async function finish() {
@@ -178,7 +189,7 @@ export default function QualityMonthProject({ routeParams }) {
     <QualityShell>
       {state.phase !== 'home' ? <Header state={state} /> : null}
       {error ? <div className="qm-alert" role="alert">{error}</div> : null}
-      {state.phase === 'home' ? <Home state={state} loading={submitting} onStart={start} /> : null}
+      {state.phase === 'home' ? <Home state={state} loading={submitting} onStart={requestStart} /> : null}
       {state.phase === 'quiz' && currentQuestion ? (
         <Quiz
           state={state}
@@ -195,6 +206,13 @@ export default function QualityMonthProject({ routeParams }) {
         />
       ) : null}
       {state.phase === 'result' ? <Result state={state} /> : null}
+      <ProfileDialog
+        open={profileDialogOpen}
+        loading={submitting}
+        serverError={error}
+        onClose={() => setProfileDialogOpen(false)}
+        onSubmit={start}
+      />
     </QualityShell>
   )
 }
@@ -236,7 +254,7 @@ function buildPreviewState(mode) {
       })),
     }
   }
-  return { ...base, phase: 'home' }
+  return { ...base, phase: 'home', profileCompleted: true }
 }
 
 function QualityShell({ children }) {
@@ -290,6 +308,51 @@ function Home({ state, loading, onStart }) {
         </div>
       </div>
     </section>
+  )
+}
+
+function ProfileDialog({ open, loading, serverError, onClose, onSubmit }) {
+  const [name, setName] = useState('')
+  const [employeeNo, setEmployeeNo] = useState('')
+  const [formError, setFormError] = useState('')
+
+  if (!open) return null
+
+  function submit(event) {
+    event.preventDefault()
+    const normalizedName = name.trim()
+    const normalizedEmployeeNo = employeeNo.trim()
+    if (!normalizedName || !normalizedEmployeeNo) {
+      setFormError('请填写姓名和工号后再开始答题')
+      return
+    }
+    setFormError('')
+    onSubmit({ name: normalizedName, employeeNo: normalizedEmployeeNo })
+  }
+
+  return (
+    <div className="qm-profile-dialog-backdrop" role="presentation">
+      <section className="qm-profile-dialog" role="dialog" aria-modal="true" aria-labelledby="qm-profile-title">
+        <p className="qm-profile-dialog__kicker">FIRST TIME · PROFILE</p>
+        <h2 id="qm-profile-title">填写答题信息</h2>
+        <p>首次参加质量月答题，请填写真实姓名和工号。信息提交后无需重复填写。</p>
+        <form onSubmit={submit}>
+          <label>
+            <span>姓名</span>
+            <input value={name} maxLength={100} autoComplete="name" placeholder="请输入姓名" onChange={(event) => setName(event.target.value)} disabled={loading} />
+          </label>
+          <label>
+            <span>工号</span>
+            <input value={employeeNo} maxLength={80} autoComplete="off" placeholder="请输入工号" onChange={(event) => setEmployeeNo(event.target.value)} disabled={loading} />
+          </label>
+          {formError || serverError ? <p className="qm-profile-dialog__error" role="alert">{formError || serverError}</p> : null}
+          <div className="qm-profile-dialog__actions">
+            <button className="qm-secondary" type="button" onClick={onClose} disabled={loading}>暂不答题</button>
+            <button className="qm-primary qm-primary--compact" type="submit" disabled={loading}>{loading ? '提交中…' : '提交并开始答题'}</button>
+          </div>
+        </form>
+      </section>
+    </div>
   )
 }
 

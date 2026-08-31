@@ -72,7 +72,7 @@ export default function QualityMonthAdminPage({ activity }) {
     setActing(true)
     try {
       const result = await clearQualityMonthData(activity.activityKey, { scope: 'user', userId: normalized })
-      message.success(`已清除用户 ${normalized} 的 ${result.cleared.attempts} 条答题记录`)
+      message.success(`已清除用户 ${normalized} 的 ${result.cleared.attempts} 条答题记录及 ${result.cleared.profiles || 0} 条报名信息`)
       setUserId('')
       await load()
     } catch (error) {
@@ -86,7 +86,7 @@ export default function QualityMonthAdminPage({ activity }) {
     setActing(true)
     try {
       const result = await clearQualityMonthData(activity.activityKey, { scope: 'all' })
-      message.success(`已清除本活动全部 ${result.cleared.attempts} 条答题记录`)
+      message.success(`已清除本活动全部 ${result.cleared.attempts} 条答题记录及 ${result.cleared.profiles || 0} 条报名信息`)
       await load()
     } catch (error) {
       message.error(error.message || '清除全部数据失败')
@@ -108,6 +108,8 @@ export default function QualityMonthAdminPage({ activity }) {
 
   const resultColumns = [
     { title: '用户ID', dataIndex: 'userId', width: 90 },
+    { title: '姓名', dataIndex: 'name', width: 100, render: (value) => value || '-' },
+    { title: '工号', dataIndex: 'employeeNo', width: 110, render: (value) => value || '-' },
     { title: '昵称', dataIndex: 'nickname', render: (value) => value || '-' },
     { title: '周次', dataIndex: 'weekNo', width: 72, render: (value) => `第${value}周` },
     { title: '正确题数', width: 100, render: (_, row) => `${row.correctCount}/${row.totalQuestions}` },
@@ -156,8 +158,8 @@ export default function QualityMonthAdminPage({ activity }) {
         <Alert
           type="warning"
           showIcon
-          message="仅清除本活动的答题记录与答案明细"
-          description="不会删除用户、活动配置、题库、其他活动数据或访问统计。清除后用户可重新参加对应周次。"
+          message="仅清除本活动的答题记录、答案明细与姓名工号信息"
+          description="不会删除微信用户、活动配置、题库、其他活动数据或访问统计。清除后用户需重新填写信息后参加对应周次。"
           style={{ marginBottom: 18 }}
         />
         <Space wrap align="center">
@@ -179,7 +181,7 @@ export default function QualityMonthAdminPage({ activity }) {
       </Card>
 
       <Card title="最近提交结果（最多50条）">
-        <Table rowKey="id" loading={loading} dataSource={data?.recentResults || []} columns={resultColumns} pagination={{ pageSize: 10 }} scroll={{ x: 820 }} />
+        <Table rowKey="id" loading={loading} dataSource={data?.recentResults || []} columns={resultColumns} pagination={{ pageSize: 10 }} scroll={{ x: 980 }} />
       </Card>
     </Space>
   )
