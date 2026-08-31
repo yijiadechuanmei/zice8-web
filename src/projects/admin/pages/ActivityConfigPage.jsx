@@ -26,6 +26,7 @@ import {
   updateNanhaiChallengeDrawManualControl,
   updateNanhaiChallengeRegionAccessExemption,
   updateNanshaOpenMicConfig,
+  updateRiderSafetySurveyMode,
 } from '../api'
 
 const { Text, Title } = Typography
@@ -94,6 +95,8 @@ export default function ActivityConfigPage({ activity }) {
   const [riderSafetyClearScope, setRiderSafetyClearScope] = useState('user')
   const [riderSafetyUserId, setRiderSafetyUserId] = useState('')
   const [riderSafetyClearing, setRiderSafetyClearing] = useState(false)
+  const [riderSafetyTestMode, setRiderSafetyTestMode] = useState(true)
+  const [riderSafetyModeSaving, setRiderSafetyModeSaving] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -104,6 +107,7 @@ export default function ActivityConfigPage({ activity }) {
       .then((data) => {
         if (!alive) return
         setActivityStatus(Number(data?.activity?.status) === 1 ? 1 : 0)
+        setRiderSafetyTestMode(data?.configJson?.testMode === true)
         setBgm({
           enabled: Boolean(data?.bgm?.enabled),
           url: String(data?.bgm?.url || ''),
@@ -311,13 +315,30 @@ export default function ActivityConfigPage({ activity }) {
       })
       const cleared = result?.cleared || {}
       if (scope === 'user') setRiderSafetyUserId('')
-      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条、红包预占 ${cleared.cashGrants || 0} 条`)
+      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条、测试红包流水 ${cleared.cashGrants || 0} 条；红包库已重置`)
     } catch (err) {
       const text = err.message || '清除骑手安全问卷数据失败'
       setError(text)
       message.error(text)
     } finally {
       setRiderSafetyClearing(false)
+    }
+  }
+
+  async function handleRiderSafetyModeChange(mode) {
+    setRiderSafetyModeSaving(true)
+    setError('')
+    try {
+      const result = await updateRiderSafetySurveyMode(activity.activityKey, mode)
+      const testMode = result?.testMode === true
+      setRiderSafetyTestMode(testMode)
+      message.success(testMode ? '已切换至测试阶段，红包不会真实发放' : '已切换至正式阶段，后续红包将按微信授权和风控规则发放')
+    } catch (err) {
+      const text = err.message || '活动阶段切换失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRiderSafetyModeSaving(false)
     }
   }
 
@@ -829,13 +850,35 @@ export default function ActivityConfigPage({ activity }) {
         ) : null}
 
         {activity.type === 'rider_safety_survey' ? (
-          <Card size="small" title="问卷测试数据清除" style={{ borderColor: '#ffccc7' }}>
-            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Space direction="vertical" size={16} style={{ width: '100%' }}>
+            <Card size="small" title="活动阶段" style={{ borderColor: riderSafetyTestMode ? '#ffe58f' : '#ffccc7' }}>
+              <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                <Alert
+                  type={riderSafetyTestMode ? 'warning' : 'error'}
+                  showIcon
+                  message={riderSafetyTestMode ? '当前：测试阶段' : '当前：正式阶段'}
+                  description={riderSafetyTestMode ? '抽奖只扣减测试库存，不会调用微信现金红包发放；可清除个人或全部测试数据并重置红包库。' : '后续抽奖会执行微信零钱转账授权、账户和预算校验，并可能真实发放现金红包；为保护正式数据，不允许在此阶段清除数据。'}
+                />
+                <Popconfirm
+                  title={riderSafetyTestMode ? '确认切换至正式阶段？' : '确认切换回测试阶段？'}
+                  description={riderSafetyTestMode ? '仅允许在本活动没有参与、问卷、抽奖和红包流水时切换。切换后将开启真实红包发放。' : '仅允许在本活动没有参与、问卷、抽奖和红包流水时切换。切换后将关闭真实红包发放。'}
+                  okText="确认切换"
+                  cancelText="取消"
+                  onConfirm={() => handleRiderSafetyModeChange(riderSafetyTestMode ? 'formal' : 'test')}
+                >
+                  <Button danger={!riderSafetyTestMode} type={riderSafetyTestMode ? 'primary' : 'default'} loading={riderSafetyModeSaving}>
+                    {riderSafetyTestMode ? '切换至正式阶段' : '切换至测试阶段'}
+                  </Button>
+                </Popconfirm>
+              </Space>
+            </Card>
+            <Card size="small" title="问卷测试数据清除" style={{ borderColor: '#ffccc7' }}>
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Alert
                 type="warning"
                 showIcon
                 message="仅限超级管理员；操作不可恢复"
-                description="指定用户仅清除该用户在本活动的问卷、抽奖、未发放红包预占、参与和授权记录；清除全部只影响本活动。存在已成功或发放中的现金红包、已登记收货的实物奖品时，服务端会拒绝清除，避免影响真实资金和履约。"
+                description="仅测试阶段可用。清除指定用户时会回补该用户的测试红包占用；清除全部时会将本活动2元、68元红包库恢复为初始库存。不会影响活动配置、微信用户及其他活动数据。"
               />
               <Space wrap>
                 <Select
@@ -854,18 +897,19 @@ export default function ActivityConfigPage({ activity }) {
                 ) : null}
                 <Popconfirm
                   title={riderSafetyClearScope === 'all' ? '确认清除本活动全部问卷数据？' : '确认清除该用户的问卷数据？'}
-                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；无论是否中奖均可清除，且不会影响其他用户和其他活动。`}
+                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除，并将红包库恢复到初始库存；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；会清除该用户数据并回补其测试红包库存，不影响其他用户和其他活动。`}
                   okText="确认清除"
                   cancelText="取消"
                   onConfirm={handleClearRiderSafetySurveyData}
                 >
-                  <Button danger loading={riderSafetyClearing} disabled={riderSafetyClearScope === 'user' && !/^[1-9]\d*$/.test(riderSafetyUserId.trim())}>
+                  <Button danger loading={riderSafetyClearing} disabled={!riderSafetyTestMode || (riderSafetyClearScope === 'user' && !/^[1-9]\d*$/.test(riderSafetyUserId.trim()))}>
                     {riderSafetyClearScope === 'all' ? '清除全部数据' : '清除指定用户'}
                   </Button>
                 </Popconfirm>
               </Space>
             </Space>
-          </Card>
+            </Card>
+          </Space>
         ) : null}
 
         <Card size="small" title="移动端音效配置">

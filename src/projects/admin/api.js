@@ -210,6 +210,16 @@ export function clearRiderSafetySurveyData(activityKey, payload) {
   })
 }
 
+export function updateRiderSafetySurveyMode(activityKey, mode) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/mode`, {
+    method: 'POST',
+    body: JSON.stringify({
+      mode,
+      confirm: 'SET_RIDER_SAFETY_SURVEY_MODE',
+    }),
+  })
+}
+
 export function getQualityMonthSettings(activityKey) {
   return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/settings`)
 }

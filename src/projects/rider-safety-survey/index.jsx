@@ -21,8 +21,8 @@ import "./styles.css";
 
 const previewConfig = {
   accessMode: "public",
-  oauthScope: "snsapi_userinfo",
-  requireUserinfo: true,
+  oauthScope: "snsapi_base",
+  requireUserinfo: false,
 };
 const activityAssetsBaseUrl = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`;
 
@@ -73,10 +73,13 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const [notice, setNotice] = useState("");
   const [participant, setParticipant] = useState({ name: "", phone: "" });
   const canvasRef = useRef(null);
-  const { authReady, blockedMessage, hasToken, reauth } = useWechatAuth(
+  const { authReady, blockedMessage, hasToken } = useWechatAuth(
     activityKey,
     publicConfig,
-    { replaceOAuthCallback: true },
+    {
+      replaceOAuthCallback: true,
+      oauthScopeOverride: "snsapi_base",
+    },
   );
   useWechatShare(activityKey, publicConfig);
 
@@ -93,10 +96,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     if (preview || !authReady || !hasToken) return;
     getBootstrap(activityKey)
       .then((data) => {
-        if (data.profileIncomplete) {
-          reauth("missing-user-profile");
-          return;
-        }
         setBootstrap(data);
         setParticipant({
           name: data.participant?.name || "",
@@ -111,7 +110,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
         }
       })
       .catch((error) => setNotice(readError(error, "问卷加载失败")));
-  }, [activityKey, authReady, hasToken, preview, reauth]);
+  }, [activityKey, authReady, hasToken, preview]);
 
   const question = questions[index];
   const currentAnswer = answers[question?.id];

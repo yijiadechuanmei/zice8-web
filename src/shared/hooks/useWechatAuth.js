@@ -75,6 +75,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const requiresWechatBrowser = getAccessMode(publicConfig) === 'wechat_required'
   const configuredOauthScope = getOauthScope(publicConfig)
   const configuredRequireUserinfo = getRequireUserinfo(publicConfig)
+  const oauthScopeOverride = options.oauthScopeOverride
   const blockSnapshotUser = Boolean(options.blockSnapshotUser)
   const replaceOAuthCallback = Boolean(options.replaceOAuthCallback)
 
@@ -125,7 +126,9 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
       activity_key: activityKey,
       redirect_url: redirectUrl,
     })
-    if (configuredRequireUserinfo || configuredOauthScope === 'snsapi_userinfo') {
+    if (oauthScopeOverride === 'snsapi_base' || oauthScopeOverride === 'snsapi_userinfo') {
+      oauthParams.set('scope', oauthScopeOverride)
+    } else if (configuredRequireUserinfo || configuredOauthScope === 'snsapi_userinfo') {
       oauthParams.set('scope', 'snsapi_userinfo')
     }
     const oauthUrl = `${API_BASE_URL}/wechat/oauth/redirect?${oauthParams.toString()}`
@@ -140,7 +143,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
+  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, oauthScopeOverride, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
