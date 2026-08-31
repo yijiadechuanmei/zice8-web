@@ -961,6 +961,106 @@
   color: #075fac;
   background: #fff;
 }
+
+/* 结果页按 IH5 的 750 × 1448 画布等比呈现，所有内容使用原稿坐标。 */
+.rss-result-scene {
+  width: 100vw;
+  min-height: 100svh;
+  margin-left: calc(50% - 50vw);
+  padding: max(0px, calc((100svh - min(193.0667vw, 1448px)) / 2)) 0;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  background: #0ca1fe;
+}
+.rss-result-canvas {
+  width: min(100vw, 750px);
+  height: min(193.0667vw, 1448px);
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: url("https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/e9db063ec93f389c16dbcff785bceb4b_198073_750_1624.png") center center / cover no-repeat;
+}
+.rss-result-card,
+.rss-result-heading,
+.rss-result-diagnosis,
+.rss-result-draw {
+  position: absolute;
+}
+.rss-result-card {
+  width: 80.5334%;
+  height: auto;
+  top: 2.0028%;
+  left: 9.7334%;
+  display: block;
+  animation: rss-result-reveal 0.42s ease-out both;
+}
+.rss-result-heading {
+  width: 50.8%;
+  min-height: 4.6271%;
+  margin: 0;
+  top: 61.0498%;
+  left: 24.5334%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: min(7.3334vw, 55px);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: min(0.4vw, 3px);
+  text-align: center;
+  white-space: nowrap;
+  animation: rss-result-reveal 0.35s 0.08s ease-out both;
+}
+.rss-result-diagnosis {
+  width: 78.8%;
+  margin: 0;
+  top: 67.0581%;
+  left: 10.5334%;
+  color: #fff;
+  font-size: min(2.6667vw, 20px);
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: justify;
+  white-space: pre-line;
+  word-break: break-all;
+  animation: rss-result-reveal 0.4s 0.14s ease-out both;
+}
+.rss-result-draw {
+  width: 90.1334%;
+  margin: 0;
+  padding: 0;
+  top: 87.2238%;
+  left: 4.8%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  animation: rss-result-reveal 0.35s 0.2s ease-out both;
+}
+.rss-result-draw img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.rss-result-draw:active {
+  transform: scale(0.985);
+}
+.rss-result-draw:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+@keyframes rss-result-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @keyframes rss-enter {
   from {
     opacity: 0;

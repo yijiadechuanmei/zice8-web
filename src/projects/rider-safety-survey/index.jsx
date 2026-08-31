@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
 import {
@@ -72,7 +72,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
   const [participant, setParticipant] = useState({ name: "", phone: "" });
-  const canvasRef = useRef(null);
   const { authReady, blockedMessage, hasToken } = useWechatAuth(
     activityKey,
     publicConfig,
@@ -229,16 +228,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     }
   };
 
-  const drawPoster = useCallback(() => {
-    if (!result || !submission || !canvasRef.current) return;
-    paintPoster(canvasRef.current, result, submission.scores);
-  }, [result, submission]);
-
   const completeWheel = useCallback(() => setStage("prize"), []);
-
-  useEffect(() => {
-    drawPoster();
-  }, [drawPoster]);
 
   if (!preview && blockedMessage)
     return (
@@ -332,48 +322,27 @@ export default function RiderSafetySurveyProject({ routeParams }) {
       ) : null}
       {stage === "result" && result ? (
         <section className="rss-result-scene">
-          <p className="rss-section-kicker">
-            RIDER SAFETY REPORT · {submission.scores.total}/14
-          </p>
-          <h1>你的骑手江湖称号</h1>
-          <div className="rss-poster-wrap">
-            <canvas
-              ref={canvasRef}
-              width="750"
-              height="1100"
-              aria-label={`${result.title}结果海报`}
+          <div className="rss-result-canvas">
+            <img
+              className="rss-result-card"
+              src={`${activityAssetsBaseUrl}/${result.resultImage}`}
+              alt={`${result.title}结果卡`}
+              referrerPolicy="no-referrer"
             />
-          </div>
-          <div className="rss-score-lines">
-            <ScoreLine
-              label="安全防御力"
-              value={submission.scores.safety}
-              max={4}
-            />
-            <ScoreLine
-              label="政策知晓度"
-              value={submission.scores.policy}
-              max={4}
-            />
-            <ScoreLine
-              label="金融防骗术"
-              value={submission.scores.fraud}
-              max={6}
-            />
-          </div>
-          <p className="rss-comment">{result.comment}</p>
-          <div className="rss-advice">
-            <span>专属忠告</span>
-            {result.advice}
-          </div>
-          <div className="rss-result-actions">
+            <h1 className="rss-result-heading">诊断评语</h1>
+            <p className="rss-result-diagnosis">{result.diagnosis}</p>
             <button
-              className="rss-primary"
+              className="rss-result-draw"
               type="button"
               onClick={startDraw}
               disabled={busy === "draw"}
+              aria-label={busy === "draw" ? "正在准备抽奖" : "立即抽奖"}
             >
-              {busy === "draw" ? "准备抽奖…" : "立即抽奖"}
+              <img
+                src={`${activityAssetsBaseUrl}/99f4cd96cc98a974b16e14ddeb6b1f4f_8277_676_116.png`}
+                alt="立即抽奖"
+                referrerPolicy="no-referrer"
+              />
             </button>
           </div>
         </section>
@@ -437,20 +406,6 @@ function Intro({ onStart }) {
         </button>
       </div>
     </section>
-  );
-}
-
-function ScoreLine({ label, value, max }) {
-  return (
-    <div>
-      <span>{label}</span>
-      <i>
-        <b style={{ width: `${(value / max) * 100}%` }} />
-      </i>
-      <strong>
-        {value}/{max}
-      </strong>
-    </div>
   );
 }
 
@@ -679,79 +634,6 @@ function invokeMerchantTransferAuthorization(authorization) {
     else
       document.addEventListener("WeixinJSBridgeReady", invoke, { once: true });
   });
-}
-
-function paintPoster(canvas, result, scores) {
-  const ctx = canvas.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 750, 1100);
-  gradient.addColorStop(0, "#62c7f7");
-  gradient.addColorStop(1, "#087edc");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 750, 1100);
-  ctx.strokeStyle = "rgba(255,255,255,.22)";
-  ctx.lineWidth = 2;
-  for (let y = -250; y < 1200; y += 84) {
-    ctx.beginPath();
-    ctx.moveTo(520, y);
-    ctx.lineTo(750, y + 360);
-    ctx.stroke();
-  }
-  ctx.fillStyle = "#e7f8ff";
-  ctx.font = "700 24px Arial";
-  ctx.fillText("RIDER SAFETY REPORT / 2026", 62, 78);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 68px Arial";
-  ctx.fillText(result.title, 58, 205);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 29px Arial";
-  ctx.fillText("★".repeat(result.stars), 62, 258);
-  ctx.fillStyle = "#d6f2ff";
-  ctx.font = "26px Arial";
-  wrapCanvasText(ctx, result.subtitle, 62, 324, 620, 40);
-  const metrics = [
-    ["安全防御力", scores.safety, 4],
-    ["政策知晓度", scores.policy, 4],
-    ["金融防骗术", scores.fraud, 6],
-  ];
-  metrics.forEach(([label, value, max], i) => {
-    const y = 430 + i * 102;
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 25px Arial";
-    ctx.fillText(label, 62, y);
-    ctx.fillStyle = "rgba(255,255,255,.28)";
-    ctx.fillRect(62, y + 22, 520, 14);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(62, y + 22, (520 * value) / max, 14);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "800 24px Arial";
-    ctx.fillText(`${value}/${max}`, 610, y + 9);
-  });
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "700 25px Arial";
-  ctx.fillText("专属忠告", 62, 765);
-  ctx.fillStyle = "#d6f2ff";
-  ctx.font = "25px Arial";
-  wrapCanvasText(ctx, result.advice, 62, 818, 620, 39);
-  ctx.fillStyle = "rgba(255,255,255,.78)";
-  ctx.fillRect(62, 990, 626, 2);
-  ctx.font = "700 21px Arial";
-  ctx.fillText("跑得快，更要稳稳到家。", 62, 1040);
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#d6f2ff";
-  ctx.fillText(`${scores.total} / 14`, 688, 1040);
-  ctx.textAlign = "left";
-}
-
-function wrapCanvasText(ctx, text, x, y, width, lineHeight) {
-  let line = "";
-  for (const char of text) {
-    if (ctx.measureText(line + char).width > width) {
-      ctx.fillText(line, x, y);
-      line = char;
-      y += lineHeight;
-    } else line += char;
-  }
-  if (line) ctx.fillText(line, x, y);
 }
 
 function createRequestId() {
