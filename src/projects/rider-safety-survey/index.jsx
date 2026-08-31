@@ -102,9 +102,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           name: data.participant?.name || "",
           phone: data.participant?.phone || "",
         });
-        if (!data.participant?.completed) {
-          setStage("profile");
-        } else if (data.draw) {
+        if (data.draw) {
           setDraw(data.draw);
           setStage("prize");
         } else if (data.submission) {
