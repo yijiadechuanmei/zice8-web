@@ -858,15 +858,15 @@
   width: 0;
   height: 0;
   position: absolute;
-  z-index: 3;
-  top: -4px;
+  z-index: 1;
+  top: calc(50% - 62px);
   left: 50%;
   transform: translateX(-50%);
   border-top: 0;
-  border-right: 18px solid transparent;
-  border-bottom: 43px solid #fff;
-  border-left: 18px solid transparent;
-  filter: drop-shadow(0 5px 6px rgba(0, 77, 150, 0.25));
+  border-right: 16px solid transparent;
+  border-bottom: 44px solid #fff;
+  border-left: 16px solid transparent;
+  filter: drop-shadow(0 3px 4px rgba(0, 77, 150, 0.22));
 }
 .rss-wheel {
   width: 100%;
