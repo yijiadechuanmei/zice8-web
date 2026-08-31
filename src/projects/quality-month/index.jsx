@@ -461,14 +461,61 @@ function formatNumber(value) {
 }
 
 function getActivityWindowMessage(publicConfig) {
-  const now = Date.now()
-  const startTime = publicConfig?.startTime ? new Date(publicConfig.startTime).getTime() : NaN
-  const endTime = publicConfig?.endTime ? new Date(publicConfig.endTime).getTime() : NaN
+  // Activity 表的 DATETIME 按北京时间保存；接口序列化后带 Z，但其 UTC
+  // 字段仍表示北京时间的墙上时刻，不能按绝对 UTC 时刻直接比较。
+  const now = getBeijingWallTimestamp(new Date())
+  const startTime = getActivityBeijingTimestamp(publicConfig?.startTime)
+  const endTime = getActivityBeijingTimestamp(publicConfig?.endTime)
   if (Number.isFinite(startTime) && now < startTime) return '活动未开始'
   if (Number.isFinite(endTime) && now > endTime) return '活动已结束'
+  // 正常情况下以上两项已完全以 Activity 表时间为准。仅在活动未设置
+  // 起止时间时，才回退到接口状态，避免缓存状态影响准确的边界判断。
+  if (Number.isFinite(startTime) || Number.isFinite(endTime)) return ''
   if (publicConfig?.activityWindow?.status === 'not_started') return '活动未开始'
   if (publicConfig?.activityWindow?.status === 'ended') return '活动已结束'
   return ''
+}
+
+function getActivityBeijingTimestamp(value) {
+  if (!value) return NaN
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return NaN
+  return Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+    date.getUTCMilliseconds(),
+  )
+}
+
+function getBeijingWallTimestamp(value) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(value)
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, Number(part.value)]),
+  )
+  return Date.UTC(
+    values.year,
+    values.month - 1,
+    values.day,
+    values.hour,
+    values.minute,
+    values.second,
+    value.getMilliseconds(),
+  )
 }
 
 function draftKey(attemptId) {
