@@ -100,11 +100,11 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           name: data.participant?.name || "",
           phone: data.participant?.phone || "",
         });
+        if (data.submission) setSubmission(normalizeSubmission(data.submission));
         if (data.draw) {
           setDraw(data.draw);
           setStage("prize");
         } else if (data.submission) {
-          setSubmission(normalizeSubmission(data.submission));
           setStage("result");
         }
       })
