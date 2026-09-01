@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { DeleteOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { getCurrentUser } from './api'
@@ -89,7 +90,7 @@ function CartDrawer({ products, onClose, onRemove, onCheckout }) {
         <img alt={product.name} src={product.image} />
         <strong>{product.name}</strong>
         <span>x1</span>
-        <button type="button" aria-label={`移除${product.name}`} onClick={() => onRemove(product.id)}>删除</button>
+        <button type="button" aria-label={`移除${product.name}`} onClick={() => onRemove(product.id)}><DeleteOutlined /></button>
       </article>)}</div>
       <footer><span>已选 <b>{products.length}</b> 件</span><button type="button" onClick={onCheckout} disabled={!products.length}>去结算 ›</button></footer>
     </section>
