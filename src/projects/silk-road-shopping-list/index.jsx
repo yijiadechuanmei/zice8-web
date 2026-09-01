@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DeleteOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -9,6 +9,55 @@ import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAsset
 import './styles.css'
 
 const DESIGN_WIDTH = 750
+
+function loadPosterImage(src, label, timeout = 10000) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      reject(new Error(`${label}地址缺失`))
+      return
+    }
+    const image = new Image()
+    let settled = false
+    const finish = (callback, value) => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(timer)
+      callback(value)
+    }
+    const timer = window.setTimeout(() => finish(reject, new Error(`${label}加载超时`)), timeout)
+    image.crossOrigin = 'anonymous'
+    image.onload = () => finish(resolve, image)
+    image.onerror = () => finish(reject, new Error(`${label}加载失败`))
+    image.src = src
+  })
+}
+
+function drawPosterCover(context, image, left, top, width, height) {
+  const scale = Math.max(width / image.width, height / image.height)
+  const sourceWidth = width / scale
+  const sourceHeight = height / scale
+  context.drawImage(image, (image.width - sourceWidth) / 2, (image.height - sourceHeight) / 2, sourceWidth, sourceHeight, left, top, width, height)
+}
+
+function waitForPosterQr(qrRef) {
+  return new Promise((resolve, reject) => {
+    let remainingAttempts = 30
+    const findCanvas = () => {
+      const canvas = qrRef.current?.querySelector('canvas')
+      if (canvas?.width && canvas?.height) {
+        resolve(canvas)
+        return
+      }
+      remainingAttempts -= 1
+      if (remainingAttempts <= 0) {
+        reject(new Error('二维码生成超时'))
+        return
+      }
+      window.setTimeout(findCanvas, 50)
+    }
+    findCanvas()
+  })
+}
 
 function useScale(designHeight, fitViewport) {
   const [scale, setScale] = useState(() => Math.min(window.innerWidth / DESIGN_WIDTH, fitViewport ? window.innerHeight / designHeight : 1, 1))
@@ -110,61 +159,24 @@ function Poster({ products, profile, onBack }) {
   const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
   const footerTop = 699 + collectionHeight - 70
   const height = footerTop + 403
-  const loadImage = (src, timeout = 10000) => new Promise((resolve, reject) => {
-    const image = new Image()
-    const timer = window.setTimeout(() => reject(new Error(`海报素材加载超时：${src}`)), timeout)
-    image.crossOrigin = 'anonymous'
-    image.onload = () => {
-      window.clearTimeout(timer)
-      resolve(image)
-    }
-    image.onerror = () => {
-      window.clearTimeout(timer)
-      reject(new Error(`海报素材加载失败：${src}`))
-    }
-    image.src = src
-  })
-  const drawCover = (context, image, left, top, width, targetHeight) => {
-    const scale = Math.max(width / image.width, targetHeight / image.height)
-    const sourceWidth = width / scale
-    const sourceHeight = targetHeight / scale
-    context.drawImage(image, (image.width - sourceWidth) / 2, (image.height - sourceHeight) / 2, sourceWidth, sourceHeight, left, top, width, targetHeight)
-  }
-  const waitForQrCanvas = () => new Promise((resolve, reject) => {
-    let remainingAttempts = 30
-    const findCanvas = () => {
-      const canvas = qrRef.current?.querySelector('canvas')
-      if (canvas) {
-        resolve(canvas)
-        return
-      }
-      remainingAttempts -= 1
-      if (remainingAttempts <= 0) {
-        reject(new Error('二维码尚未生成'))
-        return
-      }
-      window.setTimeout(findCanvas, 50)
-    }
-    findCanvas()
-  })
-  const savePoster = async () => {
-    setPosterError('')
-    try {
-      const qrCanvas = await waitForQrCanvas()
-      const output = document.createElement('canvas')
-      output.width = 750
-      output.height = height
-      const context = output.getContext('2d')
-      const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
-        loadImage(silkRoadAssets.posterHeader),
-        loadImage(silkRoadAssets.posterCollection),
-        loadImage(silkRoadAssets.posterLabel),
-        loadImage(silkRoadAssets.posterItem),
-        loadImage(silkRoadAssets.posterFooter),
-        // 微信头像来自第三方域名时可能被 Canvas 跨域策略拦住或一直等待；它只能作为可选图层。
-        profile.avatar ? loadImage(profile.avatar, 1500).catch(() => null) : Promise.resolve(null),
-        ...products.map((product) => loadImage(product.posterImage)),
-      ])
+  const composePoster = useCallback(async () => {
+    if (!products.length) throw new Error('未选择商品，无法生成海报')
+    const qrCanvas = await waitForPosterQr(qrRef)
+    const output = document.createElement('canvas')
+    output.width = 750
+    output.height = height
+    const context = output.getContext('2d')
+    if (!context) throw new Error('当前浏览器不支持海报合成')
+    const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
+      loadPosterImage(silkRoadAssets.posterHeader, '海报头图'),
+      loadPosterImage(silkRoadAssets.posterCollection, '商品列表背景'),
+      loadPosterImage(silkRoadAssets.posterLabel, '列表标题图'),
+      loadPosterImage(silkRoadAssets.posterItem, '商品卡片底图'),
+      loadPosterImage(silkRoadAssets.posterFooter, '海报底图'),
+      // 微信头像来自第三方域名时可能被 Canvas 跨域策略拦住；头像仅作为可选图层。
+      profile.avatar ? loadPosterImage(profile.avatar, '微信头像', 1500).catch(() => null) : Promise.resolve(null),
+      ...products.map((product, index) => loadPosterImage(product.posterImage, `第${index + 1}件商品“${product.name}”图片`)),
+    ])
     context.drawImage(header, 0, 0, 750, 769)
     if (avatar) {
       context.save()
@@ -176,7 +188,7 @@ function Poster({ products, profile, onBack }) {
     }
     context.fillStyle = '#3b4b42'
     context.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif'
-    context.fillText(profile.nickname, 206, 550)
+    context.fillText(profile.nickname || '丝路旅人', 206, 550)
     context.fillStyle = '#f3e2d3'
     context.font = '22px PingFang SC, Microsoft YaHei, sans-serif'
     context.textAlign = 'center'
@@ -185,7 +197,7 @@ function Poster({ products, profile, onBack }) {
     context.font = 'bold 53px Arial, sans-serif'
     context.textAlign = 'right'
     context.fillText('100', 583, 574)
-    drawCover(context, collection, 0, 699, 750, collectionHeight)
+    drawPosterCover(context, collection, 0, 699, 750, collectionHeight)
     context.strokeStyle = '#e0cab5'
     context.lineWidth = 2
     context.strokeRect(25, 728, 700, 42 + rows * 213)
@@ -211,12 +223,36 @@ function Poster({ products, profile, onBack }) {
     context.drawImage(label, 200.5, 699, 349, 49)
     context.drawImage(footer, 0, footerTop, 750, 403)
     context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
-      setPosterImage(output.toDataURL('image/png'))
+    const dataUrl = (() => {
+      try {
+        return output.toDataURL('image/png')
+      } catch (error) {
+        throw new Error(`海报转成图片失败：${error instanceof Error ? error.message : 'Canvas 导出异常'}`, { cause: error })
+      }
+    })()
+    if (!dataUrl.startsWith('data:image/png')) throw new Error('海报转成图片失败：未生成 PNG 数据')
+    return dataUrl
+  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows])
+
+  const savePoster = useCallback(async () => {
+    try {
+      setPosterImage(await composePoster())
     } catch (error) {
       console.error('[silk-road-shopping-list] poster composition failed', error)
-      setPosterError('海报生成失败，请重试')
+      setPosterError(error instanceof Error ? error.message : '海报生成失败：未知异常')
     }
-  }
+  }, [composePoster])
+
+  useEffect(() => {
+    let active = true
+    composePoster().then((image) => {
+      if (active) setPosterImage(image)
+    }).catch((error) => {
+      console.error('[silk-road-shopping-list] automatic poster composition failed', error)
+      if (active) setPosterError(error instanceof Error ? error.message : '海报生成失败：未知异常')
+    })
+    return () => { active = false }
+  }, [composePoster])
   return <Stage height={height}>
     <img alt="" src={silkRoadAssets.posterHeader} style={{ position: 'absolute', width: 750, height: 769, left: 0, top: 0 }} />
     <button className="srsl-back-hitbox" type="button" aria-label="返回购物车" onClick={onBack} />
@@ -233,8 +269,8 @@ function Poster({ products, profile, onBack }) {
         <span className="srsl-poster-order">{index + 1}</span>
       </div>)}</div>
     </div>
-    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={savePoster} /></div>
-    {posterError && <span className="srsl-poster-error">{posterError}</span>}
+    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={() => { setPosterError(''); savePoster() }} /></div>
+    {posterError && createPortal(<div className="srsl-poster-error" role="alert">海报生成失败：{posterError}</div>, document.body)}
     {posterImage && createPortal(<div className="srsl-poster-preview" role="dialog" aria-modal="true" aria-label="生成的海报">
       <button type="button" aria-label="关闭海报" onClick={() => setPosterImage('')}>×</button>
       <img alt="千年丝路带货清单海报" src={posterImage} />
