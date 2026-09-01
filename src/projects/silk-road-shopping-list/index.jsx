@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { getCurrentUser } from './api'
 import { SILK_ROAD_PRODUCTS, silkRoadAssets } from './config'
@@ -22,7 +23,7 @@ function Stage({ height, children, className = '', fitViewport = false }) {
 }
 
 function Home({ onStart, showOrientation }) {
-  return <Stage height={1624} className="srsl-home-stage" fitViewport>
+  return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
       <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
@@ -32,6 +33,17 @@ function Home({ onStart, showOrientation }) {
     </div>
     {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
+}
+
+function VideoPanel({ mode, videoRef, onEnd, onShop }) {
+  return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
+    <Stage height={1448} fitViewport>
+      <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
+        <video ref={videoRef} src={silkRoadAssets.video} autoPlay muted defaultMuted playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onCanPlay={() => videoRef.current?.play().catch(() => null)} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+      </div>
+      {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
+    </Stage>
+  </div>
 }
 
 function ProductCard({ product, selected, onToggle }) {
@@ -55,15 +67,33 @@ function ProductCard({ product, selected, onToggle }) {
   </div>
 }
 
-function ProductList({ products, selectedIds, onToggle, onCart, cart }) {
+function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }) {
   const rows = Math.ceil(products.length / 2)
   return <Stage height={626 + rows * 230} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 376, top: 467, width: 94, height: 37 }}>{selectedIds.length}/50</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 319, height: 35, left: 215.5, top: 571 }} />
     <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={onToggle} />)}</div>
-    <button className="srsl-image-button srsl-dock" type="button" aria-label={cart ? '去结算' : '查看购物车'} onClick={onCart}><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span></button>
+    <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
   </Stage>
+}
+
+function CartDrawer({ products, onClose, onRemove, onCheckout }) {
+  return <div className="srsl-cart-drawer-layer" role="dialog" aria-modal="true" aria-label="已选商品">
+    <button className="srsl-cart-backdrop" type="button" aria-label="关闭购物车" onClick={onClose} />
+    <section className="srsl-cart-drawer">
+      <div className="srsl-cart-drawer-handle" />
+      <h2>已选商品</h2>
+      <p className="srsl-cart-drawer-count">共 {products.length} 件</p>
+      <div className="srsl-cart-drawer-list">{products.map((product) => <article key={product.id}>
+        <img alt={product.name} src={product.image} />
+        <strong>{product.name}</strong>
+        <span>x1</span>
+        <button type="button" aria-label={`移除${product.name}`} onClick={() => onRemove(product.id)}>删除</button>
+      </article>)}</div>
+      <footer><span>已选 <b>{products.length}</b> 件</span><button type="button" onClick={onCheckout} disabled={!products.length}>去结算 ›</button></footer>
+    </section>
+  </div>
 }
 
 function Poster({ products, profile, onBack }) {
@@ -112,6 +142,7 @@ function Poster({ products, profile, onBack }) {
 export default function SilkRoadShoppingList() {
   const [page, setPage] = useState('home')
   const [selectedIds, setSelectedIds] = useState(() => JSON.parse(localStorage.getItem('silk-road-shopping-list-cart') || '[]'))
+  const [cartOpen, setCartOpen] = useState(false)
   const [profile, setProfile] = useState({ nickname: '丝路旅人', avatar: '' })
   const videoRef = useRef(null)
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
@@ -123,17 +154,23 @@ export default function SilkRoadShoppingList() {
     const timer = window.setTimeout(() => setPage('video'), 3000)
     return () => window.clearTimeout(timer)
   }, [page])
-  useEffect(() => { if (page === 'video') videoRef.current?.play().catch(() => null) }, [page])
+  useEffect(() => { if (page === 'orientation' || page === 'video') videoRef.current?.play().catch(() => null) }, [page])
 
   const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
-  if (page === 'home' || page === 'orientation') return <main className="srsl-app srsl-home-page"><Home onStart={() => setPage('orientation')} showOrientation={page === 'orientation'} /></main>
-  if (page === 'video' || page === 'video-end') return <main className="srsl-video"><Stage height={1448} fitViewport>
-    <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
-      <video ref={videoRef} src={silkRoadAssets.video} autoPlay muted playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onEnded={videoEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-    </div>
-    {page === 'video' ? <button type="button" className="srsl-skip" onClick={videoEnd}>跳过</button> : <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={() => setPage('shop')} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button>}
-  </Stage></main>
-  if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => setPage('cart')} /></main>
-  return <main className="srsl-app"><ProductList products={page === 'cart' ? selected : SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onCart={() => setPage(page === 'cart' ? 'poster' : 'cart')} cart={page === 'cart'} /></main>
+  const startVideo = () => {
+    flushSync(() => setPage('orientation'))
+    videoRef.current?.play().catch(() => null)
+  }
+  const checkout = () => {
+    if (!selected.length) return
+    setCartOpen(false)
+    setPage('poster')
+  }
+  if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return <main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
+    {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} showOrientation={page === 'orientation'} />}
+    {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
+  </main>
+  if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} /></main>
+  return <main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>
 }
