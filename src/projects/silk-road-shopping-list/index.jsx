@@ -6,23 +6,24 @@ import './styles.css'
 
 const DESIGN_WIDTH = 750
 
-function useScale() {
-  const [scale, setScale] = useState(() => Math.min(window.innerWidth / DESIGN_WIDTH, 1))
+function useScale(designHeight, fitViewport) {
+  const getScale = () => Math.min(window.innerWidth / DESIGN_WIDTH, fitViewport ? window.innerHeight / designHeight : 1, 1)
+  const [scale, setScale] = useState(getScale)
   useEffect(() => {
-    const update = () => setScale(Math.min(window.innerWidth / DESIGN_WIDTH, 1))
+    const update = () => setScale(getScale())
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
   }, [])
   return scale
 }
 
-function Stage({ height, children, className = '' }) {
-  const scale = useScale()
+function Stage({ height, children, className = '', fitViewport = false }) {
+  const scale = useScale(height, fitViewport)
   return <div className={`srsl-frame ${className}`} style={{ width: 750 * scale, height: height * scale }}><div className="srsl-stage" style={{ width: 750, height, transform: `scale(${scale})` }}>{children}</div></div>
 }
 
 function Home({ onStart, showOrientation }) {
-  return <Stage height={1624} className="srsl-home-stage">
+  return <Stage height={1624} className="srsl-home-stage" fitViewport>
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
       <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
@@ -127,10 +128,10 @@ export default function SilkRoadShoppingList() {
 
   const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
-  if (page === 'home' || page === 'orientation') return <main className="srsl-app"><Home onStart={() => setPage('orientation')} showOrientation={page === 'orientation'} /></main>
-  if (page === 'video' || page === 'video-end') return <main className="srsl-video"><Stage height={1448}>
+  if (page === 'home' || page === 'orientation') return <main className="srsl-app srsl-home-page"><Home onStart={() => setPage('orientation')} showOrientation={page === 'orientation'} /></main>
+  if (page === 'video' || page === 'video-end') return <main className="srsl-video"><Stage height={1448} fitViewport>
     <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
-      <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" onEnded={videoEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+      <video ref={videoRef} src={silkRoadAssets.video} autoPlay muted playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onEnded={videoEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     </div>
     {page === 'video' ? <button type="button" className="srsl-skip" onClick={videoEnd}>跳过</button> : <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={() => setPage('shop')} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button>}
   </Stage></main>
