@@ -167,11 +167,7 @@ function OrientationPanel({ onDone }) {
     return () => window.clearTimeout(timer)
   }, [onDone])
   return (
-    <section className="srsl-orientation" aria-live="polite">
-      <div className="srsl-phone-orientation" aria-hidden="true"><span /></div>
-      <img src={silkRoadAssets.orientationHint} alt="请竖置手机锁定方向后，再横屏观看视频" />
-      <strong>3 秒后进入丝路影像</strong>
-    </section>
+    <section className="srsl-orientation" aria-live="polite"><p>请竖置手机锁定方向后 再横屏观看视频</p></section>
   )
 }
 
@@ -193,14 +189,18 @@ function VideoStage({ completed, onEnd, onShop }) {
   const videoRef = useRef(null)
   useEffect(() => {
     const video = videoRef.current
-    if (!video || completed) return undefined
+    if (!video) return undefined
+    if (completed) {
+      video.pause()
+      return undefined
+    }
     video.play().catch(() => undefined)
     return undefined
   }, [completed])
   return (
     <section className="srsl-video-stage">
       <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-type="h5" onEnded={onEnd} />
-      <div className="srsl-video-portrait-tip"><span>请横屏观看视频</span><small>旋转手机后即可继续</small></div>
+      {!completed && <button type="button" className="srsl-video-skip" onClick={onEnd}>跳过</button>}
       {completed && <button type="button" className="srsl-video-finish" onClick={onShop}>开启丝路带货清单</button>}
     </section>
   )
@@ -252,9 +252,17 @@ function Cart({ products, onBack, onToggle, onCheckout }) {
   )
 }
 
-function Poster({ dataUrl, products, user, onBack, onRegenerate }) {
+function Poster({ dataUrl, products, user, onBack, onSave }) {
   return (
-    <section className="srsl-poster-page"><header><button type="button" onClick={onBack}>‹</button><span>我的丝路海报</span></header><div className="srsl-poster-preview">{dataUrl ? <img src={dataUrl} alt={`${user.nickname}的丝路带货清单海报`} /> : <div className="srsl-poster-building">正在合成海报…</div>}</div><p>已收集 {products.length} 件丝路珍宝</p><button type="button" className="srsl-poster-save" disabled={!dataUrl} onClick={onRegenerate}>{dataUrl ? '长按保存海报 / 重新生成' : '正在生成…'}</button></section>
+    <section className="srsl-poster-page">
+      <div className="srsl-poster-design">
+        <img className="srsl-poster-header-image" src={silkRoadAssets.posterHeader} alt="丝路香潮起 互鉴向未来" />
+        <button type="button" className="srsl-poster-back" onClick={onBack} aria-label="返回购物车">‹</button>
+        <div className="srsl-poster-profile"><img src={user.avatar || silkRoadAssets.homeIllustration} alt="" /><strong>{user.nickname}</strong><small>海上丝路之旅<br />探寻文明互鉴之美</small><b>{products.length}</b><em>件</em></div>
+        <section className="srsl-poster-collection"><img src={silkRoadAssets.posterCollection} alt="" /><img className="srsl-poster-label" src={silkRoadAssets.posterLabel} alt="我已集齐的丝路珍宝" /><div className="srsl-poster-product-grid">{products.slice(0, 12).map((product, index) => <div key={product.id}><img src={silkRoadAssets.posterItem} alt="" /><span>{index + 1}</span><img src={product.image} alt={product.name} /><small>{product.name}</small></div>)}</div></section>
+        <section className="srsl-poster-footer"><img src={silkRoadAssets.posterFooter} alt="" />{dataUrl ? <div className="srsl-poster-qr"><QRCodeCanvas value={getActivityUrl(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY)} size={106} level="M" includeMargin /></div> : <span>正在合成海报…</span>}<button type="button" onClick={onSave} disabled={!dataUrl}>保存海报</button></section>
+      </div>
+    </section>
   )
 }
 
@@ -278,6 +286,8 @@ export default function SilkRoadShoppingList({ routeParams }) {
   const selectedProducts = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const toggleProduct = useCallback((id) => setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]), [])
   const beginVideo = useCallback(() => {
+    window.scrollTo({ top: 0, left: 0 })
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0 }))
     setStage(STAGE.ORIENTATION)
     window.screen?.orientation?.lock?.('landscape').catch(() => undefined)
   }, [])
@@ -286,6 +296,13 @@ export default function SilkRoadShoppingList({ routeParams }) {
     setPosterError('')
     try { setPosterUrl(await createPoster({ products: selectedProducts, user, qrWrapper: qrSourceRef.current })) } catch (error) { setPosterError(error.message || '海报生成失败') }
   }, [selectedProducts, user])
+  const savePoster = useCallback(() => {
+    if (!posterUrl) return
+    const anchor = document.createElement('a')
+    anchor.href = posterUrl
+    anchor.download = '我的丝路带货清单.png'
+    anchor.click()
+  }, [posterUrl])
   useEffect(() => {
     if (stage !== STAGE.POSTER || !selectedProducts.length) return undefined
     const timer = window.setTimeout(() => { void generate() }, 0)
@@ -295,12 +312,12 @@ export default function SilkRoadShoppingList({ routeParams }) {
   return (
     <main className={`srsl-app srsl-stage-${stage}`}>
       <div className="srsl-qr-source" ref={qrSourceRef}><QRCodeCanvas value={getActivityUrl(activityKey)} size={180} level="M" includeMargin /></div>
-      {stage === STAGE.HOME && <Home onStart={beginVideo} />}
+      {(stage === STAGE.HOME || stage === STAGE.ORIENTATION) && <Home onStart={beginVideo} />}
       {stage === STAGE.ORIENTATION && <OrientationPanel onDone={enterVideo} />}
       {(stage === STAGE.VIDEO || stage === STAGE.VIDEO_END) && <VideoStage completed={stage === STAGE.VIDEO_END} onEnd={() => setStage(STAGE.VIDEO_END)} onShop={() => { window.screen?.orientation?.unlock?.(); setStage(STAGE.SHOP) }} />}
       {stage === STAGE.SHOP && <Shop selectedIds={selectedIds} onToggle={toggleProduct} onCart={() => setStage(STAGE.CART)} />}
       {stage === STAGE.CART && <Cart products={selectedProducts} onBack={() => setStage(STAGE.SHOP)} onToggle={toggleProduct} onCheckout={() => setStage(STAGE.POSTER)} />}
-      {stage === STAGE.POSTER && <Poster dataUrl={posterUrl} products={selectedProducts} user={user} onBack={() => setStage(STAGE.CART)} onRegenerate={generate} />}
+      {stage === STAGE.POSTER && <Poster dataUrl={posterUrl} products={selectedProducts} user={user} onBack={() => setStage(STAGE.CART)} onSave={savePoster} />}
       {posterError && <div className="srsl-toast" role="status">{posterError}</div>}
     </main>
   )
