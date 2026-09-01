@@ -98,25 +98,89 @@ function CartDrawer({ products, onClose, onRemove, onCheckout }) {
 
 function Poster({ products, profile, onBack }) {
   const qrRef = useRef(null)
-  const height = 1764
-  const savePoster = () => {
+  const rows = Math.max(1, Math.ceil(products.length / 4))
+  const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
+  const footerTop = 699 + collectionHeight - 70
+  const height = footerTop + 403
+  const loadImage = (src) => new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.onload = () => resolve(image)
+    image.onerror = reject
+    image.src = src
+  })
+  const drawCover = (context, image, left, top, width, targetHeight) => {
+    const scale = Math.max(width / image.width, targetHeight / image.height)
+    const sourceWidth = width / scale
+    const sourceHeight = targetHeight / scale
+    context.drawImage(image, (image.width - sourceWidth) / 2, (image.height - sourceHeight) / 2, sourceWidth, sourceHeight, left, top, width, targetHeight)
+  }
+  const savePoster = async () => {
     const qrCanvas = qrRef.current?.querySelector('canvas')
     if (!qrCanvas) return
     const output = document.createElement('canvas')
     output.width = 750
     output.height = height
     const context = output.getContext('2d')
-    const image = new Image()
-    image.crossOrigin = 'anonymous'
-    image.onload = () => {
-      context.drawImage(image, 0, 0, 750, 403)
-      context.drawImage(qrCanvas, 77, 136, 106, 106)
-      const link = document.createElement('a')
-      link.download = '千年丝路带货清单.png'
-      link.href = output.toDataURL('image/png')
-      link.click()
+    const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
+      loadImage(silkRoadAssets.posterHeader),
+      loadImage(silkRoadAssets.posterCollection),
+      loadImage(silkRoadAssets.posterLabel),
+      loadImage(silkRoadAssets.posterItem),
+      loadImage(silkRoadAssets.posterFooter),
+      profile.avatar ? loadImage(profile.avatar) : Promise.resolve(null),
+      ...products.map((product) => loadImage(product.image)),
+    ])
+    context.drawImage(header, 0, 0, 750, 769)
+    if (avatar) {
+      context.save()
+      context.beginPath()
+      context.arc(127, 570, 53, 0, Math.PI * 2)
+      context.clip()
+      context.drawImage(avatar, 74, 517, 106, 106)
+      context.restore()
     }
-    image.src = silkRoadAssets.posterFooter
+    context.fillStyle = '#3b4b42'
+    context.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif'
+    context.fillText(profile.nickname, 206, 550)
+    context.fillStyle = '#f3e2d3'
+    context.font = '22px PingFang SC, Microsoft YaHei, sans-serif'
+    context.textAlign = 'center'
+    context.fillText(String(products.length), 563, 501)
+    context.fillStyle = '#000'
+    context.font = 'bold 53px Arial, sans-serif'
+    context.textAlign = 'right'
+    context.fillText('100', 583, 574)
+    drawCover(context, collection, 0, 699, 750, collectionHeight)
+    context.drawImage(label, 200.5, 699, 349, 49)
+    context.strokeStyle = '#e0cab5'
+    context.lineWidth = 2
+    context.strokeRect(25, 728, 700, 42 + rows * 213)
+    products.forEach((product, index) => {
+      const column = index % 4
+      const row = Math.floor(index / 4)
+      const left = 28 + column * 171
+      const top = 760 + row * 213
+      context.drawImage(item, left, top, 171, 213)
+      context.drawImage(productImages[index], left + 14, top - 4, 127, 180)
+      context.fillStyle = '#3b4b42'
+      context.font = '26px PingFang SC, Microsoft YaHei, sans-serif'
+      context.textAlign = 'center'
+      context.fillText(product.name, left + 85.5, top + 180)
+      context.fillStyle = '#866548'
+      context.beginPath()
+      context.arc(left + 20, top + 20, 20, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#f3e2d3'
+      context.font = '24px PingFang SC, Microsoft YaHei, sans-serif'
+      context.fillText(String(index + 1), left + 20, top + 28)
+    })
+    context.drawImage(footer, 0, footerTop, 750, 403)
+    context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
+    const link = document.createElement('a')
+    link.download = '千年丝路带货清单.png'
+    link.href = output.toDataURL('image/png')
+    link.click()
   }
   return <Stage height={height}>
     <img alt="" src={silkRoadAssets.posterHeader} style={{ position: 'absolute', width: 750, height: 769, left: 0, top: 0 }} />
@@ -125,17 +189,16 @@ function Poster({ products, profile, onBack }) {
     <span className="srsl-nickname" style={{ left: 206, top: 520, width: 203, height: 46 }}>{profile.nickname}</span>
     <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}>{products.length}</span>
     <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>100</span>
-    <div className="srsl-collection">
-      <img alt="" src={silkRoadAssets.posterCollection} style={{ position: 'absolute', width: 750, height: 672, left: 0, top: 0 }} />
+    <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
       <img alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
-      <div className="srsl-poster-grid">{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
+      <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
         <img alt="" src={silkRoadAssets.posterItem} />
         <img alt={product.name} src={product.image} />
         <span className="srsl-poster-product-name">{product.name}</span>
         <span className="srsl-poster-order">{index + 1}</span>
       </div>)}</div>
     </div>
-    <div className="srsl-footer"><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={savePoster} /></div>
+    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={savePoster} /></div>
   </Stage>
 }
 
