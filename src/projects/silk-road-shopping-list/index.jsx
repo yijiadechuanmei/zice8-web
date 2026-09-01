@@ -7,13 +7,12 @@ import './styles.css'
 const DESIGN_WIDTH = 750
 
 function useScale(designHeight, fitViewport) {
-  const getScale = () => Math.min(window.innerWidth / DESIGN_WIDTH, fitViewport ? window.innerHeight / designHeight : 1, 1)
-  const [scale, setScale] = useState(getScale)
+  const [scale, setScale] = useState(() => Math.min(window.innerWidth / DESIGN_WIDTH, fitViewport ? window.innerHeight / designHeight : 1, 1))
   useEffect(() => {
-    const update = () => setScale(getScale())
+    const update = () => setScale(Math.min(window.innerWidth / DESIGN_WIDTH, fitViewport ? window.innerHeight / designHeight : 1, 1))
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [])
+  }, [designHeight, fitViewport])
   return scale
 }
 
