@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DeleteOutlined } from '@ant-design/icons'
-import { flushSync } from 'react-dom'
+import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { getCurrentUser } from './api'
 import { SILK_ROAD_PRODUCTS, silkRoadAssets } from './config'
@@ -24,7 +24,7 @@ function Stage({ height, children, className = '', fitViewport = false }) {
 }
 
 function Home({ onStart, showOrientation }) {
-  return <Stage height={1624} className="srsl-home-stage" fitViewport>
+  return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
       <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
@@ -40,7 +40,7 @@ function VideoPanel({ mode, videoRef, onEnd, onShop }) {
   return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
     <Stage height={1448} fitViewport>
       <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
-        <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onCanPlay={() => videoRef.current?.play().catch(() => null)} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <video ref={videoRef} src={silkRoadAssets.video} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
       {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
@@ -70,13 +70,16 @@ function ProductCard({ product, selected, onToggle }) {
 
 function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }) {
   const rows = Math.ceil(products.length / 2)
-  return <Stage height={626 + rows * 230} className="srsl-list-stage">
+  const dock = <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
+  return <>
+  <Stage height={626 + rows * 230} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 376, top: 467, width: 94, height: 37 }}>{selectedIds.length}/50</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 319, height: 35, left: 215.5, top: 571 }} />
     <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={onToggle} />)}</div>
-    <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
   </Stage>
+  {createPortal(dock, document.body)}
+  </>
 }
 
 function CartDrawer({ products, onClose, onRemove, onCheckout }) {
@@ -218,12 +221,8 @@ export default function SilkRoadShoppingList() {
     const timer = window.setTimeout(() => setPage('video'), 3000)
     return () => window.clearTimeout(timer)
   }, [page])
-  useEffect(() => { if (page === 'orientation' || page === 'video') videoRef.current?.play().catch(() => null) }, [page])
-
-  const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
-  const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
-  const startVideo = () => {
-    flushSync(() => setPage('orientation'))
+  useEffect(() => {
+    if (page !== 'video') return
     const video = videoRef.current
     if (!video) return
     video.muted = false
@@ -232,7 +231,11 @@ export default function SilkRoadShoppingList() {
       video.muted = true
       video.play().catch(() => null)
     })
-  }
+  }, [page])
+
+  const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
+  const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
+  const startVideo = () => setPage('orientation')
   const checkout = () => {
     if (!selected.length) return
     setCartOpen(false)
