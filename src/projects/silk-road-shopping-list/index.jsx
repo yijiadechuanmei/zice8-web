@@ -129,9 +129,10 @@ export default function SilkRoadShoppingList() {
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
   if (page === 'home' || page === 'orientation') return <main className="srsl-app"><Home onStart={() => setPage('orientation')} showOrientation={page === 'orientation'} /></main>
   if (page === 'video' || page === 'video-end') return <main className="srsl-video"><Stage height={1448}>
-    <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" onEnded={videoEnd} style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0' }} />
-    <img alt="" src={silkRoadAssets.orientationHint} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }} />
-    {page === 'video' ? <button type="button" className="srsl-skip" onClick={videoEnd}>跳过</button> : <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={() => setPage('shop')} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="" src={silkRoadAssets.homeStart} /></button>}
+    <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
+      <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" onEnded={videoEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    </div>
+    {page === 'video' ? <button type="button" className="srsl-skip" onClick={videoEnd}>跳过</button> : <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={() => setPage('shop')} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button>}
   </Stage></main>
   if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => setPage('cart')} /></main>
   return <main className="srsl-app"><ProductList products={page === 'cart' ? selected : SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onCart={() => setPage(page === 'cart' ? 'poster' : 'cart')} cart={page === 'cart'} /></main>
