@@ -3,6 +3,7 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { getCurrentUser, getPublicConfig } from './api'
 import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAssets } from './config'
 import './styles.css'
@@ -109,11 +110,18 @@ function Poster({ products, profile, onBack }) {
   const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
   const footerTop = 699 + collectionHeight - 70
   const height = footerTop + 403
-  const loadImage = (src) => new Promise((resolve, reject) => {
+  const loadImage = (src, timeout = 10000) => new Promise((resolve, reject) => {
     const image = new Image()
+    const timer = window.setTimeout(() => reject(new Error(`海报素材加载超时：${src}`)), timeout)
     image.crossOrigin = 'anonymous'
-    image.onload = () => resolve(image)
-    image.onerror = reject
+    image.onload = () => {
+      window.clearTimeout(timer)
+      resolve(image)
+    }
+    image.onerror = () => {
+      window.clearTimeout(timer)
+      reject(new Error(`海报素材加载失败：${src}`))
+    }
     image.src = src
   })
   const drawCover = (context, image, left, top, width, targetHeight) => {
@@ -153,7 +161,8 @@ function Poster({ products, profile, onBack }) {
         loadImage(silkRoadAssets.posterLabel),
         loadImage(silkRoadAssets.posterItem),
         loadImage(silkRoadAssets.posterFooter),
-        profile.avatar ? loadImage(profile.avatar).catch(() => null) : Promise.resolve(null),
+        // 微信头像来自第三方域名时可能被 Canvas 跨域策略拦住或一直等待；它只能作为可选图层。
+        profile.avatar ? loadImage(profile.avatar, 1500).catch(() => null) : Promise.resolve(null),
         ...products.map((product) => loadImage(product.posterImage)),
       ])
     context.drawImage(header, 0, 0, 750, 769)
@@ -203,7 +212,8 @@ function Poster({ products, profile, onBack }) {
     context.drawImage(footer, 0, footerTop, 750, 403)
     context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
       setPosterImage(output.toDataURL('image/png'))
-    } catch {
+    } catch (error) {
+      console.error('[silk-road-shopping-list] poster composition failed', error)
       setPosterError('海报生成失败，请重试')
     }
   }
@@ -242,6 +252,7 @@ export default function SilkRoadShoppingList() {
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
   const { authReady } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
+  useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
 
   useEffect(() => { localStorage.setItem('silk-road-shopping-list-cart', JSON.stringify(selectedIds)) }, [selectedIds])
   useEffect(() => {
