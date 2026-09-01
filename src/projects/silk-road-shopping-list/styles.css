@@ -35,7 +35,7 @@
 .srsl-nickname { color: #3b4b42; font-size: 24px; font-weight: bold; line-height: 46px; white-space: nowrap; text-overflow: ellipsis; }
 .srsl-poster-selected { color: #f3e2d3; font: 22px/38px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
 .srsl-poster-score { color: #000; font: bold 53px/64px Arial, sans-serif; text-align: right; }
-.srsl-collection { position: absolute; left: 0; top: 699px; width: 750px; min-height: 592px; overflow: visible; border: 1px solid #e0cab5; border-radius: 20px; background-repeat: no-repeat; background-position: center center; background-size: cover; }
+.srsl-collection { position: absolute; left: 0; top: 699px; width: 750px; min-height: 592px; overflow: visible; border-radius: 20px; background-repeat: no-repeat; background-position: center center; background-size: cover; }
 .srsl-poster-label { z-index: 2; }
 .srsl-poster-grid { position: absolute; z-index: 1; left: 25px; top: 29px; display: grid; grid-template-columns: repeat(4, 171px); grid-auto-rows: 213px; width: 700px; padding: 30px 1px 10px; border: 2px solid #e0cab5; border-radius: 20px; }
 .srsl-poster-product { position: relative; width: 171px; height: 213px; overflow: hidden; }
