@@ -2,10 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { DeleteOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
-import { setToken } from '../../shared/api/request'
-import { getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
-import { getCurrentUser } from './api'
-import { SILK_ROAD_PRODUCTS, silkRoadAssets } from './config'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { getCurrentUser, getPublicConfig } from './api'
+import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAssets } from './config'
 import './styles.css'
 
 const DESIGN_WIDTH = 750
@@ -76,7 +75,7 @@ function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }
   return <>
   <Stage height={626 + rows * 230} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
-    <span className="srsl-progress" style={{ left: 376, top: 467, width: 94, height: 37 }}>{selectedIds.length}/50</span>
+    <span className="srsl-progress" style={{ left: 410, top: 467, width: 60, height: 37 }}>{selectedIds.length}/50</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 319, height: 35, left: 215.5, top: 571 }} />
     <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={onToggle} />)}</div>
   </Stage>
@@ -234,22 +233,34 @@ function Poster({ products, profile, onBack }) {
 }
 
 export default function SilkRoadShoppingList() {
-  const tokenFromUrl = getTokenFromUrl()
-  const shouldRedirectAfterAuth = Boolean(tokenFromUrl)
-  if (tokenFromUrl) setToken(tokenFromUrl)
+  const [publicConfig, setPublicConfig] = useState(null)
   const [page, setPage] = useState('home')
   const [selectedIds, setSelectedIds] = useState(() => JSON.parse(localStorage.getItem('silk-road-shopping-list-cart') || '[]'))
   const [cartOpen, setCartOpen] = useState(false)
   const [profile, setProfile] = useState({ nickname: '丝路旅人', avatar: '' })
   const videoRef = useRef(null)
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
+  const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
+  const { authReady } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
 
   useEffect(() => { localStorage.setItem('silk-road-shopping-list-cart', JSON.stringify(selectedIds)) }, [selectedIds])
   useEffect(() => {
-    if (shouldRedirectAfterAuth) return undefined
-    getCurrentUser().then((user) => setProfile({ nickname: user?.nickname || '丝路旅人', avatar: user?.avatar || '' })).catch(() => null)
-    return undefined
-  }, [shouldRedirectAfterAuth])
+    let active = true
+    getPublicConfig(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY).then((config) => {
+      if (active) setPublicConfig(config || {})
+    }).catch(() => {
+      if (active) setPublicConfig({})
+    })
+    return () => { active = false }
+  }, [])
+  useEffect(() => {
+    if (!authReady) return undefined
+    let active = true
+    getCurrentUser().then((user) => {
+      if (active) setProfile({ nickname: user?.nickname || '丝路旅人', avatar: user?.avatar || '' })
+    }).catch(() => null)
+    return () => { active = false }
+  }, [authReady])
   useEffect(() => {
     if (page !== 'orientation') return undefined
     const timer = window.setTimeout(() => setPage('video'), 3000)
@@ -274,10 +285,6 @@ export default function SilkRoadShoppingList() {
     if (!selected.length) return
     setCartOpen(false)
     setPage('poster')
-  }
-  if (shouldRedirectAfterAuth) {
-    window.location.replace(sanitizeUrlForWechat(window.location.href))
-    return null
   }
   if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return <main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
     {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} showOrientation={page === 'orientation'} />}
