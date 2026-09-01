@@ -1,7 +1,14 @@
+import posterHeader from './assets/poster/header.png'
+import posterCollection from './assets/poster/collection.png'
+import posterLabel from './assets/poster/label.png'
+import posterItem from './assets/poster/item.png'
+import posterFooter from './assets/poster/footer.png'
+
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE = 'silk_road_shopping_list'
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY = 'millennium_silk_road_shopping_list_2026'
 
 export const ASSET_ROOT = `https://assets.zice8.com/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE}/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY}`
+const posterProductImages = import.meta.glob('./assets/poster/products/*.png', { eager: true, query: '?url', import: 'default' })
 
 export const silkRoadAssets = {
   homeBackground: `${ASSET_ROOT}/b4d5cd34fa18bdfc0bab69b4e6b26998_2446173_750_1624.png`,
@@ -19,11 +26,11 @@ export const silkRoadAssets = {
   minusIcon: `${ASSET_ROOT}/1b16aadeba1e9b4e0b5f33dcadd456f4_633.svg`,
   detailTitle: `${ASSET_ROOT}/3d7685eaa9e31059a8bc4458a5713a8f_10412_115_58.png`,
   detailIcon: `${ASSET_ROOT}/4f985035441e52a947de6e19dcbc057b_425.svg`,
-  posterHeader: `${ASSET_ROOT}/2694d248cb901da63ec7a2c426d8bf94_1063352_750_769.png`,
-  posterCollection: `${ASSET_ROOT}/fe565f6402942f780b1ca87c08a9ad98_683579_750_672.png`,
-  posterLabel: `${ASSET_ROOT}/070e0f9228c2fdf53133433a69f280e3_36375_349_49.png`,
-  posterItem: `${ASSET_ROOT}/3777992feb211c8d365700c002d2bc58_49065_171_213.png`,
-  posterFooter: `${ASSET_ROOT}/4c033e8a6cb48f5f7351dc862492ca86_527857_750_403.png`,
+  posterHeader,
+  posterCollection,
+  posterLabel,
+  posterItem,
+  posterFooter,
 }
 
 const productImage = (name) => `${ASSET_ROOT}/${name}`
@@ -57,4 +64,10 @@ export const SILK_ROAD_PRODUCTS = [
   ['阿拉伯医药', '阿拉伯医学经丝路传入，影响中国回回医学', 'edb24203d8b91c6008b65b714e4a864e_111989_262_268.png'],
   ['东罗马高脚金杯', '东罗马帝国（拜占庭）制品，经丝路传入的奢侈品', 'b3a29cedb09c7f9c4944aa9d1a88e454_57975_168_261.png'],
   ['金币', '东罗马、波斯等货币经丝路流通，见证贸易往来', '0816147e4c6fe5d450db15a6f8581019_60600_253_166.png'],
-].map(([name, description, image], index) => ({ id: index + 1, name, description, image: productImage(image) }))
+].map(([name, description, image], index) => ({
+  id: index + 1,
+  name,
+  description,
+  image: productImage(image),
+  posterImage: posterProductImages[`./assets/poster/products/${image}`],
+}))

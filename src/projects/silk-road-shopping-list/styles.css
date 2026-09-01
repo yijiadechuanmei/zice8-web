@@ -1,12 +1,15 @@
 .srsl-app { min-height: 100svh; overflow: hidden; background: #f3e2d3; }
 .srsl-intro-screen { position: fixed; inset: 0; display: grid; width: 100%; height: 100%; overflow: hidden; place-items: center; overscroll-behavior: none; background: #f3e2d3; }.srsl-intro-screen.is-video { background: #000; }
 .srsl-intro-screen:not(.is-video) .srsl-home-stage { position: absolute; left: 50%; top: 50%; margin: 0; transform: translate(-50%, -50%); }
+.srsl-home-background { animation: srsl-home-fade .65s ease-out both; }.srsl-home-title { animation: srsl-home-rise .52s .14s ease-out both; }.srsl-home-illustration { animation: srsl-home-rise .6s .28s ease-out both; }.srsl-home-ribbon { animation: srsl-home-rise .48s .42s ease-out both; }.srsl-home-start { animation: srsl-home-rise .5s .56s ease-out both; }
 .srsl-app *, .srsl-intro-screen * { box-sizing: border-box; }
 .srsl-frame { position: relative; margin: 0 auto; overflow: hidden; }
 .srsl-stage { position: relative; transform-origin: 0 0; overflow: hidden; }
 .srsl-image-button { display: block; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .srsl-image-button img { display: block; width: 100%; height: 100%; }
 .srsl-orientation { position: absolute; z-index: 50; left: 0; top: 0; display: grid; width: 750px; height: 1624px; place-items: center; padding: 80px; color: #fff; background: rgba(0, 0, 0, .4); font: 28px/1.6 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
+@keyframes srsl-home-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
 .srsl-video-panel { position: fixed; z-index: 60; inset: 0; display: grid; overflow: hidden; place-items: center; background: #000; }.srsl-video-panel.is-preparing { opacity: 0; pointer-events: none; }.srsl-video-panel .srsl-frame { margin: 0; }.srsl-skip { position: fixed; z-index: 61; right: 24px; bottom: 24px; padding: 8px 16px; border: 0; transform: rotate(90deg); transform-origin: center; color: #fff; background: rgba(0, 0, 0, .4); font: 22px "PingFang SC", "Microsoft YaHei", sans-serif; }
 

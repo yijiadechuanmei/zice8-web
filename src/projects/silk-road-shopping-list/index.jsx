@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { DeleteOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
+import { setToken } from '../../shared/api/request'
+import { getTokenFromUrl, sanitizeUrlForWechat } from '../../shared/utils/url'
 import { getCurrentUser } from './api'
 import { SILK_ROAD_PRODUCTS, silkRoadAssets } from './config'
 import './styles.css'
@@ -26,11 +28,11 @@ function Stage({ height, children, className = '', fitViewport = false }) {
 function Home({ onStart, showOrientation }) {
   return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
-      <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
-      <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
-      <img alt="" src={silkRoadAssets.homeIllustration} style={{ position: 'absolute', width: 295, height: 595, left: 204, top: 87 }} />
-      <img alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
-      <button className="srsl-image-button" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
+      <img className="srsl-home-background" alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
+      <img className="srsl-home-title" alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
+      <img className="srsl-home-illustration" alt="" src={silkRoadAssets.homeIllustration} style={{ position: 'absolute', width: 295, height: 595, left: 204, top: 87 }} />
+      <img className="srsl-home-ribbon" alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
+      <button className="srsl-image-button srsl-home-start" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
     </div>
     {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
@@ -52,9 +54,9 @@ function ProductCard({ product, selected, onToggle }) {
   return <div className={`srsl-product-card${flipped ? ' is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)} onKeyDown={(event) => event.key === 'Enter' && setFlipped(!flipped)}>
     <div className="srsl-product-face">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: 230, left: 0, top: 0 }} />
-      <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product.id) }}>
+      {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product.id) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
-      </button>
+      </button>}
       <img alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 0 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
@@ -121,11 +123,27 @@ function Poster({ products, profile, onBack }) {
     const sourceHeight = targetHeight / scale
     context.drawImage(image, (image.width - sourceWidth) / 2, (image.height - sourceHeight) / 2, sourceWidth, sourceHeight, left, top, width, targetHeight)
   }
+  const waitForQrCanvas = () => new Promise((resolve, reject) => {
+    let remainingAttempts = 30
+    const findCanvas = () => {
+      const canvas = qrRef.current?.querySelector('canvas')
+      if (canvas) {
+        resolve(canvas)
+        return
+      }
+      remainingAttempts -= 1
+      if (remainingAttempts <= 0) {
+        reject(new Error('二维码尚未生成'))
+        return
+      }
+      window.setTimeout(findCanvas, 50)
+    }
+    findCanvas()
+  })
   const savePoster = async () => {
-    const qrCanvas = qrRef.current?.querySelector('canvas')
-    if (!qrCanvas) return
     setPosterError('')
     try {
+      const qrCanvas = await waitForQrCanvas()
       const output = document.createElement('canvas')
       output.width = 750
       output.height = height
@@ -137,7 +155,7 @@ function Poster({ products, profile, onBack }) {
         loadImage(silkRoadAssets.posterItem),
         loadImage(silkRoadAssets.posterFooter),
         profile.avatar ? loadImage(profile.avatar).catch(() => null) : Promise.resolve(null),
-        ...products.map((product) => loadImage(product.image)),
+        ...products.map((product) => loadImage(product.posterImage)),
       ])
     context.drawImage(header, 0, 0, 750, 769)
     if (avatar) {
@@ -216,6 +234,9 @@ function Poster({ products, profile, onBack }) {
 }
 
 export default function SilkRoadShoppingList() {
+  const tokenFromUrl = getTokenFromUrl()
+  const shouldRedirectAfterAuth = Boolean(tokenFromUrl)
+  if (tokenFromUrl) setToken(tokenFromUrl)
   const [page, setPage] = useState('home')
   const [selectedIds, setSelectedIds] = useState(() => JSON.parse(localStorage.getItem('silk-road-shopping-list-cart') || '[]'))
   const [cartOpen, setCartOpen] = useState(false)
@@ -224,7 +245,11 @@ export default function SilkRoadShoppingList() {
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
 
   useEffect(() => { localStorage.setItem('silk-road-shopping-list-cart', JSON.stringify(selectedIds)) }, [selectedIds])
-  useEffect(() => { getCurrentUser().then((user) => setProfile({ nickname: user?.nickname || '丝路旅人', avatar: user?.avatar || '' })).catch(() => null) }, [])
+  useEffect(() => {
+    if (shouldRedirectAfterAuth) return undefined
+    getCurrentUser().then((user) => setProfile({ nickname: user?.nickname || '丝路旅人', avatar: user?.avatar || '' })).catch(() => null)
+    return undefined
+  }, [shouldRedirectAfterAuth])
   useEffect(() => {
     if (page !== 'orientation') return undefined
     const timer = window.setTimeout(() => setPage('video'), 3000)
@@ -249,6 +274,10 @@ export default function SilkRoadShoppingList() {
     if (!selected.length) return
     setCartOpen(false)
     setPage('poster')
+  }
+  if (shouldRedirectAfterAuth) {
+    window.location.replace(sanitizeUrlForWechat(window.location.href))
+    return null
   }
   if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return <main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
     {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} showOrientation={page === 'orientation'} />}
