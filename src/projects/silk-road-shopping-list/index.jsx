@@ -21,13 +21,16 @@ function Stage({ height, children, className = '' }) {
   return <div className={`srsl-frame ${className}`} style={{ width: 750 * scale, height: height * scale }}><div className="srsl-stage" style={{ width: 750, height, transform: `scale(${scale})` }}>{children}</div></div>
 }
 
-function Home({ onStart }) {
-  return <Stage height={1448}>
-    <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
-    <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
-    <img alt="" src={silkRoadAssets.homeIllustration} style={{ position: 'absolute', width: 295, height: 595, left: 204, top: 87 }} />
-    <img alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
-    <button className="srsl-image-button" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
+function Home({ onStart, showOrientation }) {
+  return <Stage height={1624} className="srsl-home-stage">
+    <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
+      <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
+      <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
+      <img alt="" src={silkRoadAssets.homeIllustration} style={{ position: 'absolute', width: 295, height: 595, left: 204, top: 87 }} />
+      <img alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
+      <button className="srsl-image-button" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
+    </div>
+    {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
 }
 
@@ -124,7 +127,7 @@ export default function SilkRoadShoppingList() {
 
   const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
-  if (page === 'home' || page === 'orientation') return <main className="srsl-app"><Home onStart={() => setPage('orientation')} />{page === 'orientation' && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}</main>
+  if (page === 'home' || page === 'orientation') return <main className="srsl-app"><Home onStart={() => setPage('orientation')} showOrientation={page === 'orientation'} /></main>
   if (page === 'video' || page === 'video-end') return <main className="srsl-video"><Stage height={1448}>
     <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" onEnded={videoEnd} style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0' }} />
     <img alt="" src={silkRoadAssets.orientationHint} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }} />
