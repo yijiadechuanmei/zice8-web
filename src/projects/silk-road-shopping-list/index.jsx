@@ -102,6 +102,8 @@ function CartDrawer({ products, onClose, onRemove, onCheckout }) {
 
 function Poster({ products, profile, onBack }) {
   const qrRef = useRef(null)
+  const [posterImage, setPosterImage] = useState('')
+  const [posterError, setPosterError] = useState('')
   const rows = Math.max(1, Math.ceil(products.length / 4))
   const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
   const footerTop = 699 + collectionHeight - 70
@@ -122,19 +124,21 @@ function Poster({ products, profile, onBack }) {
   const savePoster = async () => {
     const qrCanvas = qrRef.current?.querySelector('canvas')
     if (!qrCanvas) return
-    const output = document.createElement('canvas')
-    output.width = 750
-    output.height = height
-    const context = output.getContext('2d')
-    const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
-      loadImage(silkRoadAssets.posterHeader),
-      loadImage(silkRoadAssets.posterCollection),
-      loadImage(silkRoadAssets.posterLabel),
-      loadImage(silkRoadAssets.posterItem),
-      loadImage(silkRoadAssets.posterFooter),
-      profile.avatar ? loadImage(profile.avatar) : Promise.resolve(null),
-      ...products.map((product) => loadImage(product.image)),
-    ])
+    setPosterError('')
+    try {
+      const output = document.createElement('canvas')
+      output.width = 750
+      output.height = height
+      const context = output.getContext('2d')
+      const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
+        loadImage(silkRoadAssets.posterHeader),
+        loadImage(silkRoadAssets.posterCollection),
+        loadImage(silkRoadAssets.posterLabel),
+        loadImage(silkRoadAssets.posterItem),
+        loadImage(silkRoadAssets.posterFooter),
+        profile.avatar ? loadImage(profile.avatar).catch(() => null) : Promise.resolve(null),
+        ...products.map((product) => loadImage(product.image)),
+      ])
     context.drawImage(header, 0, 0, 750, 769)
     if (avatar) {
       context.save()
@@ -156,7 +160,6 @@ function Poster({ products, profile, onBack }) {
     context.textAlign = 'right'
     context.fillText('100', 583, 574)
     drawCover(context, collection, 0, 699, 750, collectionHeight)
-    context.drawImage(label, 200.5, 699, 349, 49)
     context.strokeStyle = '#e0cab5'
     context.lineWidth = 2
     context.strokeRect(25, 728, 700, 42 + rows * 213)
@@ -179,12 +182,13 @@ function Poster({ products, profile, onBack }) {
       context.font = '24px PingFang SC, Microsoft YaHei, sans-serif'
       context.fillText(String(index + 1), left + 20, top + 28)
     })
+    context.drawImage(label, 200.5, 699, 349, 49)
     context.drawImage(footer, 0, footerTop, 750, 403)
     context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
-    const link = document.createElement('a')
-    link.download = '千年丝路带货清单.png'
-    link.href = output.toDataURL('image/png')
-    link.click()
+      setPosterImage(output.toDataURL('image/png'))
+    } catch {
+      setPosterError('海报生成失败，请重试')
+    }
   }
   return <Stage height={height}>
     <img alt="" src={silkRoadAssets.posterHeader} style={{ position: 'absolute', width: 750, height: 769, left: 0, top: 0 }} />
@@ -194,7 +198,7 @@ function Poster({ products, profile, onBack }) {
     <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}>{products.length}</span>
     <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>100</span>
     <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
-      <img alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
+      <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
       <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
         <img alt="" src={silkRoadAssets.posterItem} />
         <img alt={product.name} src={product.image} />
@@ -203,6 +207,11 @@ function Poster({ products, profile, onBack }) {
       </div>)}</div>
     </div>
     <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={savePoster} /></div>
+    {posterError && <span className="srsl-poster-error">{posterError}</span>}
+    {posterImage && createPortal(<div className="srsl-poster-preview" role="dialog" aria-modal="true" aria-label="生成的海报">
+      <button type="button" aria-label="关闭海报" onClick={() => setPosterImage('')}>×</button>
+      <img alt="千年丝路带货清单海报" src={posterImage} />
+    </div>, document.body)}
   </Stage>
 }
 
