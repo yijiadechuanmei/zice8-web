@@ -23,7 +23,7 @@ function Stage({ height, children, className = '', fitViewport = false }) {
 }
 
 function Home({ onStart, showOrientation }) {
-  return <Stage height={1624} className="srsl-home-stage">
+  return <Stage height={1624} className="srsl-home-stage" fitViewport>
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
       <img alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 440, height: 53, left: 155, top: 725 }} />
@@ -39,7 +39,7 @@ function VideoPanel({ mode, videoRef, onEnd, onShop }) {
   return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
     <Stage height={1448} fitViewport>
       <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
-        <video ref={videoRef} src={silkRoadAssets.video} autoPlay muted defaultMuted playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onCanPlay={() => videoRef.current?.play().catch(() => null)} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <video ref={videoRef} src={silkRoadAssets.video} autoPlay playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onCanPlay={() => videoRef.current?.play().catch(() => null)} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
       {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
@@ -223,7 +223,14 @@ export default function SilkRoadShoppingList() {
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
   const startVideo = () => {
     flushSync(() => setPage('orientation'))
-    videoRef.current?.play().catch(() => null)
+    const video = videoRef.current
+    if (!video) return
+    video.muted = false
+    video.volume = 1
+    video.play().catch(() => {
+      video.muted = true
+      video.play().catch(() => null)
+    })
   }
   const checkout = () => {
     if (!selected.length) return
