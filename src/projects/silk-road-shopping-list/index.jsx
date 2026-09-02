@@ -45,11 +45,26 @@ function loadPosterImage(src, label, timeout = 10000) {
   })
 }
 
-function drawPosterCover(context, image, left, top, width, height) {
-  const scale = Math.max(width / image.width, height / image.height)
-  const sourceWidth = width / scale
-  const sourceHeight = height / scale
-  context.drawImage(image, (image.width - sourceWidth) / 2, (image.height - sourceHeight) / 2, sourceWidth, sourceHeight, left, top, width, height)
+function drawPosterLayer(context, image, left, top, width, height, options = {}) {
+  const { sourceTop = 0, sourceHeight = image.height, fadeTop = 0 } = options
+  if (!fadeTop) {
+    context.drawImage(image, 0, sourceTop, image.width, sourceHeight, left, top, width, height)
+    return
+  }
+  const layer = document.createElement('canvas')
+  layer.width = width
+  layer.height = height
+  const layerContext = layer.getContext('2d')
+  if (!layerContext) throw new Error('当前浏览器不支持海报图层合成')
+  layerContext.drawImage(image, 0, sourceTop, image.width, sourceHeight, 0, 0, width, height)
+  layerContext.globalCompositeOperation = 'destination-in'
+  const mask = layerContext.createLinearGradient(0, 0, 0, height)
+  mask.addColorStop(0, 'rgba(255, 255, 255, 0)')
+  mask.addColorStop(Math.min(fadeTop / height, 1), 'rgba(255, 255, 255, 1)')
+  mask.addColorStop(1, 'rgba(255, 255, 255, 1)')
+  layerContext.fillStyle = mask
+  layerContext.fillRect(0, 0, width, height)
+  context.drawImage(layer, left, top)
 }
 
 function waitForPosterQr(qrRef) {
@@ -306,6 +321,9 @@ function Poster({ products, profile, onBack, onReselect }) {
     output.height = height
     const context = output.getContext('2d')
     if (!context) throw new Error('当前浏览器不支持海报合成')
+    // 头图和底图含半透明像素；先铺页面纸张底色，避免导出的 PNG 在深色预览层上透出暗影。
+    context.fillStyle = '#f3e2d3'
+    context.fillRect(0, 0, output.width, output.height)
     const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
       loadPosterImage(silkRoadAssets.posterHeader, '海报头图'),
       loadPosterImage(silkRoadAssets.posterCollection, '商品列表背景'),
@@ -342,7 +360,12 @@ function Poster({ products, profile, onBack, onReselect }) {
     context.shadowOffsetX = 0
     context.shadowOffsetY = 0
     context.filter = 'none'
-    drawPosterCover(context, collection, 0, 699, 750, collectionHeight)
+    const collectionEdgeCrop = Math.min(96, Math.floor((collection.height - 1) / 2))
+    drawPosterLayer(context, collection, 0, 699, 750, collectionHeight, {
+      sourceTop: collectionEdgeCrop,
+      sourceHeight: collection.height - collectionEdgeCrop * 2,
+      fadeTop: 70,
+    })
     context.restore()
     context.strokeStyle = '#e0cab5'
     context.lineWidth = 2
@@ -367,7 +390,7 @@ function Poster({ products, profile, onBack, onReselect }) {
       context.fillText(String(index + 1), left + 20, top + 28)
     })
     context.drawImage(label, 200.5, 699, 349, 49)
-    context.drawImage(footer, 0, footerTop, 750, 403)
+    drawPosterLayer(context, footer, 0, footerTop, 750, 403, { fadeTop: 70 })
     context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
     const dataUrl = (() => {
       try {
