@@ -1,7 +1,7 @@
 .srsl-app { min-height: 100svh; overflow: hidden; background: #f3e2d3; }
 .srsl-intro-screen { position: fixed; inset: 0; display: grid; width: 100%; height: 100%; overflow: hidden; place-items: center; overscroll-behavior: none; background: #f3e2d3; }.srsl-intro-screen.is-video { background: #000; }
 .srsl-intro-screen:not(.is-video) .srsl-home-stage { position: absolute; left: 50%; top: 50%; margin: 0; transform: translate(-50%, -50%); }
-.srsl-home-background { animation: srsl-home-fade .65s ease-out both; }.srsl-home-title { animation: srsl-home-rise .52s .14s ease-out both; }.srsl-home-illustration { animation: srsl-home-rise .6s .28s ease-out both; }.srsl-home-ribbon { animation: srsl-home-rise .48s .42s ease-out both; }.srsl-home-start { z-index: 3; animation: srsl-home-rise .5s .56s ease-out both; }
+.srsl-home-background { will-change: transform, opacity; animation: srsl-home-background-in .9s ease-out both; }.srsl-home-title { will-change: transform, opacity, filter; animation: srsl-home-title-in .8s .14s cubic-bezier(.2, .82, .24, 1.12) both; }.srsl-home-illustration { will-change: transform, opacity, filter; animation: srsl-home-illustration-in .88s .3s cubic-bezier(.2, .82, .24, 1.08) both; }.srsl-home-ribbon { will-change: transform, opacity; animation: srsl-home-ribbon-in .62s .54s cubic-bezier(.2, .82, .24, 1.08) both; }.srsl-home-start { z-index: 3; will-change: transform, opacity; animation: srsl-home-start-in .72s .7s cubic-bezier(.2, .82, .24, 1.12) both; }.srsl-home-start img { transform-origin: 50% 50%; will-change: transform, filter; animation: srsl-home-start-pulse 1.32s 1.55s ease-in-out infinite; }
 .srsl-app *, .srsl-intro-screen * { box-sizing: border-box; }
 .srsl-frame { position: relative; margin: 0 auto; overflow: hidden; }
 .srsl-stage { position: relative; transform-origin: 0 0; overflow: hidden; }
@@ -13,8 +13,12 @@
 .srsl-orientation-phone::before { position: absolute; top: 9px; left: 50%; width: 24px; height: 4px; border-radius: 4px; background: currentColor; content: ''; transform: translateX(-50%); }
 .srsl-orientation-phone span { position: absolute; bottom: 8px; left: 50%; width: 7px; height: 7px; border: 2px solid currentColor; border-radius: 50%; transform: translateX(-50%); }
 .srsl-orientation-copy { color: #fff; font-size: 19px; font-weight: 700; line-height: 1.7; letter-spacing: 0; }
-@keyframes srsl-home-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes srsl-home-background-in { from { opacity: 0; transform: scale(1.045); } to { opacity: 1; transform: scale(1); } }
+@keyframes srsl-home-title-in { from { opacity: 0; filter: blur(4px); transform: translateY(82px) scale(.84) rotate(-1.4deg); } to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1) rotate(0); } }
+@keyframes srsl-home-illustration-in { from { opacity: 0; filter: blur(3px); transform: translateY(108px) scale(.86); } to { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); } }
+@keyframes srsl-home-ribbon-in { from { opacity: 0; transform: translateY(62px) scale(.86); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes srsl-home-start-in { from { opacity: 0; transform: translateY(92px) scale(.72); } 65% { opacity: 1; transform: translateY(-10px) scale(1.045); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes srsl-home-start-pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(213, 75, 40, 0)); } 16% { transform: scale(1.075); filter: drop-shadow(0 0 13px rgba(213, 75, 40, .54)); } 31% { transform: scale(1.015); } 46% { transform: scale(1.052); filter: drop-shadow(0 0 9px rgba(213, 75, 40, .36)); } 63% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(213, 75, 40, 0)); } }
 @keyframes srsl-shop-entry-pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(225, 103, 52, 0)); } 50% { transform: scale(1.075); filter: drop-shadow(0 0 12px rgba(225, 103, 52, .52)); } }
 @keyframes srsl-orientation-rotate { 0%, 15% { opacity: .62; transform: rotate(0deg) scale(.94); } 36%, 62% { opacity: 1; transform: rotate(90deg) scale(1); } 84%, 100% { opacity: .62; transform: rotate(0deg) scale(.94); } }
 .srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
@@ -65,4 +69,4 @@
 .srsl-poster-preview { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow: auto; background: rgba(0, 0, 0, .75); }
 .srsl-poster-preview > img { display: block; width: min(750px, 100%); height: auto; margin: auto; }
 .srsl-poster-preview > button { position: fixed; z-index: 1; right: 20px; top: calc(20px + env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .55); font-size: 36px; line-height: 40px; }
-@media (prefers-reduced-motion: reduce) { .srsl-sandstorm { opacity: .22; } .srsl-shop-entry img, .srsl-orientation-phone { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .srsl-sandstorm { opacity: .22; } .srsl-shop-entry img, .srsl-orientation-phone, .srsl-home-background, .srsl-home-title, .srsl-home-illustration, .srsl-home-ribbon, .srsl-home-start, .srsl-home-start img { animation: none; } }
