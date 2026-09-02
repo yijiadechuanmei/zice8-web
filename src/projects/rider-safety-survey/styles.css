@@ -977,9 +977,9 @@
   color: #fff;
   background-color: #0ca1fe;
   background-image: var(--rss-result-background);
-  background-position: center max(-11.7334vw, -88px);
-  background-size: min(100vw, 750px) auto;
-  background-repeat: repeat-y;
+  background-position: center top;
+  background-size: min(100vw, 750px) 100%;
+  background-repeat: no-repeat;
 }
 .rss-result-canvas {
   width: min(100vw, 750px);
@@ -1072,23 +1072,6 @@
   gap: min(3.2vw, 24px);
   position: relative;
   z-index: 1;
-  isolation: isolate;
-}
-.rss-article-list::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  right: 50%;
-  bottom: 0;
-  width: 100vw;
-  transform: translateX(50%);
-  pointer-events: none;
-  background-color: #0ca1fe;
-  background-image: var(--rss-result-background);
-  background-position: center calc(max(-11.7334vw, -88px) - min(193.0667vw, 1448px) + min(12.8vw, 96px));
-  background-size: min(100vw, 750px) auto;
-  background-repeat: repeat-y;
 }
 .rss-article-list > h2 {
   margin: 0;
@@ -1144,23 +1127,24 @@
   position: absolute;
   top: min(3.2vw, 24px);
   right: min(3.2vw, 24px);
-  width: min(10.1334vw, 76px);
-  height: min(10.1334vw, 76px);
+  width: min(8.5334vw, 64px);
+  height: min(8.5334vw, 64px);
   display: grid;
   place-items: center;
   border-radius: 50%;
   color: #fff;
-  background: rgba(12, 31, 68, 0.62);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(5, 49, 101, 0.62);
+  box-shadow: 0 4px 14px rgba(0, 22, 67, 0.28);
 }
 .rss-article-arrow svg {
-  width: 58%;
-  height: 58%;
+  width: 54%;
+  height: 54%;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 2.35;
+  stroke-width: 2.6;
 }
 .rss-article-link:active {
   transform: scale(0.99);
