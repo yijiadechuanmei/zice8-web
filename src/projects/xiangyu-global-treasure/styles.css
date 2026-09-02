@@ -40,9 +40,9 @@ body.xygt-lock-scroll { overflow: hidden; }
 .xygt-home-title { position: absolute; top: 10.64%; left: 13.73%; width: 70.93%; height: auto; animation: xygt-title-in .58s .08s both; }
 .xygt-home-mascot { position: absolute; top: 38.54%; left: 22.27%; width: 60.4%; height: auto; transform-origin: 50% 85%; animation: xygt-mascot-float 4s ease-in-out infinite; pointer-events: none; }
 .xygt-home-field-label { position: absolute; top: 66.37%; left: 34.4%; width: 35.07%; height: auto; pointer-events: none; }
-.xygt-home-input-wrap { position: absolute; top: 61.19%; left: 22.53%; width: 53.87%; height: 14.02%; }
-.xygt-home-input-wrap img { width: 100%; height: auto; }
-.xygt-home-input-wrap input { position: absolute; top: 41.87%; left: 3%; box-sizing: border-box; width: 94%; height: 33.5%; border: 0; outline: none; background: transparent; color: #11466f; font: 600 clamp(13px, 3.35vw, 26px) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; letter-spacing: .05em; }
+.xygt-home-input-wrap { position: absolute; top: 69.2%; left: 15.73%; width: 67.07%; height: 7.25%; overflow: hidden; }
+.xygt-home-input-wrap img { position: absolute; top: -110.48%; left: 10.14%; width: 80.32%; height: 193.33%; }
+.xygt-home-input-wrap input { position: absolute; top: 16.19%; left: 9.54%; box-sizing: border-box; width: 81.51%; height: 64.76%; border: 0; outline: none; background: transparent; color: #000; font: 600 clamp(13px, 3.35vw, 26px) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; letter-spacing: .05em; }
 .xygt-home-input-wrap input::placeholder { color: rgba(54, 126, 174, .7); }
 .xygt-home-start { position: absolute; top: 78.18%; left: 31.47%; width: 36.93%; height: auto; filter: drop-shadow(0 8px 6px rgba(5, 74, 126, .27)); transition: transform .2s ease, filter .2s ease; animation: xygt-button-pulse 2.8s 1.2s ease-in-out infinite; }
 .xygt-home-start:hover { filter: brightness(1.08) drop-shadow(0 9px 8px rgba(5, 74, 126, .35)); }
