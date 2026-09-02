@@ -115,7 +115,7 @@ function VideoPanel({ mode, videoRef, onEnd, onShop }) {
       <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
         <video ref={videoRef} src={silkRoadAssets.video} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
-      {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
+      {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button srsl-shop-entry" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 125, top: 556, transform: 'rotate(90deg)', transformOrigin: '0 0' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
   </div>
 }
@@ -173,7 +173,7 @@ function CartDrawer({ products, onClose, onRemove, onCheckout }) {
   </div>
 }
 
-function Poster({ products, profile, onBack }) {
+function Poster({ products, profile, onBack, onReselect }) {
   const qrRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
@@ -296,7 +296,7 @@ function Poster({ products, profile, onBack }) {
     {posterError && createPortal(<div className="srsl-poster-error" role="alert">海报生成失败：{posterError}</div>, document.body)}
     {createPortal(<div className="srsl-poster-actions" role="group" aria-label="海报操作">
       <button className="srsl-poster-save" type="button" onClick={() => { setPosterError(''); savePoster() }}><DownloadOutlined />保存海报</button>
-      <button className="srsl-poster-reselect" type="button" onClick={onBack}><SyncOutlined />重新选购</button>
+      <button className="srsl-poster-reselect" type="button" onClick={onReselect}><SyncOutlined />重新选购</button>
     </div>, document.body)}
     {posterImage && createPortal(<div className="srsl-poster-preview" role="dialog" aria-modal="true" aria-label="生成的海报">
       <button type="button" aria-label="关闭海报" onClick={() => setPosterImage('')}>×</button>
@@ -308,7 +308,7 @@ function Poster({ products, profile, onBack }) {
 export default function SilkRoadShoppingList() {
   const [publicConfig, setPublicConfig] = useState(null)
   const [page, setPage] = useState('home')
-  const [selectedIds, setSelectedIds] = useState(() => JSON.parse(localStorage.getItem('silk-road-shopping-list-cart') || '[]'))
+  const [selectedIds, setSelectedIds] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
   const [profile, setProfile] = useState({ nickname: '丝路旅人', avatar: '' })
   const videoRef = useRef(null)
@@ -317,7 +317,7 @@ export default function SilkRoadShoppingList() {
   const { authReady } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
   useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
 
-  useEffect(() => { localStorage.setItem('silk-road-shopping-list-cart', JSON.stringify(selectedIds)) }, [selectedIds])
+  useEffect(() => { localStorage.removeItem('silk-road-shopping-list-cart') }, [])
   useEffect(() => {
     let active = true
     getPublicConfig(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY).then((config) => {
@@ -364,6 +364,6 @@ export default function SilkRoadShoppingList() {
     {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} showOrientation={page === 'orientation'} />}
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
   </main>
-  if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} /></main>
+  if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>
   return <main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>
 }
