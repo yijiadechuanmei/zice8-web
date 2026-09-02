@@ -546,13 +546,26 @@ function SnakeGame({ activityKey, onBack }) {
   )
 }
 
+function ComingSoonNotice() {
+  return <div className="lyfg-coming-soon-notice" role="status" aria-live="polite">敬请期待</div>
+}
+
 export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY
   const [view, setView] = useState('home')
+  const [showComingSoon, setShowComingSoon] = useState(false)
 
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
   }, [])
+
+  useEffect(() => {
+    if (!showComingSoon) return undefined
+    const timer = window.setTimeout(() => setShowComingSoon(false), 1600)
+    return () => window.clearTimeout(timer)
+  }, [showComingSoon])
+
+  const openComingSoon = useCallback(() => setShowComingSoon(true), [])
 
   if (view === 'snake') {
     return <SnakeGame activityKey={activityKey} onBack={() => setView('selector')} />
@@ -563,11 +576,11 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'fruit-merge-rules') {
-    return <FruitMergeRules onBack={() => setView('selector')} onStart={() => setView('fruit-merge')} />
+    return <><FruitMergeRules onBack={() => setView('selector')} onComingSoon={openComingSoon} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
   if (view === 'selector') {
-    return <GameSelector onSelectSnake={() => setView('snake')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />
+    return <><GameSelector onComingSoon={openComingSoon} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
   return <HomePage onStart={() => setView('selector')} />
