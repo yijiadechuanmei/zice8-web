@@ -30,6 +30,7 @@ const RiderSafetySurveyProject = lazy(() => import('./rider-safety-survey/index.
 const QualityMonthProject = lazy(() => import('./quality-month/index.jsx'))
 const LvyuanFruitfulGamesProject = lazy(() => import('./lvyuan-fruitful-games/index.jsx'))
 const SilkRoadShoppingListProject = lazy(() => import('./silk-road-shopping-list/index.jsx'))
+const XiangyuGlobalTreasureProject = lazy(() => import('./xiangyu-global-treasure/index.jsx'))
 
 const activityTypeProjects = {
   payment_transfer_test: PaymentTransferTestProject,
@@ -46,6 +47,7 @@ const activityTypeProjects = {
   otsuka_quality_month_quiz: QualityMonthProject,
   lvyuan_consumer_game_collection: LvyuanFruitfulGamesProject,
   silk_road_shopping_list: SilkRoadShoppingListProject,
+  xiangyu_global_treasure: XiangyuGlobalTreasureProject,
 }
 
 function ActivityTypeProject({ routeParams }) {

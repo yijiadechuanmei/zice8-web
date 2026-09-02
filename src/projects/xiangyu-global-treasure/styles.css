@@ -1,0 +1,97 @@
+body.xygt-lock-scroll { overflow: hidden; }
+
+.xygt-app {
+  width: 100vw;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+  background: #0ca1fe;
+  color: #fff;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.xygt-stage {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  background: #0ca1fe var(--xygt-bg) center / cover no-repeat;
+}
+
+.xygt-canvas {
+  position: relative;
+  width: min(100vw, calc(100svh * 750 / 1448));
+  height: min(100svh, calc(100vw * 1448 / 750));
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.xygt-canvas img { display: block; max-width: none; user-select: none; }
+.xygt-background { position: absolute; z-index: -1; top: -6.08%; left: 0; width: 100%; height: 112.15%; pointer-events: none; }
+.xygt-brand { position: absolute; z-index: 3; top: 1.38%; left: 6.4%; width: 32.27%; height: auto; pointer-events: none; animation: xygt-brand-in .5s ease both; }
+.xygt-page { position: absolute; inset: 0; }
+.xygt-image-button { display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; }
+.xygt-image-button img { width: 100%; height: 100%; }
+.xygt-image-button:focus-visible, .xygt-page input:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.xygt-image-button:disabled { cursor: wait; opacity: .65; }
+
+.xygt-home-title { position: absolute; top: 10.64%; left: 13.73%; width: 70.93%; height: auto; animation: xygt-title-in .58s .08s both; }
+.xygt-home-mascot { position: absolute; top: 38.54%; left: 22.27%; width: 60.4%; height: auto; transform-origin: 50% 85%; animation: xygt-mascot-float 4s ease-in-out infinite; pointer-events: none; }
+.xygt-home-field-label { position: absolute; top: 66.37%; left: 34.4%; width: 35.07%; height: auto; pointer-events: none; }
+.xygt-home-input-wrap { position: absolute; top: 61.19%; left: 22.53%; width: 53.87%; height: 14.02%; }
+.xygt-home-input-wrap img { width: 100%; height: auto; }
+.xygt-home-input-wrap input { position: absolute; top: 41.87%; left: 3%; box-sizing: border-box; width: 94%; height: 33.5%; border: 0; outline: none; background: transparent; color: #11466f; font: 600 clamp(13px, 3.35vw, 26px) / 1.2 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; letter-spacing: .05em; }
+.xygt-home-input-wrap input::placeholder { color: rgba(54, 126, 174, .7); }
+.xygt-home-start { position: absolute; top: 78.18%; left: 31.47%; width: 36.93%; height: auto; filter: drop-shadow(0 8px 6px rgba(5, 74, 126, .27)); transition: transform .2s ease, filter .2s ease; animation: xygt-button-pulse 2.8s 1.2s ease-in-out infinite; }
+.xygt-home-start:hover { filter: brightness(1.08) drop-shadow(0 9px 8px rgba(5, 74, 126, .35)); }
+.xygt-home-start:active { transform: translateY(3px) scale(.98); }
+
+.xygt-page-enter { animation: xygt-page-in .42s ease both; }
+.xygt-won-title { position: absolute; top: 15.88%; left: 14.13%; width: 68.93%; height: auto; animation: xygt-title-in .55s ease both; }
+.xygt-locked-chest { position: absolute; top: 38.95%; left: 16.53%; width: 66.67%; height: auto; filter: drop-shadow(0 16px 16px rgba(0, 71, 122, .22)); animation: xygt-chest-float 3.4s .25s ease-in-out infinite; }
+.xygt-open-button { position: absolute; top: 69.75%; left: 31.47%; width: 36.93%; height: auto; filter: drop-shadow(0 8px 6px rgba(5, 74, 126, .27)); transition: transform .2s ease, filter .2s ease; animation: xygt-button-pulse 2.8s .6s ease-in-out infinite; }
+.xygt-open-button:hover { filter: brightness(1.08) drop-shadow(0 9px 8px rgba(5, 74, 126, .35)); }
+.xygt-open-button:active { transform: translateY(3px) scale(.98); }
+.xygt-opened-title { position: absolute; top: 30.32%; left: 33.07%; width: 34.93%; height: auto; animation: xygt-title-in .5s .12s ease both; }
+.xygt-opened-chest { position: absolute; top: 36.6%; left: 15.33%; width: 69.87%; height: auto; filter: drop-shadow(0 16px 16px rgba(0, 71, 122, .22)); animation: xygt-chest-open .55s .18s cubic-bezier(.2, .8, .25, 1.15) both; }
+
+.xygt-lost-title { position: absolute; top: 15.68%; left: 14.27%; width: 70.53%; height: auto; animation: xygt-title-in .55s ease both; }
+.xygt-daily-limit { position: absolute; top: 32.04%; left: 23.33%; width: 52.8%; height: auto; animation: xygt-title-in .46s .14s ease both; }
+.xygt-lost-mascot { position: absolute; top: 41.71%; left: 27.33%; width: 48.8%; height: auto; transform-origin: 50% 90%; animation: xygt-mascot-float 4s .3s ease-in-out infinite; }
+.xygt-try-again { position: absolute; top: 37.71%; left: 50.67%; width: 24.67%; height: auto; filter: drop-shadow(0 6px 5px rgba(5, 74, 126, .25)); transition: transform .2s ease; }
+.xygt-tomorrow { position: absolute; top: 53.04%; left: 6.4%; width: 24.67%; height: auto; filter: drop-shadow(0 6px 5px rgba(5, 74, 126, .25)); transition: transform .2s ease; }
+.xygt-try-again:active, .xygt-tomorrow:active { transform: translateY(2px) scale(.97); }
+
+.xygt-dialog-backdrop { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; padding: 4%; background: rgba(0, 73, 129, .24); backdrop-filter: blur(3px); animation: xygt-backdrop-in .2s ease both; }
+.xygt-redeem-dialog { position: relative; width: 88.4%; aspect-ratio: 663 / 742; margin: 0; animation: xygt-dialog-in .3s ease-out both; }
+.xygt-redeem-dialog > img { width: 100%; height: 100%; }
+.xygt-redeem-dialog > input { position: absolute; top: 47.44%; left: 23.83%; box-sizing: border-box; width: 61.84%; height: 9.16%; border: 0; outline: none; background: transparent; color: #155da2; font: 600 clamp(14px, 3.5vw, 26px) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; letter-spacing: .13em; }
+.xygt-redeem-dialog > input::placeholder { color: rgba(42, 129, 201, .62); letter-spacing: 0; }
+.xygt-redeem-submit { position: absolute; top: 78.84%; left: 35.6%; width: 41.78%; height: auto; filter: drop-shadow(0 5px 4px rgba(5, 74, 126, .25)); transition: transform .2s ease; }
+.xygt-redeem-submit:active { transform: translateY(2px) scale(.98); }
+.xygt-dialog-error { position: absolute; top: 58.7%; right: 9%; left: 9%; margin: 0; color: #ec4b36; font-size: clamp(12px, 3.2vw, 20px); font-weight: 700; text-align: center; }
+
+.xygt-message { position: absolute; z-index: 15; right: 7%; bottom: 7%; left: 7%; min-height: 42px; border: 1px solid rgba(255,255,255,.75); border-radius: 999px; background: rgba(2, 73, 127, .83); box-shadow: 0 8px 22px rgba(0, 51, 95, .28); color: #fff; font: 600 clamp(13px, 3.5vw, 18px) / 1.35 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; animation: xygt-message-in .2s ease both; }
+.xygt-center-state { position: absolute; z-index: 30; inset: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; background: rgba(8, 141, 225, .55); color: #fff; font-size: clamp(14px, 3.8vw, 20px); text-shadow: 0 2px 4px rgba(0, 79, 139, .45); }
+.xygt-center-state .anticon { font-size: 30px; }
+
+@keyframes xygt-brand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes xygt-title-in { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes xygt-page-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xygt-mascot-float { 0%, 100% { transform: translateY(0) rotate(-.8deg); } 50% { transform: translateY(-9px) rotate(.8deg); } }
+@keyframes xygt-chest-float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.015); } }
+@keyframes xygt-chest-open { from { opacity: 0; transform: translateY(20px) scale(.84); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes xygt-button-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+@keyframes xygt-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xygt-dialog-in { from { opacity: 0; transform: scale(.9) translateY(18px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes xygt-message-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (hover: hover) and (pointer: fine) {
+  .xygt-try-again:hover, .xygt-tomorrow:hover { filter: brightness(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xygt-brand, .xygt-home-title, .xygt-won-title, .xygt-opened-title, .xygt-lost-title, .xygt-daily-limit, .xygt-page-enter, .xygt-dialog-backdrop, .xygt-redeem-dialog, .xygt-message, .xygt-home-mascot, .xygt-locked-chest, .xygt-opened-chest, .xygt-lost-mascot, .xygt-home-start, .xygt-open-button { animation: none; }
+  .xygt-image-button { transition: none; }
+}

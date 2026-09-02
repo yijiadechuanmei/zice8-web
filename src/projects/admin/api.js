@@ -200,6 +200,16 @@ export function clearLongwenBeerQuizData(activityKey) {
   })
 }
 
+export function clearXiangyuGlobalTreasureData(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/xiangyu-global-treasure/clear-data`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'CLEAR_XIANGYU_GLOBAL_TREASURE_DATA',
+    }),
+  })
+}
+
 export function clearRiderSafetySurveyData(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/clear-data`, {
     method: 'POST',

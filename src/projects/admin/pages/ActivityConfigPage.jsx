@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import {
   clearLongwenBeerQuizData,
+  clearXiangyuGlobalTreasureData,
   clearRiderSafetySurveyData,
   clearSongWishLotteryDraws,
   deleteNanshaOpenMicEntry,
@@ -92,6 +93,9 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaDeleteEntryId, setNanshaDeleteEntryId] = useState('')
   const [nanshaDeletingEntry, setNanshaDeletingEntry] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
+  const [xiangyuClearScope, setXiangyuClearScope] = useState('user')
+  const [xiangyuUserId, setXiangyuUserId] = useState('')
+  const [xiangyuClearing, setXiangyuClearing] = useState(false)
   const [riderSafetyClearScope, setRiderSafetyClearScope] = useState('user')
   const [riderSafetyUserId, setRiderSafetyUserId] = useState('')
   const [riderSafetyClearing, setRiderSafetyClearing] = useState(false)
@@ -296,6 +300,32 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setLongwenClearing(false)
+    }
+  }
+
+  async function handleClearXiangyuGlobalTreasureData() {
+    const scope = xiangyuClearScope
+    const userId = xiangyuUserId.trim()
+    if (scope === 'user' && !/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要清除的正整数用户ID')
+      return
+    }
+    setXiangyuClearing(true)
+    setError('')
+    try {
+      const result = await clearXiangyuGlobalTreasureData(activity.activityKey, {
+        scope,
+        ...(scope === 'user' ? { userId } : {}),
+      })
+      const cleared = result?.cleared || {}
+      if (scope === 'user') setXiangyuUserId('')
+      message.success(`已清除抽奖 ${cleared.draws || 0} 条、参与记录 ${cleared.participants || 0} 条`)
+    } catch (err) {
+      const text = err.message || '清除象屿寻宝数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setXiangyuClearing(false)
     }
   }
 
@@ -845,6 +875,46 @@ export default function ActivityConfigPage({ activity }) {
               >
                 <Button danger loading={longwenClearing}>清空答题数据</Button>
               </Popconfirm>
+            </Space>
+          </Card>
+        ) : null}
+
+        {activity.type === 'xiangyu_global_treasure' ? (
+          <Card size="small" title="寻宝数据管理" style={{ borderColor: '#ffccc7' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Alert
+                type="warning"
+                showIcon
+                message="清除后用户可立即重新参与"
+                description="只删除本活动的单位名称、当天抽奖结果、核销记录与活动参与记录；不会删除微信用户、活动配置、操作审计或其他项目数据。"
+              />
+              <Space wrap>
+                <Select
+                  value={xiangyuClearScope}
+                  style={{ width: 150 }}
+                  options={[{ value: 'user', label: '清除指定用户' }, { value: 'all', label: '清除所有数据' }]}
+                  onChange={setXiangyuClearScope}
+                />
+                {xiangyuClearScope === 'user' ? (
+                  <Input
+                    style={{ width: 230 }}
+                    placeholder="请输入用户ID"
+                    value={xiangyuUserId}
+                    onChange={(event) => setXiangyuUserId(event.target.value.replace(/\D/g, ''))}
+                  />
+                ) : null}
+                <Popconfirm
+                  title={xiangyuClearScope === 'all' ? '确认清除象屿寻宝全部数据？' : '确认清除该用户的象屿寻宝数据？'}
+                  description={xiangyuClearScope === 'all' ? '该操作不可恢复，所有用户将恢复为可参与状态；不会影响其他活动。' : `用户ID：${xiangyuUserId || '未填写'}；仅影响该用户的本活动抽奖与核销记录。`}
+                  okText="确认清除"
+                  cancelText="取消"
+                  onConfirm={handleClearXiangyuGlobalTreasureData}
+                >
+                  <Button danger loading={xiangyuClearing} disabled={xiangyuClearScope === 'user' && !/^[1-9]\d*$/.test(xiangyuUserId.trim())}>
+                    {xiangyuClearScope === 'all' ? '清除所有数据' : '清除指定用户'}
+                  </Button>
+                </Popconfirm>
+              </Space>
             </Space>
           </Card>
         ) : null}
