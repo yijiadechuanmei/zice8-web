@@ -964,6 +964,7 @@
 
 /* 结果页按 IH5 的 750 × 1448 画布等比呈现，所有内容使用原稿坐标。 */
 .rss-result-scene {
+  --rss-result-background: url("https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/e9db063ec93f389c16dbcff785bceb4b_198073_750_1624.png");
   width: 100vw;
   min-height: 100svh;
   margin-left: calc(50% - 50vw);
@@ -974,7 +975,11 @@
   justify-content: center;
   overflow-x: hidden;
   color: #fff;
-  background: #0ca1fe;
+  background-color: #0ca1fe;
+  background-image: var(--rss-result-background);
+  background-position: center max(-11.7334vw, -88px);
+  background-size: min(100vw, 750px) auto;
+  background-repeat: repeat-y;
 }
 .rss-result-canvas {
   width: min(100vw, 750px);
@@ -982,7 +987,7 @@
   flex: 0 0 auto;
   position: relative;
   overflow: hidden;
-  background: url("https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/e9db063ec93f389c16dbcff785bceb4b_198073_750_1624.png") center center / cover no-repeat;
+  background: var(--rss-result-background) center center / cover no-repeat;
 }
 .rss-result-card,
 .rss-result-heading,
