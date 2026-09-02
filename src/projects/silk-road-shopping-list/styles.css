@@ -1,7 +1,7 @@
 .srsl-app { min-height: 100svh; overflow: hidden; background: #f3e2d3; }
 .srsl-intro-screen { position: fixed; inset: 0; display: grid; width: 100%; height: 100%; overflow: hidden; place-items: center; overscroll-behavior: none; background: #f3e2d3; }.srsl-intro-screen.is-video { background: #000; }
 .srsl-intro-screen:not(.is-video) .srsl-home-stage { position: absolute; left: 50%; top: 50%; margin: 0; transform: translate(-50%, -50%); }
-.srsl-home-background { animation: srsl-home-fade .65s ease-out both; }.srsl-home-title { animation: srsl-home-rise .52s .14s ease-out both; }.srsl-home-illustration { animation: srsl-home-rise .6s .28s ease-out both; }.srsl-home-ribbon { animation: srsl-home-rise .48s .42s ease-out both; }.srsl-home-start { animation: srsl-home-rise .5s .56s ease-out both; }
+.srsl-home-background { animation: srsl-home-fade .65s ease-out both; }.srsl-home-title { animation: srsl-home-rise .52s .14s ease-out both; }.srsl-home-illustration { animation: srsl-home-rise .6s .28s ease-out both; }.srsl-home-ribbon { animation: srsl-home-rise .48s .42s ease-out both; }.srsl-home-start { z-index: 3; animation: srsl-home-rise .5s .56s ease-out both; }
 .srsl-app *, .srsl-intro-screen * { box-sizing: border-box; }
 .srsl-frame { position: relative; margin: 0 auto; overflow: hidden; }
 .srsl-stage { position: relative; transform-origin: 0 0; overflow: hidden; }
@@ -10,6 +10,9 @@
 .srsl-orientation { position: absolute; z-index: 50; left: 0; top: 0; display: grid; width: 750px; height: 1624px; place-items: center; padding: 80px; color: #fff; background: rgba(0, 0, 0, .4); font: 28px/1.6 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
 @keyframes srsl-home-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: multiply; }
+.srsl-sand-grain { position: absolute; left: var(--left); top: var(--top); width: var(--size); height: calc(var(--size) * .58); border-radius: 999px; opacity: 0; background: rgba(154, 102, 51, .38); filter: blur(.4px); will-change: transform, opacity; animation: srsl-sand-drift var(--duration) var(--delay) linear infinite; }
+@keyframes srsl-sand-drift { 0% { opacity: 0; transform: translate3d(-96px, 22px, 0) scale(.55); } 13% { opacity: .55; } 70% { opacity: .34; } 100% { opacity: 0; transform: translate3d(var(--drift), -24px, 0) scale(1.1); } }
 
 .srsl-video-panel { position: fixed; z-index: 60; inset: 0; display: grid; overflow: hidden; place-items: center; background: #000; }.srsl-video-panel.is-preparing { opacity: 0; pointer-events: none; }.srsl-video-panel .srsl-frame { margin: 0; }.srsl-skip { position: fixed; z-index: 61; right: 24px; bottom: 24px; padding: 8px 16px; border: 0; transform: rotate(90deg); transform-origin: center; color: #fff; background: rgba(0, 0, 0, .4); font: 22px "PingFang SC", "Microsoft YaHei", sans-serif; }
 
@@ -47,8 +50,13 @@
 .srsl-footer > img { position: absolute; inset: 0; width: 750px; height: 403px; }
 .srsl-qr { position: absolute; left: 77px; top: 136px; width: 106px; height: 106px; background: #fff; }
 .srsl-qr canvas { display: block; width: 106px !important; height: 106px !important; }
-.srsl-footer button { position: absolute; left: 352px; top: 290px; width: 285px; height: 75px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.srsl-poster-actions { position: fixed; z-index: 120; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: min(3.2vw, 24px); width: min(calc(100vw - 32px), 694px); transform: translateX(-50%); }
+.srsl-poster-actions button { display: flex; align-items: center; justify-content: center; gap: min(2.133vw, 16px); min-height: min(12vw, 90px); padding: 0 min(2.667vw, 20px); border: 2px solid #d6aa7e; border-radius: 999px; font: min(4.267vw, 32px)/1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; box-shadow: 0 5px 14px rgba(89, 55, 29, .18); }
+.srsl-poster-actions .anticon { font-size: min(4.267vw, 32px); }
+.srsl-poster-save { color: #fff7e8; background: linear-gradient(180deg, #d9764c, #bf4828); }
+.srsl-poster-reselect { color: #4c392b; background: rgba(250, 239, 220, .96); }
 .srsl-poster-error { position: fixed; z-index: 110; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; color: #fff; background: rgba(0, 0, 0, .78); padding: 10px 14px; border-radius: 8px; font: 14px/1.5 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; white-space: normal; box-shadow: 0 4px 16px rgba(0, 0, 0, .2); }
 .srsl-poster-preview { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow: auto; background: rgba(0, 0, 0, .75); }
 .srsl-poster-preview > img { display: block; width: min(750px, 100%); height: auto; margin: auto; }
 .srsl-poster-preview > button { position: fixed; z-index: 1; right: 20px; top: calc(20px + env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .55); font-size: 36px; line-height: 40px; }
+@media (prefers-reduced-motion: reduce) { .srsl-sand-grain { animation: none; opacity: .18; } }

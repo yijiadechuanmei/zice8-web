@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, DownloadOutlined, SyncOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
@@ -9,6 +9,15 @@ import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAsset
 import './styles.css'
 
 const DESIGN_WIDTH = 750
+const SAND_PARTICLES = [
+  [4, 11, 5, 11, -3, 270], [14, 6, 3, 14, -9, 330], [24, 18, 7, 13, -5, 290], [36, 10, 4, 16, -12, 350],
+  [48, 5, 6, 12, -7, 300], [59, 16, 3, 15, -2, 360], [71, 9, 5, 13, -10, 280], [84, 20, 4, 17, -6, 340],
+  [7, 31, 6, 15, -11, 320], [19, 39, 3, 12, -4, 250], [31, 28, 5, 16, -13, 370], [45, 43, 4, 14, -8, 300],
+  [57, 33, 7, 17, -1, 350], [68, 48, 3, 13, -10, 270], [79, 37, 5, 15, -5, 330], [91, 51, 4, 12, -9, 290],
+  [3, 59, 4, 13, -6, 310], [16, 72, 6, 16, -12, 360], [29, 61, 3, 11, -2, 260], [41, 76, 5, 15, -8, 340],
+  [54, 66, 4, 14, -4, 300], [65, 80, 7, 17, -11, 380], [77, 64, 3, 12, -7, 280], [88, 75, 5, 16, -3, 350],
+  [10, 91, 3, 14, -10, 290], [35, 88, 6, 17, -5, 370], [62, 93, 4, 13, -9, 320], [83, 89, 5, 15, -1, 340],
+]
 
 function loadPosterImage(src, label, timeout = 10000) {
   return new Promise((resolve, reject) => {
@@ -83,6 +92,7 @@ function Home({ onStart, showOrientation }) {
       <img className="srsl-home-ribbon" alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
       <button className="srsl-image-button srsl-home-start" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
     </div>
+    <div className="srsl-sandstorm" aria-hidden="true">{SAND_PARTICLES.map(([left, top, size, duration, delay, drift], index) => <span className="srsl-sand-grain" key={index} style={{ '--left': `${left}%`, '--top': `${top}%`, '--size': `${size}px`, '--duration': `${duration}s`, '--delay': `${delay}s`, '--drift': `${drift}px` }} />)}</div>
     {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
 }
@@ -269,8 +279,12 @@ function Poster({ products, profile, onBack }) {
         <span className="srsl-poster-order">{index + 1}</span>
       </div>)}</div>
     </div>
-    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div><button type="button" aria-label="保存海报" onClick={() => { setPosterError(''); savePoster() }} /></div>
+    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div></div>
     {posterError && createPortal(<div className="srsl-poster-error" role="alert">海报生成失败：{posterError}</div>, document.body)}
+    {createPortal(<div className="srsl-poster-actions" role="group" aria-label="海报操作">
+      <button className="srsl-poster-save" type="button" onClick={() => { setPosterError(''); savePoster() }}><DownloadOutlined />保存海报</button>
+      <button className="srsl-poster-reselect" type="button" onClick={onBack}><SyncOutlined />重新选购</button>
+    </div>, document.body)}
     {posterImage && createPortal(<div className="srsl-poster-preview" role="dialog" aria-modal="true" aria-label="生成的海报">
       <button type="button" aria-label="关闭海报" onClick={() => setPosterImage('')}>×</button>
       <img alt="千年丝路带货清单海报" src={posterImage} />
