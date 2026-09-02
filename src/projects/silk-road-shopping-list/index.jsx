@@ -102,6 +102,48 @@ function Stage({ height, children, className = '', fitViewport = false }) {
   return <div className={`srsl-frame ${className}`} style={{ width: 750 * scale, height: height * scale }}><div className="srsl-stage" style={{ width: 750, height, transform: `scale(${scale})` }}>{children}</div></div>
 }
 
+function flyProductToCart(image, sourceElement) {
+  const sourceImage = sourceElement.closest('.srsl-product-card')?.querySelector('.srsl-product-image')
+  const dock = document.querySelector('.srsl-dock')
+  if (!sourceImage || !dock || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+  const sourceRect = sourceImage.getBoundingClientRect()
+  const dockRect = dock.getBoundingClientRect()
+  const size = Math.max(48, Math.min(74, sourceRect.width * .72))
+  const startLeft = sourceRect.left + (sourceRect.width - size) / 2
+  const startTop = sourceRect.top + (sourceRect.height - size) / 2
+  const distanceX = dockRect.left + dockRect.width * .1 - (startLeft + size / 2)
+  const distanceY = dockRect.top + dockRect.height * .58 - (startTop + size / 2)
+  const arc = Math.min(150, Math.max(56, Math.abs(distanceY) * .2))
+  const flyer = document.createElement('img')
+  flyer.className = 'srsl-product-flyer'
+  flyer.alt = ''
+  flyer.src = image
+  flyer.style.width = `${size}px`
+  flyer.style.height = `${size}px`
+  flyer.style.left = `${startLeft}px`
+  flyer.style.top = `${startTop}px`
+  document.body.appendChild(flyer)
+  if (typeof flyer.animate !== 'function') {
+    flyer.remove()
+    return
+  }
+  const animation = flyer.animate([
+    { transform: 'translate3d(0, 0, 0) scale(1) rotate(0deg)', opacity: 1 },
+    { transform: `translate3d(${distanceX * .54}px, ${distanceY * .26 - arc}px, 0) scale(.78) rotate(8deg)`, opacity: 1, offset: .48 },
+    { transform: `translate3d(${distanceX}px, ${distanceY}px, 0) scale(.24) rotate(18deg)`, opacity: .15 },
+  ], { duration: 720, easing: 'cubic-bezier(.28, .7, .22, 1)', fill: 'forwards' })
+  const removeFlyer = () => flyer.remove()
+  animation.oncancel = removeFlyer
+  animation.onfinish = () => {
+    removeFlyer()
+    dock.animate?.([
+      { transform: 'translate3d(-50%, -100%, 0) scale(1)' },
+      { transform: 'translate3d(-50%, -100%, 0) scale(1.055)', offset: .42 },
+      { transform: 'translate3d(-50%, -100%, 0) scale(1)' },
+    ], { duration: 360, easing: 'ease-out' })
+  }
+}
+
 function Sandstorm() {
   const canvasRef = useRef(null)
   useEffect(() => {
@@ -257,10 +299,10 @@ function ProductCard({ product, selected, onToggle }) {
   return <div className={`srsl-product-card${flipped ? ' is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)} onKeyDown={(event) => event.key === 'Enter' && setFlipped(!flipped)}>
     <div className="srsl-product-face">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: 230, left: 0, top: 0 }} />
-      {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product.id) }}>
+      {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
       </button>}
-      <img alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 0 }} />
+      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 0 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
     <div className="srsl-product-face srsl-product-detail">
@@ -275,13 +317,18 @@ function ProductCard({ product, selected, onToggle }) {
 
 function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }) {
   const rows = Math.ceil(products.length / 2)
+  const handleToggle = (product, sourceElement) => {
+    if (!selectedIds.includes(product.id)) flyProductToCart(product.image, sourceElement)
+    onToggle(product.id)
+  }
   const dock = <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
   return <>
   <Stage height={626 + rows * 230 + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 410, top: 467, width: 60, height: 37 }}>{selectedIds.length}/50</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 319, height: 35, left: 215.5, top: 571 }} />
-    <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={onToggle} />)}</div>
+    <span className="srsl-card-detail-hint">点击卡片查看详情</span>
+    <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
   </Stage>
   {createPortal(dock, document.body)}
   </>
@@ -447,6 +494,7 @@ function Poster({ products, profile, onBack, onReselect }) {
     {posterImage && createPortal(<div className="srsl-poster-preview" role="dialog" aria-modal="true" aria-label="生成的海报">
       <button type="button" aria-label="关闭海报" onClick={() => setPosterImage('')}>×</button>
       <img alt="千年丝路带货清单海报" src={posterImage} />
+      <p className="srsl-poster-save-hint">长按图片保存到手机</p>
     </div>, document.body)}
   </Stage>
 }
