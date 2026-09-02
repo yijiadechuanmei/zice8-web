@@ -96,63 +96,112 @@ function Sandstorm() {
 
     const width = DESIGN_WIDTH
     const height = 1624
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
-    const windAngle = -Math.PI * 0.17
-    const windX = Math.cos(windAngle)
-    const windY = Math.sin(windAngle)
-    canvas.width = width * pixelRatio
-    canvas.height = height * pixelRatio
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-
-    const reset = (particle, initial = false) => {
-      const isGust = Math.random() < 0.16
-      particle.length = isGust ? 68 + Math.random() * 128 : 8 + Math.random() * 42
-      particle.thickness = isGust ? .8 + Math.random() * 1.8 : .35 + Math.random() * 1.2
-      particle.speed = isGust ? 92 + Math.random() * 82 : 38 + Math.random() * 118
-      particle.opacity = isGust ? .06 + Math.random() * .11 : .12 + Math.random() * .33
-      particle.curve = (Math.random() - .5) * (isGust ? 16 : 6)
-      particle.wobble = 4 + Math.random() * 22
-      particle.frequency = .35 + Math.random() * 1.1
-      particle.phase = Math.random() * Math.PI * 2
-      particle.x = initial ? Math.random() * (width + particle.length) - particle.length : -particle.length - Math.random() * 150
-      particle.y = initial ? Math.random() * (height + 180) - 90 : Math.random() * height + 80
-    }
-
-    const particles = Array.from({ length: 92 }, () => {
-      const particle = {}
-      reset(particle, true)
-      return particle
-    })
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const random = (min, max) => Math.random() * (max - min) + min
+    const colors = ['246, 216, 161', '238, 194, 119', '224, 166, 88']
+    let pixelRatio = 1
+    let particles = []
     let frameId = 0
     let previousTime = performance.now()
-    let elapsed = 0
+    let time = 0
+    const defaultWind = 1.18
+    let wind = defaultWind
+    let targetWind = defaultWind
+    let nextGustAt = 0
 
-    const draw = (time) => {
-      const delta = Math.min((time - previousTime) / 1000, .04)
-      previousTime = time
-      elapsed += delta
-      context.clearRect(0, 0, width, height)
-      particles.forEach((particle) => {
-        particle.x += particle.speed * windX * delta
-        particle.y += particle.speed * windY * delta + Math.sin(elapsed * particle.frequency + particle.phase) * particle.wobble * delta
-        if (particle.x > width + particle.length || particle.y < -160) reset(particle)
-
-        context.save()
-        context.translate(particle.x, particle.y)
-        context.rotate(windAngle + Math.sin(elapsed * particle.frequency + particle.phase) * .055)
-        context.strokeStyle = `rgba(169, 108, 52, ${particle.opacity})`
-        context.lineWidth = particle.thickness
-        context.lineCap = 'round'
-        context.beginPath()
-        context.moveTo(-particle.length, particle.curve)
-        context.quadraticCurveTo(-particle.length * .45, -particle.curve, 0, 0)
-        context.stroke()
-        context.restore()
-      })
-      frameId = window.requestAnimationFrame(draw)
+    const resetParticle = (particle, initial = false) => {
+      particle.x = initial ? random(-30, width) : width + random(10, width * .15)
+      particle.y = random(height * .12, height)
     }
-    frameId = window.requestAnimationFrame(draw)
-    return () => window.cancelAnimationFrame(frameId)
+
+    const createParticle = (type) => {
+      const particle = type === 0
+        ? { type, size: random(.45, 1.15), ratio: random(.7, 1.3), speed: random(28, 74), alpha: random(.1, .31), rotateSpeed: random(-.25, .25), wave: random(7, 20) }
+        : type === 1
+          ? { type, size: random(1.1, 2.3), ratio: random(.65, 1.4), speed: random(82, 156), alpha: random(.16, .46), rotateSpeed: random(-.45, .45), wave: random(16, 42) }
+          : { type, size: random(2.5, 5.5), ratio: random(.55, 1.35), speed: random(175, 290), alpha: random(.08, .24), rotateSpeed: random(-.7, .7), wave: random(28, 70), blur: random(.3, 1.8) }
+      particle.rotation = random(-.35, .35)
+      particle.waveSpeed = random(.45, 1.35)
+      particle.offset = random(0, Math.PI * 2)
+      resetParticle(particle, true)
+      return particle
+    }
+
+    const createParticles = () => {
+      const compact = window.innerWidth < 600
+      const counts = compact ? [260, 100, 24] : [420, 160, 40]
+      particles = counts.flatMap((count, type) => Array.from({ length: count }, () => createParticle(type)))
+    }
+
+    const resize = () => {
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = width * pixelRatio
+      canvas.height = height * pixelRatio
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+      createParticles()
+    }
+
+    const drawGroundDust = () => {
+      const gradient = context.createLinearGradient(0, height * .48, 0, height)
+      gradient.addColorStop(0, 'rgba(213, 145, 64, 0)')
+      gradient.addColorStop(.72, `rgba(213, 145, 64, ${.026 * wind})`)
+      gradient.addColorStop(1, `rgba(205, 130, 50, ${.07 * wind})`)
+      context.fillStyle = gradient
+      context.fillRect(0, 0, width, height)
+    }
+
+    const drawParticle = (particle) => {
+      context.save()
+      context.translate(particle.x, particle.y)
+      context.rotate(particle.rotation)
+      if (particle.type === 2) {
+        context.shadowBlur = particle.blur * 2
+        context.shadowColor = 'rgba(255, 215, 145, .4)'
+      }
+      context.fillStyle = `rgba(${colors[particle.type]}, ${particle.alpha})`
+      context.beginPath()
+      context.ellipse(0, 0, particle.size * particle.ratio, particle.size * random(.55, .9), 0, 0, Math.PI * 2)
+      context.fill()
+      context.restore()
+    }
+
+    const updateParticle = (particle, delta) => {
+      particle.x -= particle.speed * wind * delta
+      particle.y += (particle.speed * .19 + Math.sin(time * particle.waveSpeed + particle.offset) * particle.wave) * wind * delta
+      particle.rotation += particle.rotateSpeed * delta
+      if (particle.x < -particle.size * 6 || particle.y > height + 32) resetParticle(particle)
+    }
+
+    const render = (delta) => {
+      time += delta
+      if (time >= nextGustAt) {
+        targetWind = random(.98, 1.48)
+        nextGustAt = time + random(2.6, 5.8)
+      }
+      wind += (targetWind - wind) * Math.min(delta * 1.8, 1)
+      context.clearRect(0, 0, width, height)
+      drawGroundDust()
+      particles.forEach((particle) => {
+        updateParticle(particle, delta)
+        drawParticle(particle)
+      })
+    }
+
+    const animate = (now) => {
+      const delta = Math.min((now - previousTime) / 1000, .04)
+      previousTime = now
+      render(delta)
+      frameId = window.requestAnimationFrame(animate)
+    }
+
+    resize()
+    if (reducedMotion) render(0)
+    else frameId = window.requestAnimationFrame(animate)
+    window.addEventListener('resize', resize)
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.removeEventListener('resize', resize)
+    }
   }, [])
   return <div className="srsl-sandstorm" aria-hidden="true"><canvas ref={canvasRef} /></div>
 }
