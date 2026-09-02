@@ -504,7 +504,12 @@ function SafetyArticleLinks() {
           <span className="rss-article-copy">
             <span className="rss-article-title">{article.title}</span>
           </span>
-          <span className="rss-article-arrow" aria-hidden="true">↗</span>
+          <span className="rss-article-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M4.5 4.5h10a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-10" />
+              <path d="M11 12h9m-3.5-3.5L20 12l-3.5 3.5" />
+            </svg>
+          </span>
         </a>
       ))}
     </nav>

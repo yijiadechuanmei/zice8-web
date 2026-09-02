@@ -1061,9 +1061,9 @@
 }
 .rss-article-list {
   width: min(90.1334vw, 676px);
-  margin: min(6.4vw, 48px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  margin: max(-14vw, -100px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
   display: grid;
-  gap: min(5.3334vw, 40px);
+  gap: min(3.2vw, 24px);
 }
 .rss-article-list > h2 {
   margin: 0;
@@ -1127,10 +1127,15 @@
   color: #fff;
   background: rgba(12, 31, 68, 0.62);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  font-family: Arial, sans-serif;
-  font-size: min(6.4vw, 48px);
-  font-weight: 400;
-  line-height: 1;
+}
+.rss-article-arrow svg {
+  width: 58%;
+  height: 58%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.35;
 }
 .rss-article-link:active {
   transform: scale(0.99);
