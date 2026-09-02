@@ -1066,12 +1066,29 @@
 }
 .rss-article-list {
   width: min(90.1334vw, 676px);
-  margin: 0 auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  margin: max(-12.8vw, -96px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
   padding-top: min(5.3334vw, 40px);
   display: grid;
   gap: min(3.2vw, 24px);
   position: relative;
   z-index: 1;
+  isolation: isolate;
+}
+.rss-article-list::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 50%;
+  bottom: 0;
+  width: 100vw;
+  transform: translateX(50%);
+  pointer-events: none;
+  background-color: #0ca1fe;
+  background-image: var(--rss-result-background);
+  background-position: center calc(max(-11.7334vw, -88px) - min(193.0667vw, 1448px) + min(12.8vw, 96px));
+  background-size: min(100vw, 750px) auto;
+  background-repeat: repeat-y;
 }
 .rss-article-list > h2 {
   margin: 0;
