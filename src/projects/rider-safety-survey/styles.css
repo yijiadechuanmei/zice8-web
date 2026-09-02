@@ -980,7 +980,6 @@
   width: min(100vw, 750px);
   height: min(193.0667vw, 1448px);
   flex: 0 0 auto;
-  margin-bottom: max(-14vw, -100px);
   position: relative;
   overflow: hidden;
   background: url("https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/e9db063ec93f389c16dbcff785bceb4b_198073_750_1624.png") center center / cover no-repeat;
