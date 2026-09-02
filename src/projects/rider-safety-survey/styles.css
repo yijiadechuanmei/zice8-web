@@ -969,8 +969,10 @@
   margin-left: calc(50% - 50vw);
   padding: max(0px, calc((100svh - min(193.0667vw, 1448px)) / 2)) 0;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow-x: hidden;
   color: #fff;
   background: #0ca1fe;
 }
@@ -1056,6 +1058,83 @@
 .rss-result-draw:disabled {
   cursor: wait;
   opacity: 0.7;
+}
+.rss-article-list {
+  width: min(90.1334vw, 676px);
+  margin: min(6.4vw, 48px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  display: grid;
+  gap: min(5.3334vw, 40px);
+}
+.rss-article-list > h2 {
+  margin: 0;
+  color: #fff;
+  font-size: min(5.0667vw, 38px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: min(0.16vw, 1.2px);
+  text-align: center;
+}
+.rss-article-link {
+  position: relative;
+  min-height: min(47.7334vw, 358px);
+  display: block;
+  overflow: hidden;
+  border-radius: min(2.4vw, 18px);
+  color: #fff;
+  background: #087cc8;
+  box-shadow: 0 min(1.6vw, 12px) min(4.8vw, 36px) rgba(0, 71, 133, 0.28);
+  isolation: isolate;
+  animation: rss-result-reveal 0.4s ease-out both;
+}
+.rss-article-link:nth-of-type(2) { animation-delay: 0.05s; }
+.rss-article-link:nth-of-type(3) { animation-delay: 0.1s; }
+.rss-article-link:nth-of-type(4) { animation-delay: 0.15s; }
+.rss-article-link:nth-of-type(5) { animation-delay: 0.2s; }
+.rss-article-link > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.rss-article-copy {
+  position: absolute;
+  inset: 0;
+  padding: min(4vw, 30px) min(4.5334vw, 34px) min(4.2667vw, 32px);
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(180deg, rgba(0, 29, 80, 0.02) 28%, rgba(0, 39, 104, 0.86) 100%);
+}
+.rss-article-title {
+  max-width: calc(100% - min(10.6667vw, 80px));
+  color: #fff;
+  font-size: min(4.5334vw, 34px);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 30, 82, 0.45);
+}
+.rss-article-arrow {
+  position: absolute;
+  top: min(3.2vw, 24px);
+  right: min(3.2vw, 24px);
+  width: min(10.1334vw, 76px);
+  height: min(10.1334vw, 76px);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(12, 31, 68, 0.62);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  font-family: Arial, sans-serif;
+  font-size: min(6.4vw, 48px);
+  font-weight: 400;
+  line-height: 1;
+}
+.rss-article-link:active {
+  transform: scale(0.99);
+  filter: brightness(0.96);
 }
 @keyframes rss-result-reveal {
   from {

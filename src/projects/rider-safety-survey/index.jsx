@@ -32,6 +32,34 @@ const WHEEL_STOP_INDEX_BY_PRIZE = {
   cash_6800: 3,
 };
 
+const SAFETY_ARTICLES = [
+  {
+    title: "安全刻不容缓 |《电动自行车和二三轮摩托车交通安全警示教育片》重磅警醒！",
+    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3Sk5Xr1beAvM3AyTvj3HeB4lTm49peoRKGRhXxa0uNqOq1aHsTUgBx70AzLOFEqvIXDbj79ibibuEUQ/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/w3as5UUeRjLwZbcYYkIaqw",
+  },
+  {
+    title: "警花说道 | 文明相伴骑乘两轮车，这些危险行为可不能有！",
+    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3SO23Eb03C7UfCn09twMvg1ILqvdxtfJscAgnhu8gbBhT7ibCZls5J71j01NvgC2KRw06AXXTjq6rA/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/ph-XrpNHHZOwG7gW0FuX0A",
+  },
+  {
+    title: "大警示① | 砰！这些二轮车事故案例，光是看看都会觉得疼！",
+    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3R0wNzCJAyss5YoSecw6picI2N03E7c6AuVPdicGFQzag38VMdEbU4ia0S3pZH9rc8qsib5fak5upltow/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/E6Q5tPu7fqkLK3RFwHVj4Q",
+  },
+  {
+    title: "新就业形态人员速存！职业伤害怎么认、怎么赔，一文说清",
+    coverUrl: "http://mmecoa.qpic.cn/sz_mmecoa_jpg/9yPxDmqsZB3gezSZ0VOZDibRQQdOZiabhHibSZUB4iaC77rvREr0u6GNosNqGkcQcEzEocOI0Xma1jHx9F6LwGEwseO2G5zyFcNPtIRPrXibFicEE/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/dLG-j21PbrDhmIiYaQ0gGQ",
+  },
+  {
+    title: "安全出行 一路有爱丨职业伤害保障为您护航",
+    coverUrl: "https://mmbiz.qpic.cn/mmbiz_jpg/nYbkgOObZhxP4AxOIwM0QOOlic1K0DhAEC2ogJic6Euexfc2Uv00rmqokM1YSyhSdd1n3pMdK986UdicczXKpxlpA/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/bM1DNi--wKITIp5rKfakvQ",
+  },
+];
+
 function syncVisibleViewportInset() {
   const sync = () => {
     const viewport = window.visualViewport;
@@ -348,6 +376,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
               {busy === "draw" ? "正在准备抽奖…" : hasDraw ? "查看奖品" : "立即抽奖"}
             </button>
           </div>
+          <SafetyArticleLinks />
         </section>
       ) : null}
       {stage === "dispatch" ? <PrizeDispatching /> : null}
@@ -456,6 +485,29 @@ function ParticipantProfile({ value, onChange, onSubmit, busy }) {
         <small>仅用于本次问卷参与与活动联络。</small>
       </form>
     </section>
+  );
+}
+
+function SafetyArticleLinks() {
+  return (
+    <nav className="rss-article-list" aria-label="安全知识推荐">
+      <h2>安全知识推荐</h2>
+      {SAFETY_ARTICLES.map((article) => (
+        <a className="rss-article-link" href={article.url} key={article.url}>
+          <img
+            src={article.coverUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+          />
+          <span className="rss-article-copy">
+            <span className="rss-article-title">{article.title}</span>
+          </span>
+          <span className="rss-article-arrow" aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </nav>
   );
 }
 
