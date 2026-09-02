@@ -15,8 +15,6 @@ import {
 } from './config'
 import './styles.css'
 
-const XIANGYU_BUILD_VERSION = 'v2026.09.02.1708'
-
 export default function XiangyuGlobalTreasureProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || XIANGYU_GLOBAL_TREASURE_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
@@ -115,7 +113,6 @@ export default function XiangyuGlobalTreasureProject({ routeParams }) {
         <div className="xygt-canvas">
           <ImageAsset className="xygt-background" src={background} alt="" />
           <ImageAsset className="xygt-brand" src={assetUrl(config.assetsBaseUrl, config.brandImage)} alt="象屿股份" />
-          <p className="xygt-version" aria-label={`页面版本 ${XIANGYU_BUILD_VERSION}`}>{XIANGYU_BUILD_VERSION}</p>
           {!loading && state?.page === 'home' ? (
             <HomePage
               config={config}

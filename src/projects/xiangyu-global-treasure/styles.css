@@ -2,7 +2,8 @@ body.xygt-lock-scroll { overflow: hidden; }
 
 .xygt-app {
   width: 100vw;
-  height: 100svh;
+  height: 100vh;
+  height: 100dvh;
   min-height: 0;
   overflow: hidden;
   background: #0ca1fe;
@@ -16,13 +17,13 @@ body.xygt-lock-scroll { overflow: hidden; }
   height: 100%;
   place-items: center;
   overflow: hidden;
-  background: #0ca1fe var(--xygt-bg) center / cover no-repeat;
+  background: #0ca1fe;
 }
 
 .xygt-canvas {
   position: relative;
-  width: min(100vw, calc(100svh * 750 / 1448));
-  height: min(100svh, calc(100vw * 1448 / 750));
+  width: min(100vw, calc(100vh * 750 / 1448));
+  height: min(100vh, calc(100vw * 1448 / 750));
   overflow: hidden;
   isolation: isolate;
 }
@@ -30,7 +31,6 @@ body.xygt-lock-scroll { overflow: hidden; }
 .xygt-canvas img { display: block; max-width: none; user-select: none; }
 .xygt-background { position: absolute; z-index: -1; top: -6.08%; left: 0; width: 100%; height: 112.15%; pointer-events: none; }
 .xygt-brand { position: absolute; z-index: 3; top: 1.38%; left: 6.4%; width: 32.27%; height: auto; pointer-events: none; animation: xygt-brand-in .5s ease both; }
-.xygt-version { position: absolute; z-index: 8; right: 0; bottom: 1.65%; left: 0; margin: 0; color: rgba(255, 255, 255, .84); font: 500 clamp(9px, 2.35vw, 15px) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: .08em; text-align: center; pointer-events: none; text-shadow: 0 1px 3px rgba(0, 72, 122, .5); }
 .xygt-page { position: absolute; inset: 0; }
 .xygt-image-button { display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; }
 .xygt-image-button img { width: 100%; height: 100%; }
@@ -77,6 +77,13 @@ body.xygt-lock-scroll { overflow: hidden; }
 .xygt-message { width: min(72%, 510px); min-height: 42px; box-sizing: border-box; margin: 0; padding: 11px 20px; border: 1px solid rgba(255,255,255,.75); border-radius: 999px; background: rgba(2, 73, 127, .88); box-shadow: 0 8px 22px rgba(0, 51, 95, .28); color: #fff; font: 600 clamp(13px, 3.5vw, 18px) / 1.35 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; animation: xygt-message-in .2s ease both; }
 .xygt-center-state { position: absolute; z-index: 30; inset: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; background: rgba(8, 141, 225, .55); color: #fff; font-size: clamp(14px, 3.8vw, 20px); text-shadow: 0 2px 4px rgba(0, 79, 139, .45); }
 .xygt-center-state .anticon { font-size: 30px; }
+
+@supports (height: 100dvh) {
+  .xygt-canvas {
+    width: min(100vw, calc(100dvh * 750 / 1448));
+    height: min(100dvh, calc(100vw * 1448 / 750));
+  }
+}
 
 @keyframes xygt-brand-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes xygt-title-in { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
