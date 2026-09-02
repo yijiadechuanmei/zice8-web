@@ -64,8 +64,8 @@ body.xygt-lock-scroll { overflow: hidden; }
 .xygt-tomorrow { position: absolute; top: 53.04%; left: 6.4%; width: 24.67%; height: auto; filter: drop-shadow(0 6px 5px rgba(5, 74, 126, .25)); transition: transform .2s ease; }
 .xygt-try-again:active, .xygt-tomorrow:active { transform: translateY(2px) scale(.97); }
 
-.xygt-dialog-backdrop { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; padding: 4%; background: rgba(0, 73, 129, .24); backdrop-filter: blur(3px); animation: xygt-backdrop-in .2s ease both; }
-.xygt-redeem-dialog { position: relative; width: 88.4%; aspect-ratio: 663 / 742; margin: 0; animation: xygt-dialog-in .3s ease-out both; }
+.xygt-dialog-backdrop { position: absolute; z-index: 20; inset: 0; padding: 0; background: rgba(0, 73, 129, .24); backdrop-filter: blur(3px); animation: xygt-backdrop-in .2s ease both; }
+.xygt-redeem-dialog { position: absolute; top: 13.47%; left: 0; width: 88.4%; aspect-ratio: 663 / 742; margin: 0; animation: xygt-dialog-in .3s ease-out both; }
 .xygt-redeem-dialog > img { width: 100%; height: 100%; }
 .xygt-redeem-dialog > input { position: absolute; top: 47.44%; left: 23.83%; box-sizing: border-box; width: 61.84%; height: 9.16%; border: 0; outline: none; background: transparent; color: #155da2; font: 600 clamp(14px, 3.5vw, 26px) / 1 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; letter-spacing: .13em; }
 .xygt-redeem-dialog > input::placeholder { color: rgba(42, 129, 201, .62); letter-spacing: 0; }
