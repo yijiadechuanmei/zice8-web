@@ -980,6 +980,7 @@
   width: min(100vw, 750px);
   height: min(193.0667vw, 1448px);
   flex: 0 0 auto;
+  margin-bottom: max(-14vw, -100px);
   position: relative;
   overflow: hidden;
   background: url("https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/e9db063ec93f389c16dbcff785bceb4b_198073_750_1624.png") center center / cover no-repeat;
@@ -1061,9 +1062,9 @@
 }
 .rss-article-list {
   width: min(90.1334vw, 676px);
-  margin: max(-14vw, -100px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  margin: min(6.4vw, 48px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
   display: grid;
-  gap: min(3.2vw, 24px);
+  gap: min(5.3334vw, 40px);
 }
 .rss-article-list > h2 {
   margin: 0;
