@@ -34,19 +34,9 @@ const WHEEL_STOP_INDEX_BY_PRIZE = {
 
 const SAFETY_ARTICLES = [
   {
-    title: "安全刻不容缓 |《电动自行车和二三轮摩托车交通安全警示教育片》重磅警醒！",
-    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3Sk5Xr1beAvM3AyTvj3HeB4lTm49peoRKGRhXxa0uNqOq1aHsTUgBx70AzLOFEqvIXDbj79ibibuEUQ/0?wx_fmt=jpeg",
-    url: "https://mp.weixin.qq.com/s/w3as5UUeRjLwZbcYYkIaqw",
-  },
-  {
-    title: "警花说道 | 文明相伴骑乘两轮车，这些危险行为可不能有！",
-    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3SO23Eb03C7UfCn09twMvg1ILqvdxtfJscAgnhu8gbBhT7ibCZls5J71j01NvgC2KRw06AXXTjq6rA/0?wx_fmt=jpeg",
-    url: "https://mp.weixin.qq.com/s/ph-XrpNHHZOwG7gW0FuX0A",
-  },
-  {
-    title: "大警示① | 砰！这些二轮车事故案例，光是看看都会觉得疼！",
-    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3R0wNzCJAyss5YoSecw6picI2N03E7c6AuVPdicGFQzag38VMdEbU4ia0S3pZH9rc8qsib5fak5upltow/0?wx_fmt=jpeg",
-    url: "https://mp.weixin.qq.com/s/E6Q5tPu7fqkLK3RFwHVj4Q",
+    title: "当孙悟空也开始防诈骗？宁德金融消保“神仙操作”破圈了！",
+    coverUrl: "https://mmbiz.qpic.cn/mmbiz_jpg/mWJoJUWqQw36FwV3TiaIgpticeRe5YiboIianEbB5LGX3zXiaazG4upg6q8BGAsKoVWFqmWPicXNuLd7fAxfgibKM4wHA/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/8SPxi8ylkUWDF4eq0xWf7g",
   },
   {
     title: "新就业形态人员速存！职业伤害怎么认、怎么赔，一文说清",
@@ -54,9 +44,14 @@ const SAFETY_ARTICLES = [
     url: "https://mp.weixin.qq.com/s/dLG-j21PbrDhmIiYaQ0gGQ",
   },
   {
-    title: "安全出行 一路有爱丨职业伤害保障为您护航",
-    coverUrl: "https://mmbiz.qpic.cn/mmbiz_jpg/nYbkgOObZhxP4AxOIwM0QOOlic1K0DhAEC2ogJic6Euexfc2Uv00rmqokM1YSyhSdd1n3pMdK986UdicczXKpxlpA/0?wx_fmt=jpeg",
-    url: "https://mp.weixin.qq.com/s/bM1DNi--wKITIp5rKfakvQ",
+    title: "安全刻不容缓 |《电动自行车和二三轮摩托车交通安全警示教育片》重磅警醒！",
+    coverUrl: "https://mmbiz.qpic.cn/sz_mmbiz_jpg/0xXd5Hlpz3Sk5Xr1beAvM3AyTvj3HeB4lTm49peoRKGRhXxa0uNqOq1aHsTUgBx70AzLOFEqvIXDbj79ibibuEUQ/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/w3as5UUeRjLwZbcYYkIaqw",
+  },
+  {
+    title: "跑单有保障，安心闯闽地｜人保财险福建骑手保险科普指南",
+    coverUrl: "http://mmecoa.qpic.cn/sz_mmecoa_jpg/4fpaNphPlquUEW1AAkHkN6nYHz6Owc3nR3PHPYMyzTuIA0N5E5uECaWWYHWmOm2mZIibUClEAbvC9pQ5V3zdf7tBvzP2IDSrw7kbcsKZRFCY/0?wx_fmt=jpeg",
+    url: "https://mp.weixin.qq.com/s/it-607ONj7RLpOMjPuUrWw",
   },
 ];
 
