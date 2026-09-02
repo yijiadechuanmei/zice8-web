@@ -9,15 +9,7 @@ import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAsset
 import './styles.css'
 
 const DESIGN_WIDTH = 750
-const SAND_PARTICLES = [
-  [4, 11, 5, 11, -3, 270], [14, 6, 3, 14, -9, 330], [24, 18, 7, 13, -5, 290], [36, 10, 4, 16, -12, 350],
-  [48, 5, 6, 12, -7, 300], [59, 16, 3, 15, -2, 360], [71, 9, 5, 13, -10, 280], [84, 20, 4, 17, -6, 340],
-  [7, 31, 6, 15, -11, 320], [19, 39, 3, 12, -4, 250], [31, 28, 5, 16, -13, 370], [45, 43, 4, 14, -8, 300],
-  [57, 33, 7, 17, -1, 350], [68, 48, 3, 13, -10, 270], [79, 37, 5, 15, -5, 330], [91, 51, 4, 12, -9, 290],
-  [3, 59, 4, 13, -6, 310], [16, 72, 6, 16, -12, 360], [29, 61, 3, 11, -2, 260], [41, 76, 5, 15, -8, 340],
-  [54, 66, 4, 14, -4, 300], [65, 80, 7, 17, -11, 380], [77, 64, 3, 12, -7, 280], [88, 75, 5, 16, -3, 350],
-  [10, 91, 3, 14, -10, 290], [35, 88, 6, 17, -5, 370], [62, 93, 4, 13, -9, 320], [83, 89, 5, 15, -1, 340],
-]
+const PRODUCT_LIST_BOTTOM_GUTTER = 150
 
 function getShoppingScore(quantity) {
   const count = Math.min(Math.max(quantity, 0), 28)
@@ -95,6 +87,76 @@ function Stage({ height, children, className = '', fitViewport = false }) {
   return <div className={`srsl-frame ${className}`} style={{ width: 750 * scale, height: height * scale }}><div className="srsl-stage" style={{ width: 750, height, transform: `scale(${scale})` }}>{children}</div></div>
 }
 
+function Sandstorm() {
+  const canvasRef = useRef(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d')
+    if (!canvas || !context) return undefined
+
+    const width = DESIGN_WIDTH
+    const height = 1624
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+    const windAngle = -Math.PI * 0.17
+    const windX = Math.cos(windAngle)
+    const windY = Math.sin(windAngle)
+    canvas.width = width * pixelRatio
+    canvas.height = height * pixelRatio
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+
+    const reset = (particle, initial = false) => {
+      const isGust = Math.random() < 0.16
+      particle.length = isGust ? 68 + Math.random() * 128 : 8 + Math.random() * 42
+      particle.thickness = isGust ? .8 + Math.random() * 1.8 : .35 + Math.random() * 1.2
+      particle.speed = isGust ? 92 + Math.random() * 82 : 38 + Math.random() * 118
+      particle.opacity = isGust ? .06 + Math.random() * .11 : .12 + Math.random() * .33
+      particle.curve = (Math.random() - .5) * (isGust ? 16 : 6)
+      particle.wobble = 4 + Math.random() * 22
+      particle.frequency = .35 + Math.random() * 1.1
+      particle.phase = Math.random() * Math.PI * 2
+      particle.x = initial ? Math.random() * (width + particle.length) - particle.length : -particle.length - Math.random() * 150
+      particle.y = initial ? Math.random() * (height + 180) - 90 : Math.random() * height + 80
+    }
+
+    const particles = Array.from({ length: 92 }, () => {
+      const particle = {}
+      reset(particle, true)
+      return particle
+    })
+    let frameId = 0
+    let previousTime = performance.now()
+    let elapsed = 0
+
+    const draw = (time) => {
+      const delta = Math.min((time - previousTime) / 1000, .04)
+      previousTime = time
+      elapsed += delta
+      context.clearRect(0, 0, width, height)
+      particles.forEach((particle) => {
+        particle.x += particle.speed * windX * delta
+        particle.y += particle.speed * windY * delta + Math.sin(elapsed * particle.frequency + particle.phase) * particle.wobble * delta
+        if (particle.x > width + particle.length || particle.y < -160) reset(particle)
+
+        context.save()
+        context.translate(particle.x, particle.y)
+        context.rotate(windAngle + Math.sin(elapsed * particle.frequency + particle.phase) * .055)
+        context.strokeStyle = `rgba(169, 108, 52, ${particle.opacity})`
+        context.lineWidth = particle.thickness
+        context.lineCap = 'round'
+        context.beginPath()
+        context.moveTo(-particle.length, particle.curve)
+        context.quadraticCurveTo(-particle.length * .45, -particle.curve, 0, 0)
+        context.stroke()
+        context.restore()
+      })
+      frameId = window.requestAnimationFrame(draw)
+    }
+    frameId = window.requestAnimationFrame(draw)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [])
+  return <div className="srsl-sandstorm" aria-hidden="true"><canvas ref={canvasRef} /></div>
+}
+
 function Home({ onStart, showOrientation }) {
   return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
@@ -104,7 +166,7 @@ function Home({ onStart, showOrientation }) {
       <img className="srsl-home-ribbon" alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 87, left: 78, top: 1289 }} />
       <button className="srsl-image-button srsl-home-start" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
     </div>
-    <div className="srsl-sandstorm" aria-hidden="true">{SAND_PARTICLES.map(([left, top, size, duration, delay, drift], index) => <span className="srsl-sand-grain" key={index} style={{ '--left': `${left}%`, '--top': `${top}%`, '--size': `${size}px`, '--duration': `${duration}s`, '--delay': `${delay}s`, '--drift': `${drift}px` }} />)}</div>
+    <Sandstorm />
     {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
 }
@@ -145,7 +207,7 @@ function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }
   const rows = Math.ceil(products.length / 2)
   const dock = <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
   return <>
-  <Stage height={626 + rows * 230} className="srsl-list-stage">
+  <Stage height={626 + rows * 230 + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 410, top: 467, width: 60, height: 37 }}>{selectedIds.length}/50</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 319, height: 35, left: 215.5, top: 571 }} />

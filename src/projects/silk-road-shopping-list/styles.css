@@ -13,8 +13,7 @@
 @keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes srsl-shop-entry-pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(225, 103, 52, 0)); } 50% { transform: scale(1.075); filter: drop-shadow(0 0 12px rgba(225, 103, 52, .52)); } }
 .srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
-.srsl-sand-grain { position: absolute; left: var(--left); top: var(--top); width: calc(var(--size) + 10px); height: var(--size); border-radius: 999px; opacity: 0; background: rgba(161, 100, 43, .72); box-shadow: 0 0 6px rgba(184, 125, 67, .34); filter: blur(.2px); will-change: transform, opacity; animation: srsl-sand-drift var(--duration) var(--delay) linear infinite; }
-@keyframes srsl-sand-drift { 0% { opacity: 0; transform: translate3d(-96px, 22px, 0) scale(.55); } 13% { opacity: .84; } 70% { opacity: .52; } 100% { opacity: 0; transform: translate3d(var(--drift), -24px, 0) scale(1.1); } }
+.srsl-sandstorm canvas { display: block; width: 750px; height: 1624px; }
 
 .srsl-video-panel { position: fixed; z-index: 60; inset: 0; display: grid; overflow: hidden; place-items: center; background: #000; }.srsl-video-panel.is-preparing { opacity: 0; pointer-events: none; }.srsl-video-panel .srsl-frame { margin: 0; }.srsl-skip { position: fixed; z-index: 61; right: 24px; bottom: 24px; padding: 8px 16px; border: 0; transform: rotate(90deg); transform-origin: center; color: #fff; background: rgba(0, 0, 0, .4); font: 22px "PingFang SC", "Microsoft YaHei", sans-serif; }
 
@@ -61,4 +60,4 @@
 .srsl-poster-preview { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow: auto; background: rgba(0, 0, 0, .75); }
 .srsl-poster-preview > img { display: block; width: min(750px, 100%); height: auto; margin: auto; }
 .srsl-poster-preview > button { position: fixed; z-index: 1; right: 20px; top: calc(20px + env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .55); font-size: 36px; line-height: 40px; }
-@media (prefers-reduced-motion: reduce) { .srsl-sand-grain { animation: none; opacity: .18; } .srsl-shop-entry img { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .srsl-sandstorm { opacity: .22; } .srsl-shop-entry img { animation: none; } }
