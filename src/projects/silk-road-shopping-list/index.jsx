@@ -98,7 +98,7 @@ function Sandstorm() {
     const height = 1624
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const random = (min, max) => Math.random() * (max - min) + min
-    const colors = ['246, 216, 161', '238, 194, 119', '224, 166, 88']
+    const colors = ['232, 191, 126', '214, 154, 79', '181, 113, 49']
     let pixelRatio = 1
     let particles = []
     let frameId = 0
@@ -116,10 +116,10 @@ function Sandstorm() {
 
     const createParticle = (type) => {
       const particle = type === 0
-        ? { type, size: random(.45, 1.15), ratio: random(.7, 1.3), speed: random(28, 74), alpha: random(.1, .31), rotateSpeed: random(-.25, .25), wave: random(7, 20) }
+        ? { type, size: random(.45, 1.15), ratio: random(.7, 1.3), speed: random(28, 74), alpha: random(.13, .38), rotateSpeed: random(-.25, .25), wave: random(7, 20) }
         : type === 1
-          ? { type, size: random(1.1, 2.3), ratio: random(.65, 1.4), speed: random(82, 156), alpha: random(.16, .46), rotateSpeed: random(-.45, .45), wave: random(16, 42) }
-          : { type, size: random(2.5, 5.5), ratio: random(.55, 1.35), speed: random(175, 290), alpha: random(.08, .24), rotateSpeed: random(-.7, .7), wave: random(28, 70), blur: random(.3, 1.8) }
+          ? { type, size: random(1.1, 2.3), ratio: random(.65, 1.4), speed: random(82, 156), alpha: random(.22, .55), rotateSpeed: random(-.45, .45), wave: random(16, 42) }
+          : { type, size: random(2.5, 5.5), ratio: random(.55, 1.35), speed: random(175, 290), alpha: random(.12, .32), rotateSpeed: random(-.7, .7), wave: random(28, 70), blur: random(.3, 1.8) }
       particle.rotation = random(-.35, .35)
       particle.waveSpeed = random(.45, 1.35)
       particle.offset = random(0, Math.PI * 2)
@@ -129,7 +129,7 @@ function Sandstorm() {
 
     const createParticles = () => {
       const compact = window.innerWidth < 600
-      const counts = compact ? [260, 100, 24] : [420, 160, 40]
+      const counts = compact ? [350, 150, 34] : [540, 220, 56]
       particles = counts.flatMap((count, type) => Array.from({ length: count }, () => createParticle(type)))
     }
 
@@ -144,8 +144,8 @@ function Sandstorm() {
     const drawGroundDust = () => {
       const gradient = context.createLinearGradient(0, height * .48, 0, height)
       gradient.addColorStop(0, 'rgba(213, 145, 64, 0)')
-      gradient.addColorStop(.72, `rgba(213, 145, 64, ${.026 * wind})`)
-      gradient.addColorStop(1, `rgba(205, 130, 50, ${.07 * wind})`)
+      gradient.addColorStop(.72, `rgba(213, 145, 64, ${.042 * wind})`)
+      gradient.addColorStop(1, `rgba(205, 130, 50, ${.11 * wind})`)
       context.fillStyle = gradient
       context.fillRect(0, 0, width, height)
     }
@@ -206,7 +206,14 @@ function Sandstorm() {
   return <div className="srsl-sandstorm" aria-hidden="true"><canvas ref={canvasRef} /></div>
 }
 
-function Home({ onStart, showOrientation }) {
+function OrientationPrompt() {
+  return <div className="srsl-orientation-prompt" role="status" aria-live="polite">
+    <div className="srsl-orientation-phone" aria-hidden="true"><span /></div>
+    <div className="srsl-orientation-copy">请竖置手机锁定方向后<br />再横屏观看视频</div>
+  </div>
+}
+
+function Home({ onStart }) {
   return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img className="srsl-home-background" alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
@@ -216,7 +223,6 @@ function Home({ onStart, showOrientation }) {
       <button className="srsl-image-button srsl-home-start" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
     </div>
     <Sandstorm />
-    {showOrientation && <div className="srsl-orientation">请竖置手机锁定方向后 再横屏观看视频</div>}
   </Stage>
 }
 
@@ -472,7 +478,8 @@ export default function SilkRoadShoppingList() {
     setPage('poster')
   }
   if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return <main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
-    {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} showOrientation={page === 'orientation'} />}
+    {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} />}
+    {page === 'orientation' && <OrientationPrompt />}
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
   </main>
   if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>

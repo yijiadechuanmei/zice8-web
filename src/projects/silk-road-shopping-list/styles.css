@@ -8,10 +8,15 @@
 .srsl-image-button { display: block; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .srsl-image-button img { display: block; width: 100%; height: 100%; }
 .srsl-shop-entry img { transform-origin: 50% 50%; will-change: transform, filter; animation: srsl-shop-entry-pulse 1.35s ease-in-out infinite; }
-.srsl-orientation { position: absolute; z-index: 50; left: 0; top: 0; display: grid; width: 750px; height: 1624px; place-items: center; padding: 80px; color: #fff; background: rgba(0, 0, 0, .4); font: 28px/1.6 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
+.srsl-orientation-prompt { position: fixed; z-index: 3000; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; color: #fff; background: rgba(0, 0, 0, .72); text-align: center; }
+.srsl-orientation-phone { position: relative; width: 72px; height: 116px; border: 4px solid currentColor; border-radius: 13px; color: #fff; transform-origin: center center; animation: srsl-orientation-rotate 2.1s ease-in-out infinite; }
+.srsl-orientation-phone::before { position: absolute; top: 9px; left: 50%; width: 24px; height: 4px; border-radius: 4px; background: currentColor; content: ''; transform: translateX(-50%); }
+.srsl-orientation-phone span { position: absolute; bottom: 8px; left: 50%; width: 7px; height: 7px; border: 2px solid currentColor; border-radius: 50%; transform: translateX(-50%); }
+.srsl-orientation-copy { color: #fff; font-size: 19px; font-weight: 700; line-height: 1.7; letter-spacing: 0; }
 @keyframes srsl-home-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes srsl-shop-entry-pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(225, 103, 52, 0)); } 50% { transform: scale(1.075); filter: drop-shadow(0 0 12px rgba(225, 103, 52, .52)); } }
+@keyframes srsl-orientation-rotate { 0%, 15% { opacity: .62; transform: rotate(0deg) scale(.94); } 36%, 62% { opacity: 1; transform: rotate(90deg) scale(1); } 84%, 100% { opacity: .62; transform: rotate(0deg) scale(.94); } }
 .srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
 .srsl-sandstorm canvas { display: block; width: 750px; height: 1624px; }
 
@@ -60,4 +65,4 @@
 .srsl-poster-preview { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow: auto; background: rgba(0, 0, 0, .75); }
 .srsl-poster-preview > img { display: block; width: min(750px, 100%); height: auto; margin: auto; }
 .srsl-poster-preview > button { position: fixed; z-index: 1; right: 20px; top: calc(20px + env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .55); font-size: 36px; line-height: 40px; }
-@media (prefers-reduced-motion: reduce) { .srsl-sandstorm { opacity: .22; } .srsl-shop-entry img { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .srsl-sandstorm { opacity: .22; } .srsl-shop-entry img, .srsl-orientation-phone { animation: none; } }
