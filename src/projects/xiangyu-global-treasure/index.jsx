@@ -235,7 +235,26 @@ function RedeemDialog({ config, code, error, submitting, inputRef, onCodeChange,
 }
 
 function MessageToast({ message, onClose }) {
-  return <button className="xygt-message" type="button" role="alert" onClick={onClose}>{message}</button>
+  useEffect(() => {
+    const timer = window.setTimeout(onClose, 1500)
+    return () => window.clearTimeout(timer)
+  }, [message, onClose])
+
+  const preventBackgroundAction = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  return (
+    <div
+      className="xygt-message-layer"
+      role="presentation"
+      onPointerDown={preventBackgroundAction}
+      onClick={preventBackgroundAction}
+    >
+      <p className="xygt-message" role="alert">{message}</p>
+    </div>
+  )
 }
 
 function LoadingState() {
