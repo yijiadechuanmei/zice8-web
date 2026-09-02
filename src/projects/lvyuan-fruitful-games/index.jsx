@@ -6,7 +6,9 @@ import {
   LVYUAN_SNAKE_TARGET_SCORE,
 } from './config'
 import FruitMergeGame from './FruitMergeGame'
+import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
+import HomePage from './HomePage'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -546,7 +548,7 @@ function SnakeGame({ activityKey, onBack }) {
 
 export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY
-  const [view, setView] = useState('selector')
+  const [view, setView] = useState('home')
 
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
@@ -560,7 +562,15 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return <FruitMergeGame onBack={() => setView('selector')} />
   }
 
-  return <GameSelector onSelectSnake={() => setView('snake')} onSelectFruitMerge={() => setView('fruit-merge')} />
+  if (view === 'fruit-merge-rules') {
+    return <FruitMergeRules onBack={() => setView('selector')} onStart={() => setView('fruit-merge')} />
+  }
+
+  if (view === 'selector') {
+    return <GameSelector onSelectSnake={() => setView('snake')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />
+  }
+
+  return <HomePage onStart={() => setView('selector')} />
 }
 
 export {

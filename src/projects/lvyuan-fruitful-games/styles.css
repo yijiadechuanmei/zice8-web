@@ -1161,6 +1161,126 @@
   to { opacity: 1; }
 }
 
+/* IH5 reference pages use the supplied 750 × 1448 coordinate system. */
+.lyfg-ih5-page {
+  display: flex;
+  min-height: 100svh;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #efd386;
+}
+
+.lyfg-ih5-page::before {
+  display: none;
+}
+
+.lyfg-ih5-canvas {
+  position: relative;
+  width: min(750px, 100vw);
+  aspect-ratio: 750 / 1448;
+  flex: none;
+  margin-bottom: 2.4%;
+  overflow: visible;
+}
+
+.lyfg-ih5-canvas img {
+  display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lyfg-ih5-background,
+.lyfg-ih5-home-title,
+.lyfg-ih5-home-hero,
+.lyfg-ih5-selector-title,
+.lyfg-ih5-selector-subtitle,
+.lyfg-ih5-selector-footer,
+.lyfg-ih5-rules-title,
+.lyfg-ih5-rules-diagram,
+.lyfg-ih5-game-card,
+.lyfg-ih5-action {
+  position: absolute;
+}
+
+.lyfg-ih5-background {
+  z-index: 0;
+  top: -6.0773%;
+  left: 0;
+  width: 100%;
+  height: 112.1547%;
+}
+
+.lyfg-ih5-home-title,
+.lyfg-ih5-home-hero,
+.lyfg-ih5-selector-title,
+.lyfg-ih5-selector-subtitle,
+.lyfg-ih5-selector-footer,
+.lyfg-ih5-rules-title,
+.lyfg-ih5-rules-diagram {
+  z-index: 1;
+  object-fit: contain;
+  animation: lyfg-ih5-reveal 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lyfg-ih5-home-title { top: 12.4309%; left: 14.6667%; width: 72.9333%; height: 6.3536%; }
+.lyfg-ih5-home-hero { top: 20.442%; left: 17.6%; width: 63.2%; height: 18.6464%; animation-delay: 110ms; }
+
+.lyfg-ih5-selector-title { top: 5.5939%; left: 15.6%; width: 70.4%; height: 7.5276%; }
+.lyfg-ih5-selector-subtitle { top: 15.1243%; left: 12.8%; width: 75.6%; height: 9.2541%; animation-delay: 100ms; }
+.lyfg-ih5-selector-footer { top: 73.5497%; left: 20.5333%; width: 59.2%; height: 19.8204%; animation-delay: 250ms; }
+
+.lyfg-ih5-rules-title { top: -0.6215%; left: 9.6%; width: 84.1333%; height: 29.4199%; }
+.lyfg-ih5-rules-diagram { top: 28.7983%; left: 0.2667%; width: 98.6667%; height: 54.558%; animation-delay: 120ms; }
+
+.lyfg-ih5-action {
+  z-index: 3;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-origin: center;
+  -webkit-tap-highlight-color: transparent;
+  animation: lyfg-ih5-heartbeat 1.9s ease-in-out infinite;
+}
+
+.lyfg-ih5-action:active {
+  animation-play-state: paused;
+  transform: scale(0.96);
+}
+
+.lyfg-ih5-fill-image {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.lyfg-ih5-home-start { top: 71.8232%; left: 21.0667%; width: 57.8667%; height: 8.9088%; animation-delay: 260ms; }
+
+.lyfg-ih5-game-card { z-index: 2; display: block; width: 26.8%; height: 39.779%; }
+.lyfg-ih5-game-card--snake { top: 26.2431%; left: 7.4667%; animation-delay: 240ms; }
+.lyfg-ih5-game-card--spot-difference { top: 26.2431%; left: 36.4%; }
+.lyfg-ih5-game-card--fruit-merge { top: 26.2431%; left: 65.3333%; animation-delay: 480ms; }
+
+.lyfg-ih5-rules-back { top: 82.7348%; left: 0.6667%; width: 47.6%; height: 18.163%; animation-delay: 180ms; }
+.lyfg-ih5-rules-start { top: 82.804%; left: 51.0667%; width: 48.9333%; height: 18.4392%; animation-delay: 420ms; }
+
+@keyframes lyfg-ih5-reveal {
+  from { opacity: 0; transform: translateY(1.6%) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes lyfg-ih5-heartbeat {
+  0%, 100% { filter: brightness(1); transform: scale(1); }
+  47% { filter: brightness(1); transform: scale(1); }
+  55% { filter: brightness(1.08); transform: scale(1.035); }
+  65% { filter: brightness(1.02); transform: scale(0.99); }
+  75% { filter: brightness(1.06); transform: scale(1.018); }
+}
+
 @media (max-height: 760px) {
   .lyfg-game-shell { padding-top: 8px; }
   .lyfg-header { min-height: 76px; }
@@ -1193,7 +1313,15 @@
   .lyfg-fruit span,
   .lyfg-overlay-fruit,
   .lyfg-joystick-wrap p span,
-  .lyfg-touch-hint span {
+  .lyfg-touch-hint span,
+  .lyfg-ih5-home-title,
+  .lyfg-ih5-home-hero,
+  .lyfg-ih5-selector-title,
+  .lyfg-ih5-selector-subtitle,
+  .lyfg-ih5-selector-footer,
+  .lyfg-ih5-rules-title,
+  .lyfg-ih5-rules-diagram,
+  .lyfg-ih5-action {
     animation: none;
   }
 
