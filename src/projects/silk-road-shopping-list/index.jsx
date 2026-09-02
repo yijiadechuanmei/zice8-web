@@ -285,7 +285,7 @@ function CartDrawer({ products, onClose, onRemove, onCheckout }) {
         <span>x1</span>
         <button type="button" aria-label={`移除${product.name}`} onClick={() => onRemove(product.id)}><DeleteOutlined /></button>
       </article>)}</div>
-      <footer><span>已选 <b>{products.length}</b> 件</span><button type="button" onClick={onCheckout} disabled={!products.length}>去结算 ›</button></footer>
+      <footer><span>已选 <b>{products.length}</b> 件</span><button type="button" onClick={onCheckout}>去结算 ›</button></footer>
     </section>
   </div>
 }
@@ -300,7 +300,6 @@ function Poster({ products, profile, onBack, onReselect }) {
   const footerTop = 699 + collectionHeight - 70
   const height = footerTop + 403
   const composePoster = useCallback(async () => {
-    if (!products.length) throw new Error('未选择商品，无法生成海报')
     const qrCanvas = await waitForPosterQr(qrRef)
     const output = document.createElement('canvas')
     output.width = 750
@@ -337,7 +336,14 @@ function Poster({ products, profile, onBack, onReselect }) {
     context.font = 'bold 53px Arial, sans-serif'
     context.textAlign = 'right'
     context.fillText(String(score), 583, 574)
+    context.save()
+    context.shadowColor = 'transparent'
+    context.shadowBlur = 0
+    context.shadowOffsetX = 0
+    context.shadowOffsetY = 0
+    context.filter = 'none'
     drawPosterCover(context, collection, 0, 699, 750, collectionHeight)
+    context.restore()
     context.strokeStyle = '#e0cab5'
     context.lineWidth = 2
     context.strokeRect(25, 728, 700, 42 + rows * 213)
@@ -473,7 +479,6 @@ export default function SilkRoadShoppingList() {
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
   const startVideo = () => setPage('orientation')
   const checkout = () => {
-    if (!selected.length) return
     setCartOpen(false)
     setPage('poster')
   }
