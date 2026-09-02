@@ -10,9 +10,9 @@
 .srsl-orientation { position: absolute; z-index: 50; left: 0; top: 0; display: grid; width: 750px; height: 1624px; place-items: center; padding: 80px; color: #fff; background: rgba(0, 0, 0, .4); font: 28px/1.6 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
 @keyframes srsl-home-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes srsl-home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-.srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; mix-blend-mode: multiply; }
-.srsl-sand-grain { position: absolute; left: var(--left); top: var(--top); width: var(--size); height: calc(var(--size) * .58); border-radius: 999px; opacity: 0; background: rgba(154, 102, 51, .38); filter: blur(.4px); will-change: transform, opacity; animation: srsl-sand-drift var(--duration) var(--delay) linear infinite; }
-@keyframes srsl-sand-drift { 0% { opacity: 0; transform: translate3d(-96px, 22px, 0) scale(.55); } 13% { opacity: .55; } 70% { opacity: .34; } 100% { opacity: 0; transform: translate3d(var(--drift), -24px, 0) scale(1.1); } }
+.srsl-sandstorm { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
+.srsl-sand-grain { position: absolute; left: var(--left); top: var(--top); width: calc(var(--size) + 10px); height: var(--size); border-radius: 999px; opacity: 0; background: rgba(161, 100, 43, .72); box-shadow: 0 0 6px rgba(184, 125, 67, .34); filter: blur(.2px); will-change: transform, opacity; animation: srsl-sand-drift var(--duration) var(--delay) linear infinite; }
+@keyframes srsl-sand-drift { 0% { opacity: 0; transform: translate3d(-96px, 22px, 0) scale(.55); } 13% { opacity: .84; } 70% { opacity: .52; } 100% { opacity: 0; transform: translate3d(var(--drift), -24px, 0) scale(1.1); } }
 
 .srsl-video-panel { position: fixed; z-index: 60; inset: 0; display: grid; overflow: hidden; place-items: center; background: #000; }.srsl-video-panel.is-preparing { opacity: 0; pointer-events: none; }.srsl-video-panel .srsl-frame { margin: 0; }.srsl-skip { position: fixed; z-index: 61; right: 24px; bottom: 24px; padding: 8px 16px; border: 0; transform: rotate(90deg); transform-origin: center; color: #fff; background: rgba(0, 0, 0, .4); font: 22px "PingFang SC", "Microsoft YaHei", sans-serif; }
 
@@ -50,7 +50,7 @@
 .srsl-footer > img { position: absolute; inset: 0; width: 750px; height: 403px; }
 .srsl-qr { position: absolute; left: 77px; top: 136px; width: 106px; height: 106px; background: #fff; }
 .srsl-qr canvas { display: block; width: 106px !important; height: 106px !important; }
-.srsl-poster-actions { position: fixed; z-index: 120; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: min(3.2vw, 24px); width: min(calc(100vw - 32px), 694px); transform: translateX(-50%); }
+.srsl-poster-actions { position: fixed; z-index: 90; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: min(3.2vw, 24px); width: min(calc(100vw - 32px), 694px); transform: translateX(-50%); }
 .srsl-poster-actions button { display: flex; align-items: center; justify-content: center; gap: min(2.133vw, 16px); min-height: min(12vw, 90px); padding: 0 min(2.667vw, 20px); border: 2px solid #d6aa7e; border-radius: 999px; font: min(4.267vw, 32px)/1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; box-shadow: 0 5px 14px rgba(89, 55, 29, .18); }
 .srsl-poster-actions .anticon { font-size: min(4.267vw, 32px); }
 .srsl-poster-save { color: #fff7e8; background: linear-gradient(180deg, #d9764c, #bf4828); }

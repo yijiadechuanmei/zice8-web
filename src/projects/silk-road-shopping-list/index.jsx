@@ -19,6 +19,18 @@ const SAND_PARTICLES = [
   [10, 91, 3, 14, -10, 290], [35, 88, 6, 17, -5, 370], [62, 93, 4, 13, -9, 320], [83, 89, 5, 15, -1, 340],
 ]
 
+function getShoppingScore(quantity) {
+  const count = Math.min(Math.max(quantity, 0), 28)
+  const bands = [
+    [0, 7, 0, 30],
+    [8, 14, 30, 60],
+    [15, 21, 60, 80],
+    [22, 28, 80, 100],
+  ]
+  const [minCount, maxCount, minScore, maxScore] = bands.find(([, maxCount]) => count <= maxCount)
+  return Math.round(minScore + ((count - minCount) / (maxCount - minCount)) * (maxScore - minScore))
+}
+
 function loadPosterImage(src, label, timeout = 10000) {
   return new Promise((resolve, reject) => {
     if (!src) {
@@ -166,6 +178,7 @@ function Poster({ products, profile, onBack }) {
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
   const rows = Math.max(1, Math.ceil(products.length / 4))
+  const score = getShoppingScore(products.length)
   const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
   const footerTop = 699 + collectionHeight - 70
   const height = footerTop + 403
@@ -206,7 +219,7 @@ function Poster({ products, profile, onBack }) {
     context.fillStyle = '#000'
     context.font = 'bold 53px Arial, sans-serif'
     context.textAlign = 'right'
-    context.fillText('100', 583, 574)
+    context.fillText(String(score), 583, 574)
     drawPosterCover(context, collection, 0, 699, 750, collectionHeight)
     context.strokeStyle = '#e0cab5'
     context.lineWidth = 2
@@ -242,7 +255,7 @@ function Poster({ products, profile, onBack }) {
     })()
     if (!dataUrl.startsWith('data:image/png')) throw new Error('海报转成图片失败：未生成 PNG 数据')
     return dataUrl
-  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows])
+  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows, score])
 
   const savePoster = useCallback(async () => {
     try {
@@ -269,7 +282,7 @@ function Poster({ products, profile, onBack }) {
     {profile.avatar && <img className="srsl-avatar" alt="" src={profile.avatar} style={{ position: 'absolute', width: 106, height: 106, left: 74, top: 517 }} />}
     <span className="srsl-nickname" style={{ left: 206, top: 520, width: 203, height: 46 }}>{profile.nickname}</span>
     <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}>{products.length}</span>
-    <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>100</span>
+    <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>{score}</span>
     <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
       <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
       <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
