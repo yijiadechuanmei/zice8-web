@@ -1,4 +1,5 @@
 import { getLvyuanFruitfulGamesAsset } from './config'
+import Ih5Stage from './Ih5Stage'
 
 function PosterImage({ asset, className, alt = '' }) {
   return <img className={className} src={getLvyuanFruitfulGamesAsset(asset)} alt={alt} draggable="false" />
@@ -7,7 +8,7 @@ function PosterImage({ asset, className, alt = '' }) {
 export default function FruitMergeRules({ onBack, onStart }) {
   return (
     <main className="lyfg-page lyfg-ih5-page lyfg-ih5-rules-page">
-      <section className="lyfg-ih5-canvas" aria-label="合成水果规则">
+      <Ih5Stage label="合成水果规则">
         <PosterImage asset="background" className="lyfg-ih5-background" />
         <PosterImage asset="mergeRulesTitle" className="lyfg-ih5-rules-title" alt="合成水果游戏规则" />
         <PosterImage asset="mergeRulesDiagram" className="lyfg-ih5-rules-diagram" alt="种子、树苗与水果的合成规则" />
@@ -17,7 +18,7 @@ export default function FruitMergeRules({ onBack, onStart }) {
         <button className="lyfg-ih5-action lyfg-ih5-rules-start" type="button" onClick={onStart} aria-label="开始合成水果游戏">
           <PosterImage asset="mergeRulesStart" className="lyfg-ih5-fill-image" alt="开始游戏" />
         </button>
-      </section>
+      </Ih5Stage>
     </main>
   )
 }

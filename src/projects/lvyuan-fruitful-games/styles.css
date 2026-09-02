@@ -1163,12 +1163,15 @@
 
 /* IH5 reference pages use the supplied 750 × 1448 coordinate system. */
 .lyfg-ih5-page {
+  position: fixed;
+  inset: 0;
   display: flex;
-  min-height: 100svh;
-  align-items: flex-start;
+  width: 100%;
+  height: 100%;
   justify-content: center;
-  overflow-x: hidden;
-  overflow-y: auto;
+  align-items: center;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: #efd386;
 }
 
@@ -1176,12 +1179,18 @@
   display: none;
 }
 
-.lyfg-ih5-canvas {
+.lyfg-ih5-frame {
   position: relative;
-  width: min(750px, 100vw);
-  aspect-ratio: 750 / 1448;
-  flex: none;
-  margin-bottom: 2.4%;
+  overflow: hidden;
+}
+
+.lyfg-ih5-canvas {
+  position: absolute;
+  top: 88px;
+  left: 0;
+  width: 750px;
+  height: 1448px;
+  transform-origin: 0 0;
   overflow: visible;
 }
 
@@ -1207,10 +1216,10 @@
 
 .lyfg-ih5-background {
   z-index: 0;
-  top: -6.0773%;
+  top: -88px;
   left: 0;
-  width: 100%;
-  height: 112.1547%;
+  width: 750px;
+  height: 1624px;
 }
 
 .lyfg-ih5-home-title,
@@ -1225,15 +1234,15 @@
   animation: lyfg-ih5-reveal 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.lyfg-ih5-home-title { top: 12.4309%; left: 14.6667%; width: 72.9333%; height: 6.3536%; }
-.lyfg-ih5-home-hero { top: 20.442%; left: 17.6%; width: 63.2%; height: 18.6464%; animation-delay: 110ms; }
+.lyfg-ih5-home-title { top: 180px; left: 110px; width: 547px; height: 92px; }
+.lyfg-ih5-home-hero { top: 296px; left: 132px; width: 474px; height: 270px; animation-delay: 110ms; }
 
-.lyfg-ih5-selector-title { top: 5.5939%; left: 15.6%; width: 70.4%; height: 7.5276%; }
-.lyfg-ih5-selector-subtitle { top: 15.1243%; left: 12.8%; width: 75.6%; height: 9.2541%; animation-delay: 100ms; }
-.lyfg-ih5-selector-footer { top: 73.5497%; left: 20.5333%; width: 59.2%; height: 19.8204%; animation-delay: 250ms; }
+.lyfg-ih5-selector-title { top: 81px; left: 117px; width: 528px; height: 109px; }
+.lyfg-ih5-selector-subtitle { top: 219px; left: 96px; width: 567px; height: 134px; animation-delay: 100ms; }
+.lyfg-ih5-selector-footer { top: 1065px; left: 154px; width: 444px; height: 287px; animation-delay: 250ms; }
 
-.lyfg-ih5-rules-title { top: -0.6215%; left: 9.6%; width: 84.1333%; height: 29.4199%; }
-.lyfg-ih5-rules-diagram { top: 28.7983%; left: 0.2667%; width: 98.6667%; height: 54.558%; animation-delay: 120ms; }
+.lyfg-ih5-rules-title { top: -9px; left: 72px; width: 631px; height: 426px; }
+.lyfg-ih5-rules-diagram { top: 417px; left: 2px; width: 740px; height: 790px; animation-delay: 120ms; }
 
 .lyfg-ih5-action {
   z-index: 3;
@@ -1258,15 +1267,15 @@
   pointer-events: none;
 }
 
-.lyfg-ih5-home-start { top: 71.8232%; left: 21.0667%; width: 57.8667%; height: 8.9088%; animation-delay: 260ms; }
+.lyfg-ih5-home-start { top: 1040px; left: 158px; width: 434px; height: 129px; animation-delay: 260ms; }
 
-.lyfg-ih5-game-card { z-index: 2; display: block; width: 26.8%; height: 39.779%; }
-.lyfg-ih5-game-card--snake { top: 26.2431%; left: 7.4667%; animation-delay: 240ms; }
-.lyfg-ih5-game-card--spot-difference { top: 26.2431%; left: 36.4%; }
-.lyfg-ih5-game-card--fruit-merge { top: 26.2431%; left: 65.3333%; animation-delay: 480ms; }
+.lyfg-ih5-game-card { z-index: 2; display: block; width: 201px; height: 576px; }
+.lyfg-ih5-game-card--snake { top: 380px; left: 56px; animation-delay: 240ms; }
+.lyfg-ih5-game-card--spot-difference { top: 380px; left: 273px; }
+.lyfg-ih5-game-card--fruit-merge { top: 380px; left: 490px; animation-delay: 480ms; }
 
-.lyfg-ih5-rules-back { top: 82.7348%; left: 0.6667%; width: 47.6%; height: 18.163%; animation-delay: 180ms; }
-.lyfg-ih5-rules-start { top: 82.804%; left: 51.0667%; width: 48.9333%; height: 18.4392%; animation-delay: 420ms; }
+.lyfg-ih5-rules-back { top: 1198px; left: 5px; width: 357px; height: 263px; animation-delay: 180ms; }
+.lyfg-ih5-rules-start { top: 1199px; left: 383px; width: 367px; height: 267px; animation-delay: 420ms; }
 
 @keyframes lyfg-ih5-reveal {
   from { opacity: 0; transform: translateY(1.6%) scale(0.975); }
