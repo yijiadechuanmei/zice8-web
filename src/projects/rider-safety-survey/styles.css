@@ -1039,7 +1039,7 @@
   height: 8.0111%;
   margin: 0;
   padding: 0;
-  top: 83.4%;
+  top: 86.8%;
   left: 4.8%;
   display: grid;
   place-items: center;
@@ -1066,7 +1066,7 @@
 }
 .rss-article-list {
   width: min(90.1334vw, 676px);
-  margin: max(-3.2vw, -24px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  margin: 0 auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
   display: grid;
   gap: min(5.3334vw, 40px);
   position: relative;
