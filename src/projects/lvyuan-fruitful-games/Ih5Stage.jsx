@@ -32,9 +32,11 @@ export default function Ih5Stage({ children, label }) {
 
   return (
     <div className="lyfg-ih5-frame" style={{ width: DESIGN_WIDTH * scale, height: DESIGN_HEIGHT * scale }}>
-      <section className="lyfg-ih5-canvas" style={{ transform: `scale(${scale})` }} aria-label={label}>
-        {children}
-      </section>
+      <div className="lyfg-ih5-stage" style={{ transform: `scale(${scale})` }}>
+        <section className="lyfg-ih5-canvas" aria-label={label}>
+          {children}
+        </section>
+      </div>
     </div>
   )
 }

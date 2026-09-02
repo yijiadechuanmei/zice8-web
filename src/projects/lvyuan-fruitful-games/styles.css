@@ -1184,13 +1184,22 @@
   overflow: hidden;
 }
 
+.lyfg-ih5-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 750px;
+  height: 1624px;
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+
 .lyfg-ih5-canvas {
   position: absolute;
   top: 88px;
   left: 0;
   width: 750px;
   height: 1448px;
-  transform-origin: 0 0;
   overflow: visible;
 }
 
