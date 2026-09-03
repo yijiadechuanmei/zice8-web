@@ -21,6 +21,7 @@ import {
   clearQualityMonthData,
   getQualityMonthSettings,
   updateQualityMonthCurrentWeek,
+  updateQualityMonthWeekSchedule,
 } from '../api'
 
 const { Paragraph, Text, Title } = Typography
@@ -30,11 +31,20 @@ export default function QualityMonthAdminPage({ activity }) {
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState(false)
   const [userId, setUserId] = useState('')
+  const [scheduleDrafts, setScheduleDrafts] = useState({})
+  const [savingScheduleWeek, setSavingScheduleWeek] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      setData(await getQualityMonthSettings(activity.activityKey))
+      const nextData = await getQualityMonthSettings(activity.activityKey)
+      setData(nextData)
+      setScheduleDrafts(Object.fromEntries(
+        (nextData?.weeks || []).map((week) => [week.weekNo, {
+          startTime: toBeijingDateTimeInput(week.startTime),
+          endTime: toBeijingDateTimeInput(week.endTime),
+        }]),
+      ))
     } catch (error) {
       message.error(error.message || '质量月配置加载失败')
     } finally {
@@ -60,6 +70,30 @@ export default function QualityMonthAdminPage({ activity }) {
       message.error(error.message || '切换周次失败')
     } finally {
       setActing(false)
+    }
+  }
+
+  function updateScheduleDraft(weekNo, field, value) {
+    setScheduleDrafts((current) => ({
+      ...current,
+      [weekNo]: { ...current[weekNo], [field]: value },
+    }))
+  }
+
+  async function saveWeekSchedule(weekNo) {
+    const draft = scheduleDrafts[weekNo] || {}
+    setSavingScheduleWeek(weekNo)
+    try {
+      await updateQualityMonthWeekSchedule(activity.activityKey, weekNo, {
+        startTime: draft.startTime || null,
+        endTime: draft.endTime || null,
+      })
+      message.success(`第 ${weekNo} 周答题时间已保存（北京时间）`)
+      await load()
+    } catch (error) {
+      message.error(error.message || '答题时间保存失败')
+    } finally {
+      setSavingScheduleWeek(null)
     }
   }
 
@@ -99,11 +133,51 @@ export default function QualityMonthAdminPage({ activity }) {
     { title: '周次', dataIndex: 'weekNo', width: 80, render: (value) => <Tag color={value === data?.currentWeek ? 'blue' : 'default'}>第 {value} 周</Tag> },
     { title: '题库', dataIndex: 'title' },
     { title: '题数', dataIndex: 'questionCount', width: 76 },
+    {
+      title: '答题开始（北京时间）',
+      width: 210,
+      render: (_, week) => (
+        <Input
+          type="datetime-local"
+          value={scheduleDrafts[week.weekNo]?.startTime || ''}
+          disabled={loading || savingScheduleWeek === week.weekNo}
+          onChange={(event) => updateScheduleDraft(week.weekNo, 'startTime', event.target.value)}
+        />
+      ),
+    },
+    {
+      title: '答题结束（北京时间）',
+      width: 210,
+      render: (_, week) => (
+        <Input
+          type="datetime-local"
+          value={scheduleDrafts[week.weekNo]?.endTime || ''}
+          disabled={loading || savingScheduleWeek === week.weekNo}
+          onChange={(event) => updateScheduleDraft(week.weekNo, 'endTime', event.target.value)}
+        />
+      ),
+    },
+    {
+      title: '时间操作',
+      width: 112,
+      fixed: 'right',
+      render: (_, week) => (
+        <Button
+          type="primary"
+          size="small"
+          loading={savingScheduleWeek === week.weekNo}
+          disabled={loading || Boolean(savingScheduleWeek)}
+          onClick={() => saveWeekSchedule(week.weekNo)}
+        >
+          保存
+        </Button>
+      ),
+    },
     { title: '开始人数', dataIndex: 'startedCount', width: 96 },
     { title: '提交人数', dataIndex: 'finishedCount', width: 96 },
     { title: '平均正确题数', dataIndex: 'averageCorrectCount', width: 120, render: (value) => Number(value || 0).toFixed(2) },
     { title: '平均正确率', dataIndex: 'averageAccuracy', width: 110, render: (value) => `${Number(value || 0).toFixed(2)}%` },
-    { title: '平均用时', dataIndex: 'averageDurationSeconds', width: 96, render: formatDuration },
+    { title: '平均用时', dataIndex: 'averageDurationSeconds', width: 112, render: formatDuration },
   ]
 
   const resultColumns = [
@@ -114,7 +188,7 @@ export default function QualityMonthAdminPage({ activity }) {
     { title: '周次', dataIndex: 'weekNo', width: 72, render: (value) => `第${value}周` },
     { title: '正确题数', width: 100, render: (_, row) => `${row.correctCount}/${row.totalQuestions}` },
     { title: '正确率', dataIndex: 'accuracy', width: 90, render: (value) => `${Number(value || 0).toFixed(2)}%` },
-    { title: '用时', dataIndex: 'durationSeconds', width: 86, render: formatDuration },
+    { title: '用时', dataIndex: 'durationSeconds', width: 106, render: formatDuration },
     { title: '提交时间', dataIndex: 'submittedAt', width: 170, render: formatDateTime },
   ]
 
@@ -126,7 +200,7 @@ export default function QualityMonthAdminPage({ activity }) {
             <Text type="secondary">答题周期控制</Text>
             <Title level={4} style={{ margin: '4px 0 0' }}>当前第 {data?.currentWeek || '-'} 周</Title>
             <Paragraph type="secondary" style={{ margin: '6px 0 0' }}>
-              切换后，用户会进入新周首页；已提交的旧周成绩继续保留。
+              切换后，用户会进入新周首页；已提交的旧周成绩继续保留。每周时间按北京时间执行，未设置时不额外限制该周答题。
             </Paragraph>
           </div>
           <Space wrap>
@@ -151,7 +225,7 @@ export default function QualityMonthAdminPage({ activity }) {
       </Row>
 
       <Card title="各周统计">
-        <Table rowKey="weekNo" loading={loading} dataSource={data?.weeks || []} columns={weekColumns} pagination={false} scroll={{ x: 900 }} />
+        <Table rowKey="weekNo" loading={loading} dataSource={data?.weeks || []} columns={weekColumns} pagination={false} scroll={{ x: 1460 }} />
       </Card>
 
       <Card title="答题数据清除">
@@ -190,11 +264,19 @@ export default function QualityMonthAdminPage({ activity }) {
 function formatDuration(value) {
   const seconds = Math.max(0, Number(value) || 0)
   const minutes = Math.floor(seconds / 60)
-  const rest = seconds % 60
-  return `${minutes}分${String(rest).padStart(2, '0')}秒`
+  const rest = (seconds - minutes * 60).toFixed(2).padStart(5, '0')
+  return `${minutes}分${rest}秒`
 }
 
 function formatDateTime(value) {
   if (!value) return '-'
   return String(value).replace('T', ' ').slice(0, 19)
+}
+
+function toBeijingDateTimeInput(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`
 }

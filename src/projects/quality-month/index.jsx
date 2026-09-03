@@ -156,7 +156,7 @@ export default function QualityMonthProject({ routeParams }) {
   }
 
   function requestStart() {
-    const activityWindowMessage = getActivityWindowMessage(publicConfig)
+    const activityWindowMessage = getActivityWindowMessage(publicConfig, state)
     if (activityWindowMessage) {
       showToast(activityWindowMessage)
       return
@@ -316,7 +316,7 @@ function Home({ state, loading, onStart }) {
         <img className="qm-home-art qm-home-art--bottom" src={HOME_ART.bottom} alt="" />
         <div className="qm-home-cta-wrap">
           <p>第 {state.currentWeek} 周 · {state.weekTitle}</p>
-          {state.currentWeek === 1 ? <p className="qm-home-schedule">答题时间：9月1日 08:00—9月4日 16:30</p> : null}
+          {state.weekStartTime && state.weekEndTime ? <p className="qm-home-schedule">答题时间：{formatWeekSchedule(state.weekStartTime)}—{formatWeekSchedule(state.weekEndTime)}</p> : null}
           <button className="qm-primary qm-primary--home" type="button" onClick={onStart} disabled={loading}>
             <span>{loading ? '正在进入…' : '开始本周答题'}</span><b>→</b>
           </button>
@@ -451,8 +451,8 @@ function Result({ state }) {
 function formatDuration(seconds) {
   const value = Math.max(0, Number(seconds) || 0)
   const minutes = Math.floor(value / 60)
-  const rest = value % 60
-  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
+  const rest = (value - minutes * 60).toFixed(2).padStart(5, '0')
+  return `${String(minutes).padStart(2, '0')}:${rest}`
 }
 
 function formatNumber(value) {
@@ -460,7 +460,7 @@ function formatNumber(value) {
   return Number.isInteger(number) ? String(number) : number.toFixed(2)
 }
 
-function getActivityWindowMessage(publicConfig) {
+function getActivityWindowMessage(publicConfig, state) {
   // Activity 表的 DATETIME 按北京时间保存；接口序列化后带 Z，但其 UTC
   // 字段仍表示北京时间的墙上时刻，不能按绝对 UTC 时刻直接比较。
   const now = getBeijingWallTimestamp(new Date())
@@ -468,12 +468,22 @@ function getActivityWindowMessage(publicConfig) {
   const endTime = getActivityBeijingTimestamp(publicConfig?.endTime)
   if (Number.isFinite(startTime) && now < startTime) return '活动未开始'
   if (Number.isFinite(endTime) && now > endTime) return '活动已结束'
-  // 正常情况下以上两项已完全以 Activity 表时间为准。仅在活动未设置
-  // 起止时间时，才回退到接口状态，避免缓存状态影响准确的边界判断。
-  if (Number.isFinite(startTime) || Number.isFinite(endTime)) return ''
-  if (publicConfig?.activityWindow?.status === 'not_started') return '活动未开始'
-  if (publicConfig?.activityWindow?.status === 'ended') return '活动已结束'
+  if (!Number.isFinite(startTime) && !Number.isFinite(endTime)) {
+    if (publicConfig?.activityWindow?.status === 'not_started') return '活动未开始'
+    if (publicConfig?.activityWindow?.status === 'ended') return '活动已结束'
+  }
+  const weekStartTime = getActivityBeijingTimestamp(state?.weekStartTime)
+  const weekEndTime = getActivityBeijingTimestamp(state?.weekEndTime)
+  if (Number.isFinite(weekStartTime) && now < weekStartTime) return '本周答题未开始'
+  if (Number.isFinite(weekEndTime) && now >= weekEndTime) return '本周答题已结束'
   return ''
+}
+
+function formatWeekSchedule(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${date.getUTCMonth() + 1}月${date.getUTCDate()}日 ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`
 }
 
 function getActivityBeijingTimestamp(value) {

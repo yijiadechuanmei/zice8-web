@@ -241,6 +241,13 @@ export function updateQualityMonthCurrentWeek(activityKey, weekNo) {
   })
 }
 
+export function updateQualityMonthWeekSchedule(activityKey, weekNo, payload) {
+  return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/weeks/${encodeURIComponent(weekNo)}/schedule`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function clearQualityMonthData(activityKey, payload) {
   return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/clear-data`, {
     method: 'POST',
