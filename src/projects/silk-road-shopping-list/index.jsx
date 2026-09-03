@@ -326,12 +326,12 @@ function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }
   }
   const dock = <div className="srsl-dock"><img alt="" src={silkRoadAssets.cartDock} /><span>{selectedIds.length}</span><button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} /><button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} /></div>
   return <>
-  <Stage height={636 + rows * 230 + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
+  <Stage height={646 + rows * 230 + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 410, top: 464, width: 60, height: 43 }}>{selectedIds.length}</span>
-    <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 255, height: 28, left: 247.5, top: 606 }} />
+    <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 255, height: 28, left: 247.5, top: 612 }} />
     <span className="srsl-card-detail-hint">点击卡片查看详情</span>
-    <div className="srsl-product-grid" style={{ height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
+    <div className="srsl-product-grid" style={{ top: 646, height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
   </Stage>
   {createPortal(dock, document.body)}
   </>
