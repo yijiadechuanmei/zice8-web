@@ -491,12 +491,15 @@ function Intro({ onStart }) {
 }
 
 function PrivacyNotice({ onConfirm, onDecline }) {
-  const [agreed, setAgreed] = useState(false);
+  const [decision, setDecision] = useState("");
+  const confirmDecision = () => {
+    if (decision === "agree") onConfirm();
+    if (decision === "decline") onDecline();
+  };
   return (
-    <section className="rss-privacy-page" aria-labelledby="rss-privacy-title">
+    <div className="rss-privacy-mask" role="presentation">
       <article className="rss-privacy-card">
         <header>
-          <p className="rss-section-kicker">PRIVACY NOTICE</p>
           <h1 id="rss-privacy-title">个人信息处理告知书</h1>
         </header>
         <div className="rss-privacy-copy">
@@ -591,14 +594,17 @@ function PrivacyNotice({ onConfirm, onDecline }) {
         </div>
         <footer className="rss-privacy-actions">
           <label className="rss-consent-check">
-            <input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} />
+            <input type="checkbox" checked={decision === "agree"} onChange={() => setDecision("agree")} />
             <span>我已阅读并充分理解《个人信息处理告知书》的全部内容，并同意按照上述规则处理本人个人信息。</span>
           </label>
-          <button className="rss-primary" type="button" disabled={!agreed} onClick={onConfirm}>确认并填写资料</button>
-          <button className="rss-privacy-decline" type="button" onClick={onDecline}>我不同意</button>
+          <label className="rss-consent-check rss-consent-decline">
+            <input type="checkbox" checked={decision === "decline"} onChange={() => setDecision("decline")} />
+            <span>我不同意上述个人信息处理规则。</span>
+          </label>
+          <button className="rss-primary" type="button" disabled={!decision} onClick={confirmDecision}>确定</button>
         </footer>
       </article>
-    </section>
+    </div>
   );
 }
 
