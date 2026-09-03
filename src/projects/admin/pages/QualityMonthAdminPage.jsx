@@ -276,8 +276,9 @@ export default function QualityMonthAdminPage({ activity }) {
 
 function formatDuration(value) {
   const seconds = Math.max(0, Number(value) || 0)
-  const minutes = Math.floor(seconds / 60)
-  const rest = (seconds - minutes * 60).toFixed(2).padStart(5, '0')
+  const roundedSeconds = Math.round(seconds * 100) / 100
+  const minutes = Math.floor(roundedSeconds / 60)
+  const rest = (roundedSeconds - minutes * 60).toFixed(2).padStart(5, '0')
   return `${minutes}分${rest}秒`
 }
 

@@ -166,7 +166,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: '累计完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
         { label: '平均正确率', value: Math.round(Number(qualityMonth.averageAccuracy ?? 0)), suffix: '%' },
         { label: '平均答对题数', value: Number(qualityMonth.averageCorrectCount ?? 0).toFixed(1) },
-        { label: '平均答题用时', value: Math.round(Number(qualityMonth.averageDurationSeconds ?? 0)), suffix: '秒' },
+        { label: '平均答题用时', value: (Math.round(Number(qualityMonth.averageDurationSeconds ?? 0) * 100) / 100).toFixed(2), suffix: '秒' },
         { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
       ]
