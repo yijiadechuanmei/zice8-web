@@ -718,6 +718,7 @@
   background: linear-gradient(100deg, #0f9bec 0%, #096fc8 64%, #075cac 100%);
   box-shadow: 0 12px 24px rgba(0, 75, 158, 0.25);
 }
+.rss-privacy-page,
 .rss-profile-page,
 .rss-dispatch,
 .rss-wheel-page {
@@ -735,6 +736,99 @@
     radial-gradient(circle at 10% 6%, rgba(255, 255, 255, 0.2) 0 1px, transparent 1.5px) 0 0 / 13px 18px,
     linear-gradient(165deg, #69c7f8 0%, #0ca1fe 52%, #078be8 100%);
 }
+.rss-privacy-page {
+  width: 100vw;
+  min-height: 100svh;
+  margin-left: calc(50% - 50vw);
+  padding: 24px 16px max(28px, env(safe-area-inset-bottom));
+  color: #075fac;
+  background:
+    radial-gradient(circle at 10% 6%, rgba(255, 255, 255, 0.25) 0 1px, transparent 1.5px) 0 0 / 13px 18px,
+    linear-gradient(165deg, #69c7f8 0%, #0ca1fe 52%, #078be8 100%);
+}
+.rss-privacy-card {
+  width: min(100%, 640px);
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 20px 42px rgba(0, 81, 154, 0.28);
+}
+.rss-privacy-card > header {
+  padding: 30px 24px 20px;
+  color: #fff;
+  background: linear-gradient(120deg, #0f9bec, #075cac);
+}
+.rss-privacy-card .rss-section-kicker { color: rgba(255, 255, 255, 0.78); }
+.rss-privacy-card h1 { margin: 8px 0 0; font-size: 27px; line-height: 1.25; }
+.rss-privacy-copy {
+  max-height: min(60svh, 620px);
+  padding: 22px 24px;
+  overflow-y: auto;
+  color: #315f83;
+  font-size: 13px;
+  line-height: 1.75;
+  overscroll-behavior: contain;
+}
+.rss-privacy-copy p { margin: 0 0 12px; }
+.rss-privacy-copy section { margin: 21px 0 0; }
+.rss-privacy-copy h2 { margin: 0 0 8px; color: #075fac; font-size: 16px; line-height: 1.4; }
+.rss-privacy-copy ol { margin: 0 0 12px; padding-left: 20px; }
+.rss-privacy-copy li { margin: 0 0 5px; }
+.rss-privacy-actions {
+  padding: 18px 24px 24px;
+  border-top: 1px solid #d6eafa;
+  background: #f8fcff;
+}
+.rss-consent-check {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: #24577f;
+  font-size: 13px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+.rss-consent-check input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  margin: 1px 0 0;
+  accent-color: #087fd1;
+}
+.rss-privacy-actions .rss-primary { min-height: 52px; margin-top: 16px; border-radius: 999px; color: #fff; background: linear-gradient(100deg, #0f9bec, #075cac); }
+.rss-privacy-decline {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 8px;
+  border: 0;
+  color: #5a86a9;
+  background: transparent;
+  font: 500 14px "Noto Sans SC", sans-serif;
+}
+.rss-consent-mask {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 48, 98, 0.62);
+}
+.rss-question-consent {
+  width: min(100%, 430px);
+  padding: 28px 24px 22px;
+  border-radius: 20px;
+  color: #24577f;
+  background: #fff;
+  box-shadow: 0 24px 56px rgba(0, 30, 73, 0.35);
+}
+.rss-question-consent .rss-section-kicker { color: #098ee0; }
+.rss-question-consent h2 { margin: 8px 0 10px; color: #075fac; font-size: 24px; }
+.rss-question-consent > p { margin: 0 0 18px; font-size: 14px; line-height: 1.75; }
+.rss-question-consent-actions { display: grid; gap: 9px; margin-top: 20px; }
+.rss-question-consent-actions .rss-primary { min-height: 50px; border-radius: 999px; color: #fff; background: linear-gradient(100deg, #0f9bec, #075cac); }
+.rss-question-consent-actions > button:last-child { min-height: 42px; border: 0; color: #5a86a9; background: transparent; font: 500 14px "Noto Sans SC", sans-serif; }
 .rss-profile-card {
   width: min(100%, 520px);
   padding: 36px 28px 28px;
@@ -990,6 +1084,7 @@
   background: var(--rss-result-background) center center / cover no-repeat;
 }
 .rss-result-card,
+.rss-result-disclaimer,
 .rss-result-heading,
 .rss-result-diagnosis,
 .rss-result-draw {
@@ -1002,6 +1097,17 @@
   left: 9.7334%;
   display: block;
   animation: rss-result-reveal 0.42s ease-out both;
+}
+.rss-result-disclaimer {
+  width: 78.8%;
+  margin: 0;
+  top: 58.62%;
+  left: 10.5334%;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: min(1.7vw, 13px);
+  line-height: 1.35;
+  text-align: center;
+  animation: rss-result-reveal 0.35s 0.06s ease-out both;
 }
 .rss-result-heading {
   width: 50.8%;
