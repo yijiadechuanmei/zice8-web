@@ -133,46 +133,6 @@ export default function QualityMonthAdminPage({ activity }) {
     { title: '周次', dataIndex: 'weekNo', width: 80, render: (value) => <Tag color={value === data?.currentWeek ? 'blue' : 'default'}>第 {value} 周</Tag> },
     { title: '题库', dataIndex: 'title' },
     { title: '题数', dataIndex: 'questionCount', width: 76 },
-    {
-      title: '答题开始（北京时间）',
-      width: 210,
-      render: (_, week) => (
-        <Input
-          type="datetime-local"
-          value={scheduleDrafts[week.weekNo]?.startTime || ''}
-          disabled={loading || savingScheduleWeek === week.weekNo}
-          onChange={(event) => updateScheduleDraft(week.weekNo, 'startTime', event.target.value)}
-        />
-      ),
-    },
-    {
-      title: '答题结束（北京时间）',
-      width: 210,
-      render: (_, week) => (
-        <Input
-          type="datetime-local"
-          value={scheduleDrafts[week.weekNo]?.endTime || ''}
-          disabled={loading || savingScheduleWeek === week.weekNo}
-          onChange={(event) => updateScheduleDraft(week.weekNo, 'endTime', event.target.value)}
-        />
-      ),
-    },
-    {
-      title: '时间操作',
-      width: 112,
-      fixed: 'right',
-      render: (_, week) => (
-        <Button
-          type="primary"
-          size="small"
-          loading={savingScheduleWeek === week.weekNo}
-          disabled={loading || Boolean(savingScheduleWeek)}
-          onClick={() => saveWeekSchedule(week.weekNo)}
-        >
-          保存
-        </Button>
-      ),
-    },
     { title: '开始人数', dataIndex: 'startedCount', width: 96 },
     { title: '提交人数', dataIndex: 'finishedCount', width: 96 },
     { title: '平均正确题数', dataIndex: 'averageCorrectCount', width: 120, render: (value) => Number(value || 0).toFixed(2) },
@@ -224,8 +184,61 @@ export default function QualityMonthAdminPage({ activity }) {
         <Col xs={12} md={6}><Card><Statistic title="当前周平均用时" value={formatDuration(currentStats?.averageDurationSeconds || 0)} /></Card></Col>
       </Row>
 
+      <Card title="每周答题时间设置（北京时间）">
+        <Alert
+          type="info"
+          showIcon
+          message="用户只能在当前周设置的时间区间内开始或提交答题"
+          description="每周必须同时填写开始和结束时间；清空两个时间后，该周不再额外限制。保存后首页会直接提示“本周答题未开始”或“本周答题已结束”。"
+          style={{ marginBottom: 18 }}
+        />
+        <Row gutter={[16, 16]}>
+          {(data?.weeks || []).map((week) => (
+            <Col key={week.weekNo} xs={24} md={12} xl={8}>
+              <Card
+                size="small"
+                title={`第 ${week.weekNo} 周｜${week.title.replace(/^第.+?｜/, '')}`}
+                extra={week.weekNo === data?.currentWeek ? <Tag color="blue">当前周</Tag> : null}
+              >
+                <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                  <label className="admin-field-block">
+                    <Text strong>开始时间</Text>
+                    <Input
+                      style={{ marginTop: 6 }}
+                      type="datetime-local"
+                      value={scheduleDrafts[week.weekNo]?.startTime || ''}
+                      disabled={loading || savingScheduleWeek === week.weekNo}
+                      onChange={(event) => updateScheduleDraft(week.weekNo, 'startTime', event.target.value)}
+                    />
+                  </label>
+                  <label className="admin-field-block">
+                    <Text strong>结束时间</Text>
+                    <Input
+                      style={{ marginTop: 6 }}
+                      type="datetime-local"
+                      value={scheduleDrafts[week.weekNo]?.endTime || ''}
+                      disabled={loading || savingScheduleWeek === week.weekNo}
+                      onChange={(event) => updateScheduleDraft(week.weekNo, 'endTime', event.target.value)}
+                    />
+                  </label>
+                  <Button
+                    type="primary"
+                    block
+                    loading={savingScheduleWeek === week.weekNo}
+                    disabled={loading || Boolean(savingScheduleWeek)}
+                    onClick={() => saveWeekSchedule(week.weekNo)}
+                  >
+                    保存第 {week.weekNo} 周时间
+                  </Button>
+                </Space>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Card>
+
       <Card title="各周统计">
-        <Table rowKey="weekNo" loading={loading} dataSource={data?.weeks || []} columns={weekColumns} pagination={false} scroll={{ x: 1460 }} />
+        <Table rowKey="weekNo" loading={loading} dataSource={data?.weeks || []} columns={weekColumns} pagination={false} scroll={{ x: 900 }} />
       </Card>
 
       <Card title="答题数据清除">
