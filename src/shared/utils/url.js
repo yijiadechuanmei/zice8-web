@@ -22,6 +22,7 @@ export function sanitizeUrlForWechat(inputUrl) {
   parsed.searchParams.delete('token')
   parsed.searchParams.delete('code')
   parsed.searchParams.delete('state')
+  parsed.searchParams.delete('wechat_oauth_retry')
   return parsed.toString()
 }
 

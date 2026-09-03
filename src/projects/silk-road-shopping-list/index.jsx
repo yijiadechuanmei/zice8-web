@@ -284,10 +284,17 @@ function Home({ onStart }) {
 }
 
 function VideoPanel({ mode, videoRef, onEnd, onShop }) {
+  const [progress, setProgress] = useState(0)
+  const updateProgress = (event) => {
+    const video = event.currentTarget
+    const duration = Number(video.duration)
+    setProgress(Number.isFinite(duration) && duration > 0 ? Math.min(video.currentTime / duration, 1) : 0)
+  }
   return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
-    <Stage height={1448} fitViewport>
-      <div style={{ position: 'absolute', width: 1448, height: 824, left: 798, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
-        <video ref={videoRef} src={silkRoadAssets.video} controls={mode === 'video'} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    <Stage height={1448}>
+      <div style={{ position: 'absolute', width: 1448, height: 750, left: 750, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
+        <video ref={videoRef} src={silkRoadAssets.video} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onDurationChange={updateProgress} onTimeUpdate={updateProgress} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        {mode === 'video' && <div className="srsl-video-progress" role="progressbar" aria-label="视频播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)} style={{ '--srsl-video-progress': `${progress * 100}%` }} />}
       </div>
       {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button srsl-shop-entry" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(90deg)', transformOrigin: '50% 50%' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
@@ -511,7 +518,7 @@ export default function SilkRoadShoppingList() {
   const videoRef = useRef(null)
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
-  const { authReady } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
+  const { authReady, reauth } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
   useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
 
   useEffect(() => { localStorage.removeItem('silk-road-shopping-list-cart') }, [])
@@ -529,9 +536,11 @@ export default function SilkRoadShoppingList() {
     let active = true
     getCurrentUser().then((user) => {
       if (active) setProfile({ nickname: user?.nickname || '丝路旅人', avatar: user?.avatar || '' })
-    }).catch(() => null)
+    }).catch((error) => {
+      if (active && Number(error?.status) === 401) reauth('current-user-unauthorized')
+    })
     return () => { active = false }
-  }, [authReady])
+  }, [authReady, reauth])
   useEffect(() => {
     if (page !== 'orientation') return undefined
     const timer = window.setTimeout(() => setPage('video'), 3000)

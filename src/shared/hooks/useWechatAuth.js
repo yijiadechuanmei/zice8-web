@@ -6,6 +6,7 @@ import { getQueryParam, getTokenFromUrl, isWechatBrowser, removeQueryParam, sani
 
 const REAUTH_LIMIT = 2
 const AUTH_NONCE_STORAGE_PREFIX = 'wechat_auth_nonce'
+const OAUTH_RETRY_QUERY_PARAM = 'wechat_oauth_retry'
 
 export function getWechatAuthNonceStorageKey(activityKey, nonceParam) {
   return `${AUTH_NONCE_STORAGE_PREFIX}:${activityKey}:${nonceParam}`
@@ -161,6 +162,12 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
         return
       }
       removeQueryParam('token')
+    }
+
+    if (getQueryParam(OAUTH_RETRY_QUERY_PARAM) === '1') {
+      removeQueryParam(OAUTH_RETRY_QUERY_PARAM)
+      reauth('oauth-callback-retry')
+      return
     }
 
     const inWechat = isWechatBrowser()
