@@ -337,6 +337,12 @@ function SnakeGame({ activityKey, onBack }) {
     return () => window.clearTimeout(timer)
   }, [countdown, gameState])
 
+  useEffect(() => {
+    if (gameState !== 'finishing') return undefined
+    const timer = window.setTimeout(() => setGameState('success'), 2000)
+    return () => window.clearTimeout(timer)
+  }, [gameState])
+
   const chooseDirection = useCallback((vector) => {
     targetDirectionRef.current = normalizeVector(vector, targetDirectionRef.current)
     setGameState((current) => current === 'paused' ? 'playing' : current)
@@ -484,7 +490,9 @@ function SnakeGame({ activityKey, onBack }) {
       }
 
       if (nextLength - INITIAL_SNAKE.length >= SNAKE_BEAD_COUNT) {
-        setGameState('success')
+        fruitRef.current = null
+        setFruit(null)
+        setGameState('finishing')
         return
       }
 
