@@ -4,7 +4,6 @@ import {
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
   LVYUAN_SNAKE_FRUITS,
   LVYUAN_SNAKE_MATERIALS,
-  LVYUAN_SNAKE_TARGET_SCORE,
   getLvyuanFruitfulGamesAsset,
 } from './config'
 import FruitMergeGame from './FruitMergeGame'
@@ -24,6 +23,7 @@ const SNAKE_RADIUS = 0.52
 const FRUIT_COLLISION_DISTANCE = 0.78
 const TRAIL_SAMPLE_DISTANCE = 0.1
 const PLAY_AREA_INSET = 1.05
+const SNAKE_BEAD_COUNT = LVYUAN_SNAKE_MATERIALS.bodies.length
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -343,17 +343,17 @@ function SnakeGame({ activityKey, onBack }) {
   }, [])
 
   const restartGame = useCallback(() => {
-    const nextFruit = getRandomFruit(INITIAL_SNAKE)
     directionRef.current = DIRECTIONS.right
     targetDirectionRef.current = DIRECTIONS.right
     snakeRef.current = INITIAL_SNAKE
     trailRef.current = createInitialTrail()
-    fruitRef.current = nextFruit
+    fruitRef.current = null
     scoreRef.current = 0
     setSnakeLength(INITIAL_SNAKE.length)
-    setFruit(nextFruit)
+    setFruit(null)
     setScore(0)
-    setGameState('playing')
+    setCountdown(3)
+    setGameState('ready')
   }, [])
 
   const updateFloatingJoystick = useCallback((event) => {
@@ -483,7 +483,7 @@ function SnakeGame({ activityKey, onBack }) {
         localStorage.setItem(`${activityKey}:snake-best`, String(nextScore))
       }
 
-      if (nextScore >= LVYUAN_SNAKE_TARGET_SCORE) {
+      if (nextLength - INITIAL_SNAKE.length >= SNAKE_BEAD_COUNT) {
         setGameState('success')
         return
       }
@@ -499,6 +499,7 @@ function SnakeGame({ activityKey, onBack }) {
   }, [activityKey, gameState])
 
   const gameFinished = gameState === 'success' || gameState === 'failed'
+  const collectedBeads = snakeLength - INITIAL_SNAKE.length
 
   return (
     <main
@@ -522,12 +523,12 @@ function SnakeGame({ activityKey, onBack }) {
           {gameFinished ? (
             <div className="lyfg-ih5-snake-overlay">
               <h2>{gameState === 'success' ? '硕果满篮！' : '碰到果园边界了'}</h2>
-              <p>{gameState === 'success' ? `本局获得 ${score} 分` : `本局 ${score} 分，再试一次吧`}</p>
+              <p>{gameState === 'success' ? `已收集全部 ${SNAKE_BEAD_COUNT} 颗珠子` : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 颗，再试一次吧`}</p>
               <button type="button" onClick={restartGame}>再来一局</button>
             </div>
           ) : null}
         </div>
-        <div className="lyfg-ih5-snake-status" aria-live="polite">{gameState === 'paused' ? '已暂停' : `${score} 分 · 最佳 ${bestScore}`}</div>
+        <div className="lyfg-ih5-snake-status" aria-live="polite">{gameState === 'paused' ? '已暂停' : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 珠 · ${score} 分`}</div>
         {(gameState === 'playing' || gameState === 'paused') ? <button className="lyfg-ih5-snake-pause" type="button" onClick={() => setGameState((current) => current === 'playing' ? 'paused' : 'playing')}>{gameState === 'paused' ? '继续' : '暂停'}</button> : null}
       </Ih5Stage>
       <FloatingJoystick joystickRef={joystickRef} />
