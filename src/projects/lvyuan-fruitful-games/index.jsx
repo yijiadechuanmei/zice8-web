@@ -19,7 +19,7 @@ const GRID_HEIGHT = 30
 const JOYSTICK_LIMIT = 42
 const SNAKE_SPEED = 4.4
 const SNAKE_TURN_RESPONSE = 11
-const SEGMENT_DISTANCE = 1.45
+const SEGMENT_DISTANCE = 1.28
 const SNAKE_RADIUS = 0.52
 const FRUIT_COLLISION_DISTANCE = 0.78
 const TRAIL_SAMPLE_DISTANCE = 0.1
@@ -224,27 +224,29 @@ function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
       const cell = Math.min(width / GRID_WIDTH, height / GRID_HEIGHT)
       const snake = snakeRef.current
       const fruit = fruitRef.current
-      const pulse = 1 + Math.sin(time / 175) * 0.06
-      const fruitX = (fruit.x / GRID_WIDTH) * width
-      const fruitY = (fruit.y / GRID_HEIGHT) * height
-      const fruitBodyIndex = fruit.bodyIndex ?? 0
-      const fruitSprite = bodySprites[fruitBodyIndex]
-      context.save()
-      context.translate(fruitX, fruitY)
-      context.scale(pulse, pulse)
-      if (isLoadedImage(fruitSprite)) {
-        drawSnakeMaterial(context, fruitSprite, 0, 0, cell * 1.28, cell * 1.43)
-      } else {
-        drawSnakeBall(
-          context,
-          0,
-          0,
-          cell * SNAKE_RADIUS,
-          SNAKE_BALL_HUES[fruitBodyIndex % SNAKE_BALL_HUES.length],
-          SNAKE_BODY_TEXT[fruitBodyIndex],
-        )
+      if (fruit) {
+        const pulse = 1 + Math.sin(time / 175) * 0.06
+        const fruitX = (fruit.x / GRID_WIDTH) * width
+        const fruitY = (fruit.y / GRID_HEIGHT) * height
+        const fruitBodyIndex = fruit.bodyIndex ?? 0
+        const fruitSprite = bodySprites[fruitBodyIndex]
+        context.save()
+        context.translate(fruitX, fruitY)
+        context.scale(pulse, pulse)
+        if (isLoadedImage(fruitSprite)) {
+          drawSnakeMaterial(context, fruitSprite, 0, 0, cell * 1.28, cell * 1.43)
+        } else {
+          drawSnakeBall(
+            context,
+            0,
+            0,
+            cell * SNAKE_RADIUS,
+            SNAKE_BALL_HUES[fruitBodyIndex % SNAKE_BALL_HUES.length],
+            SNAKE_BODY_TEXT[fruitBodyIndex],
+          )
+        }
+        context.restore()
       }
-      context.restore()
 
       for (let index = snake.length - 1; index >= 1; index -= 1) {
         const part = snake[index]
@@ -299,7 +301,7 @@ function FloatingJoystick({ joystickRef }) {
 
 function SnakeGame({ activityKey, onBack }) {
   const [snakeLength, setSnakeLength] = useState(INITIAL_SNAKE.length)
-  const [fruit, setFruit] = useState(() => getRandomFruit(INITIAL_SNAKE))
+  const [fruit, setFruit] = useState(null)
   const [score, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(() => Number(localStorage.getItem(`${activityKey}:snake-best`)) || 0)
   const [gameState, setGameState] = useState('ready')
@@ -308,7 +310,7 @@ function SnakeGame({ activityKey, onBack }) {
   const targetDirectionRef = useRef(DIRECTIONS.right)
   const snakeRef = useRef(INITIAL_SNAKE)
   const trailRef = useRef(createInitialTrail())
-  const fruitRef = useRef(fruit)
+  const fruitRef = useRef(null)
   const scoreRef = useRef(0)
   const bestScoreRef = useRef(bestScore)
   const joystickRef = useRef(null)
@@ -325,6 +327,9 @@ function SnakeGame({ activityKey, onBack }) {
       if (countdown > 1) {
         setCountdown((current) => current - 1)
       } else {
+        const nextFruit = getRandomFruit(snakeRef.current)
+        fruitRef.current = nextFruit
+        setFruit(nextFruit)
         setCountdown(0)
         setGameState('playing')
       }
@@ -334,7 +339,7 @@ function SnakeGame({ activityKey, onBack }) {
 
   const chooseDirection = useCallback((vector) => {
     targetDirectionRef.current = normalizeVector(vector, targetDirectionRef.current)
-    setGameState((current) => current === 'ready' || current === 'paused' ? 'playing' : current)
+    setGameState((current) => current === 'paused' ? 'playing' : current)
   }, [])
 
   const restartGame = useCallback(() => {
@@ -433,6 +438,10 @@ function SnakeGame({ activityKey, onBack }) {
 
       const currentSnake = snakeRef.current
       const currentFruit = fruitRef.current
+      if (!currentFruit) {
+        frameId = window.requestAnimationFrame(moveSnake)
+        return
+      }
       const head = currentSnake[0]
       const nextHead = {
         x: head.x + directionRef.current.x * SNAKE_SPEED * elapsedSeconds,
