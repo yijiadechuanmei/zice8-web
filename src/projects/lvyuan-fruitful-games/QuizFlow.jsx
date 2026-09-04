@@ -33,8 +33,6 @@ export default function QuizFlow({ onBack }) {
     else setStep((current) => current + 1)
   }
 
-  const retry = () => { setStep(0); setSuccessVisible(false); setStatus('quiz') }
-
   if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="消保称号海报">
     {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
     <div className="lyfg-quiz-poster-title">消保小天使</div>
@@ -45,7 +43,7 @@ export default function QuizFlow({ onBack }) {
 
   if (status === 'wrong') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="答题失败">
     {image('quizWrongBackground', 'lyfg-ih5-background')}{image('quizWrongTitle', 'lyfg-quiz-wrong-title')}{image('quizWrongPanel', 'lyfg-quiz-wrong-panel')}
-    <button className="lyfg-ih5-action lyfg-quiz-wrong-retry" type="button" onClick={retry}>{image('quizWrongRetry', 'lyfg-ih5-fill-image', '重新答题')}</button>
+    <button className="lyfg-ih5-action lyfg-quiz-wrong-retry" type="button" onClick={onBack}>{image('quizWrongRetry', 'lyfg-ih5-fill-image', '再来一局')}</button>
     <button className="lyfg-ih5-action lyfg-quiz-wrong-back" type="button" onClick={onBack}>{image('quizWrongBack', 'lyfg-ih5-fill-image', '返回游戏')}</button>
   </Ih5Stage></main>
 
