@@ -24,7 +24,24 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   snakeRulesDiagram: '683ebc6086af91ad664e1156862a44ba_1162054_624_805.png',
   snakeRulesBack: '784c0097227e26e62ffc1b2d48ec0e4b_165279_352_286.png',
   snakeRulesStart: '158d9a9a27f35f279252a4c59087bee7_153134_359_283.png',
+  spotDifferenceRulesTitle: '68cec37c5950ef2d994bba297be277ad_463208_654_404.png',
+  spotDifferenceRulesDiagram: 'c8cdf367d677360389153e486f66b162_1742055_750_933.png',
+  spotDifferenceRulesStart: '87d44fc602576547cc8677f4cc7789f8_126951_371_205.png',
+  spotDifferenceRulesBack: 'bdf383d19313d1d5ff1d520f5e4632c0_121491_362_207.png',
+  spotDifferenceRulesBackground: '0db226297108267afe84530bb42df428_3164308_750_1622.png',
+  spotDifferenceGameBackground: '1eec8360c995122e6ff71dea2a62e60f_2783049_750_1622.png',
 }
+
+export const LVYUAN_SPOT_MERGE_MATERIALS = [
+  'a749c8af0c9956820d2cfcba9ae46f7c_9161_46_52.png',
+  '92d76aa6fa3ee7f7fd32137205d7aca4_9741_50_55.png',
+  'b22d3abcafdb1d2b189a35bbc0e67082_19564_83_146.png',
+  '46acb123862b2149125c08a079885fa5_19710_89_102.png',
+  '823d5ff78bb7ddd2c81db6b3a6b29968_14271_81_77.png',
+  '640cccc14a811c3a41693f714ea998f3_29082_106_134.png',
+  '5ccd3a5811744249ed2c2c47472bf881_25926_178_121.png',
+  '0c33739ff40bf18dd48741d142a156d5_21808_93_136.png',
+]
 
 export const LVYUAN_SNAKE_MATERIALS = {
   head: 'dc160da0a2eb3002e5fc168f48dadca4_22990_93_117.png',

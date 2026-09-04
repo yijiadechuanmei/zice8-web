@@ -12,6 +12,8 @@ import GameSelector from './GameSelector'
 import HomePage from './HomePage'
 import Ih5Stage from './Ih5Stage'
 import SnakeRules from './SnakeRules'
+import SpotDifferenceRules from './SpotDifferenceRules'
+import SpotDifferenceGame from './SpotDifferenceGame'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -574,6 +576,14 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return <SnakeRules onBack={() => setView('selector')} onStart={() => setView('snake')} />
   }
 
+  if (view === 'spot-difference-rules') {
+    return <SpotDifferenceRules onBack={() => setView('selector')} onStart={() => setView('spot-difference-game')} />
+  }
+
+  if (view === 'spot-difference-game') {
+    return <SpotDifferenceGame onBack={() => setView('spot-difference-rules')} />
+  }
+
   if (view === 'fruit-merge') {
     return <FruitMergeGame onBack={() => setView('selector')} />
   }
@@ -583,7 +593,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'selector') {
-    return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake-rules')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
+    return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake-rules')} onSelectSpotDifference={() => setView('spot-difference-rules')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
   return <HomePage onStart={() => setView('selector')} />
