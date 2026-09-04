@@ -4,7 +4,6 @@ import { LVYUAN_QUESTION_BANK } from './questionBank'
 import Ih5Stage from './Ih5Stage'
 
 const OPTION_ASSETS = ['quizOptionA', 'quizOptionB', 'quizOptionC', 'quizOptionD']
-const LETTERS = ['A', 'B', 'C', 'D']
 const image = (asset, className, alt = '') => <img className={className} src={getLvyuanFruitfulGamesAsset(asset)} alt={alt} draggable="false" />
 
 function selectQuestions() {
@@ -53,7 +52,7 @@ export default function QuizFlow({ onBack }) {
     {image('quizBackground', 'lyfg-ih5-background')}{image('quizTitle', 'lyfg-quiz-title')}{image('quizPanel', 'lyfg-quiz-panel')}{image('quizQuestionCard', 'lyfg-quiz-question-card')}
     <div className="lyfg-quiz-progress">第 {step + 1} / 3 题</div><div className="lyfg-quiz-question">{question.question}</div>
     <div className="lyfg-quiz-options">{question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" onClick={() => answer(index)}>
-      {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span><b>{LETTERS[index]}</b>{option}</span>
+      {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span>{option}</span>
     </button>)}</div>
     {status === 'success' ? <div className="lyfg-quiz-success" role="status">{image('quizSuccess', '', '三题全部答对')}</div> : null}
   </Ih5Stage></main>

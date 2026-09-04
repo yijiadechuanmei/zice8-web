@@ -1333,11 +1333,16 @@
 .lyfg-quiz-question-card { top: 398px; left: 127px; width: 499px; height: 325px; }
 .lyfg-quiz-progress { position: absolute; z-index: 3; top: 340px; left: 0; width: 750px; color: #8f4c22; text-align: center; font-size: 25px; font-weight: 900; }
 .lyfg-quiz-question { position: absolute; z-index: 3; top: 455px; left: 145px; display: flex; width: 463px; height: 237px; align-items: center; overflow: hidden; color: #3f2b19; text-align: justify; font-size: 26px; font-weight: 700; line-height: 1.55; }
-.lyfg-quiz-options { position: absolute; z-index: 4; top: 746px; left: 130px; display: grid; width: 491px; gap: 12px; }
-.lyfg-quiz-options button { position: relative; width: 491px; height: 98px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; transition: transform 100ms ease; }
+.lyfg-quiz-options { position: absolute; z-index: 4; top: 746px; left: 130px; width: 491px; height: 428px; }
+.lyfg-quiz-options button { position: absolute; left: 0; width: 491px; height: 98px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; transition: transform 100ms ease; }
+.lyfg-quiz-options button:nth-child(1) { top: 0; }
+.lyfg-quiz-options button:nth-child(2) { top: 111px; }
+.lyfg-quiz-options button:nth-child(3) { top: 221px; }
+.lyfg-quiz-options button:nth-child(4) { top: 330px; }
 .lyfg-quiz-options button:active { transform: scale(.96); }
-.lyfg-quiz-options button span { position: absolute; inset: 0 38px; display: flex; align-items: center; gap: 14px; overflow: hidden; color: #4e321d; text-align: left; font-size: 22px; font-weight: 700; line-height: 1.25; }
-.lyfg-quiz-options button span b { flex: 0 0 auto; color: #a54323; font-size: 27px; }
+.lyfg-quiz-options button span { position: absolute; top: 13px; left: 96px; display: flex; width: 362px; height: 75px; align-items: center; overflow: hidden; color: #000; text-align: justify; white-space: pre-wrap; word-break: normal; font-size: 24px; font-weight: 400; line-height: 23px; }
+.lyfg-quiz-options button:nth-child(2) span { top: 12px; }
+.lyfg-quiz-options button:nth-child(3) span, .lyfg-quiz-options button:nth-child(4) span { top: 10px; }
 .lyfg-quiz-success { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.54); }
 .lyfg-quiz-success img { width: min(485px, 78vw); height: auto; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
 .lyfg-quiz-wrong-title { top: 41px; left: 172px; width: 407px; height: 243px; }
