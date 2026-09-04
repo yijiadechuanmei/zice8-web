@@ -14,6 +14,7 @@ import SnakeRules from './SnakeRules'
 import SpotDifferenceRules from './SpotDifferenceRules'
 import SpotDifferenceGame from './SpotDifferenceGame'
 import QuizFlow from './QuizFlow'
+import RankingPage from './RankingPage'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -596,6 +597,8 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
 
   if (view === 'quiz') return <QuizFlow onBack={() => setView('selector')} />
 
+  if (view === 'ranking') return <RankingPage onBack={() => setView('home')} />
+
   if (view === 'fruit-merge-rules') {
     return <FruitMergeRules onBack={() => setView('selector')} onStart={() => setView('fruit-merge')} />
   }
@@ -604,7 +607,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake-rules')} onSelectSpotDifference={() => setView('spot-difference-rules')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
-  return <><HomePage onStart={() => setView('selector')} onRanking={openComingSoon} />{showComingSoon ? <ComingSoonNotice /> : null}</>
+  return <HomePage onStart={() => setView('selector')} onRanking={() => setView('ranking')} />
 }
 
 export {

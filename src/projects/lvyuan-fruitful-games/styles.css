@@ -1324,6 +1324,32 @@
 .lyfg-game-rules-hint { position: absolute; z-index: 3; right: 60px; bottom: 79px; left: 60px; padding: 38px 0 5px; color: #5c3819; text-align: center; background: linear-gradient(transparent,rgba(255,240,205,.96) 58%); font-size: 26px; pointer-events: none; transition: opacity 200ms ease; }
 .lyfg-game-rules-hint.is-hidden { opacity: 0; }
 
+.lyfg-ranking-podium, .lyfg-ranking-row-bg, .lyfg-ranking-avatar { position: absolute; object-fit: contain; }
+.lyfg-ranking-podium { z-index: 1; animation: lyfg-ranking-rise 560ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-ranking-podium--first { top: 234px; left: 246px; width: 258px; height: 393px; }
+.lyfg-ranking-podium--second { top: 306px; left: 56px; width: 207px; height: 319px; animation-delay: 100ms; }
+.lyfg-ranking-podium--third { top: 306px; left: 489px; width: 203px; height: 319px; animation-delay: 180ms; }
+.lyfg-ranking-winner { position: absolute; z-index: 3; text-align: center; font-weight: 900; }
+.lyfg-ranking-winner strong, .lyfg-ranking-winner b { display: grid; height: 41px; place-items: center; overflow: hidden; white-space: nowrap; }
+.lyfg-ranking-winner strong { color: #fff; font-size: 26px; }
+.lyfg-ranking-winner b { margin-top: 9px; color: #842b15; font-size: 32px; }
+.lyfg-ranking-winner--1 { top: 517px; left: 280px; width: 190px; }
+.lyfg-ranking-winner--1 b { margin-top: 14px; font-size: 34px; }
+.lyfg-ranking-winner--2 { top: 526px; left: 74px; width: 170px; }
+.lyfg-ranking-winner--3 { top: 526px; left: 507px; width: 170px; }
+.lyfg-ranking-list { position: absolute; z-index: 4; top: 652px; left: 61px; width: 626px; height: 546px; overflow: hidden auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.lyfg-ranking-list::-webkit-scrollbar { display: none; }
+.lyfg-ranking-row { position: relative; width: 626px; height: 78px; flex: 0 0 auto; color: #842b15; animation: lyfg-ranking-row-in 380ms ease both; animation-delay: calc(var(--row-index) * 38ms); }
+.lyfg-ranking-row-bg { inset: 0; width: 626px; height: 78px; }
+.lyfg-ranking-avatar { z-index: 2; top: 0; left: 109px; width: 71px; height: 72px; }
+.lyfg-ranking-number, .lyfg-ranking-name, .lyfg-ranking-score { position: absolute; z-index: 3; top: 17px; display: flex; height: 41px; align-items: center; overflow: hidden; font-weight: 900; white-space: nowrap; }
+.lyfg-ranking-number { left: 12px; justify-content: center; width: 86px; font-size: 28px; }
+.lyfg-ranking-name { left: 200px; width: 244px; font-size: 22px; }
+.lyfg-ranking-score { left: 464px; justify-content: flex-end; width: 107px; font-size: 22px; }
+.lyfg-ranking-back { top: 1317px; left: 209px; width: 333px; height: 98px; }
+@keyframes lyfg-ranking-rise { from { opacity: 0; transform: translateY(35px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes lyfg-ranking-row-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+
 .lyfg-ih5-rules-back { top: 1198px; left: 5px; width: 357px; height: 263px; animation-delay: 180ms; }
 .lyfg-ih5-rules-start { top: 1199px; left: 383px; width: 367px; height: 267px; animation-delay: 420ms; }
 .lyfg-ih5-snake-rules-back { top: 1165px; left: 7px; width: 352px; height: 286px; animation-delay: 180ms; }
