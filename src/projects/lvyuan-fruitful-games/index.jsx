@@ -589,7 +589,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'fruit-merge-rules') {
-    return <><FruitMergeRules onBack={() => setView('selector')} onComingSoon={openComingSoon} />{showComingSoon ? <ComingSoonNotice /> : null}</>
+    return <FruitMergeRules onBack={() => setView('selector')} onStart={() => setView('fruit-merge')} />
   }
 
   if (view === 'selector') {
