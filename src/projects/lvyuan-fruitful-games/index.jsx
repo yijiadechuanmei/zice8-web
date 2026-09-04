@@ -13,6 +13,7 @@ import Ih5Stage from './Ih5Stage'
 import SnakeRules from './SnakeRules'
 import SpotDifferenceRules from './SpotDifferenceRules'
 import SpotDifferenceGame from './SpotDifferenceGame'
+import QuizFlow from './QuizFlow'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -301,7 +302,7 @@ function FloatingJoystick({ joystickRef }) {
   )
 }
 
-function SnakeGame({ activityKey, onBack }) {
+function SnakeGame({ activityKey, onBack, onComplete }) {
   const [snakeLength, setSnakeLength] = useState(INITIAL_SNAKE.length)
   const [fruit, setFruit] = useState(null)
   const [score, setScore] = useState(0)
@@ -344,6 +345,12 @@ function SnakeGame({ activityKey, onBack }) {
     const timer = window.setTimeout(() => setGameState('success'), 2000)
     return () => window.clearTimeout(timer)
   }, [gameState])
+
+  useEffect(() => {
+    if (gameState !== 'success') return undefined
+    const timer = window.setTimeout(onComplete, 800)
+    return () => window.clearTimeout(timer)
+  }, [gameState, onComplete])
 
   const chooseDirection = useCallback((vector) => {
     targetDirectionRef.current = normalizeVector(vector, targetDirectionRef.current)
@@ -568,7 +575,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const openComingSoon = useCallback(() => setShowComingSoon(true), [])
 
   if (view === 'snake') {
-    return <SnakeGame activityKey={activityKey} onBack={() => setView('selector')} />
+    return <SnakeGame activityKey={activityKey} onBack={() => setView('selector')} onComplete={() => setView('quiz')} />
   }
 
   if (view === 'snake-rules') {
@@ -580,12 +587,14 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'spot-difference-game') {
-    return <SpotDifferenceGame onBack={() => setView('spot-difference-rules')} />
+    return <SpotDifferenceGame onBack={() => setView('spot-difference-rules')} onComplete={() => setView('quiz')} />
   }
 
   if (view === 'fruit-merge') {
-    return <SpotDifferenceGame onBack={() => setView('fruit-merge-rules')} />
+    return <SpotDifferenceGame onBack={() => setView('fruit-merge-rules')} onComplete={() => setView('quiz')} />
   }
+
+  if (view === 'quiz') return <QuizFlow onBack={() => setView('selector')} />
 
   if (view === 'fruit-merge-rules') {
     return <FruitMergeRules onBack={() => setView('selector')} onStart={() => setView('fruit-merge')} />

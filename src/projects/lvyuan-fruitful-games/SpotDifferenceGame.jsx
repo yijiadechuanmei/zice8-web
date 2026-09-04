@@ -45,7 +45,7 @@ function GameCanvas({ bodiesRef, previewRef, nextTypeRef, completeRef }) {
   return <canvas ref={canvasRef} className="lyfg-spot-merge-canvas" />
 }
 
-export default function SpotDifferenceGame({ onBack }) {
+export default function SpotDifferenceGame({ onBack, onComplete }) {
   const boardRef = useRef(null); const bodiesRef = useRef([]); const idRef = useRef(1); const sequenceRef = useRef(0); const fruitRef = useRef(0)
   const previewRef = useRef(WIDTH / 2); const targetRef = useRef(WIDTH / 2); const nextTypeRef = useRef(0); const holdingRef = useRef(false); const completeRef = useRef(false)
   const [nextType, setNextType] = useState(0); const [fruitCount, setFruitCount] = useState(0); const [complete, setComplete] = useState(false)
@@ -77,6 +77,12 @@ export default function SpotDifferenceGame({ onBack }) {
     }
     frame = requestAnimationFrame(tick); return () => { cancelAnimationFrame(frame); clearTimeout(completionTimer) }
   }, [])
+
+  useEffect(() => {
+    if (!complete) return undefined
+    const timer = window.setTimeout(onComplete, 900)
+    return () => window.clearTimeout(timer)
+  }, [complete, onComplete])
 
   return <main className="lyfg-page lyfg-ih5-page lyfg-spot-merge-page"><Ih5Stage label="乡韵怀旧合成果实">
     <img className="lyfg-ih5-background" src={getLvyuanFruitfulGamesAsset('spotDifferenceGameBackground')} alt="" draggable="false" />

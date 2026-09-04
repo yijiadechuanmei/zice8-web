@@ -1327,6 +1327,29 @@
 .lyfg-spot-merge-success p { margin: 18px 0 30px; font-size: 26px; font-weight: 800; }
 .lyfg-spot-merge-success button { margin: 0 8px; padding: 14px 24px; border: 0; border-radius: 999px; color: white; background: #b84b24; font-size: 21px; font-weight: 800; }
 
+.lyfg-quiz-title, .lyfg-quiz-panel, .lyfg-quiz-question-card, .lyfg-quiz-wrong-title, .lyfg-quiz-wrong-panel, .lyfg-quiz-poster-panel, .lyfg-quiz-poster-footer { position: absolute; z-index: 1; object-fit: contain; animation: lyfg-ih5-reveal 520ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-quiz-title { top: -3px; left: 211px; width: 324px; height: 143px; }
+.lyfg-quiz-panel { top: 125px; left: 71px; width: 607px; height: 1086px; }
+.lyfg-quiz-question-card { top: 398px; left: 127px; width: 499px; height: 325px; }
+.lyfg-quiz-progress { position: absolute; z-index: 3; top: 340px; left: 0; width: 750px; color: #8f4c22; text-align: center; font-size: 25px; font-weight: 900; }
+.lyfg-quiz-question { position: absolute; z-index: 3; top: 455px; left: 145px; display: flex; width: 463px; height: 237px; align-items: center; overflow: hidden; color: #3f2b19; text-align: justify; font-size: 26px; font-weight: 700; line-height: 1.55; }
+.lyfg-quiz-options { position: absolute; z-index: 4; top: 746px; left: 130px; display: grid; width: 491px; gap: 12px; }
+.lyfg-quiz-options button { position: relative; width: 491px; height: 98px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; transition: transform 100ms ease; }
+.lyfg-quiz-options button:active { transform: scale(.96); }
+.lyfg-quiz-options button span { position: absolute; inset: 0 38px; display: flex; align-items: center; gap: 14px; overflow: hidden; color: #4e321d; text-align: left; font-size: 22px; font-weight: 700; line-height: 1.25; }
+.lyfg-quiz-options button span b { flex: 0 0 auto; color: #a54323; font-size: 27px; }
+.lyfg-quiz-success { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.54); }
+.lyfg-quiz-success img { width: min(485px, 78vw); height: auto; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-quiz-wrong-title { top: 41px; left: 172px; width: 407px; height: 243px; }
+.lyfg-quiz-wrong-panel { top: 302px; left: 91px; width: 571px; height: 968px; }
+.lyfg-quiz-wrong-retry { top: 1108px; left: 118px; width: 251px; height: 103px; }
+.lyfg-quiz-wrong-back { top: 1108px; left: 382px; width: 251px; height: 103px; }
+.lyfg-quiz-poster-panel { top: 165px; left: 58px; width: 632px; height: 900px; }
+.lyfg-quiz-poster-title { position: absolute; z-index: 3; top: 748px; left: 233px; display: grid; width: 290px; height: 75px; place-items: center; color: #5c3819; font-size: 41px; font-weight: 900; }
+.lyfg-quiz-poster-left { top: 1067px; left: 40px; width: 320px; height: 125px; }
+.lyfg-quiz-poster-right { top: 1067px; left: 388px; width: 320px; height: 125px; }
+.lyfg-quiz-poster-footer { top: 1223px; left: 185px; width: 378px; height: 110px; }
+
 .lyfg-ih5-snake-page {
   touch-action: none;
   user-select: none;
