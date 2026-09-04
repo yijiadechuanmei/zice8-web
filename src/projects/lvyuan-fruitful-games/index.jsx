@@ -292,6 +292,7 @@ function SnakeGame({ activityKey, onBack }) {
   const [score, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(() => Number(localStorage.getItem(`${activityKey}:snake-best`)) || 0)
   const [gameState, setGameState] = useState('ready')
+  const [countdown, setCountdown] = useState(3)
   const directionRef = useRef(DIRECTIONS.right)
   const targetDirectionRef = useRef(DIRECTIONS.right)
   const snakeRef = useRef(INITIAL_SNAKE)
@@ -306,6 +307,19 @@ function SnakeGame({ activityKey, onBack }) {
   useEffect(() => {
     fruitRef.current = fruit
   }, [fruit])
+
+  useEffect(() => {
+    if (gameState !== 'ready') return undefined
+    const timer = window.setTimeout(() => {
+      if (countdown > 1) {
+        setCountdown((current) => current - 1)
+      } else {
+        setCountdown(0)
+        setGameState('playing')
+      }
+    }, 1000)
+    return () => window.clearTimeout(timer)
+  }, [countdown, gameState])
 
   const chooseDirection = useCallback((vector) => {
     targetDirectionRef.current = normalizeVector(vector, targetDirectionRef.current)
@@ -464,7 +478,7 @@ function SnakeGame({ activityKey, onBack }) {
     return () => window.cancelAnimationFrame(frameId)
   }, [activityKey, gameState])
 
-  const overlayVisible = gameState !== 'playing' && gameState !== 'paused'
+  const gameFinished = gameState === 'success' || gameState === 'failed'
 
   return (
     <main
@@ -482,11 +496,14 @@ function SnakeGame({ activityKey, onBack }) {
         <button className="lyfg-ih5-snake-back" type="button" onClick={onBack} aria-label="返回游戏选择">‹</button>
         <div className="lyfg-ih5-snake-playfield" role="img" aria-label={`果园贪吃蛇游戏区，当前蛇身长度 ${snakeLength}`}>
           <SnakeCanvas snakeRef={snakeRef} fruitRef={fruitRef} directionRef={directionRef} />
-          {overlayVisible ? (
+          {gameState === 'ready' ? (
+            <div className="lyfg-ih5-snake-countdown" aria-live="assertive" aria-label={`游戏将在 ${countdown} 秒后开始`}>{countdown}</div>
+          ) : null}
+          {gameFinished ? (
             <div className="lyfg-ih5-snake-overlay">
-              <h2>{gameState === 'success' ? '硕果满篮！' : gameState === 'failed' ? '碰到果园边界了' : '收集好果实'}</h2>
-              <p>{gameState === 'success' ? `本局获得 ${score} 分` : gameState === 'failed' ? `本局 ${score} 分，再试一次吧` : '按住屏幕拖动摇杆，指引小蛇前行'}</p>
-              <button type="button" onClick={restartGame}>{gameState === 'ready' ? '开始游戏' : '再来一局'}</button>
+              <h2>{gameState === 'success' ? '硕果满篮！' : '碰到果园边界了'}</h2>
+              <p>{gameState === 'success' ? `本局获得 ${score} 分` : `本局 ${score} 分，再试一次吧`}</p>
+              <button type="button" onClick={restartGame}>再来一局</button>
             </div>
           ) : null}
         </div>
