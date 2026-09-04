@@ -39,7 +39,7 @@ export default function QuizFlow({ onBack }) {
     <div className="lyfg-quiz-poster-title">消保小天使</div>
     <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={onBack}>{image('posterLeftAction', 'lyfg-ih5-fill-image', '返回游戏')}</button>
     <button className="lyfg-ih5-action lyfg-quiz-poster-right" type="button" onClick={onBack}>{image('posterRightAction', 'lyfg-ih5-fill-image', '完成')}</button>
-    {image('posterFooter', 'lyfg-quiz-poster-footer')}
+    <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回游戏选择">{image('posterFooter', 'lyfg-ih5-fill-image', '返回游戏选择')}</button>
   </Ih5Stage></main>
 
   if (status === 'wrong') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="答题失败">
