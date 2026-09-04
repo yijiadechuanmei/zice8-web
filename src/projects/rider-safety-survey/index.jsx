@@ -50,7 +50,7 @@ const SAFETY_ARTICLES = [
   },
   {
     title: "跑单有保障，安心闯闽地｜人保财险福建骑手保险科普指南",
-    coverUrl: "http://mmecoa.qpic.cn/sz_mmecoa_jpg/4fpaNphPlquUEW1AAkHkN6nYHz6Owc3nR3PHPYMyzTuIA0N5E5uECaWWYHWmOm2mZIibUClEAbvC9pQ5V3zdf7tBvzP2IDSrw7kbcsKZRFCY/0?wx_fmt=jpeg",
+    coverUrl: "https://mmecoa.qpic.cn/mmecoa_jpg/CWowxSc0ZGNxo7fLt1HzjBQ7vnZpiaIJo4dNibJbzTaQM3IX0Ysf1ZkvFSgaoiapPicFsYwtdiboWorXUrp9qUMrJxt63wXkaw2cI7lFBVneiayts/640?wx_fmt=jpeg&from=appmsg",
     url: "https://mp.weixin.qq.com/s/it-607ONj7RLpOMjPuUrWw",
   },
 ];
