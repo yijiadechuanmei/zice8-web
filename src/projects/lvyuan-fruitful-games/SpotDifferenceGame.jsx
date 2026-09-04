@@ -10,6 +10,7 @@ const TYPES = [
 const DROP_SEQUENCE = [0, 1, 0, 1, 1, 0, 0, 1]
 const WIDTH = 670
 const HEIGHT = 1288
+const DROP_Y = 220
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 const createBody = (id, type, x, y, options = {}) => ({ id, type, x, y, vx: options.vx || 0, vy: options.vy || 0, angle: options.angle || 0, spin: options.spin || 0 })
 
@@ -37,7 +38,7 @@ function GameCanvas({ bodiesRef, previewRef, nextTypeRef, completeRef }) {
       if (image?.complete && image.naturalWidth) { const scale = Math.min((radius * 2) / image.naturalWidth, (radius * 2.35) / image.naturalHeight); ctx.drawImage(image, -image.naturalWidth * scale / 2, -image.naturalHeight * scale / 2, image.naturalWidth * scale, image.naturalHeight * scale) } else drawSeed(ctx, item.type, radius)
       ctx.restore()
     }
-    const draw = () => { ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, canvas.width / ratio, canvas.height / ratio); bodiesRef.current.forEach((item) => body(item)); if (!completeRef.current) body({ type: nextTypeRef.current, x: previewRef.current, y: 48, angle: 0 }, .94); frame = requestAnimationFrame(draw) }
+    const draw = () => { ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, canvas.width / ratio, canvas.height / ratio); bodiesRef.current.forEach((item) => body(item)); if (!completeRef.current) body({ type: nextTypeRef.current, x: previewRef.current, y: DROP_Y, angle: 0 }, .94); frame = requestAnimationFrame(draw) }
     resize(); const observer = new ResizeObserver(resize); observer.observe(canvas); frame = requestAnimationFrame(draw)
     return () => { observer.disconnect(); cancelAnimationFrame(frame) }
   }, [bodiesRef, completeRef, nextTypeRef, previewRef])
@@ -51,7 +52,7 @@ export default function SpotDifferenceGame({ onBack }) {
   const pointerX = (event) => { const rect = boardRef.current.getBoundingClientRect(); const radius = TYPES[nextTypeRef.current].radius; return clamp(((event.clientX - rect.left) / rect.width) * WIDTH, radius, WIDTH - radius) }
   const onDown = (event) => { if (completeRef.current) return; event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); holdingRef.current = true; targetRef.current = pointerX(event); previewRef.current = targetRef.current }
   const onMove = (event) => { if (holdingRef.current) { event.preventDefault(); targetRef.current = pointerX(event) } }
-  const onUp = (event) => { if (!holdingRef.current) return; event.preventDefault(); holdingRef.current = false; bodiesRef.current = [...bodiesRef.current, createBody(idRef.current++, nextTypeRef.current, pointerX(event), 48)]; sequenceRef.current += 1; const type = DROP_SEQUENCE[sequenceRef.current % DROP_SEQUENCE.length]; nextTypeRef.current = type; setNextType(type) }
+  const onUp = (event) => { if (!holdingRef.current) return; event.preventDefault(); holdingRef.current = false; bodiesRef.current = [...bodiesRef.current, createBody(idRef.current++, nextTypeRef.current, pointerX(event), DROP_Y)]; sequenceRef.current += 1; const type = DROP_SEQUENCE[sequenceRef.current % DROP_SEQUENCE.length]; nextTypeRef.current = type; setNextType(type) }
   const restart = () => { bodiesRef.current = []; idRef.current = 1; sequenceRef.current = 0; fruitRef.current = 0; completeRef.current = false; nextTypeRef.current = 0; previewRef.current = WIDTH / 2; targetRef.current = WIDTH / 2; setNextType(0); setFruitCount(0); setComplete(false) }
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function SpotDifferenceGame({ onBack }) {
     const tick = (now) => {
       const dt = Math.min((now - then) / 1000, .022); then = now; previewRef.current += (targetRef.current - previewRef.current) * (1 - Math.exp(-24 * dt))
       const items = bodiesRef.current.map((item) => ({ ...item }))
-      for (const item of items) { item.vy += 1550 * dt; item.x += item.vx * dt; item.y += item.vy * dt; item.angle += item.spin * dt; item.vx *= Math.exp(-2.4 * dt); item.spin *= Math.exp(-9 * dt); if (Math.abs(item.spin) < .08) item.spin = 0; constrain(item) }
+      for (const item of items) { item.vy += 1550 * dt; item.x += item.vx * dt; item.y += item.vy * dt; item.angle += item.spin * dt; item.vx *= Math.exp(-2.4 * dt); item.spin *= Math.exp(-7.2 * dt); if (Math.abs(item.spin) < .025) item.spin = 0; constrain(item) }
       const removed = new Set(); const added = []
       for (let a = 0; a < items.length; a += 1) for (let b = a + 1; b < items.length; b += 1) {
         const left = items[a], right = items[b]; if (removed.has(left.id) || removed.has(right.id)) continue
@@ -69,7 +70,7 @@ export default function SpotDifferenceGame({ onBack }) {
         const nx = dx / distance, ny = dy / distance, overlap = minimum - distance; left.x -= nx * overlap / 2; left.y -= ny * overlap / 2; right.x += nx * overlap / 2; right.y += ny * overlap / 2
         let result = -1; if (left.type === right.type && left.type <= 1) result = 2; else if (left.type === 2 && right.type === 2 && fruitRef.current < 5) result = 3 + fruitRef.current
         if (result >= 0) { removed.add(left.id); removed.add(right.id); added.push(createBody(idRef.current++, result, (left.x + right.x) / 2, (left.y + right.y) / 2, { vy: -45, spin: clamp((left.spin + right.spin) * .15, -1.2, 1.2) })); if (result >= 3) { fruitRef.current += 1; setFruitCount(fruitRef.current); if (fruitRef.current === 5) { completeRef.current = true; completionTimer = setTimeout(() => setComplete(true), 900) } } continue }
-        const relative = (right.vx - left.vx) * nx + (right.vy - left.vy) * ny; if (relative < -8) { const impulse = -relative * .3; left.vx -= impulse * nx; left.vy -= impulse * ny; right.vx += impulse * nx; right.vy += impulse * ny; if (relative < -35) { left.spin = clamp(left.spin - impulse * .002, -.8, .8); right.spin = clamp(right.spin + impulse * .002, -.8, .8) } }
+        const relative = (right.vx - left.vx) * nx + (right.vy - left.vy) * ny; if (relative < -8) { const impulse = -relative * .3; left.vx -= impulse * nx; left.vy -= impulse * ny; right.vx += impulse * nx; right.vy += impulse * ny; if (relative < -140) { left.spin = clamp(left.spin - impulse * .0012, -.55, .55); right.spin = clamp(right.spin + impulse * .0012, -.55, .55) } }
         constrain(left); constrain(right)
       }
       bodiesRef.current = [...items.filter((item) => !removed.has(item.id)), ...added]; frame = requestAnimationFrame(tick)
