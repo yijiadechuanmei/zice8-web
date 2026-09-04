@@ -91,7 +91,7 @@ export const questions = [
   {
     id: "q9",
     section: "四、金融素养",
-    title: "遇到保险纠纷，你会怎么办？",
+    title: "在保险理赔过程中，遇到困难你会怎么办？",
     options: [
       ["insurer", "打保险公司电话"],
       ["third_party", "找第三方维权代理"],

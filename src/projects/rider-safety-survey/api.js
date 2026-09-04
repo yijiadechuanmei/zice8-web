@@ -14,10 +14,10 @@ export const submitParticipantProfile = (activityKey, payload) =>
     method: "POST",
     body: JSON.stringify(payload),
   });
-export const submitSurvey = (activityKey, answers, q7Consent) =>
+export const submitSurvey = (activityKey, answers) =>
   request(`${base(activityKey)}/submissions`, {
     method: "POST",
-    body: JSON.stringify({ answers, q7Consent }),
+    body: JSON.stringify({ answers }),
   });
 export const createAuthorization = (activityKey, renew = false) =>
   request(

@@ -96,8 +96,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const [notice, setNotice] = useState("");
   const [participant, setParticipant] = useState({ name: "", phone: "" });
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [q7Consent, setQ7Consent] = useState(null);
-  const [showQ7Consent, setShowQ7Consent] = useState(false);
   const { authReady, blockedMessage, hasToken } = useWechatAuth(
     activityKey,
     publicConfig,
@@ -152,11 +150,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const categoryPosition =
     categoryQuestions.findIndex((item) => item.id === question?.id) + 1;
 
-  useEffect(() => {
-    if (stage === "survey" && question?.id === "q7" && q7Consent === null)
-      setShowQ7Consent(true);
-  }, [question?.id, q7Consent, stage]);
-
   const selectOption = (value) => {
     if (!question.multiple) {
       setAnswers((current) => ({ ...current, [question.id]: value }));
@@ -185,7 +178,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     try {
       const data = preview
         ? scoreSurvey(answers)
-        : await submitSurvey(activityKey, answers, Boolean(q7Consent));
+        : await submitSurvey(activityKey, answers);
       setSubmission(normalizeSubmission(data));
       setStage("result");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -276,18 +269,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     setStage("profile");
   };
 
-  const declineQ7 = () => {
-    setQ7Consent(false);
-    setShowQ7Consent(false);
-    setAnswers((current) => {
-      const next = { ...current };
-      delete next.q7;
-      return next;
-    });
-    setIndex((value) => Math.min(value + 1, questions.length - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   if (!preview && blockedMessage)
     return (
       <Shell>
@@ -363,10 +344,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
                     type="button"
                     className={active ? "is-active" : ""}
                     key={value}
-                    onClick={() => {
-                      if (question.id === "q7" && q7Consent !== true) return;
-                      selectOption(value);
-                    }}
+                    onClick={() => selectOption(value)}
                   >
                     <b>{String.fromCharCode(65 + optionIndex)}</b>
                     <span>{label}</span>
@@ -386,15 +364,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
           </button>
         </section>
       ) : null}
-      {showQ7Consent ? (
-        <QuestionConsentDialog
-          onAgree={() => {
-            setQ7Consent(true);
-            setShowQ7Consent(false);
-          }}
-          onDecline={declineQ7}
-        />
-      ) : null}
       {stage === "result" && result ? (
         <section className="rss-result-scene">
           <div className="rss-result-canvas">
@@ -407,7 +376,7 @@ export default function RiderSafetySurveyProject({ routeParams }) {
             <p className="rss-result-disclaimer">
               该称号基于您的问卷答案，通过预设算法自动生成；分数仅用于本次评估，不构成任何承诺或对个人能力的最终判断。
             </p>
-            <h1 className="rss-result-heading">诊断评语</h1>
+            <h1 className="rss-result-heading">测评结语</h1>
             <p className="rss-result-diagnosis">{result.diagnosis}</p>
             <button
               className="rss-result-draw"
@@ -510,10 +479,7 @@ function PrivacyNotice({ onConfirm, onDecline }) {
           <p>当您勾选“我已阅读并同意《个人信息处理告知书》”后，我们将在您授权同意的范围内处理您的个人信息。</p>
 
           <NoticeSection title="一、个人信息处理者">
-            <p>个人信息处理者：【单位/公司完整名称】</p>
-            <p>联系地址：【单位联系地址】</p>
-            <p>联系方式：【联系电话或电子邮箱】</p>
-            <p>如您对本次个人信息处理活动存在疑问、意见或投诉，或希望行使个人信息相关权利，可以通过上述联系方式与我们取得联系。</p>
+            <p>个人信息处理者：【兴业银行宁德分行/人保财险宁德市分公司】</p>
           </NoticeSection>
           <NoticeSection title="二、个人信息处理目的">
             <p>我们收集和处理您的个人信息，主要用于以下目的：</p>
@@ -532,10 +498,10 @@ function PrivacyNotice({ onConfirm, onDecline }) {
             <p>我们将采取与个人信息安全风险相适应的技术措施和管理措施，对您的个人信息进行保护，防止未经授权的访问以及个人信息泄露、篡改、丢失。</p>
           </NoticeSection>
           <NoticeSection title="四、处理的个人信息种类">
-            <p>根据本次问卷实际内容，我们可能处理以下个人信息：</p>
+            <p>根据本次问卷实际内容，我们需要处理以下个人信息：</p>
             <ol>
-              <li><strong>基本身份信息</strong>：如姓名、性别、年龄等；</li>
-              <li><strong>联系信息</strong>：如手机号码、电子邮箱等；</li>
+              <li><strong>基本身份信息</strong>：如姓名等；</li>
+              <li><strong>联系信息</strong>：如手机号码等；</li>
               <li><strong>问卷填写信息</strong>：您在问卷中主动填写、选择或提交的答案、意见及其他内容；</li>
               <li><strong>活动参与信息</strong>：如报名信息、参与记录、答题记录、成绩、抽奖或活动结果等；</li>
               <li><strong>必要的网络及设备信息</strong>：如IP地址、访问时间、设备类型等，用于保障问卷系统安全、防止异常提交及进行必要的访问统计。</li>
@@ -543,27 +509,19 @@ function PrivacyNotice({ onConfirm, onDecline }) {
             <p>实际收集的信息以本问卷页面中明确展示并要求您填写或授权的信息为准。</p>
             <p>我们将遵循合法、正当、必要和诚信原则，仅收集实现上述处理目的所必要的个人信息。</p>
           </NoticeSection>
-          <NoticeSection title="五、敏感个人信息说明">
-            <p>如本次问卷涉及身份证号码、精确定位信息、医疗健康信息、金融账户信息、生物识别信息等敏感个人信息，我们将在收集前另行以显著方式向您说明处理敏感个人信息的必要性以及对您个人权益可能产生的影响，并依法取得您的单独同意。</p>
-            <p>如本次问卷不涉及上述敏感个人信息，我们不会主动收集。</p>
-          </NoticeSection>
-          <NoticeSection title="六、个人信息保存期限">
+          <NoticeSection title="五、个人信息保存期限">
             <p>您的个人信息原则上仅在实现本次问卷调查及活动目的所必要的最短期限内保存。</p>
-            <p>本次问卷相关个人信息预计保存期限为：【例如：自活动结束之日起6个月 / 1年】。</p>
-            <p>保存期限届满后，我们将依法对相关个人信息进行删除或者匿名化处理。法律、行政法规对个人信息保存期限另有规定的，我们将按照相关规定执行。</p>
+            <p>本次问卷相关个人信息预计保存期限以法律、行政法规对个人信息保存期限为准。</p>
+            <p>保存期限届满后，我们将依法对相关个人信息进行删除或者匿名化处理。</p>
           </NoticeSection>
-          <NoticeSection title="七、个人信息共享、委托处理及对外提供">
-            <p>原则上，我们不会向与本次问卷调查或活动无关的第三方出售、出租或者提供您的个人信息。</p>
+          <NoticeSection title="六、个人信息共享、委托处理及对外提供">
+            <p>我们承诺不会向与本次问卷调查或活动无关的第三方出售、出租或者提供您的个人信息。</p>
             <p>因问卷系统运行、服务器托管、云服务、短信服务、技术维护或活动执行等实际需要，我们可能委托必要的技术服务提供商处理部分个人信息。</p>
             <p>对于受托处理个人信息的服务提供商，我们将要求其按照约定的处理目的、期限、方式和个人信息种类处理相关信息，并采取必要措施保护您的个人信息安全。</p>
             <p>如我们需要向其他个人信息处理者提供您的个人信息，我们将按照法律法规要求向您告知接收方的名称或者姓名、联系方式、处理目的、处理方式以及个人信息种类，并在依法需要取得单独同意的情况下取得您的单独同意。</p>
             <p>除法律法规另有规定外，未经您的授权同意，我们不会向其他无关第三方提供您的个人信息。</p>
           </NoticeSection>
-          <NoticeSection title="八、个人信息跨境提供">
-            <p>原则上，本次问卷收集的个人信息将在中华人民共和国境内存储和处理。</p>
-            <p>如后续确需向中华人民共和国境外提供您的个人信息，我们将按照相关法律法规要求履行相应程序，并向您告知境外接收方的名称或姓名、联系方式、处理目的、处理方式、个人信息种类以及您向境外接收方行使个人信息权利的方式和程序等事项，并依法取得您的单独同意。</p>
-          </NoticeSection>
-          <NoticeSection title="九、您的个人信息权利">
+          <NoticeSection title="七、您的个人信息权利">
             <p>在符合法律法规规定的情况下，您对自己的个人信息享有以下权利：</p>
             <ol>
               <li>查询、查阅您的个人信息；</li><li>复制您的个人信息；</li><li>对不准确或者不完整的个人信息提出更正、补充；</li><li>请求删除您的个人信息；</li><li>撤回此前作出的个人信息处理授权或同意；</li><li>要求我们对个人信息处理规则进行解释说明；</li><li>限制或者拒绝我们对您的个人信息进行特定处理；</li><li>法律法规规定的其他个人信息权利。</li>
@@ -571,25 +529,27 @@ function PrivacyNotice({ onConfirm, onDecline }) {
             <p>如您希望行使上述权利，可以通过本告知书第一条所列联系方式联系我们。我们将在核实您的身份后，按照法律法规规定的期限和要求处理您的请求。</p>
             <p>您撤回同意，不影响撤回前基于您的同意已经开展的个人信息处理活动的效力。</p>
           </NoticeSection>
-          <NoticeSection title="十、不同意或撤回同意的影响">
+          <NoticeSection title="八、不同意或撤回同意的影响">
             <p>您有权自主决定是否向我们提供个人信息。</p>
             <p>如果相关个人信息属于参与本次问卷调查或活动所必需的信息，在您不同意提供或撤回相关授权后，我们可能无法继续为您提供相应的问卷填写、活动参与、结果反馈等服务。</p>
             <p>对于非必要的个人信息，您拒绝提供原则上不会影响您使用其他基本功能。</p>
           </NoticeSection>
-          <NoticeSection title="十一、未成年人个人信息保护">
+          <NoticeSection title="九、未成年人个人信息保护">
             <p>如您未满14周岁，请在您的父母或其他监护人陪同下阅读本告知书，并在取得父母或其他监护人同意后参与本次问卷。</p>
             <p>如本次问卷明确面向不满14周岁的未成年人，我们将按照法律法规要求制定专门的个人信息处理规则，并依法取得其父母或其他监护人的同意。</p>
           </NoticeSection>
-          <NoticeSection title="十二、告知书的更新">
+          <NoticeSection title="十、告知书的更新">
             <p>如本次个人信息处理的目的、方式、个人信息种类、保存期限、共享范围等发生重大变化，我们将依法重新向您进行告知。</p>
             <p>对于依法需要重新取得您同意的事项，我们将在取得您的同意后再进行相关个人信息处理活动。</p>
           </NoticeSection>
-          <NoticeSection title="十三、联系我们">
-            <p>个人信息处理者：【单位/公司完整名称】</p>
-            <p>联系电话：【联系电话】</p>
-            <p>电子邮箱：【联系邮箱】</p>
-            <p>联系地址：【联系地址】</p>
-            <p>我们将在收到您的咨询、投诉或者个人信息权利请求后及时进行处理。</p>
+          <NoticeSection title="十一、联系我们">
+            <p>兴业银行宁德分行</p>
+            <p>联系方式：2508815</p>
+            <p>联系地址：宁德市天湖东路6号</p>
+            <p>人保财险宁德市分公司</p>
+            <p>联系方式：2795518</p>
+            <p>联系地址：蕉城区蕉城南路9号</p>
+            <p>如您对本次个人信息处理活动存在疑问、意见或投诉，或希望行使个人信息相关权利，可以通过上述联系方式与我们取得联系。</p>
           </NoticeSection>
         </div>
         <footer className="rss-privacy-actions">
@@ -610,27 +570,6 @@ function PrivacyNotice({ onConfirm, onDecline }) {
 
 function NoticeSection({ title, children }) {
   return <section><h2>{title}</h2>{children}</section>;
-}
-
-function QuestionConsentDialog({ onAgree, onDecline }) {
-  const [agreed, setAgreed] = useState(false);
-  return (
-    <div className="rss-consent-mask" role="presentation">
-      <section className="rss-question-consent" role="dialog" aria-modal="true" aria-labelledby="rss-question-consent-title">
-        <p className="rss-section-kicker">单独同意</p>
-        <h2 id="rss-question-consent-title">是否回答本题</h2>
-        <p>本题会询问您对“代办多赔钱”中介行为的个人态度，用于评估防诈骗和职业伤害保障宣导需求。该题答案仅用于本次评估，不影响活动参与或抽奖资格。</p>
-        <label className="rss-consent-check">
-          <input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} />
-          <span>我已知悉本题处理的必要性，并同意回答本题。</span>
-        </label>
-        <div className="rss-question-consent-actions">
-          <button className="rss-primary" type="button" disabled={!agreed} onClick={onAgree}>同意并答题</button>
-          <button type="button" onClick={onDecline}>不同意，跳过本题</button>
-        </div>
-      </section>
-    </div>
-  );
 }
 
 function ParticipantProfile({ value, onChange, onSubmit, busy }) {
