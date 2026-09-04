@@ -1299,11 +1299,30 @@
 }
 
 .lyfg-ih5-home-start { top: 1040px; left: 158px; width: 434px; height: 129px; animation-delay: 260ms; }
+.lyfg-ih5-home-ranking { top: 879px; left: 170px; width: 410px; height: 164px; animation-delay: 160ms; }
 
 .lyfg-ih5-game-card { z-index: 2; display: block; width: 201px; height: 576px; }
-.lyfg-ih5-game-card--snake { top: 380px; left: 56px; animation-delay: 240ms; }
-.lyfg-ih5-game-card--spot-difference { top: 380px; left: 273px; }
-.lyfg-ih5-game-card--fruit-merge { top: 380px; left: 490px; animation-delay: 480ms; }
+.lyfg-ih5-game-card--snake { top: 367px; left: 56px; animation-delay: 240ms; }
+.lyfg-ih5-game-card--spot-difference { top: 367px; left: 273px; }
+.lyfg-ih5-game-card--fruit-merge { top: 367px; left: 490px; animation-delay: 480ms; }
+.lyfg-ih5-selector-rules { top: 957px; left: 172px; width: 405px; height: 118px; animation-delay: 520ms; }
+.lyfg-ih5-selector-footer { top: 1082px; }
+
+.lyfg-game-rules-mask { position: absolute; z-index: 50; inset: -88px 0 -88px; display: grid; place-items: center; background: rgba(0,0,0,.49); backdrop-filter: blur(1.2px); animation: lyfg-fade 180ms ease both; }
+.lyfg-game-rules-card { position: relative; width: 595px; height: 1238px; filter: drop-shadow(0 18px 30px rgba(63,15,5,.36)); animation: lyfg-ih5-reveal 380ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-game-rules-frame { position: absolute; inset: 0; width: 595px; height: 1238px; pointer-events: none; }
+.lyfg-game-rules-close { position: absolute; z-index: 4; top: 64px; right: 51px; display: grid; width: 58px; height: 58px; padding: 0 0 5px; place-items: center; border: 2px solid #dc9b3e; border-radius: 50%; color: #81291f; background: rgba(255,246,218,.96); box-shadow: 0 3px 9px rgba(111,39,18,.22); font: 400 44px/1 sans-serif; cursor: pointer; }
+.lyfg-game-rules-close:active { transform: scale(.9); }
+.lyfg-game-rules-scroll { position: absolute; z-index: 2; top: 254px; right: 57px; bottom: 90px; left: 62px; overflow-y: auto; overscroll-behavior: contain; padding: 4px 14px 72px 3px; color: #6f271e; font-size: 22px; line-height: 1.65; scrollbar-width: thin; scrollbar-color: #d99a3d transparent; -webkit-overflow-scrolling: touch; }
+.lyfg-game-rules-scroll::-webkit-scrollbar { width: 5px; }
+.lyfg-game-rules-scroll::-webkit-scrollbar-thumb { border-radius: 999px; background: linear-gradient(#f0bd5c,#c97825); }
+.lyfg-game-rules-scroll h2 { margin: 28px 0 12px; color: #982f20; font-size: 27px; letter-spacing: .05em; }
+.lyfg-game-rules-scroll h2:first-child { margin-top: 0; }
+.lyfg-game-rules-scroll p { margin: 0 0 12px; }
+.lyfg-game-rules-level { margin: 12px 0 !important; padding: 12px 14px; border-left: 4px solid #dea044; border-radius: 5px 12px 12px 5px; background: rgba(229,164,70,.11); }
+.lyfg-game-rules-tip { margin-top: 24px !important; padding: 16px; border: 1px solid rgba(196,112,42,.32); border-radius: 15px; background: rgba(255,235,186,.44); font-weight: 700; }
+.lyfg-game-rules-hint { position: absolute; z-index: 3; right: 60px; bottom: 79px; left: 60px; padding: 38px 0 5px; color: #5c3819; text-align: center; background: linear-gradient(transparent,rgba(255,240,205,.96) 58%); font-size: 26px; pointer-events: none; transition: opacity 200ms ease; }
+.lyfg-game-rules-hint.is-hidden { opacity: 0; }
 
 .lyfg-ih5-rules-back { top: 1198px; left: 5px; width: 357px; height: 263px; animation-delay: 180ms; }
 .lyfg-ih5-rules-start { top: 1199px; left: 383px; width: 367px; height: 267px; animation-delay: 420ms; }

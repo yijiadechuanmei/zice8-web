@@ -604,7 +604,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake-rules')} onSelectSpotDifference={() => setView('spot-difference-rules')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
-  return <HomePage onStart={() => setView('selector')} />
+  return <><HomePage onStart={() => setView('selector')} onRanking={openComingSoon} />{showComingSoon ? <ComingSoonNotice /> : null}</>
 }
 
 export {
