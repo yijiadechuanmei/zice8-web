@@ -18,13 +18,14 @@ export default function QuizFlow({ onBack }) {
   const questions = useMemo(selectQuestions, [])
   const [step, setStep] = useState(0)
   const [status, setStatus] = useState('quiz')
+  const [successVisible, setSuccessVisible] = useState(false)
   const question = questions[step]
 
   useEffect(() => {
-    if (status !== 'success') return undefined
+    if (status !== 'success' || !successVisible) return undefined
     const timer = window.setTimeout(() => setStatus('poster'), 1500)
     return () => window.clearTimeout(timer)
-  }, [status])
+  }, [status, successVisible])
 
   const answer = (optionIndex) => {
     if (optionIndex !== question.answer) { setStatus('wrong'); return }
@@ -32,7 +33,7 @@ export default function QuizFlow({ onBack }) {
     else setStep((current) => current + 1)
   }
 
-  const retry = () => { setStep(0); setStatus('quiz') }
+  const retry = () => { setStep(0); setSuccessVisible(false); setStatus('quiz') }
 
   if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="消保称号海报">
     {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
@@ -54,6 +55,6 @@ export default function QuizFlow({ onBack }) {
     <div className="lyfg-quiz-options">{question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" onClick={() => answer(index)}>
       {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span>{option}</span>
     </button>)}</div>
-    {status === 'success' ? <div className="lyfg-quiz-success" role="status">{image('quizSuccess', '', '三题全部答对')}</div> : null}
+    {status === 'success' ? <div className="lyfg-quiz-success" role="status"><img src={getLvyuanFruitfulGamesAsset('quizSuccess')} alt="三题全部答对" draggable="false" onLoad={() => setSuccessVisible(true)} /></div> : null}
   </Ih5Stage></main>
 }

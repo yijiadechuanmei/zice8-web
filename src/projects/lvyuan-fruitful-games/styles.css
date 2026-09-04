@@ -1344,7 +1344,7 @@
 .lyfg-quiz-options button:nth-child(2) span { top: 12px; }
 .lyfg-quiz-options button:nth-child(3) span, .lyfg-quiz-options button:nth-child(4) span { top: 10px; }
 .lyfg-quiz-success { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.54); }
-.lyfg-quiz-success img { width: min(485px, 78vw); height: auto; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-quiz-success img { width: 485px; height: 702px; object-fit: fill; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
 .lyfg-quiz-wrong-title { top: 41px; left: 172px; width: 407px; height: 243px; }
 .lyfg-quiz-wrong-panel { top: 302px; left: 91px; width: 571px; height: 968px; }
 .lyfg-quiz-wrong-retry { top: 1108px; left: 118px; width: 251px; height: 103px; }
