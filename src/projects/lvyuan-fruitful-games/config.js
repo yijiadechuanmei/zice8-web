@@ -20,6 +20,10 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   mergeRulesStart: 'd38476026148b3f9de858ac3917c019f_147856_367_267.png',
   snakeBackground: '2078ea4ed1d72ccc9e82e98305ec1144_3266804_765_1627.png',
   snakeTitle: 'b6bcc0301f373b3f255365ad434155ed_142239_615_91.png',
+  snakeRulesTitle: 'f7712b3332398df948a01c5e24629b89_356601_543_352.png',
+  snakeRulesDiagram: '683ebc6086af91ad664e1156862a44ba_1162054_624_805.png',
+  snakeRulesBack: '784c0097227e26e62ffc1b2d48ec0e4b_165279_352_286.png',
+  snakeRulesStart: '158d9a9a27f35f279252a4c59087bee7_153134_359_283.png',
 }
 
 export const LVYUAN_SNAKE_MATERIALS = {

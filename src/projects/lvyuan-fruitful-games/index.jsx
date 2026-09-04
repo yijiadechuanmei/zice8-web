@@ -11,6 +11,7 @@ import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
 import Ih5Stage from './Ih5Stage'
+import SnakeRules from './SnakeRules'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -569,6 +570,10 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return <SnakeGame activityKey={activityKey} onBack={() => setView('selector')} />
   }
 
+  if (view === 'snake-rules') {
+    return <SnakeRules onBack={() => setView('selector')} onStart={() => setView('snake')} />
+  }
+
   if (view === 'fruit-merge') {
     return <FruitMergeGame onBack={() => setView('selector')} />
   }
@@ -578,7 +583,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'selector') {
-    return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
+    return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => setView('snake-rules')} onSelectFruitMerge={() => setView('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
   }
 
   return <HomePage onStart={() => setView('selector')} />

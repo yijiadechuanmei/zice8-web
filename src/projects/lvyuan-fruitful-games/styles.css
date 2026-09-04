@@ -1218,6 +1218,8 @@
 .lyfg-ih5-selector-footer,
 .lyfg-ih5-rules-title,
 .lyfg-ih5-rules-diagram,
+.lyfg-ih5-snake-rules-title,
+.lyfg-ih5-snake-rules-diagram,
 .lyfg-ih5-game-card,
 .lyfg-ih5-action {
   position: absolute;
@@ -1243,6 +1245,13 @@
   animation: lyfg-ih5-reveal 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.lyfg-ih5-snake-rules-title,
+.lyfg-ih5-snake-rules-diagram {
+  z-index: 1;
+  object-fit: contain;
+  animation: lyfg-ih5-reveal 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .lyfg-ih5-home-title { top: 180px; left: 110px; width: 547px; height: 92px; }
 .lyfg-ih5-home-hero { top: 296px; left: 132px; width: 474px; height: 270px; animation-delay: 110ms; }
 
@@ -1252,6 +1261,8 @@
 
 .lyfg-ih5-rules-title { top: -9px; left: 72px; width: 631px; height: 426px; }
 .lyfg-ih5-rules-diagram { top: 417px; left: 2px; width: 740px; height: 790px; animation-delay: 120ms; }
+.lyfg-ih5-snake-rules-title { top: -6px; left: 107px; width: 543px; height: 352px; }
+.lyfg-ih5-snake-rules-diagram { top: 345px; left: 58px; width: 624px; height: 805px; animation-delay: 120ms; }
 
 .lyfg-ih5-action {
   z-index: 3;
@@ -1285,6 +1296,8 @@
 
 .lyfg-ih5-rules-back { top: 1198px; left: 5px; width: 357px; height: 263px; animation-delay: 180ms; }
 .lyfg-ih5-rules-start { top: 1199px; left: 383px; width: 367px; height: 267px; animation-delay: 420ms; }
+.lyfg-ih5-snake-rules-back { top: 1165px; left: 7px; width: 352px; height: 286px; animation-delay: 180ms; }
+.lyfg-ih5-snake-rules-start { top: 1167px; left: 379px; width: 359px; height: 283px; animation-delay: 420ms; }
 
 .lyfg-ih5-snake-page {
   touch-action: none;
