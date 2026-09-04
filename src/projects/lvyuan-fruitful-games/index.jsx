@@ -6,7 +6,6 @@ import {
   LVYUAN_SNAKE_MATERIALS,
   getLvyuanFruitfulGamesAsset,
 } from './config'
-import FruitMergeGame from './FruitMergeGame'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
@@ -585,7 +584,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'fruit-merge') {
-    return <FruitMergeGame onBack={() => setView('selector')} />
+    return <SpotDifferenceGame onBack={() => setView('fruit-merge-rules')} />
   }
 
   if (view === 'fruit-merge-rules') {
