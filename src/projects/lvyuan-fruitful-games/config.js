@@ -20,6 +20,24 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   mergeRulesStart: 'd38476026148b3f9de858ac3917c019f_147856_367_267.png',
 }
 
+export const LVYUAN_SNAKE_MATERIALS = {
+  head: 'dc160da0a2eb3002e5fc168f48dadca4_22990_93_117.png',
+  bodies: [
+    '5465b2d8cd5d93c4e2c27131e4bc287b_15364_84_94.png',
+    '85f46fef0db7e12ccb25e6de06d49738_14966_84_94.png',
+    '730ddb37650e4fa091ddb68340016f99_15486_84_94.png',
+    '6d0b72638a484d9c0f3452dd081454a1_15430_84_94.png',
+    '2297216545c748d8c6b9bc43314c034f_15119_84_94.png',
+    'a0b0126269a6464f04d2558a40c901ce_15503_84_94.png',
+    'b45030e83e8f267e7b34551df493de5c_14689_84_94.png',
+    '666498cd81b33d9a10369415949ee5f0_14618_84_94.png',
+    '2f5e4e7c886b692b6b52a1024688ad6e_14320_84_94.png',
+    'dab6ea471fc0c2a014d836535d58ee4f_13962_84_94.png',
+    'bf7c0299e22424cca025cffc9e4a177e_14212_84_94.png',
+    '60fb3b3113326bd37596acee4cc845ac_14285_84_94.png',
+  ],
+}
+
 export function getLvyuanFruitfulGamesAsset(assetName) {
   return `${LVYUAN_FRUITFUL_GAMES_ASSET_BASE}/${LVYUAN_FRUITFUL_GAMES_IH5_ASSETS[assetName]}`
 }

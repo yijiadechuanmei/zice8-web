@@ -3,7 +3,9 @@ import {
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY,
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
   LVYUAN_SNAKE_FRUITS,
+  LVYUAN_SNAKE_MATERIALS,
   LVYUAN_SNAKE_TARGET_SCORE,
+  getLvyuanFruitfulGamesAsset,
 } from './config'
 import FruitMergeGame from './FruitMergeGame'
 import FruitMergeRules from './FruitMergeRules'
@@ -28,10 +30,7 @@ const DIRECTIONS = {
   right: { x: 1, y: 0 },
 }
 
-const INITIAL_SNAKE = [
-  { x: 7.5, y: 11.5 },
-  { x: 6.58, y: 11.5 },
-]
+const INITIAL_SNAKE = [{ x: 7.5, y: 11.5 }]
 
 const SNAKE_BODY_TEXT = ['消', '保', '知', '识', '守', '护', '权', '益', '安', '心']
 const SNAKE_BALL_HUES = [2, 8, 15, 23, 31, 40, 48, 353]
@@ -172,6 +171,18 @@ function drawSnakeHead(context, x, y, radius, direction) {
   context.restore()
 }
 
+function drawSnakeMaterial(context, image, x, y, width, height, direction) {
+  context.save()
+  context.translate(x, y)
+  if (direction) context.rotate(Math.atan2(direction.y, direction.x) + Math.PI / 2)
+  context.drawImage(image, -width / 2, -height / 2, width, height)
+  context.restore()
+}
+
+function isLoadedImage(image) {
+  return image?.complete && image.naturalWidth > 0
+}
+
 function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
   const canvasRef = useRef(null)
 
@@ -183,6 +194,13 @@ function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
     let width = 0
     let height = 0
     let pixelRatio = 1
+    const headSprite = new Image()
+    const bodySprites = LVYUAN_SNAKE_MATERIALS.bodies.map((assetName) => {
+      const image = new Image()
+      image.src = getLvyuanFruitfulGamesAsset(assetName)
+      return image
+    })
+    headSprite.src = getLvyuanFruitfulGamesAsset(LVYUAN_SNAKE_MATERIALS.head)
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect()
@@ -217,23 +235,30 @@ function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
 
       for (let index = snake.length - 1; index >= 1; index -= 1) {
         const part = snake[index]
-        drawSnakeBall(
-          context,
-          (part.x / GRID_WIDTH) * width,
-          (part.y / GRID_HEIGHT) * height,
-          cell * SNAKE_RADIUS,
-          SNAKE_BALL_HUES[index % SNAKE_BALL_HUES.length],
-          index > 1 ? SNAKE_BODY_TEXT[(index - 2) % SNAKE_BODY_TEXT.length] : '',
-        )
+        const x = (part.x / GRID_WIDTH) * width
+        const y = (part.y / GRID_HEIGHT) * height
+        const bodySprite = bodySprites[(index - 1) % bodySprites.length]
+        if (isLoadedImage(bodySprite)) {
+          drawSnakeMaterial(context, bodySprite, x, y, cell * 1.28, cell * 1.43)
+        } else {
+          drawSnakeBall(
+            context,
+            x,
+            y,
+            cell * SNAKE_RADIUS,
+            SNAKE_BALL_HUES[index % SNAKE_BALL_HUES.length],
+            SNAKE_BODY_TEXT[(index - 1) % SNAKE_BODY_TEXT.length],
+          )
+        }
       }
       const head = snake[0]
-      drawSnakeHead(
-        context,
-        (head.x / GRID_WIDTH) * width,
-        (head.y / GRID_HEIGHT) * height,
-        cell * SNAKE_RADIUS,
-        directionRef.current,
-      )
+      const headX = (head.x / GRID_WIDTH) * width
+      const headY = (head.y / GRID_HEIGHT) * height
+      if (isLoadedImage(headSprite)) {
+        drawSnakeMaterial(context, headSprite, headX, headY, cell * 1.42, cell * 1.79, directionRef.current)
+      } else {
+        drawSnakeHead(context, headX, headY, cell * SNAKE_RADIUS, directionRef.current)
+      }
       frameId = window.requestAnimationFrame(draw)
     }
 
