@@ -1286,6 +1286,157 @@
 .lyfg-ih5-rules-back { top: 1198px; left: 5px; width: 357px; height: 263px; animation-delay: 180ms; }
 .lyfg-ih5-rules-start { top: 1199px; left: 383px; width: 367px; height: 267px; animation-delay: 420ms; }
 
+.lyfg-ih5-snake-page {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  background: #dba957;
+}
+
+.lyfg-ih5-snake-page .lyfg-ih5-canvas {
+  top: 0;
+  height: 1624px;
+}
+
+.lyfg-ih5-snake-background,
+.lyfg-ih5-snake-title,
+.lyfg-ih5-snake-playfield,
+.lyfg-ih5-snake-back,
+.lyfg-ih5-snake-status,
+.lyfg-ih5-snake-pause {
+  position: absolute;
+}
+
+.lyfg-ih5-snake-background {
+  z-index: 0;
+  top: 0;
+  left: -6px;
+  width: 765px;
+  height: 1627px;
+  pointer-events: none;
+}
+
+.lyfg-ih5-snake-title {
+  z-index: 3;
+  top: 121px;
+  left: 67px;
+  width: 615px;
+  height: 91px;
+  pointer-events: none;
+  animation: lyfg-ih5-reveal 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lyfg-ih5-snake-playfield {
+  z-index: 2;
+  top: 239px;
+  left: 61px;
+  width: 630px;
+  height: 1270px;
+  overflow: hidden;
+}
+
+.lyfg-ih5-snake-playfield .lyfg-snake-canvas {
+  inset: 0;
+}
+
+.lyfg-ih5-snake-back {
+  z-index: 5;
+  top: 132px;
+  left: 76px;
+  width: 46px;
+  height: 66px;
+  padding: 0 0 7px;
+  border: 0;
+  color: #9c431d;
+  background: transparent;
+  font: 700 63px/1 Georgia, serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lyfg-ih5-snake-back:active { transform: scale(0.9); }
+
+.lyfg-ih5-snake-status {
+  z-index: 4;
+  top: 219px;
+  left: 0;
+  width: 100%;
+  color: rgba(122, 57, 22, 0.78);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 1px rgba(255, 243, 190, 0.72);
+  pointer-events: none;
+}
+
+.lyfg-ih5-snake-pause {
+  z-index: 5;
+  right: 74px;
+  top: 133px;
+  min-width: 88px;
+  height: 58px;
+  border: 0;
+  border-radius: 28px;
+  color: #9c431d;
+  background: rgba(255, 241, 188, 0.42);
+  box-shadow: inset 0 0 0 2px rgba(159, 89, 37, 0.28);
+  font: 800 22px/1 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.lyfg-ih5-snake-overlay {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  width: 410px;
+  padding: 42px 30px 36px;
+  border: 2px solid rgba(163, 82, 25, 0.5);
+  border-radius: 42px;
+  color: #813719;
+  background: rgba(255, 243, 194, 0.77);
+  box-shadow: 0 14px 34px rgba(84, 49, 15, 0.18), inset 0 0 0 5px rgba(255, 252, 220, 0.42);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(3px);
+}
+
+.lyfg-ih5-snake-overlay h2 { margin: 0; font-size: 36px; letter-spacing: 0.08em; }
+.lyfg-ih5-snake-overlay p { margin: 16px 0 28px; font-size: 20px; line-height: 1.7; }
+.lyfg-ih5-snake-overlay button {
+  min-width: 210px;
+  height: 66px;
+  border: 0;
+  border-radius: 33px;
+  color: #fff7db;
+  background: linear-gradient(180deg, #e67835, #bb481d);
+  box-shadow: 0 6px 0 #873315;
+  font: 800 25px/1 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.lyfg-ih5-snake-overlay button:active { transform: translateY(4px); box-shadow: 0 2px 0 #873315; }
+
+.lyfg-ih5-snake-page .lyfg-floating-joystick {
+  width: 112px;
+  height: 112px;
+}
+.lyfg-ih5-snake-page .lyfg-floating-joystick__ring {
+  inset: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.48);
+  background: rgba(69, 64, 38, 0.1);
+  box-shadow: none;
+}
+.lyfg-ih5-snake-page .lyfg-floating-joystick__knob {
+  top: 35px;
+  left: 35px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: none;
+}
+.lyfg-ih5-snake-page .lyfg-floating-joystick__knob i { display: none; }
+
 @keyframes lyfg-ih5-reveal {
   from { opacity: 0; transform: translateY(1.6%) scale(0.975); }
   to { opacity: 1; transform: translateY(0) scale(1); }

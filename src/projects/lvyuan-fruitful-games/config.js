@@ -18,6 +18,8 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   mergeRulesDiagram: '41042f91aa5a8f4bd40a5d21264341a7_1313614_740_790.png',
   mergeRulesBack: '53aa93ef73c99076abc8b9e25ac244d9_156438_357_263.png',
   mergeRulesStart: 'd38476026148b3f9de858ac3917c019f_147856_367_267.png',
+  snakeBackground: '2078ea4ed1d72ccc9e82e98305ec1144_3266804_765_1627.png',
+  snakeTitle: 'b6bcc0301f373b3f255365ad434155ed_142239_615_91.png',
 }
 
 export const LVYUAN_SNAKE_MATERIALS = {
@@ -39,7 +41,7 @@ export const LVYUAN_SNAKE_MATERIALS = {
 }
 
 export function getLvyuanFruitfulGamesAsset(assetName) {
-  return `${LVYUAN_FRUITFUL_GAMES_ASSET_BASE}/${LVYUAN_FRUITFUL_GAMES_IH5_ASSETS[assetName]}`
+  return `${LVYUAN_FRUITFUL_GAMES_ASSET_BASE}/${LVYUAN_FRUITFUL_GAMES_IH5_ASSETS[assetName] || assetName}`
 }
 
 export const LVYUAN_SNAKE_TARGET_SCORE = 100

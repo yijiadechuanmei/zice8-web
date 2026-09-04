@@ -11,10 +11,11 @@ import FruitMergeGame from './FruitMergeGame'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
+import Ih5Stage from './Ih5Stage'
 import './styles.css'
 
 const GRID_WIDTH = 15
-const GRID_HEIGHT = 18
+const GRID_HEIGHT = 30
 const JOYSTICK_LIMIT = 42
 const SNAKE_SPEED = 4.4
 const SNAKE_TURN_RESPONSE = 11
@@ -22,6 +23,7 @@ const SEGMENT_DISTANCE = 0.92
 const SNAKE_RADIUS = 0.52
 const FRUIT_COLLISION_DISTANCE = 0.78
 const TRAIL_SAMPLE_DISTANCE = 0.1
+const PLAY_AREA_INSET = 1.05
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -30,7 +32,7 @@ const DIRECTIONS = {
   right: { x: 1, y: 0 },
 }
 
-const INITIAL_SNAKE = [{ x: 7.5, y: 11.5 }]
+const INITIAL_SNAKE = [{ x: 7.5, y: 15.5 }]
 
 const SNAKE_BODY_TEXT = ['消', '保', '知', '识', '守', '护', '权', '益', '安', '心']
 const SNAKE_BALL_HUES = [2, 8, 15, 23, 31, 40, 48, 353]
@@ -39,8 +41,8 @@ function getRandomFruit(snake) {
   let cell = { x: GRID_WIDTH * 0.25, y: GRID_HEIGHT * 0.25 }
   for (let attempt = 0; attempt < 80; attempt += 1) {
     const candidate = {
-      x: 1.15 + Math.random() * (GRID_WIDTH - 2.3),
-      y: 1.15 + Math.random() * (GRID_HEIGHT - 2.3),
+      x: PLAY_AREA_INSET + 0.25 + Math.random() * (GRID_WIDTH - (PLAY_AREA_INSET + 0.25) * 2),
+      y: PLAY_AREA_INSET + 0.25 + Math.random() * (GRID_HEIGHT - (PLAY_AREA_INSET + 0.25) * 2),
     }
     const isClear = snake.every((part) => Math.hypot(part.x - candidate.x, part.y - candidate.y) > 1.5)
     if (isClear) {
@@ -275,22 +277,6 @@ function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
   return <canvas ref={canvasRef} className="lyfg-snake-canvas" aria-hidden="true" />
 }
 
-function SnakeBoard({ snakeRef, fruitRef, directionRef, snakeLength }) {
-  return (
-    <div
-      className="lyfg-board"
-      role="img"
-      aria-label={`贪吃蛇游戏区，当前蛇身长度 ${snakeLength}`}
-      style={{ '--lyfg-columns': GRID_WIDTH, '--lyfg-rows': GRID_HEIGHT }}
-    >
-      <span className="lyfg-board-sun" aria-hidden="true" />
-      <span className="lyfg-board-leaf lyfg-board-leaf--one" aria-hidden="true" />
-      <span className="lyfg-board-leaf lyfg-board-leaf--two" aria-hidden="true" />
-      <SnakeCanvas snakeRef={snakeRef} fruitRef={fruitRef} directionRef={directionRef} />
-    </div>
-  )
-}
-
 function FloatingJoystick({ joystickRef }) {
   return (
     <div ref={joystickRef} className="lyfg-floating-joystick" aria-hidden="true">
@@ -427,10 +413,10 @@ function SnakeGame({ activityKey, onBack }) {
         x: head.x + directionRef.current.x * SNAKE_SPEED * elapsedSeconds,
         y: head.y + directionRef.current.y * SNAKE_SPEED * elapsedSeconds,
       }
-      const hitsWall = nextHead.x <= SNAKE_RADIUS
-        || nextHead.x >= GRID_WIDTH - SNAKE_RADIUS
-        || nextHead.y <= SNAKE_RADIUS
-        || nextHead.y >= GRID_HEIGHT - SNAKE_RADIUS
+      const hitsWall = nextHead.x <= PLAY_AREA_INSET
+        || nextHead.x >= GRID_WIDTH - PLAY_AREA_INSET
+        || nextHead.y <= PLAY_AREA_INSET
+        || nextHead.y >= GRID_HEIGHT - PLAY_AREA_INSET
 
       if (hitsWall) {
         setGameState('failed')
@@ -478,12 +464,11 @@ function SnakeGame({ activityKey, onBack }) {
     return () => window.cancelAnimationFrame(frameId)
   }, [activityKey, gameState])
 
-  const progress = Math.min(100, (score / LVYUAN_SNAKE_TARGET_SCORE) * 100)
   const overlayVisible = gameState !== 'playing' && gameState !== 'paused'
 
   return (
     <main
-      className="lyfg-page lyfg-snake-game-page"
+      className="lyfg-page lyfg-ih5-page lyfg-snake-game-page lyfg-ih5-snake-page"
       data-activity-type={LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE}
       data-activity-key={activityKey}
       onPointerDown={handleControlPointerDown}
@@ -491,81 +476,23 @@ function SnakeGame({ activityKey, onBack }) {
       onPointerUp={releaseFloatingJoystick}
       onPointerCancel={releaseFloatingJoystick}
     >
-      <section className="lyfg-game-shell">
-        <header className="lyfg-header">
-          <button className="lyfg-back-button" type="button" onClick={onBack}>← 游戏选择</button>
-          <p className="lyfg-eyebrow"><span /> 绿园消保 · 游戏季 <span /></p>
-          <div className="lyfg-title-lockup">
-            <span className="lyfg-title-mark" aria-hidden="true">🍏</span>
-            <div>
-              <h1>硕果盈心</h1>
-              <p>FRUITFUL HEART</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="lyfg-status-row">
-          <div className="lyfg-score-block">
-            <span>本局果实</span>
-            <strong>{score}<small> 分</small></strong>
-          </div>
-          <div className="lyfg-progress-block">
-            <div><span>目标</span><b>{LVYUAN_SNAKE_TARGET_SCORE}</b></div>
-            <div className="lyfg-progress-track"><i style={{ width: `${progress}%` }} /></div>
-          </div>
-          <div className="lyfg-best-block">
-            <span>最佳</span>
-            <strong>{bestScore}</strong>
-          </div>
-        </div>
-
-        <div className="lyfg-board-frame">
-          <div className="lyfg-board-label"><span>贪吃蛇</span><i>{gameState === 'paused' ? '已暂停' : '碰墙即失败'}</i></div>
-          <SnakeBoard
-            snakeRef={snakeRef}
-            fruitRef={fruitRef}
-            directionRef={directionRef}
-            snakeLength={snakeLength}
-          />
-
+      <Ih5Stage label="果园贪吃蛇">
+        <img className="lyfg-ih5-snake-background" src={getLvyuanFruitfulGamesAsset('snakeBackground')} alt="" draggable="false" />
+        <img className="lyfg-ih5-snake-title" src={getLvyuanFruitfulGamesAsset('snakeTitle')} alt="果园贪吃蛇，等待果子" draggable="false" />
+        <button className="lyfg-ih5-snake-back" type="button" onClick={onBack} aria-label="返回游戏选择">‹</button>
+        <div className="lyfg-ih5-snake-playfield" role="img" aria-label={`果园贪吃蛇游戏区，当前蛇身长度 ${snakeLength}`}>
+          <SnakeCanvas snakeRef={snakeRef} fruitRef={fruitRef} directionRef={directionRef} />
           {overlayVisible ? (
-            <div className="lyfg-game-overlay">
-              <span className="lyfg-overlay-fruit" aria-hidden="true">
-                {gameState === 'success' ? '🍎' : gameState === 'failed' ? '🍂' : '🍐'}
-              </span>
-              <h2>{gameState === 'success' ? '硕果满篮！' : gameState === 'failed' ? '别撞到果园边界' : '收集好果实'}</h2>
-              <p>
-                {gameState === 'success'
-                  ? `已收集 ${score} 分，正式版将进入答题环节`
-                  : gameState === 'failed'
-                    ? `本局 ${score} 分 · 再试一次吧`
-                    : '摇杆指向哪里，贪吃蛇就平滑游向哪里'}
-              </p>
-              <button type="button" onClick={restartGame}>
-                {gameState === 'ready' ? '开始收集' : '再来一局'}
-              </button>
+            <div className="lyfg-ih5-snake-overlay">
+              <h2>{gameState === 'success' ? '硕果满篮！' : gameState === 'failed' ? '碰到果园边界了' : '收集好果实'}</h2>
+              <p>{gameState === 'success' ? `本局获得 ${score} 分` : gameState === 'failed' ? `本局 ${score} 分，再试一次吧` : '按住屏幕拖动摇杆，指引小蛇前行'}</p>
+              <button type="button" onClick={restartGame}>{gameState === 'ready' ? '开始游戏' : '再来一局'}</button>
             </div>
           ) : null}
         </div>
-
-        <div className="lyfg-control-zone">
-          {gameState === 'playing' || gameState === 'paused' ? (
-            <button
-              className="lyfg-pause-button"
-              type="button"
-              onClick={() => setGameState((current) => current === 'playing' ? 'paused' : 'playing')}
-            >
-              {gameState === 'paused' ? '继续' : '暂停'}
-            </button>
-          ) : null}
-          <div className="lyfg-touch-hint"><span />任意位置按住拖动 · 浮动摇杆自由转向</div>
-          <div className="lyfg-fruit-legend" aria-label="果实分值">
-            {LVYUAN_SNAKE_FRUITS.map((item) => (
-              <span key={item.id}>{item.emoji}<small>+{item.score}</small></span>
-            ))}
-          </div>
-        </div>
-      </section>
+        <div className="lyfg-ih5-snake-status" aria-live="polite">{gameState === 'paused' ? '已暂停' : `${score} 分 · 最佳 ${bestScore}`}</div>
+        {(gameState === 'playing' || gameState === 'paused') ? <button className="lyfg-ih5-snake-pause" type="button" onClick={() => setGameState((current) => current === 'playing' ? 'paused' : 'playing')}>{gameState === 'paused' ? '继续' : '暂停'}</button> : null}
+      </Ih5Stage>
       <FloatingJoystick joystickRef={joystickRef} />
     </main>
   )
