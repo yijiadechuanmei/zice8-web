@@ -895,30 +895,81 @@
   font-size: 13px;
 }
 .rss-wheel-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   justify-content: flex-start;
   padding-top: max(10vw, 54px);
 }
+.rss-wheel-page::before,
+.rss-wheel-page::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.rss-wheel-page::before {
+  width: min(110vw, 550px);
+  height: min(110vw, 550px);
+  top: min(20vw, 100px);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 66%);
+}
+.rss-wheel-page::after {
+  width: min(150vw, 750px);
+  height: min(150vw, 750px);
+  top: min(30vw, 150px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.rss-wheel-heading {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
 .rss-wheel-page h1 {
-  margin: 8px 0 4px;
+  margin: 6px 0 5px;
   color: #fff;
-  font-size: 32px;
+  font-size: min(8.2vw, 38px);
+  letter-spacing: 0.08em;
 }
 .rss-wheel-tip {
-  margin: 0 0 28px;
+  margin: 0;
   color: #e8f8ff;
-  font-size: 14px;
+  font-size: 13px;
 }
 .rss-wheel-stage {
-  width: min(86vw, 430px);
-  height: min(86vw, 430px);
-  margin: 12px auto 30px;
+  width: min(84vw, 420px);
+  height: min(84vw, 420px);
+  margin: min(10vw, 48px) auto min(9vw, 42px);
   position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+.rss-wheel-halo {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.rss-wheel-halo-one { inset: -15px; animation: rss-wheel-breathe 2.2s ease-in-out infinite; }
+.rss-wheel-halo-two { inset: -31px; opacity: 0.42; animation: rss-wheel-breathe 2.2s 0.55s ease-in-out infinite; }
+.rss-wheel-stage::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255,255,255,0.64), transparent 19%, rgba(255,255,255,0.2) 45%, transparent 69%, rgba(255,255,255,0.58));
+  filter: blur(8px);
+  animation: rss-wheel-aura 5.4s linear infinite;
 }
 .rss-wheel-pointer {
   width: 0;
   height: 0;
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   top: calc(50% - 62px);
   left: 50%;
   transform: translateX(-50%);
@@ -933,7 +984,8 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  border: 8px solid #fff;
+  z-index: 1;
+  border: 9px solid #fff;
   border-radius: 50%;
   background: conic-gradient(
     from -30deg,
@@ -944,7 +996,7 @@
     #e6f7ff 240deg 300deg,
     #159eea 300deg 360deg
   );
-  box-shadow: 0 18px 36px rgba(0, 66, 132, 0.28), inset 0 0 0 2px rgba(8, 97, 171, 0.13);
+  box-shadow: 0 22px 44px rgba(0, 53, 124, 0.34), inset 0 0 0 2px rgba(8, 97, 171, 0.13);
   transition: transform 3.55s cubic-bezier(0.12, 0.74, 0.08, 1);
 }
 .rss-wheel-label {
@@ -970,7 +1022,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 2;
+  z-index: 4;
   transform: translate(-50%, -50%);
   border: 5px solid #fff;
   border-radius: 50%;
@@ -979,6 +1031,135 @@
   box-shadow: 0 2px 9px rgba(0, 86, 159, 0.2);
   font-size: 14px;
   font-weight: 900;
+}
+.rss-wheel-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #e8f8ff;
+  background: rgba(0, 93, 177, 0.17);
+  backdrop-filter: blur(6px);
+}
+.rss-wheel-status i {
+  width: 7px;
+  height: 7px;
+  display: block;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 12px #fff;
+  animation: rss-pulse 1.2s ease-in-out infinite;
+}
+.rss-wheel-status small { color: inherit; font-size: 12px; }
+
+/* 抽奖结果以奖品徽章为视觉中心，沿用活动蓝色与白色高光。 */
+.rss-prize-result {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  justify-content: center;
+  padding: max(12vw, 52px) 24px max(10vw, 42px);
+}
+.rss-prize-result > * { position: relative; z-index: 1; }
+.rss-prize-light {
+  position: absolute;
+  z-index: 0;
+  width: min(140vw, 700px);
+  height: min(140vw, 700px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -56%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.11) 31%, transparent 68%);
+  animation: rss-prize-glow 2.6s ease-in-out infinite;
+}
+.rss-prize-caption {
+  margin: 7px 0 0;
+  color: rgba(232, 248, 255, 0.82);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+.rss-prize-orbit {
+  width: min(48vw, 218px);
+  height: min(48vw, 218px);
+  margin: min(11vw, 54px) 0 min(8vw, 34px);
+  border: 2px solid rgba(255,255,255,0.84);
+  color: #fff;
+  background: radial-gradient(circle at 36% 28%, rgba(255,255,255,0.92), rgba(163,229,255,0.38) 27%, rgba(6,123,211,0.55) 68%);
+  box-shadow: 0 18px 48px rgba(0,66,150,0.34), inset 0 0 38px rgba(255,255,255,0.42);
+  animation: rss-prize-rise 0.6s cubic-bezier(0.2,0.8,0.2,1) both;
+}
+.rss-prize-orbit::before { inset: -14px; border-width: 1px; }
+.rss-prize-orbit::after { inset: 17px; border-width: 1px; }
+.rss-prize-orbit.is-win {
+  border-color: #fff;
+  background: radial-gradient(circle at 37% 25%, #fff 0%, #ffeec1 16%, #ffd064 37%, #e6a72e 68%, #b16c0b 100%);
+  box-shadow: 0 20px 54px rgba(127,75,0,0.3), inset 0 0 30px rgba(255,255,255,0.66);
+}
+.rss-prize-orbit span {
+  color: #075fac;
+  font: 900 min(22vw, 96px)/1 "Barlow Condensed", "Noto Sans SC";
+  letter-spacing: 0;
+  text-shadow: 0 2px 0 rgba(255,255,255,0.48);
+}
+.rss-prize-orbit.is-win span { color: #a35d00; }
+.rss-prize-spark {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 16px #fff;
+  animation: rss-prize-spark 1.7s ease-in-out infinite;
+}
+.rss-prize-spark-one { top: 8%; right: 5%; }
+.rss-prize-spark-two { bottom: 10%; left: 1%; animation-delay: 0.58s; }
+.rss-prize-result h1 {
+  margin: 0;
+  color: #fff;
+  font-size: min(11vw, 51px);
+  letter-spacing: 0.08em;
+  text-shadow: 0 4px 12px rgba(0,74,148,0.28);
+}
+.rss-prize-result h2 {
+  min-height: 30px;
+  margin: 12px 0 10px;
+  color: #fff;
+  font-size: min(5.2vw, 24px);
+  font-weight: 800;
+}
+.rss-prize-notice {
+  width: min(86vw, 390px);
+  margin: 0;
+  color: #e8f8ff !important;
+  font-size: 13px !important;
+  line-height: 1.65;
+}
+.rss-prize-return {
+  width: min(86vw, 400px);
+  min-height: 56px;
+  margin-top: min(10vw, 44px);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(100deg, #119fe9, #087bd0 62%, #075cad);
+  box-shadow: 0 12px 0 rgba(2, 73, 143, 0.16), 0 18px 30px rgba(0, 66, 132, 0.24);
+  font: 800 18px "Noto Sans SC", sans-serif;
+  letter-spacing: 0.12em;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+.rss-prize-return:active { transform: translateY(2px) scale(0.99); filter: brightness(0.95); }
+@keyframes rss-wheel-breathe { 50% { transform: scale(1.045); opacity: 0.18; } }
+@keyframes rss-wheel-aura { to { transform: rotate(360deg); } }
+@keyframes rss-prize-glow { 50% { opacity: 0.65; transform: translate(-50%, -56%) scale(1.08); } }
+@keyframes rss-prize-rise { from { opacity: 0; transform: translateY(22px) scale(0.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes rss-prize-spark { 50% { transform: scale(0.45); opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) {
+  .rss-wheel-halo, .rss-wheel-stage::after, .rss-prize-light, .rss-prize-orbit, .rss-prize-spark { animation: none; }
 }
 .rss-radar {
   border-color: rgba(255, 255, 255, 0.74);
@@ -1020,6 +1201,10 @@
 .rss-claimed {
   color: #075fac;
   background: #fff;
+}
+.rss-prize-orbit.is-win {
+  background: radial-gradient(circle at 37% 25%, #fff 0%, #ffeec1 16%, #ffd064 37%, #e6a72e 68%, #b16c0b 100%);
+  box-shadow: 0 20px 54px rgba(127, 75, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.66);
 }
 
 /* 结果页按 IH5 的 750 × 1448 画布等比呈现，所有内容使用原稿坐标。 */

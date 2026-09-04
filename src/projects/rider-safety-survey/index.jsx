@@ -677,10 +677,14 @@ function PrizeWheel({ draw, onComplete }) {
 
   return (
     <section className="rss-wheel-page" aria-live="polite">
-      <p className="rss-section-kicker">LUCKY WHEEL</p>
-      <h1>幸运转盘</h1>
-      <p className="rss-wheel-tip">结果已确定，正在转向本次抽奖结果</p>
+      <header className="rss-wheel-heading">
+        <p className="rss-section-kicker">LUCKY DRAW</p>
+        <h1>幸运转盘</h1>
+        <p className="rss-wheel-tip">结果已锁定，正在揭晓本次幸运奖励</p>
+      </header>
       <div className="rss-wheel-stage">
+        <i className="rss-wheel-halo rss-wheel-halo-one" aria-hidden="true" />
+        <i className="rss-wheel-halo rss-wheel-halo-two" aria-hidden="true" />
         <div className="rss-wheel-pointer" aria-hidden="true" />
         <div
           className="rss-wheel"
@@ -704,7 +708,10 @@ function PrizeWheel({ draw, onComplete }) {
         </div>
         <div className="rss-wheel-center">抽奖中</div>
       </div>
-      <small>请稍候，转盘停止后公布结果</small>
+      <div className="rss-wheel-status">
+        <i aria-hidden="true" />
+        <small>请稍候，转盘停止后公布结果</small>
+      </div>
     </section>
   );
 }
@@ -712,18 +719,22 @@ function PrizeWheel({ draw, onComplete }) {
 function PrizeResult({ draw, onPoster }) {
   const won = isWinningDraw(draw);
   return (
-    <section className="rss-prize-result">
+    <section className={`rss-prize-result ${won ? "is-win" : "is-miss"}`}>
+      <div className="rss-prize-light" aria-hidden="true" />
       <p className="rss-section-kicker">DRAW RESULT</p>
+      <p className="rss-prize-caption">本次抽奖结果</p>
       <div className={`rss-prize-orbit ${won ? "is-win" : ""}`}>
-        <span>{won ? "LUCKY" : "SAFE"}</span>
+        <i className="rss-prize-spark rss-prize-spark-one" aria-hidden="true" />
+        <i className="rss-prize-spark rss-prize-spark-two" aria-hidden="true" />
+        <span>{won ? "¥" : "安"}</span>
       </div>
       <h1>{won ? "恭喜中奖" : "谢谢参与"}</h1>
       <h2>{won ? draw.prizeName : "平安到家就是今天的头奖"}</h2>
       {draw?.prizeType === "cash" && won ? (
-        <p>测试阶段仅记录抽奖结果，不会发起真实红包发放。</p>
-      ) : null}
-      <button type="button" className="rss-text-button" onClick={onPoster}>
-        返回查看诊断海报
+        <p className="rss-prize-notice">测试阶段仅记录抽奖结果，不会发起真实红包发放。</p>
+      ) : <p className="rss-prize-notice">感谢参与，愿您每一程都平安顺利。</p>}
+      <button type="button" className="rss-prize-return" onClick={onPoster}>
+        返回查看测评结语
       </button>
     </section>
   );

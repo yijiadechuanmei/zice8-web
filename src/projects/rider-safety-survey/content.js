@@ -103,13 +103,13 @@ export const questions = [
     id: "q10",
     section: "四、金融素养",
     title: "下面哪些是骗局？",
-    hint: "多选，全对才有效",
+    hint: "多选",
     multiple: true,
     options: [
       ["rebate_scam", "刷单返现"],
-      ["claim_refund", "理赔双倍退款"],
-      ["credit_repair", "低息贷款消除征信"],
-      ["police_transfer", "公检法要求转账"],
+      ["claim_refund", "征信洗白"],
+      ["credit_repair", "债务清零"],
+      ["police_transfer", "“共享屏幕”骗局"],
     ],
   },
 ];
