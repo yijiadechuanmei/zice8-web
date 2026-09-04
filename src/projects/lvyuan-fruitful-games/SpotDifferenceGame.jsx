@@ -3,9 +3,9 @@ import { LVYUAN_SPOT_MERGE_MATERIALS, getLvyuanFruitfulGamesAsset } from './conf
 import Ih5Stage from './Ih5Stage'
 
 const TYPES = [
-  { name: '绿种子', radius: 24 }, { name: '棕种子', radius: 27 }, { name: '树苗', radius: 42 },
-  { name: '青苹果', radius: 43 }, { name: '青果', radius: 40 }, { name: '红苹果', radius: 50 },
-  { name: '香蕉', radius: 62 }, { name: '梨', radius: 48 },
+  { name: '绿种子', radius: 30 }, { name: '棕种子', radius: 34 }, { name: '树苗', radius: 52 },
+  { name: '青苹果', radius: 54 }, { name: '青果', radius: 50 }, { name: '红苹果', radius: 62 },
+  { name: '香蕉', radius: 77 }, { name: '梨', radius: 60 },
 ]
 const DROP_SEQUENCE = [0, 1, 0, 1, 1, 0, 0, 1]
 const WIDTH = 670
@@ -56,11 +56,11 @@ export default function SpotDifferenceGame({ onBack }) {
 
   useEffect(() => {
     let frame; let then = performance.now(); let completionTimer
-    const constrain = (item) => { const radius = TYPES[item.type].radius; if (item.x < radius) { item.x = radius; item.vx = Math.abs(item.vx) * .2 } if (item.x > WIDTH - radius) { item.x = WIDTH - radius; item.vx = -Math.abs(item.vx) * .2 } if (item.y > HEIGHT - radius) { item.y = HEIGHT - radius; item.vy = Math.abs(item.vy) > 70 ? -item.vy * .15 : 0; item.vx *= .8; item.spin *= .5 } }
+    const constrain = (item) => { const radius = TYPES[item.type].radius; if (item.x < radius) { item.x = radius; item.vx = Math.abs(item.vx) * .16; item.spin *= .45 } if (item.x > WIDTH - radius) { item.x = WIDTH - radius; item.vx = -Math.abs(item.vx) * .16; item.spin *= .45 } if (item.y > HEIGHT - radius) { item.y = HEIGHT - radius; item.vy = Math.abs(item.vy) > 80 ? -item.vy * .12 : 0; item.vx *= .68; item.spin *= .25; if (Math.abs(item.vx) < 2) item.vx = 0; if (Math.abs(item.spin) < .12) item.spin = 0 } }
     const tick = (now) => {
       const dt = Math.min((now - then) / 1000, .022); then = now; previewRef.current += (targetRef.current - previewRef.current) * (1 - Math.exp(-24 * dt))
       const items = bodiesRef.current.map((item) => ({ ...item }))
-      for (const item of items) { item.vy += 1550 * dt; item.x += item.vx * dt; item.y += item.vy * dt; item.angle += item.spin * dt; item.vx *= Math.exp(-1.8 * dt); item.spin *= Math.exp(-4.6 * dt); constrain(item) }
+      for (const item of items) { item.vy += 1550 * dt; item.x += item.vx * dt; item.y += item.vy * dt; item.angle += item.spin * dt; item.vx *= Math.exp(-2.4 * dt); item.spin *= Math.exp(-9 * dt); if (Math.abs(item.spin) < .08) item.spin = 0; constrain(item) }
       const removed = new Set(); const added = []
       for (let a = 0; a < items.length; a += 1) for (let b = a + 1; b < items.length; b += 1) {
         const left = items[a], right = items[b]; if (removed.has(left.id) || removed.has(right.id)) continue
@@ -69,7 +69,7 @@ export default function SpotDifferenceGame({ onBack }) {
         const nx = dx / distance, ny = dy / distance, overlap = minimum - distance; left.x -= nx * overlap / 2; left.y -= ny * overlap / 2; right.x += nx * overlap / 2; right.y += ny * overlap / 2
         let result = -1; if (left.type === right.type && left.type <= 1) result = 2; else if (left.type === 2 && right.type === 2 && fruitRef.current < 5) result = 3 + fruitRef.current
         if (result >= 0) { removed.add(left.id); removed.add(right.id); added.push(createBody(idRef.current++, result, (left.x + right.x) / 2, (left.y + right.y) / 2, { vy: -45, spin: clamp((left.spin + right.spin) * .15, -1.2, 1.2) })); if (result >= 3) { fruitRef.current += 1; setFruitCount(fruitRef.current); if (fruitRef.current === 5) { completeRef.current = true; completionTimer = setTimeout(() => setComplete(true), 900) } } continue }
-        const relative = (right.vx - left.vx) * nx + (right.vy - left.vy) * ny; if (relative < 0) { const impulse = -relative * .36; left.vx -= impulse * nx; left.vy -= impulse * ny; right.vx += impulse * nx; right.vy += impulse * ny; left.spin = clamp(left.spin - impulse * .004, -2, 2); right.spin = clamp(right.spin + impulse * .004, -2, 2) }
+        const relative = (right.vx - left.vx) * nx + (right.vy - left.vy) * ny; if (relative < -8) { const impulse = -relative * .3; left.vx -= impulse * nx; left.vy -= impulse * ny; right.vx += impulse * nx; right.vy += impulse * ny; if (relative < -35) { left.spin = clamp(left.spin - impulse * .002, -.8, .8); right.spin = clamp(right.spin + impulse * .002, -.8, .8) } }
         constrain(left); constrain(right)
       }
       bodiesRef.current = [...items.filter((item) => !removed.has(item.id)), ...added]; frame = requestAnimationFrame(tick)

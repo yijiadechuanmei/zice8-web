@@ -1312,10 +1312,11 @@
 .lyfg-ih5-spot-difference-rules-start { top: 1277px; left: 0; width: 371px; height: 205px; animation-delay: 180ms; }
 .lyfg-ih5-spot-difference-rules-back { top: 1277px; left: 388px; width: 362px; height: 207px; animation-delay: 420ms; }
 
-.lyfg-spot-merge-page .lyfg-ih5-canvas { overflow: hidden; }
-.lyfg-spot-merge-board { position: absolute; z-index: 2; top: -79px; left: 38px; width: 670px; height: 1288px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.lyfg-spot-merge-page .lyfg-ih5-canvas { top: 0; height: 1624px; overflow: hidden; }
+.lyfg-spot-merge-page .lyfg-ih5-background { top: 0; height: 1622px; }
+.lyfg-spot-merge-board { position: absolute; z-index: 2; top: 9px; left: 38px; width: 670px; height: 1288px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .lyfg-spot-merge-canvas { display: block; width: 100%; height: 100%; }
-.lyfg-spot-merge-back, .lyfg-spot-merge-progress { position: absolute; z-index: 8; top: 34px; border: 2px solid rgba(130,65,20,.72); border-radius: 999px; color: #7f2c17; background: rgba(255,239,181,.9); box-shadow: 0 3px 8px rgba(79,39,8,.22); font: 800 22px/1 PingFang SC, sans-serif; }
+.lyfg-spot-merge-back, .lyfg-spot-merge-progress { position: absolute; z-index: 8; top: 122px; border: 2px solid rgba(130,65,20,.72); border-radius: 999px; color: #7f2c17; background: rgba(255,239,181,.9); box-shadow: 0 3px 8px rgba(79,39,8,.22); font: 800 22px/1 PingFang SC, sans-serif; }
 .lyfg-spot-merge-back { left: 58px; padding: 13px 24px; }
 .lyfg-spot-merge-progress { right: 58px; padding: 13px 22px; }
 .lyfg-spot-merge-progress b { color: #d54a20; font-size: 28px; }
