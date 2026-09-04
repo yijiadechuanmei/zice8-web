@@ -19,7 +19,7 @@ const GRID_HEIGHT = 30
 const JOYSTICK_LIMIT = 42
 const SNAKE_SPEED = 4.4
 const SNAKE_TURN_RESPONSE = 11
-const SEGMENT_DISTANCE = 0.92
+const SEGMENT_DISTANCE = 1.45
 const SNAKE_RADIUS = 0.52
 const FRUIT_COLLISION_DISTANCE = 0.78
 const TRAIL_SAMPLE_DISTANCE = 0.1
@@ -34,7 +34,7 @@ const DIRECTIONS = {
 
 const INITIAL_SNAKE = [{ x: 7.5, y: 15.5 }]
 
-const SNAKE_BODY_TEXT = ['消', '保', '知', '识', '守', '护', '权', '益', '安', '心']
+const SNAKE_BODY_TEXT = ['清', '朗', '金', '融', '网', '络', '守', '护', '安', '心', '消', '费']
 const SNAKE_BALL_HUES = [2, 8, 15, 23, 31, 40, 48, 353]
 
 function getRandomFruit(snake) {
@@ -52,7 +52,11 @@ function getRandomFruit(snake) {
   }
 
   const fruit = LVYUAN_SNAKE_FRUITS[Math.floor(Math.random() * LVYUAN_SNAKE_FRUITS.length)]
-  return { ...cell, ...fruit }
+  return {
+    ...cell,
+    ...fruit,
+    bodyIndex: (snake.length - 1) % LVYUAN_SNAKE_MATERIALS.bodies.length,
+  }
 }
 
 function normalizeVector(vector, fallback = DIRECTIONS.right) {
@@ -223,16 +227,23 @@ function SnakeCanvas({ snakeRef, fruitRef, directionRef }) {
       const pulse = 1 + Math.sin(time / 175) * 0.06
       const fruitX = (fruit.x / GRID_WIDTH) * width
       const fruitY = (fruit.y / GRID_HEIGHT) * height
+      const fruitBodyIndex = fruit.bodyIndex ?? 0
+      const fruitSprite = bodySprites[fruitBodyIndex]
       context.save()
       context.translate(fruitX, fruitY)
       context.scale(pulse, pulse)
-      context.font = `${Math.max(20, cell * 1.1)}px Apple Color Emoji, PingFang SC, sans-serif`
-      context.textAlign = 'center'
-      context.textBaseline = 'middle'
-      context.shadowColor = 'rgba(10, 37, 19, 0.34)'
-      context.shadowBlur = 3
-      context.shadowOffsetY = 2
-      context.fillText(fruit.emoji, 0, 0)
+      if (isLoadedImage(fruitSprite)) {
+        drawSnakeMaterial(context, fruitSprite, 0, 0, cell * 1.28, cell * 1.43)
+      } else {
+        drawSnakeBall(
+          context,
+          0,
+          0,
+          cell * SNAKE_RADIUS,
+          SNAKE_BALL_HUES[fruitBodyIndex % SNAKE_BALL_HUES.length],
+          SNAKE_BODY_TEXT[fruitBodyIndex],
+        )
+      }
       context.restore()
 
       for (let index = snake.length - 1; index >= 1; index -= 1) {
