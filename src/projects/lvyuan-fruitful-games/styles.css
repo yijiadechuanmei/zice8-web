@@ -1371,6 +1371,10 @@
 @keyframes lyfg-ranking-row-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
 
 .lyfg-spot-find-page .lyfg-ih5-canvas { overflow: hidden; }
+.lyfg-spot-find-page--full .lyfg-ih5-canvas { top: 0; height: 1624px; }
+.lyfg-spot-find-page--full .lyfg-ih5-background { top: 0; height: 1624px; }
+.lyfg-spot-find-page--full .lyfg-spot-find-back { top: 116px; }
+.lyfg-spot-find-page--full .lyfg-spot-find-count { top: 191px; }
 .lyfg-spot-find-title, .lyfg-spot-find-picture, .lyfg-spot-find-hint { position: absolute; z-index: 1; object-fit: fill; }
 .lyfg-spot-find-title { top: 23px; left: 129px; width: 483px; height: 77px; animation: lyfg-ih5-reveal 480ms ease both; }
 .lyfg-spot-find-picture { animation: lyfg-spot-picture-in 520ms cubic-bezier(.22,1,.36,1) both; }
@@ -1428,6 +1432,9 @@
 .lyfg-quiz-options button span { position: absolute; top: 13px; left: 96px; display: flex; width: 362px; height: 75px; align-items: center; overflow: hidden; color: #000; text-align: justify; white-space: pre-wrap; word-break: normal; font-size: 24px; font-weight: 400; line-height: 23px; }
 .lyfg-quiz-options button:nth-child(2) span { top: 12px; }
 .lyfg-quiz-options button:nth-child(3) span, .lyfg-quiz-options button:nth-child(4) span { top: 10px; }
+.lyfg-quiz-answer-toast { position: absolute; z-index: 35; inset: -88px 0; display: grid; place-items: center; background: rgba(42,24,8,.18); pointer-events: auto; }
+.lyfg-quiz-answer-toast span { min-width: 270px; padding: 23px 42px; border: 3px solid #e7a33c; border-radius: 999px; color: #fff8d6; text-align: center; background: rgba(126,42,24,.96); box-shadow: 0 10px 26px rgba(60,25,5,.34); font-size: 32px; font-weight: 900; animation: lyfg-toast-pop 220ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-quiz-answer-toast.is-correct span { border-color: #e6c65b; background: rgba(60,113,48,.96); }
 .lyfg-quiz-success { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.54); }
 .lyfg-quiz-success img { width: 485px; height: 702px; object-fit: fill; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
 .lyfg-quiz-wrong-title { top: 41px; left: 172px; width: 407px; height: 243px; }

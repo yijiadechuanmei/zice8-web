@@ -20,6 +20,7 @@ export default function QuizFlow({ onBack }) {
   const [status, setStatus] = useState('quiz')
   const [successVisible, setSuccessVisible] = useState(false)
   const [shareVisible, setShareVisible] = useState(false)
+  const [answerFeedback, setAnswerFeedback] = useState(null)
   const question = questions[step]
 
   useEffect(() => {
@@ -37,10 +38,24 @@ export default function QuizFlow({ onBack }) {
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [shareVisible])
 
+  useEffect(() => {
+    if (!answerFeedback) return undefined
+    const timer = window.setTimeout(() => {
+      if (!answerFeedback.correct) {
+        setAnswerFeedback(null)
+        setStatus('wrong')
+        return
+      }
+      setAnswerFeedback(null)
+      if (step === questions.length - 1) setStatus('success')
+      else setStep((current) => current + 1)
+    }, 1500)
+    return () => window.clearTimeout(timer)
+  }, [answerFeedback, questions.length, step])
+
   const answer = (optionIndex) => {
-    if (optionIndex !== question.answer) { setStatus('wrong'); return }
-    if (step === questions.length - 1) setStatus('success')
-    else setStep((current) => current + 1)
+    if (answerFeedback) return
+    setAnswerFeedback({ correct: optionIndex === question.answer })
   }
 
   if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page">
@@ -73,6 +88,7 @@ export default function QuizFlow({ onBack }) {
     <div className="lyfg-quiz-options">{question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" onClick={() => answer(index)}>
       {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span>{option}</span>
     </button>)}</div>
+    {answerFeedback ? <div className={`lyfg-quiz-answer-toast ${answerFeedback.correct ? 'is-correct' : 'is-wrong'}`} role="alert" aria-live="assertive"><span>{answerFeedback.correct ? '回答正确' : '回答错误'}</span></div> : null}
     {status === 'success' ? <div className="lyfg-quiz-success" role="status"><img src={getLvyuanFruitfulGamesAsset('quizSuccess')} alt="三题全部答对" draggable="false" onLoad={() => setSuccessVisible(true)} /></div> : null}
   </Ih5Stage></main>
 }
