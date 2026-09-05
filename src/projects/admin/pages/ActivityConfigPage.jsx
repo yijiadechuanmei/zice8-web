@@ -332,6 +332,10 @@ export default function ActivityConfigPage({ activity }) {
   async function handleClearRiderSafetySurveyData() {
     const scope = riderSafetyClearScope
     const userId = riderSafetyUserId.trim()
+    if (!riderSafetyTestMode && scope !== 'user') {
+      message.warning('正式阶段仅允许清除指定用户')
+      return
+    }
     if (scope === 'user' && !/^[1-9]\d*$/.test(userId)) {
       message.warning('请输入要清除的正整数用户ID')
       return
@@ -345,7 +349,7 @@ export default function ActivityConfigPage({ activity }) {
       })
       const cleared = result?.cleared || {}
       if (scope === 'user') setRiderSafetyUserId('')
-      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条、测试红包流水 ${cleared.cashGrants || 0} 条；红包库已重置`)
+      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条；${cleared.resetCashPrizeStock ? '测试红包库已重置' : '该用户可重新参与，真实红包流水、库存和预算已保留'}`)
     } catch (err) {
       const text = err.message || '清除骑手安全问卷数据失败'
       setError(text)
@@ -927,7 +931,7 @@ export default function ActivityConfigPage({ activity }) {
                   type={riderSafetyTestMode ? 'warning' : 'error'}
                   showIcon
                   message={riderSafetyTestMode ? '当前：测试阶段' : '当前：正式阶段'}
-                  description={riderSafetyTestMode ? '抽奖只扣减测试库存，不会调用微信现金红包发放；可清除个人或全部测试数据并重置红包库。' : '后续抽奖会执行微信零钱转账授权、账户和预算校验，并可能真实发放现金红包；为保护正式数据，不允许在此阶段清除数据。'}
+                  description={riderSafetyTestMode ? '抽奖只扣减测试库存，不会调用微信现金红包发放；可清除个人或全部测试数据并重置红包库。' : '抽奖可能真实发放现金红包；允许按用户ID重置参与资格，保留资金流水和额度，禁止清除全部数据。'}
                 />
                 <Popconfirm
                   title={riderSafetyTestMode ? '确认切换至正式阶段？' : '确认切换回测试阶段？'}
@@ -942,19 +946,19 @@ export default function ActivityConfigPage({ activity }) {
                 </Popconfirm>
               </Space>
             </Card>
-            <Card size="small" title="问卷测试数据清除" style={{ borderColor: '#ffccc7' }}>
+            <Card size="small" title="问卷数据清除" style={{ borderColor: '#ffccc7' }}>
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Alert
                 type="warning"
                 showIcon
                 message="仅限超级管理员；操作不可恢复"
-                description="仅测试阶段可用。清除指定用户时会回补该用户的测试红包占用；清除全部时会将本活动2元、68元红包库恢复为初始库存。不会影响活动配置、微信用户及其他活动数据。"
+                description={riderSafetyTestMode ? '测试阶段可清除个人或全部数据，并重置对应红包库存。' : '正式阶段仅可清除指定用户的参与数据，使其重新参与；保留真实红包流水、库存和预算占用。处理中红包须结束后才能清除。'}
               />
               <Space wrap>
                 <Select
                   value={riderSafetyClearScope}
                   style={{ width: 150 }}
-                  options={[{ value: 'user', label: '清除指定用户' }, { value: 'all', label: '清除全部数据' }]}
+                  options={[{ value: 'user', label: '清除指定用户' }, { value: 'all', label: '清除全部数据', disabled: !riderSafetyTestMode }]}
                   onChange={setRiderSafetyClearScope}
                 />
                 {riderSafetyClearScope === 'user' ? (
@@ -967,12 +971,12 @@ export default function ActivityConfigPage({ activity }) {
                 ) : null}
                 <Popconfirm
                   title={riderSafetyClearScope === 'all' ? '确认清除本活动全部问卷数据？' : '确认清除该用户的问卷数据？'}
-                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除，并将红包库恢复到初始库存；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；会清除该用户数据并回补其测试红包库存，不影响其他用户和其他活动。`}
+                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除，并将红包库恢复到初始库存；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；${riderSafetyTestMode ? '清除参与数据并回补测试红包库存' : '重置参与资格，保留真实红包流水及库存、预算消耗，再次抽奖可能再次真实发放红包'}。`}
                   okText="确认清除"
                   cancelText="取消"
                   onConfirm={handleClearRiderSafetySurveyData}
                 >
-                  <Button danger loading={riderSafetyClearing} disabled={!riderSafetyTestMode || (riderSafetyClearScope === 'user' && !/^[1-9]\d*$/.test(riderSafetyUserId.trim()))}>
+                  <Button danger loading={riderSafetyClearing} disabled={(!riderSafetyTestMode && riderSafetyClearScope !== 'user') || (riderSafetyClearScope === 'user' && !/^[1-9]\d*$/.test(riderSafetyUserId.trim()))}>
                     {riderSafetyClearScope === 'all' ? '清除全部数据' : '清除指定用户'}
                   </Button>
                 </Popconfirm>
