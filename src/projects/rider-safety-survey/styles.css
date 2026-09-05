@@ -1320,6 +1320,9 @@
   display: block;
   animation: rss-result-reveal 0.42s ease-out both;
 }
+.rss-result-card-placeholder {
+  aspect-ratio: 687 / 928;
+}
 .rss-result-draw {
   width: 90.1334%;
   height: 8.0111%;

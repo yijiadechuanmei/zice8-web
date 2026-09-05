@@ -367,12 +367,16 @@ export default function RiderSafetySurveyProject({ routeParams }) {
       {stage === "result" && result ? (
         <section className="rss-result-scene">
           <div className="rss-result-canvas">
-            <img
+            {result.resultImage ? <img
               className="rss-result-card"
               src={`${activityAssetsBaseUrl}/${result.resultImage}`}
               alt={`${result.title}结果卡`}
               referrerPolicy="no-referrer"
-            />
+            /> : <div
+              className="rss-result-card rss-result-card-placeholder"
+              role="img"
+              aria-label={`${result.title}海报待制作`}
+            />}
             <button
               className="rss-result-draw"
               type="button"

@@ -178,7 +178,7 @@ export const results = {
     title: "犹豫就会败北",
     stars: 2,
     subtitle: "有基本常识，但面对中介定力不够",
-    resultImage: "bf727a705ac2d252930cfbf7164680bf_611510_687_928.png",
+    resultImage: null,
     diagnosis: `车技这块您拿捏得死死的，下雨天滑倒都知道怎么拍照留证，
 绝对是老江湖！但一问职伤保障就“马冬梅”—别嫌麻烦，国家
 给交的保险不要白不要！另外，千万别信路边“代办多赔钱”的
