@@ -15,6 +15,7 @@ import SpotDifferenceRules from './SpotDifferenceRules'
 import SpotDifferenceGame from './SpotDifferenceGame'
 import QuizFlow from './QuizFlow'
 import RankingPage from './RankingPage'
+import SpotDifferenceFindGame from './SpotDifferenceFindGame'
 import './styles.css'
 
 const GRID_WIDTH = 15
@@ -588,7 +589,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'spot-difference-game') {
-    return <SpotDifferenceGame onBack={() => setView('spot-difference-rules')} onComplete={() => setView('quiz')} />
+    return <SpotDifferenceFindGame onBack={() => setView('spot-difference-rules')} onComplete={() => setView('quiz')} />
   }
 
   if (view === 'fruit-merge') {
