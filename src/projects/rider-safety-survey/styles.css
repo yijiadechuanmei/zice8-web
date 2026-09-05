@@ -1325,7 +1325,7 @@
   width: 50.8%;
   min-height: 4.6271%;
   margin: 0;
-  top: 62.3%;
+  top: 60.8%;
   left: 24.5334%;
   display: grid;
   place-items: center;
@@ -1341,7 +1341,7 @@
 .rss-result-diagnosis {
   width: 78.8%;
   margin: 0;
-  top: 68%;
+  top: 66.2%;
   left: 10.5334%;
   color: #fff;
   font-size: min(2.6667vw, 20px);
@@ -1357,7 +1357,7 @@
   height: 8.0111%;
   margin: 0;
   padding: 0;
-  top: 84.3%;
+  top: 82.2%;
   left: 4.8%;
   display: grid;
   place-items: center;
@@ -1384,10 +1384,10 @@
 }
 .rss-article-list {
   width: min(90.1334vw, 676px);
-  margin: max(-12.8vw, -96px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
-  padding-top: min(5.3334vw, 40px);
+  margin: max(-16vw, -120px) auto max(10vw, calc(10vw + env(safe-area-inset-bottom)));
+  padding-top: min(3.2vw, 24px);
   display: grid;
-  gap: min(3.2vw, 24px);
+  gap: min(2.1334vw, 16px);
   position: relative;
   z-index: 1;
 }
