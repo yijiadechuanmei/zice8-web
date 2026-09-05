@@ -503,7 +503,7 @@ export default function FruitMergeGame({ onBack }) {
           <div><span>收获进度</span><strong><HarvestFruit type="apple" unlocked={harvestedLevels.includes(3)} /><HarvestFruit type="pear" unlocked={harvestedLevels.includes(4)} /></strong></div>
           <button type="button" onClick={restart}>重新开始</button>
         </section>
-        {isComplete ? <div className="lyfg-merge-success" role="dialog" aria-modal="true"><span><HarvestFruit type="apple" unlocked /><b>+</b><HarvestFruit type="pear" unlocked /></span><h2>两种水果收获完成！</h2><p>你已合成苹果与梨，下一步可进入消保答题。</p><button type="button" onClick={restart}>再玩一次</button></div> : null}
+        {isComplete ? <div className="lyfg-merge-success" role="status"><span><HarvestFruit type="apple" unlocked /><b>+</b><HarvestFruit type="pear" unlocked /></span><h2>恭喜你</h2><p>闯关成功！</p></div> : null}
       </section>
     </main>
   )

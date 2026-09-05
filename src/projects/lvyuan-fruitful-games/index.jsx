@@ -541,9 +541,9 @@ function SnakeGame({ activityKey, onBack, onComplete }) {
           ) : null}
           {gameFinished ? (
             <div className="lyfg-ih5-snake-overlay">
-              <h2>{gameState === 'success' ? '硕果满篮！' : '碰到果园边界了'}</h2>
-              <p>{gameState === 'success' ? `已收集全部 ${SNAKE_BEAD_COUNT} 颗珠子` : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 颗，再试一次吧`}</p>
-              <button type="button" onClick={restartGame}>再来一局</button>
+              <h2>{gameState === 'success' ? '恭喜你' : '碰到果园边界了'}</h2>
+              <p>{gameState === 'success' ? '闯关成功！' : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 颗，再试一次吧`}</p>
+              {gameState === 'failed' ? <button type="button" onClick={restartGame}>再来一局</button> : null}
             </div>
           ) : null}
         </div>

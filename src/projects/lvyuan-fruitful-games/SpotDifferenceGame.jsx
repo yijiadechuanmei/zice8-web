@@ -90,6 +90,6 @@ export default function SpotDifferenceGame({ onBack, onComplete }) {
     <section ref={boardRef} className="lyfg-spot-merge-board" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} aria-label="按住移动种子，松手下落">
       <GameCanvas bodiesRef={bodiesRef} previewRef={previewRef} nextTypeRef={nextTypeRef} completeRef={completeRef} /><span className="lyfg-spot-merge-tip">按住移动 · 松手下落 · 当前：{TYPES[nextType].name}</span>
     </section>
-    {complete ? <div className="lyfg-spot-merge-success"><div><strong>五果丰收</strong><p>恭喜完成游戏！</p><button type="button" onClick={restart}>再玩一次</button><button type="button" onClick={onBack}>返回选择</button></div></div> : null}
+    {complete ? <div className="lyfg-spot-merge-success"><div><strong>恭喜你</strong><p>闯关成功！</p></div></div> : null}
   </Ih5Stage></main>
 }
