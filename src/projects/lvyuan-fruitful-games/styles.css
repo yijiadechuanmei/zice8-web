@@ -1466,6 +1466,7 @@
 
 .lyfg-ih5-snake-background,
 .lyfg-ih5-snake-title,
+.lyfg-ih5-snake-boundary,
 .lyfg-ih5-snake-playfield,
 .lyfg-ih5-snake-back,
 .lyfg-ih5-snake-pause {
@@ -1491,12 +1492,21 @@
   animation: lyfg-ih5-reveal 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.lyfg-ih5-snake-boundary {
+  z-index: 3;
+  top: 239px;
+  left: 52px;
+  width: 647px;
+  height: 1257px;
+  pointer-events: none;
+}
+
 .lyfg-ih5-snake-playfield {
   z-index: 2;
   top: 239px;
-  left: 61px;
-  width: 630px;
-  height: 1270px;
+  left: 52px;
+  width: 647px;
+  height: 1257px;
   overflow: hidden;
 }
 

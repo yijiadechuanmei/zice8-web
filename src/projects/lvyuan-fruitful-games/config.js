@@ -42,6 +42,7 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   mergeRulesStart: 'd38476026148b3f9de858ac3917c019f_147856_367_267.png',
   snakeBackground: '2078ea4ed1d72ccc9e82e98305ec1144_3266804_765_1627.png',
   snakeTitle: 'b6bcc0301f373b3f255365ad434155ed_142239_615_91.png',
+  snakeBoundary: 'https://file3.ih5.cn/v35/edt/u10013600/be3f5099f2919fa8c3c58cebbc7e82a3_96252_647_1257.png',
   snakeRulesTitle: 'f7712b3332398df948a01c5e24629b89_356601_543_352.png',
   snakeRulesDiagram: '683ebc6086af91ad664e1156862a44ba_1162054_624_805.png',
   snakeRulesBack: '784c0097227e26e62ffc1b2d48ec0e4b_165279_352_286.png',
@@ -102,7 +103,8 @@ export const LVYUAN_SNAKE_MATERIALS = {
 }
 
 export function getLvyuanFruitfulGamesAsset(assetName) {
-  return `${LVYUAN_FRUITFUL_GAMES_ASSET_BASE}/${LVYUAN_FRUITFUL_GAMES_IH5_ASSETS[assetName] || assetName}`
+  const asset = LVYUAN_FRUITFUL_GAMES_IH5_ASSETS[assetName] || assetName
+  return /^https?:\/\//i.test(asset) ? asset : `${LVYUAN_FRUITFUL_GAMES_ASSET_BASE}/${asset}`
 }
 
 export const LVYUAN_SNAKE_TARGET_SCORE = 100

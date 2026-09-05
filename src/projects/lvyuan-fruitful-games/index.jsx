@@ -30,6 +30,7 @@ const SNAKE_RADIUS = 0.52
 const FRUIT_COLLISION_DISTANCE = 0.78
 const TRAIL_SAMPLE_DISTANCE = 0.1
 const PLAY_AREA_INSET = 1.05
+const FRUIT_SPAWN_INSET = 2.1
 const SNAKE_BEAD_COUNT = LVYUAN_SNAKE_MATERIALS.bodies.length
 
 const DIRECTIONS = {
@@ -48,8 +49,8 @@ function getRandomFruit(snake) {
   let cell = { x: GRID_WIDTH * 0.25, y: GRID_HEIGHT * 0.25 }
   for (let attempt = 0; attempt < 80; attempt += 1) {
     const candidate = {
-      x: PLAY_AREA_INSET + 0.25 + Math.random() * (GRID_WIDTH - (PLAY_AREA_INSET + 0.25) * 2),
-      y: PLAY_AREA_INSET + 0.25 + Math.random() * (GRID_HEIGHT - (PLAY_AREA_INSET + 0.25) * 2),
+      x: FRUIT_SPAWN_INSET + Math.random() * (GRID_WIDTH - FRUIT_SPAWN_INSET * 2),
+      y: FRUIT_SPAWN_INSET + Math.random() * (GRID_HEIGHT - FRUIT_SPAWN_INSET * 2),
     }
     const isClear = snake.every((part) => Math.hypot(part.x - candidate.x, part.y - candidate.y) > 1.5)
     if (isClear) {
@@ -535,6 +536,7 @@ function SnakeGame({ activityKey, onBack, onComplete }) {
       <Ih5Stage label="果园贪吃蛇">
         <img className="lyfg-ih5-snake-background" src={getLvyuanFruitfulGamesAsset('snakeBackground')} alt="" draggable="false" />
         <img className="lyfg-ih5-snake-title" src={getLvyuanFruitfulGamesAsset('snakeTitle')} alt="果园贪吃蛇，等待果子" draggable="false" />
+        <img className="lyfg-ih5-snake-boundary" src={getLvyuanFruitfulGamesAsset('snakeBoundary')} alt="" draggable="false" />
         <button className="lyfg-ih5-snake-back" type="button" onClick={onBack} aria-label="返回游戏选择">‹</button>
         <div className="lyfg-ih5-snake-playfield" role="img" aria-label={`果园贪吃蛇游戏区，当前蛇身长度 ${snakeLength}`}>
           <SnakeCanvas snakeRef={snakeRef} fruitRef={fruitRef} directionRef={directionRef} />
