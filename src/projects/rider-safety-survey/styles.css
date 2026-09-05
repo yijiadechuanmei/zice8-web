@@ -1402,10 +1402,10 @@
 .rss-article-heading h2 {
   margin: 0;
   color: #fff;
-  font-size: min(5.0667vw, 38px);
+  font-size: min(4.2667vw, 32px);
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: min(0.16vw, 1.2px);
+  letter-spacing: min(0.1vw, 0.75px);
   text-align: center;
 }
 .rss-article-mascot {
