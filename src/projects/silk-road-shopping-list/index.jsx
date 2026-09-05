@@ -372,16 +372,45 @@ function Home({ onStart }) {
 
 function VideoPanel({ mode, videoRef, onEnd, onShop }) {
   const [progress, setProgress] = useState(0)
+  const progressRef = useRef(null)
+  const draggingProgressRef = useRef(false)
   const updateProgress = (event) => {
     const video = event.currentTarget
     const duration = Number(video.duration)
     setProgress(Number.isFinite(duration) && duration > 0 ? Math.min(video.currentTime / duration, 1) : 0)
   }
+  const seekToPointer = (event) => {
+    const video = videoRef.current
+    const track = progressRef.current
+    const duration = Number(video?.duration)
+    if (!video || !track || !Number.isFinite(duration) || duration <= 0) return
+    const rect = track.getBoundingClientRect()
+    const isVertical = rect.height > rect.width
+    const position = isVertical ? (event.clientY - rect.top) / rect.height : (event.clientX - rect.left) / rect.width
+    const ratio = Math.min(Math.max(position, 0), 1)
+    video.currentTime = ratio * duration
+    setProgress(ratio)
+  }
+  const handleProgressKeyDown = (event) => {
+    const video = videoRef.current
+    const duration = Number(video?.duration)
+    if (!video || !Number.isFinite(duration) || duration <= 0) return
+    const step = 5 / duration
+    let nextProgress
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') nextProgress = Math.min(progress + step, 1)
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') nextProgress = Math.max(progress - step, 0)
+    else if (event.key === 'Home') nextProgress = 0
+    else if (event.key === 'End') nextProgress = 1
+    else return
+    event.preventDefault()
+    video.currentTime = nextProgress * duration
+    setProgress(nextProgress)
+  }
   return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
     <Stage height={1448}>
       <div style={{ position: 'absolute', width: 1448, height: 750, left: 750, top: 0, transform: 'rotate(90deg)', transformOrigin: '0 0', transformStyle: 'flat' }}>
         <video ref={videoRef} src={silkRoadAssets.video} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onDurationChange={updateProgress} onTimeUpdate={updateProgress} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-        {mode === 'video' && <div className="srsl-video-progress" role="progressbar" aria-label="视频播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)} style={{ '--srsl-video-progress': `${progress * 100}%` }} />}
+        {mode === 'video' && <div ref={progressRef} className="srsl-video-progress" role="slider" tabIndex={0} aria-label="视频播放进度，可拖动调整" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)} aria-valuetext={`${Math.round(progress * 100)}%`} style={{ '--srsl-video-progress': `${progress * 100}%` }} onPointerDown={(event) => { event.preventDefault(); draggingProgressRef.current = true; event.currentTarget.setPointerCapture?.(event.pointerId); seekToPointer(event) }} onPointerMove={(event) => { if (draggingProgressRef.current) seekToPointer(event) }} onPointerUp={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onPointerCancel={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onKeyDown={handleProgressKeyDown} />}
       </div>
       {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button srsl-shop-entry" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(90deg)', transformOrigin: '50% 50%' }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
