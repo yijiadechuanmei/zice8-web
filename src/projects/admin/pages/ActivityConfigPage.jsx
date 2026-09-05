@@ -349,7 +349,7 @@ export default function ActivityConfigPage({ activity }) {
       })
       const cleared = result?.cleared || {}
       if (scope === 'user') setRiderSafetyUserId('')
-      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条；${cleared.resetCashPrizeStock ? '测试红包库已重置' : '该用户可重新参与，真实红包流水、库存和预算已保留'}`)
+      message.success(`已清除问卷 ${cleared.submissions || 0} 条、抽奖 ${cleared.draws || 0} 条；${cleared.resetCashPrizeStock ? '测试数据已重置，真实红包流水、库存和预算已保留' : '该用户可重新参与，真实红包流水、库存和预算已保留'}`)
     } catch (err) {
       const text = err.message || '清除骑手安全问卷数据失败'
       setError(text)
@@ -931,11 +931,11 @@ export default function ActivityConfigPage({ activity }) {
                   type={riderSafetyTestMode ? 'warning' : 'error'}
                   showIcon
                   message={riderSafetyTestMode ? '当前：测试阶段' : '当前：正式阶段'}
-                  description={riderSafetyTestMode ? '抽奖只扣减测试库存，不会调用微信现金红包发放；可清除个人或全部测试数据并重置红包库。' : '抽奖可能真实发放现金红包；允许按用户ID重置参与资格，保留资金流水和额度，禁止清除全部数据。'}
+                  description={riderSafetyTestMode ? '抽奖只扣减测试库存，不会调用微信现金红包发放；可清除个人或全部测试数据。若曾有正式发放记录，真实红包流水、库存和预算会保留。' : '抽奖可能真实发放现金红包；允许按用户ID重置参与资格，保留资金流水和额度，禁止清除全部数据。'}
                 />
                 <Popconfirm
                   title={riderSafetyTestMode ? '确认切换至正式阶段？' : '确认切换回测试阶段？'}
-                  description={riderSafetyTestMode ? '仅允许在本活动没有参与、问卷、抽奖和红包流水时切换。切换后将开启真实红包发放。' : '仅允许在本活动没有参与、问卷、抽奖和红包流水时切换。切换后将关闭真实红包发放。'}
+                  description={riderSafetyTestMode ? '请先通过“清除全部数据”清空本活动测试参与、问卷、抽奖和测试红包记录；切换后将开启真实红包发放。' : '所有正式红包发放结束后即可切回测试阶段；已完成的真实红包流水、库存和预算将保留，不会影响测试。'}
                   okText="确认切换"
                   cancelText="取消"
                   onConfirm={() => handleRiderSafetyModeChange(riderSafetyTestMode ? 'formal' : 'test')}
@@ -952,7 +952,7 @@ export default function ActivityConfigPage({ activity }) {
                 type="warning"
                 showIcon
                 message="仅限超级管理员；操作不可恢复"
-                description={riderSafetyTestMode ? '测试阶段可清除个人或全部数据，并重置对应红包库存。' : '正式阶段仅可清除指定用户的参与数据，使其重新参与；保留真实红包流水、库存和预算占用。处理中红包须结束后才能清除。'}
+                description={riderSafetyTestMode ? '测试阶段可清除个人或全部测试数据，并按保留的真实红包流水重新计算库存和预算。' : '正式阶段仅可清除指定用户的参与数据，使其重新参与；保留真实红包流水、库存和预算占用。处理中红包须结束后才能清除。'}
               />
               <Space wrap>
                 <Select
@@ -971,7 +971,7 @@ export default function ActivityConfigPage({ activity }) {
                 ) : null}
                 <Popconfirm
                   title={riderSafetyClearScope === 'all' ? '确认清除本活动全部问卷数据？' : '确认清除该用户的问卷数据？'}
-                  description={riderSafetyClearScope === 'all' ? '测试阶段无论是否中奖均可清除，并将红包库恢复到初始库存；不会删除微信用户、活动配置或其他活动数据。' : `用户ID：${riderSafetyUserId || '未填写'}；${riderSafetyTestMode ? '清除参与数据并回补测试红包库存' : '重置参与资格，保留真实红包流水及库存、预算消耗，再次抽奖可能再次真实发放红包'}。`}
+                  description={riderSafetyClearScope === 'all' ? '清除全部测试参与数据；不会删除微信用户、活动配置、其他活动数据或已完成的真实红包流水。红包库存和预算将按保留流水重新计算。' : `用户ID：${riderSafetyUserId || '未填写'}；${riderSafetyTestMode ? '清除测试参与数据，并按保留的真实红包流水重新计算库存' : '重置参与资格，保留真实红包流水及库存、预算消耗，再次抽奖可能再次真实发放红包'}。`}
                   okText="确认清除"
                   cancelText="取消"
                   onConfirm={handleClearRiderSafetySurveyData}
