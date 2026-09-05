@@ -46,24 +46,23 @@
 .srsl-cart-drawer footer b { color: #b73f24; }.srsl-cart-drawer footer button { flex: 1; min-height: min(10.133vw, 76px); border: 0; border-radius: 99px; color: #fff7e8; background: #d74b28; font: min(4vw, 30px) "PingFang SC", "Microsoft YaHei", sans-serif; }.srsl-cart-drawer footer button:disabled { opacity: .45; }
 @keyframes srsl-drawer-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-.srsl-back-hitbox { position: absolute; z-index: 3; left: 0; top: 0; width: 70px; height: 70px; padding: 0; border: 0; background: transparent; }
-.srsl-avatar { border-radius: 50%; object-fit: cover; }
-.srsl-nickname, .srsl-poster-selected, .srsl-poster-score { position: absolute; z-index: 1; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-.srsl-nickname { color: #3b4b42; font-size: 24px; font-weight: bold; line-height: 46px; white-space: nowrap; text-overflow: ellipsis; }
-.srsl-poster-selected { color: #f3e2d3; font: 22px/38px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
-.srsl-poster-score { color: #000; font: bold 53px/64px Arial, sans-serif; text-align: right; }
-.srsl-collection { position: absolute; left: 0; top: 699px; width: 750px; min-height: 592px; overflow: visible; border-radius: 20px; box-shadow: none; filter: none; background-repeat: no-repeat; background-position: center center; background-size: cover; }
-.srsl-poster-label { z-index: 2; }
-.srsl-poster-grid { position: absolute; z-index: 1; left: 25px; top: 29px; display: grid; grid-template-columns: repeat(4, 171px); grid-auto-rows: 213px; width: 700px; padding: 30px 1px 10px; border: 2px solid #e0cab5; border-radius: 20px; }
-.srsl-poster-product { position: relative; width: 171px; height: 213px; overflow: hidden; }
-.srsl-poster-product > img:first-child { position: absolute; inset: 0; width: 171px; height: 213px; }
-.srsl-poster-product > img:nth-child(2) { position: absolute; left: 14px; top: -4px; width: 127px; height: 180px; }
-.srsl-poster-product-name { position: absolute; left: 0; top: 150px; display: block; width: 171px; height: 46px; color: #3b4b42; font: 26px/46px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
-.srsl-poster-order { position: absolute; left: 0; top: 0; display: block; width: 40px; height: 40px; border-radius: 50%; color: #f3e2d3; background: #866548; font: 24px/40px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
-.srsl-footer { position: absolute; left: 0; width: 750px; height: 403px; }
-.srsl-footer > img { position: absolute; inset: 0; width: 750px; height: 403px; }
-.srsl-qr { position: absolute; left: 77px; top: 136px; width: 106px; height: 106px; background: #fff; }
-.srsl-qr canvas { display: block; width: 106px !important; height: 106px !important; }
+.srsl-final-poster-stage .srsl-stage { overflow: hidden; background: #f3e2d3; }
+.srsl-final-background { display: block; pointer-events: none; }
+.srsl-back-hitbox { position: absolute; z-index: 5; left: 0; top: 0; width: 70px; height: 70px; padding: 0; border: 0; background: transparent; }
+.srsl-final-avatar { position: absolute; z-index: 3; overflow: hidden; border: 2px solid #fff; border-radius: 50%; background: transparent; }
+.srsl-final-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.srsl-final-nickname, .srsl-final-number, .srsl-final-title { position: absolute; z-index: 3; display: flex; align-items: center; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+.srsl-final-nickname { color: #3b4b42; font-weight: bold; white-space: nowrap; text-overflow: ellipsis; }
+.srsl-final-number { justify-content: flex-end; color: #000; font-family: Arial, sans-serif; font-weight: bold; text-align: right; }
+.srsl-final-title { justify-content: center; overflow: visible; color: #fff; letter-spacing: 1px; text-align: center; white-space: nowrap; }
+.srsl-final-product-list { position: absolute; z-index: 3; overflow: visible; transform-origin: 0 0; }
+.srsl-final-product { position: absolute; overflow: visible; }
+.srsl-final-product-image { position: absolute; display: block; }
+.srsl-final-product-name { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #5c3819; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: normal; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.srsl-final-product-check { position: absolute; display: block; border: 2px solid #5c3819; }
+.srsl-final-product-check img { position: absolute; left: -2px; top: -2px; display: block; width: 26px; height: 26px; }
+.srsl-final-qr { position: absolute; z-index: 3; overflow: hidden; background: #f5f5f5; }
+.srsl-final-qr canvas { display: block; width: 100% !important; height: 100% !important; background: #fff; }
 .srsl-poster-actions { position: fixed; z-index: 90; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: min(3.2vw, 24px); width: min(calc(100vw - 32px), 694px); transform: translateX(-50%); }
 .srsl-poster-actions button { display: flex; align-items: center; justify-content: center; gap: min(2.133vw, 16px); min-height: min(12vw, 90px); padding: 0 min(2.667vw, 20px); border: 2px solid #d6aa7e; border-radius: 999px; font: min(4.267vw, 32px)/1 "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; box-shadow: 0 5px 14px rgba(89, 55, 29, .18); }
 .srsl-poster-actions .anticon { font-size: min(4.267vw, 32px); }

@@ -1,8 +1,4 @@
-import posterHeader from './assets/poster/header.png'
-import posterCollection from './assets/poster/collection.png'
-import posterLabel from './assets/poster/label.png'
-import posterItem from './assets/poster/item.png'
-import posterFooter from './assets/poster/footer.png'
+import posterCheck from './assets/poster/final/check.svg'
 
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE = 'silk_road_shopping_list'
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY = 'millennium_silk_road_shopping_list_2026'
@@ -26,11 +22,11 @@ export const silkRoadAssets = {
   minusIcon: `${ASSET_ROOT}/1b16aadeba1e9b4e0b5f33dcadd456f4_633.svg`,
   detailTitle: `${ASSET_ROOT}/3d7685eaa9e31059a8bc4458a5713a8f_10412_115_58.png`,
   detailIcon: `${ASSET_ROOT}/4f985035441e52a947de6e19dcbc057b_425.svg`,
-  posterHeader,
-  posterCollection,
-  posterLabel,
-  posterItem,
-  posterFooter,
+  posterNovice: `${ASSET_ROOT}/f2f20ea0fcefa00825ef35a6f93a255c_759257_750_1624.png`,
+  posterApprentice: `${ASSET_ROOT}/e6316f6997866910ea82ec8f8274e1c8_767683_750_1624.png`,
+  posterExpert: `${ASSET_ROOT}/148d2b2c2e9685ab17589e255eff9faa_923172_750_1900.png`,
+  posterMasterOverlay: `${ASSET_ROOT}/0490edb206703dddc1e25a05ea31803b_1058644_750_2098.png`,
+  posterCheck,
 }
 
 const productImage = (name) => `${ASSET_ROOT}/${name}`

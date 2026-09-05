@@ -23,6 +23,113 @@ function getShoppingScore(quantity) {
   return Math.round(minScore + ((count - minCount) / (maxCount - minCount)) * (maxScore - minScore))
 }
 
+const POSTER_TIERS = [
+  {
+    max: 7,
+    title: '丝路新手·大漠小白',
+    height: 1624,
+    backgrounds: [{ src: silkRoadAssets.posterNovice, height: 1624 }],
+    avatar: { left: 49, top: 555, size: 106 },
+    nickname: { left: 167, top: 561, width: 153, height: 46, fontSize: 24, align: 'left' },
+    quantity: { left: 158, top: 722, width: 119, height: 64, fontSize: 53 },
+    score: { left: 163, top: 851, width: 119, height: 64, fontSize: 53 },
+    titleBox: { left: 47, top: 1025, width: 257, height: 46, fontSize: 25 },
+    lists: [{ left: 384, top: 641, width: 320, height: 644, rotate: 4 }],
+    product: {
+      width: 320, height: 92, step: 92, offsetLeft: 4,
+      image: { left: 3, top: -18, width: 89, height: 126 },
+      name: { left: 93, top: 16, width: 148, height: 46, fontSize: 25 },
+      check: { left: 260, top: 25, size: 26 },
+    },
+    qr: { left: 72, top: 1295, outer: 154, inner: 141 },
+  },
+  {
+    max: 14,
+    title: '丝路学徒·长安常客',
+    height: 1624,
+    backgrounds: [{ src: silkRoadAssets.posterApprentice, height: 1624 }],
+    avatar: { left: 49, top: 555, size: 106 },
+    nickname: { left: 167, top: 561, width: 153, height: 46, fontSize: 24, align: 'left' },
+    quantity: { left: 158, top: 722, width: 119, height: 64, fontSize: 53 },
+    score: { left: 163, top: 851, width: 119, height: 64, fontSize: 53 },
+    titleBox: { left: 47, top: 1025, width: 257, height: 46, fontSize: 25 },
+    lists: [{ left: 384, top: 590, width: 320, height: 884, rotate: 3 }],
+    product: {
+      width: 320, height: 63, step: 63, offsetLeft: 4,
+      image: { left: 26, top: -12, width: 66, height: 93 },
+      name: { left: 93, top: 16, width: 148, height: 46, fontSize: 22 },
+      check: { left: 260, top: 25, size: 26 },
+    },
+    qr: { left: 72, top: 1295, outer: 154, inner: 141 },
+  },
+  {
+    max: 21,
+    title: '丝路行家·西市VIP',
+    height: 1900,
+    backgrounds: [{ src: silkRoadAssets.posterExpert, height: 1900 }],
+    avatar: { left: 62, top: 633, size: 106 },
+    nickname: { left: 41, top: 759, width: 153, height: 46, fontSize: 24, align: 'center' },
+    quantity: { left: 36, top: 965, width: 119, height: 64, fontSize: 45 },
+    score: { left: 36, top: 1163, width: 119, height: 64, fontSize: 45 },
+    titleBox: { left: 32, top: 1346, width: 175, height: 46, fontSize: 20 },
+    lists: [
+      { left: 255, top: 722, width: 203, height: 884, rotate: 0 },
+      { left: 501, top: 722, width: 203, height: 884, rotate: 0 },
+    ],
+    product: {
+      width: 203, height: 63, step: 76, offsetLeft: 4,
+      image: { left: -3, top: -12, width: 66, height: 93 },
+      name: { left: 55, top: 16, width: 102, height: 46, fontSize: 20 },
+      check: { left: 161, top: 25, size: 26 },
+    },
+    qr: { left: 53, top: 1520, outer: 134, inner: 124 },
+  },
+  {
+    max: 28,
+    title: '丝路宗师·凿空之王',
+    height: 2098,
+    backgrounds: [
+      { src: silkRoadAssets.posterExpert, height: 1900 },
+      { src: silkRoadAssets.posterMasterOverlay, height: 2098 },
+    ],
+    avatar: { left: 49, top: 583, size: 106 },
+    nickname: { left: 28, top: 687, width: 153, height: 46, fontSize: 24, align: 'center' },
+    quantity: { left: 11, top: 895, width: 119, height: 64, fontSize: 45 },
+    score: { left: 28, top: 1105, width: 119, height: 64, fontSize: 45 },
+    titleBox: { left: 16, top: 1324, width: 175, height: 46, fontSize: 20 },
+    lists: [
+      { left: 237, top: 650, width: 223, height: 1193, rotate: 1 },
+      { left: 501, top: 650, width: 223, height: 1193, rotate: 1 },
+    ],
+    product: {
+      width: 203, height: 63, step: 85, offsetLeft: 4,
+      image: { left: -3, top: -12, width: 66, height: 93 },
+      name: { left: 65, top: 16, width: 102, height: 46, fontSize: 20 },
+      check: { left: 176, top: 25, size: 26 },
+    },
+    qr: { left: 41, top: 1633, outer: 134, inner: 124 },
+  },
+]
+
+function getPosterTier(quantity) {
+  return POSTER_TIERS.find(({ max }) => quantity <= max) || POSTER_TIERS[POSTER_TIERS.length - 1]
+}
+
+function getPosterColumns(products, tier) {
+  if (tier.lists.length === 1) return [products]
+  return [
+    products.filter((_, index) => index % 2 === 0),
+    products.filter((_, index) => index % 2 === 1),
+  ]
+}
+
+function fitPosterText(context, text, maxWidth) {
+  if (context.measureText(text).width <= maxWidth) return text
+  let value = text
+  while (value && context.measureText(`${value}…`).width > maxWidth) value = value.slice(0, -1)
+  return `${value}…`
+}
+
 function loadPosterImage(src, label, timeout = 10000) {
   return new Promise((resolve, reject) => {
     if (!src) {
@@ -30,6 +137,7 @@ function loadPosterImage(src, label, timeout = 10000) {
       return
     }
     const image = new Image()
+    image.referrerPolicy = 'no-referrer'
     let settled = false
     const finish = (callback, value) => {
       if (settled) return
@@ -43,28 +151,6 @@ function loadPosterImage(src, label, timeout = 10000) {
     image.onerror = () => finish(reject, new Error(`${label}加载失败`))
     image.src = src
   })
-}
-
-function drawPosterLayer(context, image, left, top, width, height, options = {}) {
-  const { sourceTop = 0, sourceHeight = image.height, fadeTop = 0 } = options
-  if (!fadeTop) {
-    context.drawImage(image, 0, sourceTop, image.width, sourceHeight, left, top, width, height)
-    return
-  }
-  const layer = document.createElement('canvas')
-  layer.width = width
-  layer.height = height
-  const layerContext = layer.getContext('2d')
-  if (!layerContext) throw new Error('当前浏览器不支持海报图层合成')
-  layerContext.drawImage(image, 0, sourceTop, image.width, sourceHeight, 0, 0, width, height)
-  layerContext.globalCompositeOperation = 'destination-in'
-  const mask = layerContext.createLinearGradient(0, 0, 0, height)
-  mask.addColorStop(0, 'rgba(255, 255, 255, 0)')
-  mask.addColorStop(Math.min(fadeTop / height, 1), 'rgba(255, 255, 255, 1)')
-  mask.addColorStop(1, 'rgba(255, 255, 255, 1)')
-  layerContext.fillStyle = mask
-  layerContext.fillRect(0, 0, width, height)
-  context.drawImage(layer, left, top)
 }
 
 function waitForPosterQr(qrRef) {
@@ -372,89 +458,97 @@ function Poster({ products, profile, onBack, onReselect }) {
   const qrRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
-  const rows = Math.max(1, Math.ceil(products.length / 4))
+  const tier = getPosterTier(products.length)
+  const columns = useMemo(() => getPosterColumns(products, tier), [products, tier])
   const score = getShoppingScore(products.length)
-  const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
-  const footerTop = 699 + collectionHeight - 70
-  const height = footerTop + 403
   const composePoster = useCallback(async () => {
     const qrCanvas = await waitForPosterQr(qrRef)
     const output = document.createElement('canvas')
     output.width = 750
-    output.height = height
+    output.height = tier.height
     const context = output.getContext('2d')
     if (!context) throw new Error('当前浏览器不支持海报合成')
-    // 头图和底图含半透明像素；先铺页面纸张底色，避免导出的 PNG 在深色预览层上透出暗影。
     context.fillStyle = '#f3e2d3'
     context.fillRect(0, 0, output.width, output.height)
-    const [header, collection, label, item, footer, avatar, ...productImages] = await Promise.all([
-      loadPosterImage(silkRoadAssets.posterHeader, '海报头图'),
-      loadPosterImage(silkRoadAssets.posterCollection, '商品列表背景'),
-      loadPosterImage(silkRoadAssets.posterLabel, '列表标题图'),
-      loadPosterImage(silkRoadAssets.posterItem, '商品卡片底图'),
-      loadPosterImage(silkRoadAssets.posterFooter, '海报底图'),
-      // 微信头像来自第三方域名时可能被 Canvas 跨域策略拦住；头像仅作为可选图层。
+    const [backgrounds, checkImage, avatar, productImages] = await Promise.all([
+      Promise.all(tier.backgrounds.map((layer, index) => loadPosterImage(layer.src, `第${index + 1}层海报背景`))),
+      loadPosterImage(silkRoadAssets.posterCheck, '商品勾选图标'),
       profile.avatar ? loadPosterImage(profile.avatar, '微信头像', 1500).catch(() => null) : Promise.resolve(null),
-      ...products.map((product, index) => loadPosterImage(product.posterImage, `第${index + 1}件商品“${product.name}”图片`)),
+      Promise.all(products.map((product, index) => loadPosterImage(product.posterImage, `第${index + 1}件商品“${product.name}”图片`))),
     ])
-    context.drawImage(header, 0, 0, 750, 769)
+    backgrounds.forEach((background, index) => {
+      context.drawImage(background, 0, 0, 750, tier.backgrounds[index].height)
+    })
     if (avatar) {
+      const { left, top, size } = tier.avatar
+      context.fillStyle = '#fff'
+      context.beginPath()
+      context.arc(left + size / 2, top + size / 2, size / 2, 0, Math.PI * 2)
+      context.fill()
       context.save()
       context.beginPath()
-      context.arc(127, 570, 53, 0, Math.PI * 2)
+      context.arc(left + size / 2, top + size / 2, size / 2 - 2, 0, Math.PI * 2)
       context.clip()
-      context.drawImage(avatar, 74, 517, 106, 106)
+      context.drawImage(avatar, left + 2, top + 2, size - 4, size - 4)
       context.restore()
     }
+    const nickname = profile.nickname || '丝路旅人'
+    const nicknameBox = tier.nickname
     context.fillStyle = '#3b4b42'
-    context.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif'
-    context.fillText(profile.nickname || '丝路旅人', 206, 550)
-    context.fillStyle = '#f3e2d3'
-    context.font = '22px PingFang SC, Microsoft YaHei, sans-serif'
+    context.font = `bold ${nicknameBox.fontSize}px PingFang SC, Microsoft YaHei, sans-serif`
+    context.textAlign = nicknameBox.align
+    context.textBaseline = 'middle'
+    const nicknameX = nicknameBox.align === 'center' ? nicknameBox.left + nicknameBox.width / 2 : nicknameBox.left
+    context.fillText(fitPosterText(context, nickname, nicknameBox.width), nicknameX, nicknameBox.top + nicknameBox.height / 2)
+
+    const drawNumber = (value, box) => {
+      context.fillStyle = '#000'
+      context.font = `bold ${box.fontSize}px Arial, sans-serif`
+      context.textAlign = 'right'
+      context.textBaseline = 'middle'
+      context.fillText(String(value), box.left + box.width, box.top + box.height / 2)
+    }
+    drawNumber(products.length, tier.quantity)
+    drawNumber(score, tier.score)
+
+    const titleBox = tier.titleBox
+    context.fillStyle = '#fff'
+    context.font = `${titleBox.fontSize}px PingFang SC, Microsoft YaHei, sans-serif`
     context.textAlign = 'center'
-    context.fillText(String(products.length), 563, 501)
-    context.fillStyle = '#000'
-    context.font = 'bold 53px Arial, sans-serif'
-    context.textAlign = 'right'
-    context.fillText(String(score), 583, 574)
-    context.save()
-    context.shadowColor = 'transparent'
-    context.shadowBlur = 0
-    context.shadowOffsetX = 0
-    context.shadowOffsetY = 0
-    context.filter = 'none'
-    const collectionEdgeCrop = Math.min(96, Math.floor((collection.height - 1) / 2))
-    drawPosterLayer(context, collection, 0, 699, 750, collectionHeight, {
-      sourceTop: collectionEdgeCrop,
-      sourceHeight: collection.height - collectionEdgeCrop * 2,
-      fadeTop: 70,
+    context.textBaseline = 'middle'
+    context.fillText(tier.title, titleBox.left + titleBox.width / 2, titleBox.top + titleBox.height / 2)
+
+    const productImagesById = new Map(products.map((product, index) => [product.id, productImages[index]]))
+    columns.forEach((columnProducts, columnIndex) => {
+      const list = tier.lists[columnIndex]
+      context.save()
+      context.translate(list.left, list.top)
+      context.rotate((list.rotate * Math.PI) / 180)
+      columnProducts.forEach((product, rowIndex) => {
+        const itemLeft = tier.product.offsetLeft
+        const itemTop = rowIndex * tier.product.step
+        const imageBox = tier.product.image
+        const nameBox = tier.product.name
+        const checkBox = tier.product.check
+        context.drawImage(productImagesById.get(product.id), itemLeft + imageBox.left, itemTop + imageBox.top, imageBox.width, imageBox.height)
+        context.fillStyle = '#5c3819'
+        context.font = `${nameBox.fontSize}px PingFang SC, Microsoft YaHei, sans-serif`
+        context.textAlign = 'center'
+        context.textBaseline = 'middle'
+        context.fillText(fitPosterText(context, product.name, nameBox.width), itemLeft + nameBox.left + nameBox.width / 2, itemTop + nameBox.top + nameBox.height / 2)
+        context.strokeStyle = '#5c3819'
+        context.lineWidth = 2
+        context.strokeRect(itemLeft + checkBox.left, itemTop + checkBox.top, checkBox.size, checkBox.size)
+        context.drawImage(checkImage, itemLeft + checkBox.left, itemTop + checkBox.top, checkBox.size, checkBox.size)
+      })
+      context.restore()
     })
-    context.restore()
-    context.strokeStyle = '#e0cab5'
-    context.lineWidth = 2
-    context.strokeRect(25, 728, 700, 42 + rows * 213)
-    products.forEach((product, index) => {
-      const column = index % 4
-      const row = Math.floor(index / 4)
-      const left = 28 + column * 171
-      const top = 760 + row * 213
-      context.drawImage(item, left, top, 171, 213)
-      context.drawImage(productImages[index], left + 14, top - 4, 127, 180)
-      context.fillStyle = '#3b4b42'
-      context.font = '26px PingFang SC, Microsoft YaHei, sans-serif'
-      context.textAlign = 'center'
-      context.fillText(product.name, left + 85.5, top + 180)
-      context.fillStyle = '#866548'
-      context.beginPath()
-      context.arc(left + 20, top + 20, 20, 0, Math.PI * 2)
-      context.fill()
-      context.fillStyle = '#f3e2d3'
-      context.font = '24px PingFang SC, Microsoft YaHei, sans-serif'
-      context.fillText(String(index + 1), left + 20, top + 28)
-    })
-    context.drawImage(label, 200.5, 699, 349, 49)
-    drawPosterLayer(context, footer, 0, footerTop, 750, 403, { fadeTop: 70 })
-    context.drawImage(qrCanvas, 77, footerTop + 136, 106, 106)
+
+    const qrLeft = tier.qr.left + (tier.qr.outer - tier.qr.inner) / 2
+    const qrTop = tier.qr.top + (tier.qr.outer - tier.qr.inner) / 2
+    context.fillStyle = '#fff'
+    context.fillRect(qrLeft, qrTop, tier.qr.inner, tier.qr.inner)
+    context.drawImage(qrCanvas, qrLeft, qrTop, tier.qr.inner, tier.qr.inner)
     const dataUrl = (() => {
       try {
         return output.toDataURL('image/png')
@@ -464,7 +558,7 @@ function Poster({ products, profile, onBack, onReselect }) {
     })()
     if (!dataUrl.startsWith('data:image/png')) throw new Error('海报转成图片失败：未生成 PNG 数据')
     return dataUrl
-  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows, score])
+  }, [columns, products, profile.avatar, profile.nickname, score, tier])
 
   const savePoster = useCallback(async () => {
     try {
@@ -485,23 +579,25 @@ function Poster({ products, profile, onBack, onReselect }) {
     })
     return () => { active = false }
   }, [composePoster])
-  return <Stage height={height}>
-    <img alt="" src={silkRoadAssets.posterHeader} style={{ position: 'absolute', width: 750, height: 769, left: 0, top: 0 }} />
+  return <Stage height={tier.height} className="srsl-final-poster-stage">
+    {tier.backgrounds.map((background, index) => <img className="srsl-final-background" alt="" src={background.src} key={background.src} referrerPolicy="no-referrer" style={{ position: 'absolute', width: 750, height: background.height, left: 0, top: 0, zIndex: index }} />)}
     <button className="srsl-back-hitbox" type="button" aria-label="返回购物车" onClick={onBack} />
-    {profile.avatar && <img className="srsl-avatar" alt="" src={profile.avatar} style={{ position: 'absolute', width: 106, height: 106, left: 74, top: 517 }} />}
-    <span className="srsl-nickname" style={{ left: 206, top: 520, width: 203, height: 46 }}>{profile.nickname}</span>
-    <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}>{products.length}</span>
-    <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>{score}</span>
-    <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
-      <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
-      <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
-        <img alt="" src={silkRoadAssets.posterItem} />
-        <img alt={product.name} src={product.image} />
-        <span className="srsl-poster-product-name">{product.name}</span>
-        <span className="srsl-poster-order">{index + 1}</span>
-      </div>)}</div>
-    </div>
-    <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div></div>
+    {profile.avatar && <div className="srsl-final-avatar" style={{ left: tier.avatar.left, top: tier.avatar.top, width: tier.avatar.size, height: tier.avatar.size }}><img alt="" src={profile.avatar} referrerPolicy="no-referrer" /></div>}
+    <span className="srsl-final-nickname" style={{ left: tier.nickname.left, top: tier.nickname.top, width: tier.nickname.width, height: tier.nickname.height, fontSize: tier.nickname.fontSize, textAlign: tier.nickname.align, justifyContent: tier.nickname.align === 'center' ? 'center' : 'flex-start' }}>{profile.nickname || '丝路旅人'}</span>
+    <span className="srsl-final-number" style={{ left: tier.quantity.left, top: tier.quantity.top, width: tier.quantity.width, height: tier.quantity.height, fontSize: tier.quantity.fontSize }}>{products.length}</span>
+    <span className="srsl-final-number" style={{ left: tier.score.left, top: tier.score.top, width: tier.score.width, height: tier.score.height, fontSize: tier.score.fontSize }}>{score}</span>
+    <span className="srsl-final-title" style={{ left: tier.titleBox.left, top: tier.titleBox.top, width: tier.titleBox.width, height: tier.titleBox.height, fontSize: tier.titleBox.fontSize }}>{tier.title}</span>
+    {columns.map((columnProducts, columnIndex) => {
+      const list = tier.lists[columnIndex]
+      return <div className="srsl-final-product-list" key={list.left} style={{ left: list.left, top: list.top, width: list.width, height: list.height, transform: `rotate(${list.rotate}deg)` }}>
+        {columnProducts.map((product, rowIndex) => <div className="srsl-final-product" key={product.id} style={{ left: tier.product.offsetLeft, top: rowIndex * tier.product.step, width: tier.product.width, height: tier.product.height }}>
+          <img className="srsl-final-product-image" alt={product.name} src={product.image} style={{ left: tier.product.image.left, top: tier.product.image.top, width: tier.product.image.width, height: tier.product.image.height }} />
+          <span className="srsl-final-product-name" style={{ left: tier.product.name.left, top: tier.product.name.top, width: tier.product.name.width, height: tier.product.name.height, fontSize: tier.product.name.fontSize }}>{product.name}</span>
+          <span className="srsl-final-product-check" style={{ left: tier.product.check.left, top: tier.product.check.top, width: tier.product.check.size, height: tier.product.check.size }}><img alt="" src={silkRoadAssets.posterCheck} /></span>
+        </div>)}
+      </div>
+    })}
+    <div ref={qrRef} className="srsl-final-qr" style={{ left: tier.qr.left, top: tier.qr.top, width: tier.qr.outer, height: tier.qr.outer, padding: (tier.qr.outer - tier.qr.inner) / 2 }}><QRCodeCanvas value={window.location.href} size={tier.qr.inner} includeMargin={false} /></div>
     {posterError && createPortal(<div className="srsl-poster-error" role="alert">海报生成失败：{posterError}</div>, document.body)}
     {createPortal(<div className="srsl-poster-actions" role="group" aria-label="海报操作">
       <button className="srsl-poster-save" type="button" onClick={() => { setPosterError(''); savePoster() }}><DownloadOutlined />保存海报</button>
