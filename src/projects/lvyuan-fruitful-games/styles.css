@@ -1440,12 +1440,9 @@
 .lyfg-quiz-poster-actions .lyfg-ih5-action { position: relative; inset: auto; flex: none; }
 .lyfg-quiz-poster-left { width: 320px; height: 125px; }
 .lyfg-quiz-poster-footer { width: 378px; height: 110px; }
-.lyfg-quiz-share-guide { position: absolute; z-index: 60; inset: -88px 0; display: grid; place-items: center; overflow: hidden; background: rgba(26, 17, 10, .58); animation: lyfg-fade 180ms ease both; }
-.lyfg-quiz-share-guide-arrow { position: absolute; top: 46px; right: 42px; color: #fff8df; font: 900 92px/1 sans-serif; text-shadow: 0 3px 12px rgba(0,0,0,.35); transform: rotate(-8deg); animation: lyfg-share-arrow-pulse 1.4s ease-in-out infinite; }
-.lyfg-quiz-share-guide-card { width: 500px; padding: 48px 36px 36px; border: 3px solid rgba(251, 211, 128, .9); border-radius: 30px; color: #fff8df; text-align: center; background: rgba(102, 45, 22, .94); box-shadow: 0 16px 36px rgba(0,0,0,.3); animation: lyfg-ih5-reveal 360ms cubic-bezier(.22,1,.36,1) both; }
-.lyfg-quiz-share-guide-card strong { display: block; font-size: 34px; letter-spacing: .08em; }
-.lyfg-quiz-share-guide-card p { margin: 22px 0 30px; font-size: 25px; line-height: 1.65; }
-.lyfg-quiz-share-guide-card button { min-width: 190px; padding: 13px 26px; border: 2px solid #f7d995; border-radius: 999px; color: #6f2e19; background: #fff1c9; font-size: 22px; font-weight: 800; cursor: pointer; }
+.lyfg-quiz-share-guide { position: absolute; z-index: 60; inset: -88px 0; overflow: hidden; background: rgba(26, 17, 10, .66); animation: lyfg-fade 180ms ease both; }
+.lyfg-quiz-share-guide-arrow { position: absolute; top: 38px; right: 36px; color: #fff; font: 900 104px/1 sans-serif; text-shadow: 0 3px 12px rgba(0,0,0,.35); transform: rotate(-8deg); animation: lyfg-share-arrow-pulse 1.4s ease-in-out infinite; }
+.lyfg-quiz-share-guide-copy { position: absolute; top: 170px; right: 64px; width: 430px; color: #fff; text-align: right; font-size: 31px; font-weight: 800; line-height: 1.65; letter-spacing: .04em; text-shadow: 0 3px 12px rgba(0,0,0,.48); animation: lyfg-ih5-reveal 360ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes lyfg-share-arrow-pulse { 0%, 100% { opacity: .7; transform: translate(0, 0) rotate(-8deg); } 50% { opacity: 1; transform: translate(5px, -5px) rotate(-8deg); } }
 
 .lyfg-ih5-snake-page {
@@ -1464,7 +1461,6 @@
 .lyfg-ih5-snake-title,
 .lyfg-ih5-snake-playfield,
 .lyfg-ih5-snake-back,
-.lyfg-ih5-snake-status,
 .lyfg-ih5-snake-pause {
   position: absolute;
 }
@@ -1518,24 +1514,10 @@
 
 .lyfg-ih5-snake-back:active { transform: scale(0.9); }
 
-.lyfg-ih5-snake-status {
-  z-index: 4;
-  top: 219px;
-  left: 0;
-  width: 100%;
-  color: rgba(122, 57, 22, 0.78);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-shadow: 0 1px rgba(255, 243, 190, 0.72);
-  pointer-events: none;
-}
-
 .lyfg-ih5-snake-pause {
   z-index: 6;
-  top: 133px;
-  left: calc(50% - 24px);
+  top: 131px;
+  left: calc(50% - 4px);
   display: grid;
   width: 70px;
   min-width: 0;

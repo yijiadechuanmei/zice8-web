@@ -549,7 +549,6 @@ function SnakeGame({ activityKey, onBack, onComplete }) {
             </div>
           ) : null}
         </div>
-        <div className="lyfg-ih5-snake-status" aria-live="polite">{gameState === 'paused' ? '已暂停' : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 珠 · ${score} 分`}</div>
         {(gameState === 'playing' || gameState === 'paused') ? (
           <button
             className="lyfg-ih5-snake-pause"

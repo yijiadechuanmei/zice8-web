@@ -52,10 +52,8 @@ export default function QuizFlow({ onBack }) {
     </div>
     {shareVisible ? <div className="lyfg-quiz-share-guide" role="dialog" aria-modal="true" aria-label="分享提示" onClick={() => setShareVisible(false)}>
       <div className="lyfg-quiz-share-guide-arrow" aria-hidden="true">↗</div>
-      <div className="lyfg-quiz-share-guide-card" onClick={(event) => event.stopPropagation()}>
-        <strong>分享给你的好友</strong>
-        <p>请点击右上角三个点<br />分享给你的好友</p>
-        <button type="button" onClick={() => setShareVisible(false)}>我知道了</button>
+      <div className="lyfg-quiz-share-guide-copy">
+        点击右上角三个点<br />分享给你的好友
       </div>
     </div> : null}
   </Ih5Stage></main>
