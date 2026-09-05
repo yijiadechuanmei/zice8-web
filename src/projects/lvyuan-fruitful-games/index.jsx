@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY,
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
+  LVYUAN_FRUITFUL_GAMES_BGM,
   LVYUAN_SNAKE_FRUITS,
   LVYUAN_SNAKE_MATERIALS,
   getLvyuanFruitfulGamesAsset,
 } from './config'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
@@ -584,6 +586,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }, [showComingSoon])
 
   const openComingSoon = useCallback(() => setShowComingSoon(true), [])
+  const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={LVYUAN_FRUITFUL_GAMES_BGM} activityKey={activityKey} /></>
   const navigate = useCallback((nextView) => {
     if (typeof document.startViewTransition === 'function') {
       document.startViewTransition(() => setView(nextView))
@@ -593,38 +596,38 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }, [])
 
   if (view === 'snake') {
-    return <SnakeGame activityKey={activityKey} onBack={() => navigate('selector')} onComplete={() => navigate('quiz')} />
+    return renderPage(<SnakeGame activityKey={activityKey} onBack={() => navigate('selector')} onComplete={() => navigate('quiz')} />)
   }
 
   if (view === 'snake-rules') {
-    return <SnakeRules onBack={() => navigate('selector')} onStart={() => navigate('snake')} />
+    return renderPage(<SnakeRules onBack={() => navigate('selector')} onStart={() => navigate('snake')} />)
   }
 
   if (view === 'spot-difference-rules') {
-    return <SpotDifferenceRules onBack={() => navigate('selector')} onStart={() => navigate('spot-difference-game')} />
+    return renderPage(<SpotDifferenceRules onBack={() => navigate('selector')} onStart={() => navigate('spot-difference-game')} />)
   }
 
   if (view === 'spot-difference-game') {
-    return <SpotDifferenceFindGame onBack={() => navigate('spot-difference-rules')} onComplete={() => navigate('quiz')} />
+    return renderPage(<SpotDifferenceFindGame onBack={() => navigate('spot-difference-rules')} onComplete={() => navigate('quiz')} />)
   }
 
   if (view === 'fruit-merge') {
-    return <SpotDifferenceGame onBack={() => navigate('fruit-merge-rules')} onComplete={() => navigate('quiz')} />
+    return renderPage(<SpotDifferenceGame onBack={() => navigate('fruit-merge-rules')} onComplete={() => navigate('quiz')} />)
   }
 
-  if (view === 'quiz') return <QuizFlow onBack={() => navigate('selector')} />
+  if (view === 'quiz') return renderPage(<QuizFlow onBack={() => navigate('selector')} />)
 
-  if (view === 'ranking') return <RankingPage onBack={() => navigate('home')} />
+  if (view === 'ranking') return renderPage(<RankingPage onBack={() => navigate('home')} />)
 
   if (view === 'fruit-merge-rules') {
-    return <FruitMergeRules onBack={() => navigate('selector')} onStart={() => navigate('fruit-merge')} />
+    return renderPage(<FruitMergeRules onBack={() => navigate('selector')} onStart={() => navigate('fruit-merge')} />)
   }
 
   if (view === 'selector') {
-    return <><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => navigate('snake-rules')} onSelectSpotDifference={() => navigate('spot-difference-rules')} onSelectFruitMerge={() => navigate('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>
+    return renderPage(<><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => navigate('snake-rules')} onSelectSpotDifference={() => navigate('spot-difference-rules')} onSelectFruitMerge={() => navigate('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>)
   }
 
-  return <HomePage onStart={() => navigate('selector')} onRanking={() => navigate('ranking')} />
+  return renderPage(<HomePage onStart={() => navigate('selector')} onRanking={() => navigate('ranking')} />)
 }
 
 export {
