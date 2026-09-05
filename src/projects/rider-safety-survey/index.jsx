@@ -623,7 +623,23 @@ function ParticipantProfile({ value, onChange, onSubmit, busy }) {
 function SafetyArticleLinks() {
   return (
     <nav className="rss-article-list" aria-label="安全知识推荐">
-      <h2>安全知识推荐</h2>
+      <div className="rss-article-heading">
+        <img
+          className="rss-article-mascot rss-article-mascot-left"
+          src={`${activityAssetsBaseUrl}/1.png`}
+          alt=""
+          aria-hidden="true"
+          referrerPolicy="no-referrer"
+        />
+        <h2>安全知识推荐</h2>
+        <img
+          className="rss-article-mascot rss-article-mascot-right"
+          src={`${activityAssetsBaseUrl}/2.png`}
+          alt=""
+          aria-hidden="true"
+          referrerPolicy="no-referrer"
+        />
+      </div>
       {SAFETY_ARTICLES.map((article) => (
         <a className="rss-article-link" href={article.url} key={article.url}>
           <img

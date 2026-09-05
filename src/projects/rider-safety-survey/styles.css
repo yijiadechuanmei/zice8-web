@@ -1391,7 +1391,15 @@
   position: relative;
   z-index: 1;
 }
-.rss-article-list > h2 {
+.rss-article-heading {
+  position: relative;
+  min-height: min(18.1334vw, 136px);
+  box-sizing: border-box;
+  padding-bottom: min(2.6667vw, 20px);
+  display: grid;
+  place-items: center;
+}
+.rss-article-heading h2 {
   margin: 0;
   color: #fff;
   font-size: min(5.0667vw, 38px);
@@ -1399,6 +1407,21 @@
   line-height: 1.2;
   letter-spacing: min(0.16vw, 1.2px);
   text-align: center;
+}
+.rss-article-mascot {
+  position: absolute;
+  bottom: 0;
+  z-index: 1;
+  width: min(13.3334vw, 100px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 54, 116, 0.2));
+}
+.rss-article-mascot-left {
+  left: 18%;
+}
+.rss-article-mascot-right {
+  right: 18%;
 }
 .rss-article-link {
   position: relative;
