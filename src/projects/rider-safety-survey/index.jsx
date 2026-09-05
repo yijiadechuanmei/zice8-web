@@ -373,8 +373,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
               alt={`${result.title}结果卡`}
               referrerPolicy="no-referrer"
             />
-            <h1 className="rss-result-heading">测评结语</h1>
-            <p className="rss-result-diagnosis">{result.diagnosis}</p>
             <button
               className="rss-result-draw"
               type="button"
@@ -770,7 +768,7 @@ function PrizeResult({ draw, onPoster }) {
         <p className="rss-prize-notice">中奖红包将直接发放至微信支付零钱</p>
       ) : <p className="rss-prize-notice">感谢参与，愿您每一程都平安顺利。</p>}
       <button type="button" className="rss-prize-return" onClick={onPoster}>
-        返回查看测评结语
+        返回查看测评结果
       </button>
     </section>
     </dialog>
