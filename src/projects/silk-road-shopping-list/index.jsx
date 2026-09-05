@@ -10,6 +10,7 @@ import './styles.css'
 
 const DESIGN_WIDTH = 750
 const PRODUCT_LIST_BOTTOM_GUTTER = 150
+const PRODUCT_CARD_HEIGHT = 340
 
 function getShoppingScore(quantity) {
   const count = Math.min(Math.max(quantity, 0), 28)
@@ -391,19 +392,23 @@ function ProductCard({ product, selected, onToggle }) {
   const [flipped, setFlipped] = useState(false)
   return <div className={`srsl-product-card${flipped ? ' is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)} onKeyDown={(event) => event.key === 'Enter' && setFlipped(!flipped)}>
     <div className="srsl-product-face">
-      <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: 230, left: 0, top: 0 }} />
+      <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
       {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
       </button>}
-      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 0 }} />
+      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 22 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
     <div className="srsl-product-face srsl-product-detail">
-      <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: 230, left: 0, top: 0 }} />
+      <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
       <img alt="" src={silkRoadAssets.detailTitle} style={{ position: 'absolute', width: 115, height: 58, left: 109, top: 36 }} />
       <img alt="" src={silkRoadAssets.detailIcon} style={{ position: 'absolute', width: 35, height: 35, left: 17.5, top: 15.5 }} />
       <span className="srsl-detail-name">{product.name}</span>
-      <span className="srsl-detail-description">{product.description}</span>
+      <div className="srsl-detail-description">
+        <p><b>原产地：</b>{product.origin}</p>
+        <p><b>传入时间：</b>{product.transferTime}</p>
+        <p><b>记载：</b>{product.record}</p>
+      </div>
       {flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
       </button>}
@@ -425,12 +430,12 @@ function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }
     <button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} />
   </div>
   return <>
-  <Stage height={646 + rows * 230 + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
+  <Stage height={646 + rows * PRODUCT_CARD_HEIGHT + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 410, top: 464, width: 60, height: 43 }}>{selectedIds.length}</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 255, height: 28, left: 247.5, top: 612 }} />
     <span className="srsl-card-detail-hint">点击卡片查看详情</span>
-    <div className="srsl-product-grid" style={{ top: 646, height: rows * 230 + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
+    <div className="srsl-product-grid" style={{ top: 646, height: rows * PRODUCT_CARD_HEIGHT + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
   </Stage>
   {createPortal(dock, document.body)}
   </>
