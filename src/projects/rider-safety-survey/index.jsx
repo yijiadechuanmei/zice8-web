@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
 import {
@@ -398,12 +398,11 @@ export default function RiderSafetySurveyProject({ routeParams }) {
         </section>
       ) : null}
       {stage === "dispatch" ? <PrizeDispatching /> : null}
-      {stage === "wheel" ? (
-        <PrizeWheel draw={draw} onComplete={completeWheel} />
-      ) : null}
-      {stage === "prize" ? (
-        <PrizeResult
+      {stage === "wheel" || stage === "prize" ? (
+        <PrizeWheel
           draw={draw}
+          showResult={stage === "prize"}
+          onComplete={completeWheel}
           onPoster={() => setStage("result")}
         />
       ) : null}
@@ -660,11 +659,12 @@ function PrizeDispatching() {
   );
 }
 
-function PrizeWheel({ draw, onComplete }) {
+function PrizeWheel({ draw, showResult, onComplete, onPoster }) {
   const targetIndex = wheelStopIndexForDraw(draw);
-  const [rotation, setRotation] = useState(0);
+  const [rotation, setRotation] = useState(() => showResult ? 1440 - targetIndex * 60 : 0);
 
   useEffect(() => {
+    if (showResult) return;
     const frame = window.requestAnimationFrame(() => {
       setRotation(1440 - targetIndex * 60);
     });
@@ -673,14 +673,15 @@ function PrizeWheel({ draw, onComplete }) {
       window.cancelAnimationFrame(frame);
       window.clearTimeout(timer);
     };
-  }, [onComplete, targetIndex]);
+  }, [onComplete, targetIndex, showResult]);
 
   return (
+    <>
     <section className="rss-wheel-page" aria-live="polite">
       <header className="rss-wheel-heading">
         <p className="rss-section-kicker">LUCKY DRAW</p>
         <h1>幸运转盘</h1>
-        <p className="rss-wheel-tip">结果已锁定，正在揭晓本次幸运奖励</p>
+        <p className="rss-wheel-tip">{showResult ? "本次抽奖已完成" : "正在揭晓本次幸运奖励"}</p>
       </header>
       <div className="rss-wheel-stage">
         <i className="rss-wheel-halo rss-wheel-halo-one" aria-hidden="true" />
@@ -706,19 +707,38 @@ function PrizeWheel({ draw, onComplete }) {
             );
           })}
         </div>
-        <div className="rss-wheel-center">抽奖中</div>
+        <div className="rss-wheel-center">{showResult ? "已开奖" : "抽奖中"}</div>
       </div>
       <div className="rss-wheel-status">
         <i aria-hidden="true" />
-        <small>请稍候，转盘停止后公布结果</small>
+        <small>{showResult ? "本次结果已记录" : "请稍候，转盘停止后公布结果"}</small>
       </div>
     </section>
+    {showResult ? <PrizeResult draw={draw} onPoster={onPoster} /> : null}
+    </>
   );
 }
 
 function PrizeResult({ draw, onPoster }) {
   const won = isWinningDraw(draw);
+  const dialogRef = useRef(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
   return (
+    <dialog
+      ref={dialogRef}
+      className="rss-prize-modal"
+      aria-labelledby="rss-prize-title"
+      onCancel={(event) => { event.preventDefault(); onPoster(); }}
+    >
     <section className={`rss-prize-result ${won ? "is-win" : "is-miss"}`}>
       <div className="rss-prize-light" aria-hidden="true" />
       <p className="rss-section-kicker">DRAW RESULT</p>
@@ -728,7 +748,7 @@ function PrizeResult({ draw, onPoster }) {
         <i className="rss-prize-spark rss-prize-spark-two" aria-hidden="true" />
         <span>{won ? "¥" : "安"}</span>
       </div>
-      <h1>{won ? "恭喜中奖" : "谢谢参与"}</h1>
+      <h1 id="rss-prize-title">{won ? "恭喜中奖" : "谢谢参与"}</h1>
       <h2>{won ? draw.prizeName : "平安到家就是今天的头奖"}</h2>
       {draw?.prizeType === "cash" && won ? (
         <p className="rss-prize-notice">测试阶段仅记录抽奖结果，不会发起真实红包发放。</p>
@@ -737,6 +757,7 @@ function PrizeResult({ draw, onPoster }) {
         返回查看测评结语
       </button>
     </section>
+    </dialog>
   );
 }
 
