@@ -373,9 +373,6 @@ export default function RiderSafetySurveyProject({ routeParams }) {
               alt={`${result.title}结果卡`}
               referrerPolicy="no-referrer"
             />
-            <p className="rss-result-disclaimer">
-              该称号基于您的问卷答案，通过预设算法自动生成；分数仅用于本次评估，不构成任何承诺或对个人能力的最终判断。
-            </p>
             <h1 className="rss-result-heading">测评结语</h1>
             <p className="rss-result-diagnosis">{result.diagnosis}</p>
             <button

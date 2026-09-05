@@ -1308,7 +1308,6 @@
   background: var(--rss-result-background) center center / cover no-repeat;
 }
 .rss-result-card,
-.rss-result-disclaimer,
 .rss-result-heading,
 .rss-result-diagnosis,
 .rss-result-draw {
@@ -1321,19 +1320,6 @@
   left: 9.7334%;
   display: block;
   animation: rss-result-reveal 0.42s ease-out both;
-}
-.rss-result-disclaimer {
-  width: 78.8%;
-  margin: 0;
-  top: 58.3%;
-  left: 10.5334%;
-  color: #d8f4ff;
-  font-size: min(2.4vw, 18px);
-  font-weight: 600;
-  line-height: 1.45;
-  text-shadow: 0 1px 2px rgba(0, 69, 133, 0.52);
-  text-align: center;
-  animation: rss-result-reveal 0.35s 0.06s ease-out both;
 }
 .rss-result-heading {
   width: 50.8%;
