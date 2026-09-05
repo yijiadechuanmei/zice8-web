@@ -679,7 +679,6 @@ function PrizeWheel({ draw, showResult, onComplete, onPoster }) {
     <>
     <section className="rss-wheel-page" aria-live="polite">
       <header className="rss-wheel-heading">
-        <p className="rss-section-kicker">LUCKY DRAW</p>
         <h1>幸运转盘</h1>
         <p className="rss-wheel-tip">{showResult ? "本次抽奖已完成" : "正在揭晓本次幸运奖励"}</p>
       </header>
@@ -741,7 +740,6 @@ function PrizeResult({ draw, onPoster }) {
     >
     <section className={`rss-prize-result ${won ? "is-win" : "is-miss"}`}>
       <div className="rss-prize-light" aria-hidden="true" />
-      <p className="rss-section-kicker">DRAW RESULT</p>
       <p className="rss-prize-caption">本次抽奖结果</p>
       <div className={`rss-prize-orbit ${won ? "is-win" : ""}`}>
         <i className="rss-prize-spark rss-prize-spark-one" aria-hidden="true" />
