@@ -3,15 +3,6 @@ export const LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY = 'lvyuan_fruitful_heart_2026'
 
 export const LVYUAN_FRUITFUL_GAMES_ASSET_BASE = `https://assets.zice8.com/${LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE}/${LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY}`
 
-export const LVYUAN_FRUITFUL_GAMES_BGM = {
-  enabled: true,
-  url: 'https://assets.zice8.com/rider_safety_survey/rider_safety_survey_20260827/bgm.mp3',
-  loop: true,
-  autoplay: true,
-  showControl: true,
-  volume: 0.58,
-}
-
 export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   background: '247f932dd14699f1a830558efc4b63f4_2455907_750_1624.png',
   homeTitle: 'dc158b9026db63abdbe9c1655b90188d_103543_547_92.png',
@@ -78,7 +69,6 @@ export const LVYUAN_FRUITFUL_GAMES_IH5_ASSETS = {
   posterBackground: 'a981f19148d145eb314a0ad26283b47a_2891558_750_1622.png',
   posterPanel: 'a0bcfc53e8bdceb97d61ae1d572ba5ed_1361359_632_900.png',
   posterLeftAction: '574f591f300d1bd8850617bb5f343265_98081_320_125.png',
-  posterRightAction: '761aa02e6ff6754263f03fde9d02e816_103252_320_125.png',
   posterFooter: '32f1dcc103541fa59720c76019bd07d5_22876_378_110.png',
 }
 

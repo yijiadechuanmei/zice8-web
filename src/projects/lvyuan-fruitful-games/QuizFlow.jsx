@@ -46,13 +46,15 @@ export default function QuizFlow({ onBack }) {
   if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="消保称号海报">
     {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
     <div className="lyfg-quiz-poster-title">消保小天使</div>
-    <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={() => setShareVisible(true)} aria-label="分享给朋友">{image('posterLeftAction', 'lyfg-ih5-fill-image', '分享到朋友圈')}</button>
-    <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回果园">{image('posterFooter', 'lyfg-ih5-fill-image', '返回果园')}</button>
+    <div className="lyfg-quiz-poster-actions">
+      <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={() => setShareVisible(true)} aria-label="分享给朋友">{image('posterLeftAction', 'lyfg-ih5-fill-image', '分享')}</button>
+      <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回果园">{image('posterFooter', 'lyfg-ih5-fill-image', '返回果园')}</button>
+    </div>
     {shareVisible ? <div className="lyfg-quiz-share-guide" role="dialog" aria-modal="true" aria-label="分享提示" onClick={() => setShareVisible(false)}>
       <div className="lyfg-quiz-share-guide-arrow" aria-hidden="true">↗</div>
       <div className="lyfg-quiz-share-guide-card" onClick={(event) => event.stopPropagation()}>
         <strong>分享给你的好友</strong>
-        <p>请点击右上角三个点<br />选择“分享”发送给好友</p>
+        <p>请点击右上角三个点<br />分享给你的好友</p>
         <button type="button" onClick={() => setShareVisible(false)}>我知道了</button>
       </div>
     </div> : null}

@@ -1413,7 +1413,7 @@
 .lyfg-spot-merge-success p { margin: 18px 0 30px; font-size: 26px; font-weight: 800; }
 .lyfg-spot-merge-success button { margin: 0 8px; padding: 14px 24px; border: 0; border-radius: 999px; color: white; background: #b84b24; font-size: 21px; font-weight: 800; }
 
-.lyfg-quiz-title, .lyfg-quiz-panel, .lyfg-quiz-question-card, .lyfg-quiz-wrong-title, .lyfg-quiz-wrong-panel, .lyfg-quiz-poster-panel, .lyfg-quiz-poster-footer { position: absolute; z-index: 1; object-fit: contain; animation: lyfg-ih5-reveal 520ms cubic-bezier(.22,1,.36,1) both; }
+.lyfg-quiz-title, .lyfg-quiz-panel, .lyfg-quiz-question-card, .lyfg-quiz-wrong-title, .lyfg-quiz-wrong-panel, .lyfg-quiz-poster-panel { position: absolute; z-index: 1; object-fit: contain; animation: lyfg-ih5-reveal 520ms cubic-bezier(.22,1,.36,1) both; }
 .lyfg-quiz-title { top: -3px; left: 211px; width: 324px; height: 143px; }
 .lyfg-quiz-panel { top: 125px; left: 71px; width: 607px; height: 1086px; }
 .lyfg-quiz-question-card { top: 398px; left: 127px; width: 499px; height: 325px; }
@@ -1436,8 +1436,10 @@
 .lyfg-quiz-wrong-back { top: 1108px; left: 382px; width: 251px; height: 103px; }
 .lyfg-quiz-poster-panel { top: 165px; left: 58px; width: 632px; height: 900px; }
 .lyfg-quiz-poster-title { position: absolute; z-index: 3; top: 748px; left: 233px; display: grid; width: 290px; height: 75px; place-items: center; color: #5c3819; font-size: 41px; font-weight: 900; }
-.lyfg-quiz-poster-left { top: 1067px; left: 215px; width: 320px; height: 125px; }
-.lyfg-quiz-poster-footer { top: 1223px; left: 185px; width: 378px; height: 110px; }
+.lyfg-quiz-poster-actions { position: absolute; z-index: 4; top: 1067px; left: 0; display: flex; width: 750px; flex-direction: column; align-items: center; gap: 30px; }
+.lyfg-quiz-poster-actions .lyfg-ih5-action { position: relative; inset: auto; flex: none; }
+.lyfg-quiz-poster-left { width: 320px; height: 125px; }
+.lyfg-quiz-poster-footer { width: 378px; height: 110px; }
 .lyfg-quiz-share-guide { position: absolute; z-index: 60; inset: -88px 0; display: grid; place-items: center; overflow: hidden; background: rgba(26, 17, 10, .58); animation: lyfg-fade 180ms ease both; }
 .lyfg-quiz-share-guide-arrow { position: absolute; top: 46px; right: 42px; color: #fff8df; font: 900 92px/1 sans-serif; text-shadow: 0 3px 12px rgba(0,0,0,.35); transform: rotate(-8deg); animation: lyfg-share-arrow-pulse 1.4s ease-in-out infinite; }
 .lyfg-quiz-share-guide-card { width: 500px; padding: 48px 36px 36px; border: 3px solid rgba(251, 211, 128, .9); border-radius: 30px; color: #fff8df; text-align: center; background: rgba(102, 45, 22, .94); box-shadow: 0 16px 36px rgba(0,0,0,.3); animation: lyfg-ih5-reveal 360ms cubic-bezier(.22,1,.36,1) both; }

@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY,
   LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
-  LVYUAN_FRUITFUL_GAMES_BGM,
   LVYUAN_SNAKE_FRUITS,
   LVYUAN_SNAKE_MATERIALS,
   getLvyuanFruitfulGamesAsset,
 } from './config'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
+import { getLvyuanFruitfulGamesPublicConfig } from './api'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
@@ -574,10 +574,23 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY
   const [view, setView] = useState('home')
   const [showComingSoon, setShowComingSoon] = useState(false)
+  const [bgmConfig, setBgmConfig] = useState(null)
 
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getLvyuanFruitfulGamesPublicConfig(activityKey)
+      .then((publicConfig) => {
+        if (!cancelled) setBgmConfig(publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {})
+      })
+      .catch(() => {
+        if (!cancelled) setBgmConfig({})
+      })
+    return () => { cancelled = true }
+  }, [activityKey])
 
   useEffect(() => {
     if (!showComingSoon) return undefined
@@ -586,7 +599,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }, [showComingSoon])
 
   const openComingSoon = useCallback(() => setShowComingSoon(true), [])
-  const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={LVYUAN_FRUITFUL_GAMES_BGM} activityKey={activityKey} /></>
+  const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={bgmConfig || {}} activityKey={activityKey} /></>
   const navigate = useCallback((nextView) => {
     if (typeof document.startViewTransition === 'function') {
       document.startViewTransition(() => setView(nextView))
