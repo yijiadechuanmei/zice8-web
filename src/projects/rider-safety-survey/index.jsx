@@ -767,7 +767,7 @@ function PrizeResult({ draw, onPoster }) {
       <h1 id="rss-prize-title">{won ? "恭喜中奖" : "谢谢参与"}</h1>
       <h2>{won ? draw.prizeName : "平安到家就是今天的头奖"}</h2>
       {draw?.prizeType === "cash" && won ? (
-        <p className="rss-prize-notice">中奖红包将直接发放至微信支付零钱；当前为测试阶段，仅记录抽奖结果，暂不实际发放。</p>
+        <p className="rss-prize-notice">中奖红包将直接发放至微信支付零钱</p>
       ) : <p className="rss-prize-notice">感谢参与，愿您每一程都平安顺利。</p>}
       <button type="button" className="rss-prize-return" onClick={onPoster}>
         返回查看测评结语
