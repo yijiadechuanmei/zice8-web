@@ -82,7 +82,6 @@
 .srsl-detail-description p { margin: 0 0 8px; }
 .srsl-detail-description p:last-child { margin-bottom: 0; }
 .srsl-detail-description b { color: #9e7650; font-weight: 600; }
-.srsl-product-detail::after { position: absolute; z-index: 1; top: 80px; left: 103px; width: 131px; height: 5px; border-top: 1px solid #c29a70; border-bottom: 1px solid #c29a70; content: ''; opacity: .82; }
 .srsl-video-progress { pointer-events: auto; touch-action: none; cursor: grab; }
 .srsl-video-progress:active { cursor: grabbing; }
 .srsl-video-progress:focus-visible { outline: 3px solid rgba(255, 255, 255, .9); outline-offset: 8px; }
