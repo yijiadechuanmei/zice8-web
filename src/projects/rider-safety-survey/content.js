@@ -77,7 +77,7 @@ export const questions = [
   {
     id: "q8",
     section: "四、金融素养",
-    title: "你最怕骑手保险哪一点？",
+    title: "骑手投保最怕哪一点",
     hint: "可多选",
     multiple: true,
     options: [
