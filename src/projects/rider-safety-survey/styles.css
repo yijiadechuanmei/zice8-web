@@ -132,26 +132,31 @@
   top: 28.4%;
   left: 50%;
   box-sizing: border-box;
-  width: min(88%, 660px);
+  width: min(86%, 644px);
   margin: 0;
-  padding: min(1.65vw, 12px) min(2.4vw, 18px);
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 999px;
-  background: linear-gradient(100deg, rgba(0, 126, 219, 0.82), rgba(10, 93, 190, 0.9));
-  box-shadow: 0 min(0.8vw, 6px) 0 rgba(0, 97, 184, 0.24), inset 0 1px rgba(255, 255, 255, 0.24);
-  color: #fff;
-  font-size: min(3.8vw, 28px);
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: 0.035em;
+  padding: min(1.6vw, 12px) min(2.2vw, 16px) min(1.7vw, 13px);
+  border: 2px solid rgba(255, 255, 255, 0.94);
+  border-radius: min(5.2vw, 39px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 250, 255, 0.9));
+  box-shadow: 0 min(1.1vw, 8px) min(3.2vw, 24px) rgba(0, 66, 142, 0.24), inset 0 1px rgba(255, 255, 255, 0.9);
+  color: #0b4f99;
+  font-size: min(3.6vw, 27px);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: 0.02em;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 69, 142, 0.35);
   transform: translateX(-50%);
 }
 .rss-home-reward-notice strong {
-  color: #fff2aa;
-  font-size: 1.12em;
+  color: #e17b00;
+  font-size: 1.08em;
   font-weight: 800;
+}
+.rss-home-reward-rule {
+  display: inline-block;
+  font-size: 0.86em;
+  font-weight: 600;
+  letter-spacing: 0.045em;
 }
 .rss-home-organizer {
   width: min(68vw, 510px);

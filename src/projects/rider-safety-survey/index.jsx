@@ -436,9 +436,9 @@ function Intro({ onStart }) {
           referrerPolicy="no-referrer"
         />
         <p className="rss-home-reward-notice">
-          本次问卷共设置 <strong>2010 个红包</strong>，先答先得，
+          本次问卷共设置 <strong>2010 个红包</strong>
           <br />
-          抽完即止！诚邀您参与填写～
+          <span className="rss-home-reward-rule">先答先得，抽完即止！诚邀您参与填写～</span>
         </p>
         <img
           className="rss-home-organizer"
