@@ -43,20 +43,23 @@ export default function QuizFlow({ onBack }) {
     else setStep((current) => current + 1)
   }
 
-  if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="消保称号海报">
-    {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
-    <div className="lyfg-quiz-poster-title">消保小天使</div>
-    <div className="lyfg-quiz-poster-actions">
-      <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={() => setShareVisible(true)} aria-label="分享给朋友">{image('posterLeftAction', 'lyfg-ih5-fill-image', '分享')}</button>
-      <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回果园">{image('posterFooter', 'lyfg-ih5-fill-image', '返回果园')}</button>
-    </div>
-    {shareVisible ? <div className="lyfg-quiz-share-guide" role="dialog" aria-modal="true" aria-label="分享提示" onClick={() => setShareVisible(false)}>
-      <div className="lyfg-quiz-share-guide-arrow" aria-hidden="true">↗</div>
-      <div className="lyfg-quiz-share-guide-copy">
-        点击右上角三个点<br />分享给你的好友
+  if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page">
+    <Ih5Stage label="消保称号海报">
+      {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
+      <div className="lyfg-quiz-poster-title">消保小天使</div>
+      <div className="lyfg-quiz-poster-actions">
+        <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={() => setShareVisible(true)} aria-label="分享给朋友">{image('posterLeftAction', 'lyfg-ih5-fill-image', '分享')}</button>
+        <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回果园">{image('posterFooter', 'lyfg-ih5-fill-image', '返回果园')}</button>
       </div>
+    </Ih5Stage>
+    {shareVisible ? <div className="lyfg-quiz-share-guide" role="dialog" aria-modal="true" aria-label="分享提示" onClick={() => setShareVisible(false)}>
+      <svg className="lyfg-quiz-share-guide-arrow" viewBox="0 0 72 104" aria-hidden="true">
+        <path d="M12 94C12 52 30 25 61 12" />
+        <path d="M40 9L63 11L58 34" />
+      </svg>
+      <div className="lyfg-quiz-share-guide-copy">点击右上角三个点<br />分享给你的好友</div>
     </div> : null}
-  </Ih5Stage></main>
+  </main>
 
   if (status === 'wrong') return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="答题失败">
     {image('quizWrongBackground', 'lyfg-ih5-background')}{image('quizWrongTitle', 'lyfg-quiz-wrong-title')}{image('quizWrongPanel', 'lyfg-quiz-wrong-panel')}

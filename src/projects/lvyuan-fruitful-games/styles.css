@@ -1440,10 +1440,10 @@
 .lyfg-quiz-poster-actions .lyfg-ih5-action { position: relative; inset: auto; flex: none; }
 .lyfg-quiz-poster-left { width: 320px; height: 125px; }
 .lyfg-quiz-poster-footer { width: 378px; height: 110px; }
-.lyfg-quiz-share-guide { position: absolute; z-index: 60; inset: -88px 0; overflow: hidden; background: rgba(26, 17, 10, .66); animation: lyfg-fade 180ms ease both; }
-.lyfg-quiz-share-guide-arrow { position: absolute; top: 38px; right: 36px; color: #fff; font: 900 104px/1 sans-serif; text-shadow: 0 3px 12px rgba(0,0,0,.35); transform: rotate(-8deg); animation: lyfg-share-arrow-pulse 1.4s ease-in-out infinite; }
-.lyfg-quiz-share-guide-copy { position: absolute; top: 170px; right: 64px; width: 430px; color: #fff; text-align: right; font-size: 31px; font-weight: 800; line-height: 1.65; letter-spacing: .04em; text-shadow: 0 3px 12px rgba(0,0,0,.48); animation: lyfg-ih5-reveal 360ms cubic-bezier(.22,1,.36,1) both; }
-@keyframes lyfg-share-arrow-pulse { 0%, 100% { opacity: .7; transform: translate(0, 0) rotate(-8deg); } 50% { opacity: 1; transform: translate(5px, -5px) rotate(-8deg); } }
+.lyfg-quiz-share-guide { position: fixed; z-index: 100; inset: 0; overflow: hidden; background: rgba(26, 17, 10, .66); animation: lyfg-fade 180ms ease both; }
+.lyfg-quiz-share-guide-arrow { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); width: 72px; height: 104px; fill: none; stroke: #fff; stroke-width: 6px; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 3px 6px rgba(0,0,0,.4)); animation: lyfg-share-arrow-pulse 1.4s ease-in-out infinite; }
+.lyfg-quiz-share-guide-copy { position: absolute; top: max(120px, calc(env(safe-area-inset-top) + 108px)); right: max(24px, env(safe-area-inset-right)); width: min(78vw, 320px); color: #fff; text-align: right; font-size: 21px; font-weight: 800; line-height: 1.65; letter-spacing: .04em; text-shadow: 0 3px 10px rgba(0,0,0,.52); animation: lyfg-ih5-reveal 360ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes lyfg-share-arrow-pulse { 0%, 100% { opacity: .72; transform: translate(0, 0); } 50% { opacity: 1; transform: translate(3px, -4px); } }
 
 .lyfg-ih5-snake-page {
   touch-action: none;
