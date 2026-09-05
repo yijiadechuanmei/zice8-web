@@ -132,23 +132,24 @@
   top: 28.4%;
   left: 50%;
   box-sizing: border-box;
-  width: min(86%, 644px);
+  width: min(88%, 660px);
   margin: 0;
-  padding: min(1.6vw, 12px) min(2.2vw, 16px) min(1.7vw, 13px);
-  border: 2px solid rgba(255, 255, 255, 0.94);
-  border-radius: min(5.2vw, 39px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 250, 255, 0.9));
-  box-shadow: 0 min(1.1vw, 8px) min(3.2vw, 24px) rgba(0, 66, 142, 0.24), inset 0 1px rgba(255, 255, 255, 0.9);
-  color: #0b4f99;
-  font-size: min(3.6vw, 27px);
+  padding: 0 min(1.6vw, 12px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+  font-size: min(3.2vw, 24px);
   font-weight: 700;
-  line-height: 1.28;
+  line-height: 1.22;
   letter-spacing: 0.02em;
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 47, 112, 0.78), 0 0 2px rgba(0, 47, 112, 0.55);
   transform: translateX(-50%);
 }
 .rss-home-reward-notice strong {
-  color: #e17b00;
+  color: #ffe16b;
   font-size: 1.08em;
   font-weight: 800;
 }
