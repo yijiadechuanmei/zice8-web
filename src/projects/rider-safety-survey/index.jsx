@@ -435,6 +435,10 @@ function Intro({ onStart }) {
           alt="护商行动 安商问卷"
           referrerPolicy="no-referrer"
         />
+        <p className="rss-home-reward-notice">
+          本次问卷共设置 <strong>2010 个红包</strong>，先答先得，抽完即止！
+          <span>诚邀您参与填写～</span>
+        </p>
         <img
           className="rss-home-organizer"
           src={`${activityAssetsBaseUrl}/2f1a775078dbb7bc8f07a2fc83fee458_5019_510_126.png`}

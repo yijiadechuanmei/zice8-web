@@ -126,6 +126,39 @@
   top: 1.6575%;
   pointer-events: none;
 }
+.rss-home-reward-notice {
+  position: absolute;
+  z-index: 2;
+  top: 28.4%;
+  left: 50%;
+  box-sizing: border-box;
+  width: min(79%, 592px);
+  margin: 0;
+  padding: min(1.65vw, 12px) min(2.4vw, 18px);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(0, 126, 219, 0.82), rgba(10, 93, 190, 0.9));
+  box-shadow: 0 min(0.8vw, 6px) 0 rgba(0, 97, 184, 0.24), inset 0 1px rgba(255, 255, 255, 0.24);
+  color: #fff;
+  font-size: min(3.55vw, 26px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 69, 142, 0.35);
+  transform: translateX(-50%);
+}
+.rss-home-reward-notice strong {
+  color: #fff2aa;
+  font-size: 1.12em;
+  font-weight: 800;
+}
+.rss-home-reward-notice span {
+  display: block;
+  margin-top: 0.08em;
+  font-size: 0.9em;
+  letter-spacing: 0.12em;
+}
 .rss-home-organizer {
   width: min(68vw, 510px);
   height: auto;
