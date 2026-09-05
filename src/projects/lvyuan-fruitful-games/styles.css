@@ -1397,7 +1397,6 @@
 .lyfg-quiz-title { top: -3px; left: 211px; width: 324px; height: 143px; }
 .lyfg-quiz-panel { top: 125px; left: 71px; width: 607px; height: 1086px; }
 .lyfg-quiz-question-card { top: 398px; left: 127px; width: 499px; height: 325px; }
-.lyfg-quiz-progress { position: absolute; z-index: 3; top: 340px; left: 0; width: 750px; color: #8f4c22; text-align: center; font-size: 25px; font-weight: 900; }
 .lyfg-quiz-question { position: absolute; z-index: 3; top: 455px; left: 145px; display: flex; width: 463px; height: 237px; align-items: center; overflow: hidden; color: #3f2b19; text-align: justify; font-size: 26px; font-weight: 700; line-height: 1.55; }
 .lyfg-quiz-options { position: absolute; z-index: 4; top: 746px; left: 130px; width: 491px; height: 428px; }
 .lyfg-quiz-options button { position: absolute; left: 0; width: 491px; height: 98px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; transition: transform 100ms ease; }
@@ -1506,17 +1505,50 @@
 }
 
 .lyfg-ih5-snake-pause {
-  z-index: 5;
-  right: 74px;
+  z-index: 6;
   top: 133px;
-  min-width: 88px;
+  left: 50%;
+  display: grid;
+  width: 58px;
+  min-width: 0;
   height: 58px;
-  border: 0;
-  border-radius: 28px;
-  color: #9c431d;
-  background: rgba(255, 241, 188, 0.42);
-  box-shadow: inset 0 0 0 2px rgba(159, 89, 37, 0.28);
-  font: 800 22px/1 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  padding: 0;
+  place-items: center;
+  border: 2px solid rgba(157, 78, 27, 0.58);
+  border-radius: 50%;
+  background: rgba(255, 239, 177, 0.96);
+  box-shadow: 0 4px 10px rgba(91, 42, 11, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+  transform: translateX(-50%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lyfg-ih5-snake-pause:active { transform: translateX(-50%) scale(0.9); }
+
+.lyfg-snake-pause-icon {
+  display: flex;
+  width: 22px;
+  height: 25px;
+  gap: 6px;
+}
+
+.lyfg-snake-pause-icon::before,
+.lyfg-snake-pause-icon::after {
+  width: 8px;
+  border-radius: 3px;
+  background: #973a20;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  content: '';
+}
+
+.lyfg-snake-play-icon {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-left: 21px solid #973a20;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.28));
 }
 
 .lyfg-ih5-snake-overlay {

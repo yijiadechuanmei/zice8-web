@@ -548,7 +548,16 @@ function SnakeGame({ activityKey, onBack, onComplete }) {
           ) : null}
         </div>
         <div className="lyfg-ih5-snake-status" aria-live="polite">{gameState === 'paused' ? '已暂停' : `已收集 ${collectedBeads}/${SNAKE_BEAD_COUNT} 珠 · ${score} 分`}</div>
-        {(gameState === 'playing' || gameState === 'paused') ? <button className="lyfg-ih5-snake-pause" type="button" onClick={() => setGameState((current) => current === 'playing' ? 'paused' : 'playing')}>{gameState === 'paused' ? '继续' : '暂停'}</button> : null}
+        {(gameState === 'playing' || gameState === 'paused') ? (
+          <button
+            className="lyfg-ih5-snake-pause"
+            type="button"
+            aria-label={gameState === 'paused' ? '开始游戏' : '暂停游戏'}
+            onClick={() => setGameState((current) => current === 'playing' ? 'paused' : 'playing')}
+          >
+            <span className={gameState === 'paused' ? 'lyfg-snake-play-icon' : 'lyfg-snake-pause-icon'} aria-hidden="true" />
+          </button>
+        ) : null}
       </Ih5Stage>
       <FloatingJoystick joystickRef={joystickRef} />
     </main>

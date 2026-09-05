@@ -49,7 +49,7 @@ export default function QuizFlow({ onBack }) {
 
   return <main className="lyfg-page lyfg-ih5-page"><Ih5Stage label="消保知识答题">
     {image('quizBackground', 'lyfg-ih5-background')}{image('quizTitle', 'lyfg-quiz-title')}{image('quizPanel', 'lyfg-quiz-panel')}{image('quizQuestionCard', 'lyfg-quiz-question-card')}
-    <div className="lyfg-quiz-progress">第 {step + 1} / 3 题</div><div className="lyfg-quiz-question">{question.question}</div>
+    <div className="lyfg-quiz-question">{question.question}</div>
     <div className="lyfg-quiz-options">{question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" onClick={() => answer(index)}>
       {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span>{option}</span>
     </button>)}</div>
