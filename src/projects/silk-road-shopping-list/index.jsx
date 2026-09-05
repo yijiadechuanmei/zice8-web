@@ -430,7 +430,7 @@ function ProductCard({ product, selected, onToggle }) {
     </div>
     <div className="srsl-product-face srsl-product-detail">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
-      <img alt="" src={silkRoadAssets.detailTitle} style={{ position: 'absolute', width: 115, height: 58, left: 109, top: 36 }} />
+      <img alt="" src={silkRoadAssets.detailTitle} style={{ position: 'absolute', width: 115, height: 58, left: 109, top: 28 }} />
       <img alt="" src={silkRoadAssets.detailIcon} style={{ position: 'absolute', width: 35, height: 35, left: 17.5, top: 15.5 }} />
       <span className="srsl-detail-name">{product.name}</span>
       <div className="srsl-detail-description">
