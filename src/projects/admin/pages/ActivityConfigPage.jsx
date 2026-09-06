@@ -1127,7 +1127,7 @@ export default function ActivityConfigPage({ activity }) {
                         type="info"
                         showIcon
                         message="正式环境端到端验收专用"
-                        description="开启后会将 2 元、68 元奖池库存置为 0，仅开放少量 0.2 元红包，完整走微信授权、抽奖、商家转账和到账查询链路。仅允许在尚未产生真实红包流水时开启。"
+                        description="开启后会关闭 2 元、68 元的剩余可抽库存，仅开放少量 0.2 元红包，完整走微信授权、抽奖、商家转账和到账查询链路。历史中奖与已完成发放记录会保留并继续计入预算；只有处理中红包会阻止切换。"
                       />
                     )}
                     <Space wrap align="end">
@@ -1148,7 +1148,7 @@ export default function ActivityConfigPage({ activity }) {
                       ) : null}
                       <Popconfirm
                         title={riderSafetySettings.payoutTest?.active ? '确认恢复正式红包奖池？' : '确认开启0.2元真实红包测试？'}
-                        description={riderSafetySettings.payoutTest?.active ? '测试红包全部结束后才可恢复。已实际发放的测试金额会计入活动总上限，因此正式 2 元红包库存可能相应减少。' : '此操作会立刻关闭常规 2 元、68 元抽奖并启用真实微信转账。请确认商户平台已允许单笔0.2元转账，且本活动尚未产生真实红包流水。'}
+                        description={riderSafetySettings.payoutTest?.active ? '测试红包全部结束后才可恢复。已实际发放的测试金额会计入活动总上限，因此正式 2 元红包库存可能相应减少。' : '此操作会立刻关闭常规 2 元、68 元抽奖并启用真实微信转账。请确认商户平台已允许单笔0.2元转账；历史中奖记录会保留，只有处理中红包会阻止切换。'}
                         okText="确认"
                         cancelText="取消"
                         onConfirm={() => handleConfigureRiderSafetyPayoutTest(riderSafetySettings.payoutTest?.active ? 'restore' : 'enable')}
