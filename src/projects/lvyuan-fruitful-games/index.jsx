@@ -7,6 +7,7 @@ import {
   getLvyuanFruitfulGamesAsset,
 } from './config'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
+import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { completeLvyuanFruitfulGame, getLvyuanFruitfulGamesBootstrap, getLvyuanFruitfulGamesPublicConfig } from './api'
 import FruitMergeRules from './FruitMergeRules'
@@ -587,6 +588,12 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
   }, [])
+
+  useEffect(() => {
+    trackPageView(activityKey, '/lvyuan-fruitful-games', {
+      activityType: LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
+    })
+  }, [activityKey])
 
   useEffect(() => {
     let cancelled = false
