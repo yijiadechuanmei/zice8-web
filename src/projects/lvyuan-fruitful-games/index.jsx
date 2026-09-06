@@ -679,7 +679,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
 
   if (view === 'quiz') return renderPage(<QuizFlow onBack={() => navigate('selector')} onComplete={completeGame} totalScore={userProgress.totalScore} />)
 
-  if (view === 'ranking') return renderPage(<RankingPage onBack={() => navigate('home')} />)
+  if (view === 'ranking') return renderPage(<RankingPage activityKey={activityKey} onBack={() => navigate('home')} />)
 
   if (view === 'fruit-merge-rules') {
     return renderPage(<FruitMergeRules onBack={() => navigate('selector')} onStart={() => navigate('fruit-merge')} />)

@@ -33,6 +33,7 @@ import {
   updateNanshaOpenMicConfig,
   updateRiderSafetySurveyMode,
 } from '../api'
+import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
 
 const { Text, Title } = Typography
 
@@ -914,6 +915,10 @@ export default function ActivityConfigPage({ activity }) {
             </Text>
           </Space>
         </Card>
+
+        {activity.type === 'lvyuan_consumer_game_collection' ? (
+          <LvyuanDataClearPanel activityKey={activity.activityKey} />
+        ) : null}
 
         {activity.type === 'nansha_open_mic' ? (
           <Card

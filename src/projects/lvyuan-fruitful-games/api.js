@@ -6,6 +6,9 @@ export const getLvyuanFruitfulGamesPublicConfig = (activityKey) =>
 export const getLvyuanFruitfulGamesBootstrap = (activityKey) =>
   request(`/lvyuan-fruitful-games/activities/${encodeURIComponent(activityKey)}/bootstrap`)
 
+export const getLvyuanFruitfulGamesRanking = (activityKey) =>
+  request(`/lvyuan-fruitful-games/activities/${encodeURIComponent(activityKey)}/ranking`)
+
 export const completeLvyuanFruitfulGame = (activityKey, gameKey, answers) =>
   request(`/lvyuan-fruitful-games/activities/${encodeURIComponent(activityKey)}/complete`, {
     method: 'POST',

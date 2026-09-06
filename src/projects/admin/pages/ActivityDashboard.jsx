@@ -4,6 +4,7 @@ import { Button, Card, Col, Empty, Row, Select, Space, Spin, Statistic, Tooltip,
 import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
+import { getLvyuanAdminOverview } from '../lvyuanFruitfulApi'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
 const { Paragraph, Text, Title } = Typography
@@ -54,10 +55,13 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     const sourceAccessRequest = isXiwuqiRoadNight
       ? getSourceAccess(activity.activityKey, XIWUQI_AMAP_SOURCE_FILTER).catch(() => null)
       : Promise.resolve(null)
-    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest])
-      .then(([overviewData, chartData, sourceAccessData]) => {
+    const lvyuanOverviewRequest = activity.type === 'lvyuan_consumer_game_collection'
+      ? getLvyuanAdminOverview(activity.activityKey)
+      : Promise.resolve(null)
+    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest])
+      .then(([overviewData, chartData, sourceAccessData, lvyuanOverview]) => {
         if (!alive) return
-        setOverview(overviewData)
+        setOverview(lvyuanOverview ? { ...overviewData, lvyuanFruitfulGames: lvyuanOverview } : overviewData)
         setCharts(chartData)
         setSourceAccess(sourceAccessData)
         setUpdatedAt(new Date())
@@ -74,7 +78,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     return () => {
       alive = false
     }
-  }, [activity.activityKey, isXiwuqiRoadNight, phaseScope, refreshNonce])
+  }, [activity.activityKey, activity.type, isXiwuqiRoadNight, phaseScope, refreshNonce])
 
   useEffect(() => {
     if (!compact || !autoRefreshMs) return undefined
@@ -89,6 +93,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '高德 UV', value: sourceOverview.uv ?? 0, tooltip: uvHint },
       { label: '抖音点击', value: sourceOverview.outboundClicks ?? 0, tooltip: '高德来源访客点击图片跳转抖音的次数。' },
     ] : []
+
+    if (activity.type === 'lvyuan_consumer_game_collection') {
+      const lvyuan = overview?.lvyuanFruitfulGames || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+        { label: '参与用户', value: lvyuan.participantCount ?? 0 },
+        { label: '获得积分用户', value: lvyuan.scoredUserCount ?? 0 },
+        { label: '满300分用户', value: lvyuan.fullCompletionCount ?? 0 },
+        { label: '已发放总积分', value: lvyuan.totalScore ?? 0 },
+        { label: '贪吃蛇通关', value: lvyuan.completedByGame?.snake ?? 0 },
+        { label: '找茬通关', value: lvyuan.completedByGame?.spot_difference ?? 0 },
+        { label: '合成水果通关', value: lvyuan.completedByGame?.fruit_merge ?? 0 },
+      ]
+    }
 
     if (isTjrcbPensionManual) {
       return [

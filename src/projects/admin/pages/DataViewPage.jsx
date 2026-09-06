@@ -5,10 +5,12 @@ import { SearchOutlined } from '@ant-design/icons'
 import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, reviewNanshaOpenMicEntry, syncNanhaiChallengePayout } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
+import { LvyuanParticipantsPage } from '../components/LvyuanFruitfulAdmin'
 
 const pageSize = 20
 
 export default function DataViewPage({ activity, phaseScope = 'all' }) {
+  if (activity.type === 'lvyuan_consumer_game_collection') return <LvyuanParticipantsPage activity={activity} />
   return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} phaseScope={phaseScope} />
 }
 
