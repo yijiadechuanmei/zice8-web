@@ -88,6 +88,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [mode, setMode] = useState('personal')
   const [modal, setModal] = useState('')
   const [error, setError] = useState('')
+  const [formToast, setFormToast] = useState('')
   const [answerToast, setAnswerToast] = useState('')
   const [answerFeedback, setAnswerFeedback] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -109,12 +110,16 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, Math.ceil(((attempt?.deadline || 0) - now - offset) / 1000))
-  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setAnswerToast(''); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
+  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setAnswerFeedback(null); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
     setError(err.message || '请求失败，请重试')
   }, [reauth])
+  const showFormToast = useCallback((message) => {
+    setFormToast(message)
+    window.setTimeout(() => setFormToast((current) => current === message ? '' : current), 1500)
+  }, [])
   async function run(work) {
     if (busyRef.current) return
     busyRef.current = true; setBusy(true); setError('')
@@ -170,15 +175,15 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         else go('quiz')
         return
       }
-      setForm({ name: p.name || value.nickname || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
+      setForm({ name: p.name || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
       requestId.current = uuid(); go('register')
     })
   }
   async function start(event) {
     event.preventDefault()
     const payload = { ...form, name: form.name.trim(), phone: form.phone.trim(), companyName: form.companyName.trim(), departmentName: form.departmentName.trim(), mode, requestId: requestId.current }
-    if (!payload.name || !payload.companyName || !payload.departmentName) { setError('请完整填写参与信息'); return }
-    if (!/^1[3-9]\d{9}$/.test(payload.phone)) { setError('请输入正确的手机号码'); return }
+    if (!payload.name || !payload.companyName || !payload.departmentName) { showFormToast('请完整填写参与信息'); return }
+    if (!/^1[3-9]\d{9}$/.test(payload.phone)) { showFormToast('请输入正确的手机号码'); return }
     await run(async () => {
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([])
@@ -202,6 +207,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerFeedback(null)
     if (nextAttempt.status === 'failed') setModal('failed')
     else if (nextAttempt.status === 'success') go('result')
+  }
+  async function completeAll() {
+    await run(async () => {
+      const value = accept(await request(`${base}/complete-all`, { method: 'POST', body: JSON.stringify({ mode }) }))
+      if (value.modes[mode].attempt?.status === 'success') go('result')
+    })
   }
   async function draw() {
     if (spinning) return
@@ -251,11 +262,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
               <input aria-label="部门名称" required maxLength={80} placeholder="点击输入部门名称" value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
               <button className="cyber-register-submit" style={{ top: infoArt.submitTop }} type="submit" disabled={busy} aria-label="开始答题"><img src={src(infoArt.submit)} alt="" draggable={false} /></button>
             </form>
-            <Picture id="a92dbb46d90efd589d31942056deb1f7" x={25} y={1} w={55} h={55} onClick={() => go('home')} label="返回" />
-            <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} onClick={() => go('home')} label="返回首页" />
+            <Picture id="a92dbb46d90efd589d31942056deb1f7" x={25} y={1} w={55} h={55} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回" />
+            <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回首页" />
           </>}
           {page === 'quiz' && <>
-            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={navigation} />
+            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-timer" role="timer">{formatTime(remainingSeconds)}</div>
             <div className="cyber-progress"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
             <div className="cyber-question-content" key={visibleQuestion?.id}>
@@ -288,6 +299,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       </div>
     </div>
     {error && <div className="cyber-toast-layer"><div className="cyber-toast" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="关闭提示">×</button></div></div>}
+    {formToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{formToast}</div></div>}
     {answerToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{answerToast}</div></div>}
     {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '3次机会已用完，感谢参与' : attempt?.reason === 'timeout' ? `答题时间已结束，剩余${progress?.remaining || 0}次机会` : `累计答错3题，剩余${progress?.remaining || 0}次机会`}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
