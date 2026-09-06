@@ -1,4 +1,4 @@
-.cyber-app { min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-app { height:100dvh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-app * { box-sizing:border-box; }
 .cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
 .cyber-stage { width:750px; height:1624px; position:relative; transform-origin:top left; perspective:2000px; }

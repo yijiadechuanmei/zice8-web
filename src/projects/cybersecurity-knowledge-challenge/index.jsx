@@ -19,8 +19,7 @@ const getStageScale = () => {
   if (typeof window === 'undefined') return 1
   const viewport = window.visualViewport
   const width = viewport?.width ?? window.innerWidth
-  const height = viewport?.height ?? window.innerHeight
-  return Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT, 1)
+  return Math.min(width / DESIGN_WIDTH, 1)
 }
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (Number(c) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16))
 const rect = (left, top, width, height) => ({ position: 'absolute', left, top, width, height })
