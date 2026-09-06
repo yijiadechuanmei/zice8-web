@@ -146,7 +146,7 @@ export const layouts = {
       "modal": false
     },
     {
-      "src": "text-3e63f29b2543.png",
+      "src": "739f9f21f54b72ca51ec21114b0e625b_5152_56_56.png",
       "x": 686.0,
       "y": 9.0,
       "w": 56.0,

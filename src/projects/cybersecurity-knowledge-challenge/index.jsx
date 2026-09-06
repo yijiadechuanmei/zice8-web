@@ -13,6 +13,7 @@ const TYPE = 'cybersecurity_knowledge_challenge'
 const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
 const DESIGN_WIDTH = 750
 const DESIGN_HEIGHT = 1624
+const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
 const labelMode = (mode) => mode === 'team' ? '团队' : '个人'
 const INFO_ART = {
@@ -31,11 +32,7 @@ const getStageScale = () => {
   if (typeof window === 'undefined') return 1
   const viewport = window.visualViewport
   const viewportWidth = viewport?.width || window.innerWidth
-  const viewportHeight = viewport?.height || window.innerHeight
-  const widthScale = viewportWidth / DESIGN_WIDTH
-  const heightScale = viewportHeight / DESIGN_HEIGHT
-  if (viewportWidth < DESIGN_WIDTH) return Math.min(Math.max(widthScale, heightScale), 1)
-  return Math.min(widthScale, 1)
+  return Math.min(viewportWidth / DESIGN_WIDTH, 1)
 }
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (Number(c) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16))
 const rect = (left, top, width, height) => ({ position: 'absolute', left, top, width, height })
@@ -202,13 +199,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const modalProps = { scale, onClose: closeModal }
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '6aa715', 'cd20df', '5c1f714']
   const infoArt = INFO_ART[mode]
+  const stageHeight = page === 'home' ? HOME_HEIGHT : DESIGN_HEIGHT
   return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
-    <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: DESIGN_HEIGHT * scale }}>
-      <div className="cyber-stage" style={{ transform: `scale(${scale})` }}>
+    <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
+      <div className="cyber-stage" style={{ height: stageHeight, transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
           {page === 'home' && <>
-            <Artwork page={1} omit={['text-3e63f29b2543']} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, 'text-34aa4cc01a58': { label: '活动规则', onClick: () => go('choose') } }} classes={{ '95e7bc9d0c3c9a2257f91795ba29ff92': 'cyber-enter', f5121483110c6ccf8067f3557519bce1: 'cyber-float', a70528fc49f038acb66a2ef22bb445ed: 'cyber-float-delay', f118cea1a1b86c389d53cae4600ca41b: 'cyber-float-delay' }} />
-            <button type="button" className="cyber-my-prizes" onClick={() => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') }}>我的奖品</button>
+            <Artwork page={1} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, 'text-34aa4cc01a58': { label: '活动规则', onClick: () => go('choose') }, '739f9f21f54b72ca51ec21114b0e625b': { label: '我的奖品', onClick: () => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') } } }} />
           </>}
           {page === 'choose' && <Artwork page={2} actions={{ ...navigation, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
           {page === 'register' && <>

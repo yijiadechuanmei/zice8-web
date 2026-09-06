@@ -1,7 +1,7 @@
 .cyber-app { position:fixed; inset:0; display:flex; width:100%; height:100%; align-items:center; justify-content:center; overflow:hidden; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-app * { box-sizing:border-box; }
-.cyber-stage-wrap { position:relative; flex:none; overflow:hidden; }
-.cyber-stage { position:absolute; top:0; left:0; width:750px; height:1624px; transform-origin:top left; overflow:hidden; perspective:2000px; }
+.cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
+.cyber-stage { position:absolute; top:0; left:0; width:750px; transform-origin:top left; overflow:visible; perspective:2000px; }
 .cyber-page { position:absolute; inset:0; transform-origin:left center; animation:cyber-page-turn .55s cubic-bezier(.2,.75,.2,1) both; }
 .cyber-picture { padding:0; border:0; background:none; }
 .cyber-picture img { display:block; width:100%; height:100%; object-fit:fill; }
@@ -9,7 +9,6 @@
 .cyber-button:active { scale:.97; filter:brightness(.96); }
 .cyber-button:focus-visible, .cyber-app button:focus-visible { outline:4px solid #936529; outline-offset:5px; }
 .cyber-button:disabled { opacity:.45; cursor:default; }
-.cyber-my-prizes { position:absolute; right:22px; top:6px; padding:8px 16px; border:1px solid #b3844b; border-radius:20px; font-size:23px; background:#fff9ed; color:#946224; cursor:pointer; }
 .cyber-enter { animation:cyber-rise .7s .12s both; }
 .cyber-float { animation:cyber-float 4s ease-in-out infinite; }
 .cyber-float-delay { animation:cyber-float 3.7s .6s ease-in-out infinite reverse; }
