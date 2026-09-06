@@ -1439,7 +1439,11 @@
 .lyfg-quiz-success-card { position: relative; width: 600px; height: 869px; animation: lyfg-ih5-reveal 420ms cubic-bezier(.22,1,.36,1) both; }
 .lyfg-quiz-success-card img { width: 100%; height: 100%; object-fit: fill; }
 .lyfg-quiz-success-score { position: absolute; top: 564px; left: 291px; display: flex; width: 136px; height: 50px; align-items: center; justify-content: center; color: #5c3819; font-size: 36px; line-height: normal; letter-spacing: -1px; }
-.lyfg-auth-gate { position: fixed; inset: 0; display: grid; place-items: center; background: #f6d989; color: #5c3819; font-size: 20px; }
+.lyfg-entry-page { position: fixed; inset: 0; overflow: hidden; background: #f6d989; }
+.lyfg-entry-page > .lyfg-page { filter: blur(3px); }
+.lyfg-auth-gate { position: fixed; z-index: 100; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; padding: 28px; color: #5c3819; text-align: center; background: rgba(246,217,137,.76); font-size: 22px; font-weight: 700; }
+.lyfg-auth-gate p { margin: 0; padding: 18px 28px; border: 2px solid rgba(145,83,32,.28); border-radius: 999px; background: rgba(255,246,211,.94); box-shadow: 0 10px 28px rgba(92,56,25,.18); }
+.lyfg-auth-gate button { padding: 12px 30px; border: 0; border-radius: 999px; color: #fff7dc; background: #9b3b22; font: inherit; }
 .lyfg-quiz-wrong-title { top: 41px; left: 172px; width: 407px; height: 243px; }
 .lyfg-quiz-wrong-panel { top: 302px; left: 91px; width: 571px; height: 968px; }
 .lyfg-quiz-wrong-retry { top: 1108px; left: 118px; width: 251px; height: 103px; }

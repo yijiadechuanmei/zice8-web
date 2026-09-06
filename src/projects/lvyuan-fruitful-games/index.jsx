@@ -579,6 +579,8 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const [bgmConfig, setBgmConfig] = useState(null)
   const [publicConfig, setPublicConfig] = useState(null)
   const [userProgress, setUserProgress] = useState({ nickname: '微信用户', totalScore: 0, completedGames: [] })
+  const [progressReady, setProgressReady] = useState(false)
+  const [entryError, setEntryError] = useState('')
   const [activeGame, setActiveGame] = useState('')
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig, { blockSnapshotUser: true })
 
@@ -611,8 +613,16 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     if (!authReady) return
     let cancelled = false
     getLvyuanFruitfulGamesBootstrap(activityKey)
-      .then((progress) => { if (!cancelled) setUserProgress(progress) })
-      .catch((error) => { if (error?.status === 401) reauth('lvyuan-bootstrap') })
+      .then((progress) => {
+        if (cancelled) return
+        setUserProgress(progress)
+        setProgressReady(true)
+      })
+      .catch((error) => {
+        if (cancelled) return
+        if (error?.status === 401 && reauth('lvyuan-bootstrap')) return
+        setEntryError(error?.message || '活动加载失败，请重试')
+      })
     return () => { cancelled = true }
   }, [activityKey, authReady, reauth])
 
@@ -639,7 +649,13 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return result
   }, [activeGame, activityKey])
 
-  if (!publicConfig || !authReady) return <main className="lyfg-auth-gate"><p>{blockedMessage || '正在进入果园…'}</p></main>
+  if (!publicConfig || !authReady || !progressReady) return <div className="lyfg-entry-page">
+    <HomePage onStart={() => {}} onRanking={() => {}} />
+    <div className="lyfg-auth-gate" role="status" aria-live="polite">
+      <p>{entryError || blockedMessage || (!publicConfig ? '正在加载活动…' : !authReady ? '正在微信授权…' : '正在读取游戏进度…')}</p>
+      {entryError ? <button type="button" onClick={() => window.location.reload()}>重新加载</button> : null}
+    </div>
+  </div>
 
   if (view === 'snake') {
     return renderPage(<SnakeGame activityKey={activityKey} onBack={() => navigate('selector')} onComplete={() => navigate('quiz')} />)
