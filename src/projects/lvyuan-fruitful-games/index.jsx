@@ -9,6 +9,7 @@ import {
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { isWechatBrowser } from '../../shared/utils/url'
 import { completeLvyuanFruitfulGame, getLvyuanFruitfulGamesBootstrap, getLvyuanFruitfulGamesPublicConfig } from './api'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
@@ -575,25 +576,34 @@ function ComingSoonNotice({ message = '敬请期待' }) {
 
 export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY
+  const isWechat = isWechatBrowser()
   const [view, setView] = useState('home')
   const [notice, setNotice] = useState('')
   const [bgmConfig, setBgmConfig] = useState(null)
   const [publicConfig, setPublicConfig] = useState(null)
-  const [userProgress, setUserProgress] = useState({ nickname: '微信用户', totalScore: 0, completedGames: [] })
-  const [progressReady, setProgressReady] = useState(false)
+  const [userProgress, setUserProgress] = useState(() => ({
+    nickname: isWechat ? '微信用户' : '游客试玩',
+    totalScore: 0,
+    completedGames: [],
+  }))
+  const [progressReady, setProgressReady] = useState(() => !isWechat)
   const [entryError, setEntryError] = useState('')
   const [activeGame, setActiveGame] = useState('')
-  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig, { blockSnapshotUser: true })
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig, {
+    blockSnapshotUser: isWechat,
+    allowNonWechatGuest: true,
+  })
 
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
   }, [])
 
   useEffect(() => {
+    if (!isWechat) return
     trackPageView(activityKey, '/lvyuan-fruitful-games', {
       activityType: LVYUAN_FRUITFUL_GAMES_ACTIVITY_TYPE,
     })
-  }, [activityKey])
+  }, [activityKey, isWechat])
 
   useEffect(() => {
     let cancelled = false
@@ -618,6 +628,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
 
   useEffect(() => {
     if (!authReady) return
+    if (!isWechat) return
     let cancelled = false
     getLvyuanFruitfulGamesBootstrap(activityKey)
       .then((progress) => {
@@ -631,7 +642,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
         setEntryError(error?.message || '活动加载失败，请重试')
       })
     return () => { cancelled = true }
-  }, [activityKey, authReady, reauth])
+  }, [activityKey, authReady, isWechat, reauth])
 
   const openComingSoon = useCallback(() => setNotice('敬请期待'), [])
   const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={bgmConfig || {}} activityKey={activityKey} /></>
@@ -651,10 +662,11 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     navigate(rulesView)
   }, [navigate, userProgress.completedGames])
   const completeGame = useCallback(async (answers) => {
+    if (!isWechat) return { totalScore: 0, completedGames: [] }
     const result = await completeLvyuanFruitfulGame(activityKey, activeGame, answers)
     setUserProgress(result)
     return result
-  }, [activeGame, activityKey])
+  }, [activeGame, activityKey, isWechat])
 
   if (!publicConfig || !authReady || !progressReady) return <div className="lyfg-entry-page">
     <HomePage onStart={() => {}} onRanking={() => {}} />

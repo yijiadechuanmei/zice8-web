@@ -79,13 +79,14 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const oauthScopeOverride = options.oauthScopeOverride
   const blockSnapshotUser = Boolean(options.blockSnapshotUser)
   const replaceOAuthCallback = Boolean(options.replaceOAuthCallback)
+  const allowNonWechatGuest = Boolean(options.allowNonWechatGuest)
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
 
     const inWechat = isWechatBrowser()
     if (!inWechat) {
-      if (requiresWechatBrowser) {
+      if (requiresWechatBrowser && !allowNonWechatGuest) {
         setBlockedMessage('请在微信中打开')
         setAuthReady(false)
         setAuthStatus('error')
@@ -144,7 +145,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, configuredOauthScope, configuredRequireUserinfo, oauthScopeOverride, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
+  }, [activityKey, allowNonWechatGuest, configuredOauthScope, configuredRequireUserinfo, oauthScopeOverride, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
@@ -188,7 +189,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
       lastAuthStep: inWechat ? 'wechat-check' : 'browser-check',
     })
 
-    if (accessMode === 'wechat_required' && !inWechat) {
+    if (accessMode === 'wechat_required' && !inWechat && !allowNonWechatGuest) {
       setBlockedMessage('请在微信中打开')
       setAuthReady(false)
       setAuthStatus('error')
@@ -249,7 +250,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     setAuthReady(true)
     setAuthStatus('ready')
-  }, [activityKey, blockSnapshotUser, configuredOauthScope, configuredRequireUserinfo, publicConfig, reauth, replaceOAuthCallback])
+  }, [activityKey, allowNonWechatGuest, blockSnapshotUser, configuredOauthScope, configuredRequireUserinfo, publicConfig, reauth, replaceOAuthCallback])
 
   return { authReady, blockedMessage, hasToken: Boolean(getToken()), autoAuthStarted, authStatus, reauth, clearToken: removeToken }
 }
