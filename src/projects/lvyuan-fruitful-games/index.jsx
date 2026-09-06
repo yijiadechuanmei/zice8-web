@@ -7,7 +7,8 @@ import {
   getLvyuanFruitfulGamesAsset,
 } from './config'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
-import { getLvyuanFruitfulGamesPublicConfig } from './api'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { completeLvyuanFruitfulGame, getLvyuanFruitfulGamesBootstrap, getLvyuanFruitfulGamesPublicConfig } from './api'
 import FruitMergeRules from './FruitMergeRules'
 import GameSelector from './GameSelector'
 import HomePage from './HomePage'
@@ -310,7 +311,7 @@ function FloatingJoystick({ joystickRef }) {
 function SnakeGame({ activityKey, onBack, onComplete }) {
   const [snakeLength, setSnakeLength] = useState(INITIAL_SNAKE.length)
   const [fruit, setFruit] = useState(null)
-  const [score, setScore] = useState(0)
+  const [, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(() => Number(localStorage.getItem(`${activityKey}:snake-best`)) || 0)
   const [gameState, setGameState] = useState('ready')
   const [countdown, setCountdown] = useState(3)
@@ -567,15 +568,19 @@ function SnakeGame({ activityKey, onBack, onComplete }) {
   )
 }
 
-function ComingSoonNotice() {
-  return <div className="lyfg-coming-soon-notice" role="status" aria-live="polite">敬请期待</div>
+function ComingSoonNotice({ message = '敬请期待' }) {
+  return <div className="lyfg-coming-soon-notice" role="status" aria-live="polite">{message}</div>
 }
 
 export default function LvyuanFruitfulGamesProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || LVYUAN_FRUITFUL_GAMES_ACTIVITY_KEY
   const [view, setView] = useState('home')
-  const [showComingSoon, setShowComingSoon] = useState(false)
+  const [notice, setNotice] = useState('')
   const [bgmConfig, setBgmConfig] = useState(null)
+  const [publicConfig, setPublicConfig] = useState(null)
+  const [userProgress, setUserProgress] = useState({ nickname: '微信用户', totalScore: 0, completedGames: [] })
+  const [activeGame, setActiveGame] = useState('')
+  const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, publicConfig, { blockSnapshotUser: true })
 
   useEffect(() => {
     document.title = '绿园消保 · 硕果盈心'
@@ -585,21 +590,33 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     let cancelled = false
     getLvyuanFruitfulGamesPublicConfig(activityKey)
       .then((publicConfig) => {
-        if (!cancelled) setBgmConfig(publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {})
+        if (!cancelled) {
+          setPublicConfig(publicConfig)
+          setBgmConfig(publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {})
+        }
       })
       .catch(() => {
-        if (!cancelled) setBgmConfig({})
+        if (!cancelled) { setPublicConfig({}); setBgmConfig({}) }
       })
     return () => { cancelled = true }
   }, [activityKey])
 
   useEffect(() => {
-    if (!showComingSoon) return undefined
-    const timer = window.setTimeout(() => setShowComingSoon(false), 1600)
+    if (!notice) return undefined
+    const timer = window.setTimeout(() => setNotice(''), 1600)
     return () => window.clearTimeout(timer)
-  }, [showComingSoon])
+  }, [notice])
 
-  const openComingSoon = useCallback(() => setShowComingSoon(true), [])
+  useEffect(() => {
+    if (!authReady) return
+    let cancelled = false
+    getLvyuanFruitfulGamesBootstrap(activityKey)
+      .then((progress) => { if (!cancelled) setUserProgress(progress) })
+      .catch((error) => { if (error?.status === 401) reauth('lvyuan-bootstrap') })
+    return () => { cancelled = true }
+  }, [activityKey, authReady, reauth])
+
+  const openComingSoon = useCallback(() => setNotice('敬请期待'), [])
   const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={bgmConfig || {}} activityKey={activityKey} /></>
   const navigate = useCallback((nextView) => {
     if (typeof document.startViewTransition === 'function') {
@@ -608,6 +625,21 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     }
     setView(nextView)
   }, [])
+  const startGame = useCallback((gameKey, rulesView) => {
+    if (userProgress.completedGames.includes(gameKey)) {
+      setNotice('已完成')
+      return
+    }
+    setActiveGame(gameKey)
+    navigate(rulesView)
+  }, [navigate, userProgress.completedGames])
+  const completeGame = useCallback(async (answers) => {
+    const result = await completeLvyuanFruitfulGame(activityKey, activeGame, answers)
+    setUserProgress(result)
+    return result
+  }, [activeGame, activityKey])
+
+  if (!publicConfig || !authReady) return <main className="lyfg-auth-gate"><p>{blockedMessage || '正在进入果园…'}</p></main>
 
   if (view === 'snake') {
     return renderPage(<SnakeGame activityKey={activityKey} onBack={() => navigate('selector')} onComplete={() => navigate('quiz')} />)
@@ -629,7 +661,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return renderPage(<SpotDifferenceGame onBack={() => navigate('fruit-merge-rules')} onComplete={() => navigate('quiz')} />)
   }
 
-  if (view === 'quiz') return renderPage(<QuizFlow onBack={() => navigate('selector')} />)
+  if (view === 'quiz') return renderPage(<QuizFlow onBack={() => navigate('selector')} onComplete={completeGame} totalScore={userProgress.totalScore} />)
 
   if (view === 'ranking') return renderPage(<RankingPage onBack={() => navigate('home')} />)
 
@@ -638,7 +670,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'selector') {
-    return renderPage(<><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => navigate('snake-rules')} onSelectSpotDifference={() => navigate('spot-difference-rules')} onSelectFruitMerge={() => navigate('fruit-merge-rules')} />{showComingSoon ? <ComingSoonNotice /> : null}</>)
+    return renderPage(<><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => startGame('snake', 'snake-rules')} onSelectSpotDifference={() => startGame('spot_difference', 'spot-difference-rules')} onSelectFruitMerge={() => startGame('fruit_merge', 'fruit-merge-rules')} />{notice ? <ComingSoonNotice message={notice} /> : null}</>)
   }
 
   return renderPage(<HomePage onStart={() => navigate('selector')} onRanking={() => navigate('ranking')} />)

@@ -14,13 +14,15 @@ function selectQuestions() {
   return pool.slice(0, 3)
 }
 
-export default function QuizFlow({ onBack }) {
-  const questions = useMemo(selectQuestions, [])
+export default function QuizFlow({ onBack, onComplete, totalScore = 0 }) {
+  const questions = useMemo(() => selectQuestions(), [])
   const [step, setStep] = useState(0)
   const [status, setStatus] = useState('quiz')
   const [successVisible, setSuccessVisible] = useState(false)
   const [shareVisible, setShareVisible] = useState(false)
   const [answerFeedback, setAnswerFeedback] = useState(null)
+  const [submittedAnswers, setSubmittedAnswers] = useState([])
+  const [displayScore, setDisplayScore] = useState(totalScore)
   const question = questions[step]
 
   useEffect(() => {
@@ -47,21 +49,33 @@ export default function QuizFlow({ onBack }) {
         return
       }
       setAnswerFeedback(null)
-      if (step === questions.length - 1) setStatus('success')
-      else setStep((current) => current + 1)
+      if (step === questions.length - 1) {
+        Promise.resolve(onComplete?.([...submittedAnswers, answerFeedback.answer]))
+          .then((result) => {
+            if (typeof result?.totalScore === 'number') setDisplayScore(result.totalScore)
+            setStatus('success')
+          })
+          .catch(() => setStatus('wrong'))
+      } else {
+        setSubmittedAnswers((current) => [...current, answerFeedback.answer])
+        setStep((current) => current + 1)
+      }
     }, 1500)
     return () => window.clearTimeout(timer)
-  }, [answerFeedback, questions.length, step])
+  }, [answerFeedback, onComplete, questions.length, step, submittedAnswers])
 
   const answer = (optionIndex) => {
     if (answerFeedback) return
-    setAnswerFeedback({ correct: optionIndex === question.answer })
+    setAnswerFeedback({
+      correct: optionIndex === question.answer,
+      answer: { questionId: question.id, optionIndex },
+    })
   }
 
   if (status === 'poster') return <main className="lyfg-page lyfg-ih5-page">
     <Ih5Stage label="消保称号海报">
       {image('posterBackground', 'lyfg-ih5-background')}{image('posterPanel', 'lyfg-quiz-poster-panel')}
-      <div className="lyfg-quiz-poster-title">消保小天使</div>
+      <div className="lyfg-quiz-poster-title">{displayScore >= 300 ? '消保小天使' : displayScore >= 200 ? '消保小卫士' : '消保宣传员'}</div>
       <div className="lyfg-quiz-poster-actions">
         <button className="lyfg-ih5-action lyfg-quiz-poster-left" type="button" onClick={() => setShareVisible(true)} aria-label="分享给朋友">{image('posterLeftAction', 'lyfg-ih5-fill-image', '分享')}</button>
         <button className="lyfg-ih5-action lyfg-quiz-poster-footer" type="button" onClick={onBack} aria-label="返回果园">{image('posterFooter', 'lyfg-ih5-fill-image', '返回果园')}</button>
@@ -89,6 +103,9 @@ export default function QuizFlow({ onBack }) {
       {image(OPTION_ASSETS[index], 'lyfg-ih5-fill-image')}<span>{option}</span>
     </button>)}</div>
     {answerFeedback ? <div className={`lyfg-quiz-answer-toast ${answerFeedback.correct ? 'is-correct' : 'is-wrong'}`} role="alert" aria-live="assertive"><span>{answerFeedback.correct ? '回答正确' : '回答错误'}</span></div> : null}
-    {status === 'success' ? <div className="lyfg-quiz-success" role="status"><img src={getLvyuanFruitfulGamesAsset('quizSuccess')} alt="三题全部答对" draggable="false" onLoad={() => setSuccessVisible(true)} /></div> : null}
+    {status === 'success' ? <div className="lyfg-quiz-success" role="status"><div className="lyfg-quiz-success-card">
+      <img src={getLvyuanFruitfulGamesAsset('quizSuccess')} alt="三题全部答对" draggable="false" onLoad={() => setSuccessVisible(true)} />
+      <span className="lyfg-quiz-success-score">{displayScore}</span>
+    </div></div> : null}
   </Ih5Stage></main>
 }
