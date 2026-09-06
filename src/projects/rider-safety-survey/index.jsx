@@ -248,10 +248,23 @@ export default function RiderSafetySurveyProject({ routeParams }) {
       await wait(720);
       setStage("wheel");
     } catch (error) {
-      // 服务端的库存、预算、授权或网络错误都不能伪造成“未中奖”，
-      // 否则红包抽完后仍会播放转盘并误导用户。保留测评结果页并直接提示原因。
-      setNotice(readError(error, "抽奖暂时不可用，请稍后重试"));
-      setStage("result");
+      const message = readError(error, "红包发放未成功，本次为谢谢参与");
+      // 只有服务端已确认奖池耗尽时才结束活动；其余接口异常仍按既有
+      // “谢谢参与”流程处理，避免用户因为临时接口波动而卡在结果页。
+      if (message === "活动已结束") {
+        setNotice(message);
+        setStage("result");
+        return;
+      }
+      setDraw({
+        id: "dispatch-failed",
+        status: "miss",
+        prizeType: "none",
+        prizeName: null,
+      });
+      setNotice(message);
+      await wait(720);
+      setStage("wheel");
     } finally {
       setBusy("");
     }
