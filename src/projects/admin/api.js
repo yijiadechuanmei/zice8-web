@@ -244,6 +244,16 @@ export function saveRiderSafetySurveySettings(activityKey, payload) {
   })
 }
 
+export function configureRiderSafetySurveyPayoutTest(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/payout-test-config`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'CONFIGURE_RIDER_SAFETY_SURVEY_PAYOUT_TEST',
+    }),
+  })
+}
+
 export function reissueRiderSafetySurveyCash(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/cash-reissues`, {
     method: 'POST',

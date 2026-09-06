@@ -5,6 +5,7 @@ import {
   clearLongwenBeerQuizData,
   clearXiangyuGlobalTreasureData,
   clearRiderSafetySurveyData,
+  configureRiderSafetySurveyPayoutTest,
   clearSongWishLotteryDraws,
   deleteNanshaOpenMicEntry,
   getActivityConfig,
@@ -107,9 +108,12 @@ export default function ActivityConfigPage({ activity }) {
   const [riderSafetySettings, setRiderSafetySettings] = useState({
     prizes: [],
     maxWinningUsersPerIp: 3,
+    payoutTest: { active: false, amountFen: 20, maxStock: 20, prize: null },
     budget: null,
   })
   const [riderSafetySettingsSaving, setRiderSafetySettingsSaving] = useState(false)
+  const [riderSafetyPayoutTestStock, setRiderSafetyPayoutTestStock] = useState(5)
+  const [riderSafetyPayoutTestSaving, setRiderSafetyPayoutTestSaving] = useState(false)
   const [riderSafetyReissueGrantId, setRiderSafetyReissueGrantId] = useState('')
   const [riderSafetyReissueAmountYuan, setRiderSafetyReissueAmountYuan] = useState(2)
   const [riderSafetyReissueReason, setRiderSafetyReissueReason] = useState('')
@@ -187,12 +191,13 @@ export default function ActivityConfigPage({ activity }) {
           setRiderSafetySettings({
             prizes: data?.prizes || [],
             maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+            payoutTest: data?.payoutTest || { active: false, amountFen: 20, maxStock: 20, prize: null },
             budget: data?.budget || null,
           })
         })
         .catch((err) => { if (alive) setError(err.message || '骑手安全问卷配置加载失败') })
     } else {
-      setRiderSafetySettings({ prizes: [], maxWinningUsersPerIp: 3, budget: null })
+      setRiderSafetySettings({ prizes: [], maxWinningUsersPerIp: 3, payoutTest: { active: false, amountFen: 20, maxStock: 20, prize: null }, budget: null })
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -445,6 +450,7 @@ export default function ActivityConfigPage({ activity }) {
       setRiderSafetySettings({
         prizes: data?.prizes || [],
         maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+        payoutTest: data?.payoutTest || { active: false, amountFen: 20, maxStock: 20, prize: null },
         budget: data?.budget || null,
       })
       message.success('奖品、库存、预算和IP风控配置已保存')
@@ -454,6 +460,32 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setRiderSafetySettingsSaving(false)
+    }
+  }
+
+  async function handleConfigureRiderSafetyPayoutTest(action) {
+    const testStock = Number(riderSafetyPayoutTestStock)
+    if (action === 'enable' && (!Number.isInteger(testStock) || testStock < 1 || testStock > 20)) {
+      message.warning('0.2元测试红包数量应为1到20个')
+      return
+    }
+    setRiderSafetyPayoutTestSaving(true)
+    setError('')
+    try {
+      const data = await configureRiderSafetySurveyPayoutTest(activity.activityKey, action === 'enable' ? { action, testStock } : { action })
+      setRiderSafetySettings({
+        prizes: data?.prizes || [],
+        maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+        payoutTest: data?.payoutTest || { active: false, amountFen: 20, maxStock: 20, prize: null },
+        budget: data?.budget || null,
+      })
+      message.success(action === 'enable' ? '已开启0.2元真实发放测试，后续抽奖仅发放该测试红包' : '已恢复正式红包奖池；测试已发放金额已从正式可发额度中扣除')
+    } catch (err) {
+      const text = err.message || '真实红包测试配置失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRiderSafetyPayoutTestSaving(false)
     }
   }
 
@@ -1071,6 +1103,64 @@ export default function ActivityConfigPage({ activity }) {
                   message="配置受预算与库存硬限制保护"
                   description="金额以元展示、以分保存；总预算不可超过安全上限，库存不可低于已发放和预留数量。单IP上限按已中奖或发放中的不同用户数计算，设为0表示关闭该项限制。"
                 />
+                <Card
+                  size="small"
+                  type="inner"
+                  title="甲方真实红包测试"
+                  style={{ borderColor: riderSafetySettings.payoutTest?.active ? '#faad14' : undefined }}
+                >
+                  <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                    {riderSafetySettings.payoutTest?.active ? (
+                      <Alert
+                        type="warning"
+                        showIcon
+                        message="0.2元真实发放测试进行中"
+                        description={`正式 2 元、68 元奖池已暂时关闭；当前仅可发放 0.2 元测试红包。已成功 ${riderSafetySettings.payoutTest?.prize?.stockIssued || 0} 个，处理中 ${riderSafetySettings.payoutTest?.prize?.stockReserved || 0} 个，剩余 ${riderSafetySettings.payoutTest?.prize?.remainingCount || 0} 个。恢复正式奖池时，已成功测试金额会从正式可发预算中扣除。`}
+                      />
+                    ) : (
+                      <Alert
+                        type="info"
+                        showIcon
+                        message="正式环境端到端验收专用"
+                        description="开启后会将 2 元、68 元奖池库存置为 0，仅开放少量 0.2 元红包，完整走微信授权、抽奖、商家转账和到账查询链路。仅允许在尚未产生真实红包流水时开启。"
+                      />
+                    )}
+                    <Space wrap align="end">
+                      {!riderSafetySettings.payoutTest?.active ? (
+                        <label>
+                          <Text strong>0.2元测试红包数量</Text>
+                          <div style={{ marginTop: 6 }}>
+                            <InputNumber
+                              min={1}
+                              max={riderSafetySettings.payoutTest?.maxStock || 20}
+                              precision={0}
+                              value={riderSafetyPayoutTestStock}
+                              disabled={riderSafetyTestMode}
+                              onChange={(value) => setRiderSafetyPayoutTestStock(Number(value || 0))}
+                            />
+                          </div>
+                        </label>
+                      ) : null}
+                      <Popconfirm
+                        title={riderSafetySettings.payoutTest?.active ? '确认恢复正式红包奖池？' : '确认开启0.2元真实红包测试？'}
+                        description={riderSafetySettings.payoutTest?.active ? '测试红包全部结束后才可恢复。已实际发放的测试金额会计入活动总上限，因此正式 2 元红包库存可能相应减少。' : '此操作会立刻关闭常规 2 元、68 元抽奖并启用真实微信转账。请确认商户平台已允许单笔0.2元转账，且本活动尚未产生真实红包流水。'}
+                        okText="确认"
+                        cancelText="取消"
+                        onConfirm={() => handleConfigureRiderSafetyPayoutTest(riderSafetySettings.payoutTest?.active ? 'restore' : 'enable')}
+                      >
+                        <Button
+                          danger={!riderSafetySettings.payoutTest?.active}
+                          type={riderSafetySettings.payoutTest?.active ? 'primary' : 'default'}
+                          loading={riderSafetyPayoutTestSaving}
+                          disabled={!riderSafetySettings.payoutTest?.active && riderSafetyTestMode}
+                        >
+                          {riderSafetySettings.payoutTest?.active ? '恢复正式奖池' : '开启0.2元真实测试'}
+                        </Button>
+                      </Popconfirm>
+                      {riderSafetyTestMode ? <Text type="warning">请先切换至正式阶段，测试阶段不会发起真实转账。</Text> : null}
+                    </Space>
+                  </Space>
+                </Card>
                 {riderSafetySettings.prizes.map((prize) => (
                   <Card key={prize.id} size="small" type="inner" title={prize.prizeName}>
                     <Space wrap size={16}>
@@ -1082,6 +1172,7 @@ export default function ActivityConfigPage({ activity }) {
                             max={200}
                             precision={2}
                             value={Number(prize.amountFen || 0) / 100}
+                            disabled={riderSafetySettings.payoutTest?.active}
                             onChange={(value) => updateRiderSafetyPrize(prize.id, { amountFen: Math.round(Number(value || 0) * 100) })}
                           />
                         </div>
@@ -1094,13 +1185,14 @@ export default function ActivityConfigPage({ activity }) {
                             max={100000}
                             precision={0}
                             value={Number(prize.stockTotal || 0)}
+                            disabled={riderSafetySettings.payoutTest?.active}
                             onChange={(value) => updateRiderSafetyPrize(prize.id, { stockTotal: Number(value || 0) })}
                           />
                         </div>
                       </label>
                       <label>
                         <Text strong>启用奖项</Text>
-                        <div style={{ marginTop: 9 }}><Switch checked={prize.enabled === true} onChange={(enabled) => updateRiderSafetyPrize(prize.id, { enabled })} /></div>
+                          <div style={{ marginTop: 9 }}><Switch disabled={riderSafetySettings.payoutTest?.active} checked={prize.enabled === true} onChange={(enabled) => updateRiderSafetyPrize(prize.id, { enabled })} /></div>
                       </label>
                       <Text type="secondary">已发放 {prize.stockIssued || 0} · 预留 {prize.stockReserved || 0} · 剩余 {prize.remainingCount || 0}</Text>
                     </Space>
@@ -1115,6 +1207,7 @@ export default function ActivityConfigPage({ activity }) {
                         max={100}
                         precision={0}
                         value={riderSafetySettings.maxWinningUsersPerIp}
+                        disabled={riderSafetySettings.payoutTest?.active}
                         onChange={(value) => setRiderSafetySettings((current) => ({ ...current, maxWinningUsersPerIp: Number(value || 0) }))}
                       />
                     </div>
@@ -1131,7 +1224,7 @@ export default function ActivityConfigPage({ activity }) {
                     cancelText="取消"
                     onConfirm={handleSaveRiderSafetySettings}
                   >
-                    <Button type="primary" loading={riderSafetySettingsSaving}>保存配置</Button>
+                    <Button type="primary" loading={riderSafetySettingsSaving} disabled={riderSafetySettings.payoutTest?.active}>保存配置</Button>
                   </Popconfirm>
                 </Space>
               </Space>

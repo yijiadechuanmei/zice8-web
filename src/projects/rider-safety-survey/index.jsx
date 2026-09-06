@@ -30,6 +30,7 @@ const WHEEL_SEGMENTS = ["谢谢参与", "2元红包", "谢谢参与", "68元红�
 const WHEEL_STOP_INDEX_BY_PRIZE = {
   cash_200: 1,
   cash_6800: 3,
+  cash_test_020: 1,
 };
 
 const SAFETY_ARTICLES = [
@@ -681,6 +682,9 @@ function PrizeDispatching() {
 
 function PrizeWheel({ draw, showResult, onComplete, onPoster }) {
   const targetIndex = wheelStopIndexForDraw(draw);
+  const wheelSegments = draw?.prizeCode === "cash_test_020"
+    ? ["谢谢参与", "0.2元红包", "谢谢参与", "0.2元红包", "谢谢参与", "0.2元红包"]
+    : WHEEL_SEGMENTS;
   const [rotation, setRotation] = useState(() => showResult ? 1440 - targetIndex * 60 : 0);
 
   useEffect(() => {
@@ -711,7 +715,7 @@ function PrizeWheel({ draw, showResult, onComplete, onPoster }) {
           style={{ transform: `rotate(${rotation}deg)` }}
           aria-label="抽奖转盘"
         >
-          {WHEEL_SEGMENTS.map((label, index) => {
+          {wheelSegments.map((label, index) => {
             const angle = index * 60;
             return (
               <span
@@ -809,7 +813,7 @@ function normalizeSubmission(data) {
 }
 
 function previewPrize(forced) {
-  const type = ["cash", "cash_200", "cash_6800", "none"].includes(forced)
+  const type = ["cash", "cash_200", "cash_6800", "cash_test_020", "none"].includes(forced)
     ? forced
     : ["cash_200", "cash_6800", "none"][Math.floor(Math.random() * 3)];
   if (type === "cash" || type === "cash_200")
@@ -829,6 +833,15 @@ function previewPrize(forced) {
       prizeCode: "cash_6800",
       prizeName: "68元微信现金红包",
       prizeAmount: 6800,
+    };
+  if (type === "cash_test_020")
+    return {
+      id: "preview-cash-test-020",
+      status: "won",
+      prizeType: "cash",
+      prizeCode: "cash_test_020",
+      prizeName: "0.2元微信现金红包（甲方测试）",
+      prizeAmount: 20,
     };
   return {
     id: "preview-none",
