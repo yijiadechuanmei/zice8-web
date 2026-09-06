@@ -33,6 +33,7 @@ const SilkRoadShoppingListProject = lazy(() => import('./silk-road-shopping-list
 const XiangyuGlobalTreasureProject = lazy(() => import('./xiangyu-global-treasure/index.jsx'))
 
 const activityTypeProjects = {
+  cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),
   payment_transfer_test: PaymentTransferTestProject,
   artist_call_lottery: ArtistCallLotteryProject,
   'artist-call-lottery': ArtistCallLotteryProject,
