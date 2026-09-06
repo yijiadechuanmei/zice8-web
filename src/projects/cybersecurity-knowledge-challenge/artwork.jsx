@@ -12,7 +12,8 @@ export function Artwork({ page, actions = {}, omit = [], classes = {} }) {
   return layouts[page].filter((v) => !v.modal && !omit.some((id) => v.src.startsWith(id))).map((v) => {
     const id = v.src.split('_')[0].replace('.png', '')
     const action = actions[id]
-    return <Picture key={`${v.src}:${v.x}:${v.y}`} id={v.src} {...v} onClick={action?.onClick} label={action?.label} disabled={action?.disabled} className={classes[id] || ''} />
+    const position = v.y === -88 && v.w === 750 && v.h === 1624 ? { ...v, y: 0 } : v
+    return <Picture key={`${v.src}:${v.x}:${v.y}`} id={v.src} {...position} onClick={action?.onClick} label={action?.label} disabled={action?.disabled} className={classes[id] || ''} />
   })
 }
 export const PRIZE_ART = { cup: '79cde7710e78ec3fa445d45b5db8d5e0', pillow: 'ccd59680942cf673e3b24e4169db0a0a', lucky: '7e0684f704cefbaac29683fdfc97e390', mousepad: 'e433c133c59973398f40f9e588225178', none: 'text-1d1ce1877686' }

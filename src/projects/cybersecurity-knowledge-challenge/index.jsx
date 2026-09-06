@@ -110,7 +110,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     load().then((value) => { if (value.modes[mode].attempt?.status === 'failed') setModal('failed') }).catch(showError)
   }, [attempt?.status, remainingSeconds, page, load, mode, now, showError])
 
-  const navigation = { [backId]: { label: '返回', onClick: () => go(page === 'quiz' ? 'home' : 'choose') }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
+  const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
+  const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
   async function chooseMode(nextMode) {
     setMode(nextMode); setSelected([]); setReviewIndex(null)
     if (!hasToken) { if (!reauth('cybersecurity-start')) setError('请在微信中打开活动并完成授权后参与'); return }
@@ -172,11 +173,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const modalProps = { scale, onClose: closeModal }
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '6aa715', 'cd20df', '5c1f714']
   return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
-    <div className="cyber-stage-wrap" style={{ width: 750 * scale, height: 1448 * scale }}>
+    <div className="cyber-stage-wrap" style={{ width: 750 * scale, height: 1624 * scale }}>
       <div className="cyber-stage" style={{ transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
           {page === 'home' && <>
-            <Artwork page={1} omit={['text-3e63f29b2543']} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => { setMode('personal'); go('choose') } }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => { setMode('team'); go('choose') } }, 'text-34aa4cc01a58': { label: '活动规则', onClick: () => setModal('rules') } }} classes={{ '95e7bc9d0c3c9a2257f91795ba29ff92': 'cyber-enter', f5121483110c6ccf8067f3557519bce1: 'cyber-float', a70528fc49f038acb66a2ef22bb445ed: 'cyber-float-delay', f118cea1a1b86c389d53cae4600ca41b: 'cyber-float-delay' }} />
+            <Artwork page={1} omit={['text-3e63f29b2543']} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, 'text-34aa4cc01a58': { label: '活动规则', onClick: () => go('choose') } }} classes={{ '95e7bc9d0c3c9a2257f91795ba29ff92': 'cyber-enter', f5121483110c6ccf8067f3557519bce1: 'cyber-float', a70528fc49f038acb66a2ef22bb445ed: 'cyber-float-delay', f118cea1a1b86c389d53cae4600ca41b: 'cyber-float-delay' }} />
             <button type="button" className="cyber-my-prizes" onClick={() => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') }}>我的奖品</button>
           </>}
           {page === 'choose' && <Artwork page={2} actions={{ ...navigation, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}

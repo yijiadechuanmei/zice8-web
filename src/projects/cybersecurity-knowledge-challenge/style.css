@@ -1,7 +1,7 @@
 .cyber-app { min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-app * { box-sizing:border-box; }
-.cyber-stage-wrap { position:relative; flex:none; overflow:hidden; }
-.cyber-stage { width:750px; height:1448px; position:relative; transform-origin:top left; perspective:2000px; }
+.cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
+.cyber-stage { width:750px; height:1624px; position:relative; transform-origin:top left; perspective:2000px; }
 .cyber-page { position:absolute; inset:0; transform-origin:left center; animation:cyber-page-turn .55s cubic-bezier(.2,.75,.2,1) both; }
 .cyber-picture { padding:0; border:0; background:none; }
 .cyber-picture img { display:block; width:100%; height:100%; object-fit:fill; }
