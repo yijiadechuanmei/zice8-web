@@ -67,9 +67,10 @@
 .cyber-register small { font-size:22px; line-height:1.5; display:block; margin:16px 0; }
 .cyber-register button { width:100%; border:0; border-radius:15px; background:linear-gradient(100deg,#ef3528,#ffac00); color:#fff; padding:18px; font:inherit; cursor:pointer; }
 .cyber-register button:disabled { opacity:.5; }
-.cyber-register-panel { position:absolute; z-index:1; left:6px; top:301px; width:736px; height:913px; }
-.cyber-register-title { position:absolute; z-index:3; left:21px; top:0; width:655px; height:119px; }
-.cyber-register-page { position:absolute; z-index:2; inset:0; margin:0; }
+.cyber-register-panel { position:absolute; z-index:1; left:6px; width:736px; height:913px; }
+.cyber-register-field-art { position:absolute; z-index:2; display:block; }
+.cyber-register-title { position:absolute; z-index:3; left:27px; width:655px; height:119px; }
+.cyber-register-page { position:absolute; z-index:3; inset:0; margin:0; }
 .cyber-register-page input { position:absolute; left:68px; width:633px; height:90px; padding:0 20px; border:0; outline:0; border-radius:4px; color:#4d3422; background:transparent; font:28px/90px "PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-register-page input::placeholder { color:#bababa; }
 .cyber-register-page input:nth-of-type(1) { top:375px; }
@@ -77,7 +78,7 @@
 .cyber-register-page input:nth-of-type(3) { top:715px; }
 .cyber-register-page input:nth-of-type(4) { top:886px; }
 .cyber-register-page input:read-only { color:#888; }
-.cyber-register-submit { position:absolute; left:59px; top:940px; width:639px; height:91px; padding:0; border:0; background:transparent; cursor:pointer; }
+.cyber-register-submit { position:absolute; left:65px; width:639px; height:91px; padding:0; border:0; background:transparent; cursor:pointer; }
 .cyber-register-submit img { display:block; width:100%; height:100%; }
 .cyber-register-submit:disabled { opacity:.5; cursor:default; }
 .cyber-failure-copy { position:absolute; left:50px; top:510px; width:650px; text-align:center; font-size:27px; color:#a67336; margin:0; }

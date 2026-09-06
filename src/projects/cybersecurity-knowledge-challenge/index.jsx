@@ -20,11 +20,29 @@ const INFO_ART = {
     panel: 'fa2512f2dc3d93f1f963c4f9410e4cfc_115624_736_913.png',
     title: '1de5e5b8a42b944fac624f08b3565858_20989_655_119.png',
     submit: 'e0fe5913b27491a1c96fadd63f113049_69258_639_91.png',
+    panelTop: 303,
+    titleTop: 92,
+    submitTop: 1032,
+    fields: [
+      ['2acceb05365acabd7a01910c5fb1a187_1129_633_136.png', 330],
+      ['53979a886bd9d70285e596e9fd09300e_1344_633_132.png', 504],
+      ['ba70627213d16f75a233ea654aa9caad_1477_633_132.png', 674],
+      ['afb482f110ad1d4d5d3f6273abf617b1_1507_633_132.png', 844],
+    ],
   },
   team: {
     panel: '09c33fb1fb39ea8500de60634f24bb3a_116066_736_913.png',
     title: '944afe00424a6cd8e67781e976c76cf5_20689_655_119.png',
     submit: 'b7e70876b14d0186d09359ab4b963f01_69595_639_91.png',
+    panelTop: 301,
+    titleTop: 90,
+    submitTop: 1030,
+    fields: [
+      ['2acceb05365acabd7a01910c5fb1a187_1129_633_136.png', 328],
+      ['53979a886bd9d70285e596e9fd09300e_1344_633_132.png', 502],
+      ['7d1ad753fca8afb290fc73a8e155f629_1550_633_132.png', 672],
+      ['2fbbee8ccb5265181eb3ab87836ab0c7_1335_633_132.png', 841],
+    ],
   },
 }
 const getStageScale = () => {
@@ -208,18 +226,19 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'choose' && <Artwork page={2} actions={{ ...navigation, a92dbb46d90efd589d31942056deb1f7: { label: '返回首页', onClick: () => go('home') }, c42ebc15530f0f8b314fa0990da30880: { label: '返回首页', onClick: () => go('home') }, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
           {page === 'register' && <>
-            <Picture id="2194de0f17da7fc22aa700a189a841cc" x={0} y={0} w={750} h={1624} />
-            <img className="cyber-register-panel" src={src(infoArt.panel)} alt="" draggable={false} />
-            <img className="cyber-register-title" src={src(infoArt.title)} alt={`${labelMode(mode)}参与信息`} draggable={false} />
+            <Picture id="2194de0f17da7fc22aa700a189a841cc" x={0} y={-88} w={750} h={1624} />
+            <img className="cyber-register-panel" style={{ top: infoArt.panelTop }} src={src(infoArt.panel)} alt="" draggable={false} />
+            {infoArt.fields.map(([image, top]) => <img key={image} className="cyber-register-field-art" style={rect(67, top, 633, image.startsWith('2acceb') ? 136 : 132)} src={src(image)} alt="" draggable={false} />)}
+            <img className="cyber-register-title" style={{ top: infoArt.titleTop }} src={src(infoArt.title)} alt={`${labelMode(mode)}参与信息`} draggable={false} />
             <form className="cyber-register-page" onSubmit={start}>
               <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder="点击输入姓名" value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input aria-label="手机号码" autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} placeholder="点击输入手机号码" value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               <input aria-label="公司名称" required maxLength={80} placeholder="点击输入公司名称" value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
               <input aria-label="部门名称" required maxLength={80} placeholder="点击输入部门名称" value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
-              <button className="cyber-register-submit" type="submit" disabled={busy} aria-label="开始答题"><img src={src(infoArt.submit)} alt="" draggable={false} /></button>
+              <button className="cyber-register-submit" style={{ top: infoArt.submitTop }} type="submit" disabled={busy} aria-label="开始答题"><img src={src(infoArt.submit)} alt="" draggable={false} /></button>
             </form>
-            <Picture id="text-bf1fb3d4749d" x={25} y={1} w={55} h={55} onClick={() => go('home')} label="返回" />
-            <Picture id="text-5ef4d1229e77" x={566} y={9} w={160} h={37} onClick={() => go('home')} label="返回首页" />
+            <Picture id="a92dbb46d90efd589d31942056deb1f7" x={25} y={1} w={55} h={55} onClick={() => go('home')} label="返回" />
+            <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} onClick={() => go('home')} label="返回首页" />
           </>}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={navigation} />
