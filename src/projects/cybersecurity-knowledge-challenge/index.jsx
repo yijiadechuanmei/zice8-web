@@ -12,7 +12,6 @@ import './style.css'
 const TYPE = 'cybersecurity_knowledge_challenge'
 const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
 const DESIGN_WIDTH = 750
-const DESIGN_HEIGHT = 1624
 const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
 const labelMode = (mode) => mode === 'team' ? '团队' : '个人'
@@ -199,7 +198,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const modalProps = { scale, onClose: closeModal }
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '6aa715', 'cd20df', '5c1f714']
   const infoArt = INFO_ART[mode]
-  const stageHeight = page === 'home' ? HOME_HEIGHT : DESIGN_HEIGHT
+  const stageHeight = HOME_HEIGHT
   return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
     <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
       <div className="cyber-stage" style={{ height: stageHeight, transform: `scale(${scale})` }}>
@@ -207,7 +206,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'home' && <>
             <Artwork page={1} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, '31695a5bf339bd55a32fe0eed9c22b8e': { label: '活动规则', onClick: () => go('choose') }, '739f9f21f54b72ca51ec21114b0e625b': { label: '我的奖品', onClick: () => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') } } }} />
           </>}
-          {page === 'choose' && <Artwork page={2} actions={{ ...navigation, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
+          {page === 'choose' && <Artwork page={2} actions={{ ...navigation, a92dbb46d90efd589d31942056deb1f7: { label: '返回首页', onClick: () => go('home') }, c42ebc15530f0f8b314fa0990da30880: { label: '返回首页', onClick: () => go('home') }, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
           {page === 'register' && <>
             <Picture id="2194de0f17da7fc22aa700a189a841cc" x={0} y={0} w={750} h={1624} />
             <img className="cyber-register-panel" src={src(infoArt.panel)} alt="" draggable={false} />

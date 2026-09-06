@@ -236,7 +236,7 @@ export const layouts = {
       "modal": false
     },
     {
-      "src": "text-bf1fb3d4749d.png",
+      "src": "a92dbb46d90efd589d31942056deb1f7_4754_55_55.png",
       "x": 25.0,
       "y": 1.0,
       "w": 55.0,
@@ -244,7 +244,7 @@ export const layouts = {
       "modal": false
     },
     {
-      "src": "text-5ef4d1229e77.png",
+      "src": "c42ebc15530f0f8b314fa0990da30880_11130_205_47.png",
       "x": 566.0,
       "y": 9.0,
       "w": 160.0,
