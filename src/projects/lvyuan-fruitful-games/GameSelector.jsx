@@ -6,8 +6,7 @@ function PosterImage({ asset, className, alt = '' }) {
   return <img className={className} src={getLvyuanFruitfulGamesAsset(asset)} alt={alt} draggable="false" />
 }
 
-export default function GameSelector({ onComingSoon, onSelectSnake, onSelectSpotDifference, onSelectFruitMerge }) {
-  const [showRules, setShowRules] = useState(false)
+export default function GameSelector({ onRanking, onSelectSnake, onSelectSpotDifference, onSelectFruitMerge }) {
   return (
     <main className="lyfg-page lyfg-ih5-page lyfg-ih5-selector-page">
       <Ih5Stage label="游戏选择">
@@ -23,17 +22,16 @@ export default function GameSelector({ onComingSoon, onSelectSnake, onSelectSpot
         <button className="lyfg-ih5-action lyfg-ih5-game-card lyfg-ih5-game-card--fruit-merge" type="button" onClick={onSelectFruitMerge} aria-label="查看合成水果规则">
           <PosterImage asset="selectorFruitMerge" className="lyfg-ih5-fill-image" alt="合成水果" />
         </button>
-        <button className="lyfg-ih5-action lyfg-ih5-selector-rules" type="button" onClick={() => setShowRules(true)} aria-label="查看游戏规则">
-          <PosterImage asset="selectorRules" className="lyfg-ih5-fill-image" alt="游戏规则" />
+        <button className="lyfg-ih5-action lyfg-ih5-selector-rules" type="button" onClick={onRanking} aria-label="查看积分排行榜">
+          <PosterImage asset="homeRanking" className="lyfg-ih5-fill-image" alt="积分排行榜" />
         </button>
         <PosterImage asset="selectorFooter" className="lyfg-ih5-selector-footer" alt="完成游戏，获得积分与海报" />
-        {showRules ? <GameRulesModal onClose={() => setShowRules(false)} /> : null}
       </Ih5Stage>
     </main>
   )
 }
 
-function GameRulesModal({ onClose }) {
+export function GameRulesModal({ onClose }) {
   const [atBottom, setAtBottom] = useState(false)
   return <div className="lyfg-game-rules-mask" role="dialog" aria-modal="true" aria-label="游戏规则">
     <section className="lyfg-game-rules-card">

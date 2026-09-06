@@ -1319,13 +1319,13 @@
 }
 
 .lyfg-ih5-home-start { top: 1040px; left: 158px; width: 434px; height: 129px; animation-delay: 260ms; }
-.lyfg-ih5-home-ranking { top: 957px; left: 172px; width: 410px; height: 164px; animation-delay: 160ms; }
+.lyfg-ih5-home-ranking { top: 879px; left: 170px; width: 405px; height: 118px; animation-delay: 160ms; }
 
 .lyfg-ih5-game-card { z-index: 2; display: block; width: 201px; height: 576px; }
 .lyfg-ih5-game-card--snake { top: 367px; left: 56px; animation-delay: 240ms; }
 .lyfg-ih5-game-card--spot-difference { top: 367px; left: 273px; }
 .lyfg-ih5-game-card--fruit-merge { top: 367px; left: 490px; animation-delay: 480ms; }
-.lyfg-ih5-selector-rules { top: 879px; left: 170px; width: 405px; height: 118px; animation-delay: 520ms; }
+.lyfg-ih5-selector-rules { top: 957px; left: 172px; width: 410px; height: 164px; animation-delay: 520ms; }
 .lyfg-ih5-selector-footer { top: 1082px; }
 
 .lyfg-game-rules-mask { position: absolute; z-index: 50; inset: -88px 0 -88px; display: grid; place-items: center; background: rgba(0,0,0,.49); backdrop-filter: blur(1.2px); animation: lyfg-fade 180ms ease both; }

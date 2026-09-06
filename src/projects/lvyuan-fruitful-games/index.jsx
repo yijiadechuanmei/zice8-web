@@ -644,7 +644,6 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     return () => { cancelled = true }
   }, [activityKey, authReady, isWechat, reauth])
 
-  const openComingSoon = useCallback(() => setNotice('敬请期待'), [])
   const renderPage = (page) => <>{page}<ActivityBgmPlayer bgm={bgmConfig || {}} activityKey={activityKey} /></>
   const navigate = useCallback((nextView) => {
     if (typeof document.startViewTransition === 'function') {
@@ -669,7 +668,7 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }, [activeGame, activityKey, isWechat])
 
   if (!publicConfig || !authReady || !progressReady) return <div className="lyfg-entry-page">
-    <HomePage onStart={() => {}} onRanking={() => {}} />
+    <HomePage onStart={() => {}} />
     <div className="lyfg-auth-gate" role="status" aria-live="polite">
       <p>{entryError || blockedMessage || (!publicConfig ? '正在加载活动…' : !authReady ? '正在微信授权…' : '正在读取游戏进度…')}</p>
       {entryError ? <button type="button" onClick={() => window.location.reload()}>重新加载</button> : null}
@@ -705,10 +704,10 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
   }
 
   if (view === 'selector') {
-    return renderPage(<><GameSelector onComingSoon={openComingSoon} onSelectSnake={() => startGame('snake', 'snake-rules')} onSelectSpotDifference={() => startGame('spot_difference', 'spot-difference-rules')} onSelectFruitMerge={() => startGame('fruit_merge', 'fruit-merge-rules')} />{notice ? <ComingSoonNotice message={notice} /> : null}</>)
+    return renderPage(<><GameSelector onRanking={() => navigate('ranking')} onSelectSnake={() => startGame('snake', 'snake-rules')} onSelectSpotDifference={() => startGame('spot_difference', 'spot-difference-rules')} onSelectFruitMerge={() => startGame('fruit_merge', 'fruit-merge-rules')} />{notice ? <ComingSoonNotice message={notice} /> : null}</>)
   }
 
-  return renderPage(<HomePage onStart={() => navigate('selector')} onRanking={() => navigate('ranking')} />)
+  return renderPage(<HomePage onStart={() => navigate('selector')} />)
 }
 
 export {
