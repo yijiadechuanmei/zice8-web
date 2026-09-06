@@ -11,8 +11,17 @@ import './style.css'
 
 const TYPE = 'cybersecurity_knowledge_challenge'
 const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
+const DESIGN_WIDTH = 750
+const DESIGN_HEIGHT = 1624
 const title = '网络安全知识大闯关'
 const labelMode = (mode) => mode === 'team' ? '团队' : '个人'
+const getStageScale = () => {
+  if (typeof window === 'undefined') return 1
+  const viewport = window.visualViewport
+  const width = viewport?.width ?? window.innerWidth
+  const height = viewport?.height ?? window.innerHeight
+  return Math.min(width / DESIGN_WIDTH, height / DESIGN_HEIGHT, 1)
+}
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (Number(c) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16))
 const rect = (left, top, width, height) => ({ position: 'absolute', left, top, width, height })
 
@@ -52,7 +61,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
-  const [scale, setScale] = useState(() => Math.min(window.innerWidth, 750) / 750)
+  const [scale, setScale] = useState(getStageScale)
   const [now, setNow] = useState(() => Date.now())
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState([])
@@ -84,10 +93,15 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const load = useCallback(async () => accept(await request(`${base}/state`)), [accept, base])
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
-    const resize = () => setScale(Math.min(window.innerWidth, 750) / 750)
+    const resize = () => setScale(getStageScale())
     window.addEventListener('resize', resize)
+    window.visualViewport?.addEventListener('resize', resize)
     const timer = setInterval(() => setNow(Date.now()), 500)
-    return () => { window.removeEventListener('resize', resize); clearInterval(timer) }
+    return () => {
+      window.removeEventListener('resize', resize)
+      window.visualViewport?.removeEventListener('resize', resize)
+      clearInterval(timer)
+    }
   }, [])
   useEffect(() => {
     let active = true
@@ -173,7 +187,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const modalProps = { scale, onClose: closeModal }
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '6aa715', 'cd20df', '5c1f714']
   return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
-    <div className="cyber-stage-wrap" style={{ width: 750 * scale, height: 1624 * scale }}>
+    <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: DESIGN_HEIGHT * scale }}>
       <div className="cyber-stage" style={{ transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
           {page === 'home' && <>
