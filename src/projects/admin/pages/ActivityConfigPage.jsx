@@ -1120,7 +1120,7 @@ export default function ActivityConfigPage({ activity }) {
                         type="warning"
                         showIcon
                         message="0.2元真实发放测试进行中"
-                        description={`正式 2 元、68 元奖池已暂时关闭；当前仅可发放 0.2 元测试红包。已成功 ${riderSafetySettings.payoutTest?.prize?.stockIssued || 0} 个，处理中 ${riderSafetySettings.payoutTest?.prize?.stockReserved || 0} 个，剩余 ${riderSafetySettings.payoutTest?.prize?.remainingCount || 0} 个。恢复正式奖池时，已成功测试金额会从正式可发预算中扣除。`}
+                        description={`正式 2 元、68 元奖池已暂时关闭；当前仅可发放 0.2 元测试红包。测试库存内的有效参与者必中奖，不受单IP中奖人数限制影响。已成功 ${riderSafetySettings.payoutTest?.prize?.stockIssued || 0} 个，处理中 ${riderSafetySettings.payoutTest?.prize?.stockReserved || 0} 个，剩余 ${riderSafetySettings.payoutTest?.prize?.remainingCount || 0} 个。恢复正式奖池时，已成功测试金额会从正式可发预算中扣除。`}
                       />
                     ) : (
                       <Alert
