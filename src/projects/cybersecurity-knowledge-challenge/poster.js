@@ -1,4 +1,10 @@
 import { src } from './artwork'
+
+const POSTER_OSS_ROOT = 'https://zice8-assets.oss-cn-shanghai.aliyuncs.com/'
+
+function posterAsset(id) {
+  return src(id).replace('https://assets.zice8.com/', POSTER_OSS_ROOT)
+}
 export function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -16,7 +22,7 @@ export async function makePoster({ mode, progress, qrCanvas }) {
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('当前浏览器不支持海报合成')
-  const [background, avatar] = await Promise.all([loadImage(src(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : '74181980fe59f9fd8b38583c2c487e23')), loadImage(src('14dba9edc1f271124020174158ee6a13'))])
+  const [background, avatar] = await Promise.all([loadImage(posterAsset(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : '74181980fe59f9fd8b38583c2c487e23')), loadImage(posterAsset('14dba9edc1f271124020174158ee6a13'))])
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
   ctx.fillStyle = '#cc2320'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
   const y = mode === 'team' ? 894 : 888
