@@ -11,6 +11,7 @@ import {
   getArtistCallLotteryPrizes,
   getNanhaiChallengeDrawControl,
   getNanhaiChallengePrizes,
+  getRiderSafetySurveySettings,
   getNanhaiChallengeRegionAccessExemptions,
   getNanshaOpenMicConfig,
   getSongWishLotteryResultConfig,
@@ -20,6 +21,8 @@ import {
   saveArtistCallLotteryPrizes,
   saveNanhaiChallengeDrawAutoControl,
   saveNanhaiChallengePrizes,
+  saveRiderSafetySurveySettings,
+  reissueRiderSafetySurveyCash,
   resetNanhaiChallengeData,
   saveSongWishLotteryResultConfig,
   updateActivityBgmConfig,
@@ -101,6 +104,16 @@ export default function ActivityConfigPage({ activity }) {
   const [riderSafetyClearing, setRiderSafetyClearing] = useState(false)
   const [riderSafetyTestMode, setRiderSafetyTestMode] = useState(true)
   const [riderSafetyModeSaving, setRiderSafetyModeSaving] = useState(false)
+  const [riderSafetySettings, setRiderSafetySettings] = useState({
+    prizes: [],
+    maxWinningUsersPerIp: 3,
+    budget: null,
+  })
+  const [riderSafetySettingsSaving, setRiderSafetySettingsSaving] = useState(false)
+  const [riderSafetyReissueGrantId, setRiderSafetyReissueGrantId] = useState('')
+  const [riderSafetyReissueAmountYuan, setRiderSafetyReissueAmountYuan] = useState(2)
+  const [riderSafetyReissueReason, setRiderSafetyReissueReason] = useState('')
+  const [riderSafetyReissuing, setRiderSafetyReissuing] = useState(false)
 
   useEffect(() => {
     if (!activity?.activityKey) return
@@ -165,6 +178,21 @@ export default function ActivityConfigPage({ activity }) {
       setNanhaiDrawControl(defaultNanhaiDrawControl)
       setNanhaiControlLoaded(false)
       setNanhaiRegionExemptions([])
+    }
+
+    if (activity.type === 'rider_safety_survey') {
+      getRiderSafetySurveySettings(activity.activityKey)
+        .then((data) => {
+          if (!alive) return
+          setRiderSafetySettings({
+            prizes: data?.prizes || [],
+            maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+            budget: data?.budget || null,
+          })
+        })
+        .catch((err) => { if (alive) setError(err.message || '骑手安全问卷配置加载失败') })
+    } else {
+      setRiderSafetySettings({ prizes: [], maxWinningUsersPerIp: 3, budget: null })
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -373,6 +401,95 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setRiderSafetyModeSaving(false)
+    }
+  }
+
+  function updateRiderSafetyPrize(prizeId, patch) {
+    setRiderSafetySettings((current) => ({
+      ...current,
+      prizes: current.prizes.map((prize) => prize.id === prizeId ? { ...prize, ...patch } : prize),
+    }))
+  }
+
+  async function handleSaveRiderSafetySettings() {
+    if (riderSafetySettings.prizes.length !== 2) {
+      message.warning('红包档位未加载完成，请刷新后重试')
+      return
+    }
+    const maxWinningUsersPerIp = Number(riderSafetySettings.maxWinningUsersPerIp)
+    if (!Number.isInteger(maxWinningUsersPerIp) || maxWinningUsersPerIp < 0 || maxWinningUsersPerIp > 100) {
+      message.warning('单IP中奖用户上限应为0到100之间的整数')
+      return
+    }
+    const invalidPrize = riderSafetySettings.prizes.find((prize) => {
+      const amountFen = Number(prize.amountFen)
+      const stockTotal = Number(prize.stockTotal)
+      return !Number.isInteger(amountFen) || amountFen < 100 || !Number.isInteger(stockTotal) || stockTotal < Number(prize.stockIssued || 0) + Number(prize.stockReserved || 0)
+    })
+    if (invalidPrize) {
+      message.warning('请检查奖品金额、库存，并确保库存不低于已发放和预留数量')
+      return
+    }
+    setRiderSafetySettingsSaving(true)
+    setError('')
+    try {
+      const data = await saveRiderSafetySurveySettings(activity.activityKey, {
+        maxWinningUsersPerIp,
+        prizes: riderSafetySettings.prizes.map((prize) => ({
+          id: prize.id,
+          amountFen: Number(prize.amountFen),
+          stockTotal: Number(prize.stockTotal),
+          enabled: prize.enabled === true,
+        })),
+      })
+      setRiderSafetySettings({
+        prizes: data?.prizes || [],
+        maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+        budget: data?.budget || null,
+      })
+      message.success('奖品、库存、预算和IP风控配置已保存')
+    } catch (err) {
+      const text = err.message || '骑手安全问卷配置保存失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRiderSafetySettingsSaving(false)
+    }
+  }
+
+  async function handleRiderSafetyCashReissue() {
+    const sourceGrantId = riderSafetyReissueGrantId.trim()
+    const amountFen = Math.round(Number(riderSafetyReissueAmountYuan) * 100)
+    const reason = riderSafetyReissueReason.trim()
+    if (!/^\d+$/.test(sourceGrantId)) {
+      message.warning('请输入失败红包记录ID')
+      return
+    }
+    if (!Number.isInteger(amountFen) || amountFen < 100 || amountFen > 20000) {
+      message.warning('补发金额应为1至200元')
+      return
+    }
+    if (!reason) {
+      message.warning('请填写补发原因')
+      return
+    }
+    setRiderSafetyReissuing(true)
+    setError('')
+    try {
+      const result = await reissueRiderSafetySurveyCash(activity.activityKey, {
+        sourceGrantId,
+        amountFen,
+        reason,
+      })
+      setRiderSafetyReissueGrantId('')
+      setRiderSafetyReissueReason('')
+      message.success(`已发起补发，补发记录ID：${result?.grantId || '-'}，请在“红包发放记录”中跟进状态`)
+    } catch (err) {
+      const text = err.message || '红包补发失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setRiderSafetyReissuing(false)
     }
   }
 
@@ -944,6 +1061,124 @@ export default function ActivityConfigPage({ activity }) {
                     {riderSafetyTestMode ? '切换至正式阶段' : '切换至测试阶段'}
                   </Button>
                 </Popconfirm>
+              </Space>
+            </Card>
+            <Card size="small" title="红包奖品与风控配置">
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                <Alert
+                  type="info"
+                  showIcon
+                  message="配置受预算与库存硬限制保护"
+                  description="金额以元展示、以分保存；总预算不可超过安全上限，库存不可低于已发放和预留数量。单IP上限按已中奖或发放中的不同用户数计算，设为0表示关闭该项限制。"
+                />
+                {riderSafetySettings.prizes.map((prize) => (
+                  <Card key={prize.id} size="small" type="inner" title={prize.prizeName}>
+                    <Space wrap size={16}>
+                      <label>
+                        <Text strong>金额（元）</Text>
+                        <div style={{ marginTop: 6 }}>
+                          <InputNumber
+                            min={1}
+                            max={200}
+                            precision={2}
+                            value={Number(prize.amountFen || 0) / 100}
+                            onChange={(value) => updateRiderSafetyPrize(prize.id, { amountFen: Math.round(Number(value || 0) * 100) })}
+                          />
+                        </div>
+                      </label>
+                      <label>
+                        <Text strong>总库存</Text>
+                        <div style={{ marginTop: 6 }}>
+                          <InputNumber
+                            min={Number(prize.stockIssued || 0) + Number(prize.stockReserved || 0)}
+                            max={100000}
+                            precision={0}
+                            value={Number(prize.stockTotal || 0)}
+                            onChange={(value) => updateRiderSafetyPrize(prize.id, { stockTotal: Number(value || 0) })}
+                          />
+                        </div>
+                      </label>
+                      <label>
+                        <Text strong>启用奖项</Text>
+                        <div style={{ marginTop: 9 }}><Switch checked={prize.enabled === true} onChange={(enabled) => updateRiderSafetyPrize(prize.id, { enabled })} /></div>
+                      </label>
+                      <Text type="secondary">已发放 {prize.stockIssued || 0} · 预留 {prize.stockReserved || 0} · 剩余 {prize.remainingCount || 0}</Text>
+                    </Space>
+                  </Card>
+                ))}
+                <Space wrap size={16} align="end">
+                  <label>
+                    <Text strong>单IP最多中奖用户数</Text>
+                    <div style={{ marginTop: 6 }}>
+                      <InputNumber
+                        min={0}
+                        max={100}
+                        precision={0}
+                        value={riderSafetySettings.maxWinningUsersPerIp}
+                        onChange={(value) => setRiderSafetySettings((current) => ({ ...current, maxWinningUsersPerIp: Number(value || 0) }))}
+                      />
+                    </div>
+                  </label>
+                  <Text type="secondary">0 = 不限制；默认建议 3</Text>
+                  <Text type="secondary">
+                    预算：{Number(riderSafetySettings.budget?.totalAmountYuan || 0).toFixed(2)} / {Number(riderSafetySettings.budget?.maxAmountYuan || 0).toFixed(2)} 元；
+                    已发放 {Number(riderSafetySettings.budget?.spentAmountFen || 0) / 100} 元，预留 {Number(riderSafetySettings.budget?.reservedAmountFen || 0) / 100} 元
+                  </Text>
+                  <Popconfirm
+                    title="确认保存红包与IP风控配置？"
+                    description="保存后会立即影响后续抽奖；不会改写已生成的红包记录。"
+                    okText="确认保存"
+                    cancelText="取消"
+                    onConfirm={handleSaveRiderSafetySettings}
+                  >
+                    <Button type="primary" loading={riderSafetySettingsSaving}>保存配置</Button>
+                  </Popconfirm>
+                </Space>
+              </Space>
+            </Card>
+            <Card size="small" title="失败红包补发" style={{ borderColor: '#ffccc7' }}>
+              <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                <Alert
+                  type={riderSafetyTestMode ? 'info' : 'warning'}
+                  showIcon
+                  message="仅正式阶段，且仅允许补发微信已明确失败的原红包"
+                  description="补发会新建独立的红包和微信转账流水，不会覆盖原失败记录。必须填写失败红包记录ID、金额和补发原因；成功或处理中红包不可补发。"
+                />
+                <Space wrap>
+                  <Input
+                    style={{ width: 190 }}
+                    placeholder="失败红包记录ID"
+                    value={riderSafetyReissueGrantId}
+                    onChange={(event) => setRiderSafetyReissueGrantId(event.target.value.replace(/\D/g, ''))}
+                  />
+                  <InputNumber
+                    style={{ width: 130 }}
+                    min={1}
+                    max={200}
+                    precision={2}
+                    addonAfter="元"
+                    value={riderSafetyReissueAmountYuan}
+                    onChange={(value) => setRiderSafetyReissueAmountYuan(Number(value || 0))}
+                  />
+                  <Input
+                    style={{ width: 260 }}
+                    maxLength={120}
+                    placeholder="补发原因（必填）"
+                    value={riderSafetyReissueReason}
+                    onChange={(event) => setRiderSafetyReissueReason(event.target.value)}
+                  />
+                  <Popconfirm
+                    title="确认发起真实红包补发？"
+                    description="该操作将调用微信商家转账。请确认原红包已失败、金额正确且授权仍有效。"
+                    okText="确认补发"
+                    cancelText="取消"
+                    onConfirm={handleRiderSafetyCashReissue}
+                  >
+                    <Button danger loading={riderSafetyReissuing} disabled={riderSafetyTestMode || !riderSafetyReissueGrantId || !riderSafetyReissueReason.trim()}>
+                      发起金额补发
+                    </Button>
+                  </Popconfirm>
+                </Space>
               </Space>
             </Card>
             <Card size="small" title="问卷数据清除" style={{ borderColor: '#ffccc7' }}>

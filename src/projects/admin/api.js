@@ -230,6 +230,30 @@ export function updateRiderSafetySurveyMode(activityKey, mode) {
   })
 }
 
+export function getRiderSafetySurveySettings(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/settings`)
+}
+
+export function saveRiderSafetySurveySettings(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/settings`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'SAVE_RIDER_SAFETY_SURVEY_SETTINGS',
+    }),
+  })
+}
+
+export function reissueRiderSafetySurveyCash(activityKey, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/rider-safety-survey/cash-reissues`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...payload,
+      confirm: 'REISSUE_RIDER_SAFETY_SURVEY_CASH',
+    }),
+  })
+}
+
 export function getQualityMonthSettings(activityKey) {
   return adminRequest(`/quality-month/admin/activities/${encodeURIComponent(activityKey)}/settings`)
 }
