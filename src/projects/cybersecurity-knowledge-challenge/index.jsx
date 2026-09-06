@@ -14,6 +14,14 @@ const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
 const DESIGN_WIDTH = 750
 const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
+const AUTO_SINGLE_ANSWERS = 'DAACDCCABCBCADDAADCBCAAABBDBAABADCCBABDDCACBBCCBBDDDABBBABDDDBBBCACCAACBCCABDBDABDCDDBBBDCDCADABAADDBADBDDADACCDCDACBADBBAACAACBADDCDBBDACABCABBCDBBCCADCACDBAABBACBADBCBABACACCCACBBACDCBCCBBAAABCACACCBABDADDBAAACDCDBCBBDBADDDBBDCABABACCBDCDACACBADBADDDDBBBDDDAABBCCABCDBADDBADCCACCDADDBCBBBCACDBBCABC'
+const AUTO_MULTIPLE_ANSWERS = 'ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BC,ABCD,ACD,ABCD,ACD,ACD,ABCD,ABCD,ABD,ABCD,ABCD,ABC,ABCD,ABC,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABD,ABCD,AB,ABCD,BC,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,AD,ABCD,ABCD,ABD,ABCD,ABCD,ACD,ABCD,ABCD,ABD,AD,ACD,ABCD,BD,CD,BC,CD,ABC,ABC,ABCD,ABCD,ABCD,ABD,ABCD,ABCD,AC,ABCD,ABCD,ABCD,AC,ABCD,BC,ABCD,ABCD,ABCD,AD,ABCD,BCD,ABD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,AD,ABD,ABCD,ABCD,ABCD,BCD,ABCD,ABCD,ACD,ACD,ABC,ABD,ABCD,ABCD,ACD,ABC,ABC,ABD,ABC,BCD,ABCD,ACD,ABD,ABD,ACD,ABCD,ABCD,ABC,ABCD,ABCD,ABD,ABCD,ACD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,ABC,ABCD,BCD,ABCD,BCD,ABC,ABCD,ABD,BCD,BCD,ABCD,ABCD,BCD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,BCD,BCD,ACD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,BCD,ACD,AD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BCD,ABD,ABC,ABD,ABCD,AC,BCD,BCD,ABCD,ABCD,ACD,BCD,ABCD,ACD,ABCD,ACD,ACD,ABD,BCD,ABCD,ABCD,ACD'.split(',')
+const AUTO_BOOLEAN_ANSWERS = 'AAABAAABAAAAAABBAABAAAAABAAAABAAAAAABABAABABAAABAAABAABBAABAAABAABABABABBABBAABABBAABABAABAABBAABBAB'
+const autoAnswer = (questionId) => {
+  const [type, sequence] = questionId.split('-')
+  const index = Number(sequence) - 1
+  return type === 'multiple' ? AUTO_MULTIPLE_ANSWERS[index] : type === 'boolean' ? AUTO_BOOLEAN_ANSWERS[index] : AUTO_SINGLE_ANSWERS[index]
+}
 const labelMode = (mode) => mode === 'team' ? '团队' : '个人'
 const INFO_ART = {
   personal: {
@@ -210,8 +218,15 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   async function completeAll() {
     await run(async () => {
-      const value = accept(await request(`${base}/complete-all`, { method: 'POST', body: JSON.stringify({ mode }) }))
-      if (value.modes[mode].attempt?.status === 'success') go('result')
+      let activeAttempt = attempt
+      while (activeAttempt?.status === 'active' && activeAttempt.currentQuestion) {
+        const question = activeAttempt.currentQuestion
+        const selected = autoAnswer(question.id)
+        if (!selected) throw new Error('题库答案缺失')
+        const value = accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: activeAttempt.id, questionId: question.id, selected: selected.split('') }) }))
+        activeAttempt = value.modes[mode].attempt
+      }
+      if (activeAttempt?.status === 'success') go('result')
     })
   }
   async function draw() {
