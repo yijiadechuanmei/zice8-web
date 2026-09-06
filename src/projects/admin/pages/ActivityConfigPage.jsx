@@ -34,6 +34,7 @@ import {
   updateRiderSafetySurveyMode,
 } from '../api'
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
+import CybersecurityChallengeAdmin from '../components/CybersecurityChallengeAdmin'
 
 const { Text, Title } = Typography
 
@@ -899,6 +900,7 @@ export default function ActivityConfigPage({ activity }) {
       </div>
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        {activity.type === 'cybersecurity_knowledge_challenge' && <CybersecurityChallengeAdmin key={activity.activityKey} activityKey={activity.activityKey} />}
         {error ? <Alert type="error" showIcon message={error} /> : null}
 
         <Card size="small" title="活动状态">
