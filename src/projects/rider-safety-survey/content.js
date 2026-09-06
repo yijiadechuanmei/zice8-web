@@ -39,7 +39,7 @@ export const questions = [
     options: [
       ["continue", "赶紧爬起来继续送，收工再说"],
       ["preserve_evidence", "拍照保留现场，然后报警/联系站长"],
-      ["private_settlement", "先私了，不惊动保险"],
+      ["private_settlement", "检查自身伤情，轻微伤则自行离开"],
     ],
   },
   {
