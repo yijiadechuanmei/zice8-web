@@ -9,6 +9,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   const [records, setRecords] = useState([])
   const [cursor, setCursor] = useState(null)
   const [code, setCode] = useState('')
+  const [userId, setUserId] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
@@ -38,6 +39,20 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
     setBusy(true); setError('')
     try { const r = await adminRequest(`${base}/records?before=${cursor}`); setRecords((old) => [...old, ...r.list]); setCursor(r.nextCursor) } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
+  async function clearUserData() {
+    setBusy(true); setError(''); setNotice('')
+    try {
+      const result = await adminRequest(`${base}/clear-user-data`, { method: 'POST', body: JSON.stringify({ userId, confirm: 'CLEAR_CYBERSECURITY_USER_DATA' }) })
+      setNotice(`已清除用户ID ${result.userId} 的参与数据${result.deleted ? '' : '（未找到记录）'}`); setUserId(''); await load()
+    } catch (err) { setError(err.message) } finally { setBusy(false) }
+  }
+  async function clearAllData() {
+    setBusy(true); setError(''); setNotice('')
+    try {
+      const result = await adminRequest(`${base}/clear-all-data`, { method: 'POST', body: JSON.stringify({ confirm: 'CLEAR_CYBERSECURITY_ALL_DATA' }) })
+      setNotice(`已清除本活动全部 ${result.deleted} 条参与数据`); await load()
+    } catch (err) { setError(err.message) } finally { setBusy(false) }
+  }
   function change(id, field, value) { setConfig((old) => ({ ...old, prizes: old.prizes.map((p) => p.id === id ? { ...p, [field]: value } : p) })) }
   const rows = records.flatMap((r) => ['personal', 'team'].filter((mode) => r.modes[mode].used).map((mode) => ({ ...r.modes[mode], mode, id: `${r.participantId}-${mode}` })))
   return <Card size="small" title="网络安全知识大闯关 · 抽奖与核销" extra={<Button onClick={load} loading={busy}>刷新</Button>}>
@@ -58,8 +73,15 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
         <Button type="primary" onClick={save} loading={busy}>保存抽奖设置</Button>
       </>}
       <Space wrap><Input style={{ width: 230 }} placeholder="输入12位核销码" value={code} maxLength={12} onChange={(e) => setCode(e.target.value)} /><Popconfirm title="确认已向用户发放该奖品？" onConfirm={redeem} disabled={!/^\d{12}$/.test(code)}><Button disabled={!/^\d{12}$/.test(code)} loading={busy}>确认核销</Button></Popconfirm></Space>
+      <Card size="small" title="清除参与数据">
+        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Typography.Text type="secondary">仅清除当前“网络安全知识大闯关”活动数据，不会影响其他活动或微信用户资料。清除后会同步恢复相应奖品库存。</Typography.Text>
+          <Space wrap><Input style={{ width: 230 }} placeholder="输入用户ID" value={userId} inputMode="numeric" onChange={(e) => setUserId(e.target.value.replace(/\D/g, ''))} /><Popconfirm title={`确认清除用户ID ${userId} 的全部参与数据？`} description="个人、团队答题和抽奖记录都会被删除。" okText="确认清除" cancelText="取消" onConfirm={clearUserData} disabled={!/^[1-9]\d*$/.test(userId)}><Button danger disabled={!/^[1-9]\d*$/.test(userId)} loading={busy}>清除用户ID数据</Button></Popconfirm></Space>
+          <Popconfirm title="确认清除本活动全部用户数据？" description="所有个人、团队答题和抽奖记录都会被删除，奖品已发放数将归零。" okText="确认清除全部" cancelText="取消" onConfirm={clearAllData}><Button danger loading={busy}>清除全部数据</Button></Popconfirm>
+        </Space>
+      </Card>
       <Table rowKey="id" dataSource={rows} pagination={{ pageSize: 10 }} scroll={{ x: 1200 }} columns={[
-        { title: '姓名', dataIndex: 'name' }, { title: '手机号', dataIndex: 'phone' },
+        { title: '用户ID', dataIndex: 'userId' }, { title: '姓名', dataIndex: 'name' }, { title: '手机号', dataIndex: 'phone' },
         { title: '身份', render: (_, r) => r.mode === 'team' ? `团队：${r.teamName}` : '个人' },
         { title: '已用次数', dataIndex: 'used' }, { title: '状态', render: (_, r) => <Tag color={r.succeeded ? 'green' : 'default'}>{r.succeeded ? '成功' : r.attempt?.status === 'active' ? '答题中' : '未通关'}</Tag> },
         { title: '得分', render: (_, r) => r.attempt?.score ?? '-' }, { title: '用时（秒）', render: (_, r) => r.attempt?.durationSeconds ?? '-' },
