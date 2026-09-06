@@ -89,6 +89,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [modal, setModal] = useState('')
   const [error, setError] = useState('')
   const [answerToast, setAnswerToast] = useState('')
+  const [answerFeedback, setAnswerFeedback] = useState(null)
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
   const [scale, setScale] = useState(getStageScale)
@@ -106,6 +107,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const progress = data?.modes?.[mode]
   const attempt = progress?.attempt
   const currentQuestion = attempt?.currentQuestion
+  const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, Math.ceil(((attempt?.deadline || 0) - now - offset) / 1000))
   const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setAnswerToast(''); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
@@ -155,13 +157,19 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
   const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
   async function chooseMode(nextMode) {
-    setMode(nextMode); setSelected([])
+    setMode(nextMode); setSelected([]); setAnswerFeedback(null)
     if (!hasToken) { if (!reauth('cybersecurity-start')) setError('请在微信中打开活动并完成授权后参与'); return }
     await run(async () => {
       const value = await load(); const p = value.modes[nextMode]
       if (p.succeeded) { go('result'); return }
       if (p.attempt?.status === 'active') { go('quiz'); return }
       if (p.remaining <= 0) { setModal('exhausted'); return }
+      if (p.name && p.phone && p.companyName && p.departmentName) {
+        const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
+        if (started.modes[nextMode].attempt?.status === 'failed') setModal('failed')
+        else go('quiz')
+        return
+      }
       setForm({ name: p.name || value.nickname || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
       requestId.current = uuid(); go('register')
     })
@@ -180,14 +188,18 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   async function submit() {
     if (!selected.length) { setError('请选择答案'); return }
     if (remainingSeconds <= 0 || answerToast) return
-    const value = await run(async () => accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: attempt.id, questionId: currentQuestion.id, selected }) })))
+    const submittedQuestion = currentQuestion
+    const value = await run(async () => accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: attempt.id, questionId: submittedQuestion.id, selected }) })))
     const nextAttempt = value?.modes?.[mode]?.attempt
     if (!nextAttempt) return
+    const submittedAnswer = nextAttempt.answers.at(-1)
     setSelected([])
-    setAnswerToast(nextAttempt.answers.at(-1)?.correct ? '回答正确' : '回答错误')
+    setAnswerFeedback({ question: submittedQuestion, answer: submittedAnswer })
+    setAnswerToast(submittedAnswer?.correct ? '回答正确' : '回答错误')
     await new Promise((resolve) => setTimeout(resolve, 1500))
     if (!alive.current) return
     setAnswerToast('')
+    setAnswerFeedback(null)
     if (nextAttempt.status === 'failed') setModal('failed')
     else if (nextAttempt.status === 'success') go('result')
   }
@@ -208,9 +220,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await run(async () => setPoster(await makePoster({ mode, progress, qrCanvas: qr.current?.querySelector('canvas') })))
   }
   function quizOption(option) {
-    const q = currentQuestion
-    const picked = selected.includes(option.key)
-    return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
+    const q = visibleQuestion
+    const picked = answerFeedback ? answerFeedback.answer.selected.includes(option.key) : selected.includes(option.key)
+    const correct = answerFeedback?.answer.answer.includes(option.key)
+    const wrong = answerFeedback && picked && !correct
+    return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
   }
   const closeModal = () => setModal('')
   const modalProps = { scale, onClose: closeModal }
@@ -244,11 +258,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={navigation} />
             <div className="cyber-quiz-timer" role="timer">{formatTime(remainingSeconds)}</div>
             <div className="cyber-progress"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
-            <div className="cyber-question-content" key={currentQuestion?.id}>
-              <h2>{currentQuestion?.title || '题目加载中…'}{currentQuestion && `（${currentQuestion.type === 'multiple' ? '多选' : currentQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
+            <div className="cyber-question-content" key={visibleQuestion?.id}>
+              <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
             </div>
             <div className="cyber-errors">累计错题：{attempt?.errors || 0}/3</div>
-            <div className="cyber-options">{currentQuestion?.options?.map(quizOption)}</div>
+            <div className="cyber-options">{visibleQuestion?.options?.map(quizOption)}</div>
             <Picture id={mode === 'team' ? 'cb6c2c29073ce3719598c1a7e00c9d9f' : '63311aa61c0b69f56a72019152e0c156'} x={388} y={1325} w={324} h={91} label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} />
           </>}
           {page === 'result' && <>
