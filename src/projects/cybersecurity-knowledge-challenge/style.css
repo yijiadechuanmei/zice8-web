@@ -1,7 +1,7 @@
-.cyber-app { height:100dvh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-app { position:fixed; inset:0; display:flex; width:100%; height:100%; align-items:center; justify-content:center; overflow:hidden; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-app * { box-sizing:border-box; }
-.cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
-.cyber-stage { width:750px; height:1624px; position:relative; transform-origin:top left; perspective:2000px; }
+.cyber-stage-wrap { position:relative; flex:none; overflow:hidden; }
+.cyber-stage { position:absolute; top:0; left:0; width:750px; height:1624px; transform-origin:top left; overflow:hidden; perspective:2000px; }
 .cyber-page { position:absolute; inset:0; transform-origin:left center; animation:cyber-page-turn .55s cubic-bezier(.2,.75,.2,1) both; }
 .cyber-picture { padding:0; border:0; background:none; }
 .cyber-picture img { display:block; width:100%; height:100%; object-fit:fill; }
@@ -68,6 +68,19 @@
 .cyber-register small { font-size:22px; line-height:1.5; display:block; margin:16px 0; }
 .cyber-register button { width:100%; border:0; border-radius:15px; background:linear-gradient(100deg,#ef3528,#ffac00); color:#fff; padding:18px; font:inherit; cursor:pointer; }
 .cyber-register button:disabled { opacity:.5; }
+.cyber-register-panel { position:absolute; z-index:1; left:6px; top:301px; width:736px; height:913px; }
+.cyber-register-title { position:absolute; z-index:3; left:21px; top:0; width:655px; height:119px; }
+.cyber-register-page { position:absolute; z-index:2; inset:0; margin:0; }
+.cyber-register-page input { position:absolute; left:68px; width:633px; height:90px; padding:0 20px; border:0; outline:0; border-radius:4px; color:#4d3422; background:transparent; font:28px/90px "PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-register-page input::placeholder { color:#bababa; }
+.cyber-register-page input:nth-of-type(1) { top:375px; }
+.cyber-register-page input:nth-of-type(2) { top:546px; }
+.cyber-register-page input:nth-of-type(3) { top:715px; }
+.cyber-register-page input:nth-of-type(4) { top:886px; }
+.cyber-register-page input:read-only { color:#888; }
+.cyber-register-submit { position:absolute; left:59px; top:940px; width:639px; height:91px; padding:0; border:0; background:transparent; cursor:pointer; }
+.cyber-register-submit img { display:block; width:100%; height:100%; }
+.cyber-register-submit:disabled { opacity:.5; cursor:default; }
 .cyber-failure-copy { position:absolute; left:50px; top:510px; width:650px; text-align:center; font-size:27px; color:#a67336; margin:0; }
 .cyber-prize-result { position:absolute; left:50px; top:465px; width:650px; text-align:center; font-size:31px; }
 .cyber-prize-result h2 { font-size:36px; font-weight:500; margin:0 0 33px; }
@@ -76,9 +89,10 @@
 .cyber-poster-loading { position:absolute; top:500px; width:100%; text-align:center; font-size:34px; color:white; }
 .cyber-poster-loading button { font:inherit; padding:20px; }
 .cyber-save-tip { position:absolute; width:100%; top:1320px; font-size:25px; color:#fff; text-align:center; }
-.cyber-toast { position:fixed; z-index:1200; bottom:24px; left:50%; transform:translateX(-50%); max-width:min(90vw,600px); width:max-content; display:flex; align-items:center; gap:12px; padding:12px 16px; background:#382819; color:#fff; border-radius:10px; font-size:15px; box-shadow:0 4px 20px #0002; }
+.cyber-toast-layer { position:fixed; z-index:1200; inset:0; display:flex; align-items:center; justify-content:center; background:transparent; }
+.cyber-toast { max-width:min(90vw,600px); width:max-content; display:flex; align-items:center; gap:12px; padding:12px 16px; background:#382819; color:#fff; border-radius:10px; font-size:15px; box-shadow:0 4px 20px #0002; }
 .cyber-toast button { background:none; border:0; color:#fff; font-size:24px; cursor:pointer; }
-.cyber-busy { position:fixed; z-index:1100; top:20px; left:50%; transform:translateX(-50%); background:#fff9ed; color:#936529; box-shadow:0 2px 14px #0002; border-radius:20px; padding:10px 20px; font-size:14px; }
+.cyber-busy { background:#fff9ed; color:#936529; box-shadow:0 2px 14px #0002; border-radius:20px; padding:10px 20px; font-size:14px; }
 .cyber-qr-source { position:fixed; left:-10000px; top:0; pointer-events:none; }
 @keyframes cyber-page-turn { from { opacity:.35; transform:rotateY(-15deg) translateX(18px); filter:brightness(.9); } to { opacity:1; transform:rotateY(0); filter:brightness(1); } }
 @keyframes cyber-rise { from { opacity:0; translate:0 16px; } to { opacity:1; translate:0 0; } }

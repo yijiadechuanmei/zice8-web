@@ -15,11 +15,27 @@ const DESIGN_WIDTH = 750
 const DESIGN_HEIGHT = 1624
 const title = '网络安全知识大闯关'
 const labelMode = (mode) => mode === 'team' ? '团队' : '个人'
+const INFO_ART = {
+  personal: {
+    panel: 'fa2512f2dc3d93f1f963c4f9410e4cfc_115624_736_913.png',
+    title: '1de5e5b8a42b944fac624f08b3565858_20989_655_119.png',
+    submit: 'e0fe5913b27491a1c96fadd63f113049_69258_639_91.png',
+  },
+  team: {
+    panel: '09c33fb1fb39ea8500de60634f24bb3a_116066_736_913.png',
+    title: '944afe00424a6cd8e67781e976c76cf5_20689_655_119.png',
+    submit: 'b7e70876b14d0186d09359ab4b963f01_69595_639_91.png',
+  },
+}
 const getStageScale = () => {
   if (typeof window === 'undefined') return 1
   const viewport = window.visualViewport
-  const width = viewport?.width ?? window.innerWidth
-  return Math.min(width / DESIGN_WIDTH, 1)
+  const viewportWidth = viewport?.width || window.innerWidth
+  const viewportHeight = viewport?.height || window.innerHeight
+  const widthScale = viewportWidth / DESIGN_WIDTH
+  const heightScale = viewportHeight / DESIGN_HEIGHT
+  if (viewportWidth < DESIGN_WIDTH) return Math.min(Math.max(widthScale, heightScale), 1)
+  return Math.min(widthScale, 1)
 }
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (Number(c) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(c) / 4).toString(16))
 const rect = (left, top, width, height) => ({ position: 'absolute', left, top, width, height })
@@ -65,7 +81,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState([])
   const [reviewIndex, setReviewIndex] = useState(null)
-  const [form, setForm] = useState({ name: '', phone: '', teamName: '' })
+  const [form, setForm] = useState({ name: '', phone: '', companyName: '', departmentName: '', teamName: '' })
   const [poster, setPoster] = useState('')
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
@@ -133,14 +149,14 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       if (p.succeeded) { go('result'); return }
       if (p.attempt?.status === 'active') { go('quiz'); return }
       if (p.remaining <= 0) { setModal('exhausted'); return }
-      setForm({ name: p.name || value.nickname || '', phone: p.phone || '', teamName: p.teamName || '' })
-      requestId.current = uuid(); setModal('register')
+      setForm({ name: p.name || value.nickname || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
+      requestId.current = uuid(); go('register')
     })
   }
   async function start(event) {
     event.preventDefault()
     await run(async () => {
-      const payload = { ...form, name: form.name.trim(), phone: form.phone.trim(), teamName: mode === 'team' ? form.teamName.trim() : '', mode, requestId: requestId.current }
+      const payload = { ...form, name: form.name.trim(), phone: form.phone.trim(), companyName: form.companyName.trim(), departmentName: form.departmentName.trim(), mode, requestId: requestId.current }
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([]); setReviewIndex(null)
       if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); setModal('failed') } else go('quiz')
@@ -185,6 +201,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const closeModal = () => setModal('')
   const modalProps = { scale, onClose: closeModal }
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '6aa715', 'cd20df', '5c1f714']
+  const infoArt = INFO_ART[mode]
   return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
     <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: DESIGN_HEIGHT * scale }}>
       <div className="cyber-stage" style={{ transform: `scale(${scale})` }}>
@@ -194,6 +211,20 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <button type="button" className="cyber-my-prizes" onClick={() => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') }}>我的奖品</button>
           </>}
           {page === 'choose' && <Artwork page={2} actions={{ ...navigation, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
+          {page === 'register' && <>
+            <Picture id="2194de0f17da7fc22aa700a189a841cc" x={0} y={0} w={750} h={1624} />
+            <img className="cyber-register-panel" src={src(infoArt.panel)} alt="" draggable={false} />
+            <img className="cyber-register-title" src={src(infoArt.title)} alt={`${labelMode(mode)}参与信息`} draggable={false} />
+            <form className="cyber-register-page" onSubmit={start}>
+              <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder="点击输入姓名" value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input aria-label="手机号码" autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} placeholder="点击输入手机号码" value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <input aria-label="公司名称" required maxLength={80} placeholder="点击输入公司名称" value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+              <input aria-label="部门名称" required maxLength={80} placeholder="点击输入部门名称" value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
+              <button className="cyber-register-submit" type="submit" disabled={busy} aria-label="开始答题"><img src={src(infoArt.submit)} alt="" draggable={false} /></button>
+            </form>
+            <Picture id="text-bf1fb3d4749d" x={25} y={1} w={55} h={55} onClick={() => go('home')} label="返回" />
+            <Picture id="text-5ef4d1229e77" x={566} y={9} w={160} h={37} onClick={() => go('home')} label="返回首页" />
+          </>}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={navigation} />
             <div className="cyber-category">当前分类：{currentQuestion?.category || '网络安全'}<br /><small>答题过程中可查看进度与剩余时间</small></div>
@@ -231,10 +262,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         </div>
       </div>
     </div>
-    {error && <div className="cyber-toast" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="关闭提示">×</button></div>}
-    {busy && !spinning && <div className="cyber-busy" role="status">正在处理…</div>}
-    {modal === 'rules' && <Modal {...modalProps} height={930} label="活动规则"><Picture id="3e3176187510559c98b15d0a91e2e225" x={7} y={60} w={736} h={856} /><div className="cyber-rules"><p>个人与团队为两种独立参与身份，每个账号每种身份各有3次答题机会，各只能成功闯关一次。</p><p>团队由三个人共用同一个账号答题，共享团队身份的次数与成绩。</p><p>每轮随机抽取20题，限时5分钟。单选题和判断题选择一个答案；多选题须全部选对，少选、多选均记为答错。</p><p>每答对一题得5分。累计答错3题或时间用尽，本轮闯关失败，返回首页后可使用剩余机会重新挑战。</p><p>中途返回或刷新不会重置时间，可继续本轮答题。已提交的答案不能修改。</p><p>成功完成后可查看结果、合成海报，并获得该身份1次抽奖机会。中奖后凭核销码前往集团科创部领取。</p></div></Modal>}
-    {modal === 'register' && <Modal {...modalProps} height={890} label={`${labelMode(mode)}参与信息`}><Picture id="3e3176187510559c98b15d0a91e2e225" x={7} y={60} w={736} h={820} /><form className="cyber-register" onSubmit={start}><h2>{labelMode(mode)}闯关</h2><p>剩余 {progress?.remaining ?? 3} 次机会{mode === 'team' ? ' · 三人共用同一账号答题' : ''}</p><label>姓名<input autoComplete="name" required maxLength={40} value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label><label>手机号<input autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>{mode === 'team' && <label>团队名称<input required maxLength={60} value={form.teamName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, teamName: e.target.value })} /></label>}<small>信息用于记录成绩与奖品领取。开始后消耗1次机会，计时持续进行。</small><button type="submit" disabled={busy}>开始答题</button></form></Modal>}
+    {error && <div className="cyber-toast-layer"><div className="cyber-toast" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="关闭提示">×</button></div></div>}
+    {busy && !spinning && <div className="cyber-toast-layer"><div className="cyber-busy" role="status">正在处理…</div></div>}
     {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '3次机会已用完，感谢参与' : attempt?.reason === 'timeout' ? `答题时间已结束，剩余${progress?.remaining || 0}次机会` : `累计答错3题，剩余${progress?.remaining || 0}次机会`}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}

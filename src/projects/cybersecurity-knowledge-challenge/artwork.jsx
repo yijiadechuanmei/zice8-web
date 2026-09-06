@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { layouts } from './layouts'
-export const asset = (name) => `/cybersecurity-knowledge-challenge/${name}`
+const OSS_ASSET_ROOT = 'https://assets.zice8.com/cybersecurity_knowledge_challenge/cybersecurity_knowledge_challenge_2026'
+export const asset = (name) => `${OSS_ASSET_ROOT}/${name}`
 export const ART = Object.fromEntries(Object.values(layouts).flat().map((v) => [v.src.split('_')[0].replace('.png', ''), v.src]))
 export const src = (id) => asset(ART[id] || id)
 export function Picture({ id, x, y, w, h, onClick, label, className = '', disabled = false, style = {} }) {
