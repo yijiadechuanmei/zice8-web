@@ -14,6 +14,13 @@ const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
 const DESIGN_WIDTH = 750
 const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
+const STAGES = [
+  { name: '第一关', topic: '智能时代', label: { x: 338, y: 772 }, marker: { x: 432, y: 828 }, player: { x: 450, y: 875 } },
+  { name: '第二关', topic: '账号密码', label: { x: 30, y: 644 }, marker: { x: 128, y: 699 }, player: { x: 70, y: 700 } },
+  { name: '第三关', topic: '信息保护', label: { x: 325, y: 488 }, marker: { x: 419, y: 543 }, player: { x: 425, y: 545 } },
+  { name: '第四关', topic: 'AI安全', label: { x: 34, y: 347 }, marker: { x: 128, y: 402 }, player: { x: 75, y: 415 } },
+  { name: '第五关', topic: '安全通行', label: { x: 394, y: 205 }, marker: { x: 488, y: 261 }, player: { x: 490, y: 275 } },
+]
 const AUTO_SINGLE_ANSWERS = 'DAACDCCABCBCADDAADCBCAAABBDBAABADCCBABDDCACBBCCBBDDDABBBABDDDBBBCACCAACBCCABDBDABDCDDBBBDCDCADABAADDBADBDDADACCDCDACBADBBAACAACBADDCDBBDACABCABBCDBBCCADCACDBAABBACBADBCBABACACCCACBBACDCBCCBBAAABCACACCBABDADDBAAACDCDBCBBDBADDDBBDCABABACCBDCDACACBADBADDDDBBBDDDAABBCCABCDBADDBADCCACCDADDBCBBBCACDBBCABC'
 const AUTO_MULTIPLE_ANSWERS = 'ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BC,ABCD,ACD,ABCD,ACD,ACD,ABCD,ABCD,ABD,ABCD,ABCD,ABC,ABCD,ABC,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABD,ABCD,AB,ABCD,BC,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,AD,ABCD,ABCD,ABD,ABCD,ABCD,ACD,ABCD,ABCD,ABD,AD,ACD,ABCD,BD,CD,BC,CD,ABC,ABC,ABCD,ABCD,ABCD,ABD,ABCD,ABCD,AC,ABCD,ABCD,ABCD,AC,ABCD,BC,ABCD,ABCD,ABCD,AD,ABCD,BCD,ABD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,AD,ABD,ABCD,ABCD,ABCD,BCD,ABCD,ABCD,ACD,ACD,ABC,ABD,ABCD,ABCD,ACD,ABC,ABC,ABD,ABC,BCD,ABCD,ACD,ABD,ABD,ACD,ABCD,ABCD,ABC,ABCD,ABCD,ABD,ABCD,ACD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,ABC,ABCD,BCD,ABCD,BCD,ABC,ABCD,ABD,BCD,BCD,ABCD,ABCD,BCD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,BCD,BCD,ACD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,BCD,ACD,AD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BCD,ABD,ABC,ABD,ABCD,AC,BCD,BCD,ABCD,ABCD,ACD,BCD,ABCD,ACD,ABCD,ACD,ACD,ABD,BCD,ABCD,ABCD,ACD'.split(',')
 const AUTO_BOOLEAN_ANSWERS = 'AAABAAABAAAAAABBAABAAAAABAAAABAAAAAABABAABABAAABAAABAABBAABAAABAABABABABBABBAABABBAABABAABAABBAABBAB'
@@ -82,6 +89,59 @@ function Modal({ children, height = 850, onClose, label, scale }) {
   }
   const fit = Math.min(scale, (window.innerHeight - 24) / height)
   return <div className="cyber-overlay" onKeyDown={keydown}><div style={{ width: 750 * fit, height: height * fit }}><section className="cyber-modal" ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={label} style={{ width: 750, height, transform: `scale(${fit})` }}>{children}{onClose && <Picture id="text-9c7a54de95b1" x={673} y={0} w={52} h={52} onClick={onClose} label="关闭弹窗" />}</section></div></div>
+}
+
+function StageMap({ attempt, onStart }) {
+  const answered = attempt?.answers?.length || 0
+  const finished = attempt?.status === 'success'
+  const unlocked = finished ? 5 : Math.min(5, Math.floor(answered / 10) + 1)
+  const stage = STAGES[unlocked - 1]
+  const progressText = finished ? '5/5 完成' : `${unlocked}/5 开启`
+  const buttonText = finished ? '查看答题结果' : `开始${stage.name}`
+  const message = finished ? '五个关卡已全部点亮' : unlocked === 1 ? '第一关正在开启，准备开始挑战' : `${stage.name}正在开启，第${unlocked - 1}关已点亮`
+  return <>
+    <Picture id="2194de0f17da7fc22aa700a189a841cc_1261078_750_1624.png" x={0} y={-88} w={750} h={1624} />
+    <Picture id="30de1debbb1714c49d2b6b04a13e5497_112192_750_512.png" x={0} y={315} w={750} h={512} className="cyber-stage-map-art" />
+    <Picture id="1647ce881ea4d8f7f69ada777314788e_300210_587_846.png" x={73} y={394} w={587} h={846} className="cyber-stage-map-art" />
+    <Picture id="997c329a9e38549b2f1fb1ba10ecc586_17866_117_93.png" x={73} y={256} w={117} h={93} className="cyber-stage-map-art" />
+    <Picture id="6de72bd1696230fe455d19db4d5bcc0e_30330_137_169.png" x={530} y={1104} w={137} h={169} className="cyber-stage-map-art" />
+    <Picture id="5fb0ae900c9a844f4468365e20328210_69419_185_227.png" x={448} y={250} w={185} h={227} className="cyber-stage-map-art" />
+    <Picture id="99d1a3d9b148d3349885ec288da462b6_52872_144_186.png" x={30} y={728} w={144} h={186} className="cyber-stage-map-art" />
+    <Picture id="e40f6d9204ab94aa56ed90ca6bb57b39_68022_186_185.png" x={13} y={445} w={186} h={185} className="cyber-stage-map-art" />
+    <Picture id="4ef044826db405182b0bc7c7ec4395b9_67118_186_203.png" x={391} y={860} w={186} h={203} className="cyber-stage-map-art" />
+    <Picture id="7797479677159fa38b17873115afbcb5_68942_169_199.png" x={390} y={573} w={169} h={199} className="cyber-stage-map-art" />
+    {STAGES.map((item, index) => <div key={item.name}><Picture id="006b3a05a86b69d1f1156f67d7571683_3648_29_84.png" x={item.marker.x} y={item.marker.y} w={29} h={84} /><div className={`cyber-stage-node ${index + 1 === unlocked ? 'active' : ''} ${index + 1 < unlocked || finished ? 'done' : ''}`} style={{ left: item.label.x, top: item.label.y }}><b>{item.name}</b><span>{item.topic}</span></div></div>)}
+    <Picture id="828c85aa3cde967068e859213aa9216c_45963_127_194.png" x={stage.player.x} y={stage.player.y} w={127} h={194} className="cyber-stage-player" />
+    <Picture id="80067636d3a65fcd1f901079cc788d7a_11196_621_41.png" x={26} y={80} w={621} h={41} />
+    <div className="cyber-stage-message">{message}</div>
+    <div className="cyber-stage-count">{progressText}</div>
+    <Picture id="641404f72e15d9bea398ce8c78223a50_34376_324_91.png" x={388} y={1325} w={324} h={91} label={buttonText} onClick={onStart} className="cyber-stage-start" />
+    <div className="cyber-stage-start-text">{buttonText}</div>
+  </>
+}
+
+function StageComplete({ attempt, onContinue }) {
+  const answered = attempt?.answers?.length || 0
+  const stageNumber = Math.max(1, Math.min(5, Math.floor(answered / 10)))
+  const stage = STAGES[stageNumber - 1]
+  const answers = attempt?.answers?.slice((stageNumber - 1) * 10, stageNumber * 10) || []
+  const score = answers.filter((answer) => answer.correct).length * 5
+  return <>
+    <Picture id="2194de0f17da7fc22aa700a189a841cc_1261078_750_1624.png" x={0} y={-88} w={750} h={1624} />
+    <Picture id="57008aec5b5494a7e750d2996819d4cf_112316_736_831.png" x={10} y={263} w={736} h={831} className="cyber-stage-map-art" />
+    <Picture id="6e599c6897b686225aa02c0a9a692cfe_105853_201_307.png" x={278} y={405} w={201} h={307} className="cyber-stage-map-art" />
+    <Picture id="1a81f207ff9962000b9afc3f05676228_6971_287_169.png" x={80} y={862} w={287} h={169} />
+    <Picture id="3e0605608f390d24f118a0ec6b175a22_5113_299_170.png" x={373} y={862} w={299} h={170} />
+    <div className="cyber-stage-complete-title">{stage.name}已点亮</div>
+    <div className="cyber-stage-complete-topic">{stage.topic}</div>
+    <div className="cyber-stage-complete-copy">你已完成「{stage.topic}」主题挑战，{stage.name}跳台已点亮。</div>
+    <b className="cyber-stage-complete-score">{score}</b>
+    <b className="cyber-stage-complete-time">{formatTime(attempt?.durationSeconds || 0)}</b>
+    <div className="cyber-stage-complete-count">{stageNumber}/5 开启</div>
+    <Picture id="641404f72e15d9bea398ce8c78223a50_34376_324_91.png" x={388} y={1129} w={324} h={91} label="查看关卡" onClick={onContinue} />
+    <div className="cyber-stage-complete-button">查看关卡</div>
+    <div className="cyber-stage-complete-footer">{stage.name}完成</div>
+  </>
 }
 
 export default function CybersecurityKnowledgeChallengeProject({ routeParams }) {
@@ -182,7 +242,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     expireRetryAt.current = Date.now() + 500
     setSelected([])
     setAnswerFeedback(null)
-    load().then((value) => { if (value.modes[mode].attempt?.status === 'failed') setModal('failed') }).catch(showError)
+    load().then((value) => {
+      const nextAttempt = value.modes[mode].attempt
+      if (nextAttempt?.status === 'failed') setModal('failed')
+      else if (nextAttempt?.status === 'active' && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
+    }).catch(showError)
   }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError])
 
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
@@ -192,13 +256,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     if (!hasToken) { if (!reauth('cybersecurity-start')) setError('请在微信中打开活动并完成授权后参与'); return }
     await run(async () => {
       const value = await load(); const p = value.modes[nextMode]
-      if (p.succeeded) { go('result'); return }
-      if (p.attempt?.status === 'active') { go('quiz'); return }
+      if (p.succeeded) { go('stage'); return }
+      if (p.attempt?.status === 'active') { go('stage'); return }
       if (p.remaining <= 0) { setModal('exhausted'); return }
       if (p.name && p.phone && p.companyName && p.departmentName) {
         const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
         if (started.modes[nextMode].attempt?.status === 'failed') setModal('failed')
-        else go('quiz')
+        else go('stage')
         return
       }
       setForm({ name: p.name || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
@@ -213,7 +277,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await run(async () => {
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([])
-      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); setModal('failed') } else go('quiz')
+      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); setModal('failed') } else go('stage')
     })
   }
   async function submit() {
@@ -234,7 +298,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
     if (nextAttempt.status === 'failed') setModal('failed')
-    else if (nextAttempt.status === 'success') go('result')
+    else if (nextAttempt.status === 'success') go('stage')
+    else if (nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
   }
   async function completeAll() {
     await run(async () => {
@@ -246,7 +311,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         const value = accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: activeAttempt.id, questionId: question.id, selected: selected.split('') }) }))
         activeAttempt = value.modes[mode].attempt
       }
-      if (activeAttempt?.status === 'success') go('result')
+      if (activeAttempt?.status === 'success') go('stage')
     })
   }
   async function draw() {
@@ -276,6 +341,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     const correct = answerFeedback?.answer.answer.includes(option.key)
     const wrong = answerFeedback && picked && !correct
     return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
+  }
+  function startStage() {
+    setSelected([])
+    setAnswerFeedback(null)
+    setSubmittedRemainingSeconds(null)
+    if (attempt?.status === 'success') go('result')
+    else if (attempt?.status === 'active') go('quiz')
   }
   const closeModal = () => setModal('')
   const modalProps = { scale, onClose: closeModal }
@@ -314,6 +386,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Picture id="a92dbb46d90efd589d31942056deb1f7" x={25} y={1} w={55} h={55} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回" />
             <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回首页" />
           </>}
+          {page === 'stage' && <StageMap attempt={attempt} onStart={startStage} />}
+          {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go('stage')} />}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
