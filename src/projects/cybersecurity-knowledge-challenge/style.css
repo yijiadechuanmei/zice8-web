@@ -37,6 +37,7 @@
 .cyber-question-enter { animation:cyber-question-enter .54s cubic-bezier(.12,.86,.2,1.12) both; }
 .cyber-float { animation:cyber-float 4s ease-in-out infinite; }
 .cyber-float-delay { animation:cyber-float 3.7s .6s ease-in-out infinite reverse; }
+.cyber-quiz-guide { position:absolute; left:27px; top:169px; width:508px; height:83px; display:flex; align-items:flex-start; justify-content:flex-start; color:#000; font-size:29px; line-height:normal; text-align:left; white-space:pre-wrap; word-break:normal; }
 .cyber-quiz-timer { position:absolute; left:355px; top:327px; width:112px; height:33px; color:#000; font-size:31px; line-height:33px; font-variant-numeric:tabular-nums; }
 .cyber-progress { position:absolute; left:60px; top:378px; width:140px; height:46px; display:flex; align-items:flex-start; color:#444; line-height:46px; }
 .cyber-progress b { color:#cc2320; font-size:40px; }
