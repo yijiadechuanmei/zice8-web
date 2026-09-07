@@ -301,7 +301,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <img className="cyber-register-panel cyber-quiz-enter" style={{ top: infoArt.panelTop }} src={src(infoArt.panel)} alt="" draggable={false} />
             {infoArt.fields.map(([image, top], index) => <img key={image} className={`cyber-register-field-art cyber-art-enter cyber-art-enter-${index + 1}`} style={rect(67, top, 633, image.startsWith('2acceb') ? 136 : 132)} src={src(image)} alt="" draggable={false} />)}
             <img className="cyber-register-title cyber-art-enter cyber-art-enter-0" style={{ top: infoArt.titleTop }} src={src(infoArt.title)} alt={`${labelMode(mode)}参与信息`} draggable={false} />
-            <form className="cyber-register-page cyber-register-enter" noValidate onSubmit={start}>
+            <form className="cyber-register-page" noValidate onSubmit={start}>
               <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder="点击输入姓名" value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input aria-label="手机号码" autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} placeholder="点击输入手机号码" value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               <input aria-label="公司名称" required maxLength={80} placeholder="点击输入公司名称" value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
@@ -325,7 +325,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'result' && <>
             <Artwork page={mode === 'team' ? 6 : 5} omit={['text-d16b2a1cbe55']} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
             <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
-            {mode === 'team' && <div className="cyber-result-team cyber-quiz-enter">{progress?.teamName}</div>}
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
@@ -339,7 +338,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'prizes' && <>
             <Artwork page={9} omit={['ccd59680942cf673e3b24e4169db0a0a']} actions={{ ...navigation, 'text-259fa5eb4a6e': { label: '返回首页', onClick: () => go('home') } }} />
-            <div className="cyber-prizes cyber-quiz-enter">{['personal', 'team'].map((m) => ({ mode: m, draw: data?.modes[m]?.draw })).filter((p) => p.draw?.prizeId).map(({ mode: m, draw: d }) => <article key={m}><img src={src(PRIZE_ART[d.image])} alt={d.name} /><div><h3>{d.name}<small>数量：1</small></h3><p>{labelMode(m)}闯关 · {d.redeemedAt ? '已核销' : '待领取'}</p><p>核销码号码：<strong>{d.code}</strong></p></div></article>)}</div>
+            <div className="cyber-prizes cyber-quiz-enter">{['personal', 'team'].map((m) => ({ mode: m, draw: data?.modes[m]?.draw })).filter((p) => p.draw?.prizeId).map(({ mode: m, draw: d }) => <article key={m}><img src={src(PRIZE_ART[d.image])} alt={d.name} /><div><h3>{d.name}<small>数量：1</small></h3><p>{labelMode(m)}闯关 · {d.redeemedAt ? '已核销' : '待领取'}</p><p>核销码号码：<strong>{d.code}</strong></p></div></article>)}{!['personal', 'team'].some((m) => data?.modes[m]?.draw?.prizeId) && <p className="cyber-empty">暂无中奖记录</p>}</div>
           </>}
         </div>
       </div>
