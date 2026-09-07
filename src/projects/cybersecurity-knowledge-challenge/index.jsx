@@ -309,7 +309,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   async function completeAll() {
     await run(async () => {
       let activeAttempt = attempt
-      while (activeAttempt?.status === 'active' && activeAttempt.currentQuestion) {
+      const stageEnd = Math.min(Math.ceil(((activeAttempt?.answers.length || 0) + 1) / 10) * 10, activeAttempt?.total || 50)
+      while (activeAttempt?.status === 'active' && activeAttempt.currentQuestion && activeAttempt.answers.length < stageEnd) {
         const question = activeAttempt.currentQuestion
         const selected = autoAnswer(question.id)
         if (!selected) throw new Error('题库答案缺失')
@@ -317,6 +318,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         activeAttempt = value.modes[mode].attempt
       }
       if (activeAttempt?.status === 'success') go('stage')
+      else if (activeAttempt?.status === 'active' && activeAttempt.answers.length > 0 && activeAttempt.answers.length % 10 === 0) go('stageComplete')
     })
   }
   async function draw() {
@@ -397,7 +399,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
-            <div className="cyber-progress cyber-quiz-enter"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
+            <div className="cyber-progress cyber-quiz-enter"><b>{String(((attempt?.answers.length || 0) % 10) + 1).padStart(2, '0')}</b><span>/10</span></div>
             <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
               <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
             </div>
