@@ -16,6 +16,10 @@ export function loadImage(url) {
   })
 }
 export const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
+export const formatCountdown = (seconds) => {
+  const safe = Math.max(0, seconds)
+  return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${(safe % 60).toFixed(2).padStart(5, '0')}`
+}
 export async function makePoster({ mode, progress, qrCanvas }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
   const canvas = document.createElement('canvas')
@@ -57,8 +61,7 @@ export async function makePoster({ mode, progress, qrCanvas }) {
   if (mode === 'team') {
     ctx.font = '22px sans-serif'; ctx.fillStyle = '#9b6b31'
     const lines = wrap(`所属团队：${teamName}`, 236).slice(0, 2)
-    const firstLineY = lines.length > 1 ? 1120 : 1132
-    lines.forEach((line, index) => ctx.fillText(line, 160, firstLineY + index * 25))
+    lines.forEach((line, index) => ctx.fillText(line, 160, 1132 + index * 25))
   }
   ctx.drawImage(qrCanvas, mode === 'team' ? 421 : 423, 1060, 96, 96)
   return canvas.toDataURL('image/png')

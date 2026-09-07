@@ -6,7 +6,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { Artwork, backId, otherBackId, Picture, PRIZE_ART, src } from './artwork'
 import { Wheel, WHEEL_ANGLES } from './wheel'
-import { formatTime, makePoster } from './poster'
+import { formatCountdown, formatTime, makePoster } from './poster'
 import './style.css'
 
 const TYPE = 'cybersecurity_knowledge_challenge'
@@ -118,7 +118,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const attempt = progress?.attempt
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
-  const remainingSeconds = Math.max(0, Math.ceil(((attempt?.deadline || 0) - now - offset) / 1000))
+  const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
   const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setDrawToast(''); setAnswerFeedback(null); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
@@ -148,7 +148,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     const resize = () => setScale(getStageScale())
     window.addEventListener('resize', resize)
     window.visualViewport?.addEventListener('resize', resize)
-    const timer = setInterval(() => setNow(Date.now()), 500)
+    const timer = setInterval(() => setNow(Date.now()), 50)
     return () => {
       window.removeEventListener('resize', resize)
       window.visualViewport?.removeEventListener('resize', resize)
@@ -170,7 +170,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }, [authReady, hasToken, load, showError])
   useEffect(() => {
     if (page !== 'quiz' || attempt?.status !== 'active' || remainingSeconds > 0 || Date.now() < expireRetryAt.current) return
-    expireRetryAt.current = Date.now() + 3000
+    expireRetryAt.current = Date.now() + 500
     load().then((value) => { if (value.modes[mode].attempt?.status === 'failed') setModal('failed') }).catch(showError)
   }, [attempt?.status, remainingSeconds, page, load, mode, now, showError])
 
@@ -289,7 +289,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
-            <div className="cyber-quiz-timer" role="timer">{formatTime(remainingSeconds)}</div>
+            <div className="cyber-quiz-timer" role="timer">{formatCountdown(remainingSeconds)}</div>
             <div className="cyber-progress"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
             <div className="cyber-question-content" key={visibleQuestion?.id}>
               <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
