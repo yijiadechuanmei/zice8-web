@@ -13,6 +13,12 @@
 .cyber-button:disabled { opacity:.45; cursor:default; }
 .cyber-pulse { animation:cyber-button-pulse 2.4s ease-in-out infinite; }
 .cyber-pulse-delay { animation-delay:1.2s; }
+.cyber-float-one { animation:cyber-float 3.6s ease-in-out infinite; }
+.cyber-float-two { animation:cyber-float 4.1s .7s ease-in-out infinite reverse; }
+.cyber-float-three { animation:cyber-float 3.2s .35s ease-in-out infinite; }
+.cyber-float-four { animation:cyber-float 4.4s 1s ease-in-out infinite reverse; }
+.cyber-float-five { animation:cyber-float 3.8s .5s ease-in-out infinite; }
+.cyber-float-six { animation:cyber-float 4.6s .8s ease-in-out infinite reverse; }
 .cyber-enter { animation:cyber-rise .7s .12s both; }
 .cyber-float { animation:cyber-float 4s ease-in-out infinite; }
 .cyber-float-delay { animation:cyber-float 3.7s .6s ease-in-out infinite reverse; }
