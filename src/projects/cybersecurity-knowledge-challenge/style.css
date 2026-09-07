@@ -1,6 +1,6 @@
-.cyber-app { position:fixed; inset:0; display:flex; width:100%; height:100%; align-items:center; justify-content:center; overflow:hidden; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-app { position:fixed; inset:0; display:flex; flex-direction:column; width:100%; height:100%; align-items:center; justify-content:flex-start; overflow-x:hidden; overflow-y:auto; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
 .cyber-app * { box-sizing:border-box; }
-.cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
+.cyber-stage-wrap { position:relative; flex:none; overflow:visible; margin-block:auto; }
 .cyber-stage { position:absolute; top:0; left:0; width:750px; transform-origin:top left; overflow:visible; perspective:2000px; }
 .cyber-page { position:absolute; inset:0; transform-origin:left center; animation:cyber-page-turn .55s cubic-bezier(.2,.75,.2,1) both; }
 .cyber-picture { padding:0; border:0; background:none; }
