@@ -171,6 +171,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   useEffect(() => {
     if (page !== 'quiz' || attempt?.status !== 'active' || remainingSeconds > 0 || Date.now() < expireRetryAt.current) return
     expireRetryAt.current = Date.now() + 500
+    setSelected([])
+    setAnswerFeedback(null)
     load().then((value) => { if (value.modes[mode].attempt?.status === 'failed') setModal('failed') }).catch(showError)
   }, [attempt?.status, remainingSeconds, page, load, mode, now, showError])
 

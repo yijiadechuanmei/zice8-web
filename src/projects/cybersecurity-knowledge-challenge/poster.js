@@ -18,7 +18,7 @@ export function loadImage(url) {
 export const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 export const formatCountdown = (seconds) => {
   const safe = Math.max(0, seconds)
-  return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${(safe % 60).toFixed(2).padStart(5, '0')}`
+  return safe.toFixed(2)
 }
 export async function makePoster({ mode, progress, qrCanvas }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
