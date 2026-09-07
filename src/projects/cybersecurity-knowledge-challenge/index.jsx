@@ -112,6 +112,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [spinning, setSpinning] = useState(false)
   const requestId = useRef(null)
   const qr = useRef(null)
+  const appRef = useRef(null)
   const alive = useRef(true)
   const expireRetryAt = useRef(0)
   const progress = data?.modes?.[mode]
@@ -119,7 +120,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
-  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setDrawToast(''); setAnswerFeedback(null); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
+  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
@@ -266,7 +267,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd']
   const infoArt = INFO_ART[mode]
   const stageHeight = HOME_HEIGHT
-  return <div className={`cyber-app cyber-${mode}`} aria-busy={busy}>
+  return <div ref={appRef} className={`cyber-app cyber-${mode}`} aria-busy={busy}>
     <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
       <div className="cyber-stage" style={{ height: stageHeight, transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
