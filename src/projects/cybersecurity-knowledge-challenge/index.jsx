@@ -248,11 +248,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       else if (nextAttempt?.status === 'active' && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
     }).catch(showError)
   }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError])
-  useEffect(() => {
-    if (page !== 'stageComplete') return undefined
-    const timer = window.setTimeout(() => go('stage'), 1500)
-    return () => window.clearTimeout(timer)
-  }, [go, page])
 
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
   const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
