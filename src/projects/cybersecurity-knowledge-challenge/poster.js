@@ -20,13 +20,17 @@ export const formatCountdown = (seconds) => {
   const safe = Math.max(0, seconds)
   return safe.toFixed(2)
 }
-export async function makePoster({ mode, progress, qrCanvas }) {
+export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
   const canvas = document.createElement('canvas')
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('当前浏览器不支持海报合成')
-  const [background, avatar] = await Promise.all([loadImage(posterAsset(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : '74181980fe59f9fd8b38583c2c487e23')), loadImage(posterAsset('14dba9edc1f271124020174158ee6a13'))])
+  const fallbackAvatar = posterAsset('14dba9edc1f271124020174158ee6a13')
+  const [background, avatar] = await Promise.all([
+    loadImage(posterAsset(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : '74181980fe59f9fd8b38583c2c487e23')),
+    avatarUrl ? loadImage(avatarUrl).catch(() => loadImage(fallbackAvatar)) : loadImage(fallbackAvatar),
+  ])
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
   ctx.fillStyle = '#cc2320'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
   const y = mode === 'team' ? 894 : 888

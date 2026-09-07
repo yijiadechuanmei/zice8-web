@@ -123,7 +123,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
   const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setSubmittedRemainingSeconds(null); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
-  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
+  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData((previous) => ({ ...value, nickname: value.nickname || previous?.nickname || '', avatar: value.avatar || previous?.avatar || '' })); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
     setError(err.message || '请求失败，请重试')
@@ -268,7 +268,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   async function generatePoster() {
     setModal('poster'); setPoster('')
-    await run(async () => setPoster(await makePoster({ mode, progress, qrCanvas: qr.current?.querySelector('canvas') })))
+    await run(async () => setPoster(await makePoster({ mode, progress, avatarUrl: data?.avatar, qrCanvas: qr.current?.querySelector('canvas') })))
   }
   function quizOption(option) {
     const q = visibleQuestion
