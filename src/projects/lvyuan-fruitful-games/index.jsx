@@ -653,13 +653,9 @@ export default function LvyuanFruitfulGamesProject({ routeParams }) {
     setView(nextView)
   }, [])
   const startGame = useCallback((gameKey, rulesView) => {
-    if (userProgress.completedGames.includes(gameKey)) {
-      setNotice('已完成')
-      return
-    }
     setActiveGame(gameKey)
     navigate(rulesView)
-  }, [navigate, userProgress.completedGames])
+  }, [navigate])
   const completeGame = useCallback(async (answers) => {
     if (!isWechat) return { totalScore: 0, completedGames: [] }
     const result = await completeLvyuanFruitfulGame(activityKey, activeGame, answers)

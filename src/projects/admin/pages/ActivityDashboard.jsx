@@ -101,7 +101,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
         { label: '参与用户', value: lvyuan.participantCount ?? 0 },
         { label: '获得积分用户', value: lvyuan.scoredUserCount ?? 0 },
-        { label: '满300分用户', value: lvyuan.fullCompletionCount ?? 0 },
+        { label: '300分及以上用户', value: lvyuan.fullCompletionCount ?? 0 },
         { label: '已发放总积分', value: lvyuan.totalScore ?? 0 },
         { label: '贪吃蛇通关', value: lvyuan.completedByGame?.snake ?? 0 },
         { label: '找茬通关', value: lvyuan.completedByGame?.spot_difference ?? 0 },
