@@ -110,10 +110,12 @@ export default function ActivityConfigPage({ activity }) {
   const [riderSafetySettings, setRiderSafetySettings] = useState({
     prizes: [],
     maxWinningUsersPerIp: 3,
+    guaranteed68UserIds: [],
     payoutTest: { active: false, amountFen: 20, maxStock: 20, prize: null },
     budget: null,
   })
   const [riderSafetySettingsSaving, setRiderSafetySettingsSaving] = useState(false)
+  const [riderSafetyGuaranteed68UserIds, setRiderSafetyGuaranteed68UserIds] = useState('')
   const [riderSafetyPayoutTestStock, setRiderSafetyPayoutTestStock] = useState(5)
   const [riderSafetyPayoutTestSaving, setRiderSafetyPayoutTestSaving] = useState(false)
   const [riderSafetyReissueGrantId, setRiderSafetyReissueGrantId] = useState('')
@@ -193,13 +195,16 @@ export default function ActivityConfigPage({ activity }) {
           setRiderSafetySettings({
             prizes: data?.prizes || [],
             maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+            guaranteed68UserIds: data?.guaranteed68UserIds || [],
             payoutTest: data?.payoutTest || { active: false, amountFen: 20, maxStock: 20, prize: null },
             budget: data?.budget || null,
           })
+          setRiderSafetyGuaranteed68UserIds((data?.guaranteed68UserIds || []).join('\n'))
         })
         .catch((err) => { if (alive) setError(err.message || '骑手安全问卷配置加载失败') })
     } else {
-      setRiderSafetySettings({ prizes: [], maxWinningUsersPerIp: 3, payoutTest: { active: false, amountFen: 20, maxStock: 20, prize: null }, budget: null })
+      setRiderSafetySettings({ prizes: [], maxWinningUsersPerIp: 3, guaranteed68UserIds: [], payoutTest: { active: false, amountFen: 20, maxStock: 20, prize: null }, budget: null })
+      setRiderSafetyGuaranteed68UserIds('')
     }
 
     if (activity.type === 'song_wish_lottery') {
@@ -437,11 +442,25 @@ export default function ActivityConfigPage({ activity }) {
       message.warning('请检查奖品金额、库存，并确保库存不低于已发放和预留数量')
       return
     }
+    const guaranteed68Tokens = riderSafetyGuaranteed68UserIds
+      .split(/[\s,，]+/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+    if (guaranteed68Tokens.some((userId) => !/^[1-9]\d{0,18}$/.test(userId))) {
+      message.warning('68元必中用户ID仅支持正整数，请逐行或用逗号分隔填写')
+      return
+    }
+    const guaranteed68UserIds = [...new Set(guaranteed68Tokens)]
+    if (guaranteed68UserIds.length > 100) {
+      message.warning('一次最多登记100个68元必中用户ID')
+      return
+    }
     setRiderSafetySettingsSaving(true)
     setError('')
     try {
       const data = await saveRiderSafetySurveySettings(activity.activityKey, {
         maxWinningUsersPerIp,
+        guaranteed68UserIds,
         prizes: riderSafetySettings.prizes.map((prize) => ({
           id: prize.id,
           amountFen: Number(prize.amountFen),
@@ -452,9 +471,11 @@ export default function ActivityConfigPage({ activity }) {
       setRiderSafetySettings({
         prizes: data?.prizes || [],
         maxWinningUsersPerIp: Number(data?.maxWinningUsersPerIp ?? 3),
+        guaranteed68UserIds: data?.guaranteed68UserIds || [],
         payoutTest: data?.payoutTest || { active: false, amountFen: 20, maxStock: 20, prize: null },
         budget: data?.budget || null,
       })
+      setRiderSafetyGuaranteed68UserIds((data?.guaranteed68UserIds || []).join('\n'))
       message.success('奖品、库存、预算和IP风控配置已保存')
     } catch (err) {
       const text = err.message || '骑手安全问卷配置保存失败'
@@ -1205,6 +1226,23 @@ export default function ActivityConfigPage({ activity }) {
                     </Space>
                   </Card>
                 ))}
+                <Card size="small" type="inner" title="68元红包指定用户必中">
+                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                    <Text type="secondary">
+                      每行一个用户ID，也可用逗号分隔。已登记的用户在正式常规抽奖中固定获得68元红包；系统会预留对应库存，不受随机批次和单IP中奖人数限制影响。
+                    </Text>
+                    <Input.TextArea
+                      rows={4}
+                      placeholder={'例如：\n19104\n19105'}
+                      value={riderSafetyGuaranteed68UserIds}
+                      disabled={riderSafetySettings.payoutTest?.active}
+                      onChange={(event) => setRiderSafetyGuaranteed68UserIds(event.target.value)}
+                    />
+                    <Text type="secondary">
+                      当前已登记 {riderSafetySettings.guaranteed68UserIds?.length || 0} 人。仍须完成问卷与微信零钱授权，且受68元库存、总预算及每个用户仅一次抽奖限制保护。
+                    </Text>
+                  </Space>
+                </Card>
                 <Space wrap size={16} align="end">
                   <label>
                     <Text strong>单IP最多中奖用户数</Text>
