@@ -315,7 +315,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(answerToast ? 15 : remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
-            <div className="cyber-question-content cyber-quiz-enter" key={visibleQuestion?.id}>
+            <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
               <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
             </div>
             <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
@@ -339,7 +339,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'prizes' && <>
             <Artwork page={9} omit={['ccd59680942cf673e3b24e4169db0a0a']} actions={{ ...navigation, 'text-259fa5eb4a6e': { label: '返回首页', onClick: () => go('home') } }} />
-            <div className="cyber-prizes cyber-quiz-enter">{['personal', 'team'].map((m) => ({ mode: m, draw: data?.modes[m]?.draw })).filter((p) => p.draw?.prizeId).map(({ mode: m, draw: d }) => <article key={m}><img src={src(PRIZE_ART[d.image])} alt={d.name} /><div><h3>{d.name}<small>数量：1</small></h3><p>{labelMode(m)}闯关 · {d.redeemedAt ? '已核销' : '待领取'}</p><p>核销码号码：<strong>{d.code}</strong></p></div></article>)}{!['personal', 'team'].some((m) => data?.modes[m]?.draw?.prizeId) && <p className="cyber-empty">暂无中奖记录</p>}</div>
+            <div className="cyber-prizes cyber-quiz-enter">{['personal', 'team'].map((m) => ({ mode: m, draw: data?.modes[m]?.draw })).filter((p) => p.draw?.prizeId).map(({ mode: m, draw: d }) => <article key={m}><img src={src(PRIZE_ART[d.image])} alt={d.name} /><div><h3>{d.name}<small>数量：1</small></h3><p>{labelMode(m)}闯关 · {d.redeemedAt ? '已核销' : '待领取'}</p><p>核销码号码：<strong>{d.code}</strong></p></div></article>)}</div>
           </>}
         </div>
       </div>
