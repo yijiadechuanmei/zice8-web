@@ -291,7 +291,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
-            <div className="cyber-quiz-timer" role="timer">{formatCountdown(remainingSeconds)}</div>
+            <div className="cyber-quiz-timer" role="timer">{formatCountdown(answerToast ? 15 : remainingSeconds)}</div>
             <div className="cyber-progress"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
             <div className="cyber-question-content" key={visibleQuestion?.id}>
               <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
