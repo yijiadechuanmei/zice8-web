@@ -1,4 +1,5 @@
-.cyber-app { position:fixed; inset:0; display:flex; flex-direction:column; width:100%; height:100%; align-items:center; justify-content:flex-start; overflow-x:hidden; overflow-y:auto; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-app { position:fixed; inset:0; display:flex; flex-direction:column; width:100%; height:100%; align-items:center; justify-content:flex-start; overflow:hidden; overscroll-behavior:none; background:#fff7ec; color:#444; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.cyber-app.cyber-scrollable { overflow-x:hidden; overflow-y:auto; }
 .cyber-app * { box-sizing:border-box; }
 @supports (height:100dvh) { .cyber-app { height:100dvh; } }
 .cyber-stage-wrap { position:relative; flex:none; overflow:visible; }
@@ -10,6 +11,8 @@
 .cyber-button:active { scale:.97; filter:brightness(.96); }
 .cyber-button:focus-visible, .cyber-app button:focus-visible { outline:4px solid #936529; outline-offset:5px; }
 .cyber-button:disabled { opacity:.45; cursor:default; }
+.cyber-pulse { animation:cyber-button-pulse 2.4s ease-in-out infinite; }
+.cyber-pulse-delay { animation-delay:1.2s; }
 .cyber-enter { animation:cyber-rise .7s .12s both; }
 .cyber-float { animation:cyber-float 4s ease-in-out infinite; }
 .cyber-float-delay { animation:cyber-float 3.7s .6s ease-in-out infinite reverse; }
@@ -95,6 +98,7 @@
 .cyber-busy { background:#fff9ed; color:#936529; box-shadow:0 2px 14px #0002; border-radius:20px; padding:10px 20px; font-size:14px; }
 .cyber-qr-source { position:fixed; left:-10000px; top:0; pointer-events:none; }
 @keyframes cyber-page-turn { from { opacity:.35; transform:rotateY(-15deg) translateX(18px); filter:brightness(.9); } to { opacity:1; transform:rotateY(0); filter:brightness(1); } }
+@keyframes cyber-button-pulse { 0%,100% { filter:drop-shadow(0 0 0 rgba(204,35,32,0)); } 50% { filter:drop-shadow(0 0 12px rgba(204,35,32,.38)); } }
 @keyframes cyber-rise { from { opacity:0; translate:0 16px; } to { opacity:1; translate:0 0; } }
 @keyframes cyber-float { 0%,100% { translate:0 0; } 50% { translate:0 -10px; } }
 @keyframes cyber-dim { from { opacity:0; } to { opacity:1; } }

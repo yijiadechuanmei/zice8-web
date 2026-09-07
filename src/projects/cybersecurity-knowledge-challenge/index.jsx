@@ -103,6 +103,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
   const [scale, setScale] = useState(getStageScale)
+  const [scrollable, setScrollable] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState([])
@@ -146,7 +147,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const load = useCallback(async () => accept(await request(`${base}/state`)), [accept, base])
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
-    const resize = () => setScale(getStageScale())
+    const resize = () => {
+      const nextScale = getStageScale()
+      const viewportHeight = window.visualViewport?.height || window.innerHeight
+      setScale(nextScale)
+      setScrollable(HOME_HEIGHT * nextScale > viewportHeight + 2)
+    }
+    resize()
     window.addEventListener('resize', resize)
     window.visualViewport?.addEventListener('resize', resize)
     const timer = setInterval(() => setNow(Date.now()), 50)
@@ -272,12 +279,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd']
   const infoArt = INFO_ART[mode]
   const stageHeight = HOME_HEIGHT
-  return <div ref={appRef} className={`cyber-app cyber-${mode}`} aria-busy={busy}>
+  return <div ref={appRef} className={`cyber-app cyber-${mode} ${scrollable ? 'cyber-scrollable' : ''}`} aria-busy={busy}>
     <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
       <div className="cyber-stage" style={{ height: stageHeight, transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
           {page === 'home' && <>
-            <Artwork page={1} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, '31695a5bf339bd55a32fe0eed9c22b8e': { label: '活动规则', onClick: () => go('choose') }, '739f9f21f54b72ca51ec21114b0e625b': { label: '我的奖品', onClick: () => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') } } }} />
+            <Artwork page={1} classes={{ '06d5feaa3577e2fc6f0e117058f6786a': 'cyber-pulse', b2e70d6e70341633565031697c3c7896: 'cyber-pulse cyber-pulse-delay' }} actions={{ '06d5feaa3577e2fc6f0e117058f6786a': { label: '个人闯关', onClick: () => chooseMode('personal') }, b2e70d6e70341633565031697c3c7896: { label: '团队闯关', onClick: () => chooseMode('team') }, '31695a5bf339bd55a32fe0eed9c22b8e': { label: '活动规则', onClick: () => go('choose') }, '739f9f21f54b72ca51ec21114b0e625b': { label: '我的奖品', onClick: () => { if (hasToken) run(async () => { await load(); go('prizes') }); else setError('请在微信中完成授权后查看奖品') } } }} />
           </>}
           {page === 'choose' && <Artwork page={2} actions={{ ...navigation, a92dbb46d90efd589d31942056deb1f7: { label: '返回首页', onClick: () => go('home') }, c42ebc15530f0f8b314fa0990da30880: { label: '返回首页', onClick: () => go('home') }, '721fe211ae2323400e635f0e02932a5a': { label: '进入个人闯关', onClick: () => chooseMode('personal'), disabled: busy }, '17312b9131744f111979488d00e96209': { label: '进入团队闯关', onClick: () => chooseMode('team'), disabled: busy } }} />}
           {page === 'register' && <>
