@@ -98,6 +98,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [error, setError] = useState('')
   const [formToast, setFormToast] = useState('')
   const [answerToast, setAnswerToast] = useState('')
+  const [drawToast, setDrawToast] = useState('')
   const [answerFeedback, setAnswerFeedback] = useState(null)
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
@@ -118,7 +119,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, Math.ceil(((attempt?.deadline || 0) - now - offset) / 1000))
-  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setAnswerFeedback(null); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
+  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setDrawToast(''); setAnswerFeedback(null); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
@@ -128,10 +129,18 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setFormToast(message)
     window.setTimeout(() => setFormToast((current) => current === message ? '' : current), 1500)
   }, [])
-  async function run(work) {
+  const showDrawToast = useCallback((message) => {
+    setDrawToast(message)
+    window.setTimeout(() => setDrawToast((current) => current === message ? '' : current), 1500)
+  }, [])
+  const showDrawError = useCallback((err) => {
+    if (Number(err?.status) === 401 && reauth('cybersecurity-draw-401')) return
+    showDrawToast(err.message || '抽奖失败，请稍后再试')
+  }, [reauth, showDrawToast])
+  async function run(work, onError = showError) {
     if (busyRef.current) return
     busyRef.current = true; setBusy(true); setError('')
-    try { return await work() } catch (err) { showError(err) } finally { busyRef.current = false; if (alive.current) setBusy(false) }
+    try { return await work() } catch (err) { onError(err) } finally { busyRef.current = false; if (alive.current) setBusy(false) }
   }
   const load = useCallback(async () => accept(await request(`${base}/state`)), [accept, base])
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
@@ -154,10 +163,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   useEffect(() => {
     if (!authReady || !hasToken) return
     let active = true
-    load().then((value) => {
+    load().then(() => {
       if (!active) return
-      const activeMode = ['personal', 'team'].find((m) => value.modes[m].attempt?.status === 'active')
-      if (activeMode) { setMode(activeMode); setPage('quiz') }
     }).catch(showError)
     return () => { active = false }
   }, [authReady, hasToken, load, showError])
@@ -239,7 +246,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       setSpinning(true); setRotation((old) => old + 1800 + ((angle - old % 360 + 360) % 360))
       await new Promise((resolve) => setTimeout(resolve, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 3400))
       if (alive.current) { setSpinning(false); setModal('prize') }
-    })
+    }, showDrawError)
   }
   async function generatePoster() {
     setModal('poster'); setPoster('')
@@ -316,6 +323,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     {error && <div className="cyber-toast-layer"><div className="cyber-toast" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')} aria-label="关闭提示">×</button></div></div>}
     {formToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{formToast}</div></div>}
     {answerToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{answerToast}</div></div>}
+    {drawToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{drawToast}</div></div>}
     {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '3次机会已用完，感谢参与' : attempt?.reason === 'timeout' ? `答题时间已结束，剩余${progress?.remaining || 0}次机会` : `累计答错3题，剩余${progress?.remaining || 0}次机会`}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}

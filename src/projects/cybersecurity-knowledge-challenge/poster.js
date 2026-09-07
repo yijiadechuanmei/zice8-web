@@ -28,14 +28,18 @@ export async function makePoster({ mode, progress, qrCanvas }) {
   const y = mode === 'team' ? 894 : 888
   ctx.fillText(String(progress.attempt.score), mode === 'team' ? 140 : 190, y)
   ctx.fillText(formatTime(progress.attempt.durationSeconds), mode === 'team' ? 324 : 449, y)
-  if (mode === 'team') ctx.fillText('1', 510, y)
+  const teamName = progress.teamName || [progress.companyName, progress.departmentName].filter(Boolean).join('') || '网络安全先锋队'
+  if (mode === 'team') ctx.fillText(progress.recommendCode || progress.phone?.slice(-6) || '', 510, y)
   // Reference personal poster has two statistic columns; team has three.
   ctx.fillStyle = '#9b6b31'
   const fit = (text, maxWidth, size) => { while (size > 14) { ctx.font = `${size}px sans-serif`; if (ctx.measureText(text).width <= maxWidth) break; size-- } }
-  if (mode === 'team') { fit(`${progress.teamName}团队获得`, 575, 28); ctx.fillText(`${progress.teamName}团队获得`, 323, 734) }
+  if (mode === 'team') {
+    ctx.fillStyle = '#fffaf7'; ctx.fillRect(110, 742, 426, 62)
+    ctx.fillStyle = '#cc2320'; ctx.textAlign = 'center'; fit(`「${teamName}」荣誉`, 410, 34); ctx.fillText(`「${teamName}」荣誉`, 323, 786)
+  }
   ctx.save(); ctx.beginPath(); ctx.arc(97, 1114, 45, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(avatar, 52, 1069, 90, 90); ctx.restore()
   ctx.textAlign = 'left'; fit(progress.name || '网络安全守护者', 236, 27); ctx.fillText(progress.name || '网络安全守护者', mode === 'team' ? 160 : 162, mode === 'team' ? 1100 : 1124)
-  if (mode === 'team') { fit(`所属团队：${progress.teamName}`, 236, 22); ctx.fillText(`所属团队：${progress.teamName}`, 160, 1132) }
+  if (mode === 'team') { fit(`所属团队：${teamName}`, 236, 22); ctx.fillText(`所属团队：${teamName}`, 160, 1132) }
   ctx.drawImage(qrCanvas, mode === 'team' ? 421 : 423, 1060, 96, 96)
   return canvas.toDataURL('image/png')
 }
