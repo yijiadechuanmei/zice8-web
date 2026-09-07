@@ -253,9 +253,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   function openDraw() {
     if (!progress?.draw) { go('draw'); return }
-    go('draw')
     showDrawToast('抽奖次数已用完')
-    window.setTimeout(() => { if (alive.current) setModal('prize') }, 1500)
+    window.setTimeout(() => { if (alive.current) go('prizes') }, 1500)
   }
   async function generatePoster() {
     setModal('poster'); setPoster('')
