@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { trackPageView } from "../../shared/analytics";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
 import {
@@ -108,6 +109,13 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   useWechatShare(activityKey, publicConfig);
 
   useEffect(() => syncVisibleViewportInset(), []);
+
+  useEffect(() => {
+    if (preview) return;
+    trackPageView(activityKey, "/rider-safety-survey", {
+      activityType: ACTIVITY_TYPE,
+    });
+  }, [activityKey, preview]);
 
   useEffect(() => {
     if (preview) return;
