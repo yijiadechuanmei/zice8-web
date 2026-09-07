@@ -98,6 +98,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [error, setError] = useState('')
   const [formToast, setFormToast] = useState('')
   const [answerToast, setAnswerToast] = useState('')
+  const [submittedRemainingSeconds, setSubmittedRemainingSeconds] = useState(null)
   const [drawToast, setDrawToast] = useState('')
   const [answerFeedback, setAnswerFeedback] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -121,7 +122,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
-  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
+  const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setSubmittedRemainingSeconds(null); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
   const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData(value); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
@@ -177,12 +178,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     return () => { active = false }
   }, [authReady, hasToken, load, showError])
   useEffect(() => {
-    if (page !== 'quiz' || attempt?.status !== 'active' || remainingSeconds > 0 || Date.now() < expireRetryAt.current) return
+    if (page !== 'quiz' || answerToast || attempt?.status !== 'active' || remainingSeconds > 0 || Date.now() < expireRetryAt.current) return
     expireRetryAt.current = Date.now() + 500
     setSelected([])
     setAnswerFeedback(null)
     load().then((value) => { if (value.modes[mode].attempt?.status === 'failed') setModal('failed') }).catch(showError)
-  }, [attempt?.status, remainingSeconds, page, load, mode, now, showError])
+  }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError])
 
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
   const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
@@ -218,10 +219,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   async function submit() {
     if (!selected.length) { setError('请选择答案'); return }
     if (remainingSeconds <= 0 || answerToast) return
+    setSubmittedRemainingSeconds(remainingSeconds)
     const submittedQuestion = currentQuestion
     const value = await run(async () => accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: attempt.id, questionId: submittedQuestion.id, selected }) })))
     const nextAttempt = value?.modes?.[mode]?.attempt
-    if (!nextAttempt) return
+    if (!nextAttempt) { setSubmittedRemainingSeconds(null); return }
     const submittedAnswer = nextAttempt.answers.at(-1)
     setSelected([])
     setAnswerFeedback({ question: submittedQuestion, answer: submittedAnswer })
@@ -229,6 +231,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await new Promise((resolve) => setTimeout(resolve, 1500))
     if (!alive.current) return
     setAnswerToast('')
+    setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
     if (nextAttempt.status === 'failed') setModal('failed')
     else if (nextAttempt.status === 'success') go('result')
@@ -313,7 +316,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
-            <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(answerToast ? 15 : remainingSeconds)}</div>
+            <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String((attempt?.answers.length || 0) + 1).padStart(2, '0')}</b><span>/{attempt?.total || 20}</span></div>
             <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
               <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
@@ -324,7 +327,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'result' && <>
             <Artwork page={mode === 'team' ? 6 : 5} omit={['text-d16b2a1cbe55']} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
-            <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
+            <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b></div>
+            <div className="cyber-recommend-code cyber-quiz-enter">{progress?.recommendCode || ''}</div>
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
