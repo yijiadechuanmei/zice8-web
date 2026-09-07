@@ -332,7 +332,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
-            <div className="cyber-details cyber-quiz-enter">{attempt?.answers?.map((a, index) => <article key={a.questionId}><header><b>{index + 1} / {a.category}</b><span className={a.correct ? 'ok' : 'bad'}>{a.correct ? '正确' : '错误'}</span></header><h3>{a.title}</h3><p>你的答案：{a.selected} 正确答案：{a.answer}</p><p>{a.explanation}</p></article>)}</div>
+            <div className="cyber-details cyber-quiz-enter">{attempt?.answers?.filter((a) => !a.correct).map((a, index) => <article key={a.questionId}><header><b>{index + 1} / {a.category}</b><span className="bad">错误</span></header><h3>{a.title}</h3><p>你的答案：{a.selected} 正确答案：{a.answer}</p><p>{a.explanation}</p></article>)}</div>
           </>}
           {page === 'draw' && <>
             <Artwork page={8} omit={['f79d5d674a55f547e986be446f382a91']} actions={{ ...navigation, ef793ee88f81c81ffda0704aeaadb071: { label: progress?.draw ? '查看抽奖结果' : '开始抽奖', onClick: draw, disabled: busy || spinning }, 'text-fbe1639180d7': { label: '返回结果', onClick: () => go('result'), disabled: spinning } }} />
