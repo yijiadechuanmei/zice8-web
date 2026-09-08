@@ -140,16 +140,19 @@ function StageMap({ attempt, onStart, onHome }) {
   const finished = attempt?.status === 'success'
   const unlocked = finished ? 5 : Math.min(5, Math.floor(answered / 10) + 1)
   const stage = STAGES[unlocked - 1]
-  const [playerPosition, setPlayerPosition] = useState(STAGE_PLAYER_INITIAL_POSITION)
+  const playerStartPosition = unlocked > 1
+    ? STAGES[unlocked - 2].player
+    : STAGE_PLAYER_INITIAL_POSITION
+  const [playerPosition, setPlayerPosition] = useState(playerStartPosition)
   const progressText = finished ? '5/5 完成' : `${unlocked}/5 开启`
   const buttonText = finished ? '查看答题结果' : `开始${stage.name}`
   const message = finished ? '五个关卡已全部点亮' : unlocked === 1 ? '第一关正在开启，准备开始挑战' : `${stage.name}正在开启，第${unlocked - 1}关已点亮`
 
   useEffect(() => {
-    setPlayerPosition(STAGE_PLAYER_INITIAL_POSITION)
+    setPlayerPosition(playerStartPosition)
     const timer = window.setTimeout(() => setPlayerPosition(stage.player), 80)
     return () => window.clearTimeout(timer)
-  }, [stage.player])
+  }, [unlocked])
 
   return <>
     <Picture id="2194de0f17da7fc22aa700a189a841cc_1261078_750_1624.png" x={0} y={-88} w={750} h={1624} />
