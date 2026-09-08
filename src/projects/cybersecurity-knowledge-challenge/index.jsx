@@ -294,6 +294,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   function chooseMode(nextMode) {
     setMode(nextMode)
     setNoticeMode(nextMode)
+    const nextProgress = data?.modes?.[nextMode]
+    if (!nextProgress?.succeeded && nextProgress?.remaining <= 0) {
+      showFormToast('该身份的3次答题机会已用完')
+      return
+    }
     setModal('notice')
   }
   async function beginMode(nextMode) {
@@ -303,7 +308,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       const value = await load(); const p = value.modes[nextMode]
       if (p.succeeded) { go('stage'); return }
       if (p.attempt?.status === 'active') { go('stage'); return }
-      if (p.remaining <= 0) { setModal('exhausted'); return }
+      if (p.remaining <= 0) { showFormToast('该身份的3次答题机会已用完'); return }
       if (p.name && p.phone && p.companyName && p.departmentName) {
         const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
         if (started.modes[nextMode].attempt?.status === 'failed') setModal('failed')
