@@ -35,7 +35,7 @@ const NOTICE = {
       '答对次数越多，答题时间越短，错的越少，成绩越高，越有机会抽中幸运奖品！',
       '完成正式闯关后，系统将生成专属“个人成绩海报”，可保存分享；',
       '完成闯关即可参与“幸运转盘抽奖”，赢取幸运奖品；',
-      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
+      '返回、刷新、关闭活动、切换后台或锁屏后，当前关卡须重新作答；本关题目重新随机，答对题数和用时重新计算，累计错题次数保留；',
       '请本人独立答题，禁止作弊、代答或使用外挂，违者取消参赛资格；',
       '请如实填写个人信息，文明答题、遵守竞赛纪律，本竞赛重在“以赛促学、以学促用”；',
       '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
@@ -48,10 +48,10 @@ const NOTICE = {
       '请由团队负责人填写团队名称及邀请码完成报名，团队成员以报名提交信息为准；',
       '每个团队报名账号仅有一次正式答题机会，请提前做好准备；',
       '请在竞赛开放时间内完成答题，逾期未答视为放弃，具体时间以活动页面公告为准；',
-      '本次答题共设 5 关，每关 10 道题，一共 50 道题，最多错五次即结束答题；',
+      '本次答题共设 5 关，每关 10 道题，一共 50 道题，累计答错 3 次即结束答题；',
       '团队成绩将结合答题正确率、答题用时等多个维度综合评定，表现优秀的团队可晋级决赛，决赛名单及荣誉不对外展示排名；',
       '晋级决赛的团队将获得相应荣誉与表彰；',
-      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
+      '返回、刷新、关闭活动、切换后台或锁屏后，当前关卡须重新作答；本关题目重新随机，答对题数和用时重新计算，累计错题次数保留；',
       '团队成员请独立答题，禁止作弊、代答或使用外挂，违者取消团队参赛资格；',
       '请如实填写团队信息，文明答题、遵守竞赛纪律，鼓励组队“共同学习、共同进步”；',
       '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
@@ -183,7 +183,8 @@ function StageComplete({ attempt, onContinue, onHome }) {
   const stageNumber = Math.max(1, Math.min(5, Math.floor(answered / 10)))
   const stage = STAGES[stageNumber - 1]
   const answers = attempt?.answers?.slice((stageNumber - 1) * 10, stageNumber * 10) || []
-  const score = answers.filter((answer) => answer.correct).length * 2
+  const settlement = attempt?.stages?.[stageNumber - 1]
+  const score = settlement?.correctCount ?? answers.filter((answer) => answer.correct).length
   const isFinalStage = attempt?.status === 'success'
   const continueText = isFinalStage ? '查看答题结果' : '查看关卡'
   return <>
@@ -197,7 +198,7 @@ function StageComplete({ attempt, onContinue, onHome }) {
     <div className="cyber-stage-complete-topic">{stage.topic}</div>
     <div className="cyber-stage-complete-copy">你已完成「{stage.topic}」主题挑战，{stage.name}跳台已点亮。</div>
     <b className="cyber-stage-complete-score">{score}</b>
-    <b className="cyber-stage-complete-time">{formatTime(attempt?.durationSeconds || 0)}</b>
+    <b className="cyber-stage-complete-time">{formatTime(settlement?.durationSeconds || 0)}</b>
     <Picture id={STAGE_PROGRESS_BUTTON_ART} x={33} y={1128} w={326} h={89} style={{ zIndex: 3 }} />
     <div className="cyber-stage-complete-count">{stageNumber}/5 开启</div>
     <Picture id="641404f72e15d9bea398ce8c78223a50_34376_324_91.png" x={388} y={1129} w={324} h={91} label={continueText} onClick={onContinue} />
@@ -321,11 +322,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   useEffect(() => {
     if (!authReady || !hasToken) return
     let active = true
-    load().then(() => {
+    request(`${base}/recover`, { method: 'POST' }).then(accept).then(() => {
       if (!active) return
     }).catch(showError)
     return () => { active = false }
-  }, [authReady, hasToken, load, showError])
+  }, [authReady, hasToken, base, accept, showError])
   useEffect(() => {
     if (page !== 'quiz' || answerToast || attempt?.status !== 'active' || remainingSeconds > 0 || Date.now() < expireRetryAt.current) return
     expireRetryAt.current = Date.now() + 500
@@ -334,11 +335,28 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     load().then((value) => {
       const nextAttempt = value.modes[mode].attempt
       if (nextAttempt?.status === 'failed') setModal('failed')
-      else if (nextAttempt?.status === 'active' && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
+      else if (nextAttempt?.status === 'success' || (nextAttempt?.status === 'active' && !nextAttempt.timerRunning && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0)) go('stageComplete')
     }).catch(showError)
-  }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError])
+  }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError, go])
+
+  const quizGeneration = useRef(0)
+  useEffect(() => {
+    if (page !== 'quiz') return undefined
+    const exit = () => {
+      quizGeneration.current += 1
+      if (attempt?.status === 'active' && attempt.timerRunning) {
+        request(`${base}/pause-question-timer`, { method: 'POST', keepalive: true, body: JSON.stringify({ mode, attemptId: attempt.id, runId: attempt.runId }) }).then(accept).catch(showError)
+      }
+      go(attempt?.answers?.length > 0 && attempt.answers.length % 10 === 0 && !attempt.timerRunning ? 'stageComplete' : 'stage')
+    }
+    const visibility = () => { if (document.hidden) exit() }
+    document.addEventListener('visibilitychange', visibility)
+    window.addEventListener('pagehide', exit)
+    return () => { document.removeEventListener('visibilitychange', visibility); window.removeEventListener('pagehide', exit) }
+  }, [page, attempt, mode, base, accept, go, showError])
 
   async function leaveQuiz(destination) {
+    quizGeneration.current += 1
     if (page !== 'quiz' || attempt?.status !== 'active' || !attempt.timerRunning) {
       go(destination)
       return
@@ -346,7 +364,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await run(async () => {
       const value = accept(await request(`${base}/pause-question-timer`, {
         method: 'POST',
-        body: JSON.stringify({ mode, attemptId: attempt.id }),
+        body: JSON.stringify({ mode, attemptId: attempt.id, runId: attempt.runId }),
       }))
       if (value.modes[mode].attempt?.status === 'active') go(destination)
     })
@@ -358,7 +376,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setMode(nextMode)
     setNoticeMode(nextMode)
     const nextProgress = data?.modes?.[nextMode]
-    if (!nextProgress?.succeeded && nextProgress?.remaining <= 0) {
+    if (!nextProgress?.succeeded && nextProgress?.attempt?.status !== 'active' && nextProgress?.remaining <= 0) {
       showFormToast('该身份的1次答题机会已用完')
       return
     }
@@ -399,11 +417,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     })
   }
   async function submit() {
+    const generation = quizGeneration.current
     if (!selected.length) { setError('请选择答案'); return }
     if (remainingSeconds <= 0 || answerToast) return
     setSubmittedRemainingSeconds(remainingSeconds)
     const submittedQuestion = currentQuestion
-    const value = await run(async () => accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: attempt.id, questionId: submittedQuestion.id, selected }) })))
+    const value = await run(async () => accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: attempt.id, runId: attempt.runId, questionId: submittedQuestion.id, selected }) })))
+    if (generation !== quizGeneration.current) return
     const nextAttempt = value?.modes?.[mode]?.attempt
     if (!nextAttempt) { setSubmittedRemainingSeconds(null); return }
     const submittedAnswer = nextAttempt.answers.at(-1)
@@ -411,7 +431,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerFeedback({ question: submittedQuestion, answer: submittedAnswer })
     setAnswerToast(submittedAnswer?.correct ? '回答正确' : '回答错误')
     await new Promise((resolve) => setTimeout(resolve, 1500))
-    if (!alive.current) return
+    if (!alive.current || generation !== quizGeneration.current) return
     setAnswerToast('')
     setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
@@ -427,7 +447,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         const question = activeAttempt.currentQuestion
         const selected = autoAnswer(question.id)
         if (!selected) throw new Error('题库答案缺失')
-        const value = accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: activeAttempt.id, questionId: question.id, selected: selected.split('') }) }))
+        const value = accept(await request(`${base}/answer`, { method: 'POST', body: JSON.stringify({ mode, attemptId: activeAttempt.id, runId: activeAttempt.runId, questionId: question.id, selected: selected.split('') }) }))
         activeAttempt = value.modes[mode].attempt
       }
       if (activeAttempt?.status === 'success') go('stageComplete')
