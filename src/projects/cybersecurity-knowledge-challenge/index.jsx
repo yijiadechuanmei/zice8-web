@@ -384,7 +384,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     if (nextMode === 'team') {
       const window = config?.teamCompetitionWindow
       if (window?.status !== 'active') {
-        showFormToast(window?.status === 'ended' ? window.endedMessage : window?.notStartedMessage || '本轮团体预选赛将于9月16日 9 点-18 点限时开启，请你准时参与')
+        showFormToast(window?.status === 'ended' ? window.endedMessage : window?.notStartedMessage || '本轮团体预选赛将于9月16日9点-18点限时开启，\n请你准时参与')
         return
       }
     }
