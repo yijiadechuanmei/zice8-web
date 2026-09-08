@@ -109,10 +109,9 @@
 .cyber-modal { position:relative; transform-origin:top left; outline:none; }
 .cyber-rules { position:absolute; left:55px; top:170px; width:640px; height:680px; overflow-y:auto; padding:20px 26px; border-radius:22px; background:rgba(255,252,247,.94); font-size:28px; line-height:1.65; color:#725238; }
 .cyber-rules p { margin:0 0 22px; }
-.cyber-notice-content { position:absolute; left:49px; top:300px; width:652px; height:775px; padding:18px 30px 30px; overflow-y:auto; color:#725238; font-size:25px; line-height:1.58; }
-.cyber-notice-content h2 { margin:0 0 20px; color:#a56729; font-size:38px; text-align:center; }
+.cyber-notice-content { position:absolute; left:67px; top:405px; width:616px; height:630px; padding:0 12px 24px; overflow-y:auto; color:#725238; font-size:25px; line-height:1.58; }
 .cyber-notice-content p { margin:0 0 18px; }
-.cyber-notice-content ol { margin:0; padding-left:34px; }
+.cyber-notice-content ol { margin:0; padding-left:42px; list-style:decimal; }
 .cyber-notice-content li { margin:0 0 13px; }
 .cyber-register { position:absolute; left:57px; top:164px; width:636px; padding:24px 28px; border-radius:22px; background:rgba(255,252,247,.94); font-size:27px; }
 .cyber-register h2 { margin:0 0 8px; font-size:38px; color:#a56729; }

@@ -475,7 +475,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       <Picture id="3e3176187510559c98b15d0a91e2e225_141194_736_856.png" x={7} y={265} w={736} h={856} />
       <Picture id="text-9c7a54de95b1" x={672} y={214} w={52} h={52} onClick={confirmNotice} label="阅读并继续答题" />
       <section className="cyber-notice-content">
-        <h2>{NOTICE[noticeMode].heading}</h2>
         <p>{NOTICE[noticeMode].intro}</p>
         <ol>{NOTICE[noticeMode].items.map((item) => <li key={item}>{item}</li>)}</ol>
       </section>

@@ -109,6 +109,28 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'cybersecurity_knowledge_challenge') {
+      const challenge = overview?.cybersecurityChallenge || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '参与用户', value: challenge.participantCount ?? 0 },
+        { label: '答题记录', value: challenge.attemptCount ?? 0 },
+        { label: '答题中', value: challenge.activeAttemptCount ?? 0 },
+        { label: '通关记录', value: challenge.successCount ?? 0 },
+        { label: '个人通关', value: challenge.personalSuccessCount ?? 0 },
+        { label: '团队通关', value: challenge.teamSuccessCount ?? 0 },
+        { label: '答题失败', value: challenge.failedCount ?? 0 },
+        { label: '通关率', value: Math.round(Number(challenge.completionRate ?? 0)), suffix: '%' },
+        { label: '平均得分', value: challenge.averageScore ?? 0, suffix: '分' },
+        { label: '平均用时', value: challenge.averageDurationSeconds ?? 0, suffix: '秒' },
+        { label: '抽奖次数', value: challenge.drawCount ?? 0 },
+        { label: '中奖次数', value: challenge.winCount ?? 0 },
+        { label: '已核销', value: challenge.redeemedCount ?? 0 },
+        { label: '排行榜人数', value: challenge.rankingCount ?? 0 },
+      ]
+    }
+
     if (isTjrcbPensionManual) {
       return [
         { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
