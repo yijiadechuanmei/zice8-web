@@ -1,6 +1,11 @@
 import { src } from './artwork'
 
 const POSTER_OSS_ROOT = 'https://zice8-assets.oss-cn-shanghai.aliyuncs.com/'
+const POSTER_FILES = {
+  '14dba9edc1f271124020174158ee6a13': '14dba9edc1f271124020174158ee6a13_115131_258_258.png',
+  '332f549dcf52581618af699dd7edf8f6': '332f549dcf52581618af699dd7edf8f6_680487_646_1240.png',
+  '74181980fe59f9fd8b38583c2c487e23': '74181980fe59f9fd8b38583c2c487e23_679720_646_1238.png',
+}
 
 const PERSONAL_TITLES = [
   '网络安全先锋',
@@ -35,7 +40,7 @@ const TEAM_TITLES = [
 ]
 
 function posterAsset(id) {
-  return src(id).replace('https://assets.zice8.com/', POSTER_OSS_ROOT)
+  return src(POSTER_FILES[id] || id).replace('https://assets.zice8.com/', POSTER_OSS_ROOT)
 }
 export function loadImage(url) {
   return new Promise((resolve, reject) => {
