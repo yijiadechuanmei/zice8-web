@@ -18,7 +18,7 @@ export function Artwork({ page, actions = {}, omit = [], classes = {}, animate =
   })
 }
 export const PRIZE_ART = {
-  ai_assistant: 'f79d5d674a55f547e986be446f382a91_584168_697_678.png',
+  ai_assistant: 'ai_assistant.png',
   pocket: 'pocket.png',
   pillow: 'ccd59680942cf673e3b24e4169db0a0a',
   cup: '79cde7710e78ec3fa445d45b5db8d5e0',
@@ -26,10 +26,6 @@ export const PRIZE_ART = {
   headrest: 'headrest.png',
   lucky: '7e0684f704cefbaac29683fdfc97e390',
   none: 'text-1d1ce1877686',
-}
-export function PrizeArtwork({ image, alt = '' }) {
-  if (image === 'ai_assistant') return <span className="cyber-ai-assistant-art" role="img" aria-label={alt} style={{ backgroundImage: `url(${src(PRIZE_ART.ai_assistant)})` }} />
-  return <img src={src(PRIZE_ART[image] || PRIZE_ART.none)} alt={alt} />
 }
 export const backId = 'text-bf1fb3d4749d'
 export const otherBackId = 'text-717e0a8c2a48'
