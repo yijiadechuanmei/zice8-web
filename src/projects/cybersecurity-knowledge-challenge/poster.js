@@ -2,6 +2,38 @@ import { src } from './artwork'
 
 const POSTER_OSS_ROOT = 'https://zice8-assets.oss-cn-shanghai.aliyuncs.com/'
 
+const PERSONAL_TITLES = [
+  '网络安全先锋',
+  '网络安全卫士',
+  '网络安全达人',
+  '网络安全新锐',
+  '网络安全标兵',
+  '智慧网安先锋',
+  '智能安全先锋',
+  '数据安全达人',
+  '数据安全卫士',
+  '云端安全卫士',
+  '密码安全达人',
+  '信息安全达人',
+  '网安答题先锋',
+  '网安闯关先锋',
+  '网安知识达人',
+  '网安学习先锋',
+  '网安进阶先锋',
+  '网安守护先锋',
+]
+
+const TEAM_TITLES = [
+  '网安先锋',
+  '数据守护',
+  '安全护航',
+  '数智护航',
+  '网安精英',
+  '网安尖兵',
+  '交投卫士',
+  '交通护航',
+]
+
 function posterAsset(id) {
   return src(id).replace('https://assets.zice8.com/', POSTER_OSS_ROOT)
 }
@@ -20,7 +52,12 @@ export const formatCountdown = (seconds) => {
   const safe = Math.max(0, seconds)
   return safe.toFixed(2)
 }
-export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas }) {
+function randomTitle(mode) {
+  const titles = mode === 'team' ? TEAM_TITLES : PERSONAL_TITLES
+  return titles[Math.floor(Math.random() * titles.length)]
+}
+
+export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, title = randomTitle(mode) }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
   const canvas = document.createElement('canvas')
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
@@ -33,12 +70,16 @@ export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas }) {
   ])
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
   ctx.fillStyle = '#cc2320'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
-  const y = mode === 'team' ? 894 : 888
-  ctx.fillText(String(progress.attempt.score), mode === 'team' ? 140 : 190, y)
-  ctx.fillText(formatTime(progress.attempt.durationSeconds), mode === 'team' ? 324 : 449, y)
+  const statY = mode === 'team' ? 894 : 888
+  if (mode === 'team') {
+    // Team poster keeps the two reference fields: recommendation code and elapsed time.
+    ctx.fillText(progress.recommendCode || '', 192, statY)
+    ctx.fillText(formatTime(progress.attempt.durationSeconds), 450, statY)
+  } else {
+    ctx.fillText(String(progress.attempt.score), 190, statY)
+    ctx.fillText(formatTime(progress.attempt.durationSeconds), 449, statY)
+  }
   const teamName = progress.teamName || [progress.companyName, progress.departmentName].filter(Boolean).join('') || '网络安全先锋队'
-  if (mode === 'team') ctx.fillText(progress.recommendCode || progress.phone?.slice(-6) || '', 510, y)
-  // Reference personal poster has two statistic columns; team has three.
   ctx.fillStyle = '#9b6b31'
   const fit = (text, maxWidth, size) => { while (size > 14) { ctx.font = `${size}px sans-serif`; if (ctx.measureText(text).width <= maxWidth) break; size-- } }
   const ellipsis = (text, maxWidth) => {
@@ -60,6 +101,8 @@ export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas }) {
     ctx.fillStyle = '#fffaf7'; ctx.fillRect(24, 699, 598, 50)
     ctx.fillStyle = '#9b6b31'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(ellipsis(`${teamName}团队获得`, 598), 323, 734)
   }
+  ctx.fillStyle = '#c91822'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
+  ctx.fillText(`「${title}」称号`, 323, 789)
   ctx.save(); ctx.beginPath(); ctx.arc(97, 1114, 45, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(avatar, 52, 1069, 90, 90); ctx.restore()
   ctx.textAlign = 'left'; fit(progress.name || '网络安全守护者', 236, 27); ctx.fillText(progress.name || '网络安全守护者', mode === 'team' ? 160 : 162, mode === 'team' ? 1100 : 1124)
   if (mode === 'team') {
