@@ -44,7 +44,7 @@
 .cyber-stage-node.active { border-color:#ec3e16; background:linear-gradient(90deg,#e80004,#ffb52b); color:#fff; animation:cyber-stage-node .7s cubic-bezier(.15,.8,.25,1) both; }
 .cyber-stage-node.done { background:#fff5db; }
 .cyber-stage-node.active.done { background:linear-gradient(90deg,#e80004,#ffb52b); color:#fff; }
-.cyber-stage-player { z-index:5; pointer-events:none; transition:left .65s cubic-bezier(.2,.8,.2,1),top .65s cubic-bezier(.2,.8,.2,1); }
+.cyber-stage-player { z-index:5; pointer-events:none; transition:left .9s cubic-bezier(.2,.8,.2,1),top .9s cubic-bezier(.2,.8,.2,1); }
 .cyber-stage-player > img { animation:cyber-stage-player .8s cubic-bezier(.15,.8,.25,1) both; }
 .cyber-stage-message { position:absolute; left:26px; top:147px; width:693px; height:72px; color:#444; font-size:30px; line-height:normal; letter-spacing:-1px; }
 .cyber-stage-count { position:absolute; left:33px; top:1324px; z-index:4; width:326px; height:89px; display:flex; align-items:center; justify-content:center; color:#9c7741; font-size:34px; letter-spacing:10px; }

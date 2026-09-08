@@ -15,12 +15,13 @@ const DEFAULT_KEY = 'cybersecurity_knowledge_challenge_2026'
 const DESIGN_WIDTH = 750
 const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
+const STAGE_PLAYER_INITIAL_POSITION = { x: 127, y: 973 }
 const STAGES = [
-  { name: '第一关', topic: '智能时代', label: { x: 338, y: 772 }, marker: { x: 432, y: 828 }, player: { x: 450, y: 875 } },
-  { name: '第二关', topic: '账号密码', label: { x: 30, y: 644 }, marker: { x: 128, y: 699 }, player: { x: 70, y: 700 } },
-  { name: '第三关', topic: '信息保护', label: { x: 325, y: 488 }, marker: { x: 419, y: 543 }, player: { x: 425, y: 545 } },
-  { name: '第四关', topic: 'AI安全', label: { x: 34, y: 347 }, marker: { x: 128, y: 402 }, player: { x: 75, y: 415 } },
-  { name: '第五关', topic: '安全通行', label: { x: 394, y: 205 }, marker: { x: 488, y: 261 }, player: { x: 490, y: 275 } },
+  { name: '第一关', topic: '智能时代', label: { x: 411, y: 824 }, marker: { x: 505, y: 880 }, player: { x: 484, y: 851 } },
+  { name: '第二关', topic: '账号密码', label: { x: 103, y: 665 }, marker: { x: 201, y: 721 }, player: { x: 105, y: 708 } },
+  { name: '第三关', topic: '信息保护', label: { x: 398, y: 511 }, marker: { x: 492, y: 567 }, player: { x: 482, y: 551 } },
+  { name: '第四关', topic: 'AI安全', label: { x: 107, y: 371 }, marker: { x: 201, y: 427 }, player: { x: 120, y: 418 } },
+  { name: '第五关', topic: '安全通行', label: { x: 394, y: 228 }, marker: { x: 488, y: 284 }, player: { x: 474, y: 261 } },
 ]
 const STAGE_PROGRESS_BUTTON_ART = '00b25428c160db7d38ebf03bdc81dd3b_4874_326_89.png'
 const NOTICE = {
@@ -138,22 +139,34 @@ function StageMap({ attempt, onStart, onHome }) {
   const finished = attempt?.status === 'success'
   const unlocked = finished ? 5 : Math.min(5, Math.floor(answered / 10) + 1)
   const stage = STAGES[unlocked - 1]
+  const [playerPosition, setPlayerPosition] = useState(STAGE_PLAYER_INITIAL_POSITION)
   const progressText = finished ? '5/5 完成' : `${unlocked}/5 开启`
   const buttonText = finished ? '查看答题结果' : `开始${stage.name}`
   const message = finished ? '五个关卡已全部点亮' : unlocked === 1 ? '第一关正在开启，准备开始挑战' : `${stage.name}正在开启，第${unlocked - 1}关已点亮`
+
+  useEffect(() => {
+    setPlayerPosition(STAGE_PLAYER_INITIAL_POSITION)
+    const timer = window.setTimeout(() => setPlayerPosition(stage.player), 80)
+    return () => window.clearTimeout(timer)
+  }, [stage.player])
+
   return <>
     <Picture id="2194de0f17da7fc22aa700a189a841cc_1261078_750_1624.png" x={0} y={-88} w={750} h={1624} />
     <Picture id="30de1debbb1714c49d2b6b04a13e5497_112192_750_512.png" x={0} y={315} w={750} h={512} className="cyber-stage-map-art" />
     <Picture id="1647ce881ea4d8f7f69ada777314788e_300210_587_846.png" x={73} y={394} w={587} h={846} className="cyber-stage-map-art" />
     <Picture id="997c329a9e38549b2f1fb1ba10ecc586_17866_117_93.png" x={73} y={256} w={117} h={93} className="cyber-stage-map-art" />
     <Picture id="6de72bd1696230fe455d19db4d5bcc0e_30330_137_169.png" x={530} y={1104} w={137} h={169} className="cyber-stage-map-art" />
-    <Picture id="5fb0ae900c9a844f4468365e20328210_69419_185_227.png" x={448} y={250} w={185} h={227} className="cyber-stage-map-art" />
-    <Picture id="99d1a3d9b148d3349885ec288da462b6_52872_144_186.png" x={30} y={728} w={144} h={186} className="cyber-stage-map-art" />
-    <Picture id="e40f6d9204ab94aa56ed90ca6bb57b39_68022_186_185.png" x={13} y={445} w={186} h={185} className="cyber-stage-map-art" />
-    <Picture id="4ef044826db405182b0bc7c7ec4395b9_67118_186_203.png" x={391} y={860} w={186} h={203} className="cyber-stage-map-art" />
-    <Picture id="7797479677159fa38b17873115afbcb5_68942_169_199.png" x={390} y={573} w={169} h={199} className="cyber-stage-map-art" />
-    {STAGES.map((item, index) => <div key={item.name}><Picture id="006b3a05a86b69d1f1156f67d7571683_3648_29_84.png" x={item.marker.x} y={item.marker.y} w={29} h={84} /><div className={`cyber-stage-node ${index + 1 === unlocked ? 'active' : ''} ${index + 1 < unlocked || finished ? 'done' : ''}`} style={{ left: item.label.x, top: item.label.y }}><b>{item.name}</b><span>{item.topic}</span></div></div>)}
-    <Picture id="828c85aa3cde967068e859213aa9216c_45963_127_194.png" x={stage.player.x} y={stage.player.y} w={127} h={194} className="cyber-stage-player" />
+    <Picture id="875494a97eeb15ec84921d2887f84b50_54146_212_149.png" x={435} y={334} w={212} h={149} className="cyber-stage-map-art" />
+    <Picture id="d7803d963a1241289233af1ec6ad6d29_50111_137_170.png" x={108} y={743} w={137} h={170} className="cyber-stage-map-art" />
+    <Picture id="525467fba5e98dd44f7717b8fc6c73ae_65245_209_155.png" x={67} y={472} w={209} h={155} className="cyber-stage-map-art" />
+    <Picture id="8d1308639b66166d0a87e115fa62f9ac_46149_181_150.png" x={458} y={914} w={181} h={150} className="cyber-stage-map-art" />
+    <Picture id="fdd80e92cbd0968748ef064f6498f66e_44149_162_156.png" x={458} y={610} w={162} h={156} className="cyber-stage-map-art" />
+    {STAGES.map((item, index) => <div key={item.name}>
+      <Picture id="006b3a05a86b69d1f1156f67d7571683_3648_29_84.png" x={item.marker.x} y={item.marker.y} w={29} h={84} />
+      {index + 1 === unlocked && <Picture id="7e9dd951990a8e791e76baedd0ee9759_22907_209_82.png" x={item.label.x} y={item.label.y} w={209} h={82} />}
+      <div className={`cyber-stage-node ${index + 1 === unlocked ? 'active' : ''} ${index + 1 < unlocked || finished ? 'done' : ''}`} style={{ left: item.label.x, top: item.label.y }}><b>{item.name}</b><span>{item.topic}</span></div>
+    </div>)}
+    <Picture id="828c85aa3cde967068e859213aa9216c_45963_127_194.png" x={playerPosition.x} y={playerPosition.y} w={127} h={194} className="cyber-stage-player" />
     <Picture id="80067636d3a65fcd1f901079cc788d7a_11196_621_41.png" x={26} y={80} w={621} h={41} />
     <StageNavigation onHome={onHome} />
     <div className="cyber-stage-message">{message}</div>
