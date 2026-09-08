@@ -530,8 +530,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <form className="cyber-register-page" noValidate onSubmit={start}>
               <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder="点击输入姓名" value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input aria-label="手机号码" autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} placeholder="点击输入手机号码" value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <input aria-label="公司名称" required maxLength={80} placeholder="点击输入公司名称" value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
-              <input aria-label="部门名称" required maxLength={80} placeholder="点击输入部门名称" value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
+              <input aria-label="公司名称" required maxLength={80} placeholder={mode === 'team' ? '点击输入团队名称' : '点击输入公司名称'} value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+              <input aria-label="部门名称" required maxLength={80} placeholder={mode === 'team' ? '点击输入推荐码' : '点击输入部门名称'} value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
               <button className="cyber-register-submit" style={{ top: infoArt.submitTop }} type="submit" disabled={busy} aria-label="开始答题"><img src={src(infoArt.submit)} alt="" draggable={false} /></button>
             </form>
             <Picture id="a92dbb46d90efd589d31942056deb1f7" x={25} y={1} w={55} h={55} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回" />
