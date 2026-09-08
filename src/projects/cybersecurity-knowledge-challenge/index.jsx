@@ -303,8 +303,22 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     }).catch(showError)
   }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError])
 
+  async function leaveQuiz(destination) {
+    if (page !== 'quiz' || attempt?.status !== 'active' || !attempt.timerRunning) {
+      go(destination)
+      return
+    }
+    await run(async () => {
+      const value = accept(await request(`${base}/pause-question-timer`, {
+        method: 'POST',
+        body: JSON.stringify({ mode, attemptId: attempt.id }),
+      }))
+      if (value.modes[mode].attempt?.status === 'active') go(destination)
+    })
+  }
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
-  const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
+  const leaveTarget = (destination) => page === 'quiz' ? leaveQuiz(destination) : go(destination)
+  const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
     setMode(nextMode)
     setNoticeMode(nextMode)
@@ -413,12 +427,20 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     const wrong = answerFeedback && picked && !correct
     return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
   }
-  function startStage() {
+  async function startStage() {
     setSelected([])
     setAnswerFeedback(null)
     setSubmittedRemainingSeconds(null)
     if (attempt?.status === 'success') go('result')
-    else if (attempt?.status === 'active') go('quiz')
+    else if (attempt?.status === 'active') {
+      await run(async () => {
+        const value = accept(await request(`${base}/start-question-timer`, {
+          method: 'POST',
+          body: JSON.stringify({ mode, attemptId: attempt.id }),
+        }))
+        if (value.modes[mode].attempt?.status === 'active') go('quiz')
+      })
+    }
   }
   const closeModal = () => setModal('')
   const modalProps = { scale, onClose: closeModal }
