@@ -73,8 +73,8 @@ export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, tit
   const statY = mode === 'team' ? 894 : 888
   if (mode === 'team') {
     // Team poster keeps the two reference fields: recommendation code and elapsed time.
-    ctx.fillText(progress.recommendCode || '', 192, statY)
-    ctx.fillText(formatTime(progress.attempt.durationSeconds), 450, statY)
+    ctx.fillText(formatTime(progress.attempt.durationSeconds), 192, statY)
+    ctx.fillText(progress.recommendCode || '', 450, statY)
   } else {
     ctx.fillText(String(progress.attempt.score), 190, statY)
     ctx.fillText(formatTime(progress.attempt.durationSeconds), 449, statY)

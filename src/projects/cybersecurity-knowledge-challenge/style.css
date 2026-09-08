@@ -47,7 +47,7 @@
 .cyber-stage-player { z-index:5; pointer-events:none; transition:left .65s cubic-bezier(.2,.8,.2,1),top .65s cubic-bezier(.2,.8,.2,1); }
 .cyber-stage-player > img { animation:cyber-stage-player .8s cubic-bezier(.15,.8,.25,1) both; }
 .cyber-stage-message { position:absolute; left:26px; top:147px; width:693px; height:72px; color:#444; font-size:30px; line-height:normal; letter-spacing:-1px; }
-.cyber-stage-count { position:absolute; left:33px; top:1324px; z-index:4; width:326px; height:89px; display:flex; align-items:center; justify-content:center; border:2px solid #ffe5aa; border-radius:45px; background:#fdfbf6; color:#9c7741; font-size:34px; letter-spacing:10px; }
+.cyber-stage-count { position:absolute; left:33px; top:1324px; z-index:4; width:326px; height:89px; display:flex; align-items:center; justify-content:center; color:#9c7741; font-size:34px; letter-spacing:10px; }
 .cyber-stage-start { z-index:4; }
 .cyber-stage-start-text { position:absolute; left:388px; top:1324px; z-index:5; width:326px; height:89px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:34px; letter-spacing:5px; pointer-events:none; }
 .cyber-stage-complete-title { position:absolute; left:50px; top:308px; width:643px; height:72px; display:flex; align-items:center; justify-content:center; color:#c91822; font-size:61px; font-weight:700; letter-spacing:3px; }
@@ -56,7 +56,7 @@
 .cyber-stage-complete-score,.cyber-stage-complete-time { position:absolute; z-index:3; width:210px; height:50px; display:flex; align-items:center; justify-content:center; color:#cc2320; font-size:42px; font-variant-numeric:tabular-nums; }
 .cyber-stage-complete-score { left:116px; top:902px; }
 .cyber-stage-complete-time { left:417px; top:902px; }
-.cyber-stage-complete-count { position:absolute; left:33px; top:1128px; width:326px; height:89px; display:flex; align-items:center; justify-content:center; border:2px solid #ffe5aa; border-radius:45px; background:#fdfbf6; color:#9c7741; font-size:34px; letter-spacing:10px; }
+.cyber-stage-complete-count { position:absolute; left:33px; top:1128px; width:326px; height:89px; display:flex; align-items:center; justify-content:center; color:#9c7741; font-size:34px; letter-spacing:10px; }
 .cyber-stage-complete-button { position:absolute; left:388px; top:1128px; z-index:4; width:326px; height:89px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:34px; letter-spacing:5px; pointer-events:none; }
 .cyber-stage-complete-footer { position:absolute; left:26px; top:79px; width:693px; height:72px; color:#9b6b31; font-size:61px; font-weight:700; letter-spacing:3px; }
 .cyber-quiz-guide { position:absolute; z-index:2; left:27px; top:169px; width:508px; height:83px; display:flex; align-items:flex-start; justify-content:flex-start; color:#000; font-size:29px; line-height:normal; text-align:left; white-space:pre-wrap; word-break:normal; }
