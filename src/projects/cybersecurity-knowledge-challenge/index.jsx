@@ -456,8 +456,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
               </div>
               <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
               <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
+              <button type="button" className="cyber-submit-answer cyber-art-enter cyber-art-enter-5" aria-label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0}><img src={src('33ad7d9d9142da327a8526b780312e8d_48782_674_91.png')} alt="" draggable={false} /></button>
             </div>
-            <Picture id="33ad7d9d9142da327a8526b780312e8d_48782_674_91.png" x={38} y={1321} w={674} h={91} label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} className="cyber-art-enter cyber-art-enter-5" />
           </>}
           {page === 'result' && <>
             <Artwork page={mode === 'team' ? 6 : 5} omit={['text-d16b2a1cbe55']} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
