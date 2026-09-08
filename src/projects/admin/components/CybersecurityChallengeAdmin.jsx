@@ -80,18 +80,18 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
         <Card size="small" title="团体预选赛时间（北京时间）">
           <Space wrap><span>开始</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.startAt)} onChange={(e) => changeTeamWindow('startAt', e.target.value)} /><span>结束</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.endAt)} onChange={(e) => changeTeamWindow('endAt', e.target.value)} /></Space>
         </Card>
-        <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
+        <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>基础谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
         {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化六个奖项。" />}
         <Table rowKey="id" pagination={false} scroll={{ x: 660 }} dataSource={config.lottery.prizes} columns={[
           { title: '奖品名称', dataIndex: 'name', render: (value, row) => <Input value={value} maxLength={60} onChange={(e) => change(row.id, 'name', e.target.value)} /> },
           { title: '库存总量', dataIndex: 'stockTotal', render: (v, r) => <InputNumber min={r.stockUsed} max={1000000} precision={0} value={v} onChange={(n) => change(r.id, 'stockTotal', n ?? 0)} /> },
           { title: '已发放', dataIndex: 'stockUsed' },
           { title: '剩余库存', render: (_, r) => r.stockTotal - r.stockUsed },
-          { title: '中奖概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={100} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
+          { title: '基础概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={10} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
         ]} />
         <Button type="primary" onClick={save} loading={busy}>保存团队赛时间和抽奖设置</Button>
       </>}
-      <Space wrap><Input style={{ width: 230 }} placeholder="输入12位核销码" value={code} maxLength={12} onChange={(e) => setCode(e.target.value)} /><Popconfirm title="确认已向用户发放该奖品？" onConfirm={redeem} disabled={!/^\d{12}$/.test(code)}><Button disabled={!/^\d{12}$/.test(code)} loading={busy}>确认核销</Button></Popconfirm></Space>
+      <Space wrap><Input style={{ width: 230 }} placeholder="输入6位核销码" value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} /><Popconfirm title="确认已向用户发放该奖品？" onConfirm={redeem} disabled={!/^(?:\d{12}|[A-HJ-NP-Z2-9]{6})$/.test(code)}><Button disabled={!/^(?:\d{12}|[A-HJ-NP-Z2-9]{6})$/.test(code)} loading={busy}>确认核销</Button></Popconfirm></Space>
       <Card size="small" title="清除参与数据">
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           <Typography.Text type="secondary">仅清除当前“网络安全知识大闯关”活动数据，不会影响其他活动或微信用户资料。清除后会同步恢复相应奖品库存。</Typography.Text>
