@@ -1,8 +1,20 @@
 /* eslint-disable react-refresh/only-export-components */
 import { Picture, PRIZE_ART, src } from './artwork'
-const sectors = [{ image: 'lucky', name: '幸运奖' }, { image: 'cup', name: '马克杯' }, { image: 'none', name: '谢谢参与' }, { image: 'mousepad', name: '鼠标垫' }, { image: 'pillow', name: '腰枕' }]
+const sectors = [
+  { image: 'ai_assistant', name: 'AI助手' },
+  { image: 'pocket', name: '口袋' },
+  { image: 'pillow', name: '腰枕' },
+  { image: 'cup', name: '杯子' },
+  { image: 'mousepad', name: '鼠标垫' },
+  { image: 'headrest', name: '头枕' },
+  { image: 'none', name: '谢谢参与' },
+]
+const sectorAngle = 360 / sectors.length
 // Target rotations place the matching sector center under the fixed top pointer.
-export const WHEEL_ANGLES = { lucky: 324, cup: 252, none: 180, mousepad: 108, pillow: 36 }
+export const WHEEL_ANGLES = Object.fromEntries(sectors.map((item, index) => {
+  const center = index * sectorAngle - 90 + sectorAngle / 2
+  return [item.image, (360 - (center + 90) + 360) % 360]
+}))
 const point = (angle, radius) => [347 + Math.cos(angle * Math.PI / 180) * radius, 324 + Math.sin(angle * Math.PI / 180) * radius]
 export function Wheel({ rotation, prizes = [] }) {
   return <>
@@ -10,7 +22,7 @@ export function Wheel({ rotation, prizes = [] }) {
     <svg aria-hidden="true" width="697" height="678" viewBox="0 0 697 678" style={{ position: 'absolute', left: 31, top: 293 }}>
       <g className="cyber-wheel" style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '347px 324px' }}>
         {sectors.map((item, i) => {
-          const a = i * 72 - 90; const b = a + 72; const center = a + 36
+          const a = i * sectorAngle - 90; const b = a + sectorAngle; const center = a + sectorAngle / 2
           const start = point(a, 277); const end = point(b, 277)
           const [x, y] = point(center, 166)
           const [tx, ty] = point(center, 234)

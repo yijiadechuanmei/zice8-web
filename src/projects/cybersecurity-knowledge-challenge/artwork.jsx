@@ -17,6 +17,15 @@ export function Artwork({ page, actions = {}, omit = [], classes = {}, animate =
     return <Picture key={`${v.src}:${v.x}:${v.y}`} id={v.src} {...v} onClick={action?.onClick} label={action?.label} disabled={action?.disabled} className={`${enterClass} ${classes[id] || ''}`.trim()} />
   })
 }
-export const PRIZE_ART = { cup: '79cde7710e78ec3fa445d45b5db8d5e0', pillow: 'ccd59680942cf673e3b24e4169db0a0a', lucky: '7e0684f704cefbaac29683fdfc97e390', mousepad: 'e433c133c59973398f40f9e588225178', none: 'text-1d1ce1877686' }
+export const PRIZE_ART = {
+  ai_assistant: 'ai_assistant.png',
+  pocket: 'pocket.png',
+  pillow: 'ccd59680942cf673e3b24e4169db0a0a',
+  cup: '79cde7710e78ec3fa445d45b5db8d5e0',
+  mousepad: 'e433c133c59973398f40f9e588225178',
+  headrest: 'headrest.png',
+  lucky: '7e0684f704cefbaac29683fdfc97e390',
+  none: 'text-1d1ce1877686',
+}
 export const backId = 'text-bf1fb3d4749d'
 export const otherBackId = 'text-717e0a8c2a48'

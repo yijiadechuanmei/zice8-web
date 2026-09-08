@@ -73,7 +73,7 @@ export function achievementTitle(mode, progress) {
   return titles[index]
 }
 
-export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, title = achievementTitle(mode, progress) }) {
+export async function makePoster({ mode, progress, nickname = '', avatarUrl = '', qrCanvas, title = achievementTitle(mode, progress) }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
   const canvas = document.createElement('canvas')
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
@@ -120,7 +120,8 @@ export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, tit
   ctx.fillStyle = '#c91822'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
   ctx.fillText(`「${title}」称号`, 323, 789)
   ctx.save(); ctx.beginPath(); ctx.arc(97, 1114, 45, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(avatar, 52, 1069, 90, 90); ctx.restore()
-  ctx.textAlign = 'left'; fit(progress.name || '网络安全守护者', 236, 27); ctx.fillText(progress.name || '网络安全守护者', mode === 'team' ? 160 : 162, mode === 'team' ? 1100 : 1124)
+  const posterNickname = nickname || '网络安全守护者'
+  ctx.textAlign = 'left'; fit(posterNickname, 236, 27); ctx.fillText(posterNickname, mode === 'team' ? 160 : 162, mode === 'team' ? 1100 : 1124)
   if (mode === 'team') {
     ctx.font = '22px sans-serif'; ctx.fillStyle = '#9b6b31'
     const lines = wrap(`所属团队：${teamName}`, 236).slice(0, 2)

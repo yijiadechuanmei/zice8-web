@@ -488,7 +488,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   async function generatePoster() {
     setModal('poster'); setPoster('')
-    await run(async () => setPoster(await makePoster({ mode, progress, avatarUrl: data?.avatar, qrCanvas: qr.current?.querySelector('canvas') })))
+    await run(async () => setPoster(await makePoster({ mode, progress, nickname: data?.nickname, avatarUrl: data?.avatar, qrCanvas: qr.current?.querySelector('canvas') })))
   }
   function quizOption(option) {
     const q = visibleQuestion
