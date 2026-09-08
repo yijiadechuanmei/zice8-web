@@ -418,7 +418,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   async function submit() {
     const generation = quizGeneration.current
-    if (!selected.length) { setError('请选择答案'); return }
+    if (!selected.length) { showFormToast('请选择答案'); return }
     if (remainingSeconds <= 0 || answerToast) return
     setSubmittedRemainingSeconds(remainingSeconds)
     const submittedQuestion = currentQuestion
