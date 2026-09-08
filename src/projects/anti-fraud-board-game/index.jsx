@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
 import { request } from '../../shared/api/request'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import {
   ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY,
@@ -256,6 +257,7 @@ function BoardScene({
   onAnswer,
   onContinue,
   onGoPoster,
+  onDebugGoPoster,
   showLandscapePrompt,
 }) {
   const currentPoint = BOARD_POINTS[position] || BOARD_POINTS[0]
@@ -329,7 +331,7 @@ function BoardScene({
           ) : null}
         </button>
         <div className="afbg-step-text" style={{ left: 96, top: 312 }}>{position} 步</div>
-        <div className="afbg-time-text" style={{ left: 91, top: 39 }} onDoubleClick={onGoPoster}>{formatElapsed(elapsed)}</div>
+        <div className="afbg-time-text" style={{ left: 91, top: 39 }} onDoubleClick={onDebugGoPoster}>{formatElapsed(elapsed)}</div>
       </div>
     </DesignStage>
 
@@ -642,6 +644,12 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   }, [title])
 
   useEffect(() => {
+    trackPageView(activityKey, '/anti-fraud-board-game', {
+      activityType: 'anti_fraud_board_game',
+    })
+  }, [activityKey])
+
+  useEffect(() => {
     let cancelled = false
     request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
       .then((config) => {
@@ -697,12 +705,18 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
 
   const handleStart = useCallback(() => {
     resetGame()
+    trackEvent({
+      activityKey,
+      eventType: 'anti_fraud_game_start',
+      page: '/anti-fraud-board-game',
+      extra: { activityType: 'anti_fraud_board_game' },
+    })
     setShowHomeOrientationPrompt(true)
     homeOrientationTimerRef.current = window.setTimeout(() => {
       setShowHomeOrientationPrompt(false)
       setPage(PAGE.GAME)
     }, HOME_ORIENTATION_PROMPT_MS)
-  }, [resetGame])
+  }, [activityKey, resetGame])
 
   const showQuestionAt = useCallback((nextPosition) => {
     if (!questionDeckRef.current.length) questionDeckRef.current = createQuestionDeck()
@@ -761,11 +775,29 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   }, [playAnswerSound, question])
 
   const handleContinue = useCallback(() => {
-    if (feedback?.isFinal) setSuccess(true)
+    if (feedback?.isFinal) {
+      trackEvent({
+        activityKey,
+        eventType: 'anti_fraud_game_complete',
+        page: '/anti-fraud-board-game',
+        extra: { activityType: 'anti_fraud_board_game' },
+      })
+      setSuccess(true)
+    }
     setFeedback(null)
-  }, [feedback])
+  }, [activityKey, feedback])
 
   const handleGoPoster = useCallback(() => {
+    trackEvent({
+      activityKey,
+      eventType: 'anti_fraud_poster_view',
+      page: '/anti-fraud-board-game',
+      extra: { activityType: 'anti_fraud_board_game' },
+    })
+    setPage(PAGE.POSTER)
+  }, [activityKey])
+
+  const handleDebugGoPoster = useCallback(() => {
     setPage(PAGE.POSTER)
   }, [])
 
@@ -797,6 +829,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           onAnswer={handleAnswer}
           onContinue={handleContinue}
           onGoPoster={handleGoPoster}
+          onDebugGoPoster={handleDebugGoPoster}
           showLandscapePrompt={isLandscape}
         />
       ) : null}

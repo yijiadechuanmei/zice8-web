@@ -38,6 +38,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const [error, setError] = useState('')
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
+  const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -106,6 +107,22 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: '贪吃蛇通关', value: lvyuan.completedByGame?.snake ?? 0 },
         { label: '找茬通关', value: lvyuan.completedByGame?.spot_difference ?? 0 },
         { label: '合成水果通关', value: lvyuan.completedByGame?.fruit_merge ?? 0 },
+      ]
+    }
+
+    if (isAntiFraudBoardGame) {
+      const boardGame = overview?.antiFraudBoardGame || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '游戏开局', value: boardGame.gameStartCount ?? 0 },
+        { label: '开局人数', value: boardGame.gameStartUserCount ?? 0, tooltip: '按浏览器匿名访客 ID 去重统计。' },
+        { label: '完成游戏', value: boardGame.gameCompleteCount ?? 0 },
+        { label: '完成人数', value: boardGame.gameCompleteUserCount ?? 0, tooltip: '按浏览器匿名访客 ID 去重统计。' },
+        { label: '完成率', value: Math.round(Number(boardGame.completionRate ?? 0)), suffix: '%' },
+        { label: '查看海报', value: boardGame.posterViewCount ?? 0 },
       ]
     }
 
@@ -360,7 +377,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))
@@ -730,7 +747,34 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual ? null : (
+          {isAntiFraudBoardGame ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天游戏流程" description="按开局、完成游戏和查看海报事件统计">
+                  <LazyChart
+                    type="line"
+                    data={charts?.antiFraudBoardGame?.gameTrend || []}
+                    series={[
+                      { key: 'gameStarts', name: '游戏开局' },
+                      { key: 'gameCompletes', name: '完成游戏' },
+                      { key: 'posterViews', name: '查看海报' },
+                    ]}
+                  />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -808,7 +852,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' ? null : (
+          ) : activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isAntiFraudBoardGame ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>
