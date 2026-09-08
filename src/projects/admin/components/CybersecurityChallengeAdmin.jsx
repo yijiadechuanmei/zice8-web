@@ -3,6 +3,19 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Space, Switch, Table, Tag, Typography } from 'antd'
 import { adminRequest } from '../api'
 
+function inputDateTime(value) {
+  if (!value || Number.isNaN(Date.parse(value))) return ''
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(value))
+  const data = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${data.year}-${data.month}-${data.day}T${data.hour}:${data.minute}`
+}
+
+function chinaDateTime(value) {
+  return value ? new Date(`${value}:00+08:00`).toISOString() : ''
+}
+
 export default function CybersecurityChallengeAdmin({ activityKey }) {
   const base = `/admin/cybersecurity-knowledge-challenge/activities/${activityKey}`
   const [config, setConfig] = useState(null)
@@ -24,8 +37,10 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   async function save() {
     setBusy(true); setError(''); setNotice('')
     try {
-      const value = await adminRequest(`${base}/lottery`, { method: 'POST', body: JSON.stringify({ enabled: config.enabled, revision: config.revision, prizes: config.prizes.map(({ id, name, image, stockTotal, probability }) => ({ id, name, image, stockTotal, probability })) }) })
-      setConfig(value); setNotice('抽奖配置已保存')
+      const { lottery, teamWindow } = config
+      if (!teamWindow.startAt || !teamWindow.endAt) throw new Error('请完整设置团队赛时间范围')
+      const value = await adminRequest(`${base}/lottery`, { method: 'POST', body: JSON.stringify({ enabled: lottery.enabled, revision: lottery.revision, prizes: lottery.prizes.map(({ id, name, image, stockTotal, probability }) => ({ id, name, image, stockTotal, probability })), teamStartAt: teamWindow.startAt, teamEndAt: teamWindow.endAt }) })
+      setConfig(value); setNotice('团队赛时间和抽奖配置已保存')
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
   async function redeem() {
@@ -53,24 +68,28 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
       setNotice(`已清除本活动全部 ${result.deleted} 条参与数据`); await load()
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
-  function change(id, field, value) { setConfig((old) => ({ ...old, prizes: old.prizes.map((p) => p.id === id ? { ...p, [field]: value } : p) })) }
+  function change(id, field, value) { setConfig((old) => ({ ...old, lottery: { ...old.lottery, prizes: old.lottery.prizes.map((p) => p.id === id ? { ...p, [field]: value } : p) } })) }
+  function changeTeamWindow(field, value) { setConfig((old) => ({ ...old, teamWindow: { ...old.teamWindow, [field]: chinaDateTime(value) } })) }
   const rows = records.flatMap((r) => ['personal', 'team'].filter((mode) => r.modes[mode].used).map((mode) => ({ ...r.modes[mode], mode, id: `${r.participantId}-${mode}` })))
-  return <Card size="small" title="网络安全知识大闯关 · 抽奖与核销" extra={<Button onClick={load} loading={busy}>刷新</Button>}>
+  return <Card size="small" title="网络安全知识大闯关 · 团队赛、抽奖与核销" extra={<Button onClick={load} loading={busy}>刷新</Button>}>
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       {error && <Alert type="error" message={error} showIcon />}
       {notice && <Alert type="success" message={notice} showIcon />}
-      <Typography.Text>个人和团队各3次机会，每种身份仅可成功1次、抽奖1次。概率余量为“谢谢参与”；奖品库存耗尽后落入该奖项也视为“谢谢参与”，不重新分配概率。</Typography.Text>
+      <Typography.Text>个人和团队各3次机会，每种身份仅可成功1次；仅个人赛可抽奖。概率余量为“谢谢参与”；奖品库存耗尽后落入该奖项也视为“谢谢参与”，不重新分配概率。</Typography.Text>
       {config && <>
-        <Space><span>开放抽奖</span><Switch checked={config.enabled} onChange={(enabled) => setConfig({ ...config, enabled })} /><span>谢谢参与概率：{Math.max(0, 100 - config.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
-        {!config.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化四个奖项。" />}
-        <Table rowKey="id" pagination={false} scroll={{ x: 660 }} dataSource={config.prizes} columns={[
+        <Card size="small" title="团体预选赛时间（北京时间）">
+          <Space wrap><span>开始</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.startAt)} onChange={(e) => changeTeamWindow('startAt', e.target.value)} /><span>结束</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.endAt)} onChange={(e) => changeTeamWindow('endAt', e.target.value)} /></Space>
+        </Card>
+        <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
+        {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化四个奖项。" />}
+        <Table rowKey="id" pagination={false} scroll={{ x: 660 }} dataSource={config.lottery.prizes} columns={[
           { title: '奖品名称', dataIndex: 'name', render: (value, row) => <Input value={value} maxLength={60} onChange={(e) => change(row.id, 'name', e.target.value)} /> },
           { title: '库存总量', dataIndex: 'stockTotal', render: (v, r) => <InputNumber min={r.stockUsed} max={1000000} precision={0} value={v} onChange={(n) => change(r.id, 'stockTotal', n ?? 0)} /> },
           { title: '已发放', dataIndex: 'stockUsed' },
           { title: '剩余库存', render: (_, r) => r.stockTotal - r.stockUsed },
           { title: '中奖概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={100} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
         ]} />
-        <Button type="primary" onClick={save} loading={busy}>保存抽奖设置</Button>
+        <Button type="primary" onClick={save} loading={busy}>保存团队赛时间和抽奖设置</Button>
       </>}
       <Space wrap><Input style={{ width: 230 }} placeholder="输入12位核销码" value={code} maxLength={12} onChange={(e) => setCode(e.target.value)} /><Popconfirm title="确认已向用户发放该奖品？" onConfirm={redeem} disabled={!/^\d{12}$/.test(code)}><Button disabled={!/^\d{12}$/.test(code)} loading={busy}>确认核销</Button></Popconfirm></Space>
       <Card size="small" title="清除参与数据">

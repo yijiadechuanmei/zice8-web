@@ -382,8 +382,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
     if (nextMode === 'team') {
-      showFormToast('团体赛9月16号正式开始')
-      return
+      const window = config?.teamCompetitionWindow
+      if (window?.status !== 'active') {
+        showFormToast(window?.status === 'ended' ? window.endedMessage : window?.notStartedMessage || '本轮团体预选赛将于9月16日 9 点-18 点限时开启，请你准时参与')
+        return
+      }
     }
     setMode(nextMode)
     setNoticeMode(nextMode)
