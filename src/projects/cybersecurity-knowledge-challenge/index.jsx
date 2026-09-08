@@ -7,7 +7,7 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
 import { Artwork, backId, otherBackId, Picture, PRIZE_ART, src } from './artwork'
 import { Wheel, WHEEL_ANGLES } from './wheel'
-import { formatCountdown, formatTime, makePoster } from './poster'
+import { achievementTitle, formatCountdown, formatTime, makePoster } from './poster'
 import './style.css'
 
 const TYPE = 'cybersecurity_knowledge_challenge'
@@ -17,11 +17,11 @@ const HOME_HEIGHT = 1448
 const title = '网络安全知识大闯关'
 const STAGE_PLAYER_INITIAL_POSITION = { x: 127, y: 973 }
 const STAGES = [
-  { name: '第一关', topic: '智能时代', label: { x: 411, y: 824 }, marker: { x: 505, y: 880 }, player: { x: 484, y: 851 } },
-  { name: '第二关', topic: '账号密码', label: { x: 103, y: 665 }, marker: { x: 201, y: 721 }, player: { x: 105, y: 708 } },
-  { name: '第三关', topic: '信息保护', label: { x: 398, y: 511 }, marker: { x: 492, y: 567 }, player: { x: 482, y: 551 } },
-  { name: '第四关', topic: 'AI安全', label: { x: 107, y: 371 }, marker: { x: 201, y: 427 }, player: { x: 120, y: 418 } },
-  { name: '第五关', topic: '安全通行', label: { x: 394, y: 228 }, marker: { x: 488, y: 284 }, player: { x: 474, y: 261 } },
+  { name: '第一关', topic: '自主保护', label: { x: 411, y: 824 }, marker: { x: 505, y: 880 }, player: { x: 484, y: 851 } },
+  { name: '第二关', topic: '指导保护', label: { x: 103, y: 665 }, marker: { x: 201, y: 721 }, player: { x: 105, y: 708 } },
+  { name: '第三关', topic: '监督保护', label: { x: 398, y: 511 }, marker: { x: 492, y: 567 }, player: { x: 482, y: 551 } },
+  { name: '第四关', topic: '强制保护', label: { x: 107, y: 371 }, marker: { x: 201, y: 427 }, player: { x: 120, y: 418 } },
+  { name: '第五关', topic: '专控保护', label: { x: 394, y: 228 }, marker: { x: 488, y: 284 }, player: { x: 474, y: 261 } },
 ]
 const STAGE_PROGRESS_BUTTON_ART = '00b25428c160db7d38ebf03bdc81dd3b_4874_326_89.png'
 const NOTICE = {
@@ -253,6 +253,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }, [activityKey])
   const progress = data?.modes?.[mode]
   const attempt = progress?.attempt
+  const resultTitle = achievementTitle(mode, progress)
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
@@ -563,6 +564,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'result' && <>
             <Artwork page={mode === 'team' ? 6 : 5} omit={['text-d16b2a1cbe55']} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
             <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
+            <div className="cyber-result-title cyber-quiz-enter">「{resultTitle}」称号</div>
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />

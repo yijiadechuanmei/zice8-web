@@ -93,6 +93,7 @@
 .cyber-submit-answer img { width:100%; height:100%; display:block; }
 .cyber-submit-answer:disabled { cursor:default; }
 .cyber-result-values { position:absolute; left:55px; top:761px; width:640px; display:grid; grid-template-columns:repeat(3,1fr); text-align:center; font-size:38px; color:#cc2320; font-variant-numeric:tabular-nums; }
+.cyber-result-title { position:absolute; left:176px; top:590px; width:419px; height:50px; display:flex; align-items:center; justify-content:center; color:#c91822; font-size:42px; font-weight:700; line-height:normal; text-align:center; white-space:nowrap; }
 .cyber-details { position:absolute; left:58px; top:348px; width:638px; height:880px; overflow:auto; padding-right:8px; }
 .cyber-details article { border-bottom:1px solid #cdb99e; padding:18px 4px 25px; font-size:26px; line-height:1.5; }
 .cyber-details header { display:flex; justify-content:space-between; gap:20px; font-size:24px; }

@@ -52,12 +52,23 @@ export const formatCountdown = (seconds) => {
   const safe = Math.max(0, seconds)
   return safe.toFixed(2)
 }
-function randomTitle(mode) {
+export function achievementTitle(mode, progress) {
   const titles = mode === 'team' ? TEAM_TITLES : PERSONAL_TITLES
-  return titles[Math.floor(Math.random() * titles.length)]
+  const seed = String(
+    progress?.attempt?.id ||
+    progress?.attempt?.startedAt ||
+    progress?.name ||
+    progress?.teamName ||
+    'cybersecurity-challenge',
+  )
+  const index = [...seed].reduce(
+    (total, character) => (total * 31 + character.codePointAt(0)) >>> 0,
+    0,
+  ) % titles.length
+  return titles[index]
 }
 
-export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, title = randomTitle(mode) }) {
+export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, title = achievementTitle(mode, progress) }) {
   if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
   const canvas = document.createElement('canvas')
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
