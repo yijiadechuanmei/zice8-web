@@ -21,6 +21,39 @@ const STAGES = [
   { name: '第四关', topic: 'AI安全', label: { x: 34, y: 347 }, marker: { x: 128, y: 402 }, player: { x: 75, y: 415 } },
   { name: '第五关', topic: '安全通行', label: { x: 394, y: 205 }, marker: { x: 488, y: 261 }, player: { x: 490, y: 275 } },
 ]
+const NOTICE = {
+  personal: {
+    heading: '个人赛・用户须知',
+    intro: '欢迎参加 "2026 年第三届“交盾杯”网络安全暨人工智能创新知识竞赛" 个人赛，为确保竞赛公平、有序进行，请参赛者仔细阅读并遵守以下须知：',
+    items: [
+      '报名时请填写真实姓名及单位信息，每位参赛者仅有一次正式答题机会，请提前做好准备；',
+      '请在竞赛开放时间内完成答题，逾期未答视为放弃。',
+      '本次答题共设 5 关，每关 10 道题，一共 50 道题，最多错三次即结束答题；',
+      '答对次数越多，答题时间越短，错的越少，成绩越高，越有机会抽中幸运奖品！',
+      '完成正式闯关后，系统将生成专属“个人成绩海报”，可保存分享；',
+      '完成闯关即可参与“幸运转盘抽奖”，赢取幸运奖品；',
+      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
+      '请本人独立答题，禁止作弊、代答或使用外挂，违者取消参赛资格；',
+      '请如实填写个人信息，文明答题、遵守竞赛纪律，本竞赛重在“以赛促学、以学促用”；',
+      '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
+    ],
+  },
+  team: {
+    heading: '团队赛・用户须知',
+    intro: '欢迎参加 "2026 年第三届“交盾杯”网络安全暨人工智能创新知识竞赛团队赛，为确保竞赛公平、有序进行，请参赛团队仔细阅读并遵守以下须知：',
+    items: [
+      '请由团队负责人填写团队名称及邀请码完成报名，团队成员以报名提交信息为准；',
+      '请在竞赛开放时间内完成答题，逾期未答视为放弃，具体时间以活动页面公告为准；',
+      '本次答题共设 5 关，每关 10 道题，一共 50 道题，最多错五次即结束答题；',
+      '团队成绩将结合答题正确率、答题用时等多个维度综合评定，表现优秀的团队可晋级决赛，决赛名单及荣誉不对外展示排名；',
+      '晋级决赛的团队将获得相应荣誉与表彰；',
+      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
+      '团队成员请独立答题，禁止作弊、代答或使用外挂，违者取消团队参赛资格；',
+      '请如实填写团队信息，文明答题、遵守竞赛纪律，鼓励组队“共同学习、共同进步”；',
+      '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
+    ],
+  },
+}
 const AUTO_SINGLE_ANSWERS = 'DAACDCCABCBCADDAADCBCAAABBDBAABADCCBABDDCACBBCCBBDDDABBBABDDDBBBCACCAACBCCABDBDABDCDDBBBDCDCADABAADDBADBDDADACCDCDACBADBBAACAACBADDCDBBDACABCABBCDBBCCADCACDBAABBACBADBCBABACACCCACBBACDCBCCBBAAABCACACCBABDADDBAAACDCDBCBBDBADDDBBDCABABACCBDCDACACBADBADDDDBBBDDDAABBCCABCDBADDBADCCACCDADDBCBBBCACDBBCABC'
 const AUTO_MULTIPLE_ANSWERS = 'ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BC,ABCD,ACD,ABCD,ACD,ACD,ABCD,ABCD,ABD,ABCD,ABCD,ABC,ABCD,ABC,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABD,ABCD,AB,ABCD,BC,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,AD,ABCD,ABCD,ABD,ABCD,ABCD,ACD,ABCD,ABCD,ABD,AD,ACD,ABCD,BD,CD,BC,CD,ABC,ABC,ABCD,ABCD,ABCD,ABD,ABCD,ABCD,AC,ABCD,ABCD,ABCD,AC,ABCD,BC,ABCD,ABCD,ABCD,AD,ABCD,BCD,ABD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,ABCD,ABCD,ABCD,AD,ABD,ABCD,ABCD,ABCD,BCD,ABCD,ABCD,ACD,ACD,ABC,ABD,ABCD,ABCD,ACD,ABC,ABC,ABD,ABC,BCD,ABCD,ACD,ABD,ABD,ACD,ABCD,ABCD,ABC,ABCD,ABCD,ABD,ABCD,ACD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,ABC,ABCD,BCD,ABCD,BCD,ABC,ABCD,ABD,BCD,BCD,ABCD,ABCD,BCD,ACD,ABCD,ABCD,ABCD,ABCD,ABCD,ABC,ABCD,BCD,BCD,ACD,ABC,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,BCD,ACD,AD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ABCD,ACD,BCD,ABD,ABC,ABD,ABCD,AC,BCD,BCD,ABCD,ABCD,ACD,BCD,ABCD,ACD,ABCD,ACD,ACD,ABD,BCD,ABCD,ABCD,ACD'.split(',')
 const AUTO_BOOLEAN_ANSWERS = 'AAABAAABAAAAAABBAABAAAAABAAAABAAAAAABABAABABAAABAAABAABBAABAAABAABABABABBABBAABABBAABABAABAABBAABBAB'
@@ -155,6 +188,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const [page, setPage] = useState('home')
   const [mode, setMode] = useState('personal')
   const [modal, setModal] = useState('')
+  const [noticeMode, setNoticeMode] = useState('personal')
   const [error, setError] = useState('')
   const [formToast, setFormToast] = useState('')
   const [answerToast, setAnswerToast] = useState('')
@@ -251,7 +285,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
 
   const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
   const navigation = { [backId]: { label: '返回', onClick: () => go(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => go('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => go('home') } }
-  async function chooseMode(nextMode) {
+  function chooseMode(nextMode) {
+    setMode(nextMode)
+    setNoticeMode(nextMode)
+    setModal('notice')
+  }
+  async function beginMode(nextMode) {
     setMode(nextMode); setSelected([]); setAnswerFeedback(null)
     if (!hasToken) { if (!reauth('cybersecurity-start')) setError('请在微信中打开活动并完成授权后参与'); return }
     await run(async () => {
@@ -268,6 +307,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       setForm({ name: p.name || '', phone: p.phone || '', companyName: p.companyName || '', departmentName: p.departmentName || '', teamName: p.teamName || '' })
       requestId.current = uuid(); go('register')
     })
+  }
+  function confirmNotice() {
+    const nextMode = noticeMode
+    setModal('')
+    beginMode(nextMode)
   }
   async function start(event) {
     event.preventDefault()
@@ -427,6 +471,15 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     {formToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{formToast}</div></div>}
     {answerToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{answerToast}</div></div>}
     {drawToast && <div className="cyber-toast-layer"><div className="cyber-toast" role="status">{drawToast}</div></div>}
+    {modal === 'notice' && <Modal scale={scale} height={1624} label={NOTICE[noticeMode].heading}>
+      <Picture id="3e3176187510559c98b15d0a91e2e225_141194_736_856.png" x={7} y={265} w={736} h={856} />
+      <Picture id="text-9c7a54de95b1" x={672} y={214} w={52} h={52} onClick={confirmNotice} label="阅读并继续答题" />
+      <section className="cyber-notice-content">
+        <h2>{NOTICE[noticeMode].heading}</h2>
+        <p>{NOTICE[noticeMode].intro}</p>
+        <ol>{NOTICE[noticeMode].items.map((item) => <li key={item}>{item}</li>)}</ol>
+      </section>
+    </Modal>}
     {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '3次机会已用完，感谢参与' : attempt?.reason === 'timeout' ? `答题时间已结束，剩余${progress?.remaining || 0}次机会` : `累计答错3题，剩余${progress?.remaining || 0}次机会`}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}
