@@ -4,6 +4,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { request } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { trackPageView } from '../../shared/analytics'
 import { Artwork, backId, otherBackId, Picture, PRIZE_ART, src } from './artwork'
 import { Wheel, WHEEL_ANGLES } from './wheel'
 import { formatCountdown, formatTime, makePoster } from './poster'
@@ -211,6 +212,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const appRef = useRef(null)
   const alive = useRef(true)
   const expireRetryAt = useRef(0)
+  useEffect(() => {
+    trackPageView(activityKey, '/cybersecurity-knowledge-challenge', {
+      activityType: 'cybersecurity_knowledge_challenge',
+    })
+  }, [activityKey])
   const progress = data?.modes?.[mode]
   const attempt = progress?.attempt
   const currentQuestion = attempt?.currentQuestion
