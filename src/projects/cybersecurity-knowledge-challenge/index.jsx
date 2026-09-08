@@ -22,6 +22,7 @@ const STAGES = [
   { name: '第四关', topic: 'AI安全', label: { x: 34, y: 347 }, marker: { x: 128, y: 402 }, player: { x: 75, y: 415 } },
   { name: '第五关', topic: '安全通行', label: { x: 394, y: 205 }, marker: { x: 488, y: 261 }, player: { x: 490, y: 275 } },
 ]
+const STAGE_PROGRESS_BUTTON_ART = '00b25428c160db7d38ebf03bdc81dd3b_4874_326_89.png'
 const NOTICE = {
   personal: {
     heading: '个人赛・用户须知',
@@ -156,6 +157,7 @@ function StageMap({ attempt, onStart, onHome }) {
     <Picture id="80067636d3a65fcd1f901079cc788d7a_11196_621_41.png" x={26} y={80} w={621} h={41} />
     <StageNavigation onHome={onHome} />
     <div className="cyber-stage-message">{message}</div>
+    <Picture id={STAGE_PROGRESS_BUTTON_ART} x={33} y={1324} w={326} h={89} style={{ zIndex: 3 }} />
     <div className="cyber-stage-count">{progressText}</div>
     <Picture id="641404f72e15d9bea398ce8c78223a50_34376_324_91.png" x={388} y={1325} w={324} h={91} label={buttonText} onClick={onStart} className="cyber-stage-start" />
     <div className="cyber-stage-start-text">{buttonText}</div>
@@ -182,6 +184,7 @@ function StageComplete({ attempt, onContinue, onHome }) {
     <div className="cyber-stage-complete-copy">你已完成「{stage.topic}」主题挑战，{stage.name}跳台已点亮。</div>
     <b className="cyber-stage-complete-score">{score}</b>
     <b className="cyber-stage-complete-time">{formatTime(attempt?.durationSeconds || 0)}</b>
+    <Picture id={STAGE_PROGRESS_BUTTON_ART} x={33} y={1128} w={326} h={89} style={{ zIndex: 3 }} />
     <div className="cyber-stage-complete-count">{stageNumber}/5 开启</div>
     <Picture id="641404f72e15d9bea398ce8c78223a50_34376_324_91.png" x={388} y={1129} w={324} h={91} label={continueText} onClick={onContinue} />
     <div className="cyber-stage-complete-button">{continueText}</div>
