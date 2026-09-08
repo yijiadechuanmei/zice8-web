@@ -167,7 +167,7 @@ function StageComplete({ attempt, onContinue, onHome }) {
   const stageNumber = Math.max(1, Math.min(5, Math.floor(answered / 10)))
   const stage = STAGES[stageNumber - 1]
   const answers = attempt?.answers?.slice((stageNumber - 1) * 10, stageNumber * 10) || []
-  const score = answers.filter((answer) => answer.correct).length * 5
+  const score = answers.filter((answer) => answer.correct).length * 2
   const isFinalStage = attempt?.status === 'success'
   const continueText = isFinalStage ? '查看答题结果' : '查看关卡'
   return <>
