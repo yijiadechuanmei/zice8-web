@@ -254,6 +254,10 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const progress = data?.modes?.[mode]
   const attempt = progress?.attempt
   const resultTitle = achievementTitle(mode, progress)
+  const resultTeamName = progress?.teamName || progress?.companyName || '网络安全先锋队'
+  const resultOmit = mode === 'team'
+    ? ['text-d16b2a1cbe55', '024a2050c9d140d62c32baa81ee1ee76']
+    : ['text-d16b2a1cbe55', 'a06e29bd2b591cf64d6102c6d5c7f4cd']
   const currentQuestion = attempt?.currentQuestion
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
@@ -562,9 +566,10 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             </div>
           </>}
           {page === 'result' && <>
-            <Artwork page={mode === 'team' ? 6 : 5} omit={['text-d16b2a1cbe55']} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
+            <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
             <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
-            <div className="cyber-result-title cyber-quiz-enter">「{resultTitle}」称号</div>
+            <div className="cyber-result-prefix cyber-quiz-enter">{mode === 'team' ? `${resultTeamName}团队获得` : '恭喜获得'}</div>
+            <div className="cyber-result-honor cyber-quiz-enter">「{resultTitle}」荣誉</div>
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
