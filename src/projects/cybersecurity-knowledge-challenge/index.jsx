@@ -46,6 +46,7 @@ const NOTICE = {
     intro: '欢迎参加 "2026 年第三届“交盾杯”网络安全暨人工智能创新知识竞赛团队赛，为确保竞赛公平、有序进行，请参赛团队仔细阅读并遵守以下须知：',
     items: [
       '请由团队负责人填写团队名称及邀请码完成报名，团队成员以报名提交信息为准；',
+      '每个团队报名账号仅有一次正式答题机会，请提前做好准备；',
       '请在竞赛开放时间内完成答题，逾期未答视为放弃，具体时间以活动页面公告为准；',
       '本次答题共设 5 关，每关 10 道题，一共 50 道题，最多错五次即结束答题；',
       '团队成绩将结合答题正确率、答题用时等多个维度综合评定，表现优秀的团队可晋级决赛，决赛名单及荣誉不对外展示排名；',
@@ -227,6 +228,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const busyRef = useRef(false)
   const [scale, setScale] = useState(getStageScale)
   const [scrollable, setScrollable] = useState(false)
+  const [quizContentHeight, setQuizContentHeight] = useState(HOME_HEIGHT)
   const [now, setNow] = useState(() => Date.now())
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState([])
@@ -237,6 +239,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const requestId = useRef(null)
   const qr = useRef(null)
   const appRef = useRef(null)
+  const quizLayoutRef = useRef(null)
   const alive = useRef(true)
   const expireRetryAt = useRef(0)
   useEffect(() => {
@@ -259,6 +262,25 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setFormToast(message)
     window.setTimeout(() => setFormToast((current) => current === message ? '' : current), 1500)
   }, [])
+  useEffect(() => {
+    if (page !== 'quiz') {
+      setQuizContentHeight(HOME_HEIGHT)
+      return undefined
+    }
+    const layout = quizLayoutRef.current
+    if (!layout) return undefined
+    const updateHeight = () => {
+      const nextHeight = Math.max(HOME_HEIGHT, Math.ceil(layout.offsetTop + layout.scrollHeight + 48))
+      setQuizContentHeight((current) => current === nextHeight ? current : nextHeight)
+    }
+    updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(layout)
+    return () => observer.disconnect()
+  }, [page, visibleQuestion?.id])
+  useEffect(() => {
+    if (page === 'quiz') appRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [page, visibleQuestion?.id])
   const showDrawToast = useCallback((message) => {
     setDrawToast(message)
     window.setTimeout(() => setDrawToast((current) => current === message ? '' : current), 1500)
@@ -337,7 +359,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setNoticeMode(nextMode)
     const nextProgress = data?.modes?.[nextMode]
     if (!nextProgress?.succeeded && nextProgress?.remaining <= 0) {
-      showFormToast('该身份的3次答题机会已用完')
+      showFormToast('该身份的1次答题机会已用完')
       return
     }
     setModal('notice')
@@ -349,7 +371,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       const value = await load(); const p = value.modes[nextMode]
       if (p.succeeded) { go('stage'); return }
       if (p.attempt?.status === 'active') { go('stage'); return }
-      if (p.remaining <= 0) { showFormToast('该身份的3次答题机会已用完'); return }
+      if (p.remaining <= 0) { showFormToast('该身份的1次答题机会已用完'); return }
       if (p.name && p.phone && p.companyName && p.departmentName) {
         const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
         if (started.modes[nextMode].attempt?.status === 'failed') setModal('failed')
@@ -462,8 +484,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     ? { 'text-d5f05bdbe429': 'cyber-quiz-header', '1ae4acbbae23e256dc8f26a7f8f3f655': 'cyber-quiz-header', cd20dfb82be204876ded77bbb5f2976a: 'cyber-quiz-header', '5c1f7141eb2dc56bf6553d7a1da68386': 'cyber-quiz-header' }
     : { '209eb202d0d19b0402013f0dac1ddd03': 'cyber-quiz-header', '316c8f7fa3659bc4861ebbdcbdb1a330': 'cyber-quiz-header', '6aa715f7a20b07dec3973991268b2398': 'cyber-quiz-header', '5c1f7141eb2dc56bf6553d7a1da68386': 'cyber-quiz-header' }
   const infoArt = INFO_ART[mode]
-  const stageHeight = HOME_HEIGHT
-  return <div ref={appRef} className={`cyber-app cyber-${mode} ${scrollable ? 'cyber-scrollable' : ''}`} aria-busy={busy}>
+  const stageHeight = page === 'quiz' ? quizContentHeight : HOME_HEIGHT
+  return <div ref={appRef} className={`cyber-app cyber-${mode} ${scrollable || page === 'quiz' ? 'cyber-scrollable' : ''}`} aria-busy={busy}>
     <div className="cyber-stage-wrap" style={{ width: DESIGN_WIDTH * scale, height: stageHeight * scale }}>
       <div className="cyber-stage" style={{ height: stageHeight, transform: `scale(${scale})` }}>
         <div className="cyber-page" key={page}>
@@ -502,7 +524,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String(((attempt?.answers.length || 0) % 10) + 1).padStart(2, '0')}</b><span>/10</span></div>
-            <div className="cyber-quiz-layout">
+            <div ref={quizLayoutRef} className="cyber-quiz-layout">
               <div className="cyber-quiz-panel" style={{ backgroundImage: `url(${src('62e9b04468b5b55aa5d7a283e50734d3_75675_712_987.png')})` }}>
                 <div className="cyber-quiz-flow">
                   <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
@@ -548,7 +570,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         <ol>{NOTICE[noticeMode].items.map((item) => <li key={item}>{item}</li>)}</ol>
       </section>
     </Modal>}
-    {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '3次机会已用完，感谢参与' : attempt?.reason === 'timeout' ? `答题时间已结束，剩余${progress?.remaining || 0}次机会` : `累计答错3题，剩余${progress?.remaining || 0}次机会`}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
+    {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '答题机会已用完，感谢参与' : attempt?.reason === 'timeout' ? '答题时间已结束，本次答题机会已用完' : '累计答错3题，本次答题机会已用完'}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}
     <div ref={qr} className="cyber-qr-source" aria-hidden="true"><QRCodeCanvas value={`${window.location.origin}/${TYPE}/${activityKey}`} size={384} marginSize={2} level="M" /></div>
