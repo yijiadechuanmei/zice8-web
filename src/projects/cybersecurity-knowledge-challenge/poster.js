@@ -118,7 +118,7 @@ export async function makePoster({ mode, progress, avatarUrl = '', qrCanvas, tit
     ctx.fillStyle = '#9b6b31'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(ellipsis(`${teamName}团队获得`, 598), 323, 734)
   }
   ctx.fillStyle = '#c91822'; ctx.font = 'bold 42px sans-serif'; ctx.textAlign = 'center'
-  ctx.fillText(`「${title}」荣誉`, 323, 789)
+  ctx.fillText(`「${title}」称号`, 323, 789)
   ctx.save(); ctx.beginPath(); ctx.arc(97, 1114, 45, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(avatar, 52, 1069, 90, 90); ctx.restore()
   ctx.textAlign = 'left'; fit(progress.name || '网络安全守护者', 236, 27); ctx.fillText(progress.name || '网络安全守护者', mode === 'team' ? 160 : 162, mode === 'team' ? 1100 : 1124)
   if (mode === 'team') {

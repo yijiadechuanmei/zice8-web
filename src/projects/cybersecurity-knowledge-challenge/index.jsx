@@ -576,7 +576,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} animate={false} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, '7e0bd602c4c2da0af24422615161d1a8': { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, ...(mode === 'personal' ? { f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw } } : {}), 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
             <div className={`cyber-result-values ${mode === 'team' ? 'cyber-result-values-team' : ''}`}><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b>{mode === 'personal' && <b>{progress?.draw ? 0 : 1}</b>}</div>
             <div className="cyber-result-prefix">{mode === 'team' ? `${resultTeamName}团队获得` : '恭喜获得'}</div>
-            <div className="cyber-result-honor">「{resultTitle}」荣誉</div>
+            <div className="cyber-result-honor">「{resultTitle}」称号</div>
           </>}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
