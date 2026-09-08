@@ -9,11 +9,11 @@ export function Picture({ id, x, y, w, h, onClick, label, className = '', disabl
   const img = <img src={src(id)} alt={onClick ? '' : (label || '')} draggable={false} />
   return onClick ? <button type="button" className={`cyber-picture cyber-button ${className}`} style={position} onClick={onClick} aria-label={label} disabled={disabled}>{img}</button> : <div className={`cyber-picture ${className}`} style={position}>{img}</div>
 }
-export function Artwork({ page, actions = {}, omit = [], classes = {} }) {
+export function Artwork({ page, actions = {}, omit = [], classes = {}, animate = true }) {
   return layouts[page].filter((v) => !v.modal && !omit.some((id) => v.src.startsWith(id))).map((v, index) => {
     const id = v.src.split('_')[0].replace('.png', '')
     const action = actions[id]
-    const enterClass = index ? `cyber-art-enter cyber-art-enter-${index % 6}` : ''
+    const enterClass = animate && index ? `cyber-art-enter cyber-art-enter-${index % 6}` : ''
     return <Picture key={`${v.src}:${v.x}:${v.y}`} id={v.src} {...v} onClick={action?.onClick} label={action?.label} disabled={action?.disabled} className={`${enterClass} ${classes[id] || ''}`.trim()} />
   })
 }
