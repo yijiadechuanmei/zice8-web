@@ -450,11 +450,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String(((attempt?.answers.length || 0) % 10) + 1).padStart(2, '0')}</b><span>/10</span></div>
-            <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
-              <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
+            <div className="cyber-quiz-flow">
+              <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
+                <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
+              </div>
+              <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
+              <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
             </div>
-            <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
-            <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
             <Picture id="33ad7d9d9142da327a8526b780312e8d_48782_674_91.png" x={38} y={1321} w={674} h={91} label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} className="cyber-art-enter cyber-art-enter-5" />
           </>}
           {page === 'result' && <>

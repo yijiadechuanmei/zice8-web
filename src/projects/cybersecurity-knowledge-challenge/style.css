@@ -64,10 +64,11 @@
 .cyber-progress { position:absolute; left:60px; top:378px; width:140px; height:46px; display:flex; align-items:flex-start; color:#444; line-height:46px; }
 .cyber-progress b { color:#cc2320; font-size:40px; }
 .cyber-progress span { font-size:31px; }
-.cyber-question-content { position:absolute; left:61px; top:440px; width:633px; height:auto; display:flex; align-items:flex-start; }
+.cyber-quiz-flow { position:absolute; left:61px; top:440px; width:633px; display:flex; flex-direction:column; align-items:stretch; }
+.cyber-question-content { width:633px; height:auto; display:flex; align-items:flex-start; }
 .cyber-question-content h2 { width:100%; margin:0; font-size:28px; line-height:normal; font-weight:700; color:#000; text-align:justify; white-space:pre-wrap; word-break:normal; }
-.cyber-errors { position:absolute; left:500px; top:518px; width:191px; height:30px; color:#a8732e; font-size:26px; line-height:30px; white-space:nowrap; }
-.cyber-options { position:absolute; left:53px; top:581px; width:615px; display:flex; flex-direction:column; gap:46px; }
+.cyber-errors { align-self:flex-end; width:191px; height:30px; margin-top:50px; color:#a8732e; font-size:26px; line-height:30px; white-space:nowrap; }
+.cyber-options { width:615px; margin-top:33px; margin-left:-8px; display:flex; flex-direction:column; gap:46px; }
 .cyber-option { width:615px; min-height:115px; height:auto; padding:0; border:0; background:transparent; display:flex; align-items:center; text-align:left; color:#444; cursor:pointer; }
 .cyber-option { animation:cyber-option-enter .52s cubic-bezier(.12,.86,.2,1.12) both; }
 .cyber-option:nth-child(1) { animation-delay:.08s; }
