@@ -408,7 +408,10 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   const closeModal = () => setModal('')
   const modalProps = { scale, onClose: closeModal }
-  const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd']
+  const commonQuizOmit = ['63311aa', 'cb6c2c', 'text-787fd', '9864c6dc4877f0b0669b124d576091c1']
+  const quizHeaderClasses = mode === 'team'
+    ? { 'text-d5f05bdbe429': 'cyber-quiz-header', '1ae4acbbae23e256dc8f26a7f8f3f655': 'cyber-quiz-header', cd20dfb82be204876ded77bbb5f2976a: 'cyber-quiz-header', '5c1f7141eb2dc56bf6553d7a1da68386': 'cyber-quiz-header' }
+    : { '209eb202d0d19b0402013f0dac1ddd03': 'cyber-quiz-header', '316c8f7fa3659bc4861ebbdcbdb1a330': 'cyber-quiz-header', '6aa715f7a20b07dec3973991268b2398': 'cyber-quiz-header', '5c1f7141eb2dc56bf6553d7a1da68386': 'cyber-quiz-header' }
   const infoArt = INFO_ART[mode]
   const stageHeight = HOME_HEIGHT
   return <div ref={appRef} className={`cyber-app cyber-${mode} ${scrollable ? 'cyber-scrollable' : ''}`} aria-busy={busy}>
@@ -446,16 +449,20 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'stage' && <StageMap attempt={attempt} onStart={startStage} />}
           {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go('stage')} />}
           {page === 'quiz' && <>
-            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
+            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} classes={quizHeaderClasses} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String(((attempt?.answers.length || 0) % 10) + 1).padStart(2, '0')}</b><span>/10</span></div>
-            <div className="cyber-quiz-flow">
-              <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
-                <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
+            <div className="cyber-quiz-layout">
+              <div className="cyber-quiz-panel" style={{ backgroundImage: `url(${src('62e9b04468b5b55aa5d7a283e50734d3_75675_712_987.png')})` }}>
+                <div className="cyber-quiz-flow">
+                  <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
+                    <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
+                  </div>
+                  <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
+                  <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
+                </div>
               </div>
-              <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
-              <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
               <button type="button" className="cyber-submit-answer cyber-art-enter cyber-art-enter-5" aria-label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0}><img src={src('33ad7d9d9142da327a8526b780312e8d_48782_674_91.png')} alt="" draggable={false} /></button>
             </div>
           </>}
