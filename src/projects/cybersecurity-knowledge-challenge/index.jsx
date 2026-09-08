@@ -381,6 +381,10 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const leaveTarget = (destination) => page === 'quiz' ? leaveQuiz(destination) : go(destination)
   const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
+    if (nextMode === 'team') {
+      showFormToast('团体赛9月16号正式开始')
+      return
+    }
     setMode(nextMode)
     setNoticeMode(nextMode)
     const nextProgress = data?.modes?.[nextMode]
@@ -566,8 +570,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             </div>
           </>}
           {page === 'result' && <>
-            <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, d2dfd044bddffcd80c0b4c9868e41375: { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, '807580b62daea1aa9f081e4f049d7276': { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
-            <div className="cyber-result-values cyber-quiz-enter"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
+            <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, '7e0bd602c4c2da0af24422615161d1a8': { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, ...(mode === 'personal' ? { f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw } } : {}), 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
+            <div className={`cyber-result-values cyber-quiz-enter ${mode === 'team' ? 'cyber-result-values-team' : ''}`}><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b>{mode === 'personal' && <b>{progress?.draw ? 0 : 1}</b>}</div>
             <div className="cyber-result-prefix cyber-quiz-enter">{mode === 'team' ? `${resultTeamName}团队获得` : '恭喜获得'}</div>
             <div className="cyber-result-honor cyber-quiz-enter">「{resultTitle}」荣誉</div>
           </>}
