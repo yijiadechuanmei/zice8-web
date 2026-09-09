@@ -7,6 +7,7 @@ const sectors = [
   { image: 'cup', name: '杯子' },
   { image: 'mousepad', name: '鼠标垫' },
   { image: 'headrest', name: '头枕' },
+  { image: 'dun_dun_usb', name: '蹲蹲U盘' },
   { image: 'none', name: '谢谢参与' },
 ]
 const sectorAngle = 360 / sectors.length

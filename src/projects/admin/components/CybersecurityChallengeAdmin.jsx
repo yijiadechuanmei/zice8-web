@@ -81,13 +81,13 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
           <Space wrap><span>开始</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.startAt)} onChange={(e) => changeTeamWindow('startAt', e.target.value)} /><span>结束</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.endAt)} onChange={(e) => changeTeamWindow('endAt', e.target.value)} /></Space>
         </Card>
         <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>基础谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
-        {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化六个奖项。" />}
+        {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化七个奖项。" />}
         <Table rowKey="id" pagination={false} scroll={{ x: 660 }} dataSource={config.lottery.prizes} columns={[
           { title: '奖品名称', dataIndex: 'name', render: (value, row) => <Input value={value} maxLength={60} onChange={(e) => change(row.id, 'name', e.target.value)} /> },
           { title: '库存总量', dataIndex: 'stockTotal', render: (v, r) => <InputNumber min={r.stockUsed} max={1000000} precision={0} value={v} onChange={(n) => change(r.id, 'stockTotal', n ?? 0)} /> },
           { title: '已发放', dataIndex: 'stockUsed' },
           { title: '剩余库存', render: (_, r) => r.stockTotal - r.stockUsed },
-          { title: '基础概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={10} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
+          { title: '基础概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={7} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
         ]} />
         <Button type="primary" onClick={save} loading={busy}>保存团队赛时间和抽奖设置</Button>
       </>}

@@ -24,6 +24,7 @@ export const PRIZE_ART = {
   cup: '79cde7710e78ec3fa445d45b5db8d5e0',
   mousepad: 'e433c133c59973398f40f9e588225178',
   headrest: 'headrest.png',
+  dun_dun_usb: 'dun_dun_usb.png',
   lucky: '7e0684f704cefbaac29683fdfc97e390',
   none: 'text-1d1ce1877686',
 }
