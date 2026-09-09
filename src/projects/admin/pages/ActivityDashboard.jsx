@@ -110,6 +110,26 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'xiangyu_global_treasure') {
+      const treasure = overview?.xiangyuGlobalTreasure || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '累计参与用户', value: overview?.participantCount ?? 0, tooltip: '至少完成过一次寻宝的去重微信用户数。' },
+        { label: '累计寻宝次数', value: treasure.drawCount ?? 0 },
+        { label: '今日寻宝次数', value: treasure.todayDrawCount ?? 0 },
+        { label: '中奖次数', value: treasure.winCount ?? 0 },
+        { label: '未中奖次数', value: treasure.missCount ?? 0 },
+        { label: '中奖率', value: Math.round(Number(treasure.winRate ?? 0)), suffix: '%' },
+        { label: '待核销奖品', value: treasure.pendingRedemptionCount ?? 0 },
+        { label: '已核销奖品', value: treasure.redeemedCount ?? 0 },
+        { label: '今日核销', value: treasure.todayRedeemedCount ?? 0 },
+        { label: '核销率', value: Math.round(Number(treasure.redemptionRate ?? 0)), suffix: '%' },
+      ]
+    }
+
     if (isAntiFraudBoardGame) {
       const boardGame = overview?.antiFraudBoardGame || {}
       return [

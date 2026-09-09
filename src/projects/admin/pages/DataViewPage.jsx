@@ -356,6 +356,19 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         },
       ]),
     ))
+    if (activity.type === 'xiangyu_global_treasure' && activeViewKey === 'xiangyu_global_treasure_draws') {
+      const drawResultColumn = columns.find((column) => column.key === 'drawResult' || column.dataIndex === 'drawResult')
+      if (drawResultColumn) {
+        drawResultColumn.render = (value) => <Tag color={value === '中奖' ? 'green' : 'default'}>{value || '-'}</Tag>
+      }
+      const redemptionStatusColumn = columns.find((column) => column.key === 'redemptionStatus' || column.dataIndex === 'redemptionStatus')
+      if (redemptionStatusColumn) {
+        redemptionStatusColumn.render = (value) => {
+          const color = value === '已核销' ? 'green' : value === '待核销' ? 'orange' : 'default'
+          return <Tag color={color}>{value || '-'}</Tag>
+        }
+      }
+    }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_profiles') {
       const statusColumn = columns.find((column) => column.key === 'status' || column.dataIndex === 'status')
       if (statusColumn) {
