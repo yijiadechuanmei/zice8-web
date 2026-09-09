@@ -30,7 +30,7 @@ export function Wheel({ rotation, prizes = [] }) {
           const name = prizes.find((p) => p.image === item.image)?.name || item.name
           return <g key={item.image}>
             <path d={`M347 324 L${start.join(' ')} A277 277 0 0 1 ${end.join(' ')} Z`} fill={i % 2 ? '#ffedcd' : '#ffe6ba'} stroke="#da4430" strokeWidth="5" />
-            <image href={src(PRIZE_ART[item.image])} x={x - 47} y={y - 43} width="94" height="86" transform={`rotate(${center + 90} ${x} ${y})`} />
+            <image href={src(PRIZE_ART[item.image])} x={x - 43} y={y - 39} width="86" height="78" transform={`rotate(${center + 90} ${x} ${y})`} />
             <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle" fill="#d32d26" fontSize="25" fontWeight="bold" transform={`rotate(${center + 90} ${tx} ${ty})`} textLength={name.length > 6 ? 175 : undefined} lengthAdjust="spacingAndGlyphs">{name}</text>
           </g>
         })}
