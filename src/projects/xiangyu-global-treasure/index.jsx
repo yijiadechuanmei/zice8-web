@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { trackPageView } from '../../shared/analytics'
 import {
   drawXiangyuGlobalTreasure,
   getXiangyuGlobalTreasurePublicConfig,
@@ -30,6 +31,12 @@ export default function XiangyuGlobalTreasureProject({ routeParams }) {
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   useWechatShare(activityKey, publicConfig)
+
+  useEffect(() => {
+    trackPageView(activityKey, '/xiangyu-global-treasure', {
+      activityType: 'xiangyu_global_treasure',
+    })
+  }, [activityKey])
 
   useEffect(() => {
     document.body.classList.add('xygt-lock-scroll')
