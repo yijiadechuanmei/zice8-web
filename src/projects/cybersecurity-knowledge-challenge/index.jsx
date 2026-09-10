@@ -31,11 +31,11 @@ const NOTICE = {
     items: [
       '报名时请填写真实姓名及单位信息，每位参赛者仅有一次正式答题机会，请提前做好准备；',
       '请在竞赛开放时间内完成答题，逾期未答视为放弃。',
-      '本次答题共设 5 关，每关 10 道题，一共 50 道题，最多错三次即结束答题；',
+      '本次答题共设 5 关，每关 10 道题，一共 50 道题，错十次即结束答题；',
       '答对次数越多，答题时间越短，错的越少，成绩越高，越有机会抽中幸运奖品！',
       '完成正式闯关后，系统将生成专属“个人成绩海报”，可保存分享；',
-      '完成闯关即可参与“幸运转盘抽奖”，赢取幸运奖品；',
-      '返回、刷新、关闭活动、切换后台或锁屏后，当前关卡须重新作答；本关题目重新随机，答对题数和用时重新计算，累计错题次数保留；',
+      '答题即可参与“幸运转盘抽奖”，赢取幸运奖品；',
+      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
       '请本人独立答题，禁止作弊、代答或使用外挂，违者取消参赛资格；',
       '请如实填写个人信息，文明答题、遵守竞赛纪律，本竞赛重在“以赛促学、以学促用”；',
       '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
@@ -46,12 +46,11 @@ const NOTICE = {
     intro: '欢迎参加 "2026 年第三届“交盾杯”网络安全暨人工智能创新知识竞赛团队赛，为确保竞赛公平、有序进行，请参赛团队仔细阅读并遵守以下须知：',
     items: [
       '请由团队负责人填写团队名称及邀请码完成报名，团队成员以报名提交信息为准；',
-      '每个团队报名账号仅有一次正式答题机会，请提前做好准备；',
       '请在竞赛开放时间内完成答题，逾期未答视为放弃，具体时间以活动页面公告为准；',
-      '本次答题共设 5 关，每关 10 道题，一共 50 道题，累计答错 3 次即结束答题；',
+      '本次答题共设 5 关，每关 10 道题，一共 50 道题，错十次即结束答题；',
       '团队成绩将结合答题正确率、答题用时等多个维度综合评定，表现优秀的团队可晋级决赛，决赛名单及荣誉不对外展示排名；',
       '晋级决赛的团队将获得相应荣誉与表彰；',
-      '返回、刷新、关闭活动、切换后台或锁屏后，当前关卡须重新作答；本关题目重新随机，答对题数和用时重新计算，累计错题次数保留；',
+      '请使用网络稳定的手机或电脑作答，答题过程中请勿切换页面或中途退出，退出视为放弃本次成绩；',
       '团队成员请独立答题，禁止作弊、代答或使用外挂，违者取消团队参赛资格；',
       '请如实填写团队信息，文明答题、遵守竞赛纪律，鼓励组队“共同学习、共同进步”；',
       '本活动最终解释权归组织方所有，如有疑问可联系集团公司科创部工作人员。',
@@ -382,6 +381,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
     const window = nextMode === 'personal' ? config?.personalCompetitionWindow : config?.teamCompetitionWindow
+    const nextProgress = data?.modes?.[nextMode]
+    if (nextMode === 'personal' && nextProgress?.attempt?.status === 'failed') {
+      setMode(nextMode)
+      go('draw')
+      return
+    }
     if (!data?.isTestUser && window?.status !== 'active') {
       const fallback = nextMode === 'personal'
         ? '本轮个人闯关将于9月14日9点-9月16日18点限时开启，请你准时参与'
@@ -391,7 +396,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     }
     setMode(nextMode)
     setNoticeMode(nextMode)
-    const nextProgress = data?.modes?.[nextMode]
     if (!nextProgress?.succeeded && nextProgress?.attempt?.status !== 'active' && nextProgress?.remaining <= 0) {
       showFormToast('该身份的1次答题机会已用完')
       return
@@ -566,7 +570,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
                   <div className="cyber-question-content cyber-question-enter" key={visibleQuestion?.id}>
                     <h2>{visibleQuestion?.title || '题目加载中…'}{visibleQuestion && `（${visibleQuestion.type === 'multiple' ? '多选' : visibleQuestion.type === 'boolean' ? '判断' : '单选'}）`}</h2>
                   </div>
-                  <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/3</div>
+                  <div className="cyber-errors cyber-quiz-enter">累计错题：{attempt?.errors || 0}/10</div>
                   <div className="cyber-options" key={`options-${visibleQuestion?.id || 'loading'}`}>{visibleQuestion?.options?.map(quizOption)}</div>
                 </div>
               </div>
@@ -587,7 +591,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Artwork page={8} omit={['f79d5d674a55f547e986be446f382a91']} actions={{ ...navigation, ef793ee88f81c81ffda0704aeaadb071: { label: progress?.draw ? '查看抽奖结果' : '开始抽奖', onClick: draw, disabled: busy || spinning }, 'text-fbe1639180d7': { label: '返回结果', onClick: () => go('result'), disabled: spinning } }} />
             <Wheel rotation={rotation} prizes={data?.lottery?.prizes} />
             <Picture id="f85af1000c81149e6069211e18180b33" x={266} y={482} w={237} h={267} className="cyber-art-enter cyber-art-enter-3" />
-            <p className="cyber-draw-state cyber-quiz-enter">{progress?.draw ? '本次抽奖已完成，可查看结果' : data?.lottery?.enabled ? '闯关成功，获得1次抽奖机会' : '抽奖暂未开放，资格已为你保留'}</p>
+            <p className="cyber-draw-state cyber-quiz-enter">{progress?.draw ? '本次抽奖已完成，可查看结果' : data?.lottery?.enabled ? '答题结束，获得1次抽奖机会' : '抽奖暂未开放，资格已为你保留'}</p>
           </>}
           {page === 'prizes' && <>
             <Artwork page={9} omit={['ccd59680942cf673e3b24e4169db0a0a']} actions={{ ...navigation, 'text-259fa5eb4a6e': { label: '返回首页', onClick: () => go('home') } }} />
@@ -608,7 +612,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         <ol>{NOTICE[noticeMode].items.map((item) => <li key={item}>{item}</li>)}</ol>
       </section>
     </Modal>}
-    {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '答题机会已用完，感谢参与' : attempt?.reason === 'timeout' ? '答题时间已结束，本次答题机会已用完' : '累计答错3题，本次答题机会已用完'}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
+    {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '答题机会已用完，感谢参与' : attempt?.reason === 'timeout' ? '答题时间已结束，本次答题机会已用完' : '累计答错10题，本次答题机会已用完'}</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}
     <div ref={qr} className="cyber-qr-source" aria-hidden="true"><QRCodeCanvas value={`${window.location.origin}/${TYPE}/${activityKey}`} size={384} marginSize={2} level="M" /></div>
