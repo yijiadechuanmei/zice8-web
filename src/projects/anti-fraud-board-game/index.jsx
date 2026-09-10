@@ -373,7 +373,7 @@ function RollOverlay({ phase, value }) {
 }
 
 function QuestionOverlay({ question, onAnswer }) {
-  const [selectedIndex, setSelectedIndex] = useState(null)
+  const [selectedIndexes, setSelectedIndexes] = useState([])
   const [referenceVisible, setReferenceVisible] = useState(false)
   const optionIcons = [
     antiFraudBoardAssets.game.optionA,
@@ -382,8 +382,15 @@ function QuestionOverlay({ question, onAnswer }) {
   ]
 
   const submitAnswer = () => {
-    if (selectedIndex === null) return
-    onAnswer(selectedIndex)
+    if (!selectedIndexes.length) return
+    onAnswer(selectedIndexes)
+  }
+
+  const multiple = Array.isArray(question.answerIndex)
+  const toggleOption = (index) => {
+    setSelectedIndexes((current) => multiple
+      ? current.includes(index) ? current.filter((value) => value !== index) : [...current, index]
+      : [index])
   }
 
   return (
@@ -402,15 +409,15 @@ function QuestionOverlay({ question, onAnswer }) {
             </button>
           ) : null}
         </div>
-        <div className="afbg-options" role="radiogroup" aria-label="请选择答案">
+        <div className="afbg-options" role={multiple ? 'group' : 'radiogroup'} aria-label={multiple ? '请选择所有正确答案' : '请选择答案'}>
           {question.options.map((option, index) => (
             <button
               key={option}
-              className={`afbg-option ${selectedIndex === index ? 'is-selected' : ''}`}
+              className={`afbg-option ${selectedIndexes.includes(index) ? 'is-selected' : ''}`}
               type="button"
-              onClick={() => setSelectedIndex(index)}
-              role="radio"
-              aria-checked={selectedIndex === index}
+              onClick={() => toggleOption(index)}
+              role={multiple ? 'checkbox' : 'radio'}
+              aria-checked={selectedIndexes.includes(index)}
             >
               <img
                 className="afbg-option-icon"
@@ -426,7 +433,7 @@ function QuestionOverlay({ question, onAnswer }) {
           className="afbg-question-submit"
           type="button"
           onClick={submitAnswer}
-          disabled={selectedIndex === null}
+          disabled={!selectedIndexes.length}
           aria-label="提交答案"
         >
           <img src={antiFraudBoardAssets.game.nextButton} alt="" draggable="false" />
@@ -761,9 +768,10 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     }, ROLLING_MS)
   }, [feedback, moving, position, question, rollCount, showQuestionAt, success])
 
-  const handleAnswer = useCallback((answerIndex) => {
+  const handleAnswer = useCallback((answerIndexes) => {
     if (!question) return
-    const correct = answerIndex === question.answerIndex
+    const expected = Array.isArray(question.answerIndex) ? question.answerIndex : [question.answerIndex]
+    const correct = answerIndexes.length === expected.length && answerIndexes.every((index) => expected.includes(index))
     playAnswerSound(correct)
     if (!correct) setHasWrongAnswer(true)
     setFeedback({
