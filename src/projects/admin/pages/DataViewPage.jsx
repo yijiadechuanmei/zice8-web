@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, reviewNanshaOpenMicEntry, syncNanhaiChallengePayout } from '../api'
@@ -8,6 +8,7 @@ import QuizAdminDataPage from './QuizAdminDataPage'
 import { LvyuanParticipantsPage } from '../components/LvyuanFruitfulAdmin'
 
 const pageSize = 20
+const emptyData = { columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } }
 
 export default function DataViewPage({ activity, phaseScope = 'all' }) {
   if (activity.type === 'lvyuan_consumer_game_collection') return <LvyuanParticipantsPage activity={activity} />
@@ -17,8 +18,9 @@ export default function DataViewPage({ activity, phaseScope = 'all' }) {
 function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   const [views, setViews] = useState([])
   const [activeViewKey, setActiveViewKey] = useState('')
+  const latestDataRequest = useRef(0)
   const [hiddenColumnsByView, setHiddenColumnsByView] = useState({})
-  const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
+  const [data, setData] = useState(emptyData)
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
   const [dataRefreshKey, setDataRefreshKey] = useState(0)
@@ -70,8 +72,9 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
   }, [activity.activityKey])
 
   useEffect(() => {
+    const requestId = ++latestDataRequest.current
     if (!activeViewKey) {
-      setData({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
+      setData(emptyData)
       return
     }
     let alive = true
@@ -89,13 +92,13 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         phaseNo,
       })
       .then((result) => {
-        if (alive) setData(result)
+        if (alive && requestId === latestDataRequest.current) setData(result)
       })
       .catch((err) => {
-        if (alive) setError(err.message || '数据加载失败')
+        if (alive && requestId === latestDataRequest.current) setError(err.message || '数据加载失败')
       })
       .finally(() => {
-        if (alive) setLoading(false)
+        if (alive && requestId === latestDataRequest.current) setLoading(false)
       })
     return () => {
       alive = false
@@ -735,7 +738,9 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       views={views}
       activeViewKey={activeViewKey}
       onChangeView={(viewKey) => {
+        latestDataRequest.current += 1
         setActiveViewKey(viewKey)
+        setData(emptyData)
         setPage(1)
         setSortField('')
         setAppointmentDate('')
@@ -746,6 +751,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
       loading={schemaLoading}
     >
       <AdminTableBlock
+        key={`${activity.activityKey}:${activeViewKey}`}
         toolbar={(
           <AdminDataToolbar
             search={(
@@ -830,7 +836,7 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
           />
         )}
         tableProps={{
-          rowKey: (row, index) => row.id ?? row.participantId ?? `${activeViewKey}-${index}`,
+          rowKey: (row, index) => `${activeViewKey}:${row.attemptId ?? row.drawId ?? row.id ?? row.participantId ?? 'row'}:${row.questionNo ?? row.mode ?? index}`,
           columns: tableColumns,
           dataSource: data.rows,
           loading: loading || schemaLoading,
