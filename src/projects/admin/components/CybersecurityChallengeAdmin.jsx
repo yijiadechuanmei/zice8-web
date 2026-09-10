@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Input, InputNumber, Popconfirm, Space, Switch, Table, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Input, InputNumber, Popconfirm, Space, Switch, Table, Typography } from 'antd'
 import { adminRequest } from '../api'
 
 function inputDateTime(value) {
@@ -19,8 +19,6 @@ function chinaDateTime(value) {
 export default function CybersecurityChallengeAdmin({ activityKey }) {
   const base = `/admin/cybersecurity-knowledge-challenge/activities/${activityKey}`
   const [config, setConfig] = useState(null)
-  const [records, setRecords] = useState([])
-  const [cursor, setCursor] = useState(null)
   const [code, setCode] = useState('')
   const [userId, setUserId] = useState('')
   const [error, setError] = useState('')
@@ -29,8 +27,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   async function load() {
     setBusy(true); setError('')
     try {
-      const [c, r] = await Promise.all([adminRequest(`${base}/lottery`), adminRequest(`${base}/records`)])
-      setConfig(c); setRecords(r.list); setCursor(r.nextCursor)
+      setConfig(await adminRequest(`${base}/lottery`))
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
   useEffect(() => { load() }, [activityKey]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -41,7 +38,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
       if (!personalWindow.startAt || !personalWindow.endAt) throw new Error('请完整设置个人赛时间范围')
       if (!teamWindow.startAt || !teamWindow.endAt) throw new Error('请完整设置团队赛时间范围')
       const value = await adminRequest(`${base}/lottery`, { method: 'POST', body: JSON.stringify({ enabled: lottery.enabled, revision: lottery.revision, prizes: lottery.prizes.map(({ id, name, image, stockTotal, probability }) => ({ id, name, image, stockTotal, probability })), personalStartAt: personalWindow.startAt, personalEndAt: personalWindow.endAt, teamStartAt: teamWindow.startAt, teamEndAt: teamWindow.endAt, testUserIds }) })
-      setConfig(value); setNotice('个人赛、团队赛时间和抽奖配置已保存')
+      setConfig(value); setNotice('已保存个人赛时间、团队赛时间、测试用户 ID 和抽奖奖品配置')
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
   async function redeem() {
@@ -50,10 +47,6 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
       const result = await adminRequest(`${base}/redeem`, { method: 'POST', body: JSON.stringify({ code: code.trim() }) })
       setNotice(`${result.name} 核销完成，核销码：${result.code}`); setCode(''); await load()
     } catch (err) { setError(err.message) } finally { setBusy(false) }
-  }
-  async function more() {
-    setBusy(true); setError('')
-    try { const r = await adminRequest(`${base}/records?before=${cursor}`); setRecords((old) => [...old, ...r.list]); setCursor(r.nextCursor) } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
   async function clearUserData() {
     setBusy(true); setError(''); setNotice('')
@@ -72,7 +65,6 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   function change(id, field, value) { setConfig((old) => ({ ...old, lottery: { ...old.lottery, prizes: old.lottery.prizes.map((p) => p.id === id ? { ...p, [field]: value } : p) } })) }
   function changeWindow(windowName, field, value) { setConfig((old) => ({ ...old, [windowName]: { ...old[windowName], [field]: chinaDateTime(value) } })) }
   function changeTestUserIds(value) { setConfig((old) => ({ ...old, testUserIds: [...new Set(value.split(/[\n,，\s]+/).map((item) => item.trim()).filter((item) => /^[1-9]\d*$/.test(item)))] })) }
-  const rows = records.flatMap((r) => ['personal', 'team'].filter((mode) => r.modes[mode].used).map((mode) => ({ ...r.modes[mode], mode, id: `${r.participantId}-${mode}` })))
   return <Card size="small" title="网络安全知识大闯关 · 个人赛、团队赛、抽奖与核销" extra={<Button onClick={load} loading={busy}>刷新</Button>}>
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       {error && <Alert type="error" message={error} showIcon />}
@@ -87,6 +79,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
         </Card>
         <Card size="small" title="测试用户 ID">
           <Input.TextArea rows={3} value={(config.testUserIds || []).join('\n')} placeholder="每行一个用户ID，也可用逗号分隔；这些用户不受个人赛和团队赛时间限制" onChange={(e) => changeTestUserIds(e.target.value)} />
+          <Typography.Text type="secondary">填写后请点击下方“保存赛事时间、测试用户和抽奖配置”。测试用户只跳过个人赛和团队赛赛程限制，活动总开关仍然有效。</Typography.Text>
         </Card>
         <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>基础谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
         {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化七个奖项。" />}
@@ -97,7 +90,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
           { title: '剩余库存', render: (_, r) => r.stockTotal - r.stockUsed },
           { title: '基础概率（%）', dataIndex: 'probability', render: (v, r) => <InputNumber min={0} max={7} precision={4} value={v * 100} onChange={(n) => change(r.id, 'probability', (n ?? 0) / 100)} /> },
         ]} />
-        <Button type="primary" onClick={save} loading={busy}>保存个人赛、团队赛时间和抽奖设置</Button>
+        <Button type="primary" onClick={save} loading={busy}>保存赛事时间、测试用户和抽奖配置</Button>
       </>}
       <Space wrap><Input style={{ width: 230 }} placeholder="输入6位核销码" value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} /><Popconfirm title="确认已向用户发放该奖品？" onConfirm={redeem} disabled={!/^(?:\d{12}|[A-HJ-NP-Z2-9]{6})$/.test(code)}><Button disabled={!/^(?:\d{12}|[A-HJ-NP-Z2-9]{6})$/.test(code)} loading={busy}>确认核销</Button></Popconfirm></Space>
       <Card size="small" title="清除参与数据">
@@ -107,15 +100,6 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
           <Popconfirm title="确认清除本活动全部用户数据？" description="所有个人、团队答题和抽奖记录都会被删除，奖品已发放数将归零。" okText="确认清除全部" cancelText="取消" onConfirm={clearAllData}><Button danger loading={busy}>清除全部数据</Button></Popconfirm>
         </Space>
       </Card>
-      <Table rowKey="id" dataSource={rows} pagination={{ pageSize: 10 }} scroll={{ x: 1200 }} columns={[
-        { title: '用户ID', dataIndex: 'userId' }, { title: '姓名', dataIndex: 'name' }, { title: '手机号', dataIndex: 'phone' },
-        { title: '身份', render: (_, r) => r.mode === 'team' ? `团队：${r.teamName}` : '个人' },
-        { title: '已用次数', dataIndex: 'used' }, { title: '状态', render: (_, r) => <Tag color={r.succeeded ? 'green' : 'default'}>{r.succeeded ? '成功' : r.attempt?.status === 'active' ? '答题中' : '未通关'}</Tag> },
-        { title: '得分', render: (_, r) => r.attempt?.score ?? '-' }, { title: '用时（秒）', render: (_, r) => r.attempt?.durationSeconds ?? '-' },
-        { title: '奖品', render: (_, r) => r.draw?.name || '未抽奖' }, { title: '核销码', render: (_, r) => r.draw?.code || '-' },
-        { title: '核销状态', render: (_, r) => r.draw?.redeemedAt ? `已核销 ${new Date(r.draw.redeemedAt).toLocaleString('zh-CN')}` : r.draw?.prizeId ? '待领取' : '-' },
-      ]} />
-      {cursor && <Button loading={busy} onClick={more}>加载更早的参与记录</Button>}
     </Space>
   </Card>
 }

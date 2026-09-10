@@ -262,7 +262,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
   const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setSubmittedRemainingSeconds(null); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
-  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData((previous) => ({ ...value, nickname: value.nickname || previous?.nickname || '', avatar: value.avatar || previous?.avatar || '' })); setNow(Date.now()); return value }, [])
+  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData((previous) => ({ ...value, isTestUser: value.isTestUser ?? previous?.isTestUser ?? false, nickname: value.nickname || previous?.nickname || '', avatar: value.avatar || previous?.avatar || '' })); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
     setError(err.message || '请求失败，请重试')
@@ -382,7 +382,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
     const window = nextMode === 'personal' ? config?.personalCompetitionWindow : config?.teamCompetitionWindow
-    if (window?.status !== 'active') {
+    if (!data?.isTestUser && window?.status !== 'active') {
       const fallback = nextMode === 'personal'
         ? '本轮个人闯关将于9月14日9点-9月16日18点限时开启，请你准时参与'
         : '本轮团体预选赛将于9月16日9点-18点限时开启，\n请你准时参与'

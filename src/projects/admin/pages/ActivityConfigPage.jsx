@@ -916,7 +916,7 @@ export default function ActivityConfigPage({ activity }) {
           <Text type="secondary">通用移动端配置，当前先提供背景音乐能力，后续可复用到 quiz、video-rank、抽奖和其他活动。</Text>
         </div>
         <Button type="primary" onClick={handleSave} loading={saving}>
-          保存配置
+          保存通用配置（背景音乐）
         </Button>
       </div>
 
