@@ -37,10 +37,10 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   async function save() {
     setBusy(true); setError(''); setNotice('')
     try {
-      const { lottery, personalWindow, teamWindow } = config
+      const { lottery, personalWindow, teamWindow, testUserIds = [] } = config
       if (!personalWindow.startAt || !personalWindow.endAt) throw new Error('请完整设置个人赛时间范围')
       if (!teamWindow.startAt || !teamWindow.endAt) throw new Error('请完整设置团队赛时间范围')
-      const value = await adminRequest(`${base}/lottery`, { method: 'POST', body: JSON.stringify({ enabled: lottery.enabled, revision: lottery.revision, prizes: lottery.prizes.map(({ id, name, image, stockTotal, probability }) => ({ id, name, image, stockTotal, probability })), personalStartAt: personalWindow.startAt, personalEndAt: personalWindow.endAt, teamStartAt: teamWindow.startAt, teamEndAt: teamWindow.endAt }) })
+      const value = await adminRequest(`${base}/lottery`, { method: 'POST', body: JSON.stringify({ enabled: lottery.enabled, revision: lottery.revision, prizes: lottery.prizes.map(({ id, name, image, stockTotal, probability }) => ({ id, name, image, stockTotal, probability })), personalStartAt: personalWindow.startAt, personalEndAt: personalWindow.endAt, teamStartAt: teamWindow.startAt, teamEndAt: teamWindow.endAt, testUserIds }) })
       setConfig(value); setNotice('个人赛、团队赛时间和抽奖配置已保存')
     } catch (err) { setError(err.message) } finally { setBusy(false) }
   }
@@ -71,6 +71,7 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
   }
   function change(id, field, value) { setConfig((old) => ({ ...old, lottery: { ...old.lottery, prizes: old.lottery.prizes.map((p) => p.id === id ? { ...p, [field]: value } : p) } })) }
   function changeWindow(windowName, field, value) { setConfig((old) => ({ ...old, [windowName]: { ...old[windowName], [field]: chinaDateTime(value) } })) }
+  function changeTestUserIds(value) { setConfig((old) => ({ ...old, testUserIds: [...new Set(value.split(/[\n,，\s]+/).map((item) => item.trim()).filter((item) => /^[1-9]\d*$/.test(item)))] })) }
   const rows = records.flatMap((r) => ['personal', 'team'].filter((mode) => r.modes[mode].used).map((mode) => ({ ...r.modes[mode], mode, id: `${r.participantId}-${mode}` })))
   return <Card size="small" title="网络安全知识大闯关 · 个人赛、团队赛、抽奖与核销" extra={<Button onClick={load} loading={busy}>刷新</Button>}>
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
@@ -83,6 +84,9 @@ export default function CybersecurityChallengeAdmin({ activityKey }) {
         </Card>
         <Card size="small" title="团体预选赛时间（北京时间）">
           <Space wrap><span>开始</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.startAt)} onChange={(e) => changeWindow('teamWindow', 'startAt', e.target.value)} /><span>结束</span><Input type="datetime-local" value={inputDateTime(config.teamWindow.endAt)} onChange={(e) => changeWindow('teamWindow', 'endAt', e.target.value)} /></Space>
+        </Card>
+        <Card size="small" title="测试用户 ID">
+          <Input.TextArea rows={3} value={(config.testUserIds || []).join('\n')} placeholder="每行一个用户ID，也可用逗号分隔；这些用户不受个人赛和团队赛时间限制" onChange={(e) => changeTestUserIds(e.target.value)} />
         </Card>
         <Space><span>开放抽奖</span><Switch checked={config.lottery.enabled} onChange={(enabled) => setConfig({ ...config, lottery: { ...config.lottery, enabled } })} /><span>基础谢谢参与概率：{Math.max(0, 100 - config.lottery.prizes.reduce((s, p) => s + p.probability * 100, 0)).toFixed(2)}%</span></Space>
         {!config.lottery.prizes.length && <Alert type="info" message="请先执行本活动的配置脚本，初始化七个奖项。" />}
