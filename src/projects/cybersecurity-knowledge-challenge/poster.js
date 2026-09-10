@@ -74,7 +74,7 @@ export function achievementTitle(mode, progress) {
 }
 
 export async function makePoster({ mode, progress, nickname = '', avatarUrl = '', qrCanvas, title = achievementTitle(mode, progress) }) {
-  if (!progress?.succeeded || !qrCanvas) throw new Error('闯关成功后才能生成海报')
+  if (!['success', 'failed'].includes(progress?.attempt?.status) || !qrCanvas) throw new Error('答题结束后才能生成海报')
   const canvas = document.createElement('canvas')
   canvas.width = 646; canvas.height = mode === 'team' ? 1240 : 1238
   const ctx = canvas.getContext('2d')

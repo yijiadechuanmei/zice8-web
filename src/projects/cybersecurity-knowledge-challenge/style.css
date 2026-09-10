@@ -175,3 +175,13 @@
 @keyframes cyber-float { 0%,100% { translate:0 0; } 50% { translate:0 -10px; } }
 @keyframes cyber-dim { from { opacity:0; } to { opacity:1; } }
 @media (prefers-reduced-motion:reduce) { .cyber-app *, .cyber-app *::before { animation:none!important; transition:none!important; } }
+
+.cyber-failure-poster { position:absolute; left:275px; top:540px; z-index:2; padding:0; border:0; background:transparent; color:#9b6b31; font:24px/28px "PingFang SC","Microsoft YaHei",sans-serif; text-decoration:underline; cursor:pointer; }
+.cyber-ranking { position:absolute; left:49px; top:385px; width:653px; height:945px; overflow:auto; padding:0; }
+.cyber-ranking-row { position:relative; height:94px; display:grid; grid-template-columns:83px 58px 156px 134px 134px; column-gap:0; align-items:center; border-bottom:1px solid rgba(155,107,49,.26); color:#9b6b31; font-size:28px; line-height:normal; }
+.cyber-ranking-rank { width:83px; height:50px; display:flex; align-items:center; justify-content:center; font-variant-numeric:tabular-nums; }
+.cyber-ranking-rank img { width:51px; max-height:46px; object-fit:contain; }
+.cyber-ranking-avatar { width:58px; height:58px; border:1px solid #9b6b31; border-radius:50%; object-fit:cover; background:#fffaf7; }
+.cyber-ranking-name { width:156px; padding-left:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:28px; font-weight:400; }
+.cyber-ranking-score,.cyber-ranking-time { width:134px; text-align:center; font-variant-numeric:tabular-nums; }
+.cyber-ranking-empty { padding:120px 0; color:#9b6b31; font-size:28px; text-align:center; }
