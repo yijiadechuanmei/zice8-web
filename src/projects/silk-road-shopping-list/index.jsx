@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { trackPageView } from '../../shared/analytics'
 import { getCurrentUser, getPublicConfig } from './api'
 import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAssets } from './config'
 import './styles.css'
@@ -656,6 +657,12 @@ export default function SilkRoadShoppingList() {
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
   const { authReady, reauth } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
   useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
+
+  useEffect(() => {
+    trackPageView(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, '/silk-road-shopping-list', {
+      activityType: 'silk_road_shopping_list',
+    })
+  }, [])
 
   useEffect(() => { localStorage.removeItem('silk-road-shopping-list-cart') }, [])
   useEffect(() => {
