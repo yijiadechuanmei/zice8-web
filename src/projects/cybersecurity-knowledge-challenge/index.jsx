@@ -381,12 +381,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const leaveTarget = (destination) => page === 'quiz' ? leaveQuiz(destination) : go(destination)
   const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
-    if (nextMode === 'team') {
-      const window = config?.teamCompetitionWindow
-      if (window?.status !== 'active') {
-        showFormToast(window?.status === 'ended' ? window.endedMessage : window?.notStartedMessage || '本轮团体预选赛将于9月16日9点-18点限时开启，\n请你准时参与')
-        return
-      }
+    const window = nextMode === 'personal' ? config?.personalCompetitionWindow : config?.teamCompetitionWindow
+    if (window?.status !== 'active') {
+      const fallback = nextMode === 'personal'
+        ? '本轮个人闯关将于9月14日9点-9月16日18点限时开启，请你准时参与'
+        : '本轮团体预选赛将于9月16日9点-18点限时开启，\n请你准时参与'
+      showFormToast(window?.status === 'ended' ? window.endedMessage : window?.notStartedMessage || fallback)
+      return
     }
     setMode(nextMode)
     setNoticeMode(nextMode)
