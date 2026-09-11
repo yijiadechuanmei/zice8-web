@@ -195,6 +195,24 @@ function FailedPersonalResult({ attempt, progress, title, onHome, onPoster, onDr
   </>
 }
 
+function TeamResult({ attempt, teamName, title, onHome, onPoster }) {
+  return <>
+    <Picture id="2194de0f17da7fc22aa700a189a841cc_1261078_750_1624.png" x={0} y={-88} w={750} h={1624} />
+    <Picture id="dda866132ec18cddab506fc898d88e57_52530_736_1152.png" x={7} y={101} w={736} h={1008} className="cyber-art-enter cyber-art-enter-1" />
+    <Picture id="91325e62910dbd4a165d50679ac57866_190478_408_286.png" x={164} y={206} w={408} h={286} className="cyber-art-enter cyber-art-enter-2" />
+    <Picture id="d333ab5e7ac8836acdf575054993ad0c_1476_313_169.png" x={51} y={758} w={313} h={169} className="cyber-art-enter cyber-art-enter-3" />
+    <Picture id="463c038787d5743cb86bb51eac3aa8d2_977_313_169.png" x={385} y={758} w={313} h={169} className="cyber-art-enter cyber-art-enter-3" />
+    <Picture id="c608d25bd30a94ef4d6aae438755d19c_7705_440_34.png" x={155} y={683} w={440} h={34} />
+    <Picture id="47b8702f197e6ffb7cf13e7132e2e56e_35536_645_91.png" x={51} y={950} w={645} h={91} onClick={onPoster} label="生成团队成绩海报" />
+    <Picture id={backId} x={25} y={1} w={55} h={55} onClick={onHome} label="返回首页" />
+    <Picture id="text-5ef4d1229e77" x={566} y={9} w={160} h={37} onClick={onHome} label="返回首页" />
+    <div className="cyber-team-result-prefix">{teamName}团队获得</div>
+    <div className="cyber-team-result-honor">「{title}」称号</div>
+    <b className="cyber-team-result-score">{attempt?.score ?? 0}</b>
+    <b className="cyber-team-result-time">{formatTime(attempt?.durationSeconds || 0)}</b>
+  </>
+}
+
 function PersonalRanking({ rows }) {
   const medalArt = [
     'e896946ffe9232bf55d28b5ace6e8430_5551_51_41.png',
@@ -385,7 +403,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerFeedback(null)
     load().then((value) => {
       const nextAttempt = value.modes[mode].attempt
-      if (nextAttempt?.status === 'failed') go('failedResult')
+      if (nextAttempt?.status === 'failed') go(mode === 'team' ? 'result' : 'failedResult')
       else if (nextAttempt?.status === 'success' || (nextAttempt?.status === 'active' && !nextAttempt.timerRunning && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0)) go('stageComplete')
     }).catch(showError)
   }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError, go])
@@ -427,9 +445,9 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   function chooseMode(nextMode) {
     const window = nextMode === 'personal' ? config?.personalCompetitionWindow : config?.teamCompetitionWindow
     const nextProgress = data?.modes?.[nextMode]
-    if (nextMode === 'personal' && nextProgress?.attempt?.status === 'failed') {
+    if (nextProgress?.attempt?.status === 'failed') {
       setMode(nextMode)
-      go('failedResult')
+      go(nextMode === 'team' ? 'result' : 'failedResult')
       return
     }
     if (!data?.isTestUser && window?.status !== 'active') {
@@ -457,7 +475,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       if (p.remaining <= 0) { showFormToast('该身份的1次答题机会已用完'); return }
       if (p.name && p.phone && p.companyName && p.departmentName) {
         const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
-        if (started.modes[nextMode].attempt?.status === 'failed') go('failedResult')
+        if (started.modes[nextMode].attempt?.status === 'failed') go(nextMode === 'team' ? 'result' : 'failedResult')
         else go('stage')
         return
       }
@@ -478,7 +496,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await run(async () => {
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([])
-      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); go('failedResult') } else go('stage')
+      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); go(mode === 'team' ? 'result' : 'failedResult') } else go('stage')
     })
   }
   async function submit() {
@@ -500,7 +518,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerToast('')
     setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
-    if (nextAttempt.status === 'failed') go('failedResult')
+    if (nextAttempt.status === 'failed') go(mode === 'team' ? 'result' : 'failedResult')
     else if (nextAttempt.status === 'success') go('stageComplete')
     else if (nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
   }
@@ -607,7 +625,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回首页" />
           </>}
           {page === 'stage' && <StageMap attempt={attempt} onStart={startStage} onHome={() => go('home')} />}
-          {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go(attempt?.status === 'success' ? 'result' : 'stage')} onHome={() => go('home')} />}
+          {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go(attempt?.status === 'success' || mode === 'team' ? 'result' : 'stage')} onHome={() => go('home')} />}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} classes={quizHeaderClasses} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
@@ -627,12 +645,14 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             </div>
           </>}
           {page === 'failedResult' && <FailedPersonalResult attempt={attempt} progress={progress} title={resultTitle} onHome={() => go('home')} onPoster={generatePoster} onDraw={openDraw} />}
-          {page === 'result' && <>
-            <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} animate={false} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, '7e0bd602c4c2da0af24422615161d1a8': { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, ...(mode === 'personal' ? { f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw } } : {}), 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
-            <div className={`cyber-result-values ${mode === 'team' ? 'cyber-result-values-team' : ''}`}><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b>{mode === 'personal' && <b>{progress?.draw ? 0 : 1}</b>}</div>
-            <div className="cyber-result-prefix">{mode === 'team' ? `${resultTeamName}团队获得` : '恭喜获得'}</div>
-            <div className="cyber-result-honor">「{resultTitle}」称号</div>
-          </>}
+          {page === 'result' && (mode === 'team'
+            ? <TeamResult attempt={attempt} teamName={resultTeamName} title={resultTitle} onHome={() => go('home')} onPoster={generatePoster} />
+            : <>
+              <Artwork page={5} omit={resultOmit} animate={false} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') } }} />
+              <div className="cyber-result-values"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
+              <div className="cyber-result-prefix">恭喜获得</div>
+              <div className="cyber-result-honor">「{resultTitle}」称号</div>
+            </>)}
           {page === 'details' && <>
             <Artwork page={7} actions={{ ...navigation, 'text-6071b7c9ff8a': { label: '返回首页', onClick: () => go('home') } }} />
             <div className="cyber-details cyber-quiz-enter">{attempt?.answers?.filter((a) => !a.correct).map((a, index) => <article key={a.questionId}><header><b>{index + 1} / {a.category}</b><span className="bad">错误</span></header><h3>{a.title}</h3><p>你的答案：{a.selected} 正确答案：{a.answer}</p><p>{a.explanation}</p></article>)}</div>
