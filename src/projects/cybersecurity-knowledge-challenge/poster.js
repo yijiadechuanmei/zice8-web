@@ -5,6 +5,7 @@ const POSTER_FILES = {
   '14dba9edc1f271124020174158ee6a13': '14dba9edc1f271124020174158ee6a13_115131_258_258.png',
   '332f549dcf52581618af699dd7edf8f6': '332f549dcf52581618af699dd7edf8f6_680487_646_1240.png',
   '74181980fe59f9fd8b38583c2c487e23': '74181980fe59f9fd8b38583c2c487e23_679720_646_1238.png',
+  '005ed5dc0947c3d999237e6bbfd456cf': '005ed5dc0947c3d999237e6bbfd456cf_487874_646_1238.png',
 }
 
 const PERSONAL_TITLES = [
@@ -81,7 +82,7 @@ export async function makePoster({ mode, progress, nickname = '', avatarUrl = ''
   if (!ctx) throw new Error('当前浏览器不支持海报合成')
   const fallbackAvatar = posterAsset('14dba9edc1f271124020174158ee6a13')
   const [background, avatar] = await Promise.all([
-    loadImage(posterAsset(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : '74181980fe59f9fd8b38583c2c487e23')),
+    loadImage(posterAsset(mode === 'team' ? '332f549dcf52581618af699dd7edf8f6' : progress.attempt.status === 'failed' ? '005ed5dc0947c3d999237e6bbfd456cf' : '74181980fe59f9fd8b38583c2c487e23')),
     avatarUrl ? loadImage(avatarUrl).catch(() => loadImage(fallbackAvatar)) : loadImage(fallbackAvatar),
   ])
   ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
