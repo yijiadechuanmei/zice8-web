@@ -454,6 +454,12 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       go(nextMode === 'team' ? 'result' : 'failedResult')
       return
     }
+    if (nextProgress?.attempt?.status === 'active') {
+      setMode(nextMode)
+      setNoticeMode(nextMode)
+      setModal('notice')
+      return
+    }
     if (!data?.isTestUser && window?.status !== 'active') {
       const fallback = nextMode === 'personal'
         ? '本轮个人闯关将于9月14日9点-9月16日18点限时开启，请你准时参与'
@@ -629,7 +635,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <Picture id="c42ebc15530f0f8b314fa0990da30880" x={566} y={9} w={160} h={37} style={{ zIndex: 4 }} onClick={() => go('home')} label="返回首页" />
           </>}
           {page === 'stage' && <StageMap attempt={attempt} onStart={startStage} onHome={() => go('home')} />}
-          {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go(attempt?.status === 'success' || mode === 'team' ? 'result' : 'stage')} onHome={() => go('home')} />}
+          {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go(attempt?.status === 'success' ? 'result' : attempt?.status === 'failed' ? (mode === 'team' ? 'result' : 'failedResult') : 'stage')} onHome={() => go('home')} />}
           {page === 'quiz' && <>
             <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} classes={quizHeaderClasses} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
