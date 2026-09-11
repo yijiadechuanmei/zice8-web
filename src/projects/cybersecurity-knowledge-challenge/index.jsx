@@ -180,6 +180,21 @@ function StageMap({ attempt, onStart, onHome }) {
   </>
 }
 
+function FailedPersonalResult({ attempt, progress, title, onHome, onPoster, onDraw }) {
+  return <>
+    <Picture id="8d5c61fa8c2550005a413a6b958e687a_1258009_750_1624.png" x={0} y={-88} w={750} h={1624} />
+    <Picture id="3327ac268dbe83438e739fae20169a89_109088_736_1008.png" x={7} y={188} w={736} h={1008} className="cyber-art-enter cyber-art-enter-1" />
+    <Picture id="87b737f4600cf5cecccbe0740ea99828_112991_252_252.png" x={243} y={361} w={252} h={252} className="cyber-art-enter cyber-art-enter-2" />
+    <Picture id="a18e80b4237d827bed9f1ba350be9f73_29329_331_91.png" x={53} y={1016} w={331} h={91} onClick={onPoster} label="生成海报" />
+    <Picture id="eb745d7d513279aad4395be380f55d97_35915_306_91.png" x={390} y={1016} w={306} h={91} onClick={onDraw} label="转盘抽奖" />
+    <Picture id={backId} x={25} y={1} w={55} h={55} onClick={onHome} label="返回首页" />
+    <Picture id="text-5ef4d1229e77" x={566} y={9} w={160} h={37} onClick={onHome} label="返回首页" />
+    <div className="cyber-failed-result-prefix">恭喜获得</div>
+    <div className="cyber-failed-result-honor">「{title}」称号</div>
+    <div className="cyber-failed-result-values"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
+  </>
+}
+
 function PersonalRanking({ rows }) {
   const medalArt = [
     'e896946ffe9232bf55d28b5ace6e8430_5551_51_41.png',
@@ -370,7 +385,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerFeedback(null)
     load().then((value) => {
       const nextAttempt = value.modes[mode].attempt
-      if (nextAttempt?.status === 'failed') setModal('failed')
+      if (nextAttempt?.status === 'failed') go('failedResult')
       else if (nextAttempt?.status === 'success' || (nextAttempt?.status === 'active' && !nextAttempt.timerRunning && nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0)) go('stageComplete')
     }).catch(showError)
   }, [answerToast, attempt?.status, remainingSeconds, page, load, mode, now, showError, go])
@@ -405,15 +420,16 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       if (value.modes[mode].attempt?.status === 'active') go(destination)
     })
   }
-  const backTarget = page === 'details' || page === 'draw' ? 'result' : 'home'
+  const resultPage = attempt?.status === 'failed' ? 'failedResult' : 'result'
+  const backTarget = page === 'details' || page === 'draw' ? resultPage : 'home'
   const leaveTarget = (destination) => page === 'quiz' ? leaveQuiz(destination) : go(destination)
-  const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget('result') }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
+  const navigation = { [backId]: { label: '返回', onClick: () => leaveTarget(backTarget) }, [otherBackId]: { label: '返回结果', onClick: () => leaveTarget(resultPage) }, 'text-5ef4d1229e77': { label: '返回首页', onClick: () => leaveTarget('home') } }
   function chooseMode(nextMode) {
     const window = nextMode === 'personal' ? config?.personalCompetitionWindow : config?.teamCompetitionWindow
     const nextProgress = data?.modes?.[nextMode]
     if (nextMode === 'personal' && nextProgress?.attempt?.status === 'failed') {
       setMode(nextMode)
-      go('draw')
+      go('failedResult')
       return
     }
     if (!data?.isTestUser && window?.status !== 'active') {
@@ -441,7 +457,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       if (p.remaining <= 0) { showFormToast('该身份的1次答题机会已用完'); return }
       if (p.name && p.phone && p.companyName && p.departmentName) {
         const started = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify({ name: p.name, phone: p.phone, companyName: p.companyName, departmentName: p.departmentName, teamName: p.teamName || '', mode: nextMode, requestId: uuid() }) }))
-        if (started.modes[nextMode].attempt?.status === 'failed') setModal('failed')
+        if (started.modes[nextMode].attempt?.status === 'failed') go('failedResult')
         else go('stage')
         return
       }
@@ -462,7 +478,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     await run(async () => {
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([])
-      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); setModal('failed') } else go('stage')
+      if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); go('failedResult') } else go('stage')
     })
   }
   async function submit() {
@@ -484,7 +500,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerToast('')
     setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
-    if (nextAttempt.status === 'failed') setModal('failed')
+    if (nextAttempt.status === 'failed') go('failedResult')
     else if (nextAttempt.status === 'success') go('stageComplete')
     else if (nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
   }
@@ -610,6 +626,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
               <button type="button" className="cyber-submit-answer cyber-art-enter cyber-art-enter-5" aria-label="提交答案" onClick={submit} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0}><img src={src('33ad7d9d9142da327a8526b780312e8d_48782_674_91.png')} alt="" draggable={false} /></button>
             </div>
           </>}
+          {page === 'failedResult' && <FailedPersonalResult attempt={attempt} progress={progress} title={resultTitle} onHome={() => go('home')} onPoster={generatePoster} onDraw={openDraw} />}
           {page === 'result' && <>
             <Artwork page={mode === 'team' ? 6 : 5} omit={resultOmit} animate={false} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, '7e0bd602c4c2da0af24422615161d1a8': { label: '生成团队主题海报', onClick: generatePoster, disabled: busy }, ...(mode === 'personal' ? { f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw } } : {}), 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') }, 'text-3b584898787c': { label: '答题详情', onClick: () => go('details') } }} />
             <div className={`cyber-result-values ${mode === 'team' ? 'cyber-result-values-team' : ''}`}><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b>{mode === 'personal' && <b>{progress?.draw ? 0 : 1}</b>}</div>
@@ -653,7 +670,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
         <ol>{NOTICE[noticeMode].items.map((item) => <li key={item}>{item}</li>)}</ol>
       </section>
     </Modal>}
-    {(modal === 'failed' || modal === 'exhausted') && <Modal scale={scale} height={736} label="闯关失败"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">{modal === 'exhausted' ? '答题机会已用完，感谢参与' : attempt?.reason === 'timeout' ? '答题时间已结束，本次答题机会已用完' : '累计答错10题，本次答题机会已用完'}</p>{attempt?.status === 'failed' && <button type="button" className="cyber-failure-poster" onClick={generatePoster}>生成成绩海报</button>}<Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
+    {modal === 'exhausted' && <Modal scale={scale} height={736} label="答题机会已用完"><Picture id="f528abf49fc758b9fb87bb73325d26fd" x={7} y={50} w={736} h={676} /><Picture id="14dba9edc1f271124020174158ee6a13" x={245} y={167} w={258} h={258} /><Picture id="text-e7b2e7bc3382" x={205} y={460} w={341} h={39} /><p className="cyber-failure-copy">答题机会已用完，感谢参与</p><Picture id="text-6071b7c9ff8a" x={223} y={580} w={308} h={89} onClick={() => go('home')} label="返回首页" /></Modal>}
     {modal === 'poster' && <Modal {...modalProps} height={1410} label="我的主题海报">{poster ? <img className="cyber-poster" src={poster} alt={`${progress?.name}的网络安全闯关成绩海报，长按保存`} /> : <div className="cyber-poster-loading">{busy ? '正在合成海报…' : <button type="button" onClick={generatePoster}>重新生成海报</button>}</div>}<p className="cyber-save-tip">长按海报保存图片，分享你的闯关成果</p></Modal>}
     {modal === 'prize' && <Modal scale={scale} height={925} label="抽奖结果"><Picture id="6ba690d2f0dfd483ba9a72685c0a1509" x={7} y={60} w={736} h={840} /><Picture id="18ef814db8126e2d97db42999153391d" x={166} y={143} w={404} h={352} /><Picture id={PRIZE_ART[progress?.draw?.image] || PRIZE_ART.none} x={282} y={236} w={186} h={170} /><div className="cyber-prize-result"><h2>{progress?.draw?.prizeId ? `恭喜获得${progress.draw.name}` : '谢谢参与'}</h2>{progress?.draw?.prizeId ? <><p>核销码号码：<strong>{progress.draw.code}</strong></p><p>请前往集团科创部核销领取</p></> : <p>感谢参与网络安全知识大闯关</p>}</div><Picture id="text-6071b7c9ff8a" x={43} y={770} w={308} h={89} onClick={() => go('home')} label="返回首页" /><Picture id="53ab4740aecbaf208b2f290acfdc3dbf" x={376} y={769} w={324} h={91} onClick={() => go('prizes')} label="前往我的奖品" /></Modal>}
     <div ref={qr} className="cyber-qr-source" aria-hidden="true"><QRCodeCanvas value={`${window.location.origin}/${TYPE}/${activityKey}`} size={384} marginSize={2} level="M" /></div>
