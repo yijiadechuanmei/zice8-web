@@ -39,11 +39,11 @@
 }
 .rss-toast {
   position: fixed;
-  top: 48px;
+  top: 50%;
   left: 50%;
   z-index: 50;
   width: min(calc(100% - 32px), 480px);
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   padding: 13px 16px;
   border: 1px solid rgba(204, 255, 53, 0.35);
   background: rgba(6, 20, 18, 0.94);
