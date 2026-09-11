@@ -662,7 +662,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             <div className="cyber-details cyber-quiz-enter">{attempt?.answers?.filter((a) => !a.correct).map((a, index) => <article key={a.questionId}><header><b>{index + 1} / {a.category}</b><span className="bad">错误</span></header><h3>{a.title}</h3><p>你的答案：{a.selected} 正确答案：{a.answer}</p><p>{a.explanation}</p></article>)}</div>
           </>}
           {page === 'draw' && <>
-            <Artwork page={8} omit={['f79d5d674a55f547e986be446f382a91']} actions={{ ...navigation, ef793ee88f81c81ffda0704aeaadb071: { label: progress?.draw ? '查看抽奖结果' : '开始抽奖', onClick: draw, disabled: busy || spinning }, 'text-fbe1639180d7': { label: '返回结果', onClick: () => go('result'), disabled: spinning } }} />
+            <Artwork page={8} omit={['f79d5d674a55f547e986be446f382a91']} actions={{ ...navigation, ef793ee88f81c81ffda0704aeaadb071: { label: progress?.draw ? '查看抽奖结果' : '开始抽奖', onClick: draw, disabled: busy || spinning }, 'text-fbe1639180d7': { label: '返回结果', onClick: () => go(resultPage), disabled: spinning } }} />
             <Wheel rotation={rotation} prizes={data?.lottery?.prizes} />
             <Picture id="f85af1000c81149e6069211e18180b33" x={266} y={482} w={237} h={267} className="cyber-art-enter cyber-art-enter-3" />
             <p className="cyber-draw-state cyber-quiz-enter">{progress?.draw ? '本次抽奖已完成，可查看结果' : data?.lottery?.enabled ? '答题结束，获得1次抽奖机会' : '抽奖暂未开放，资格已为你保留'}</p>
