@@ -524,9 +524,9 @@ export const layouts = {
     {
       "src": "3edd61c56bf2fe5689e846f94dd6bc06_131454_736_1283.png",
       "x": 7.0,
-      "y": 101.0,
+      "y": 89.0,
       "w": 736.0,
-      "h": 1283.0,
+      "h": 1183.0,
       "modal": false
     },
     {
