@@ -323,7 +323,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const visibleQuestion = answerFeedback?.question ?? currentQuestion
   const remainingSeconds = Math.max(0, ((attempt?.deadline || 0) - now - offset) / 1000)
   const go = useCallback((next) => { setPage(next); setModal(''); setError(''); setFormToast(''); setAnswerToast(''); setSubmittedRemainingSeconds(null); setDrawToast(''); setAnswerFeedback(null); appRef.current?.scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }) }, [])
-  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData((previous) => ({ ...value, isTestUser: value.isTestUser ?? previous?.isTestUser ?? false, nickname: value.nickname || previous?.nickname || '', avatar: value.avatar || previous?.avatar || '' })); setNow(Date.now()); return value }, [])
+  const accept = useCallback((value) => { setOffset(value.serverNow - Date.now()); setData((previous) => ({ ...value, isTestUser: Boolean(value.isTestUser || previous?.isTestUser), nickname: value.nickname || previous?.nickname || '', avatar: value.avatar || previous?.avatar || '' })); setNow(Date.now()); return value }, [])
   const showError = useCallback((err) => {
     if (Number(err?.status) === 401 && reauth('cybersecurity-api-401')) return
     setError(err.message || '请求失败，请重试')
@@ -458,11 +458,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       setMode(nextMode)
       setNoticeMode(nextMode)
       setModal('notice')
-      return
-    }
-    if (nextProgress?.succeeded || nextProgress?.attempt?.status === 'success') {
-      setMode(nextMode)
-      go('result')
       return
     }
     if (!data?.isTestUser && window?.status !== 'active') {
