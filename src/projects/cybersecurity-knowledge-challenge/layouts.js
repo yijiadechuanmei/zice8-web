@@ -530,10 +530,10 @@ export const layouts = {
       "modal": false
     },
     {
-      "src": "081adbf88a30ead37291580219ccb2dd_50210_639_91.png",
-      "x": 55.0,
-      "y": 1203.0,
-      "w": 639.0,
+      "src": "a18e80b4237d827bed9f1ba350be9f73_29329_331_91.png",
+      "x": 53.0,
+      "y": 1088.0,
+      "w": 331.0,
       "h": 91.0,
       "modal": false
     },
@@ -543,14 +543,6 @@ export const layouts = {
       "y": 1088.0,
       "w": 306.0,
       "h": 91.0,
-      "modal": false
-    },
-    {
-      "src": "text-f88ab9fd5abf.png",
-      "x": 52.0,
-      "y": 1087.0,
-      "w": 308.0,
-      "h": 89.0,
       "modal": false
     },
     {

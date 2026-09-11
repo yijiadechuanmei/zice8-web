@@ -658,7 +658,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'result' && (mode === 'team'
             ? <TeamResult attempt={attempt} teamName={resultTeamName} title={resultTitle} onHome={() => go('home')} onPoster={generatePoster} />
             : <>
-              <Artwork page={5} omit={resultOmit} animate={false} actions={{ ...navigation, '081adbf88a30ead37291580219ccb2dd': { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw }, 'text-f88ab9fd5abf': { label: '答题详情', onClick: () => go('details') } }} />
+              <Artwork page={5} omit={resultOmit} animate={false} actions={{ ...navigation, a18e80b4237d827bed9f1ba350be9f73: { label: '生成个人主题海报', onClick: generatePoster, disabled: busy }, f9b8b4230f06e1a083c7c548d535247f: { label: '转盘抽奖', onClick: openDraw } }} />
               <div className="cyber-result-values"><b>{attempt?.score ?? 0}</b><b>{formatTime(attempt?.durationSeconds || 0)}</b><b>{progress?.draw ? 0 : 1}</b></div>
               <div className="cyber-result-prefix">恭喜获得</div>
               <div className="cyber-result-honor">「{resultTitle}」称号</div>
