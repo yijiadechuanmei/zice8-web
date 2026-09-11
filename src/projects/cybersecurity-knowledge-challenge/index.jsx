@@ -520,7 +520,6 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     const nextAttempt = value?.modes?.[mode]?.attempt
     if (!nextAttempt) { setSubmittedRemainingSeconds(null); return }
     const submittedAnswer = nextAttempt.answers.at(-1)
-    setSelected([])
     setAnswerFeedback({ question: submittedQuestion, answer: submittedAnswer })
     setAnswerToast(submittedAnswer?.correct ? '回答正确' : '回答错误')
     await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -528,6 +527,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     setAnswerToast('')
     setSubmittedRemainingSeconds(null)
     setAnswerFeedback(null)
+    setSelected([])
     if (nextAttempt.status === 'failed') go(mode === 'team' ? 'result' : 'failedResult')
     else if (nextAttempt.status === 'success') go('stageComplete')
     else if (nextAttempt.answers.length > 0 && nextAttempt.answers.length % 10 === 0) go('stageComplete')
@@ -573,10 +573,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   }
   function quizOption(option) {
     const q = visibleQuestion
-    const picked = answerFeedback ? answerFeedback.answer.selected.includes(option.key) : selected.includes(option.key)
-    const correct = answerFeedback?.answer.answer.includes(option.key)
-    const wrong = answerFeedback && picked && !correct
-    return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
+    const picked = selected.includes(option.key)
+    return <button key={option.key} type="button" className={`cyber-option ${picked ? 'selected' : ''}`} disabled={busy || Boolean(answerToast) || remainingSeconds <= 0} aria-pressed={picked} onClick={() => setSelected((old) => q.type === 'multiple' ? old.includes(option.key) ? old.filter((k) => k !== option.key) : [...old, option.key] : [option.key])}><span>{option.key}</span><span>{option.text}</span></button>
   }
   async function startStage() {
     setSelected([])
