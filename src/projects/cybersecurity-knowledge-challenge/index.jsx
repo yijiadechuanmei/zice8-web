@@ -185,6 +185,9 @@ function FailedPersonalResult({ attempt, progress, title, onHome, onPoster, onDr
     <Picture id="8d5c61fa8c2550005a413a6b958e687a_1258009_750_1624.png" x={0} y={-88} w={750} h={1624} />
     <Picture id="3327ac268dbe83438e739fae20169a89_109088_736_1008.png" x={7} y={188} w={736} h={1008} className="cyber-art-enter cyber-art-enter-1" />
     <Picture id="87b737f4600cf5cecccbe0740ea99828_112991_252_252.png" x={243} y={361} w={252} h={252} className="cyber-art-enter cyber-art-enter-2" />
+    <Picture id="text-a2b895bfad8c.png" x={55} y={720} w={210} h={170} />
+    <Picture id="text-bf4efdd413c5.png" x={270} y={720} w={209} h={170} />
+    <Picture id="text-514b1c0f73c4.png" x={486} y={720} w={210} h={170} />
     <Picture id="a18e80b4237d827bed9f1ba350be9f73_29329_331_91.png" x={53} y={1016} w={331} h={91} onClick={onPoster} label="生成海报" />
     <Picture id="eb745d7d513279aad4395be380f55d97_35915_306_91.png" x={390} y={1016} w={306} h={91} onClick={onDraw} label="转盘抽奖" />
     <Picture id={backId} x={25} y={1} w={55} h={55} onClick={onHome} label="返回首页" />
