@@ -183,6 +183,7 @@ function StageMap({ attempt, onStart, onHome }) {
 function FailedPersonalResult({ attempt, progress, title, onHome, onPoster, onDraw }) {
   return <>
     <Picture id="8d5c61fa8c2550005a413a6b958e687a_1258009_750_1624.png" x={0} y={-88} w={750} h={1624} />
+    <Picture id="389300487ac03b72d9dbf943ec4a3bd0_8083_592_53.png" x={72} y={67} w={592} h={53} />
     <Picture id="3327ac268dbe83438e739fae20169a89_109088_736_1008.png" x={7} y={188} w={736} h={1008} className="cyber-art-enter cyber-art-enter-1" />
     <Picture id="87b737f4600cf5cecccbe0740ea99828_112991_252_252.png" x={243} y={361} w={252} h={252} className="cyber-art-enter cyber-art-enter-2" />
     <Picture id="text-a2b895bfad8c.png" x={55} y={818} w={210} h={170} />
