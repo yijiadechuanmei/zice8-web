@@ -460,6 +460,11 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
       setModal('notice')
       return
     }
+    if (nextProgress?.succeeded || nextProgress?.attempt?.status === 'success') {
+      setMode(nextMode)
+      go('result')
+      return
+    }
     if (!data?.isTestUser && window?.status !== 'active') {
       const fallback = nextMode === 'personal'
         ? '本轮个人闯关将于9月14日9点-9月16日18点限时开启，请你准时参与'
