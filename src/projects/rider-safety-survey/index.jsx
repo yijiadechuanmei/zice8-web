@@ -153,6 +153,8 @@ export default function RiderSafetySurveyProject({ routeParams }) {
     ? results[submission.resultCode]
     : submission?.result;
   const hasDraw = Boolean(draw?.id);
+  // 本地预览始终保留完整流程；线上以服务端下发的结束标识为准。
+  const activityEnded = !preview && bootstrap?.activityEnded === true;
   const categoryQuestions = questions.filter(
     (item) => item.section === question?.section,
   );
@@ -177,6 +179,10 @@ export default function RiderSafetySurveyProject({ routeParams }) {
 
   const nextQuestion = async () => {
     if (!canContinue || busy) return;
+    if (activityEnded) {
+      setNotice("活动已结束");
+      return;
+    }
     if (index < questions.length - 1) {
       setIndex((value) => value + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -201,6 +207,10 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const submitParticipant = async (event) => {
     event.preventDefault();
     if (busy) return;
+    if (activityEnded) {
+      setNotice("活动已结束");
+      return;
+    }
     const name = participant.name.trim();
     const phone = participant.phone.trim();
     if (!name) {
@@ -243,6 +253,10 @@ export default function RiderSafetySurveyProject({ routeParams }) {
 
   const startDraw = async () => {
     if (busy) return;
+    if (activityEnded) {
+      setNotice("活动已结束");
+      return;
+    }
     setBusy("draw");
     setNotice("");
     setStage("dispatch");
@@ -281,6 +295,11 @@ export default function RiderSafetySurveyProject({ routeParams }) {
   const completeWheel = useCallback(() => setStage("prize"), []);
 
   const acceptPrivacyNotice = () => {
+    if (activityEnded) {
+      setNotice("活动已结束");
+      setStage("intro");
+      return;
+    }
     setPrivacyAccepted(true);
     setNotice("");
     setStage("profile");
@@ -312,7 +331,19 @@ export default function RiderSafetySurveyProject({ routeParams }) {
         </div>
       ) : null}
       {stage === "intro" ? (
-        <Intro onStart={() => setStage("privacy")} />
+        <Intro
+          onStart={() => {
+            if (!preview && !bootstrap) {
+              setNotice("活动加载中，请稍候");
+              return;
+            }
+            if (activityEnded) {
+              setNotice("活动已结束");
+              return;
+            }
+            setStage("privacy");
+          }}
+        />
       ) : null}
       {stage === "privacy" ? (
         <PrivacyNotice
