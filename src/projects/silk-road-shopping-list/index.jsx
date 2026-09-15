@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DeleteOutlined, DownloadOutlined, SyncOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
@@ -655,6 +656,7 @@ export default function SilkRoadShoppingList() {
   const videoRef = useRef(null)
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
+  const bgmConfig = useMemo(() => publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {}, [publicConfig])
   const { authReady, reauth } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
   useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
 
@@ -708,11 +710,12 @@ export default function SilkRoadShoppingList() {
     setCartOpen(false)
     setPage('poster')
   }
-  if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return <main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
+  const renderPage = (content) => <>{content}<ActivityBgmPlayer bgm={bgmConfig} activityKey={SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY} /></>
+  if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return renderPage(<main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
     {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} />}
     {page === 'orientation' && <OrientationPrompt />}
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
-  </main>
-  if (page === 'poster') return <main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>
-  return <main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>
+  </main>)
+  if (page === 'poster') return renderPage(<main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>)
+  return renderPage(<main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>)
 }
