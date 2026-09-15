@@ -502,12 +502,13 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
     event.preventDefault()
     const payload = { ...form, name: form.name.trim(), phone: form.phone.trim(), companyName: form.companyName.trim(), departmentName: form.departmentName.trim(), mode, requestId: requestId.current }
     if (!payload.name || !payload.companyName || !payload.departmentName) { showFormToast('请完整填写参与信息'); return }
+    if (mode === 'team' && payload.name.split(/[,，]/).map((name) => name.trim()).filter(Boolean).length !== 3) { showFormToast('请分别输入3名参赛人员姓名，并用逗号隔开'); return }
     if (!/^1[3-9]\d{9}$/.test(payload.phone)) { showFormToast('请输入正确的手机号码'); return }
     await run(async () => {
       const value = accept(await request(`${base}/start`, { method: 'POST', body: JSON.stringify(payload) }))
       setSelected([])
       if (value.modes[mode].attempt?.status === 'failed') { requestId.current = uuid(); go(mode === 'team' ? 'result' : 'failedResult') } else go('stage')
-    })
+    }, (err) => showFormToast(err.message || '提交失败，请稍后再试'))
   }
   async function submit() {
     const generation = quizGeneration.current
@@ -623,7 +624,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
             {infoArt.fields.map(([image, top], index) => <img key={image} className={`cyber-register-field-art cyber-art-enter cyber-art-enter-${index + 1}`} style={rect(67, top, 633, image.startsWith('2acceb') ? 136 : 132)} src={src(image)} alt="" draggable={false} />)}
             <img className="cyber-register-title cyber-art-enter cyber-art-enter-0" style={{ top: infoArt.titleTop }} src={src(infoArt.title)} alt={`${labelMode(mode)}参与信息`} draggable={false} />
             <form className="cyber-register-page" noValidate onSubmit={start}>
-              <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder="点击输入姓名" value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input aria-label="姓名" autoComplete="name" required maxLength={40} placeholder={mode === 'team' ? '请分别输参赛人员姓名，用逗号隔开' : '点击输入姓名'} value={form.name} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input aria-label="手机号码" autoComplete="tel" required inputMode="tel" pattern="1[3-9][0-9]{9}" maxLength={11} placeholder="点击输入手机号码" value={form.phone} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               <input aria-label="公司名称" required maxLength={80} placeholder={mode === 'team' ? '点击输入团队名称' : '点击输入公司名称'} value={form.companyName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
               <input aria-label="部门名称" required maxLength={80} placeholder={mode === 'team' ? '点击输入推荐码' : '点击输入部门名称'} value={form.departmentName} readOnly={Boolean(progress?.used)} onChange={(e) => setForm({ ...form, departmentName: e.target.value })} />
