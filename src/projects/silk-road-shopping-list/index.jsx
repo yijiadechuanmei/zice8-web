@@ -3,6 +3,7 @@ import { DeleteOutlined, DownloadOutlined, SyncOutlined } from '@ant-design/icon
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
+import { activityAudioService } from '../../shared/audio/activityAudioService'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
@@ -654,6 +655,7 @@ export default function SilkRoadShoppingList() {
   const [cartOpen, setCartOpen] = useState(false)
   const [profile, setProfile] = useState({ nickname: '丝路旅人', avatar: '' })
   const videoRef = useRef(null)
+  const bgmWasPlayingBeforeVideoRef = useRef(false)
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
   const bgmConfig = useMemo(() => publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {}, [publicConfig])
@@ -693,14 +695,22 @@ export default function SilkRoadShoppingList() {
   }, [page])
   useEffect(() => {
     if (page !== 'video') return
+    bgmWasPlayingBeforeVideoRef.current = activityAudioService.getState().playing
+    activityAudioService.pause('video')
     const video = videoRef.current
-    if (!video) return
-    video.muted = false
-    video.volume = 1
-    video.play().catch(() => {
-      video.muted = true
-      video.play().catch(() => null)
-    })
+    if (video) {
+      video.muted = false
+      video.volume = 1
+      video.play().catch(() => {
+        video.muted = true
+        video.play().catch(() => null)
+      })
+    }
+    return () => {
+      if (!bgmWasPlayingBeforeVideoRef.current) return
+      bgmWasPlayingBeforeVideoRef.current = false
+      activityAudioService.play('video-resume')
+    }
   }, [page])
 
   const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
