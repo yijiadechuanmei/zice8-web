@@ -315,7 +315,8 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
   const progress = data?.modes?.[mode]
   const attempt = progress?.attempt
   const resultTitle = achievementTitle(mode, progress)
-  const resultTeamName = progress?.teamName || progress?.companyName || '网络安全先锋队'
+  // 团队报名表将团队名称写入 companyName；teamName 兼容早期数据，可能同时含有推荐码。
+  const resultTeamName = progress?.companyName || progress?.teamName || '网络安全先锋队'
   const resultOmit = mode === 'team'
     ? ['text-d16b2a1cbe55', '024a2050c9d140d62c32baa81ee1ee76']
     : ['text-d16b2a1cbe55', 'a06e29bd2b591cf64d6102c6d5c7f4cd']

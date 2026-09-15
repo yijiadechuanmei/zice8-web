@@ -96,7 +96,8 @@ export async function makePoster({ mode, progress, nickname = '', avatarUrl = ''
     ctx.fillText(String(progress.attempt.score), 190, statY)
     ctx.fillText(formatTime(progress.attempt.durationSeconds), 449, statY)
   }
-  const teamName = progress.teamName || progress.companyName || '网络安全先锋队'
+  // 团队报名表将团队名称写入 companyName；teamName 兼容早期数据，可能同时含有推荐码。
+  const teamName = progress.companyName || progress.teamName || '网络安全先锋队'
   ctx.fillStyle = '#9b6b31'
   const fit = (text, maxWidth, size) => { while (size > 14) { ctx.font = `${size}px sans-serif`; if (ctx.measureText(text).width <= maxWidth) break; size-- } }
   const ellipsis = (text, maxWidth) => {
