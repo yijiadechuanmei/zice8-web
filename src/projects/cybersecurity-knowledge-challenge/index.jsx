@@ -636,7 +636,7 @@ export default function CybersecurityKnowledgeChallengeProject({ routeParams }) 
           {page === 'stage' && <StageMap attempt={attempt} onStart={startStage} onHome={() => go('home')} />}
           {page === 'stageComplete' && <StageComplete attempt={attempt} onContinue={() => go(attempt?.status === 'success' ? 'result' : attempt?.status === 'failed' ? (mode === 'team' ? 'result' : 'failedResult') : 'stage')} onHome={() => go('home')} />}
           {page === 'quiz' && <>
-            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} classes={quizHeaderClasses} actions={{ ...navigation, '5c1f7141eb2dc56bf6553d7a1da68386': { label: '直接完成答题', onClick: completeAll, disabled: busy } }} />
+            <Artwork page={mode === 'team' ? 4 : 3} omit={commonQuizOmit} classes={quizHeaderClasses} actions={navigation} />
             <div className="cyber-quiz-guide">当前分类：{visibleQuestion?.category || ''}<br />答题过程中可查看进度与剩余时间</div>
             <div className="cyber-quiz-timer cyber-quiz-enter" role="timer">{formatCountdown(submittedRemainingSeconds ?? remainingSeconds)}</div>
             <div className="cyber-progress cyber-quiz-enter"><b>{String(((attempt?.answers.length || 0) % 10) + 1).padStart(2, '0')}</b><span>/10</span></div>
