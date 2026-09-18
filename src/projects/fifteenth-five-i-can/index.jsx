@@ -391,7 +391,7 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
           const active = selected.includes(keyword);
           return (
             <button
-              key={keyword}
+              key={`${keyword}-${index}`}
               type="button"
               className={`ffic-keyword ${active ? "is-selected" : ""}`}
               style={{
