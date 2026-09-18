@@ -92,10 +92,13 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     activityKey,
     publicConfig,
   );
-  const notify = (message, correct = false) => {
+  const notify = (message, correct = false, onDismiss) => {
     window.clearTimeout(timer.current);
     setToast({ message, correct });
-    timer.current = window.setTimeout(() => setToast(null), 1500);
+    timer.current = window.setTimeout(() => {
+      setToast(null);
+      onDismiss?.();
+    }, 1500);
   };
   const load = async () => {
     setLoading(true);
@@ -223,14 +226,16 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         return;
       }
       const progress = publicProgress.current;
-      updatePublicState({
-        started: true,
-        answers: [
-          ...(Array.isArray(progress.answers) ? progress.answers : []),
-          { questionNo: question.no, selectedOptions: [...selectedOptions].sort() },
-        ],
+      notify("回答正确，继续加油！", true, () => {
+        updatePublicState({
+          started: true,
+          answers: [
+            ...(Array.isArray(progress.answers) ? progress.answers : []),
+            { questionNo: question.no, selectedOptions: [...selectedOptions].sort() },
+          ],
+        });
+        setSelectedOptions([]);
       });
-      notify("回答正确，继续加油！", true);
       return;
     }
     const next = await run(() =>
@@ -240,11 +245,17 @@ export default function FifteenthFiveICanProject({ routeParams }) {
       }),
     );
     if (!next) return;
+    const correct = Boolean(next.feedback?.correct);
     notify(
       next.feedback?.message || "回答正确，继续加油！",
-      Boolean(next.feedback?.correct),
+      correct,
+      correct
+        ? () => {
+          setState(next);
+          setSelectedOptions([]);
+        }
+        : undefined,
     );
-    setState(next);
   }
   async function saveFutureMessage() {
     const normalizedMessage = futureMessage.trim();
@@ -350,11 +361,13 @@ export default function FifteenthFiveICanProject({ routeParams }) {
           />
         ) : null}
         {toast ? (
-          <div
-            className={`ffic-toast ${toast.correct ? "is-correct" : "is-wrong"}`}
-            role="status"
-          >
-            {toast.message}
+          <div className="ffic-toast-layer" aria-live="polite">
+            <div
+              className={`ffic-toast ${toast.correct ? "is-correct" : "is-wrong"}`}
+              role="status"
+            >
+              {toast.message}
+            </div>
           </div>
         ) : null}
         {error && state ? (
