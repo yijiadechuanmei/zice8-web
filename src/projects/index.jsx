@@ -31,6 +31,7 @@ const QualityMonthProject = lazy(() => import('./quality-month/index.jsx'))
 const LvyuanFruitfulGamesProject = lazy(() => import('./lvyuan-fruitful-games/index.jsx'))
 const SilkRoadShoppingListProject = lazy(() => import('./silk-road-shopping-list/index.jsx'))
 const XiangyuGlobalTreasureProject = lazy(() => import('./xiangyu-global-treasure/index.jsx'))
+const FifteenthFiveICanProject = lazy(() => import('./fifteenth-five-i-can/index.jsx'))
 
 const activityTypeProjects = {
   cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),
@@ -49,6 +50,7 @@ const activityTypeProjects = {
   lvyuan_consumer_game_collection: LvyuanFruitfulGamesProject,
   silk_road_shopping_list: SilkRoadShoppingListProject,
   xiangyu_global_treasure: XiangyuGlobalTreasureProject,
+  fifteenth_five_i_can: FifteenthFiveICanProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
@@ -68,6 +70,11 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/fifteenth_five_i_can/:activityKey',
+    Component: FifteenthFiveICanProject,
+    activityGate: true,
+  },
   {
     path: '/quality-month/:activityKey',
     Component: QualityMonthProject,
