@@ -407,9 +407,8 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
             src={assetUrl(layout.image, assetsBaseUrl)}
             alt={layout.label}
             style={{
-              "--i": index,
-              "--row": index % 4,
-              "--start": `${-28 - (index % 6) * 15}%`,
+              "--top": `${2 + (index % 3) * 34}%`,
+              "--delay": `${-Math.floor(index / 3) * 7}s`,
               "--w": `${layout.width / 7.5}%`,
             }}
           />
@@ -541,7 +540,7 @@ function FutureMessage({
                 </button>
               ))}
             </div>
-            <input
+            <textarea
               value={wish}
               maxLength="15"
               onChange={(event) => onWish(event.target.value)}
