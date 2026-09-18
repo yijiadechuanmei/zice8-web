@@ -15,11 +15,76 @@ import {
   ASSETS,
   FIFTEENTH_FIVE_I_CAN_ACTIVITY_KEY,
   KEYWORD_LAYOUT,
+  PUBLIC_ACTIVITY_DATA,
   assetUrl,
   mergeConfig,
 } from "./config";
 import { renderCertificatePoster } from "./poster";
 import "./styles.css";
+
+const PUBLIC_PROGRESS_STORAGE_PREFIX = "fifteenth_five_i_can_progress";
+
+function publicProgressKey(activityKey) {
+  return `${PUBLIC_PROGRESS_STORAGE_PREFIX}:${activityKey}`;
+}
+
+function readPublicProgress(activityKey) {
+  try {
+    const value = JSON.parse(localStorage.getItem(publicProgressKey(activityKey)) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePublicProgress(activityKey, progress) {
+  try {
+    localStorage.setItem(publicProgressKey(activityKey), JSON.stringify(progress));
+  } catch {
+    // Private browsing can disable storage; the activity remains usable for this visit.
+  }
+}
+
+function publicState(progress = {}) {
+  const answers = Array.isArray(progress.answers) ? progress.answers : [];
+  const selectedKeywords = Array.isArray(progress.selectedKeywords)
+    ? progress.selectedKeywords.filter((item) => PUBLIC_ACTIVITY_DATA.keywords.includes(item))
+    : [];
+  const completeQuiz = answers.length === PUBLIC_ACTIVITY_DATA.questions.length;
+  const futureMessage = typeof progress.futureMessage === "string" ? progress.futureMessage : "";
+  const wish = typeof progress.wish === "string" ? progress.wish : "";
+  return {
+    phase: !progress.started
+      ? "home"
+      : futureMessage
+        ? "certificate"
+        : completeQuiz
+          ? "future-message"
+          : selectedKeywords.length >= 2
+            ? "quiz"
+            : "keywords",
+    totalQuestions: PUBLIC_ACTIVITY_DATA.questions.length,
+    answeredCount: answers.length,
+    selectedKeywords,
+    keywordOptions: PUBLIC_ACTIVITY_DATA.keywords,
+    wishPresets: PUBLIC_ACTIVITY_DATA.wishPresets,
+    currentQuestion:
+      !completeQuiz && selectedKeywords.length >= 2
+        ? PUBLIC_ACTIVITY_DATA.questions[answers.length]
+        : null,
+    futureMessage,
+    wish,
+    nickname: "中汽青年",
+  };
+}
+
+function hasCorrectOptions(question, selectedOptions) {
+  const selected = [...new Set(selectedOptions)].sort();
+  return (
+    selected.length === question.correctOptions.length &&
+    selected.every((option, index) => option === question.correctOptions[index])
+  );
+}
 
 export default function FifteenthFiveICanProject({ routeParams }) {
   const activityKey =
@@ -38,6 +103,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const timer = useRef(null);
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
+  const isPublicActivity = publicConfig?.accessMode === "public";
 
   useWechatShare(activityKey, publicConfig);
   const { authReady, blockedMessage, reauth } = useWechatAuth(
@@ -62,6 +128,13 @@ export default function FifteenthFiveICanProject({ routeParams }) {
       setLoading(false);
     }
   };
+  const updatePublicState = (patch) => {
+    const nextProgress = { ...readPublicProgress(activityKey), ...patch };
+    writePublicProgress(activityKey, nextProgress);
+    const nextState = publicState(nextProgress);
+    setState(nextState);
+    return nextState;
+  };
 
   useEffect(() => {
     getPublicConfig(activityKey)
@@ -70,8 +143,15 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     return () => window.clearTimeout(timer.current);
   }, [activityKey]);
   useEffect(() => {
-    if (authReady) load();
-  }, [authReady]);
+    if (!authReady) return;
+    if (isPublicActivity) {
+      setError("");
+      setState(publicState(readPublicProgress(activityKey)));
+      setLoading(false);
+      return;
+    }
+    load();
+  }, [activityKey, authReady, isPublicActivity]);
   useEffect(() => {
     if (blockedMessage) {
       setLoading(false);
@@ -113,6 +193,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     }
   }
   async function begin() {
+    if (isPublicActivity) {
+      updatePublicState({ started: true });
+      return;
+    }
     const next = await run(() => start(activityKey));
     if (next) setState(next);
   }
@@ -126,6 +210,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
   }
   async function continueQuiz() {
+    if (isPublicActivity) {
+      updatePublicState({ started: true, selectedKeywords });
+      return;
+    }
     const next = await run(() => saveKeywords(activityKey, selectedKeywords));
     if (next) setState(next);
   }
@@ -141,6 +229,23 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
   }
   async function answer() {
+    if (isPublicActivity) {
+      const question = PUBLIC_ACTIVITY_DATA.questions[state.answeredCount];
+      if (!question || !hasCorrectOptions(question, selectedOptions)) {
+        notify("回答错误，请重新作答");
+        return;
+      }
+      const progress = readPublicProgress(activityKey);
+      updatePublicState({
+        started: true,
+        answers: [
+          ...(Array.isArray(progress.answers) ? progress.answers : []),
+          { questionNo: question.no, selectedOptions: [...selectedOptions].sort() },
+        ],
+      });
+      notify("回答正确，继续加油！", true);
+      return;
+    }
     const next = await run(() =>
       submitAnswer(activityKey, {
         questionNo: state.currentQuestion.no,
@@ -155,6 +260,19 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setState(next);
   }
   async function saveMessage() {
+    if (isPublicActivity) {
+      const normalizedMessage = futureMessage.trim();
+      const normalizedWish = wish.trim();
+      if (!normalizedMessage) {
+        setError("请写下给2030年的一句话");
+        return;
+      }
+      updatePublicState({
+        futureMessage: normalizedMessage,
+        wish: normalizedWish,
+      });
+      return;
+    }
     const next = await run(() =>
       submitFutureMessage(activityKey, { futureMessage, wish }),
     );

@@ -62,6 +62,33 @@ export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y], index) => ({
   image: keywordArt[index],
 }));
 
+// This activity can be configured as public, so its learning progress must be
+// usable without a WeChat identity or a JWT-backed participant record.
+export const PUBLIC_ACTIVITY_DATA = {
+  keywords: [
+    "战略使命", "高质量发展", "科技创新", "新质生产力", "产业治理", "公共基础",
+    "检测认证", "再生利用", "新能源汽车", "智能网联", "低空经济", "人工智能",
+    "国际化布局", "协同效能", "党建引领", "数智融合", "人才活力", "风险防控",
+  ],
+  wishPresets: ["奔赴更好的2030", "让梦想照进现实", "与时代同频共振", "成为更好的自己"],
+  questions: [
+    { no: 1, type: "single", title: "“十四五”时期中汽中心已经取得了历史性、开创性成就，向（）战略目标迈出坚实步伐", options: [{ id: "A", text: "“四个最”" }, { id: "B", text: "“五个最”" }, { id: "C", text: "“俩个最”" }, { id: "D", text: "“三个最”" }], correctOptions: ["A"] },
+    { no: 2, type: "single", title: "中汽中心“十五五”确立的发展战略简称是", options: [{ id: "A", text: "“一四二三”" }, { id: "B", text: "“一二三四”" }, { id: "C", text: "“五二五”" }, { id: "D", text: "“二五二”" }], correctOptions: ["A"] },
+    { no: 3, type: "multiple", title: "中汽中心的核心功能有哪些？", options: [{ id: "A", text: "汽车产业标准创新引领" }, { id: "B", text: "汽车产业战略政策支撑" }, { id: "C", text: "汽车行业共性技术供给" }, { id: "D", text: "汽车产品价值提升促进" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 4, type: "multiple", title: "中汽中心的核心竞争力有哪些？", options: [{ id: "A", text: "全价值链技术服务能力" }, { id: "B", text: "前瞻科技策源创新能力" }, { id: "C", text: "基础资源建设整合能力" }, { id: "D", text: "产业生态构建协同能力" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 5, type: "multiple", title: "中汽中心“十五五”规划中“两聚焦两着力”指的是什么？", options: [{ id: "A", text: "聚焦战略使命和高质量发展的内生需求，着力增强汽车全价值链协同效能" }, { id: "B", text: "聚焦创新驱动可持续发展的根本要求，着力培育新质发展动能" }, { id: "C", text: "聚焦产业变革和市场竞争的现实需要，着力扩大传统业务规模优势" }, { id: "D", text: "聚焦年度经营目标和考核激励的刚性约束，着力提升短期经营效益" }], correctOptions: ["A", "B"] },
+    { no: 6, type: "single", title: "中汽中心“十五五”新业务布局是什么？", options: [{ id: "A", text: "“1+6+X”" }, { id: "B", text: "“1+7+X”" }, { id: "C", text: "“1+8+X”" }, { id: "D", text: "“1+9+X”" }], correctOptions: ["D"] },
+    { no: 7, type: "single", title: "以下哪一项不包含在中汽中心战略目标中？", options: [{ id: "A", text: "成为政府最认可的产业智库" }, { id: "B", text: "成为行业最尊重的合作伙伴" }, { id: "C", text: "成为国际最具影响力的检测机构" }, { id: "D", text: "成为员工最自豪的事业平台" }], correctOptions: ["C"] },
+    { no: 8, type: "single", title: "中汽中心“十五五”国内区域网络化布局中，集团总部位于哪个区域？", options: [{ id: "A", text: "京津冀" }, { id: "B", text: "长三角" }, { id: "C", text: "粤港澳大湾区" }, { id: "D", text: "成渝地区" }], correctOptions: ["A"] },
+    { no: 9, type: "single", title: "中汽中心“十五五”国际化布局中，哪个区域的定位是“打造提升中汽中心国际影响力的标杆工程”？", options: [{ id: "A", text: "日韩" }, { id: "B", text: "欧洲" }, { id: "C", text: "中亚" }, { id: "D", text: "东南亚" }], correctOptions: ["B"] },
+    { no: 10, type: "multiple", title: "中汽中心“十五五”打造的“1+9+X”新业务布局中，9大产业关键环节包含以下哪些选项？", options: [{ id: "A", text: "产业治理" }, { id: "B", text: "公共基础" }, { id: "C", text: "检测认证" }, { id: "D", text: "再生利用" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 11, type: "multiple", title: "中汽中心“十五五”的战新业务群包含以下哪些？", options: [{ id: "A", text: "新能源汽车业务群" }, { id: "B", text: "智能网联汽车业务群" }, { id: "C", text: "低空经济业务群" }, { id: "D", text: "人工智能业务群" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 12, type: "multiple", title: "以下选项中，属于中汽中心“十五五”规划实施保障措施的有哪些？", options: [{ id: "A", text: "坚持党的领导，持之以恒加强党建" }, { id: "B", text: "以干事者为本，激发人才队伍活力" }, { id: "C", text: "加速数智融合，赋能业务转型发展" }, { id: "D", text: "防范化解重大风险" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 13, type: "multiple", title: "以下选项中，属于中汽中心“十五五”规划中专精特新基地的有哪些？", options: [{ id: "A", text: "盐城场地" }, { id: "B", text: "昆明高原场地" }, { id: "C", text: "呼伦贝尔高寒场地" }, { id: "D", text: "海南高温场地" }], correctOptions: ["A", "B", "C", "D"] },
+    { no: 14, type: "multiple", title: "以下选项中，哪些属于中汽中心团委组织的面向青年的评选活动？", options: [{ id: "A", text: "“五小”创新大赛" }, { id: "B", text: "青年创新创效大赛" }, { id: "C", text: "十大向上向上好青年评选" }], correctOptions: ["A", "B", "C"] },
+  ],
+};
+
 export function assetUrl(
   filename,
   baseUrl = FIFTEENTH_FIVE_I_CAN_ASSETS_BASE_URL,
