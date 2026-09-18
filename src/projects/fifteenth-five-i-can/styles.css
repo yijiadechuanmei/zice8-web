@@ -5,7 +5,7 @@ body.ffic-no-scroll { overflow: hidden; }
 .ffic-stage--home { background-image: var(--ffic-home-bg); }
 .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; }
 
-.ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template, .ffic-certificate__action { position: absolute; display: block; }
+.ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template, .ffic-certificate__action { position: absolute; display: block; }
 .ffic-home__title { left: 4.1333%; top: 8.8669%; width: 46.1333%; }
 .ffic-home__hero { left: 16.1333%; top: 16.0099%; width: 66.1333%; }
 .ffic-home__subtitle { left: 27.6%; top: 34.2365%; width: 43.3333%; }
@@ -17,7 +17,7 @@ body.ffic-no-scroll { overflow: hidden; }
 
 /* IVX page 2: x=0,y=144,w=750,h=180. */
 .ffic-barrage { position: absolute; left: 0; top: 8.8669%; width: 100%; height: 11.0837%; overflow: hidden; pointer-events: none; }
-.ffic-barrage img { position: absolute; left: -24%; top: calc(10% + var(--i) * 28%); width: var(--w); height: auto; animation: ffic-keyword-barrage 8s linear infinite; animation-delay: calc(var(--i) * -1.6s); }
+.ffic-barrage img { position: absolute; left: var(--start); top: calc(5% + var(--row) * 23%); width: var(--w); height: auto; animation: ffic-keyword-barrage 22s linear infinite; animation-delay: calc(var(--i) * -.65s); }
 .ffic-keywords__heading { left: 31.7333%; top: 21.3054%; width: 32%; }
 .ffic-keywords__caption { left: 20.6667%; top: 64.6552%; width: 55.0667%; }
 .ffic-keyword-cloud { position: absolute; inset: 0; }
@@ -36,9 +36,9 @@ body.ffic-no-scroll { overflow: hidden; }
 .ffic-options button.is-selected { color: #d33969; font-weight: 800; }
 .ffic-quiz__submit { left: 33.2%; top: 72.7229%; width: 32.4%; height: 5.3571%; }
 
-/* IVX message page uses the same x=65,y=411 card and x=118,y=466 text column. */
+/* IVX question 15 uses the same x=65,y=411 card and x=118,y=466 text column. */
+.ffic-form--message .ffic-form__title { left: 22.2667%; top: 20.5665%; width: 54.2667%; }
 .ffic-form__card { left: 8.6667%; top: 25.308%; width: 82.8%; }
-.ffic-form__caption { left: 17.7333%; top: 65.6404%; width: 63.6%; }
 .ffic-form__content { position: absolute; left: 15.7333%; top: 28.6946%; width: 68%; height: 30.6034%; overflow-y: auto; color: #0c1f85; }
 .ffic-form label, .ffic-wishes { display: block; font-size: 3.4667cqw; font-weight: 700; line-height: 1.45; }
 .ffic-form textarea, .ffic-form input { box-sizing: border-box; width: 100%; border: 0; border-bottom: 1px solid #0c1f85; border-radius: 0; background: transparent; color: #0c1f85; font: inherit; outline: none; }
@@ -48,7 +48,13 @@ body.ffic-no-scroll { overflow: hidden; }
 .ffic-wishes > div { display: flex; flex-wrap: wrap; gap: 1.6cqw; margin: 2cqw 0; }
 .ffic-wishes button { padding: 0; border: 0; background: transparent; color: #0c1f85; font: inherit; font-size: 2.9333cqw; cursor: pointer; }
 .ffic-wishes button.is-selected { color: #d33969; text-decoration: underline; }
-.ffic-form__submit { left: 11.3333%; top: 73.399%; width: 76.5333%; height: 5.4803%; }
+.ffic-form--message .ffic-form__caption { left: 17.7333%; top: 65.6404%; width: 63.6%; }
+.ffic-form--message .ffic-form__submit { left: 11.3333%; top: 73.399%; width: 76.5333%; height: 5.4803%; }
+
+/* IVX wish page: title x=234,y=335; caption x=95,y=1086; action x=84,y=1178. */
+.ffic-form--wish .ffic-form__title { left: 31.2%; top: 20.6281%; width: 36.2667%; }
+.ffic-form--wish .ffic-form__caption { left: 12.6667%; top: 66.8719%; width: 73.6%; }
+.ffic-form--wish .ffic-form__submit { left: 11.2%; top: 72.537%; width: 76.5333%; height: 5.5419%; }
 
 /* IVX certificate page: heading x=40,y=338; certificate x=82,y=416. */
 .ffic-certificate__heading { left: 5.3333%; top: 20.8128%; width: 91.7333%; }

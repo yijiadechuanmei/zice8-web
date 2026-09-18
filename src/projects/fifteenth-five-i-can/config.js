@@ -17,6 +17,9 @@ export const ASSETS = {
   quizTitle: "a8d939e97f7a876d76b267c434994b5a_28261_407_58.png",
   formAction: "416248c2670cc5b38a389f77a7f8d4f9_94003_574_89.png",
   formCaption: "4ad77fa9618ec826f5d34dcc922204d9_49067_477_74.png",
+  wishAction: "012c7beb8756b6c894cd1122ec85c284_96871_574_90.png",
+  wishTitle: "df54bb5a2d56536e127adef85014c343_20785_272_58.png",
+  wishCaption: "f7b255e61060f35a97191bbf163d0373_30360_552_36.png",
   certificate: "7f360e9f81acdbe06a27c1bdc4677941_851184_583_815.png",
   certificateHeading: "396de029be057e28c751a5f79e89e081_35380_688_48.png",
   certificateAction: "0e6300bf3354b0705df74a31ee34d44d_16735_152_55.png",
@@ -34,9 +37,9 @@ const keywordArt = [
   "26e1753e90a20d7e9339d1acf0f8cb83_15007_149_43.png",
   "bd9f75c75d1d627a0ed1f877d1b41d33_13924_150_43.png",
   "4bb0e23522ece9cb99286b8e909d4839_13866_150_43.png",
-  "https://file3.ih5.cn/v35/edt/u10013600/cb361ee032e5967e4c9f24e925564781_15491_149_44.png",
+  "cb361ee032e5967e4c9f24e925564781_15491_149_44.png",
   "9d21bd5379725c81b909d7bdec0edd81_14168_149_43.png",
-  "https://file3.ih5.cn/v35/edt/u10013600/b5e0cf4128e65510e62e5d4f9a80fd74_15006_149_43.png",
+  "b5e0cf4128e65510e62e5d4f9a80fd74_15006_149_43.png",
   "b8377b091fb4c5b089e75e2b1896fcb7_15389_150_44.png",
   "757c7e9bb430fb2c6f9ffac44e71bd40_14622_150_43.png",
   "31eb47c6a099f472dd0c3ebb8aecf0ed_15335_150_44.png",
@@ -72,8 +75,18 @@ const keywordCoordinates = [
   [192, 495, 149, 43], [233, 428, 149, 44], [80, 449, 149, 44],
   [27, 509, 150, 44],
 ];
+const keywordLabels = [
+  "战略使命", "高质量发展", "科技创新", "新质生产力", "产业治理", "公共基础",
+  "检测认证", "再生利用", "新能源汽车", "智能网联", "低空经济", "人工智能",
+  "国际化布局", "协同效能", "党建引领", "数智融合", "人才活力", "风险防控",
+  "全链奋进", "创新突破", "国际化开拓", "笃行实干", "新质生产力", "开放共赢",
+  "强核聚力", "人才迸发", "开放共赢", "国际化标杆工程", "成渝协同", "开放共赢",
+  "粤港澳大湾区", "京津冀总部", "长三角布局", "长江经济带",
+];
 
 export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y, width, height], index) => ({
+  id: `keyword-${index + 1}`,
+  label: keywordLabels[index],
   x,
   y,
   width,
@@ -84,14 +97,7 @@ export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y, width, height], ind
 // This activity can be configured as public, so its learning progress must be
 // usable without a WeChat identity or a JWT-backed participant record.
 export const PUBLIC_ACTIVITY_DATA = {
-  keywords: [
-    "战略使命", "高质量发展", "科技创新", "新质生产力", "产业治理", "公共基础",
-    "检测认证", "再生利用", "新能源汽车", "智能网联", "低空经济", "人工智能",
-    "国际化布局", "协同效能", "党建引领", "数智融合", "人才活力", "风险防控",
-    "全链奋进", "创新突破", "国际化开拓", "笃行实干", "新质生产力", "开放共赢",
-    "强核聚力", "人才迸发", "开放共赢", "国际化标杆工程", "成渝协同", "开放共赢",
-    "粤港澳大湾区", "京津冀总部", "长三角布局", "长江经济带",
-  ],
+  keywords: KEYWORD_LAYOUT.map(({ id }) => id),
   wishPresets: ["奔赴更好的2030", "让梦想照进现实", "与时代同频共振", "成为更好的自己"],
   questions: [
     { no: 1, type: "single", title: "“十四五”时期中汽中心已经取得了历史性、开创性成就，向（）战略目标迈出坚实步伐", options: [{ id: "A", text: "“四个最”" }, { id: "B", text: "“五个最”" }, { id: "C", text: "“俩个最”" }, { id: "D", text: "“三个最”" }], correctOptions: ["A"] },
@@ -110,6 +116,10 @@ export const PUBLIC_ACTIVITY_DATA = {
     { no: 14, type: "multiple", title: "以下选项中，哪些属于中汽中心团委组织的面向青年的评选活动？", options: [{ id: "A", text: "“五小”创新大赛" }, { id: "B", text: "青年创新创效大赛" }, { id: "C", text: "十大向上向上好青年评选" }], correctOptions: ["A", "B", "C"] },
   ],
 };
+
+export function keywordLabel(keywordId) {
+  return KEYWORD_LAYOUT.find(({ id }) => id === keywordId)?.label || keywordId;
+}
 
 export function assetUrl(
   filename,

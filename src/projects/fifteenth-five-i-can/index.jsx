@@ -17,6 +17,7 @@ import {
   KEYWORD_LAYOUT,
   PUBLIC_ACTIVITY_DATA,
   assetUrl,
+  keywordLabel,
   mergeConfig,
 } from "./config";
 import { renderCertificatePoster } from "./poster";
@@ -33,8 +34,10 @@ function publicState(progress = {}) {
   return {
     phase: !progress.started
       ? "home"
-      : futureMessage
+      : futureMessage && progress.wishSubmitted
         ? "certificate"
+        : futureMessage
+          ? "future-wish"
         : completeQuiz
           ? "future-message"
           : selectedKeywords.length >= 2
@@ -72,6 +75,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [futureMessage, setFutureMessage] = useState("");
   const [wish, setWish] = useState("");
+  const [futureStep, setFutureStep] = useState("message");
   const [toast, setToast] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -146,6 +150,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   useEffect(() => {
     setFutureMessage(state?.futureMessage || "");
     setWish(state?.wish || "");
+  }, [state?.phase]);
+  useEffect(() => {
+    if (state?.phase === "future-message") setFutureStep("message");
+    if (state?.phase === "future-wish") setFutureStep("wish");
   }, [state?.phase]);
   useEffect(() => {
     document.title = publicConfig?.title || "十五五，我看行！";
@@ -238,22 +246,35 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
     setState(next);
   }
-  async function saveMessage() {
+  async function saveFutureMessage() {
+    const normalizedMessage = futureMessage.trim();
+    if (!normalizedMessage) {
+      setError("请写下给2030年的一句话");
+      return;
+    }
     if (isPublicActivity) {
-      const normalizedMessage = futureMessage.trim();
-      const normalizedWish = wish.trim();
-      if (!normalizedMessage) {
-        setError("请写下给2030年的一句话");
-        return;
-      }
+      updatePublicState({ futureMessage: normalizedMessage });
+      return;
+    }
+    setFutureStep("wish");
+  }
+  async function saveWish() {
+    const normalizedMessage = futureMessage.trim();
+    const normalizedWish = wish.trim();
+    if (!normalizedMessage) return;
+    if (isPublicActivity) {
       updatePublicState({
         futureMessage: normalizedMessage,
         wish: normalizedWish,
+        wishSubmitted: true,
       });
       return;
     }
     const next = await run(() =>
-      submitFutureMessage(activityKey, { futureMessage, wish }),
+      submitFutureMessage(activityKey, {
+        futureMessage: normalizedMessage,
+        wish: normalizedWish,
+      }),
     );
     if (next) setState(next);
   }
@@ -261,7 +282,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     const image = await run(() =>
       renderCertificatePoster({
         nickname: state.nickname,
-        selectedKeywords: state.selectedKeywords,
+        selectedKeywords: state.selectedKeywords.map(keywordLabel),
         futureMessage: state.futureMessage,
         wish: state.wish,
         assetsBaseUrl,
@@ -305,14 +326,16 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
-        {!loading && state?.phase === "future-message" ? (
+        {!loading && ["future-message", "future-wish"].includes(state?.phase) ? (
           <FutureMessage
             state={state}
+            step={futureStep}
             message={futureMessage}
             wish={wish}
             onMessage={setFutureMessage}
             onWish={setWish}
-            onSave={saveMessage}
+            onMessageNext={saveFutureMessage}
+            onWishSave={saveWish}
             busy={busy}
             assetsBaseUrl={assetsBaseUrl}
           />
@@ -377,12 +400,20 @@ function Home({ assetsBaseUrl, onStart, busy }) {
 function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
   return (
     <section className="ffic-keywords">
-      <div className="ffic-barrage" aria-label="已选择关键词">
-        {selected.map((word, index) => {
-          const layout = KEYWORD_LAYOUT[state.keywordOptions.indexOf(word)];
-          if (!layout) return null;
-          return <img key={word} src={assetUrl(layout.image, assetsBaseUrl)} alt={word} style={{ "--i": index, "--w": `${layout.width / 7.5}%` }} />;
-        })}
+      <div className="ffic-barrage" aria-label="关键词弹幕">
+        {KEYWORD_LAYOUT.map((layout, index) => (
+          <img
+            key={layout.id}
+            src={assetUrl(layout.image, assetsBaseUrl)}
+            alt={layout.label}
+            style={{
+              "--i": index,
+              "--row": index % 4,
+              "--start": `${-28 - (index % 6) * 15}%`,
+              "--w": `${layout.width / 7.5}%`,
+            }}
+          />
+        ))}
       </div>
       <img className="ffic-keywords__heading" src={assetUrl(ASSETS.keywordHeading, assetsBaseUrl)} alt="选择关键词" />
       <div className="ffic-keyword-cloud">
@@ -402,7 +433,7 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
               }}
               onClick={() => onToggle(keyword)}
               aria-pressed={active}
-              aria-label={keyword}
+              aria-label={layout.label}
             >
               <img src={assetUrl(layout.image, assetsBaseUrl)} alt="" />
             </button>
@@ -459,58 +490,76 @@ function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
 
 function FutureMessage({
   state,
+  step,
   message,
   wish,
   onMessage,
   onWish,
-  onSave,
+  onMessageNext,
+  onWishSave,
   busy,
   assetsBaseUrl,
 }) {
+  const isWishStep = step === "wish";
   return (
-    <section className="ffic-form">
+    <section className={`ffic-form ${isWishStep ? "ffic-form--wish" : "ffic-form--message"}`}>
+      <img
+        className="ffic-form__title"
+        src={assetUrl(isWishStep ? ASSETS.wishTitle : ASSETS.quizTitle, assetsBaseUrl)}
+        alt=""
+      />
       <img className="ffic-form__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
-      <img className="ffic-form__caption" src={assetUrl(ASSETS.formCaption, assetsBaseUrl)} alt="" />
+      <img
+        className="ffic-form__caption"
+        src={assetUrl(isWishStep ? ASSETS.wishCaption : ASSETS.formCaption, assetsBaseUrl)}
+        alt=""
+      />
       <div className="ffic-form__content">
-      <label>
-        请你为2030年的自己写一句话？
-        <textarea
-          value={message}
-          maxLength="30"
-          onChange={(event) => onMessage(event.target.value)}
-          placeholder="限30字"
-        />
-        <em>{[...message].length}/30</em>
-      </label>
-      <div className="ffic-wishes">
-        <span>选择或输入一句简短期盼（可选，限15字内）</span>
-        <div>
-          {state.wishPresets.map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={wish === item ? "is-selected" : ""}
-              onClick={() => onWish(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <input
-          value={wish}
-          maxLength="15"
-          onChange={(event) => onWish(event.target.value)}
-          placeholder="输入你的期盼"
-        />
-      </div>
+        {!isWishStep ? (
+          <label>
+            15、【填空题-时空胶囊】请你为2030年的自己写一句话？（限30字）
+            <textarea
+              value={message}
+              maxLength="30"
+              onChange={(event) => onMessage(event.target.value)}
+              placeholder="请输入"
+            />
+            <em>{[...message].length}/30</em>
+          </label>
+        ) : (
+          <div className="ffic-wishes">
+            <span>选择或输入一句简短期盼（可选，限制15字内），这句话将会同步带到最终海报</span>
+            <div>
+              {state.wishPresets.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={wish === item ? "is-selected" : ""}
+                  onClick={() => onWish(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            <input
+              value={wish}
+              maxLength="15"
+              onChange={(event) => onWish(event.target.value)}
+              placeholder="输入你的期盼"
+            />
+          </div>
+        )}
       </div>
       <button
         className="ffic-image-button ffic-form__submit"
         type="button"
-        disabled={!message.trim() || busy}
-        onClick={onSave}
+        disabled={(!isWishStep && !message.trim()) || busy}
+        onClick={isWishStep ? onWishSave : onMessageNext}
       >
-        <img src={assetUrl(ASSETS.formAction, assetsBaseUrl)} alt="生成我的证书海报" />
+        <img
+          src={assetUrl(isWishStep ? ASSETS.wishAction : ASSETS.formAction, assetsBaseUrl)}
+          alt={isWishStep ? "生成我的证书海报" : "下一步"}
+        />
       </button>
     </section>
   );
@@ -526,7 +575,7 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
         <p>你已完成《十五五，我看行！》青年学习答题</p>
         <strong>「{state.futureMessage}」</strong>
         {state.wish ? <em>期盼：{state.wish}</em> : null}
-        <small>{state.selectedKeywords.join(" · ")}</small>
+        <small>{state.selectedKeywords.map(keywordLabel).join(" · ")}</small>
       </div>
       <button
         className="ffic-image-button ffic-certificate__action"
