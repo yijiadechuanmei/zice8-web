@@ -401,18 +401,27 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
   return (
     <section className="ffic-keywords">
       <div className="ffic-barrage" aria-label="关键词弹幕">
-        {KEYWORD_LAYOUT.map((layout, index) => (
-          <img
-            key={layout.id}
-            src={assetUrl(layout.image, assetsBaseUrl)}
-            alt={layout.label}
-            style={{
-              "--top": `${2 + (index % 3) * 34}%`,
-              "--delay": `${-Math.floor(index / 3) * 7}s`,
-              "--w": `${layout.width / 7.5}%`,
-            }}
-          />
-        ))}
+        {KEYWORD_LAYOUT.map((layout, index) => {
+          const lane = index % 3;
+          const sequence = Math.floor(index / 3);
+          const laneTop = [7, 38, 68][lane];
+          const verticalOffset = [-3, 2, -1, 3, -2, 1][index % 6];
+          const floatOffset = [-1.5, 1.2, -0.8, 1.6, -1, 0.7][index % 6];
+          return (
+            <img
+              key={layout.id}
+              src={assetUrl(layout.image, assetsBaseUrl)}
+              alt={layout.label}
+              style={{
+                "--top": `${laneTop + verticalOffset}%`,
+                "--delay": `${-(sequence * 7 + lane * 2.2 + (index % 5) * 0.6)}s`,
+                "--duration": `${60 + (index % 4) * 4}s`,
+                "--rise": `${floatOffset}cqw`,
+                "--w": `${layout.width / 7.5}%`,
+              }}
+            />
+          );
+        })}
       </div>
       <img className="ffic-keywords__heading" src={assetUrl(ASSETS.keywordHeading, assetsBaseUrl)} alt="选择关键词" />
       <div className="ffic-keyword-cloud">

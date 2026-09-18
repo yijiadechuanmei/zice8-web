@@ -17,7 +17,7 @@ body.ffic-no-scroll { overflow: hidden; }
 
 /* IVX page 2: x=0,y=144,w=750,h=180. */
 .ffic-barrage { position: absolute; left: 0; top: 8.8669%; width: 100%; height: 11.0837%; overflow: hidden; pointer-events: none; }
-.ffic-barrage img { position: absolute; left: -24%; top: var(--top); width: var(--w); height: auto; will-change: transform; animation: ffic-keyword-barrage 84s linear infinite; animation-delay: var(--delay); }
+.ffic-barrage img { position: absolute; left: -24%; top: var(--top); width: var(--w); height: auto; will-change: transform; animation: ffic-keyword-barrage var(--duration) linear infinite; animation-delay: var(--delay); }
 .ffic-keywords__heading { left: 31.7333%; top: 21.3054%; width: 32%; }
 .ffic-keywords__caption { left: 20.6667%; top: 64.6552%; width: 55.0667%; }
 .ffic-keyword-cloud { position: absolute; inset: 0; }
@@ -74,5 +74,5 @@ body.ffic-no-scroll { overflow: hidden; }
 .ffic-center-state { position: absolute; inset: 0; display: grid; place-content: center; gap: 3cqw; background: rgba(12, 31, 133, .82); color: #fff; font-size: 4cqw; text-align: center; }
 .ffic-center-state .anticon { font-size: 7cqw; }
 
-@keyframes ffic-keyword-barrage { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(360cqw, 0, 0); } }
+@keyframes ffic-keyword-barrage { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(180cqw, var(--rise), 0); } 100% { transform: translate3d(360cqw, 0, 0); } }
 @media (prefers-reduced-motion: reduce) { .ffic-barrage img { animation: none; left: 8%; } }
