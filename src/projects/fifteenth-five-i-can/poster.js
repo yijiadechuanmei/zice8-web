@@ -26,7 +26,6 @@ function wrap(context, text, maxWidth) {
 export async function renderCertificatePoster({
   nickname,
   selectedKeywords,
-  futureMessage,
   wish,
   assetsBaseUrl,
 }) {
@@ -39,28 +38,24 @@ export async function renderCertificatePoster({
   const context = canvas.getContext("2d");
   if (!context) throw new Error("当前浏览器不支持海报合成");
   context.drawImage(background, 0, 0, canvas.width, canvas.height);
-  context.textAlign = "center";
+  const textLeft = 186;
+  const textRight = 966;
+  const maxTextWidth = textRight - textLeft;
+  context.textAlign = "left";
   context.fillStyle = "#092c83";
-  context.font = 'bold 42px "PingFang SC", "Microsoft YaHei", sans-serif';
-  context.fillText(`${nickname || "中汽青年"}同学：`, 583, 590);
   context.font = '30px "PingFang SC", "Microsoft YaHei", sans-serif';
-  context.fillStyle = "#57462b";
-  context.fillText(`你选择了 ${selectedKeywords.join(" · ")}`, 583, 663);
-  context.fillStyle = "#092c83";
-  context.font = 'bold 34px "PingFang SC", "Microsoft YaHei", sans-serif';
-  wrap(context, `「${futureMessage}」`, 880)
-    .slice(0, 3)
-    .forEach((line, index) => context.fillText(line, 583, 760 + index * 55));
+  context.fillText(`${nickname || "中汽青年"}同学：`, textLeft, 652);
+  const body = "已完成中汽中心“十五五”发展纲要线上学习，读懂集团战略，锚定青春方向，以青春之力建功世界一流汽车全价值链技术服务机构建设。";
+  wrap(context, body, maxTextWidth)
+    .slice(0, 4)
+    .forEach((line, index) => context.fillText(line, textLeft, 746 + index * 56));
+  context.fillText(`你的青春关键词：${selectedKeywords.join(" · ")}`, textLeft, 1006);
   if (wish) {
-    context.fillStyle = "#9b6d2e";
-    context.font = '28px "PingFang SC", "Microsoft YaHei", sans-serif';
-    context.fillText(`期盼：${wish}`, 583, 970);
+    wrap(context, `青春期盼：${wish}`, maxTextWidth)
+      .slice(0, 2)
+      .forEach((line, index) => context.fillText(line, textLeft, 1074 + index * 54));
   }
-  context.fillStyle = "#57462b";
-  context.font = '24px "PingFang SC", "Microsoft YaHei", sans-serif';
-  context.fillText("完成《十五五，我看行！》青年学习答题", 583, 1235);
-  context.fillText("让我们以青春之名，奔赴2030。", 583, 1275);
-  context.font = '22px "PingFang SC", "Microsoft YaHei", sans-serif';
-  context.fillText(new Date().toLocaleDateString("zh-CN"), 583, 1460);
+  context.textAlign = "right";
+  context.fillText("中汽中心团委", textRight, 1180);
   return canvas.toDataURL("image/png");
 }

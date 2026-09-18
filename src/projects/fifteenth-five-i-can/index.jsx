@@ -579,11 +579,15 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
       <img className="ffic-certificate__template" src={assetUrl(ASSETS.certificate, assetsBaseUrl)} alt="十五五，我看行！青年学习证书" />
       <div className="ffic-certificate__copy">
-        <p>{state.nickname || "中汽青年"}同学：</p>
-        <p>你已完成《十五五，我看行！》青年学习答题</p>
-        <strong>「{state.futureMessage}」</strong>
-        {state.wish ? <em>期盼：{state.wish}</em> : null}
-        <small>{state.selectedKeywords.map(keywordLabel).join(" · ")}</small>
+        <p className="ffic-certificate__salutation">{state.nickname || "中汽青年"}同学：</p>
+        <p className="ffic-certificate__body">
+          已完成中汽中心“十五五”发展纲要线上学习，<br />
+          读懂集团战略，锚定青春方向，<br />
+          以青春之力建功世界一流汽车全价值链技术服务机构建设。
+        </p>
+        <p className="ffic-certificate__keywords">你的青春关键词：{state.selectedKeywords.map(keywordLabel).join(" · ")}</p>
+        {state.wish ? <p className="ffic-certificate__wish">青春期盼：{state.wish}</p> : null}
+        <p className="ffic-certificate__issuer">中汽中心团委</p>
       </div>
       <button
         className="ffic-image-button ffic-certificate__action"
