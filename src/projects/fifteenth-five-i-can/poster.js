@@ -41,21 +41,38 @@ export async function renderCertificatePoster({
   const textLeft = 186;
   const textRight = 966;
   const maxTextWidth = textRight - textLeft;
+  const paragraphIndent = 64;
   context.textAlign = "left";
   context.fillStyle = "#092c83";
-  context.font = '30px "PingFang SC", "Microsoft YaHei", sans-serif';
-  context.fillText(`${nickname || "中汽青年"}同学：`, textLeft, 652);
+  context.font = '32px "PingFang SC", "Microsoft YaHei", sans-serif';
+  const displayName = nickname || "中汽青年";
+  context.fillText(displayName, textLeft, 652);
+  const nameWidth = context.measureText(displayName).width;
+  context.beginPath();
+  context.moveTo(textLeft, 659);
+  context.lineTo(textLeft + nameWidth, 659);
+  context.lineWidth = 2;
+  context.strokeStyle = context.fillStyle;
+  context.stroke();
+  context.fillText("同学：", textLeft + nameWidth, 652);
   const body = "已完成中汽中心“十五五”发展纲要线上学习，读懂集团战略，锚定青春方向，以青春之力建功世界一流汽车全价值链技术服务机构建设。";
-  wrap(context, body, maxTextWidth)
+  wrap(context, body, maxTextWidth - paragraphIndent)
     .slice(0, 4)
-    .forEach((line, index) => context.fillText(line, textLeft, 746 + index * 56));
-  context.fillText(`你的青春关键词：${selectedKeywords.join(" · ")}`, textLeft, 1006);
+    .forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, 756 + index * 58));
+  const keywordLines = wrap(
+    context,
+    `你的青春关键词：${selectedKeywords.join(" · ")}`,
+    maxTextWidth - paragraphIndent,
+  ).slice(0, 3);
+  keywordLines.forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, 1028 + index * 56));
+  let nextParagraphY = 1028 + keywordLines.length * 56 + 34;
   if (wish) {
-    wrap(context, `青春期盼：${wish}`, maxTextWidth)
+    wrap(context, `青春期盼：${wish}`, maxTextWidth - paragraphIndent)
       .slice(0, 2)
-      .forEach((line, index) => context.fillText(line, textLeft, 1074 + index * 54));
+      .forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, nextParagraphY + index * 56));
+    nextParagraphY += 112;
   }
   context.textAlign = "right";
-  context.fillText("中汽中心团委", textRight, 1180);
+  context.fillText("中汽中心团委", textRight, Math.max(1194, nextParagraphY + 18));
   return canvas.toDataURL("image/png");
 }

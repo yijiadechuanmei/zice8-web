@@ -580,7 +580,7 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
       <img className="ffic-certificate__template" src={assetUrl(ASSETS.certificate, assetsBaseUrl)} alt="十五五，我看行！青年学习证书" />
       <div className="ffic-certificate__copy">
-        <p className="ffic-certificate__salutation">{state.nickname || "中汽青年"}同学：</p>
+        <p className="ffic-certificate__salutation"><span>{state.nickname || "中汽青年"}</span>同学：</p>
         <p className="ffic-certificate__body">
           已完成中汽中心“十五五”发展纲要线上学习，<br />
           读懂集团战略，锚定青春方向，<br />
