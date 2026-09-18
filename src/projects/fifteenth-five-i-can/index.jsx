@@ -582,9 +582,9 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
       <div className="ffic-certificate__copy">
         <p className="ffic-certificate__salutation"><span>{state.nickname || "中汽青年"}</span>同学：</p>
         <p className="ffic-certificate__body">
-          已完成中汽中心“十五五”发展纲要线上学习，<br />
-          读懂集团战略，锚定青春方向，<br />
-          以青春之力建功世界一流汽车全价值链技术服务机构建设。
+          <span>已完成中汽中心“十五五”发展纲要线上学习，</span>
+          <span>读懂集团战略，锚定青春方向，</span>
+          <span>以青春之力建功世界一流汽车全价值链技术服务机构建设。</span>
         </p>
         <p className="ffic-certificate__keywords">你的青春关键词：{state.selectedKeywords.map(keywordLabel).join(" · ")}</p>
         {state.wish ? <p className="ffic-certificate__wish">青春期盼：{state.wish}</p> : null}

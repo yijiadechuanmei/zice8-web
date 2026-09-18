@@ -55,10 +55,19 @@ export async function renderCertificatePoster({
   context.strokeStyle = context.fillStyle;
   context.stroke();
   context.fillText("同学：", textLeft + nameWidth, 652);
-  const body = "已完成中汽中心“十五五”发展纲要线上学习，读懂集团战略，锚定青春方向，以青春之力建功世界一流汽车全价值链技术服务机构建设。";
-  wrap(context, body, maxTextWidth - paragraphIndent)
-    .slice(0, 4)
-    .forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, 756 + index * 58));
+  const bodyLines = [
+    "已完成中汽中心“十五五”发展纲要线上学习，",
+    "读懂集团战略，锚定青春方向，",
+    "以青春之力建功世界一流汽车全价值链技术服务机构建设。",
+  ];
+  let bodyLineIndex = 0;
+  bodyLines.forEach((line) => {
+    wrap(context, line, maxTextWidth - paragraphIndent)
+      .forEach((wrappedLine) => {
+        context.fillText(wrappedLine, textLeft + paragraphIndent, 756 + bodyLineIndex * 58);
+        bodyLineIndex += 1;
+      });
+  });
   const keywordLines = wrap(
     context,
     `你的青春关键词：${selectedKeywords.join(" · ")}`,

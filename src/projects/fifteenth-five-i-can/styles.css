@@ -1,7 +1,7 @@
-body.ffic-no-scroll { overflow: hidden; }
+body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 
-.ffic-app { width: 100vw; height: 100svh; overflow: hidden; background: #102891; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-.ffic-stage { position: relative; container-type: inline-size; width: min(100vw, calc(100svh * 750 / 1624)); height: min(100svh, calc(100vw * 1624 / 750)); margin: auto; overflow: hidden; background: var(--ffic-page-bg) center / 100% 100% no-repeat; }
+.ffic-app { position: fixed; inset: 0; display: grid; width: 100vw; height: 100svh; min-width: 0; min-height: 0; overflow: hidden; place-items: center; background: #102891; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; touch-action: manipulation; }
+.ffic-stage { position: relative; container-type: inline-size; width: min(100vw, 750px); height: auto; aspect-ratio: 750 / 1624; margin: 0; overflow: hidden; background: var(--ffic-page-bg) center / 100% 100% no-repeat; }
 .ffic-stage--home { background-image: var(--ffic-home-bg); }
 .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; }
 
@@ -65,7 +65,8 @@ body.ffic-no-scroll { overflow: hidden; }
 .ffic-certificate__copy p { margin: 0; }
 .ffic-certificate__salutation { margin-bottom: 2.2cqw !important; }
 .ffic-certificate__salutation span { display: inline-block; min-width: 8.5333cqw; padding: 0 .4cqw .15cqw; border-bottom: 1px solid currentColor; text-align: center; }
-.ffic-certificate__body { min-height: 14.9333cqw; text-indent: 2em; }
+.ffic-certificate__body { min-height: 14.9333cqw; }
+.ffic-certificate__body span { display: block; text-indent: 2em; }
 .ffic-certificate__keywords, .ffic-certificate__wish { margin-top: 1.1cqw !important; text-indent: 2em; }
 .ffic-certificate__issuer { margin-top: 3.2cqw !important; text-align: right; }
 .ffic-certificate__action { left: 13.3333%; top: 78.5099%; width: 20.2667%; height: 3.3867%; }
