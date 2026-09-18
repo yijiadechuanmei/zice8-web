@@ -313,6 +313,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             onToggle={toggleKeyword}
             onNext={continueQuiz}
             busy={busy}
+            assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
         {!loading && state?.phase === "quiz" ? (
@@ -322,6 +323,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             onToggle={toggleOption}
             onAnswer={answer}
             busy={busy}
+            assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
         {!loading && state?.phase === "future-message" ? (
@@ -333,6 +335,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             onWish={setWish}
             onSave={saveMessage}
             busy={busy}
+            assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
         {!loading && state?.phase === "certificate" ? (
@@ -341,6 +344,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             poster={poster}
             onPoster={makePoster}
             busy={busy}
+            assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
         {toast ? (
@@ -386,32 +390,22 @@ function Home({ assetsBaseUrl, onStart, busy }) {
         disabled={busy}
       >
         <img src={assetUrl(ASSETS.homeButton, assetsBaseUrl)} alt="" />
-        <span>{busy ? "正在进入…" : "开启我的十五五之旅"}</span>
       </button>
     </section>
   );
 }
 
-function Keywords({ state, selected, onToggle, onNext, busy }) {
+function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
   return (
     <section className="ffic-keywords">
       <div className="ffic-barrage" aria-label="已选择关键词">
-        {selected.length ? (
-          selected.map((word, index) => (
-            <span key={word} style={{ "--i": index }}>
-              {word}
-            </span>
-          ))
-        ) : (
-          <p>
-            选择 2～3 个关键词
-            <br />
-            让它们飘向你的十五五
-          </p>
-        )}
+        {selected.map((word, index) => {
+          const layout = KEYWORD_LAYOUT[state.keywordOptions.indexOf(word)];
+          if (!layout) return null;
+          return <img key={word} src={assetUrl(layout.image, assetsBaseUrl)} alt={word} style={{ "--i": index, "--w": `${layout.width / 7.5}%` }} />;
+        })}
       </div>
-      <h1>选择关键词</h1>
-      <p className="ffic-keywords__tip">每选中一个，顶部都会出现一条专属弹幕</p>
+      <img className="ffic-keywords__heading" src={assetUrl(ASSETS.keywordHeading, assetsBaseUrl)} alt="选择关键词" />
       <div className="ffic-keyword-cloud">
         {state.keywordOptions.map((keyword, index) => {
           const layout = KEYWORD_LAYOUT[index];
@@ -422,56 +416,42 @@ function Keywords({ state, selected, onToggle, onNext, busy }) {
               type="button"
               className={`ffic-keyword ${active ? "is-selected" : ""}`}
               style={{
-                left: `${layout.x / 7.5}%`,
-                top: `${layout.y / 16.24}%`,
-                backgroundImage: `url("${assetUrl(layout.image)}")`,
+                "--left": `${layout.x / 7.5}%`,
+                "--top": `${layout.y / 16.24}%`,
+                "--width": `${layout.width / 7.5}%`,
+                "--height": `${layout.height / 16.24}%`,
               }}
               onClick={() => onToggle(keyword)}
               aria-pressed={active}
+              aria-label={keyword}
             >
-              <span>{keyword}</span>
+              <img src={assetUrl(layout.image, assetsBaseUrl)} alt="" />
             </button>
           );
         })}
       </div>
+      <img className="ffic-keywords__caption" src={assetUrl(ASSETS.keywordCaption, assetsBaseUrl)} alt="" />
       <button
-        className="ffic-primary ffic-keywords__next"
+        className="ffic-image-button ffic-keywords__next"
         type="button"
         disabled={selected.length < 2 || busy}
         onClick={onNext}
       >
-        {busy ? "正在进入…" : `去答题（已选 ${selected.length}/3）`}
+        <img src={assetUrl(ASSETS.keywordAction, assetsBaseUrl)} alt="去答题" />
       </button>
     </section>
   );
 }
 
-function Quiz({ state, selected, onToggle, onAnswer, busy }) {
+function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
   const question = state.currentQuestion;
   return (
     <section className="ffic-quiz">
-      <div className="ffic-quiz__top">
-        <span>十五五 · 青年学习答题</span>
-        <strong>
-          {question.no} / {state.totalQuestions}
-        </strong>
-      </div>
-      <img
-        className="ffic-quiz__heading"
-        src={assetUrl(ASSETS.quizHeading)}
-        alt="答题挑战"
-      />
-      <div className="ffic-quiz__card">
-        <img src={assetUrl(ASSETS.quizCard)} alt="" />
-        <div className="ffic-quiz__content">
-          <p className="ffic-quiz__kind">
-            {question.type === "multiple"
-              ? "多选题 · 请选择全部正确项"
-              : "单选题 · 请选择一项"}
-          </p>
-          <h1>
-            {question.no}、{question.title}
-          </h1>
+      <img className="ffic-quiz__title" src={assetUrl(ASSETS.quizTitle, assetsBaseUrl)} alt="答题挑战" />
+      <img className="ffic-quiz__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
+      <div className="ffic-quiz__content">
+          <p className="ffic-quiz__progress">{question.no} / {state.totalQuestions}</p>
+          <h1>{question.no}、{question.title}</h1>
           <div className="ffic-options">
             {question.options.map((option) => (
               <button
@@ -481,20 +461,18 @@ function Quiz({ state, selected, onToggle, onAnswer, busy }) {
                 onClick={() => onToggle(option.id)}
                 aria-pressed={selected.includes(option.id)}
               >
-                <b>{option.id}</b>
-                <span>{option.text}</span>
+                {option.id}．{option.text}
               </button>
             ))}
           </div>
-        </div>
       </div>
       <button
-        className="ffic-primary ffic-quiz__submit"
+        className="ffic-image-button ffic-quiz__submit"
         type="button"
         disabled={!selected.length || busy}
         onClick={onAnswer}
       >
-        {busy ? "提交中…" : "确认答案"}
+        <img src={assetUrl(ASSETS.quizHeading, assetsBaseUrl)} alt="确认答案" />
       </button>
     </section>
   );
@@ -508,11 +486,13 @@ function FutureMessage({
   onWish,
   onSave,
   busy,
+  assetsBaseUrl,
 }) {
   return (
     <section className="ffic-form">
-      <h1>写给 2030 年的自己</h1>
-      <p>完成全部 {state.totalQuestions} 道题，留下你的未来期许</p>
+      <img className="ffic-form__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
+      <img className="ffic-form__caption" src={assetUrl(ASSETS.formCaption, assetsBaseUrl)} alt="" />
+      <div className="ffic-form__content">
       <label>
         请你为2030年的自己写一句话？
         <textarea
@@ -544,25 +524,24 @@ function FutureMessage({
           placeholder="输入你的期盼"
         />
       </div>
+      </div>
       <button
-        className="ffic-primary"
+        className="ffic-image-button ffic-form__submit"
         type="button"
         disabled={!message.trim() || busy}
         onClick={onSave}
       >
-        {busy ? "正在生成…" : "生成我的证书海报"}
+        <img src={assetUrl(ASSETS.formAction, assetsBaseUrl)} alt="生成我的证书海报" />
       </button>
     </section>
   );
 }
 
-function Certificate({ state, poster, onPoster, busy }) {
+function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
-      <img
-        src={assetUrl(ASSETS.certificate)}
-        alt="十五五，我看行！青年学习证书"
-      />
+      <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
+      <img className="ffic-certificate__template" src={assetUrl(ASSETS.certificate, assetsBaseUrl)} alt="十五五，我看行！青年学习证书" />
       <div className="ffic-certificate__copy">
         <p>{state.nickname || "中汽青年"}同学：</p>
         <p>你已完成《十五五，我看行！》青年学习答题</p>
@@ -571,12 +550,12 @@ function Certificate({ state, poster, onPoster, busy }) {
         <small>{state.selectedKeywords.join(" · ")}</small>
       </div>
       <button
-        className="ffic-primary"
+        className="ffic-image-button ffic-certificate__action"
         type="button"
         onClick={onPoster}
         disabled={busy}
       >
-        {busy ? "合成中…" : "合成证书海报"}
+        <img src={assetUrl(ASSETS.certificateAction, assetsBaseUrl)} alt="合成证书海报" />
       </button>
       {poster ? (
         <a
@@ -584,8 +563,7 @@ function Certificate({ state, poster, onPoster, busy }) {
           href={poster}
           download="十五五我看行青年学习证书.png"
         >
-          <img src={poster} alt="已合成证书海报，点击保存" />
-          <span>长按图片保存海报</span>
+          保存海报
         </a>
       ) : null}
     </section>

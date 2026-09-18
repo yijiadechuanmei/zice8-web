@@ -9,10 +9,17 @@ export const ASSETS = {
   homeHero: "f8c9365f5f7bfdeec92404960c45100b_63935_496_297.png",
   homeSubtitle: "9e1b4d6abc80e4ba52d51a242c93067f_29493_325_79.png",
   homeButton: "469189e41b70647ea867327469f35f15_97246_580_90.png",
+  keywordAction: "5faa01013bde5714a700ff02ea90d0ee_94160_574_89.png",
+  keywordCaption: "9c5d45fdd30a72c56ba6a2b91a0d8f93_50535_413_74.png",
+  keywordHeading: "4fc2ef5d817fb0a655e7638330f26020_16238_240_43.png",
   quizCard: "abe26211608deab6102a052d727fcb50_20875_621_622.png",
   quizHeading: "984dd25d3ebc8c41efe2352b5935fcd9_33218_243_87.png",
+  quizTitle: "a8d939e97f7a876d76b267c434994b5a_28261_407_58.png",
+  formAction: "416248c2670cc5b38a389f77a7f8d4f9_94003_574_89.png",
+  formCaption: "4ad77fa9618ec826f5d34dcc922204d9_49067_477_74.png",
   certificate: "7f360e9f81acdbe06a27c1bdc4677941_851184_583_815.png",
   certificateHeading: "396de029be057e28c751a5f79e89e081_35380_688_48.png",
+  certificateAction: "0e6300bf3354b0705df74a31ee34d44d_16735_152_55.png",
 };
 
 const keywordArt = [
@@ -36,29 +43,19 @@ const keywordArt = [
   "e9b58fdb184afa0af2c26ecffdc63fbc_14103_150_43.png",
 ];
 const keywordCoordinates = [
-  [183, 561],
-  [35, 594],
-  [14, 657],
-  [39, 716],
-  [5, 789],
-  [49, 853],
-  [334, 901],
-  [137, 917],
-  [39, 975],
-  [222, 981],
-  [392, 975],
-  [505, 907],
-  [579, 847],
-  [541, 686],
-  [556, 582],
-  [534, 501],
-  [392, 434],
-  [215, 859],
+  [183, 561, 150, 44], [35, 594, 150, 44], [14, 657, 150, 44],
+  [39, 716, 149, 43], [5, 789, 150, 44], [49, 853, 150, 43],
+  [334, 901, 150, 43], [137, 917, 149, 43], [39, 975, 149, 43],
+  [222, 981, 150, 43], [392, 975, 150, 43], [505, 907, 149, 43],
+  [579, 847, 149, 43], [541, 686, 149, 44], [556, 582, 150, 44],
+  [534, 501, 150, 43], [392, 434, 150, 44], [215, 859, 150, 43],
 ];
 
-export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y], index) => ({
+export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y, width, height], index) => ({
   x,
   y,
+  width,
+  height,
   image: keywordArt[index],
 }));
 
