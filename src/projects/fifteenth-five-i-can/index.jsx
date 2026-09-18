@@ -22,29 +22,6 @@ import {
 import { renderCertificatePoster } from "./poster";
 import "./styles.css";
 
-const PUBLIC_PROGRESS_STORAGE_PREFIX = "fifteenth_five_i_can_progress";
-
-function publicProgressKey(activityKey) {
-  return `${PUBLIC_PROGRESS_STORAGE_PREFIX}:${activityKey}`;
-}
-
-function readPublicProgress(activityKey) {
-  try {
-    const value = JSON.parse(localStorage.getItem(publicProgressKey(activityKey)) || "{}");
-    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  } catch {
-    return {};
-  }
-}
-
-function writePublicProgress(activityKey, progress) {
-  try {
-    localStorage.setItem(publicProgressKey(activityKey), JSON.stringify(progress));
-  } catch {
-    // Private browsing can disable storage; the activity remains usable for this visit.
-  }
-}
-
 function publicState(progress = {}) {
   const answers = Array.isArray(progress.answers) ? progress.answers : [];
   const selectedKeywords = Array.isArray(progress.selectedKeywords)
@@ -101,6 +78,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [busy, setBusy] = useState(false);
   const [poster, setPoster] = useState("");
   const timer = useRef(null);
+  const publicProgress = useRef({});
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
   const isPublicActivity = publicConfig?.accessMode === "public";
@@ -129,8 +107,8 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     }
   };
   const updatePublicState = (patch) => {
-    const nextProgress = { ...readPublicProgress(activityKey), ...patch };
-    writePublicProgress(activityKey, nextProgress);
+    const nextProgress = { ...publicProgress.current, ...patch };
+    publicProgress.current = nextProgress;
     const nextState = publicState(nextProgress);
     setState(nextState);
     return nextState;
@@ -145,8 +123,9 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   useEffect(() => {
     if (!authReady) return;
     if (isPublicActivity) {
+      publicProgress.current = {};
       setError("");
-      setState(publicState(readPublicProgress(activityKey)));
+      setState(publicState());
       setLoading(false);
       return;
     }
@@ -235,7 +214,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         notify("回答错误，请重新作答");
         return;
       }
-      const progress = readPublicProgress(activityKey);
+      const progress = publicProgress.current;
       updatePublicState({
         started: true,
         answers: [
