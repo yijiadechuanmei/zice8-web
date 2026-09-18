@@ -404,9 +404,10 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
         {KEYWORD_LAYOUT.map((layout, index) => {
           const lane = index % 3;
           const sequence = Math.floor(index / 3);
-          const laneTop = [7, 38, 68][lane];
-          const verticalOffset = [-3, 2, -1, 3, -2, 1][index % 6];
-          const floatOffset = [-1.5, 1.2, -0.8, 1.6, -1, 0.7][index % 6];
+          const laneTop = [2, 39, 76][lane];
+          const verticalOffset = [-1.2, 0.8, -0.5, 1.4, -0.8, 0.5][index % 6];
+          const laneDuration = [66, 70, 74][lane];
+          const laneItemCount = lane === 0 ? 12 : 11;
           return (
             <img
               key={layout.id}
@@ -414,9 +415,9 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
               alt={layout.label}
               style={{
                 "--top": `${laneTop + verticalOffset}%`,
-                "--delay": `${-(sequence * 7 + lane * 2.2 + (index % 5) * 0.6)}s`,
-                "--duration": `${60 + (index % 4) * 4}s`,
-                "--rise": `${floatOffset}cqw`,
+                "--delay": `${-(sequence * (laneDuration / laneItemCount) + lane * 1.7)}s`,
+                "--duration": `${laneDuration}s`,
+                "--rise": "0cqw",
                 "--w": `${layout.width / 7.5}%`,
               }}
             />
