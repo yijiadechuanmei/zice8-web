@@ -60,7 +60,9 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 
 /* IVX certificate page: heading x=40,y=338; certificate x=82,y=416. */
 .ffic-certificate__heading { left: 5.3333%; top: 20.8128%; width: 91.7333%; }
-.ffic-certificate__template { left: 10.9333%; top: 25.6158%; width: 77.7333%; }
+.ffic-certificate__template, .ffic-certificate__poster { left: 10.9333%; top: 25.6158%; width: 77.7333%; }
+.ffic-certificate__poster { position: absolute; z-index: 1; display: block; }
+.ffic-certificate__poster img { display: block; width: 100%; height: auto; }
 .ffic-certificate__copy { position: absolute; left: 23.3333%; top: 44.4581%; width: 52%; height: 20.3202%; overflow: hidden; color: #0c1f85; font-size: 2.1333cqw; line-height: 1.75; text-align: left; }
 .ffic-certificate__copy p { margin: 0; }
 .ffic-certificate__salutation { margin-bottom: 2.2cqw !important; }
@@ -70,7 +72,6 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-certificate__keywords, .ffic-certificate__wish { margin-top: 1.1cqw !important; text-indent: 2em; }
 .ffic-certificate__issuer { margin-top: 3.2cqw !important; text-align: right; }
 .ffic-certificate__action { left: 13.3333%; top: 78.5099%; width: 20.2667%; height: 3.3867%; }
-.ffic-poster { position: absolute; left: 39.3333%; top: 79.1256%; color: #0c1f85; font-size: 3.2cqw; font-weight: 700; text-decoration: underline; }
 
 .ffic-toast-layer { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; pointer-events: auto; touch-action: none; }
 .ffic-toast { width: 70%; padding: 3cqw; background: #0c1f85; color: #fff; font-size: 4cqw; font-weight: 700; text-align: center; }

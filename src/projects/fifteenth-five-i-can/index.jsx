@@ -613,11 +613,12 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
       </button>
       {poster ? (
         <a
-          className="ffic-poster"
+          className="ffic-certificate__poster"
           href={poster}
           download="十五五我看行青年学习证书.png"
+          aria-label="下载我的青年学习证书海报"
         >
-          保存海报
+          <img src={poster} alt="我的十五五青年学习证书海报" />
         </a>
       ) : null}
     </section>
