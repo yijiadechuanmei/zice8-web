@@ -496,10 +496,9 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
           const laneDuration = [66, 70, 74][lane];
           const laneItemCount = lane === 0 ? 12 : 11;
           return (
-            <img
+            <span
               key={layout.id}
-              src={assetUrl(layout.image, assetsBaseUrl)}
-              alt={layout.label}
+              className={`ffic-barrage__item ${selected.includes(layout.id) ? "is-selected" : ""}`}
               style={{
                 "--top": `${laneTop + verticalOffset}%`,
                 "--delay": `${-(sequence * (laneDuration / laneItemCount) + lane * 1.7)}s`,
@@ -507,7 +506,9 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
                 "--rise": "0cqw",
                 "--w": `${layout.width / 7.5}%`,
               }}
-            />
+            >
+              {layout.label}
+            </span>
           );
         })}
       </div>
@@ -531,7 +532,7 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
               aria-pressed={active}
               aria-label={layout.label}
             >
-              <img src={assetUrl(layout.image, assetsBaseUrl)} alt="" />
+              <span>{layout.label}</span>
             </button>
           );
         })}
