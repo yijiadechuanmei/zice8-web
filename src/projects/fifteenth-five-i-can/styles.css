@@ -3,13 +3,13 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-app { position: fixed; inset: 0; display: grid; width: 100vw; height: 100svh; min-width: 0; min-height: 0; overflow: hidden; place-items: center; background: #102891; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; touch-action: manipulation; }
 .ffic-stage { position: relative; container-type: inline-size; width: min(100vw, 750px); height: auto; aspect-ratio: 750 / 1624; margin: 0; overflow: hidden; background: var(--ffic-page-bg) center / 100% 100% no-repeat; }
 .ffic-stage--home { background-image: var(--ffic-home-bg); }
-.ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; }
+.ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; animation: ffic-page-enter .46s cubic-bezier(.22, 1, .36, 1) both; }
 
 .ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template { position: absolute; display: block; }
-.ffic-home__title { left: 4.1333%; top: 8.8669%; width: 46.1333%; }
-.ffic-home__hero { left: 16.1333%; top: 16.0099%; width: 66.1333%; }
-.ffic-home__subtitle { left: 27.6%; top: 34.2365%; width: 43.3333%; }
-.ffic-home__button { left: 11.6%; top: 74.0148%; width: 77.3333%; }
+.ffic-home__title { left: 4.1333%; top: 8.8669%; width: 46.1333%; animation: ffic-home-title-enter .62s cubic-bezier(.22, 1, .36, 1) .08s both; }
+.ffic-home__hero { left: 16.1333%; top: 16.0099%; width: 66.1333%; animation: ffic-home-hero-enter .78s cubic-bezier(.22, 1, .36, 1) .2s both; }
+.ffic-home__subtitle { left: 27.6%; top: 34.2365%; width: 43.3333%; animation: ffic-home-subtitle-enter .54s cubic-bezier(.22, 1, .36, 1) .42s both; }
+.ffic-home__button { left: 11.6%; top: 74.0148%; width: 77.3333%; animation: ffic-home-button-enter .62s cubic-bezier(.22, 1, .36, 1) .58s both, ffic-home-button-glow 2.8s ease-in-out 1.3s infinite; }
 
 .ffic-image-button, .ffic-home__button, .ffic-keyword { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .ffic-image-button img, .ffic-home__button img, .ffic-keyword img { display: block; width: 100%; height: 100%; }
@@ -24,6 +24,8 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-keyword { position: absolute; left: var(--left); top: var(--top); width: var(--width); height: var(--height); }
 .ffic-keyword.is-selected { filter: brightness(.76) saturate(1.3); }
 .ffic-keywords__next { left: 11.7333%; top: 72.6601%; width: 76.5333%; height: 5.4803%; }
+.ffic-keywords__heading, .ffic-quiz__title, .ffic-form__title, .ffic-certificate__heading { animation: ffic-element-pop .5s cubic-bezier(.22, 1, .36, 1) .1s both; }
+.ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__card, .ffic-quiz__content, .ffic-quiz__submit, .ffic-form__card, .ffic-form__content, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__template, .ffic-certificate__copy, .ffic-certificate__actions { animation: ffic-element-rise .54s cubic-bezier(.22, 1, .36, 1) .16s both; }
 
 /* IVX question page: title x=167,y=334; card x=65,y=411; text x=118,y=466. */
 .ffic-quiz__title { left: 22.2667%; top: 20.5665%; width: 54.2667%; }
@@ -67,7 +69,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 /* IVX certificate page: heading x=40,y=338; certificate x=82,y=416. */
 .ffic-certificate__heading { left: 5.3333%; top: 20.8128%; width: 91.7333%; }
 .ffic-certificate__template, .ffic-certificate__poster { left: 10.9333%; top: 25.6158%; width: 77.7333%; }
-.ffic-certificate__poster { position: absolute; z-index: 1; display: block; height: auto; pointer-events: auto; user-select: auto; -webkit-user-select: auto; -webkit-touch-callout: default; }
+.ffic-certificate__poster { position: absolute; z-index: 1; display: block; height: auto; pointer-events: auto; user-select: auto; -webkit-user-select: auto; -webkit-touch-callout: default; animation: ffic-poster-reveal .42s ease-out both; }
 .ffic-certificate__copy { position: absolute; left: 23.3333%; top: 44.4581%; width: 52%; height: 20.3202%; overflow: hidden; color: #0c1f85; font-size: 2.1333cqw; line-height: 1.75; text-align: left; }
 .ffic-certificate__copy p { margin: 0; }
 .ffic-certificate__salutation { margin-bottom: 2.2cqw !important; }
@@ -89,4 +91,22 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-center-state .anticon { font-size: 7cqw; }
 
 @keyframes ffic-keyword-barrage { 0% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(180cqw, var(--rise), 0); } 100% { transform: translate3d(360cqw, 0, 0); } }
-@media (prefers-reduced-motion: reduce) { .ffic-barrage img { animation: none; left: 8%; } }
+@keyframes ffic-page-enter { from { opacity: 0; transform: translate3d(0, 2.4cqw, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes ffic-home-title-enter { from { opacity: 0; transform: translate3d(-3cqw, 0, 0) scale(.94); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+@keyframes ffic-home-hero-enter { 0% { opacity: 0; transform: translate3d(0, 4cqw, 0) scale(.88); } 68% { opacity: 1; transform: translate3d(0, -.6cqw, 0) scale(1.018); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+@keyframes ffic-home-subtitle-enter { from { opacity: 0; transform: translate3d(0, 2.4cqw, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes ffic-home-button-enter { from { opacity: 0; transform: translate3d(0, 3.2cqw, 0) scale(.94); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+@keyframes ffic-home-button-glow { 0%, 100% { filter: brightness(1) saturate(1); } 50% { filter: brightness(1.1) saturate(1.08); } }
+@keyframes ffic-element-pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+@keyframes ffic-element-rise { from { opacity: 0; transform: translate3d(0, 1.8cqw, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes ffic-poster-reveal { from { opacity: 0; transform: scale(.975); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .ffic-barrage img { animation: none; left: 8%; }
+  .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate,
+  .ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button,
+  .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next,
+  .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__content, .ffic-quiz__submit,
+  .ffic-form__title, .ffic-form__card, .ffic-form__content, .ffic-form__caption, .ffic-form__submit,
+  .ffic-certificate__heading, .ffic-certificate__template, .ffic-certificate__copy,
+  .ffic-certificate__actions, .ffic-certificate__poster { animation: none; }
+}

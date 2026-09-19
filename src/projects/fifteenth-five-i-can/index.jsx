@@ -357,6 +357,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         ) : null}
         {!loading && state?.phase === "quiz" ? (
           <Quiz
+            key={`quiz-${state.currentQuestion?.no || "start"}`}
             state={state}
             selected={selectedOptions}
             onToggle={toggleOption}
@@ -367,6 +368,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         ) : null}
         {!loading && ["future-message", "future-wish"].includes(state?.phase) ? (
           <FutureMessage
+            key={`form-${state.phase}-${futureStep}`}
             state={state}
             step={futureStep}
             message={futureMessage}
