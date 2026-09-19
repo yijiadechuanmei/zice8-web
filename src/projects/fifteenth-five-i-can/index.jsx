@@ -10,6 +10,7 @@ import {
   start,
   submitAnswer,
   submitFutureMessage,
+  submitName,
 } from "./api";
 import {
   ASSETS,
@@ -31,11 +32,14 @@ function publicState(progress = {}) {
   const completeQuiz = answers.length === PUBLIC_ACTIVITY_DATA.questions.length;
   const futureMessage = typeof progress.futureMessage === "string" ? progress.futureMessage : "";
   const wish = typeof progress.wish === "string" ? progress.wish : "";
+  const name = typeof progress.name === "string" ? progress.name.trim() : "";
   return {
     phase: !progress.started
       ? "home"
       : futureMessage && progress.wishSubmitted
-        ? "certificate"
+        ? name
+          ? "certificate"
+          : "name"
         : futureMessage
           ? "future-wish"
         : completeQuiz
@@ -54,6 +58,7 @@ function publicState(progress = {}) {
         : null,
     futureMessage,
     wish,
+    name,
     nickname: "中汽青年",
   };
 }
@@ -75,6 +80,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [futureMessage, setFutureMessage] = useState("");
   const [wish, setWish] = useState("");
+  const [name, setName] = useState("");
   const [futureStep, setFutureStep] = useState("message");
   const [toast, setToast] = useState(null);
   const [error, setError] = useState("");
@@ -156,6 +162,9 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setFutureMessage(state?.futureMessage || "");
     setWish(state?.wish || "");
   }, [state?.phase]);
+  useEffect(() => {
+    setName(state?.name || "");
+  }, [state?.name]);
   useEffect(() => {
     if (state?.phase === "future-message") setFutureStep("message");
     if (state?.phase === "future-wish") setFutureStep("wish");
@@ -291,10 +300,23 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
     if (next) setState(next);
   }
+  async function saveName() {
+    const normalizedName = name.trim();
+    if (!normalizedName) {
+      setError("请填写姓名");
+      return;
+    }
+    if (isPublicActivity) {
+      updatePublicState({ name: normalizedName });
+      return;
+    }
+    const next = await run(() => submitName(activityKey, normalizedName));
+    if (next) setState(next);
+  }
   async function makePoster() {
     const image = await run(() =>
       renderCertificatePoster({
-        nickname: state.nickname,
+        nickname: state.name || state.nickname,
         selectedKeywords: state.selectedKeywords.map(keywordLabel),
         futureMessage: state.futureMessage,
         wish: state.wish,
@@ -324,6 +346,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setSelectedOptions([]);
     setFutureMessage("");
     setWish("");
+    setName("");
     setState(publicState());
   }
   function shareCertificate() {
@@ -377,6 +400,16 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             onWish={setWish}
             onMessageNext={saveFutureMessage}
             onWishSave={saveWish}
+            busy={busy}
+            assetsBaseUrl={assetsBaseUrl}
+          />
+        ) : null}
+        {!loading && state?.phase === "name" ? (
+          <NameForm
+            key="name-form"
+            name={name}
+            onChange={setName}
+            onSubmit={saveName}
             busy={busy}
             assetsBaseUrl={assetsBaseUrl}
           />
@@ -628,13 +661,44 @@ function FutureMessage({
   );
 }
 
+function NameForm({ name, onChange, onSubmit, busy, assetsBaseUrl }) {
+  return (
+    <section className="ffic-form ffic-name">
+      <h1 className="ffic-name__title">填写姓名</h1>
+      <img className="ffic-form__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
+      <div className="ffic-form__content">
+        <label>
+          请填写您的姓名，生成专属青年学习证书
+          <input
+            value={name}
+            maxLength="20"
+            onChange={(event) => onChange(event.target.value)}
+            placeholder="请输入姓名"
+            autoComplete="name"
+          />
+          <em>{[...name].length}/20</em>
+        </label>
+      </div>
+      <p className="ffic-name__caption">姓名将展示在专属证书与海报中</p>
+      <button
+        className="ffic-image-button ffic-name__submit"
+        type="button"
+        disabled={!name.trim() || busy}
+        onClick={onSubmit}
+      >
+        <img src={assetUrl(ASSETS.wishAction, assetsBaseUrl)} alt="生成我的专属学习证书" />
+      </button>
+    </section>
+  );
+}
+
 function Certificate({ state, poster, onReplay, onShare, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
       <img className="ffic-certificate__template" src={assetUrl(ASSETS.certificate, assetsBaseUrl)} alt="十五五，我看行！青年学习证书" />
       <div className="ffic-certificate__copy">
-        <p className="ffic-certificate__salutation"><span>{state.nickname || "中汽青年"}</span>同学：</p>
+        <p className="ffic-certificate__salutation"><span>{state.name || state.nickname || "中汽青年"}</span>同学：</p>
         <p className="ffic-certificate__body">
           <span>已完成中汽中心“十五五”发展纲要线上学习，</span>
           <span>读懂集团战略，锚定青春方向，</span>

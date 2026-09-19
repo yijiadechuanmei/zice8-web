@@ -66,6 +66,15 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-form--wish .ffic-form__caption { left: 12.6667%; top: 66.8719%; width: 73.6%; }
 .ffic-form--wish .ffic-form__submit { left: 11.2%; top: 72.537%; width: 76.5333%; height: 5.5419%; }
 
+/* Name page uses the established question-card frame before the certificate. */
+.ffic-name__title, .ffic-name__caption, .ffic-name__submit { position: absolute; display: block; }
+.ffic-name__title { left: 0; top: 20.1355%; width: 100%; margin: 0; color: #0c1f85; font-size: 7.2cqw; font-weight: 900; line-height: 1.12; letter-spacing: .2667cqw; text-align: center; text-shadow: -.16cqw 0 #fff, 0 .16cqw #fff, .16cqw 0 #fff, 0 -.16cqw #fff; animation: ffic-element-pop .5s cubic-bezier(.22, 1, .36, 1) .1s both; }
+.ffic-name .ffic-form__card { left: 8.6667%; top: 25.308%; width: 82.8%; }
+.ffic-name .ffic-form__content { left: 15.7333%; top: 28.6946%; width: 68%; height: 30.6034%; }
+.ffic-name .ffic-form__content input { display: block; height: 9.0667cqw; margin-top: 6.9333cqw; padding: 0 .8cqw; font-size: 4.2667cqw; line-height: 9.0667cqw; }
+.ffic-name__caption { left: 0; top: 65.6404%; width: 100%; margin: 0; color: #0c1f85; font-size: 3.2cqw; font-weight: 600; line-height: 1.4; text-align: center; animation: ffic-element-rise .54s cubic-bezier(.22, 1, .36, 1) .16s both; }
+.ffic-name__submit { left: 11.2%; top: 72.537%; width: 76.5333%; height: 5.5419%; animation: ffic-element-rise .54s cubic-bezier(.22, 1, .36, 1) .16s both; }
+
 /* IVX certificate page: heading x=40,y=338; certificate x=82,y=416. */
 .ffic-certificate__heading { left: 5.3333%; top: 20.8128%; width: 91.7333%; }
 .ffic-certificate__template, .ffic-certificate__poster { left: 10.9333%; top: 25.6158%; width: 77.7333%; }
@@ -107,6 +116,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
   .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next,
   .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__content, .ffic-quiz__submit,
   .ffic-form__title, .ffic-form__card, .ffic-form__content, .ffic-form__caption, .ffic-form__submit,
+  .ffic-name__title, .ffic-name__caption, .ffic-name__submit,
   .ffic-certificate__heading, .ffic-certificate__template, .ffic-certificate__copy,
   .ffic-certificate__actions, .ffic-certificate__poster { animation: none; }
 }

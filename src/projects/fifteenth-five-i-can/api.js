@@ -24,3 +24,8 @@ export const submitFutureMessage = (activityKey, payload) =>
     method: "POST",
     body: JSON.stringify(payload),
   });
+export const submitName = (activityKey, name) =>
+  request(`${base(activityKey)}/name`, {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
