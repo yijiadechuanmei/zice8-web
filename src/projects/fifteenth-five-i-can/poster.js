@@ -10,17 +10,34 @@ function loadImage(url) {
   });
 }
 
-function wrap(context, text, maxWidth) {
+function wrapParagraph(context, text, maxWidth, indent) {
   const lines = [];
   let current = "";
+  let availableWidth = maxWidth - indent;
   for (const character of text) {
-    if (current && context.measureText(current + character).width > maxWidth) {
-      lines.push(current);
+    if (current && context.measureText(current + character).width > availableWidth) {
+      lines.push({ text: current, indent: lines.length === 0 ? indent : 0 });
       current = character;
+      availableWidth = maxWidth;
     } else current += character;
   }
-  if (current) lines.push(current);
+  if (current) lines.push({ text: current, indent: lines.length === 0 ? indent : 0 });
   return lines;
+}
+
+function drawParagraph(context, text, {
+  left,
+  baseline,
+  maxWidth,
+  indent = 0,
+  lineHeight,
+  maxLines,
+}) {
+  const lines = wrapParagraph(context, text, maxWidth, indent).slice(0, maxLines);
+  lines.forEach((line, index) => {
+    context.fillText(line.text, left + line.indent, baseline + index * lineHeight);
+  });
+  return baseline + lines.length * lineHeight;
 }
 
 export async function renderCertificatePoster({
@@ -42,6 +59,7 @@ export async function renderCertificatePoster({
   const textRight = 966;
   const maxTextWidth = textRight - textLeft;
   const paragraphIndent = 64;
+  const lineHeight = 52;
   context.textAlign = "left";
   context.fillStyle = "#092c83";
   context.font = '32px "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -60,28 +78,41 @@ export async function renderCertificatePoster({
     "读懂集团战略，锚定青春方向，",
     "以青春之力建功世界一流汽车全价值链技术服务机构建设。",
   ];
-  let bodyLineIndex = 0;
+  let nextParagraphY = 742;
   bodyLines.forEach((line) => {
-    wrap(context, line, maxTextWidth - paragraphIndent)
-      .forEach((wrappedLine) => {
-        context.fillText(wrappedLine, textLeft + paragraphIndent, 756 + bodyLineIndex * 58);
-        bodyLineIndex += 1;
-      });
+    nextParagraphY = drawParagraph(context, line, {
+      left: textLeft,
+      baseline: nextParagraphY,
+      maxWidth: maxTextWidth,
+      indent: paragraphIndent,
+      lineHeight,
+      maxLines: 2,
+    });
   });
-  const keywordLines = wrap(
+  nextParagraphY = Math.max(980, nextParagraphY + 22);
+  nextParagraphY = drawParagraph(
     context,
     `你的青春关键词：${selectedKeywords.join(" · ")}`,
-    maxTextWidth - paragraphIndent,
-  ).slice(0, 3);
-  keywordLines.forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, 1028 + index * 56));
-  let nextParagraphY = 1028 + keywordLines.length * 56 + 34;
+    {
+      left: textLeft,
+      baseline: nextParagraphY,
+      maxWidth: maxTextWidth,
+      indent: paragraphIndent,
+      lineHeight,
+      maxLines: 3,
+    },
+  ) + 20;
   if (wish) {
-    wrap(context, `青春期盼：${wish}`, maxTextWidth - paragraphIndent)
-      .slice(0, 2)
-      .forEach((line, index) => context.fillText(line, textLeft + paragraphIndent, nextParagraphY + index * 56));
-    nextParagraphY += 112;
+    nextParagraphY = drawParagraph(context, `青春期盼：${wish}`, {
+      left: textLeft,
+      baseline: nextParagraphY,
+      maxWidth: maxTextWidth,
+      indent: paragraphIndent,
+      lineHeight,
+      maxLines: 2,
+    });
   }
   context.textAlign = "right";
-  context.fillText("中汽中心团委", textRight, Math.max(1194, nextParagraphY + 18));
+  context.fillText("中汽中心团委", textRight, Math.min(1256, Math.max(1194, nextParagraphY + 20)));
   return canvas.toDataURL("image/png");
 }

@@ -81,7 +81,9 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [poster, setPoster] = useState("");
+  const [shareHint, setShareHint] = useState(false);
   const timer = useRef(null);
+  const posterGeneration = useRef(false);
   const publicProgress = useRef({});
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
@@ -301,21 +303,31 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
     if (image) setPoster(image);
   }
-  async function shareCertificate() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: publicConfig?.title || "十五五，我看行！",
-          text: "我已完成《十五五，我看行！》青年学习。",
-          url: window.location.href,
-        });
-        return;
-      } catch {
-        // Closing the system share sheet should leave the activity untouched.
-      }
+  useEffect(() => {
+    if (state?.phase !== "certificate") {
+      posterGeneration.current = false;
       return;
     }
-    notify("请点击右上角分享到朋友圈", true);
+    if (posterGeneration.current) return;
+    posterGeneration.current = true;
+    makePoster();
+  }, [state?.phase]);
+  function replay() {
+    setPoster("");
+    setShareHint(false);
+    if (!isPublicActivity) {
+      window.location.reload();
+      return;
+    }
+    publicProgress.current = {};
+    setSelectedKeywords([]);
+    setSelectedOptions([]);
+    setFutureMessage("");
+    setWish("");
+    setState(publicState());
+  }
+  function shareCertificate() {
+    setShareHint(true);
   }
   const homeBackground = assetUrl(ASSETS.homeBackground, assetsBaseUrl);
   const pageBackground = assetUrl(ASSETS.pageBackground, assetsBaseUrl);
@@ -371,10 +383,8 @@ export default function FifteenthFiveICanProject({ routeParams }) {
           <Certificate
             state={state}
             poster={poster}
-            onPoster={makePoster}
-            onReplay={() => window.location.reload()}
+            onReplay={replay}
             onShare={shareCertificate}
-            busy={busy}
             assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
@@ -387,6 +397,17 @@ export default function FifteenthFiveICanProject({ routeParams }) {
               {toast.message}
             </div>
           </div>
+        ) : null}
+        {shareHint ? (
+          <button
+            className="ffic-share-hint"
+            type="button"
+            onClick={() => setShareHint(false)}
+            aria-label="关闭分享提示"
+          >
+            <span aria-hidden="true">↗</span>
+            <strong>点击右上角<br />分享到朋友圈</strong>
+          </button>
         ) : null}
         {error && state ? (
           <p className="ffic-error" role="alert">
@@ -605,7 +626,7 @@ function FutureMessage({
   );
 }
 
-function Certificate({ state, poster, onPoster, onReplay, onShare, busy, assetsBaseUrl }) {
+function Certificate({ state, poster, onReplay, onShare, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
@@ -635,8 +656,7 @@ function Certificate({ state, poster, onPoster, onReplay, onShare, busy, assetsB
           <button
             className="ffic-image-button"
             type="button"
-            onClick={onPoster}
-            disabled={busy}
+            disabled
           >
             <img src={assetUrl(ASSETS.certificateSave, assetsBaseUrl)} alt="保存海报" />
           </button>
