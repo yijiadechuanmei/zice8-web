@@ -100,13 +100,13 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     activityKey,
     publicConfig,
   );
-  const notify = (message, correct = false, onDismiss) => {
+  const notify = (message, correct = false, onDismiss, duration = 1500) => {
     window.clearTimeout(timer.current);
     setToast({ message, correct });
     timer.current = window.setTimeout(() => {
       setToast(null);
       onDismiss?.();
-    }, 1500);
+    }, duration);
   };
   const load = async () => {
     setLoading(true);
@@ -205,12 +205,18 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setSelectedKeywords((current) =>
       current.includes(keyword)
         ? current.filter((item) => item !== keyword)
-        : current.length >= 3
-          ? current
-          : [...current, keyword],
+        : [...current, keyword],
     );
   }
   async function continueQuiz() {
+    if (selectedKeywords.length < 2) {
+      notify("请至少选择2个青春关键词", false, undefined, 1000);
+      return;
+    }
+    if (selectedKeywords.length > 3) {
+      notify("最多选择3个青春关键词", false, undefined, 1000);
+      return;
+    }
     if (isPublicActivity) {
       updatePublicState({ started: true, selectedKeywords });
       return;
@@ -424,7 +430,18 @@ export default function FifteenthFiveICanProject({ routeParams }) {
           />
         ) : null}
         {toast ? (
-          <div className="ffic-toast-layer" aria-live="polite">
+          <div
+            className="ffic-toast-layer"
+            aria-live="polite"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
             <div
               className={`ffic-toast ${toast.correct ? "is-correct" : "is-wrong"}`}
               role="status"
@@ -541,7 +558,7 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
       <button
         className="ffic-image-button ffic-keywords__next"
         type="button"
-        disabled={selected.length < 2 || busy}
+        disabled={busy}
         onClick={onNext}
       >
         <img src={assetUrl(ASSETS.keywordAction, assetsBaseUrl)} alt="去答题" />
