@@ -28,12 +28,19 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 /* IVX question page: title x=167,y=334; card x=65,y=411; text x=118,y=466. */
 .ffic-quiz__title { left: 22.2667%; top: 20.5665%; width: 54.2667%; }
 .ffic-quiz__card { left: 8.6667%; top: 25.308%; width: 82.8%; }
-.ffic-quiz__content { position: absolute; left: 15.7333%; top: 28.6946%; width: 68%; height: 30.6034%; overflow-y: auto; color: #0c1f85; }
+.ffic-quiz__content { position: absolute; left: 15.7333%; top: 28.6946%; width: 68%; height: 33.4359%; overflow-y: auto; scrollbar-width: none; color: #0c1f85; }
+.ffic-quiz__content::-webkit-scrollbar { display: none; }
 .ffic-quiz__progress { margin: 0 0 2cqw; font-size: 3.2cqw; font-weight: 700; text-align: right; }
 .ffic-quiz h1 { margin: 0 0 3.7333cqw; font-size: 4.2667cqw; font-weight: 700; line-height: 1.42; }
-.ffic-options { display: grid; gap: 2.1333cqw; }
-.ffic-options button { padding: 0; border: 0; background: transparent; color: #0c1f85; font-family: inherit; font-size: 3.2cqw; line-height: 1.42; text-align: left; cursor: pointer; }
-.ffic-options button.is-selected { color: #d33969; font-weight: 800; }
+.ffic-options { display: grid; gap: 1.6cqw; padding-bottom: 1cqw; }
+.ffic-options button { display: grid; grid-template-columns: 6.4cqw minmax(0, 1fr); width: 100%; min-height: 9.6cqw; padding: 1.3333cqw 1.6cqw; border: 1px solid rgba(12, 31, 133, .62); border-radius: 1.0667cqw; background: rgba(255, 255, 255, .56); color: #0c1f85; font-family: inherit; font-size: 3.2cqw; font-weight: 600; line-height: 1.42; text-align: left; align-items: center; column-gap: 1.3333cqw; cursor: pointer; transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease; }
+.ffic-option__key { display: grid; width: 5.3333cqw; height: 5.3333cqw; border: 1px solid currentColor; border-radius: 50%; place-items: center; font-size: 2.9333cqw; font-weight: 800; line-height: 1; }
+.ffic-option__text { min-width: 0; overflow-wrap: anywhere; }
+.ffic-options button.is-selected { border-color: #0c1f85; background: #0c1f85; color: #fff; box-shadow: 0 .8cqw 1.6cqw rgba(12, 31, 133, .2); }
+.ffic-options button.is-selected .ffic-option__key { border-color: #fff; background: #fff; color: #0c1f85; }
+.ffic-options--multiple button.is-selected .ffic-option__key { font-size: 0; }
+.ffic-options--multiple button.is-selected .ffic-option__key::after { content: "✓"; font-size: 3.4667cqw; line-height: 1; }
+.ffic-options button:active { transform: scale(.985); }
 .ffic-quiz__submit { left: 33.2%; top: 72.7229%; width: 32.4%; height: 5.3571%; }
 
 /* IVX question 15 uses the same x=65,y=411 card and x=118,y=466 text column. */

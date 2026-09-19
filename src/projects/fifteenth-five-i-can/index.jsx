@@ -484,7 +484,7 @@ function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
       <div className="ffic-quiz__content">
           <p className="ffic-quiz__progress">{question.no} / {state.totalQuestions}</p>
           <h1>{question.no}、{question.title}</h1>
-          <div className="ffic-options">
+          <div className={`ffic-options ffic-options--${question.type}`}>
             {question.options.map((option) => (
               <button
                 key={option.id}
@@ -493,7 +493,8 @@ function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
                 onClick={() => onToggle(option.id)}
                 aria-pressed={selected.includes(option.id)}
               >
-                {option.id}．{option.text}
+                <span className="ffic-option__key" aria-hidden="true">{option.id}</span>
+                <span className="ffic-option__text">{option.text}</span>
               </button>
             ))}
           </div>
