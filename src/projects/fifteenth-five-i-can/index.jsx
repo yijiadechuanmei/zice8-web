@@ -500,7 +500,6 @@ function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
       <img className="ffic-quiz__title" src={assetUrl(ASSETS.quizTitle, assetsBaseUrl)} alt="答题挑战" />
       <img className="ffic-quiz__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
       <div className="ffic-quiz__content">
-          <p className="ffic-quiz__progress">{question.no} / {state.totalQuestions}</p>
           <h1>{question.no}、{question.title}</h1>
           <div className={`ffic-options ffic-options--${question.type}`}>
             {question.options.map((option) => (
@@ -650,14 +649,11 @@ function Certificate({ state, poster, onPoster, onReplay, onShare, busy, assetsB
         </button>
       </div>
       {poster ? (
-        <a
+        <img
           className="ffic-certificate__poster"
-          href={poster}
-          download="十五五我看行青年学习证书.png"
-          aria-label="下载我的青年学习证书海报"
-        >
-          <img src={poster} alt="我的十五五青年学习证书海报" />
-        </a>
+          src={poster}
+          alt="我的十五五青年学习证书海报，长按可保存"
+        />
       ) : null}
     </section>
   );

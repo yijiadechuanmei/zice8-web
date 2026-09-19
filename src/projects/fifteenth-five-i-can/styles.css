@@ -30,7 +30,6 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-quiz__card { left: 8.6667%; top: 25.308%; width: 82.8%; }
 .ffic-quiz__content { position: absolute; left: 15.7333%; top: 28.6946%; width: 68%; height: 33.4359%; overflow-y: auto; scrollbar-width: none; color: #0c1f85; }
 .ffic-quiz__content::-webkit-scrollbar { display: none; }
-.ffic-quiz__progress { margin: 0 0 2cqw; font-size: 3.2cqw; font-weight: 700; text-align: right; }
 .ffic-quiz h1 { margin: 0 0 3.7333cqw; font-size: 4.2667cqw; font-weight: 700; line-height: 1.42; }
 .ffic-options { display: grid; gap: 1.6cqw; padding-bottom: 1cqw; }
 .ffic-options button { display: grid; grid-template-columns: 6.4cqw minmax(0, 1fr); width: 100%; min-height: 9.6cqw; padding: 1.3333cqw 1.6cqw; border: 1px solid rgba(12, 31, 133, .62); border-radius: 1.0667cqw; background: rgba(255, 255, 255, .56); color: #0c1f85; font-family: inherit; font-size: 3.2cqw; font-weight: 600; line-height: 1.42; text-align: left; align-items: center; column-gap: 1.3333cqw; cursor: pointer; transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease; }
@@ -68,8 +67,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 /* IVX certificate page: heading x=40,y=338; certificate x=82,y=416. */
 .ffic-certificate__heading { left: 5.3333%; top: 20.8128%; width: 91.7333%; }
 .ffic-certificate__template, .ffic-certificate__poster { left: 10.9333%; top: 25.6158%; width: 77.7333%; }
-.ffic-certificate__poster { position: absolute; z-index: 1; display: block; }
-.ffic-certificate__poster img { display: block; width: 100%; height: auto; }
+.ffic-certificate__poster { position: absolute; z-index: 1; display: block; height: auto; pointer-events: auto; user-select: auto; -webkit-user-select: auto; -webkit-touch-callout: default; }
 .ffic-certificate__copy { position: absolute; left: 23.3333%; top: 44.4581%; width: 52%; height: 20.3202%; overflow: hidden; color: #0c1f85; font-size: 2.1333cqw; line-height: 1.75; text-align: left; }
 .ffic-certificate__copy p { margin: 0; }
 .ffic-certificate__salutation { margin-bottom: 2.2cqw !important; }
@@ -82,8 +80,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-certificate__actions .ffic-image-button { width: 27.9926%; height: 75.3425%; }
 
 .ffic-toast-layer { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; pointer-events: auto; touch-action: none; }
-.ffic-toast { width: 70%; padding: 3cqw; background: #0c1f85; color: #fff; font-size: 4cqw; font-weight: 700; text-align: center; }
-.ffic-toast.is-wrong { background: #9f224e; }
+.ffic-toast { width: fit-content; max-width: 70%; padding: 2.4cqw 3.2cqw; border-radius: 1.0667cqw; background: rgba(0, 0, 0, .68); color: #fff; font-size: 3.4667cqw; font-weight: 500; line-height: 1.4; text-align: center; }
 .ffic-error { position: absolute; z-index: 20; left: 10%; right: 10%; bottom: 5%; margin: 0; color: #fff; font-size: 3.2cqw; text-align: center; }
 .ffic-center-state { position: absolute; inset: 0; display: grid; place-content: center; gap: 3cqw; background: rgba(12, 31, 133, .82); color: #fff; font-size: 4cqw; text-align: center; }
 .ffic-center-state .anticon { font-size: 7cqw; }
