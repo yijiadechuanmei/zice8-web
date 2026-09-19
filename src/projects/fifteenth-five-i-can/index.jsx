@@ -301,6 +301,22 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
     if (image) setPoster(image);
   }
+  async function shareCertificate() {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: publicConfig?.title || "十五五，我看行！",
+          text: "我已完成《十五五，我看行！》青年学习。",
+          url: window.location.href,
+        });
+        return;
+      } catch {
+        // Closing the system share sheet should leave the activity untouched.
+      }
+      return;
+    }
+    notify("请点击右上角分享到朋友圈", true);
+  }
   const homeBackground = assetUrl(ASSETS.homeBackground, assetsBaseUrl);
   const pageBackground = assetUrl(ASSETS.pageBackground, assetsBaseUrl);
   return (
@@ -356,6 +372,8 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             state={state}
             poster={poster}
             onPoster={makePoster}
+            onReplay={() => window.location.reload()}
+            onShare={shareCertificate}
             busy={busy}
             assetsBaseUrl={assetsBaseUrl}
           />
@@ -588,7 +606,7 @@ function FutureMessage({
   );
 }
 
-function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
+function Certificate({ state, poster, onPoster, onReplay, onShare, busy, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
@@ -604,14 +622,33 @@ function Certificate({ state, poster, onPoster, busy, assetsBaseUrl }) {
         {state.wish ? <p className="ffic-certificate__wish">青春期盼：{state.wish}</p> : null}
         <p className="ffic-certificate__issuer">中汽中心团委</p>
       </div>
-      <button
-        className="ffic-image-button ffic-certificate__action"
-        type="button"
-        onClick={onPoster}
-        disabled={busy}
-      >
-        <img src={assetUrl(ASSETS.certificateAction, assetsBaseUrl)} alt="合成证书海报" />
-      </button>
+      <div className="ffic-certificate__actions">
+        {poster ? (
+          <a
+            className="ffic-image-button"
+            href={poster}
+            download="十五五我看行青年学习证书.png"
+            aria-label="保存海报"
+          >
+            <img src={assetUrl(ASSETS.certificateSave, assetsBaseUrl)} alt="保存海报" />
+          </a>
+        ) : (
+          <button
+            className="ffic-image-button"
+            type="button"
+            onClick={onPoster}
+            disabled={busy}
+          >
+            <img src={assetUrl(ASSETS.certificateSave, assetsBaseUrl)} alt="保存海报" />
+          </button>
+        )}
+        <button className="ffic-image-button" type="button" onClick={onReplay}>
+          <img src={assetUrl(ASSETS.certificateReplay, assetsBaseUrl)} alt="再玩一次" />
+        </button>
+        <button className="ffic-image-button" type="button" onClick={onShare}>
+          <img src={assetUrl(ASSETS.certificateShare, assetsBaseUrl)} alt="分享到朋友圈" />
+        </button>
+      </div>
       {poster ? (
         <a
           className="ffic-certificate__poster"

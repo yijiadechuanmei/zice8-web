@@ -5,7 +5,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-stage--home { background-image: var(--ffic-home-bg); }
 .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; }
 
-.ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template, .ffic-certificate__action { position: absolute; display: block; }
+.ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template { position: absolute; display: block; }
 .ffic-home__title { left: 4.1333%; top: 8.8669%; width: 46.1333%; }
 .ffic-home__hero { left: 16.1333%; top: 16.0099%; width: 66.1333%; }
 .ffic-home__subtitle { left: 27.6%; top: 34.2365%; width: 43.3333%; }
@@ -78,7 +78,8 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-certificate__body span { display: block; text-indent: 2em; }
 .ffic-certificate__keywords, .ffic-certificate__wish { margin-top: 1.1cqw !important; text-indent: 2em; }
 .ffic-certificate__issuer { margin-top: 3.2cqw !important; text-align: right; }
-.ffic-certificate__action { left: 13.3333%; top: 78.5099%; width: 20.2667%; height: 3.3867%; }
+.ffic-certificate__actions { position: absolute; left: 13.3333%; top: 78.5099%; display: flex; width: 72.4%; height: 4.4951%; align-items: center; justify-content: space-between; }
+.ffic-certificate__actions .ffic-image-button { width: 27.9926%; height: 75.3425%; }
 
 .ffic-toast-layer { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; pointer-events: auto; touch-action: none; }
 .ffic-toast { width: 70%; padding: 3cqw; background: #0c1f85; color: #fff; font-size: 4cqw; font-weight: 700; text-align: center; }
