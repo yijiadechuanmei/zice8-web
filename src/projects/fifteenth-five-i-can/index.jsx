@@ -507,7 +507,7 @@ function Keywords({ state, selected, onToggle, onNext, busy, assetsBaseUrl }) {
                 "--w": `${layout.width / 7.5}%`,
               }}
             >
-              {layout.label}
+              <span>{layout.label}</span>
             </span>
           );
         })}
