@@ -202,6 +202,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     if (next) setState(next);
   }
   function toggleKeyword(keyword) {
+    if (!selectedKeywords.includes(keyword) && selectedKeywords.length >= 3) {
+      notify("最多选择3个青春关键词", false, undefined, 1000);
+      return;
+    }
     setSelectedKeywords((current) =>
       current.includes(keyword)
         ? current.filter((item) => item !== keyword)
@@ -211,10 +215,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   async function continueQuiz() {
     if (selectedKeywords.length < 2) {
       notify("请至少选择2个青春关键词", false, undefined, 1000);
-      return;
-    }
-    if (selectedKeywords.length > 3) {
-      notify("最多选择3个青春关键词", false, undefined, 1000);
       return;
     }
     if (isPublicActivity) {
