@@ -4,7 +4,9 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
+import { isWechatBrowser } from "../../shared/utils/url";
 import {
+  getCurrentUser,
   getPublicConfig,
   getState,
   saveKeywords,
@@ -25,7 +27,7 @@ import {
 import { renderCertificatePoster } from "./poster";
 import "./styles.css";
 
-function publicState(progress = {}) {
+function publicState(progress = {}, nickname = "") {
   const answers = Array.isArray(progress.answers) ? progress.answers : [];
   const selectedKeywords = Array.isArray(progress.selectedKeywords)
     ? progress.selectedKeywords.filter((item) => PUBLIC_ACTIVITY_DATA.keywords.includes(item))
@@ -60,7 +62,7 @@ function publicState(progress = {}) {
     futureMessage,
     wish,
     name,
-    nickname: "中汽青年",
+    nickname: nickname || "中汽青年",
   };
 }
 
@@ -76,6 +78,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const activityKey =
     routeParams?.activityKey || FIFTEENTH_FIVE_I_CAN_ACTIVITY_KEY;
   const [publicConfig, setPublicConfig] = useState(null);
+  const [wechatNickname, setWechatNickname] = useState("");
   const [state, setState] = useState(null);
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -96,13 +99,24 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const qrSourceRef = useRef(null);
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
-  const isPublicActivity = publicConfig?.accessMode === "public";
+  // This activity intentionally runs as an in-browser, reset-on-refresh flow.
+  // Its public access must not depend on a stale activity access-mode response.
+  const isPublicActivity = true;
+  const nicknameAuthConfig = useMemo(
+    () => publicConfig && ({
+      ...publicConfig,
+      accessMode: "public",
+      oauthScope: "snsapi_userinfo",
+      requireUserinfo: true,
+    }),
+    [publicConfig],
+  );
   const activityUrl = typeof window === "undefined" ? "" : window.location.href;
 
   useWechatShare(activityKey, publicConfig);
   const { authReady, blockedMessage, reauth } = useWechatAuth(
     activityKey,
-    publicConfig,
+    nicknameAuthConfig,
   );
   const notify = (message, correct = false, onDismiss, duration = 1500) => {
     window.clearTimeout(timer.current);
@@ -128,7 +142,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const updatePublicState = (patch) => {
     const nextProgress = { ...publicProgress.current, ...patch };
     publicProgress.current = nextProgress;
-    const nextState = publicState(nextProgress);
+    const nextState = publicState(nextProgress, wechatNickname);
     setState(nextState);
     return nextState;
   };
@@ -144,12 +158,31 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     if (isPublicActivity) {
       publicProgress.current = {};
       setError("");
-      setState(publicState());
+      setState(publicState({}, wechatNickname));
       setLoading(false);
       return;
     }
     load();
   }, [activityKey, authReady, isPublicActivity]);
+  useEffect(() => {
+    if (!authReady || !isWechatBrowser()) return;
+    let cancelled = false;
+    getCurrentUser()
+      .then((user) => {
+        const nickname = String(user?.nickname || "").trim();
+        if (!cancelled && nickname && nickname !== "微信用户") {
+          setWechatNickname(nickname);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [authReady]);
+  useEffect(() => {
+    if (!wechatNickname) return;
+    setState((current) => current && { ...current, nickname: wechatNickname });
+  }, [wechatNickname]);
   useEffect(() => {
     if (blockedMessage) {
       setLoading(false);
@@ -361,7 +394,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setFutureMessage("");
     setWish("");
     setName("");
-    setState(publicState());
+    setState(publicState({}, wechatNickname));
   }
   function shareCertificate() {
     setShareHint(true);

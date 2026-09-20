@@ -6,9 +6,9 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; animation: ffic-page-enter .46s cubic-bezier(.22, 1, .36, 1) both; }
 
 .ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template { position: absolute; display: block; }
-.ffic-home__title { left: 4.1333%; top: 8.8669%; width: 46.1333%; animation: ffic-home-title-enter .62s cubic-bezier(.22, 1, .36, 1) .08s both; }
-.ffic-home__hero { left: 16.1333%; top: 16.0099%; width: 66.1333%; animation: ffic-home-hero-enter .78s cubic-bezier(.22, 1, .36, 1) .2s both; }
-.ffic-home__subtitle { left: 27.6%; top: 34.2365%; width: 43.3333%; animation: ffic-home-subtitle-enter .54s cubic-bezier(.22, 1, .36, 1) .42s both; }
+.ffic-home__title { left: 4.1333%; top: 11.4532%; width: 46.1333%; animation: ffic-home-title-enter .62s cubic-bezier(.22, 1, .36, 1) .08s both; }
+.ffic-home__hero { left: 16.1333%; top: 18.5961%; width: 66.1333%; animation: ffic-home-hero-enter .78s cubic-bezier(.22, 1, .36, 1) .2s both; }
+.ffic-home__subtitle { left: 27.6%; top: 36.8227%; width: 43.3333%; animation: ffic-home-subtitle-enter .54s cubic-bezier(.22, 1, .36, 1) .42s both; }
 .ffic-home__button { left: 11.6%; top: 74.0148%; width: 77.3333%; animation: ffic-home-button-enter .62s cubic-bezier(.22, 1, .36, 1) .58s both, ffic-home-button-glow 2.8s ease-in-out 1.3s infinite; }
 
 .ffic-image-button, .ffic-home__button, .ffic-keyword { padding: 0; border: 0; background: transparent; cursor: pointer; }
