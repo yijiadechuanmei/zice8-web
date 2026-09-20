@@ -16,11 +16,11 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-image-button img, .ffic-home__button img { display: block; width: 100%; height: 100%; }
 .ffic-image-button:disabled, .ffic-home__button:disabled { cursor: not-allowed; opacity: .55; }
 
-/* IVX page 2: x=0,y=144,w=750,h=180. */
-.ffic-barrage { position: absolute; left: 0; top: 8.8669%; width: 100%; height: 11.0837%; overflow: hidden; pointer-events: none; }
+/* IVX page 2: x=0,y=175,w=750,h=180. */
+.ffic-barrage { position: absolute; left: 0; top: 10.7759%; width: 100%; height: 11.0837%; overflow: hidden; pointer-events: none; }
 .ffic-barrage__item { position: absolute; left: -24%; top: var(--top); width: var(--w); height: 24.25%; will-change: transform; animation: ffic-keyword-barrage var(--duration) linear infinite; animation-delay: var(--delay); }
-.ffic-keywords__heading { left: 31.7333%; top: 21.3054%; width: 32%; }
-.ffic-keywords__caption { left: 20.6667%; top: 64.6552%; width: 55.0667%; }
+.ffic-keywords__heading { left: 31.7333%; top: 23.2131%; width: 32%; }
+.ffic-keywords__caption { left: 20.6667%; top: 66.563%; width: 55.0667%; }
 .ffic-keyword-cloud { position: absolute; inset: 0; }
 .ffic-keyword { position: absolute; left: var(--left); top: var(--top); width: var(--width); height: var(--height); cursor: pointer; transition: transform .18s ease; }
 .ffic-keyword:active { transform: scale(.94); }
@@ -59,7 +59,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
   --capsule-edge: #ffedbe; --capsule-lilac: rgba(255, 203, 138, .55);
   border-color: #edaf46; color: #fff;
 }
-.ffic-keywords__next { left: 11.7333%; top: 72.6601%; width: 76.5333%; height: 5.4803%; }
+.ffic-keywords__next { left: 11.7333%; top: 74.569%; width: 76.5333%; height: 5.4803%; }
 .ffic-keywords__heading, .ffic-quiz__title, .ffic-form__title, .ffic-certificate__heading { animation: ffic-element-pop .5s cubic-bezier(.22, 1, .36, 1) .1s both; }
 .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__card, .ffic-quiz__content, .ffic-quiz__submit, .ffic-form__card, .ffic-form__content, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__template, .ffic-certificate__copy, .ffic-certificate__actions { animation: ffic-element-rise .54s cubic-bezier(.22, 1, .36, 1) .16s both; }
 

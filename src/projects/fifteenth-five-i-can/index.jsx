@@ -4,6 +4,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { QRCodeCanvas } from "qrcode.react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
+import { trackPageView } from "../../shared/analytics";
 import { isWechatBrowser } from "../../shared/utils/url";
 import {
   getCurrentUser,
@@ -75,6 +76,15 @@ function hasCorrectOptions(question, selectedOptions) {
   );
 }
 
+function resolveScanChannel() {
+  if (typeof window === "undefined") return "direct";
+  const params = new URLSearchParams(window.location.search);
+  const channel = String(
+    params.get("channel") || params.get("utm_source") || "",
+  ).trim().toLowerCase();
+  return channel === "onsite" || channel === "group" ? channel : "direct";
+}
+
 export default function FifteenthFiveICanProject({ routeParams }) {
   const activityKey =
     routeParams?.activityKey || FIFTEENTH_FIVE_I_CAN_ACTIVITY_KEY;
@@ -100,6 +110,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const qrSourceRef = useRef(null);
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
+  const scanChannel = useMemo(resolveScanChannel, []);
   // This activity intentionally runs as an in-browser, reset-on-refresh flow.
   // Its public access must not depend on a stale activity access-mode response.
   const isPublicActivity = true;
@@ -154,6 +165,14 @@ export default function FifteenthFiveICanProject({ routeParams }) {
       .catch(() => {});
     return () => window.clearTimeout(timer.current);
   }, [activityKey]);
+  useEffect(() => {
+    if (!authReady) return;
+    trackPageView(activityKey, "/fifteenth-five-i-can", {
+      activityType: "fifteenth_five_i_can",
+      source: scanChannel,
+      channel: scanChannel,
+    });
+  }, [activityKey, authReady, scanChannel]);
   useEffect(() => {
     if (!authReady) return;
     if (isPublicActivity) {
@@ -360,6 +379,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
           keywords: selectedKeywords,
           futureMessage: futureMessage.trim(),
           wish: wish.trim(),
+          channel: scanChannel,
         }).catch(() => {});
       }
       return;

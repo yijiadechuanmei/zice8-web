@@ -39,6 +39,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
   const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
+  const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -59,10 +60,25 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     const lvyuanOverviewRequest = activity.type === 'lvyuan_consumer_game_collection'
       ? getLvyuanAdminOverview(activity.activityKey)
       : Promise.resolve(null)
-    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest])
-      .then(([overviewData, chartData, sourceAccessData, lvyuanOverview]) => {
+    const fifteenthChannelAccessRequest = isFifteenthFiveICan
+      ? Promise.all([
+        getSourceAccess(activity.activityKey, { source: 'onsite' }).catch(() => null),
+        getSourceAccess(activity.activityKey, { source: 'group' }).catch(() => null),
+      ])
+      : Promise.resolve(null)
+    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest, fifteenthChannelAccessRequest])
+      .then(([overviewData, chartData, sourceAccessData, lvyuanOverview, fifteenthChannelAccess]) => {
         if (!alive) return
-        setOverview(lvyuanOverview ? { ...overviewData, lvyuanFruitfulGames: lvyuanOverview } : overviewData)
+        setOverview({
+          ...overviewData,
+          ...(lvyuanOverview ? { lvyuanFruitfulGames: lvyuanOverview } : {}),
+          ...(fifteenthChannelAccess ? {
+            fifteenthFiveChannelAccess: {
+              onsite: fifteenthChannelAccess[0]?.overview || {},
+              group: fifteenthChannelAccess[1]?.overview || {},
+            },
+          } : {}),
+        })
         setCharts(chartData)
         setSourceAccess(sourceAccessData)
         setUpdatedAt(new Date())
@@ -79,7 +95,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     return () => {
       alive = false
     }
-  }, [activity.activityKey, activity.type, isXiwuqiRoadNight, phaseScope, refreshNonce])
+  }, [activity.activityKey, activity.type, isFifteenthFiveICan, isXiwuqiRoadNight, phaseScope, refreshNonce])
 
   useEffect(() => {
     if (!compact || !autoRefreshMs) return undefined
@@ -112,12 +128,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
     if (activity.type === 'fifteenth_five_i_can') {
       const fifteenth = overview?.fifteenthFiveICan || {}
+      const channelAccess = overview?.fifteenthFiveChannelAccess || {}
+      const onsiteAccess = channelAccess.onsite || {}
+      const groupAccess = channelAccess.group || {}
       return [
         { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
         { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
         { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '现场宣讲 PV', value: onsiteAccess.pv ?? 0, tooltip: '仅统计现场宣讲二维码访问。' },
+        { label: '现场宣讲 UV', value: onsiteAccess.uv ?? 0, tooltip: uvHint },
+        { label: '集团扫码 PV', value: groupAccess.pv ?? 0, tooltip: '仅统计面向全集团自由扫码二维码访问。' },
+        { label: '集团扫码 UV', value: groupAccess.uv ?? 0, tooltip: uvHint },
         { label: '生成证书用户', value: fifteenth.certificateCount ?? 0, tooltip: '完成填写并生成学习证书的去重微信用户数。' },
+        { label: '现场宣讲证书', value: fifteenth.onsiteCertificateCount ?? 0 },
+        { label: '集团扫码证书', value: fifteenth.groupCertificateCount ?? 0 },
         { label: '今日生成证书', value: fifteenth.todayCertificateCount ?? 0 },
         { label: '已选青春关键词', value: fifteenth.keywordSelectionCount ?? 0 },
         { label: '已写2030留言', value: fifteenth.futureMessageCount ?? 0 },

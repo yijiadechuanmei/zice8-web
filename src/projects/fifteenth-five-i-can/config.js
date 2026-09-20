@@ -50,11 +50,14 @@ const keywordLabels = [
   "粤港澳大湾区", "京津冀总部", "长三角布局", "长江经济带",
 ];
 
+// IVX keyword page uses the same cloud coordinates with a 31px vertical shift.
+const KEYWORD_VERTICAL_OFFSET = 31;
+
 export const KEYWORD_LAYOUT = keywordCoordinates.map(([x, y, width, height], index) => ({
   id: `keyword-${index + 1}`,
   label: keywordLabels[index],
   x,
-  y,
+  y: y + KEYWORD_VERTICAL_OFFSET,
   width,
   height,
 }));
