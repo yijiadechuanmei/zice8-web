@@ -22,7 +22,7 @@
 .lucky-draw__button:not(:disabled):active { transform: scale(.96); }
 @media (hover: hover) and (pointer: fine) { .lucky-draw__button:not(:disabled):hover { filter: brightness(1.08); transform: translateY(-2px); } .lucky-draw__button:not(:disabled):hover::before { animation: lucky-sheen .75s ease; } }
 .lucky-draw__button:disabled { cursor: default; opacity: .6; }
-.lucky-draw__button:focus-visible, .lucky-dialog button:focus-visible { outline: 3px solid #fff6b8; outline-offset: 4px; }
+.lucky-draw__button:focus-visible { outline: 3px solid #fff6b8; outline-offset: 4px; }
 .lucky-draw__rule, .lucky-draw__status, .lucky-draw__error { font-size: 12px; margin: 18px 0 0; }
 .lucky-draw__rule { color: rgba(255,248,233,.5); letter-spacing: .08em; }
 .lucky-draw__status { color: #f5ce78; margin: -42px 0 24px; }
@@ -32,14 +32,12 @@
 .lucky-dialog__panel--not_won { background: linear-gradient(145deg, #f8f5f7, #e6dbe8); color: #543758; }
 .lucky-dialog__panel > p { color: #b87836; position: relative; }
 .lucky-dialog__panel--not_won > p { color: #88618f; }
-.lucky-dialog h2 { font-family: Georgia, "Songti SC", serif; font-size: 31px; font-weight: 400; letter-spacing: .04em; margin: 16px 0 17px; position: relative; }
+.lucky-dialog h2 { font-family: Georgia, "Songti SC", serif; font-size: 31px; font-weight: 400; letter-spacing: .04em; margin: 16px 0 17px; position: relative; white-space: nowrap; }
 .lucky-dialog__seal { align-items: center; background: radial-gradient(circle at 33% 27%, #fff6bc, #d28934 58%, #86452d); border-radius: 50%; box-shadow: 0 8px 18px rgba(129,65,36,.25); color: #fff6d2; display: inline-flex; height: 64px; justify-content: center; position: relative; width: 64px; }
 .lucky-dialog__seal svg { height: 30px; width: 30px; }
 .lucky-dialog__panel--not_won .lucky-dialog__seal { background: radial-gradient(circle at 33% 27%, #fff, #c9a6cd 58%, #87648e); }
 .lucky-dialog__line { background: linear-gradient(90deg, transparent, rgba(154,92,48,.45), transparent); height: 1px; margin: 21px auto 16px; position: relative; width: 150px; }
-.lucky-dialog small { display: block; font-size: 14px; line-height: 1.8; position: relative; }
-.lucky-dialog button { background: #713747; border: 0; border-radius: 999px; color: #fff8e9; cursor: pointer; font-size: 14px; letter-spacing: .14em; margin-top: 25px; min-height: 44px; padding: 0 31px; position: relative; text-indent: .14em; }
-.lucky-dialog__panel--not_won button { background: #76517b; }
+.lucky-dialog small { display: block; font-size: 14px; line-height: 1.8; position: relative; white-space: nowrap; }
 .lucky-dialog__burst { inset: 0; position: absolute; }
 .lucky-dialog__burst b { background: #e9b351; border-radius: 2px; height: 9px; left: 50%; position: absolute; top: 50%; transform: rotate(calc(var(--i) * 36deg)) translateY(-185px); transform-origin: 0 185px; width: 3px; }
 @keyframes lucky-drift-one { to { transform: translate(24vmax, 14vmax) scale(1.14); } } @keyframes lucky-drift-two { to { transform: translate(-18vmax, -15vmax) scale(.88); } } @keyframes lucky-twinkle { to { opacity: .85; transform: scale(1.8); } } @keyframes lucky-float { 50% { transform: translateY(-11px) rotate(2deg); } } @keyframes lucky-orbit { to { transform: rotate(332deg); } } @keyframes lucky-draw-spin { to { transform: rotate(360deg) scale(1.05); } } @keyframes lucky-sheen { to { left: 150%; } } @keyframes lucky-pop { from { opacity: 0; transform: scale(.82) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }

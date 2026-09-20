@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
@@ -9,8 +9,8 @@ const DEFAULT_ACTIVITY_KEY = 'lucky_draw_20260920'
 
 function resultCopy(outcome) {
   return outcome === 'won'
-    ? { eyebrow: 'LUCKY MOMENT', title: '恭喜你中奖了', message: '幸运正在向你靠近，愿这份惊喜点亮今天。', action: '收下好运' }
-    : { eyebrow: 'KEEP SHINING', title: '很遗憾未中奖', message: '这次与幸运擦肩而过，下次一定会如约而至。', action: '知道了' }
+    ? { eyebrow: 'LUCKY MOMENT', title: '恭喜你中奖了', message: '愿这份幸运点亮今天' }
+    : { eyebrow: 'KEEP SHINING', title: '很遗憾未中奖', message: '下次幸运一定会来' }
 }
 
 function readError(error, fallback) {
@@ -102,27 +102,22 @@ export default function LuckyDrawProject({ routeParams }) {
         ) : null}
         <p className="lucky-draw__rule">每位用户仅有一次抽奖机会</p>
       </section>
-      {dialogOutcome ? <ResultDialog outcome={dialogOutcome} onClose={() => setDialogOutcome(null)} /> : null}
+      {dialogOutcome ? <ResultDialog outcome={dialogOutcome} /> : null}
     </main>
   )
 }
 
-function ResultDialog({ outcome, onClose }) {
+function ResultDialog({ outcome }) {
   const copy = resultCopy(outcome)
-  const closeRef = useRef(null)
-  useEffect(() => {
-    closeRef.current?.focus()
-  }, [])
   return (
-    <div className="lucky-dialog" role="presentation" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }} onMouseDown={onClose}>
-      <section className={`lucky-dialog__panel lucky-dialog__panel--${outcome}`} role="dialog" aria-modal="true" aria-labelledby="lucky-draw-result-title" onMouseDown={(event) => event.stopPropagation()}>
+    <div className="lucky-dialog" role="presentation">
+      <section className={`lucky-dialog__panel lucky-dialog__panel--${outcome}`} role="dialog" aria-modal="true" aria-labelledby="lucky-draw-result-title">
         <div className="lucky-dialog__burst" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <b key={index} style={{ '--i': index }} />)}</div>
         <p>{copy.eyebrow}</p>
         <h2 id="lucky-draw-result-title">{copy.title}</h2>
         <span className="lucky-dialog__seal" aria-hidden="true">{outcome === 'won' ? <SparkleIcon /> : <HeartIcon />}</span>
         <div className="lucky-dialog__line" />
         <small>{copy.message}</small>
-        <button ref={closeRef} type="button" onClick={onClose}>{copy.action}</button>
       </section>
     </div>
   )
