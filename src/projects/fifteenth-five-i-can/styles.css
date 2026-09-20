@@ -125,6 +125,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-certificate__issuer { margin-top: 3.2cqw !important; text-align: right; }
 .ffic-certificate__actions { position: absolute; left: 23.2%; top: 78.633%; display: flex; width: 52.4%; height: 4.4951%; align-items: center; justify-content: space-between; }
 .ffic-certificate__actions .ffic-image-button { width: 38.6768%; height: 75.3425%; }
+.ffic-certificate__share-tip { position: absolute; left: 0; top: 83.05%; width: 100%; margin: 0; color: #0c1f85; font-size: 2.8cqw; font-weight: 700; line-height: 1.35; text-align: center; }
 
 .ffic-toast-layer { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; pointer-events: auto; touch-action: none; }
 .ffic-toast { width: fit-content; max-width: 70%; padding: 2.4cqw 3.2cqw; border-radius: 1.0667cqw; background: rgba(0, 0, 0, .68); color: #fff; font-size: 3.4667cqw; font-weight: 500; line-height: 1.4; text-align: center; }

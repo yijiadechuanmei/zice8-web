@@ -343,7 +343,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   async function saveWish() {
     const normalizedMessage = futureMessage.trim();
     const normalizedWish = wish.trim();
-    if (!normalizedMessage) return;
+    if (!normalizedMessage) {
+      setError("请写下给2030年的一句话");
+      return;
+    }
     if (isPublicActivity) {
       updatePublicState({
         futureMessage: normalizedMessage,
@@ -364,6 +367,10 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     const normalizedName = name.trim();
     if (!normalizedName) {
       setError("请填写姓名");
+      return;
+    }
+    if (!futureMessage.trim() || selectedKeywords.length < 2) {
+      setError("请完整填写提交内容后再生成证书");
       return;
     }
     if (isPublicActivity) {
@@ -814,6 +821,7 @@ function Certificate({ state, poster, onReplay, onPreviewPoster, assetsBaseUrl }
           <img src={assetUrl(ASSETS.certificateReplay, assetsBaseUrl)} alt="再玩一次" />
         </button>
       </div>
+      <p className="ffic-certificate__share-tip">请将证书分享至朋友圈</p>
       {poster ? (
         <img
           className="ffic-certificate__poster"
