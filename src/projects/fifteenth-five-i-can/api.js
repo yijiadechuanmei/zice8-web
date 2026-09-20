@@ -30,3 +30,8 @@ export const submitName = (activityKey, name) =>
     method: "POST",
     body: JSON.stringify({ name }),
   });
+export const submitCompletion = (activityKey, payload) =>
+  request(`${base(activityKey)}/completion`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });

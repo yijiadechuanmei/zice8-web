@@ -1,8 +1,9 @@
 body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 
 .ffic-app { position: fixed; inset: 0; display: grid; width: 100vw; height: 100svh; min-width: 0; min-height: 0; overflow: hidden; place-items: center; background: #102891; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; touch-action: manipulation; }
-.ffic-stage { position: relative; container-type: inline-size; width: min(100vw, 750px); height: auto; aspect-ratio: 750 / 1624; margin: 0; overflow: hidden; background: var(--ffic-page-bg) center / 100% 100% no-repeat; }
-.ffic-stage--home { background-image: var(--ffic-home-bg); }
+.ffic-stage { position: relative; isolation: isolate; container-type: inline-size; width: min(100vw, 750px); height: auto; aspect-ratio: 750 / 1624; margin: 0; overflow: hidden; background: #102891; }
+.ffic-stage__background { position: absolute; z-index: 0; inset: 0; display: block; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+.ffic-stage > :not(.ffic-stage__background) { z-index: 1; }
 .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate { position: relative; width: 100%; height: 100%; animation: ffic-page-enter .46s cubic-bezier(.22, 1, .36, 1) both; }
 
 .ffic-home__title, .ffic-home__hero, .ffic-home__subtitle, .ffic-home__button, .ffic-keywords__heading, .ffic-keywords__caption, .ffic-keywords__next, .ffic-quiz__title, .ffic-quiz__card, .ffic-quiz__submit, .ffic-form__title, .ffic-form__card, .ffic-form__caption, .ffic-form__submit, .ffic-certificate__heading, .ffic-certificate__template { position: absolute; display: block; }

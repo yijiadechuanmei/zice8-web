@@ -110,6 +110,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'fifteenth_five_i_can') {
+      const fifteenth = overview?.fifteenthFiveICan || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '生成证书用户', value: fifteenth.certificateCount ?? 0, tooltip: '完成填写并生成学习证书的去重微信用户数。' },
+        { label: '今日生成证书', value: fifteenth.todayCertificateCount ?? 0 },
+        { label: '已选青春关键词', value: fifteenth.keywordSelectionCount ?? 0 },
+        { label: '已写2030留言', value: fifteenth.futureMessageCount ?? 0 },
+        { label: '已写青春期盼', value: fifteenth.wishCount ?? 0 },
+      ]
+    }
+
     if (activity.type === 'xiangyu_global_treasure') {
       const treasure = overview?.xiangyuGlobalTreasure || {}
       return [

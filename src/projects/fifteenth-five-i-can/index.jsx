@@ -12,6 +12,7 @@ import {
   saveKeywords,
   start,
   submitAnswer,
+  submitCompletion,
   submitFutureMessage,
   submitName,
 } from "./api";
@@ -351,6 +352,16 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     }
     if (isPublicActivity) {
       updatePublicState({ name: normalizedName });
+      // The activity is intentionally reset-on-refresh. Persist only this
+      // final certificate snapshot for Admin, never use it to restore a page.
+      if (isWechatBrowser()) {
+        void submitCompletion(activityKey, {
+          name: normalizedName,
+          keywords: selectedKeywords,
+          futureMessage: futureMessage.trim(),
+          wish: wish.trim(),
+        }).catch(() => {});
+      }
       return;
     }
     const next = await run(() => submitName(activityKey, normalizedName));
@@ -405,14 +416,17 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const homeBackground = assetUrl(ASSETS.homeBackground, assetsBaseUrl);
   const pageBackground = assetUrl(ASSETS.pageBackground, assetsBaseUrl);
   return (
-    <main
-      className="ffic-app"
-      style={{
-        "--ffic-home-bg": `url("${homeBackground}")`,
-        "--ffic-page-bg": `url("${pageBackground}")`,
-      }}
-    >
+    <main className="ffic-app">
       <div className={`ffic-stage ffic-stage--${state?.phase || "home"}`}>
+        <img
+          key={state?.phase === "home" || !state ? homeBackground : pageBackground}
+          className="ffic-stage__background"
+          src={state?.phase === "home" || !state ? homeBackground : pageBackground}
+          alt=""
+          aria-hidden="true"
+          decoding="sync"
+          fetchPriority="high"
+        />
         {loading ? <CenterState loading /> : null}
         {!loading && error && !state ? <CenterState error={error} /> : null}
         {!loading && state?.phase === "home" ? (
