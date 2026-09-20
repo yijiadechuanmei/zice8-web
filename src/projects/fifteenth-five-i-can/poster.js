@@ -57,10 +57,10 @@ export async function renderCertificatePoster({
   if (!context) throw new Error("当前浏览器不支持海报合成");
   context.drawImage(background, 0, 0, canvas.width, canvas.height);
   if (qrCanvas) {
-    // IVX page coordinates: x=420,y=645, relative to the certificate x=82,y=416.
-    // The poster is exported at twice the 583×815 certificate artwork size.
-    const qrFrameX = 676;
-    const qrFrameY = 458;
+    // IVX coordinates are relative to the 583×815 certificate container:
+    // x=420, y=645. The poster is exported at double that artwork size.
+    const qrFrameX = 840;
+    const qrFrameY = 1290;
     const qrBorder = 10;
     const qrSize = 140;
     context.fillStyle = "#fff";
