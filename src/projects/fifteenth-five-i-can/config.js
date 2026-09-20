@@ -24,7 +24,6 @@ export const ASSETS = {
   certificateHeading: "396de029be057e28c751a5f79e89e081_35380_688_48.png",
   certificateSave: "0e6300bf3354b0705df74a31ee34d44d_16735_152_55.png",
   certificateReplay: "8b9bf8a271e090398e7e22f1d9da832e_16333_152_55.png",
-  certificateShare: "008aee3e128b27df1ee62aabdf7135e7_17463_152_55.png",
 };
 
 const keywordCoordinates = [

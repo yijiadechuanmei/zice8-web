@@ -101,7 +101,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [busy, setBusy] = useState(false);
   const [poster, setPoster] = useState("");
   const [posterPreview, setPosterPreview] = useState(false);
-  const [shareHint, setShareHint] = useState(false);
   const timer = useRef(null);
   const posterGeneration = useRef(false);
   const publicProgress = useRef({});
@@ -412,7 +411,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   function replay() {
     setPoster("");
     setPosterPreview(false);
-    setShareHint(false);
     if (!isPublicActivity) {
       window.location.reload();
       return;
@@ -424,9 +422,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setWish("");
     setName("");
     setState(publicState({}, wechatNickname));
-  }
-  function shareCertificate() {
-    setShareHint(true);
   }
   function previewPoster() {
     if (poster) setPosterPreview(true);
@@ -501,7 +496,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             state={state}
             poster={poster}
             onReplay={replay}
-            onShare={shareCertificate}
             onPreviewPoster={previewPoster}
             assetsBaseUrl={assetsBaseUrl}
           />
@@ -526,17 +520,6 @@ export default function FifteenthFiveICanProject({ routeParams }) {
               {toast.message}
             </div>
           </div>
-        ) : null}
-        {shareHint ? (
-          <button
-            className="ffic-share-hint"
-            type="button"
-            onClick={() => setShareHint(false)}
-            aria-label="关闭分享提示"
-          >
-            <span aria-hidden="true">↗</span>
-            <strong>点击右上角<br />分享到朋友圈</strong>
-          </button>
         ) : null}
         {posterPreview && poster ? (
           <PosterPreview poster={poster} onClose={() => setPosterPreview(false)} />
@@ -793,7 +776,7 @@ function NameForm({ name, onChange, onSubmit, busy, assetsBaseUrl }) {
   );
 }
 
-function Certificate({ state, poster, onReplay, onShare, onPreviewPoster, assetsBaseUrl }) {
+function Certificate({ state, poster, onReplay, onPreviewPoster, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
@@ -829,9 +812,6 @@ function Certificate({ state, poster, onReplay, onShare, onPreviewPoster, assets
         )}
         <button className="ffic-image-button" type="button" onClick={onReplay}>
           <img src={assetUrl(ASSETS.certificateReplay, assetsBaseUrl)} alt="再玩一次" />
-        </button>
-        <button className="ffic-image-button" type="button" onClick={onShare}>
-          <img src={assetUrl(ASSETS.certificateShare, assetsBaseUrl)} alt="分享到朋友圈" />
         </button>
       </div>
       {poster ? (
