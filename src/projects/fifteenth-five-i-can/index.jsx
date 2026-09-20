@@ -167,8 +167,8 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     setWish(state?.wish || "");
   }, [state?.phase]);
   useEffect(() => {
-    setName(state?.name || "");
-  }, [state?.name]);
+    setName(state?.name || state?.nickname || "");
+  }, [state?.name, state?.nickname]);
   useEffect(() => {
     if (state?.phase === "future-message") setFutureStep("message");
     if (state?.phase === "future-wish") setFutureStep("wish");
