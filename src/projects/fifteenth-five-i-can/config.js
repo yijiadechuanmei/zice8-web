@@ -67,7 +67,7 @@ export const PUBLIC_ACTIVITY_DATA = {
   keywords: KEYWORD_LAYOUT.map(({ id }) => id),
   wishPresets: ["奔赴更好的2030", "让梦想照进现实", "与时代同频共振", "成为更好的自己"],
   questions: [
-    { no: 1, type: "single", title: "“十四五”时期中汽中心已经取得了历史性、开创性成就，向（）战略目标迈出坚实步伐", options: [{ id: "A", text: "“四个最”" }, { id: "B", text: "“五个最”" }, { id: "C", text: "“俩个最”" }, { id: "D", text: "“三个最”" }], correctOptions: ["A"] },
+    { no: 1, type: "single", title: "“十四五”时期中汽中心已经取得了历史性、开创性成就，向（）战略目标迈出坚实步伐", options: [{ id: "A", text: "“四个最”" }, { id: "B", text: "“五个最”" }, { id: "C", text: "“两个最”" }, { id: "D", text: "“三个最”" }], correctOptions: ["A"] },
     { no: 2, type: "single", title: "中汽中心“十五五”确立的发展战略简称是", options: [{ id: "A", text: "“一四二三”" }, { id: "B", text: "“一二三四”" }, { id: "C", text: "“五二五”" }, { id: "D", text: "“二五二”" }], correctOptions: ["A"] },
     { no: 3, type: "multiple", title: "中汽中心的核心功能有哪些？", options: [{ id: "A", text: "汽车产业标准创新引领" }, { id: "B", text: "汽车产业战略政策支撑" }, { id: "C", text: "汽车行业共性技术供给" }, { id: "D", text: "汽车产品价值提升促进" }], correctOptions: ["A", "B", "C", "D"] },
     { no: 4, type: "multiple", title: "中汽中心的核心竞争力有哪些？", options: [{ id: "A", text: "全价值链技术服务能力" }, { id: "B", text: "前瞻科技策源创新能力" }, { id: "C", text: "基础资源建设整合能力" }, { id: "D", text: "产业生态构建协同能力" }], correctOptions: ["A", "B", "C", "D"] },
