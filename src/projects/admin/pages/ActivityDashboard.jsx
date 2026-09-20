@@ -140,7 +140,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: '现场宣讲 UV', value: onsiteAccess.uv ?? 0, tooltip: uvHint },
         { label: '集团扫码 PV', value: groupAccess.pv ?? 0, tooltip: '仅统计面向全集团自由扫码二维码访问。' },
         { label: '集团扫码 UV', value: groupAccess.uv ?? 0, tooltip: uvHint },
-        { label: '生成证书用户', value: fifteenth.certificateCount ?? 0, tooltip: '完成填写并生成学习证书的去重微信用户数。' },
+        { label: '生成证书记录', value: fifteenth.certificateCount ?? 0, tooltip: '每次完成填写并生成学习证书，均新增一条记录。' },
         { label: '现场宣讲证书', value: fifteenth.onsiteCertificateCount ?? 0 },
         { label: '集团扫码证书', value: fifteenth.groupCertificateCount ?? 0 },
         { label: '今日生成证书', value: fifteenth.todayCertificateCount ?? 0 },
