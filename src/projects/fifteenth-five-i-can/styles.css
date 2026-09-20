@@ -130,6 +130,13 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 .ffic-share-hint { position: absolute; z-index: 30; inset: 0; padding: 0; border: 0; background: rgba(0, 0, 0, .54); color: #fff; cursor: pointer; }
 .ffic-share-hint span { position: absolute; top: 1.3333cqw; right: 6.4cqw; font: 10.6667cqw/1 Arial, sans-serif; }
 .ffic-share-hint strong { position: absolute; top: 13.3333cqw; right: 3.2cqw; font-size: 3.7333cqw; line-height: 1.45; text-align: right; }
+.ffic-poster-preview { position: absolute; z-index: 40; inset: 0; display: grid; place-items: center; }
+.ffic-poster-preview__mask { position: absolute; inset: 0; border: 0; background: rgba(3, 13, 58, .76); }
+.ffic-poster-preview__panel { position: relative; z-index: 1; display: grid; width: 77.7333%; justify-items: center; gap: 2.4cqw; }
+.ffic-poster-preview__panel img { display: block; width: 100%; height: auto; box-shadow: 0 1.6cqw 4cqw rgba(0, 0, 0, .35); user-select: auto; -webkit-user-select: auto; -webkit-touch-callout: default; }
+.ffic-poster-preview__panel p { margin: 0; color: #fff; font-size: 3.4667cqw; font-weight: 600; line-height: 1.4; text-align: center; }
+.ffic-poster-preview__close { position: absolute; top: -3.2cqw; right: -3.2cqw; display: grid; width: 6.4cqw; height: 6.4cqw; padding: 0; border: .2667cqw solid #fff; border-radius: 50%; place-items: center; background: rgba(7, 29, 97, .82); color: #fff; font: 5.3333cqw/1 Arial, sans-serif; }
+.ffic-qr-source { position: fixed; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 .ffic-error { position: absolute; z-index: 20; left: 10%; right: 10%; bottom: 5%; margin: 0; color: #fff; font-size: 3.2cqw; text-align: center; }
 .ffic-center-state { position: absolute; inset: 0; display: grid; place-content: center; gap: 3cqw; background: rgba(12, 31, 133, .82); color: #fff; font-size: 4cqw; text-align: center; }
 .ffic-center-state .anticon { font-size: 7cqw; }

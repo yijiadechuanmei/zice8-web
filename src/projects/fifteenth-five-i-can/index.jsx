@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
+import { QRCodeCanvas } from "qrcode.react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
 import {
@@ -87,13 +88,16 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [poster, setPoster] = useState("");
+  const [posterPreview, setPosterPreview] = useState(false);
   const [shareHint, setShareHint] = useState(false);
   const timer = useRef(null);
   const posterGeneration = useRef(false);
   const publicProgress = useRef({});
+  const qrSourceRef = useRef(null);
   const config = useMemo(() => mergeConfig(publicConfig), [publicConfig]);
   const assetsBaseUrl = config.assetsBaseUrl;
   const isPublicActivity = publicConfig?.accessMode === "public";
+  const activityUrl = typeof window === "undefined" ? "" : window.location.href;
 
   useWechatShare(activityKey, publicConfig);
   const { authReady, blockedMessage, reauth } = useWechatAuth(
@@ -319,7 +323,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     const next = await run(() => submitName(activityKey, normalizedName));
     if (next) setState(next);
   }
-  async function makePoster() {
+  async function makePoster(qrCanvas) {
     const image = await run(() =>
       renderCertificatePoster({
         nickname: state.name || state.nickname,
@@ -327,6 +331,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         futureMessage: state.futureMessage,
         wish: state.wish,
         assetsBaseUrl,
+        qrCanvas,
       }),
     );
     if (image) setPoster(image);
@@ -337,11 +342,14 @@ export default function FifteenthFiveICanProject({ routeParams }) {
       return;
     }
     if (posterGeneration.current) return;
+    const qrCanvas = qrSourceRef.current?.querySelector("canvas");
+    if (!qrCanvas) return;
     posterGeneration.current = true;
-    makePoster();
-  }, [state?.phase]);
+    makePoster(qrCanvas);
+  }, [state?.phase, activityUrl]);
   function replay() {
     setPoster("");
+    setPosterPreview(false);
     setShareHint(false);
     if (!isPublicActivity) {
       window.location.reload();
@@ -357,6 +365,9 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   }
   function shareCertificate() {
     setShareHint(true);
+  }
+  function previewPoster() {
+    if (poster) setPosterPreview(true);
   }
   const homeBackground = assetUrl(ASSETS.homeBackground, assetsBaseUrl);
   const pageBackground = assetUrl(ASSETS.pageBackground, assetsBaseUrl);
@@ -426,6 +437,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             poster={poster}
             onReplay={replay}
             onShare={shareCertificate}
+            onPreviewPoster={previewPoster}
             assetsBaseUrl={assetsBaseUrl}
           />
         ) : null}
@@ -461,11 +473,17 @@ export default function FifteenthFiveICanProject({ routeParams }) {
             <strong>点击右上角<br />分享到朋友圈</strong>
           </button>
         ) : null}
+        {posterPreview && poster ? (
+          <PosterPreview poster={poster} onClose={() => setPosterPreview(false)} />
+        ) : null}
         {error && state ? (
           <p className="ffic-error" role="alert">
             {error}
           </p>
         ) : null}
+      </div>
+      <div ref={qrSourceRef} className="ffic-qr-source" aria-hidden="true">
+        <QRCodeCanvas value={activityUrl} size={400} marginSize={2} level="M" />
       </div>
     </main>
   );
@@ -574,7 +592,7 @@ function Quiz({ state, selected, onToggle, onAnswer, busy, assetsBaseUrl }) {
       <img className="ffic-quiz__title" src={assetUrl(ASSETS.quizTitle, assetsBaseUrl)} alt="答题挑战" />
       <img className="ffic-quiz__card" src={assetUrl(ASSETS.quizCard, assetsBaseUrl)} alt="" />
       <div className="ffic-quiz__content">
-          <h1>{question.no}、{question.title}</h1>
+          <h1>{question.no}、【{question.type === "multiple" ? "多选题" : "单选题"}】{question.title}</h1>
           <div className={`ffic-options ffic-options--${question.type}`}>
             {question.options.map((option) => (
               <button
@@ -710,7 +728,7 @@ function NameForm({ name, onChange, onSubmit, busy, assetsBaseUrl }) {
   );
 }
 
-function Certificate({ state, poster, onReplay, onShare, assetsBaseUrl }) {
+function Certificate({ state, poster, onReplay, onShare, onPreviewPoster, assetsBaseUrl }) {
   return (
     <section className="ffic-certificate">
       <img className="ffic-certificate__heading" src={assetUrl(ASSETS.certificateHeading, assetsBaseUrl)} alt="" />
@@ -728,14 +746,13 @@ function Certificate({ state, poster, onReplay, onShare, assetsBaseUrl }) {
       </div>
       <div className="ffic-certificate__actions">
         {poster ? (
-          <a
+          <button
             className="ffic-image-button"
-            href={poster}
-            download="十五五我看行青年学习证书.png"
-            aria-label="保存海报"
+            type="button"
+            onClick={onPreviewPoster}
           >
             <img src={assetUrl(ASSETS.certificateSave, assetsBaseUrl)} alt="保存海报" />
-          </a>
+          </button>
         ) : (
           <button
             className="ffic-image-button"
@@ -762,6 +779,20 @@ function Certificate({ state, poster, onReplay, onShare, assetsBaseUrl }) {
     </section>
   );
 }
+
+function PosterPreview({ poster, onClose }) {
+  return (
+    <div className="ffic-poster-preview" role="dialog" aria-modal="true" aria-label="保存海报">
+      <button className="ffic-poster-preview__mask" type="button" onClick={onClose} aria-label="关闭海报预览" />
+      <section className="ffic-poster-preview__panel">
+        <img src={poster} alt="我的十五五青年学习证书海报，长按保存" />
+        <p>长按图片保存到相册</p>
+        <button className="ffic-poster-preview__close" type="button" onClick={onClose} aria-label="关闭">×</button>
+      </section>
+    </div>
+  );
+}
+
 function CenterState({ loading, error }) {
   return (
     <div className="ffic-center-state">

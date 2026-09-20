@@ -45,6 +45,7 @@ export async function renderCertificatePoster({
   selectedKeywords,
   wish,
   assetsBaseUrl,
+  qrCanvas,
 }) {
   const [background] = await Promise.all([
     loadImage(assetUrl(ASSETS.certificate, assetsBaseUrl)),
@@ -55,6 +56,17 @@ export async function renderCertificatePoster({
   const context = canvas.getContext("2d");
   if (!context) throw new Error("当前浏览器不支持海报合成");
   context.drawImage(background, 0, 0, canvas.width, canvas.height);
+  if (qrCanvas) {
+    // IVX page coordinates: x=420,y=645, relative to the certificate x=82,y=416.
+    // The poster is exported at twice the 583×815 certificate artwork size.
+    const qrFrameX = 676;
+    const qrFrameY = 458;
+    const qrBorder = 10;
+    const qrSize = 140;
+    context.fillStyle = "#fff";
+    context.fillRect(qrFrameX, qrFrameY, qrSize + qrBorder * 2, qrSize + qrBorder * 2);
+    context.drawImage(qrCanvas, qrFrameX + qrBorder, qrFrameY + qrBorder, qrSize, qrSize);
+  }
   const textLeft = 186;
   const textRight = 966;
   const maxTextWidth = textRight - textLeft;
