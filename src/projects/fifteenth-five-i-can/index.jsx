@@ -79,9 +79,7 @@ function hasCorrectOptions(question, selectedOptions) {
 function resolveScanChannel() {
   if (typeof window === "undefined") return "direct";
   const params = new URLSearchParams(window.location.search);
-  const channel = String(
-    params.get("channel") || params.get("utm_source") || "",
-  ).trim().toLowerCase();
+  const channel = String(params.get("channel") || "").trim().toLowerCase();
   return channel === "onsite" || channel === "group" ? channel : "direct";
 }
 
