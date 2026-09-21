@@ -372,6 +372,16 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         }
       }
     }
+    if (activity.type === 'lucky_draw_20260920' && activeViewKey === 'lucky_draw_20260920_records') {
+      const outcomeColumn = columns.find((column) => column.key === 'outcome' || column.dataIndex === 'outcome')
+      if (outcomeColumn) {
+        outcomeColumn.render = (value) => <Tag color={value === '中奖' ? 'green' : 'default'}>{value || '-'}</Tag>
+      }
+      const wonColumn = columns.find((column) => column.key === 'won' || column.dataIndex === 'won')
+      if (wonColumn) {
+        wonColumn.render = (value) => value ? <Tag color="green">是</Tag> : <Tag>否</Tag>
+      }
+    }
     if (activity.type === 'long_march_study' && activeViewKey === 'long_march_profiles') {
       const statusColumn = columns.find((column) => column.key === 'status' || column.dataIndex === 'status')
       if (statusColumn) {

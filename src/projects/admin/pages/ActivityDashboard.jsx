@@ -40,6 +40,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
   const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
   const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
+  const isLuckyDraw = activity.type === 'lucky_draw_20260920'
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -252,6 +253,21 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (isLuckyDraw) {
+      const lottery = overview?.luckyDraw || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '累计抽奖人数', value: lottery.drawCount ?? 0, tooltip: '每位微信用户只有一次抽奖资格。' },
+        { label: '今日抽奖人数', value: lottery.todayDrawCount ?? 0 },
+        { label: '中奖人数', value: lottery.winCount ?? 0 },
+        { label: '未中奖人数', value: lottery.missCount ?? 0 },
+        { label: '实际中奖率', value: Math.round(Number(lottery.winRate ?? 0)), suffix: '%' },
+      ]
+    }
+
     if (activity.type === 'phase_quiz_lottery') {
       const pql = overview?.phaseQuizLottery || {}
       return [
@@ -437,9 +453,15 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isAntiFraudBoardGame, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
+  const luckyDrawTrend = (charts?.luckyDraw?.drawTrend || []).map((item, index) => ({
+    date: item.date,
+    draws: item.value || 0,
+    wins: charts?.luckyDraw?.winTrend?.[index]?.value || 0,
+    misses: charts?.luckyDraw?.missTrend?.[index]?.value || 0,
+  }))
   const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))
   const commentTrend = (charts?.videoRank?.commentTrend || []).map((item) => ({ ...item, comments: item.value || 0 }))
   const rankTop10 = (charts?.videoRank?.rankTop10 || []).map((item) => ({
@@ -662,6 +684,25 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
+          {isLuckyDraw ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+                  )}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={12}>
+                <ChartPanel title="近 7 天抽奖结果" description="按抽奖时间统计，中奖与未中奖之和等于当天抽奖人数。">
+                  <LazyChart type="bar" data={luckyDrawTrend} series={[{ key: 'wins', name: '中奖' }, { key: 'misses', name: '未中奖' }]} emptyText="暂无抽奖记录" />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
           {activity.type === 'material_review_registration' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={12}>
@@ -834,7 +875,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
