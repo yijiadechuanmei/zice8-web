@@ -129,6 +129,12 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 
 .ffic-toast-layer { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; pointer-events: auto; touch-action: none; }
 .ffic-toast { width: fit-content; max-width: 70%; padding: 2.4cqw 3.2cqw; border-radius: 1.0667cqw; background: rgba(0, 0, 0, .68); color: #fff; font-size: 3.4667cqw; font-weight: 500; line-height: 1.4; text-align: center; }
+.ffic-explanation { position: absolute; z-index: 30; inset: 0; display: grid; padding: 0 10.6667%; place-items: center; background: rgba(4, 18, 82, .67); touch-action: none; }
+.ffic-explanation__panel { box-sizing: border-box; width: 100%; padding: 5.0667cqw 5.3333cqw 4.2667cqw; border: .4cqw solid #73d8ff; border-radius: 2.1333cqw; background: linear-gradient(145deg, rgba(241, 251, 255, .98), rgba(187, 225, 255, .96)); box-shadow: 0 1.6cqw 4.8cqw rgba(2, 18, 94, .45), inset 0 0 0 .2667cqw rgba(255, 255, 255, .72); color: #0c1f85; text-align: center; animation: ffic-explanation-enter .26s ease-out both; }
+.ffic-explanation__eyebrow { margin: 0 0 2.6667cqw; font-size: 4.8cqw; font-weight: 900; letter-spacing: .2cqw; text-shadow: 0 .1333cqw 0 #fff; }
+.ffic-explanation__text { margin: 0; font-size: 3.7333cqw; font-weight: 700; line-height: 1.6; }
+.ffic-explanation button { width: 46%; min-height: 9.3333cqw; margin-top: 4.2667cqw; border: .2667cqw solid #0478e4; border-radius: 999px; background: radial-gradient(ellipse 65% 150% at 50% 30%, #70d6ff 0%, #258be9 58%, #0759bf 100%); box-shadow: inset 0 .4cqw .5cqw rgba(255, 255, 255, .65), 0 .6cqw 1.0667cqw rgba(8, 54, 150, .28); color: #fff; font: inherit; font-size: 3.7333cqw; font-weight: 900; letter-spacing: .2667cqw; }
+.ffic-explanation button:active { transform: translateY(.1333cqw) scale(.985); }
 .ffic-poster-preview { position: absolute; z-index: 40; inset: 0; display: grid; place-items: center; }
 .ffic-poster-preview__mask { position: absolute; inset: 0; border: 0; background: rgba(3, 13, 58, .76); }
 .ffic-poster-preview__panel { position: relative; z-index: 1; display: grid; width: 77.7333%; justify-items: center; gap: 2.4cqw; }
@@ -150,6 +156,7 @@ body.ffic-no-scroll { overflow: hidden; overscroll-behavior: none; }
 @keyframes ffic-element-pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes ffic-element-rise { from { opacity: 0; transform: translate3d(0, 1.8cqw, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
 @keyframes ffic-poster-reveal { from { opacity: 0; transform: scale(.975); } to { opacity: 1; transform: scale(1); } }
+@keyframes ffic-explanation-enter { from { opacity: 0; transform: translate3d(0, 1.6cqw, 0) scale(.96); } to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
 @media (prefers-reduced-motion: reduce) {
   .ffic-barrage__item { animation: none; left: 8%; }
   .ffic-home, .ffic-keywords, .ffic-quiz, .ffic-form, .ffic-certificate,

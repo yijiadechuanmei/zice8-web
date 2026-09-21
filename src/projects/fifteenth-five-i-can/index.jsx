@@ -96,6 +96,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
   const [name, setName] = useState("");
   const [futureStep, setFutureStep] = useState("message");
   const [toast, setToast] = useState(null);
+  const [explanationDialog, setExplanationDialog] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -289,6 +290,20 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         : [...current, option],
     );
   }
+  function showCorrectFeedback(question, onConfirm) {
+    notify("回答正确，继续加油！", true, () => {
+      if (question.explanation) {
+        setExplanationDialog({ text: question.explanation, onConfirm });
+        return;
+      }
+      onConfirm();
+    });
+  }
+  function confirmExplanation() {
+    const onConfirm = explanationDialog?.onConfirm;
+    setExplanationDialog(null);
+    onConfirm?.();
+  }
   async function answer() {
     if (isPublicActivity) {
       const question = PUBLIC_ACTIVITY_DATA.questions[state.answeredCount];
@@ -297,7 +312,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
         return;
       }
       const progress = publicProgress.current;
-      notify("回答正确，继续加油！", true, () => {
+      showCorrectFeedback(question, () => {
         updatePublicState({
           started: true,
           answers: [
@@ -309,6 +324,7 @@ export default function FifteenthFiveICanProject({ routeParams }) {
       });
       return;
     }
+    const answeredQuestion = state.currentQuestion;
     const next = await run(() =>
       submitAnswer(activityKey, {
         questionNo: state.currentQuestion.no,
@@ -317,16 +333,14 @@ export default function FifteenthFiveICanProject({ routeParams }) {
     );
     if (!next) return;
     const correct = Boolean(next.feedback?.correct);
-    notify(
-      next.feedback?.message || "回答正确，继续加油！",
-      correct,
-      correct
-        ? () => {
+    if (correct) {
+      showCorrectFeedback(answeredQuestion, () => {
           setState(next);
           setSelectedOptions([]);
-        }
-        : undefined,
-    );
+      });
+      return;
+    }
+    notify(next.feedback?.message || "回答错误，请重新作答");
   }
   async function saveFutureMessage() {
     const normalizedMessage = futureMessage.trim();
@@ -527,6 +541,12 @@ export default function FifteenthFiveICanProject({ routeParams }) {
               {toast.message}
             </div>
           </div>
+        ) : null}
+        {explanationDialog ? (
+          <ExplanationDialog
+            text={explanationDialog.text}
+            onConfirm={confirmExplanation}
+          />
         ) : null}
         {posterPreview && poster ? (
           <PosterPreview poster={poster} onClose={() => setPosterPreview(false)} />
@@ -841,6 +861,18 @@ function PosterPreview({ poster, onClose }) {
         <img src={poster} alt="我的十五五青年学习证书海报，长按保存" />
         <p>长按图片保存到相册</p>
         <button className="ffic-poster-preview__close" type="button" onClick={onClose} aria-label="关闭">×</button>
+      </section>
+    </div>
+  );
+}
+
+function ExplanationDialog({ text, onConfirm }) {
+  return (
+    <div className="ffic-explanation" role="dialog" aria-modal="true" aria-label="题目解析">
+      <section className="ffic-explanation__panel">
+        <p className="ffic-explanation__eyebrow">题目解析</p>
+        <p className="ffic-explanation__text">{text}</p>
+        <button type="button" onClick={onConfirm}>确定</button>
       </section>
     </div>
   );
