@@ -701,6 +701,16 @@
   line-height: 1.5;
   text-align: center;
 }
+.nansha-certificate-generating button {
+  justify-self: center;
+  margin-top: calc(var(--nansha-unit) * 2.13);
+  padding: calc(var(--nansha-unit) * 1.33) calc(var(--nansha-unit) * 3.2);
+  border: 1px solid currentColor;
+  border-radius: calc(var(--nansha-unit) * .53);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
 .nansha-certificate-save-tip {
   position: absolute;
   right: 0;

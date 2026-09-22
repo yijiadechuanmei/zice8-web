@@ -15,6 +15,7 @@ import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, ge
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import certificatePosterTemplateUrl from './assets/certificate-poster-template.png'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -29,7 +30,6 @@ const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
 const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
 const CERTIFICATE_BACKGROUND_URL = `${ASSET_BASE_URL}/169b88cd244b61e561cbc94de896bb5f_138135_750_1703.png`
-const CERTIFICATE_POSTER_BACKGROUND_URL = `${ASSET_BASE_URL}/a3fbf1326721d36d07d601c5f503a394_97038_750_1257.png`
 
 function createRequestId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
@@ -961,6 +961,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
 function MyCertificatePage({ entry, profile, onBack }) {
   const [certificateImage, setCertificateImage] = useState('')
   const [certificateError, setCertificateError] = useState('')
+  const [certificateRetryNonce, setCertificateRetryNonce] = useState(0)
   const certificateNo = entry.certificateNo || 'TG-00000000'
   const authorAvatar = entry.authorAvatar || profile?.avatar || ''
   const certificateIssueDate = formatCertificateIssueDate(entry.createdAt)
@@ -969,9 +970,11 @@ function MyCertificatePage({ entry, profile, onBack }) {
     let disposed = false
 
     async function composeCertificate() {
+      setCertificateImage('')
+      setCertificateError('')
       try {
         const [posterBackground, avatar] = await Promise.all([
-          loadCanvasImage(CERTIFICATE_POSTER_BACKGROUND_URL),
+          loadCanvasImage(certificatePosterTemplateUrl),
           authorAvatar ? loadCanvasImage(authorAvatar).catch(() => null) : Promise.resolve(null),
         ])
         if (disposed) return
@@ -1001,14 +1004,14 @@ function MyCertificatePage({ entry, profile, onBack }) {
         context.fillText(`编号：${certificateNo}`, 50, 1185)
 
         if (!disposed) setCertificateImage(canvas.toDataURL('image/png'))
-      } catch (error) {
-        if (!disposed) setCertificateError(error instanceof Error ? error.message : '证书生成失败，请稍后重试')
+      } catch {
+        if (!disposed) setCertificateError('证书生成失败，请稍后重新生成')
       }
     }
 
     composeCertificate()
     return () => { disposed = true }
-  }, [authorAvatar, certificateIssueDate, certificateNo, entry.authorName])
+  }, [authorAvatar, certificateIssueDate, certificateNo, certificateRetryNonce, entry.authorName])
 
   return (
     <section className="nansha-sub-page nansha-certificate-page">
@@ -1017,7 +1020,10 @@ function MyCertificatePage({ entry, profile, onBack }) {
         {certificateImage ? (
           <img className="nansha-certificate-composite" src={certificateImage} alt={`${entry.authorName}的南沙新声全民开麦证书，长按图片可保存`} draggable="false" />
         ) : (
-          <div className="nansha-certificate-generating">{certificateError || '正在生成证书…'}</div>
+          <div className="nansha-certificate-generating">
+            <span>{certificateError || '正在生成证书…'}</span>
+            {certificateError ? <button type="button" onClick={() => setCertificateRetryNonce((value) => value + 1)}>重新生成</button> : null}
+          </div>
         )}
         <p className="nansha-certificate-save-tip">长按图片可保存</p>
       </section>
