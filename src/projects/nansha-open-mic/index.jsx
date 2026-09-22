@@ -30,6 +30,13 @@ const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
 const VOTE_SUCCESS_VISUAL_URL = `${ASSET_BASE_URL}/tpcg.png`
 const VOTE_FAILURE_VISUAL_URL = `${ASSET_BASE_URL}/tpsb.png`
 const CERTIFICATE_BACKGROUND_URL = `${ASSET_BASE_URL}/169b88cd244b61e561cbc94de896bb5f_138135_750_1703.png`
+const CERTIFICATE_DEBUG_ENTRY = Object.freeze({
+  authorName: '证书海报调试',
+  authorAvatar: '',
+  certificateNo: 'TG-00000001',
+  createdAt: '2026-08-01T00:00:00.000Z',
+  mediaStatus: 'ready',
+})
 
 function createRequestId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
@@ -302,7 +309,7 @@ export default function NanshaOpenMicProject() {
       setView('vote-home')
       return
     }
-    setView(view === 'work' || view === 'certificate' ? 'my' : homeView)
+    setView(view === 'work' || view === 'certificate' || view === 'certificate-debug' ? 'my' : homeView)
   }
 
   function openRules() {
@@ -536,11 +543,12 @@ export default function NanshaOpenMicProject() {
       {view === 'publicity-ranking' && activityPhase === 'publicity' ? <PublicityRankingPage entries={entries} /> : null}
       {view === 'upload-home' && activityPhase === 'upload' ? <UploadHome myEntry={myEntry} onShowRules={openRules} onUpload={openUpload} uploadStartAt={publicConfig.uploadStartAt} uploadEndAt={publicConfig.uploadEndAt} /> : null}
       {view === 'upload-home' && activityPhase === 'closed' ? <ReviewHome onShowRules={openRules} showReviewNotice={Boolean(myEntry)} /> : null}
-      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} onOpenCertificate={() => setView('certificate')} /> : null}
+      {view === 'my' && activityPhase !== 'publicity' ? <MyPage activityPhase={activityPhase} myEntry={myEntry} profile={myProfile} voteQuota={voteQuota} onBack={goBack} onShowRules={openRules} onOpenWork={() => setView('work')} onOpenVotes={openMyVotes} onOpenCertificate={() => setView('certificate')} onOpenCertificateDebug={() => setView('certificate-debug')} /> : null}
       {view === 'my-votes' && activityPhase === 'vote' ? <MyVotesPage votes={myVotes} onBack={goBack} onHome={() => setView('vote-home')} onRanking={() => setView('ranking')} onMy={() => setView('my')} onOpenWork={openVotedWork} /> : null}
       {view === 'work-detail' && activityPhase === 'vote' && selectedEntry ? <WorkDetailPage entry={selectedEntry} onBack={goBack} onVote={openVoteDialog} onShare={() => openPosterForEntry(selectedEntry)} /> : null}
       {view === 'work' && myEntry ? <MyWorkPage entry={myEntry} activityPhase={activityPhase} onBack={goBack} onShowRules={openRules} onReplaceVideo={openVideoReplacement} onVote={() => openVoteDialogForEntry(myEntry)} onShare={() => openPosterForEntry(myEntry)} /> : null}
       {view === 'certificate' && activityPhase !== 'publicity' && myEntry && myEntry.mediaStatus !== 'failed' ? <MyCertificatePage entry={myEntry} profile={myProfile} onBack={goBack} /> : null}
+      {view === 'certificate-debug' && activityPhase !== 'publicity' && myProfile?.canDebugCertificatePoster ? <MyCertificatePage entry={CERTIFICATE_DEBUG_ENTRY} profile={myProfile} onBack={goBack} title="证书海报调试" /> : null}
       {view === 'upload' ? (
         <UploadPage
           onBack={goBack}
@@ -767,9 +775,10 @@ function RankingRow({ rank, entry, onWork }) {
   )
 }
 
-function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes, onOpenCertificate }) {
+function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRules, onOpenWork, onOpenVotes, onOpenCertificate, onOpenCertificateDebug }) {
   const isVotePhase = activityPhase === 'vote'
   const hasCertificate = Boolean(myEntry && myEntry.mediaStatus !== 'failed')
+  const canDebugCertificatePoster = Boolean(profile?.canDebugCertificatePoster)
   const workStatus = myEntry?.reviewStatus === 'published' ? '审核成功' : myEntry?.reviewStatus === 'rejected' ? '未通过' : '审核中'
   const workVotes = myEntry?.voteCount ?? 0
   const remainingVotes = voteQuota?.remaining ?? 10
@@ -786,6 +795,7 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
         <section className="nansha-my-summary-list" aria-label="我的活动信息">
           {myEntry ? <MySummaryRow icon={<VideoCameraFilled />} title="我的作品" status={workStatus} detail={`获票数：${workVotes}票`} onClick={onOpenWork} /> : null}
           {hasCertificate ? <MyCertificateRow inSummary onClick={onOpenCertificate} /> : null}
+          {canDebugCertificatePoster ? <MyCertificateRow inSummary label="生成证书海报（调试）" onClick={onOpenCertificateDebug} /> : null}
           <MySummaryRow icon={<AuditOutlined />} title="我的投票" detail={`今日剩余票数：${remainingVotes}票`} onClick={onOpenVotes} />
         </section>
       ) : myEntry ? (
@@ -799,15 +809,16 @@ function MyPage({ activityPhase, myEntry, profile, voteQuota, onBack, onShowRule
           {hasCertificate ? <MyCertificateRow onClick={onOpenCertificate} /> : null}
         </>
       ) : null}
+      {!isVotePhase && canDebugCertificatePoster ? <MyCertificateRow label="生成证书海报（调试）" onClick={onOpenCertificateDebug} /> : null}
     </section>
   )
 }
 
-function MyCertificateRow({ inSummary = false, onClick }) {
+function MyCertificateRow({ inSummary = false, label = '我的证书', onClick }) {
   return (
-    <button className={`nansha-my-certificate-row${inSummary ? ' is-in-summary' : ''}`} type="button" onClick={onClick} aria-label="查看我的证书">
+    <button className={`nansha-my-certificate-row${inSummary ? ' is-in-summary' : ''}`} type="button" onClick={onClick} aria-label={label}>
       <MyCertificateIcon className="nansha-certificate-icon" aria-hidden="true" />
-      <b>我的证书</b>
+      <b>{label}</b>
       <RightOutlined className="nansha-row-chevron" aria-hidden="true" />
     </button>
   )
@@ -958,7 +969,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
   )
 }
 
-function MyCertificatePage({ entry, profile, onBack }) {
+function MyCertificatePage({ entry, profile, onBack, title = '我的证书' }) {
   const [certificateImage, setCertificateImage] = useState('')
   const [certificateError, setCertificateError] = useState('')
   const [certificateRetryNonce, setCertificateRetryNonce] = useState(0)
@@ -1015,7 +1026,7 @@ function MyCertificatePage({ entry, profile, onBack }) {
 
   return (
     <section className="nansha-sub-page nansha-certificate-page">
-      <PageHeader title="我的证书" onBack={onBack} />
+      <PageHeader title={title} onBack={onBack} />
       <section className="nansha-certificate-stage" aria-label="我的证书海报" style={{ backgroundImage: `url(${CERTIFICATE_BACKGROUND_URL})` }}>
         {certificateImage ? (
           <img className="nansha-certificate-composite" src={certificateImage} alt={`${entry.authorName}的南沙新声全民开麦证书，长按图片可保存`} draggable="false" />
