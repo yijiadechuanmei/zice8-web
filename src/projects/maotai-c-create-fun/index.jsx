@@ -35,9 +35,9 @@ function Stage({ children, page, sceneKey = page }) {
   return (
     <main className="maotai-c-create-fun-page" aria-label="茅台向C造趣">
       <div className="maotai-c-create-fun-frame" style={{ width: viewport.width, height: viewport.height }}>
-        <section key={`${page}-${sceneKey}`} className={`maotai-c-create-fun-stage is-${page}`} style={{ top, transform: `scale(${scale})` }}>
+        <section className={`maotai-c-create-fun-stage is-${page}`} style={{ top, transform: `scale(${scale})` }}>
           <LayerImage asset={[ASSETS.background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT]} className="maotai-c-create-fun-background" />
-          {children}
+          <div key={`${page}-${sceneKey}`} className="maotai-c-create-fun-scene">{children}</div>
         </section>
       </div>
     </main>
