@@ -3,6 +3,7 @@
 .maotai-c-create-fun-stage { position: absolute; inset: 0 auto auto 0; width: 750px; height: 1624px; overflow: hidden; transform-origin: top left; animation: maotai-c-create-fun-page-enter 360ms ease-out both; }
 .maotai-c-create-fun-layer { position: absolute; display: block; max-width: none; user-select: none; pointer-events: none; transform-origin: center; }
 .maotai-c-create-fun-background { animation: maotai-c-create-fun-background-enter 520ms ease-out both; }
+.maotai-c-create-fun-stage.is-question .maotai-c-create-fun-background { animation: none; }
 
 .maotai-c-create-fun-home-layer-0 { animation: maotai-c-create-fun-fade-in 460ms 80ms ease-out both; }
 .maotai-c-create-fun-home-layer-1 { animation: maotai-c-create-fun-pop-in 420ms 140ms cubic-bezier(.22, .75, .25, 1) both; }
