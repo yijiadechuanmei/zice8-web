@@ -3,51 +3,71 @@
 .maotai-c-create-fun-stage { position: absolute; inset: 0 auto auto 0; width: 750px; height: 1624px; overflow: hidden; transform-origin: top left; animation: maotai-c-create-fun-page-enter 360ms ease-out both; }
 .maotai-c-create-fun-layer { position: absolute; display: block; max-width: none; user-select: none; pointer-events: none; transform-origin: center; }
 .maotai-c-create-fun-background { animation: maotai-c-create-fun-background-enter 520ms ease-out both; }
-.maotai-c-create-fun-home-layer, .maotai-c-create-fun-result-layer, .maotai-c-create-fun-question-footer, .maotai-c-create-fun-result-restart-image { animation: maotai-c-create-fun-layer-enter 560ms cubic-bezier(.22, .75, .25, 1) both; }
-.maotai-c-create-fun-home-layer-0 { animation-delay: 80ms; }
-.maotai-c-create-fun-home-layer-1 { animation-delay: 140ms; }
-.maotai-c-create-fun-home-layer-2 { animation-delay: 200ms; }
-.maotai-c-create-fun-home-layer-3 { animation-delay: 260ms; }
-.maotai-c-create-fun-home-layer-4 { animation-delay: 320ms; }
-.maotai-c-create-fun-home-layer-5 { animation-delay: 380ms; }
-.maotai-c-create-fun-home-layer-6 { animation: maotai-c-create-fun-layer-enter 560ms 440ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 1s infinite; }
-.maotai-c-create-fun-home-layer-7 { animation-delay: 500ms; }
-.maotai-c-create-fun-home-layer-8 { animation: maotai-c-create-fun-layer-enter 620ms 560ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-cta-breathe 1.8s ease-in-out 1180ms infinite; }
-.maotai-c-create-fun-result-common-1 { animation: maotai-c-create-fun-layer-enter 560ms 260ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 880ms infinite; }
+
+.maotai-c-create-fun-home-layer-0 { animation: maotai-c-create-fun-fade-in 460ms 80ms ease-out both; }
+.maotai-c-create-fun-home-layer-1 { animation: maotai-c-create-fun-pop-in 420ms 140ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-2 { animation: maotai-c-create-fun-slide-left 520ms 220ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-3 { animation: maotai-c-create-fun-paper-drop 620ms 270ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-4 { animation: maotai-c-create-fun-stamp-in 460ms 350ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-5 { animation: maotai-c-create-fun-pop-in 420ms 410ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-6 { animation: maotai-c-create-fun-pop-in 440ms 470ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 1.1s infinite; }
+.maotai-c-create-fun-home-layer-7 { animation: maotai-c-create-fun-slide-up 520ms 500ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-8 { animation: maotai-c-create-fun-cta-enter 560ms 590ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-cta-breathe 1.8s ease-in-out 1.25s infinite; }
+
 .maotai-c-create-fun-home-start, .maotai-c-create-fun-restart, .maotai-c-create-fun-question-submit { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; transform-origin: center; -webkit-tap-highlight-color: transparent; }
-.maotai-c-create-fun-home-start { left: 36px; top: 1222px; width: 678px; height: 172px; animation: maotai-c-create-fun-button-enter 620ms 560ms ease-out both, maotai-c-create-fun-button-glow 1.8s ease-in-out 1180ms infinite; }
-.maotai-c-create-fun-restart { left: 27px; top: 1208px; width: 350px; height: 251px; animation: maotai-c-create-fun-button-enter 620ms 560ms ease-out both, maotai-c-create-fun-button-glow 1.8s ease-in-out 1180ms infinite; }
-.maotai-c-create-fun-question-submit { left: 35px; top: 1237px; width: 678px; height: 100px; animation: maotai-c-create-fun-button-enter 560ms 480ms ease-out both, maotai-c-create-fun-button-glow 1.8s ease-in-out 1040ms infinite; }
-.maotai-c-create-fun-question-submit:disabled { cursor: default; animation: maotai-c-create-fun-button-enter 560ms 480ms ease-out both; }
+.maotai-c-create-fun-home-start { left: 36px; top: 1222px; width: 678px; height: 172px; }
+.maotai-c-create-fun-restart { left: 27px; top: 1208px; width: 350px; height: 251px; }
 .maotai-c-create-fun-home-start:active, .maotai-c-create-fun-restart:active, .maotai-c-create-fun-question-submit:not(:disabled):active { transform: scale(.97); }
 .maotai-c-create-fun-home-start:focus-visible, .maotai-c-create-fun-restart:focus-visible, .maotai-c-create-fun-question-submit:focus-visible, .maotai-c-create-fun-options button:focus-visible { outline: 4px solid #95589e; outline-offset: 4px; }
-.maotai-c-create-fun-progress { position: absolute; top: 263px; left: 71px; display: flex; width: 605px; height: 35px; align-items: center; justify-content: space-between; color: #000; font-size: 26px; line-height: 1; animation: maotai-c-create-fun-layer-enter 460ms ease-out both; }
+
+.maotai-c-create-fun-progress { position: absolute; top: 263px; left: 71px; display: flex; width: 605px; height: 35px; align-items: center; justify-content: space-between; color: #000; font-size: 26px; line-height: 1; animation: maotai-c-create-fun-slide-up 440ms 80ms cubic-bezier(.22, .75, .25, 1) both; }
 .maotai-c-create-fun-progress-track { width: 493px; height: 12px; overflow: hidden; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); }
-.maotai-c-create-fun-progress-track i { display: block; height: 100%; border-radius: inherit; background: #95589e; transition: width 180ms ease-out; animation: maotai-c-create-fun-progress-breathe 2.4s ease-in-out infinite; }
-.maotai-c-create-fun-question-card { position: absolute; top: 337px; left: 42px; box-sizing: border-box; width: 666px; height: 856px; padding: 59px 32px 0; overflow: hidden; border: 3px solid #000; border-radius: 30px; background: #f6f2e7; animation: maotai-c-create-fun-card-enter 560ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-card-breathe 3.8s ease-in-out 600ms infinite; }
-.maotai-c-create-fun-question-card h1 { min-height: 120px; margin: 0 0 67px; color: #000; font-size: 32px; font-weight: 400; line-height: 40px; text-align: left; }
+.maotai-c-create-fun-progress-track i { display: block; height: 100%; border-radius: inherit; background: #95589e; transition: width 220ms cubic-bezier(.22, .75, .25, 1); animation: maotai-c-create-fun-progress-breathe 2.4s ease-in-out infinite; }
+.maotai-c-create-fun-question-card { position: absolute; top: 337px; left: 42px; box-sizing: border-box; width: 666px; height: 856px; padding: 59px 32px 0; overflow: hidden; border: 3px solid #000; border-radius: 30px; background: #f6f2e7; animation: maotai-c-create-fun-card-enter 560ms 120ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-card-breathe 3.8s ease-in-out 800ms infinite; }
+.maotai-c-create-fun-question-card h1 { min-height: 120px; margin: 0 0 67px; color: #000; font-size: 32px; font-weight: 400; line-height: 40px; text-align: left; animation: maotai-c-create-fun-copy-in 420ms 280ms ease-out both; }
 .maotai-c-create-fun-options { display: grid; gap: 25px; }
-.maotai-c-create-fun-options button { display: flex; width: 100%; min-height: 97px; align-items: center; padding: 0 50px 0 24px; border: 1px solid #000; border-radius: 15px; background: #fff; color: #000; cursor: pointer; text-align: left; transition: transform 120ms ease-out, background-color 120ms ease-out; -webkit-tap-highlight-color: transparent; animation: maotai-c-create-fun-option-enter 460ms cubic-bezier(.22, .75, .25, 1) both; }
-.maotai-c-create-fun-option-0 { animation-delay: 160ms; }
-.maotai-c-create-fun-option-1 { animation-delay: 220ms; }
-.maotai-c-create-fun-option-2 { animation-delay: 280ms; }
-.maotai-c-create-fun-option-3 { animation-delay: 340ms; }
+.maotai-c-create-fun-options button { display: flex; width: 100%; min-height: 97px; align-items: center; padding: 0 50px 0 24px; border: 1px solid #000; border-radius: 15px; background: #fff; color: #000; cursor: pointer; text-align: left; transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out; -webkit-tap-highlight-color: transparent; animation: maotai-c-create-fun-option-enter 460ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-option-0 { animation-delay: 280ms; }
+.maotai-c-create-fun-option-1 { animation-delay: 350ms; }
+.maotai-c-create-fun-option-2 { animation-delay: 420ms; }
+.maotai-c-create-fun-option-3 { animation-delay: 490ms; }
 .maotai-c-create-fun-options button:active { background: #f4e7f4; transform: scale(.985); }
 .maotai-c-create-fun-options button.is-selected { border-width: 3px; border-color: #95589e; background: #f4e7f4; box-shadow: 0 0 0 5px rgba(149, 88, 158, .12); }
 .maotai-c-create-fun-options button.is-selected b { animation: maotai-c-create-fun-selected-badge 720ms ease-in-out infinite; }
 .maotai-c-create-fun-options b { display: grid; width: 50px; height: 50px; flex: 0 0 50px; place-items: center; margin-right: 18px; border-radius: 50%; background: #95589e; color: #fff; font-size: 28px; font-weight: 400; animation: maotai-c-create-fun-badge-breathe 2.6s ease-in-out infinite; }
 .maotai-c-create-fun-options span { font-size: 24px; font-weight: 400; line-height: 32px; }
+.maotai-c-create-fun-question-footer { animation: maotai-c-create-fun-cta-enter 560ms 500ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-question-footer.is-ready { animation: maotai-c-create-fun-cta-breathe 1.8s ease-in-out infinite; }
+.maotai-c-create-fun-question-submit { left: 35px; top: 1237px; width: 678px; height: 100px; animation: maotai-c-create-fun-fade-in 400ms 500ms ease-out both; }
+.maotai-c-create-fun-question-submit:disabled { cursor: default; }
+
+.maotai-c-create-fun-result-common-0 { animation: maotai-c-create-fun-paper-drop 620ms 160ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-result-common-1 { animation: maotai-c-create-fun-pop-in 440ms 300ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 1s infinite; }
+.maotai-c-create-fun-result-common-2 { animation: maotai-c-create-fun-slide-left 520ms 260ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-result-variant-0 { animation: maotai-c-create-fun-stamp-in 460ms 360ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-result-variant-1 { animation: maotai-c-create-fun-copy-in 480ms 430ms ease-out both; }
+.maotai-c-create-fun-result-variant-2 { animation: maotai-c-create-fun-slide-up 560ms 340ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-result-restart-image { animation: maotai-c-create-fun-cta-enter 560ms 560ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-cta-breathe 1.8s ease-in-out 1.25s infinite; }
+
+.maotai-c-create-fun-progress.is-leaving, .maotai-c-create-fun-question-card.is-leaving, .maotai-c-create-fun-question-footer.is-leaving, .maotai-c-create-fun-question-submit.is-leaving { animation: maotai-c-create-fun-question-exit 220ms ease-in both !important; }
+
 @keyframes maotai-c-create-fun-page-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes maotai-c-create-fun-background-enter { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
-@keyframes maotai-c-create-fun-layer-enter { from { opacity: 0; transform: translateY(26px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes maotai-c-create-fun-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes maotai-c-create-fun-pop-in { from { opacity: 0; transform: scale(.78) rotate(-3deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes maotai-c-create-fun-slide-left { from { opacity: 0; transform: translateX(34px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes maotai-c-create-fun-slide-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes maotai-c-create-fun-paper-drop { from { opacity: 0; transform: translateY(-28px) rotate(-4deg) scale(.94); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+@keyframes maotai-c-create-fun-stamp-in { 0% { opacity: 0; transform: scale(1.22) rotate(6deg); } 70% { opacity: 1; transform: scale(.96) rotate(-1deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes maotai-c-create-fun-cta-enter { from { opacity: 0; transform: translateY(20px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes maotai-c-create-fun-cta-breathe { 50% { transform: scale(1.018); filter: brightness(1.045); } }
 @keyframes maotai-c-create-fun-icon-sway { 50% { transform: rotate(5deg) scale(1.04); } }
-@keyframes maotai-c-create-fun-cta-breathe { 50% { transform: translateY(-5px) scale(1.018); filter: brightness(1.06); } }
-@keyframes maotai-c-create-fun-button-enter { from { opacity: 0; } to { opacity: 1; } }
-@keyframes maotai-c-create-fun-button-glow { 50% { box-shadow: 0 0 0 9px rgba(255, 255, 255, .12); } }
 @keyframes maotai-c-create-fun-card-enter { from { opacity: 0; transform: translateY(32px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes maotai-c-create-fun-card-breathe { 50% { box-shadow: 0 0 0 5px rgba(149, 88, 158, .12); } }
+@keyframes maotai-c-create-fun-copy-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes maotai-c-create-fun-option-enter { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes maotai-c-create-fun-badge-breathe { 50% { transform: scale(1.08); filter: brightness(1.08); } }
 @keyframes maotai-c-create-fun-selected-badge { 50% { transform: scale(1.14) rotate(-5deg); filter: brightness(1.14); } }
 @keyframes maotai-c-create-fun-progress-breathe { 50% { filter: brightness(1.18); } }
+@keyframes maotai-c-create-fun-question-exit { to { opacity: 0; transform: translateY(-18px) scale(.98); } }
 @media (prefers-reduced-motion: reduce) { .maotai-c-create-fun-stage, .maotai-c-create-fun-layer, .maotai-c-create-fun-home-start, .maotai-c-create-fun-restart, .maotai-c-create-fun-question-submit, .maotai-c-create-fun-progress, .maotai-c-create-fun-question-card, .maotai-c-create-fun-options button, .maotai-c-create-fun-options b, .maotai-c-create-fun-progress-track i { animation: none; transition: none; } }

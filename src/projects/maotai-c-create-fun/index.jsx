@@ -10,7 +10,7 @@ function LayerImage({ asset, alt = '', className = '' }) {
   return <img className={`maotai-c-create-fun-layer ${className}`.trim()} src={assetUrl(filename)} alt={alt} draggable="false" style={{ left, top, width, height }} />
 }
 
-function Stage({ children, page }) {
+function Stage({ children, page, sceneKey = page }) {
   const readViewport = () => {
     const viewport = window.visualViewport
     return { width: viewport?.width || window.innerWidth, height: viewport?.height || window.innerHeight }
@@ -30,12 +30,12 @@ function Stage({ children, page }) {
 
   const scale = viewport.width / DESIGN_WIDTH
   const scaledHeight = DESIGN_HEIGHT * scale
-  const top = Math.max(0, (viewport.height - scaledHeight) / 2)
+  const top = (viewport.height - scaledHeight) / 2
 
   return (
     <main className="maotai-c-create-fun-page" aria-label="茅台向C造趣">
       <div className="maotai-c-create-fun-frame" style={{ width: viewport.width, height: viewport.height }}>
-        <section className={`maotai-c-create-fun-stage is-${page}`} style={{ top, transform: `scale(${scale})` }}>
+        <section key={`${page}-${sceneKey}`} className={`maotai-c-create-fun-stage is-${page}`} style={{ top, transform: `scale(${scale})` }}>
           <LayerImage asset={[ASSETS.background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT]} className="maotai-c-create-fun-background" />
           {children}
         </section>
@@ -53,20 +53,20 @@ function HomePage({ onStart }) {
   )
 }
 
-function QuestionPage({ questionIndex, selectedAnswer, onSelect, onSubmit }) {
+function QuestionPage({ questionIndex, selectedAnswer, isTransitioning, onSelect, onSubmit }) {
   const question = QUESTIONS[questionIndex]
   const progress = ((questionIndex + 1) / QUESTIONS.length) * 100
   return (
-    <Stage page="question">
-      <div className="maotai-c-create-fun-progress" aria-label={`第 ${questionIndex + 1} 题，共 ${QUESTIONS.length} 题`}><span>{String(questionIndex + 1).padStart(2, '0')}</span><span className="maotai-c-create-fun-progress-track"><i style={{ width: `${progress}%` }} /></span><span>{String(QUESTIONS.length).padStart(2, '0')}</span></div>
-      <section className="maotai-c-create-fun-question-card" aria-labelledby={`question-${question.id}`}>
+    <Stage page="question" sceneKey={questionIndex}>
+      <div className={`maotai-c-create-fun-progress${isTransitioning ? ' is-leaving' : ''}`} aria-label={`第 ${questionIndex + 1} 题，共 ${QUESTIONS.length} 题`}><span>{String(questionIndex + 1).padStart(2, '0')}</span><span className="maotai-c-create-fun-progress-track"><i style={{ width: `${progress}%` }} /></span><span>{String(QUESTIONS.length).padStart(2, '0')}</span></div>
+      <section className={`maotai-c-create-fun-question-card${isTransitioning ? ' is-leaving' : ''}`} aria-labelledby={`question-${question.id}`}>
         <h1 id={`question-${question.id}`}>{question.title}</h1>
         <div className="maotai-c-create-fun-options">
           {Object.entries(question.options).map(([option, text], index) => <button key={option} className={`maotai-c-create-fun-option maotai-c-create-fun-option-${index}${selectedAnswer === option ? ' is-selected' : ''}`} type="button" onClick={() => onSelect(option)} aria-pressed={selectedAnswer === option}><b>{option}</b><span>{text}</span></button>)}
         </div>
       </section>
-      <LayerImage asset={[ASSETS.questionFooter, 35, 1237, 678, 100]} className="maotai-c-create-fun-question-footer" />
-      <button className="maotai-c-create-fun-question-submit" type="button" onClick={onSubmit} disabled={!selectedAnswer} aria-label="提交本题" />
+      <LayerImage asset={[ASSETS.questionFooter, 35, 1237, 678, 100]} className={`maotai-c-create-fun-question-footer${selectedAnswer ? ' is-ready' : ''}${isTransitioning ? ' is-leaving' : ''}`} />
+      <button className={`maotai-c-create-fun-question-submit${isTransitioning ? ' is-leaving' : ''}`} type="button" onClick={onSubmit} disabled={!selectedAnswer || isTransitioning} aria-label="提交本题" />
     </Stage>
   )
 }
@@ -88,27 +88,32 @@ export default function MaotaiCCreateFunProject() {
   const [answers, setAnswers] = useState([])
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [result, setResult] = useState('A')
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const answerLocked = useRef(false)
 
   useEffect(() => { document.title = '茅台向C造趣' }, [])
 
-  const start = () => { answerLocked.current = false; setAnswers([]); setSelectedAnswer(null); setQuestionIndex(0); setPage('question') }
+  const start = () => { answerLocked.current = false; setIsTransitioning(false); setAnswers([]); setSelectedAnswer(null); setQuestionIndex(0); setPage('question') }
   const submitAnswer = () => {
     if (!selectedAnswer || answerLocked.current) return
     answerLocked.current = true
     const nextAnswers = [...answers, selectedAnswer]
-    setAnswers(nextAnswers)
-    if (questionIndex === QUESTIONS.length - 1) {
-      setResult(resolveResult(nextAnswers))
-      setPage('result')
-      return
-    }
-    setSelectedAnswer(null)
-    setQuestionIndex((current) => current + 1)
-    window.setTimeout(() => { answerLocked.current = false }, 180)
+    setIsTransitioning(true)
+    window.setTimeout(() => {
+      setAnswers(nextAnswers)
+      setSelectedAnswer(null)
+      if (questionIndex === QUESTIONS.length - 1) {
+        setResult(resolveResult(nextAnswers))
+        setPage('result')
+      } else {
+        setQuestionIndex((current) => current + 1)
+      }
+      setIsTransitioning(false)
+      answerLocked.current = false
+    }, 220)
   }
 
-  if (page === 'question') return <QuestionPage questionIndex={questionIndex} selectedAnswer={selectedAnswer} onSelect={setSelectedAnswer} onSubmit={submitAnswer} />
+  if (page === 'question') return <QuestionPage questionIndex={questionIndex} selectedAnswer={selectedAnswer} isTransitioning={isTransitioning} onSelect={setSelectedAnswer} onSubmit={submitAnswer} />
   if (page === 'result') return <ResultPage result={result} onRestart={start} />
   return <HomePage onStart={start} />
 }
