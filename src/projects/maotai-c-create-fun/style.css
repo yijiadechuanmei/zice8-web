@@ -2,17 +2,18 @@
 .maotai-c-create-fun-frame { position: relative; flex: none; overflow: hidden; }
 .maotai-c-create-fun-stage { position: absolute; inset: 0 auto auto 0; width: 750px; height: 1624px; overflow: hidden; transform-origin: top left; animation: maotai-c-create-fun-page-enter 360ms ease-out both; }
 .maotai-c-create-fun-layer { position: absolute; display: block; max-width: none; user-select: none; pointer-events: none; transform-origin: center; }
-.maotai-c-create-fun-background { animation: maotai-c-create-fun-background-enter 520ms ease-out both, maotai-c-create-fun-background-breathe 5s ease-in-out 520ms infinite; }
-.maotai-c-create-fun-home-layer, .maotai-c-create-fun-result-layer, .maotai-c-create-fun-question-footer, .maotai-c-create-fun-result-restart-image { animation: maotai-c-create-fun-layer-enter 560ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-float 3.8s ease-in-out 700ms infinite; }
-.maotai-c-create-fun-home-layer-0 { animation-delay: 80ms, 760ms; }
-.maotai-c-create-fun-home-layer-1 { animation-delay: 140ms, 820ms; }
-.maotai-c-create-fun-home-layer-2 { animation-delay: 200ms, 880ms; }
-.maotai-c-create-fun-home-layer-3 { animation-delay: 260ms, 940ms; }
-.maotai-c-create-fun-home-layer-4 { animation-delay: 320ms, 1000ms; }
-.maotai-c-create-fun-home-layer-5 { animation-delay: 380ms, 1060ms; }
-.maotai-c-create-fun-home-layer-6 { animation-delay: 440ms, 1120ms; }
-.maotai-c-create-fun-home-layer-7 { animation-delay: 500ms, 1180ms; }
+.maotai-c-create-fun-background { animation: maotai-c-create-fun-background-enter 520ms ease-out both; }
+.maotai-c-create-fun-home-layer, .maotai-c-create-fun-result-layer, .maotai-c-create-fun-question-footer, .maotai-c-create-fun-result-restart-image { animation: maotai-c-create-fun-layer-enter 560ms cubic-bezier(.22, .75, .25, 1) both; }
+.maotai-c-create-fun-home-layer-0 { animation-delay: 80ms; }
+.maotai-c-create-fun-home-layer-1 { animation-delay: 140ms; }
+.maotai-c-create-fun-home-layer-2 { animation-delay: 200ms; }
+.maotai-c-create-fun-home-layer-3 { animation-delay: 260ms; }
+.maotai-c-create-fun-home-layer-4 { animation-delay: 320ms; }
+.maotai-c-create-fun-home-layer-5 { animation-delay: 380ms; }
+.maotai-c-create-fun-home-layer-6 { animation: maotai-c-create-fun-layer-enter 560ms 440ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 1s infinite; }
+.maotai-c-create-fun-home-layer-7 { animation-delay: 500ms; }
 .maotai-c-create-fun-home-layer-8 { animation: maotai-c-create-fun-layer-enter 620ms 560ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-cta-breathe 1.8s ease-in-out 1180ms infinite; }
+.maotai-c-create-fun-result-common-1 { animation: maotai-c-create-fun-layer-enter 560ms 260ms cubic-bezier(.22, .75, .25, 1) both, maotai-c-create-fun-icon-sway 2.8s ease-in-out 880ms infinite; }
 .maotai-c-create-fun-home-start, .maotai-c-create-fun-restart, .maotai-c-create-fun-question-submit { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; transform-origin: center; -webkit-tap-highlight-color: transparent; }
 .maotai-c-create-fun-home-start { left: 36px; top: 1222px; width: 678px; height: 172px; animation: maotai-c-create-fun-button-enter 620ms 560ms ease-out both, maotai-c-create-fun-button-glow 1.8s ease-in-out 1180ms infinite; }
 .maotai-c-create-fun-restart { left: 27px; top: 1208px; width: 350px; height: 251px; animation: maotai-c-create-fun-button-enter 620ms 560ms ease-out both, maotai-c-create-fun-button-glow 1.8s ease-in-out 1180ms infinite; }
@@ -38,9 +39,8 @@
 .maotai-c-create-fun-options span { font-size: 24px; font-weight: 400; line-height: 32px; }
 @keyframes maotai-c-create-fun-page-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes maotai-c-create-fun-background-enter { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
-@keyframes maotai-c-create-fun-background-breathe { 50% { filter: brightness(1.035) saturate(1.04); } }
 @keyframes maotai-c-create-fun-layer-enter { from { opacity: 0; transform: translateY(26px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes maotai-c-create-fun-float { 50% { transform: translateY(-8px); } }
+@keyframes maotai-c-create-fun-icon-sway { 50% { transform: rotate(5deg) scale(1.04); } }
 @keyframes maotai-c-create-fun-cta-breathe { 50% { transform: translateY(-5px) scale(1.018); filter: brightness(1.06); } }
 @keyframes maotai-c-create-fun-button-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes maotai-c-create-fun-button-glow { 50% { box-shadow: 0 0 0 9px rgba(255, 255, 255, .12); } }
