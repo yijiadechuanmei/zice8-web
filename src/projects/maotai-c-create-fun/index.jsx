@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ASSETS, QUESTIONS, assetUrl, resolveResult } from './data'
 import './style.css'
 
 const DESIGN_WIDTH = 750
 const DESIGN_HEIGHT = 1624
 
-function LayerImage({ asset, alt = '' }) {
+function LayerImage({ asset, alt = '', className = '' }) {
   const [filename, left, top, width, height] = asset
-  return <img className="maotai-c-create-fun-layer" src={assetUrl(filename)} alt={alt} draggable="false" style={{ left, top, width, height }} />
+  return <img className={`maotai-c-create-fun-layer ${className}`.trim()} src={assetUrl(filename)} alt={alt} draggable="false" style={{ left, top, width, height }} />
 }
 
 function Stage({ children, page }) {
-  const [scale, setScale] = useState(() => Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT))
+  const readViewport = () => {
+    const viewport = window.visualViewport
+    return { width: viewport?.width || window.innerWidth, height: viewport?.height || window.innerHeight }
+  }
+  const [viewport, setViewport] = useState(readViewport)
 
   useEffect(() => {
-    const updateScale = () => {
-      const viewport = window.visualViewport
-      setScale(Math.min((viewport?.width || window.innerWidth) / DESIGN_WIDTH, (viewport?.height || window.innerHeight) / DESIGN_HEIGHT))
-    }
+    const updateScale = () => setViewport(readViewport())
     updateScale()
     window.addEventListener('resize', updateScale)
     window.visualViewport?.addEventListener('resize', updateScale)
@@ -27,11 +28,15 @@ function Stage({ children, page }) {
     }
   }, [])
 
+  const scale = viewport.width / DESIGN_WIDTH
+  const scaledHeight = DESIGN_HEIGHT * scale
+  const top = Math.max(0, (viewport.height - scaledHeight) / 2)
+
   return (
     <main className="maotai-c-create-fun-page" aria-label="茅台向C造趣">
-      <div className="maotai-c-create-fun-frame" style={{ width: DESIGN_WIDTH * scale, height: DESIGN_HEIGHT * scale }}>
-        <section className={`maotai-c-create-fun-stage is-${page}`} style={{ transform: `scale(${scale})` }}>
-          <LayerImage asset={[ASSETS.background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT]} />
+      <div className="maotai-c-create-fun-frame" style={{ width: viewport.width, height: viewport.height }}>
+        <section className={`maotai-c-create-fun-stage is-${page}`} style={{ top, transform: `scale(${scale})` }}>
+          <LayerImage asset={[ASSETS.background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT]} className="maotai-c-create-fun-background" />
           {children}
         </section>
       </div>
@@ -40,10 +45,15 @@ function Stage({ children, page }) {
 }
 
 function HomePage({ onStart }) {
-  return <Stage page="home">{ASSETS.home.map((asset) => <LayerImage key={asset[0]} asset={asset} />)}<button className="maotai-c-create-fun-home-start" type="button" onClick={onStart} aria-label="开始测试" /></Stage>
+  return (
+    <Stage page="home">
+      {ASSETS.home.map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-home-layer maotai-c-create-fun-home-layer-${index}`} />)}
+      <button className="maotai-c-create-fun-home-start" type="button" onClick={onStart} aria-label="开始测试" />
+    </Stage>
+  )
 }
 
-function QuestionPage({ questionIndex, onSelect }) {
+function QuestionPage({ questionIndex, selectedAnswer, onSelect, onSubmit }) {
   const question = QUESTIONS[questionIndex]
   const progress = ((questionIndex + 1) / QUESTIONS.length) * 100
   return (
@@ -52,35 +62,53 @@ function QuestionPage({ questionIndex, onSelect }) {
       <section className="maotai-c-create-fun-question-card" aria-labelledby={`question-${question.id}`}>
         <h1 id={`question-${question.id}`}>{question.title}</h1>
         <div className="maotai-c-create-fun-options">
-          {Object.entries(question.options).map(([option, text]) => <button key={option} type="button" onClick={() => onSelect(option)}><b>{option}</b><span>{text}</span></button>)}
+          {Object.entries(question.options).map(([option, text], index) => <button key={option} className={`maotai-c-create-fun-option maotai-c-create-fun-option-${index}${selectedAnswer === option ? ' is-selected' : ''}`} type="button" onClick={() => onSelect(option)} aria-pressed={selectedAnswer === option}><b>{option}</b><span>{text}</span></button>)}
         </div>
       </section>
-      <LayerImage asset={[ASSETS.questionFooter, 35, 1237, 678, 100]} />
+      <LayerImage asset={[ASSETS.questionFooter, 35, 1237, 678, 100]} className="maotai-c-create-fun-question-footer" />
+      <button className="maotai-c-create-fun-question-submit" type="button" onClick={onSubmit} disabled={!selectedAnswer} aria-label="提交本题" />
     </Stage>
   )
 }
 
 function ResultPage({ result, onRestart }) {
-  return <Stage page="result">{ASSETS.resultCommon.map((asset) => <LayerImage key={asset[0]} asset={asset} />)}{ASSETS.resultVariants[result].map((asset) => <LayerImage key={asset[0]} asset={asset} />)}<LayerImage asset={ASSETS.resultRestart} /><button className="maotai-c-create-fun-restart" type="button" onClick={onRestart} aria-label="再测一次" /></Stage>
+  return (
+    <Stage page="result">
+      {ASSETS.resultCommon.map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-result-layer maotai-c-create-fun-result-common-${index}`} />)}
+      {ASSETS.resultVariants[result].map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-result-layer maotai-c-create-fun-result-variant-${index}`} />)}
+      <LayerImage asset={ASSETS.resultRestart} className="maotai-c-create-fun-result-restart-image" />
+      <button className="maotai-c-create-fun-restart" type="button" onClick={onRestart} aria-label="再测一次" />
+    </Stage>
+  )
 }
 
 export default function MaotaiCCreateFunProject() {
   const [page, setPage] = useState('home')
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState([])
+  const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [result, setResult] = useState('A')
+  const answerLocked = useRef(false)
 
   useEffect(() => { document.title = '茅台向C造趣' }, [])
 
-  const start = () => { setAnswers([]); setQuestionIndex(0); setPage('question') }
-  const selectAnswer = (answer) => {
-    const nextAnswers = [...answers, answer]
+  const start = () => { answerLocked.current = false; setAnswers([]); setSelectedAnswer(null); setQuestionIndex(0); setPage('question') }
+  const submitAnswer = () => {
+    if (!selectedAnswer || answerLocked.current) return
+    answerLocked.current = true
+    const nextAnswers = [...answers, selectedAnswer]
     setAnswers(nextAnswers)
-    if (questionIndex === QUESTIONS.length - 1) { setResult(resolveResult(nextAnswers)); setPage('result'); return }
+    if (questionIndex === QUESTIONS.length - 1) {
+      setResult(resolveResult(nextAnswers))
+      setPage('result')
+      return
+    }
+    setSelectedAnswer(null)
     setQuestionIndex((current) => current + 1)
+    window.setTimeout(() => { answerLocked.current = false }, 180)
   }
 
-  if (page === 'question') return <QuestionPage questionIndex={questionIndex} onSelect={selectAnswer} />
+  if (page === 'question') return <QuestionPage questionIndex={questionIndex} selectedAnswer={selectedAnswer} onSelect={setSelectedAnswer} onSubmit={submitAnswer} />
   if (page === 'result') return <ResultPage result={result} onRestart={start} />
   return <HomePage onStart={start} />
 }

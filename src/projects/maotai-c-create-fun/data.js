@@ -1,4 +1,5 @@
 export const MAOTAI_C_CREATE_FUN_ACTIVITY_KEY = 'maotai_c_create_fun_20260923'
+export const MAOTAI_C_CREATE_FUN_ACTIVITY_TYPE = 'maotai_c_create_fun_20260923'
 
 export const QUESTIONS = [
   { id: 1, title: '理想中的贵阳假日，整体节奏要怎么拿捏？', options: { A: '越慢越好，不赶行程不打卡，瘫到哪算哪', B: '吃字当头，收藏夹里的老店挨个打卡', C: '新鲜优先，溜达淘货挖新店，主打猎奇', D: '聚会至上，天天和搭子凑一起才叫过节' } },
@@ -12,7 +13,7 @@ export const QUESTIONS = [
   { id: 9, title: '回想最舒服的贵阳假日，你印象最深的是？', options: { A: '慢悠悠小酌的时刻，整个人都放空了', B: '吃到了好多好吃的，满足感拉满', C: '淘到了心仪的小物件，收获满满', D: '和朋友聚得开心，氛围特别好' } },
 ]
 
-export const ASSET_BASE_URL = 'https://file3.ih5.cn/v35/edt/u10013600'
+export const ASSET_BASE_URL = `https://assets.zice8.com/${MAOTAI_C_CREATE_FUN_ACTIVITY_TYPE}/${MAOTAI_C_CREATE_FUN_ACTIVITY_KEY}`
 
 export const ASSETS = {
   background: '20361668e875958b822ba05e397450bb_1188000_751_1624.png',
