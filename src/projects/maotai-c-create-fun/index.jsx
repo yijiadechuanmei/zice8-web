@@ -1,13 +1,43 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
-import { trackPageView } from '../../shared/analytics'
-import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { getVisitorId, trackPageView } from '../../shared/analytics'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { ASSETS, MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, QUESTIONS, assetUrl } from './data'
 import './style.css'
 
 const DESIGN_WIDTH = 750
 const DESIGN_HEIGHT = 1624
+const RESULT_STORAGE_KEY = `${MAOTAI_C_CREATE_FUN_ACTIVITY_KEY}:completed-result`
+
+function createSessionId() {
+  if (typeof window.crypto?.randomUUID === 'function') return `maotai_${window.crypto.randomUUID()}`
+  return `maotai_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`
+}
+
+function readStoredResult() {
+  try {
+    const result = localStorage.getItem(RESULT_STORAGE_KEY)
+    return ['A', 'B', 'C', 'D'].includes(result) ? result : null
+  } catch {
+    return null
+  }
+}
+
+function saveStoredResult(result) {
+  try {
+    localStorage.setItem(RESULT_STORAGE_KEY, result)
+  } catch {
+    // Storage can be unavailable in private browsing; the completed view still works for this visit.
+  }
+}
+
+function clearStoredResult() {
+  try {
+    localStorage.removeItem(RESULT_STORAGE_KEY)
+  } catch {
+    // Ignore unavailable storage.
+  }
+}
 
 function LayerImage({ asset, alt = '', className = '' }) {
   const [filename, left, top, width, height] = asset
@@ -88,13 +118,13 @@ function ResultPage({ result }) {
 export default function MaotaiCCreateFunProject() {
   const [page, setPage] = useState('home')
   const [questionIndex, setQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState([])
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [result, setResult] = useState('A')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [publicConfig, setPublicConfig] = useState(null)
   const [sessionReady, setSessionReady] = useState(false)
   const answerLocked = useRef(false)
+  const sessionId = useRef(null)
   const debugMode = new URLSearchParams(window.location.search).has('debug')
 
   const shareActivity = useMemo(() => {
@@ -108,7 +138,6 @@ export default function MaotaiCCreateFunProject() {
   }, [publicConfig])
 
   useWechatShare(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, shareActivity)
-  const { authReady } = useWechatAuth(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, publicConfig)
 
   useEffect(() => {
     let active = true
@@ -125,33 +154,22 @@ export default function MaotaiCCreateFunProject() {
   }, [])
 
   useEffect(() => {
-    if (!authReady) return undefined
-    let active = true
     setSessionReady(false)
-    const base = `/maotai-c-create-fun/activities/${encodeURIComponent(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY)}`
-    const stateRequest = debugMode
-      ? request(`${base}/debug/restart`, { method: 'POST' })
-      : request(`${base}/state`)
-    stateRequest.then((state) => {
-      if (!active) return
-      answerLocked.current = false
-      setIsTransitioning(false)
-      setSelectedAnswer(null)
-      if (state?.phase === 'result' && state?.result) {
-        setResult(state.result)
-        setPage('result')
-      } else {
-        setAnswers([])
-        setQuestionIndex(0)
-        setPage('home')
-      }
-    }).catch(() => {
-      if (active) setPage('home')
-    }).finally(() => {
-      if (active) setSessionReady(true)
-    })
-    return () => { active = false }
-  }, [authReady, debugMode])
+    if (debugMode) clearStoredResult()
+    const storedResult = debugMode ? null : readStoredResult()
+    answerLocked.current = false
+    sessionId.current = null
+    setIsTransitioning(false)
+    setSelectedAnswer(null)
+    setQuestionIndex(0)
+    if (storedResult) {
+      setResult(storedResult)
+      setPage('result')
+    } else {
+      setPage('home')
+    }
+    setSessionReady(true)
+  }, [debugMode])
 
   useEffect(() => {
     document.title = publicConfig?.title || '茅台向C造趣'
@@ -160,8 +178,8 @@ export default function MaotaiCCreateFunProject() {
   const start = () => {
     if (!sessionReady) return
     answerLocked.current = false
+    sessionId.current = createSessionId()
     setIsTransitioning(false)
-    setAnswers([])
     setSelectedAnswer(null)
     setQuestionIndex(0)
     setPage('question')
@@ -170,22 +188,28 @@ export default function MaotaiCCreateFunProject() {
   const submitAnswer = async () => {
     if (!selectedAnswer || answerLocked.current || !sessionReady) return
     answerLocked.current = true
-    const nextAnswers = [...answers, selectedAnswer]
+    const currentSessionId = sessionId.current
+    if (!currentSessionId) {
+      answerLocked.current = false
+      return
+    }
     setIsTransitioning(true)
     const base = `/maotai-c-create-fun/activities/${encodeURIComponent(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY)}`
+    const session = { visitorId: getVisitorId(), sessionId: currentSessionId }
     try {
       await request(`${base}/answer`, {
         method: 'POST',
-        body: JSON.stringify({ questionNo: questionIndex + 1, selectedOption: selectedAnswer }),
+        skipAuth: true,
+        body: JSON.stringify({ ...session, questionNo: questionIndex + 1, selectedOption: selectedAnswer }),
       })
       const completed = questionIndex === QUESTIONS.length - 1
-        ? await request(`${base}/complete`, { method: 'POST' })
+        ? await request(`${base}/complete`, { method: 'POST', skipAuth: true, body: JSON.stringify(session) })
         : null
       window.setTimeout(() => {
-        if (completed?.result) setResult(completed.result)
-        setAnswers(nextAnswers)
         setSelectedAnswer(null)
         if (completed?.result) {
+          saveStoredResult(completed.result)
+          setResult(completed.result)
           setPage('result')
         } else {
           setQuestionIndex((current) => current + 1)
