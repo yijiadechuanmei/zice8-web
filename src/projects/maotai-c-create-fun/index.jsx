@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { ASSETS, QUESTIONS, assetUrl, resolveResult } from './data'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { request } from '../../shared/api/request'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { ASSETS, MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, QUESTIONS, assetUrl, resolveResult } from './data'
 import './style.css'
 
 const DESIGN_WIDTH = 750
@@ -89,9 +91,32 @@ export default function MaotaiCCreateFunProject() {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [result, setResult] = useState('A')
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [publicConfig, setPublicConfig] = useState(null)
   const answerLocked = useRef(false)
 
-  useEffect(() => { document.title = '茅台向C造趣' }, [])
+  const shareActivity = useMemo(() => {
+    if (!publicConfig) return null
+    return {
+      title: publicConfig.title || '茅台向C造趣',
+      shareTitle: publicConfig.shareTitle || publicConfig.title || '茅台向C造趣',
+      shareDesc: publicConfig.shareDesc ?? '',
+      shareImage: publicConfig.shareImage || '',
+    }
+  }, [publicConfig])
+
+  useWechatShare(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, shareActivity)
+
+  useEffect(() => {
+    let active = true
+    request(`/activities/${MAOTAI_C_CREATE_FUN_ACTIVITY_KEY}/public-config`, { skipAuth: true })
+      .then((config) => { if (active) setPublicConfig(config) })
+      .catch(() => { if (active) setPublicConfig(null) })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    document.title = publicConfig?.title || '茅台向C造趣'
+  }, [publicConfig])
 
   const start = () => { answerLocked.current = false; setIsTransitioning(false); setAnswers([]); setSelectedAnswer(null); setQuestionIndex(0); setPage('question') }
   const submitAnswer = () => {
