@@ -31,14 +31,6 @@ function saveStoredResult(result) {
   }
 }
 
-function clearStoredResult() {
-  try {
-    localStorage.removeItem(RESULT_STORAGE_KEY)
-  } catch {
-    // Ignore unavailable storage.
-  }
-}
-
 function LayerImage({ asset, alt = '', className = '' }) {
   const [filename, left, top, width, height] = asset
   return <img className={`maotai-c-create-fun-layer ${className}`.trim()} src={assetUrl(filename)} alt={alt} draggable="false" style={{ left, top, width, height }} />
@@ -155,7 +147,6 @@ export default function MaotaiCCreateFunProject() {
 
   useEffect(() => {
     setSessionReady(false)
-    if (debugMode) clearStoredResult()
     const storedResult = debugMode ? null : readStoredResult()
     answerLocked.current = false
     sessionId.current = null
@@ -208,7 +199,8 @@ export default function MaotaiCCreateFunProject() {
       window.setTimeout(() => {
         setSelectedAnswer(null)
         if (completed?.result) {
-          saveStoredResult(completed.result)
+          // Debug runs must never change the result saved by the formal link.
+          if (!debugMode) saveStoredResult(completed.result)
           setResult(completed.result)
           setPage('result')
         } else {
