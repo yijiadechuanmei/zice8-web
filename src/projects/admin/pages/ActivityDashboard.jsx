@@ -41,6 +41,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
   const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
   const isLuckyDraw = activity.type === 'lucky_draw_20260920'
+  const isMaotaiCCreateFun = activity.type === 'maotai_c_create_fun_20260923'
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -268,6 +269,25 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (isMaotaiCCreateFun) {
+      const maotai = overview?.maotaiCCreateFun || {}
+      const results = new Map((maotai.resultDistribution || []).map((item) => [item.result, item.count]))
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+        { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+        { label: '开始测试用户', value: maotai.testUserCount ?? 0 },
+        { label: '答题中', value: maotai.inProgressCount ?? 0 },
+        { label: '完成测试', value: maotai.completedCount ?? 0 },
+        { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
+        { label: '结果 A', value: results.get('A') ?? 0 },
+        { label: '结果 B', value: results.get('B') ?? 0 },
+        { label: '结果 C', value: results.get('C') ?? 0 },
+        { label: '结果 D', value: results.get('D') ?? 0 },
+      ]
+    }
+
     if (activity.type === 'phase_quiz_lottery') {
       const pql = overview?.phaseQuizLottery || {}
       return [
@@ -453,7 +473,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isMaotaiCCreateFun, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const luckyDrawTrend = (charts?.luckyDraw?.drawTrend || []).map((item, index) => ({
@@ -462,6 +482,13 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     wins: charts?.luckyDraw?.winTrend?.[index]?.value || 0,
     misses: charts?.luckyDraw?.missTrend?.[index]?.value || 0,
   }))
+  const maotaiResultDistribution = (overview?.maotaiCCreateFun?.resultDistribution || []).map((item) => ({
+    name: `结果 ${item.result}`,
+    count: item.count || 0,
+  }))
+  const maotaiOptionDistribution = (overview?.maotaiCCreateFun?.questionOptionDistribution || []).flatMap((question) =>
+    (question.options || []).map((option) => ({ name: `第${question.questionNo}题 ${option.option}`, count: option.count || 0 })),
+  )
   const materialRegistrationTrend = (charts?.submissions?.trend || []).map((item) => ({ ...item, registrations: item.value || 0 }))
   const commentTrend = (charts?.videoRank?.commentTrend || []).map((item) => ({ ...item, comments: item.value || 0 }))
   const rankTop10 = (charts?.videoRank?.rankTop10 || []).map((item) => ({
@@ -703,6 +730,28 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
+          {isMaotaiCCreateFun ? (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+                  {charts?.access?.dataAvailable ? (
+                    <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+                  ) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />}
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="最终结果人数" description="仅统计完成 9 题后的服务端结果。">
+                  <LazyChart type="bar" data={maotaiResultDistribution} series={[{ key: 'count', name: '人数' }]} emptyText="暂无完成记录" />
+                </ChartPanel>
+              </Col>
+              <Col xs={24} xl={8}>
+                <ChartPanel title="各题选项人数" description="每个题号与 A/B/C/D 选项的已提交人数。">
+                  <LazyChart type="bar" data={maotaiOptionDistribution} series={[{ key: 'count', name: '人数' }]} emptyText="暂无答题记录" />
+                </ChartPanel>
+              </Col>
+            </Row>
+          ) : null}
+
           {activity.type === 'material_review_registration' ? (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={12}>
@@ -875,7 +924,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw ? null : (
+          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>

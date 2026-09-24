@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
+import { trackPageView } from '../../shared/analytics'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
-import { ASSETS, MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, QUESTIONS, assetUrl, resolveResult } from './data'
+import { ASSETS, MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, QUESTIONS, assetUrl } from './data'
 import './style.css'
 
 const DESIGN_WIDTH = 750
@@ -46,11 +48,11 @@ function Stage({ children, page, sceneKey = page }) {
   )
 }
 
-function HomePage({ onStart }) {
+function HomePage({ onStart, disabled }) {
   return (
     <Stage page="home">
       {ASSETS.home.map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-home-layer maotai-c-create-fun-home-layer-${index}`} />)}
-      <button className="maotai-c-create-fun-home-start" type="button" onClick={onStart} aria-label="开始测试" />
+      <button className="maotai-c-create-fun-home-start" type="button" onClick={onStart} disabled={disabled} aria-label="开始测试" />
     </Stage>
   )
 }
@@ -73,13 +75,12 @@ function QuestionPage({ questionIndex, selectedAnswer, isTransitioning, onSelect
   )
 }
 
-function ResultPage({ result, onRestart }) {
+function ResultPage({ result }) {
   return (
     <Stage page="result">
       {ASSETS.resultCommon.map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-result-layer maotai-c-create-fun-result-common-${index}`} />)}
       {ASSETS.resultVariants[result].map((asset, index) => <LayerImage key={asset[0]} asset={asset} className={`maotai-c-create-fun-result-layer maotai-c-create-fun-result-variant-${index}`} />)}
       <LayerImage asset={ASSETS.resultRestart} className="maotai-c-create-fun-result-restart-image" />
-      <button className="maotai-c-create-fun-restart" type="button" onClick={onRestart} aria-label="再测一次" />
     </Stage>
   )
 }
@@ -92,7 +93,9 @@ export default function MaotaiCCreateFunProject() {
   const [result, setResult] = useState('A')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [publicConfig, setPublicConfig] = useState(null)
+  const [sessionReady, setSessionReady] = useState(false)
   const answerLocked = useRef(false)
+  const debugMode = new URLSearchParams(window.location.search).has('debug')
 
   const shareActivity = useMemo(() => {
     if (!publicConfig) return null
@@ -105,6 +108,7 @@ export default function MaotaiCCreateFunProject() {
   }, [publicConfig])
 
   useWechatShare(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, shareActivity)
+  const { authReady } = useWechatAuth(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, publicConfig)
 
   useEffect(() => {
     let active = true
@@ -115,30 +119,87 @@ export default function MaotaiCCreateFunProject() {
   }, [])
 
   useEffect(() => {
+    trackPageView(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY, '/maotai-c-create-fun', {
+      activityType: 'maotai_c_create_fun_20260923',
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!authReady) return undefined
+    let active = true
+    setSessionReady(false)
+    const base = `/maotai-c-create-fun/activities/${encodeURIComponent(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY)}`
+    const stateRequest = debugMode
+      ? request(`${base}/debug/restart`, { method: 'POST' })
+      : request(`${base}/state`)
+    stateRequest.then((state) => {
+      if (!active) return
+      answerLocked.current = false
+      setIsTransitioning(false)
+      setSelectedAnswer(null)
+      if (state?.phase === 'result' && state?.result) {
+        setResult(state.result)
+        setPage('result')
+      } else {
+        setAnswers([])
+        setQuestionIndex(0)
+        setPage('home')
+      }
+    }).catch(() => {
+      if (active) setPage('home')
+    }).finally(() => {
+      if (active) setSessionReady(true)
+    })
+    return () => { active = false }
+  }, [authReady, debugMode])
+
+  useEffect(() => {
     document.title = publicConfig?.title || '茅台向C造趣'
   }, [publicConfig])
 
-  const start = () => { answerLocked.current = false; setIsTransitioning(false); setAnswers([]); setSelectedAnswer(null); setQuestionIndex(0); setPage('question') }
-  const submitAnswer = () => {
-    if (!selectedAnswer || answerLocked.current) return
+  const start = () => {
+    if (!sessionReady) return
+    answerLocked.current = false
+    setIsTransitioning(false)
+    setAnswers([])
+    setSelectedAnswer(null)
+    setQuestionIndex(0)
+    setPage('question')
+  }
+
+  const submitAnswer = async () => {
+    if (!selectedAnswer || answerLocked.current || !sessionReady) return
     answerLocked.current = true
     const nextAnswers = [...answers, selectedAnswer]
     setIsTransitioning(true)
-    window.setTimeout(() => {
-      setAnswers(nextAnswers)
-      setSelectedAnswer(null)
-      if (questionIndex === QUESTIONS.length - 1) {
-        setResult(resolveResult(nextAnswers))
-        setPage('result')
-      } else {
-        setQuestionIndex((current) => current + 1)
-      }
+    const base = `/maotai-c-create-fun/activities/${encodeURIComponent(MAOTAI_C_CREATE_FUN_ACTIVITY_KEY)}`
+    try {
+      await request(`${base}/answer`, {
+        method: 'POST',
+        body: JSON.stringify({ questionNo: questionIndex + 1, selectedOption: selectedAnswer }),
+      })
+      const completed = questionIndex === QUESTIONS.length - 1
+        ? await request(`${base}/complete`, { method: 'POST' })
+        : null
+      window.setTimeout(() => {
+        if (completed?.result) setResult(completed.result)
+        setAnswers(nextAnswers)
+        setSelectedAnswer(null)
+        if (completed?.result) {
+          setPage('result')
+        } else {
+          setQuestionIndex((current) => current + 1)
+        }
+        setIsTransitioning(false)
+        answerLocked.current = false
+      }, 220)
+    } catch {
       setIsTransitioning(false)
       answerLocked.current = false
-    }, 220)
+    }
   }
 
   if (page === 'question') return <QuestionPage questionIndex={questionIndex} selectedAnswer={selectedAnswer} isTransitioning={isTransitioning} onSelect={setSelectedAnswer} onSubmit={submitAnswer} />
-  if (page === 'result') return <ResultPage result={result} onRestart={start} />
-  return <HomePage onStart={start} />
+  if (page === 'result') return <ResultPage result={result} />
+  return <HomePage onStart={start} disabled={!sessionReady} />
 }
