@@ -34,6 +34,7 @@ const XiangyuGlobalTreasureProject = lazy(() => import('./xiangyu-global-treasur
 const FifteenthFiveICanProject = lazy(() => import('./fifteenth-five-i-can/index.jsx'))
 const LuckyDrawProject = lazy(() => import('./lucky-draw/index.jsx'))
 const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.jsx'))
+const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
 
 const activityTypeProjects = {
   cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),
@@ -55,6 +56,7 @@ const activityTypeProjects = {
   fifteenth_five_i_can: FifteenthFiveICanProject,
   lucky_draw_20260920: LuckyDrawProject,
   maotai_c_create_fun_20260923: MaotaiCCreateFunProject,
+  tianfu_new_district_reading_20260927: TianfuNewDistrictReadingProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
