@@ -12,6 +12,15 @@ const HOME = [
   layer(282, 1410, 177, 55, '11e521138753e163ad5dc1a0211005c4_18240_177_55.png'),
 ]
 
+const TIANFU_PARK = {
+  name: '天府公园',
+  introduction: `你想象过这样的场景吗——一边在公园散步，一抬头就看到选手在岩壁上飞檐走壁？这不是电影，是天府公园的日常。2025年成都世运会的速度攀岩和浮士德球比赛，就在这片草坪旁边举行。开放式场馆让“赛事即风景”成为现实，你不需要买门票，在公园漫步时就能感受到国际赛事的紧张与刺激。
+
+但天府公园的精彩远不止于此。这里是300多种鸟类的秘密基地。鸳鸯在湖面悠闲地秀恩爱，雀鹰在头顶盘旋巡视，白肩雕偶尔来串门。观鸟爱好者在这里记录到的鸟种多达46种，从赤膀鸭到红嘴蓝鹊，从翠鸟到八哥，每一种都有自己独特的“性格”。
+
+50种乔木加60种彩叶树，一年四季轮番换装，逛一次根本不够。脚下踩的透水砖也不是普通砖。这是“海绵城市”的巧思——雨水落下来直接被“喝掉”，经过滤净化后还能再利用。公园的道路和广场全部采用透水铺装，下沉式绿地和雨水花园负责收集、净化地表径流，让整座公园像一块巨大的海绵，会呼吸、会蓄水。逛一次天府公园，你等于同时上了一堂鸟类观察课、植物认知课和生态工程课。`,
+}
+
 const PAGES = [
   [
     layer(0, 0, 750, 1624, '5bc9a404d437eedc06fae329a77e4908_154473_750_1624.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(38, 103, 522, 125, '76f7806ab140036f786b40abaeb79d31_21731_522_125.png'), layer(658, 117, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(21, 283, 727, 347, '1c9e523743adb330ed510ce65fcb2554_314008_727_347.png'), layer(21, 657, 727, 331, '3b603cd853e4d82ffa66259c006e99bc_345886_727_331.png'), layer(21, 1038, 727, 341, '0aa3ecc6630ef8a990e1564db4665879_355213_727_341.png'),
@@ -47,9 +56,9 @@ function DetailLayout() {
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
     <div className="tianfu-detail-media"><div className="tianfu-detail-media-inner" /></div>
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
-    <div className="tianfu-detail-copy" />
-    <div className="tianfu-detail-title">国家川藏铁路技术创新中心</div>
-    <div className="tianfu-detail-recommendation"><div className="tianfu-detail-recommendation-row"><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>国家川藏铁路技术创新中心</div></div></div>
+    <div className="tianfu-detail-copy">{TIANFU_PARK.introduction}</div>
+    <div className="tianfu-detail-title">{TIANFU_PARK.name}</div>
+    <div className="tianfu-detail-recommendation"><div className="tianfu-detail-recommendation-row"><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{TIANFU_PARK.name}</div></div></div>
   </>
 }
 
