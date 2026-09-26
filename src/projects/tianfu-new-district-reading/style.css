@@ -2,7 +2,4 @@
 .tianfu-canvas { position: relative; width: min(750px, 100vw); height: auto; aspect-ratio: 750 / 1624; margin: 0 auto; }
 .tianfu-layer { position: absolute; display: block; max-width: none; pointer-events: none; user-select: none; }
 .tianfu-hit { position: absolute; z-index: 2; display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; }
-.tianfu-start-hit { left: 36.53%; top: 73.21%; width: 26%; height: 11.95%; }
-.tianfu-prev-hit { left: 21.46%; top: 88.24%; width: 23.6%; height: 3.39%; }
-.tianfu-next-hit { left: 53.46%; top: 88.24%; width: 23.6%; height: 3.39%; }
 .tianfu-hit:focus-visible { outline: 2px solid transparent; }

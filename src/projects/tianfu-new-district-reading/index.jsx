@@ -33,15 +33,17 @@ const PAGES = [
   ],
 ]
 
-function Canvas({ layers, onPrevious, onNext, home }) {
+function Canvas({ layers, actions = [] }) {
   return <main className="tianfu-stage"><div className="tianfu-canvas">
     {layers.map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
-    {home ? <button className="tianfu-hit tianfu-start-hit" type="button" onClick={onNext} aria-label="进入活动" /> : <><button className="tianfu-hit tianfu-prev-hit" type="button" onClick={onPrevious} aria-label="上一页" /><button className="tianfu-hit tianfu-next-hit" type="button" onClick={onNext} aria-label="下一页" /></>}
+    {actions.map((item) => <button className="tianfu-hit" key={item.label} type="button" onClick={item.onClick} aria-label={item.label} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
   </div></main>
 }
 
 export default function TianfuNewDistrictReadingProject() {
-  const [page, setPage] = useState(-1)
-  if (page < 0) return <Canvas layers={HOME} home onNext={() => setPage(0)} />
-  return <Canvas layers={PAGES[page]} onPrevious={() => setPage((value) => Math.max(-1, value - 1))} onNext={() => setPage((value) => Math.min(PAGES.length - 1, value + 1))} />
+  const [stage, setStage] = useState('home')
+  if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
+  if (stage === 'catalog') return <Canvas layers={PAGES[0]} actions={[{ label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') }]} />
+  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[{ label: '查看点位详情', left: 482, top: 236, width: 208, height: 55, onClick: () => setStage('detail') }]} />
+  return <Canvas layers={PAGES[4]} />
 }
