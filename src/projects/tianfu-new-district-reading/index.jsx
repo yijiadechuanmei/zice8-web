@@ -37,6 +37,60 @@ const TIANFU_PARK = {
   ],
 }
 
+const FIRST_PHASE_POINTS = [
+  TIANFU_PARK,
+  {
+    id: 'west-china-expo-city',
+    name: '西部国际博览城及天府国际会议中心',
+    introduction: `远看像一艘来自未来的飞船，近看是一个巨大的“V”字——这就是西博城。用钢量16万吨，超过“鸟巢”，直接拿下中国钢结构金奖。这座建筑充分利用自然光线，雨水被收集起来循环利用，壮观的背后藏着细腻的环保心思。
+
+让人挪不开眼的，还有隔壁的“天府之檐”。2025年世运会开幕式就在这里上演。这是亚洲最大的单体木结构建筑，由国际知名设计大师汤桦领衔设计，以中国古建筑“佛光寺大殿”的抬梁式木结构为原型，建构了一条长达430米、高32米的超尺度木结构空间。430米也是全国最长的连续瓦屋面建筑，犹如成都平原延绵伸展的地平线。
+
+“天府之檐”的天府有两层意思：一层指天府新区，一层指天府之国。前厅木结构檐廊以唐代斗拱型制为蓝本，完全遵循传统建筑大木作做法，通过瓜柱抬梁形成殿堂式传统形制，端头出挑，展露木结构榫卯构件，再现中国传统建筑精髓。最讲究的是，这条钢木混合结构长廊的胶合木用量超过4300立方米，为了找到最合适的材料，建设团队辗转全国10余个胶合木工厂，考察100余种胶合木，最终远赴黑龙江漠河，在零下25度的天气下寻找到最为合适的胶合木。
+
+站在这里，你看到的不仅是一座建筑，而是一段关于中国建筑智慧的当代诠释。`,
+    books: [
+      { title: '《藏在建筑里的世界史》', reason: '西博城以16万吨钢结构撑起57万平方米的巨大“V”字，天府国际会议中心则以亚洲最大单体木结构建筑“天府之檐”致敬古建智慧——读懂一座建筑，就是读懂一个时代的科技与文明。《藏在建筑里的世界史》（中国全民阅读网推荐好书）正是这样一把钥匙：以建筑为中心，以建筑的建造和用途为线索，展示与建筑相关的人们生活、科技、艺术、制度、节日庆典、宗教、历法、军事与娱乐等领域。书中1000余幅细节放大图、100余幅大型剖面图，帮助读者清晰感受文明进程的全景，也从建筑中读懂更多维度的文化内涵。' },
+      { title: '《重拾瑰宝圆明园》', reason: '正如圆明园曾汇聚天下奇珍、承载万国风华，今天的西部国际博览城同样迎接着来自全球各国的文化、科技与产品——这座“万园之园”式的会展殿堂，用同一份包容讲述着中国与世界的对话。《重拾瑰宝圆明园》是中国全民阅读网推荐好书、2022年“中国好书”。本书以历史文献为基础，利用现代数字技术复原圆明园被毁景观，并从建筑艺术、园林植物、人物故事、诗文作品等方面解析各个景点，让读者穿越时空领略“万园之园”的卓绝风采，感受古典园林深厚的文化底蕴。' },
+      { title: '《天工开物》（人民出版社）', reason: '当16万吨钢结构撑起现代会展奇迹，人们或许会问：中国造物的科技智慧从何而来？答案可以追溯至明代科学家宋应星的《天工开物》——入选《教育部基础教育课程教材发展中心中小学生阅读指导目录（2020年版）》。《天工开物》系统总结工业文明前中国农业与手工业领域130余项生产技术，涵盖谷物加工、纺织染色、金属冶炼等工艺流程，并与《考工记》《营造法式》共同完成中华“考工学”设计理论体系的建构。' },
+    ],
+  },
+  {
+    id: 'sichuan-celebrity-hall',
+    name: '四川名人馆',
+    introduction: `想和李白、苏轼、诸葛亮“面对面”聊天吗？来这里就对了。四川名人馆坐落于天府新区雅州路，紧邻天府公园，集中展示先秦至辛亥革命前的70位四川历史名人——司马相如、李白、苏轼生于巴蜀，诸葛亮、杜甫客居蜀地造福一方。
+
+但这70位先贤不是挂在墙上的画像。场馆用大数据、人工智能、体感交互打造数字展项。走进1250平方米的数字沉浸式体验展厅，你化身“寻梦者”，穿过四重沉浸式梦境场景，与先贤跨越时空“对话”。场馆的设计中藏着“蜀山、蜀水、蜀道”的传统意象，内部连通各层展厅的动线灵感取自千古诗篇里的蜀道。
+
+馆内还有吴为山、林茂等51位艺术家创作的雕塑书画，蜀锦、蜀绣、竹编穿插其中。走进这里，就像打开了一个会动的巴蜀文化盲盒——你永远不知道下一个转角会遇见谁，但每一个相遇都值得。`,
+    books: [
+      { title: '中华人物故事汇——中华先烈人物故事汇', reason: '四川名人馆以“存史、知人、益世”为宗旨，集中展示先秦至辛亥革命前的70位巴蜀先贤，勾勒出巴蜀文脉的发展轨迹。然而，四川的名人故事并未止于古代。近代以来，巴蜀大地同样涌现出黄继光、邱少云、赵一曼、丁佑君等为民族独立和人民解放英勇献身的革命先烈。“中华先烈人物故事汇”收录了这些四川籍先烈的感人故事。《中华人物故事汇》由党建读物出版社、接力出版社、学习出版社、中华书局联合编纂，包含先锋、先烈、先贤、传奇人物四个系列，共出版109册，曾获第五届中国出版政府奖图书奖，并入选全国青少年推荐百种优秀出版物。' },
+      { title: '《古诗词遇见中国地理》', reason: '名人馆中的李白、杜甫、苏轼等都与诗词和地理足迹紧密相关，人们常说，生活中要有“诗和远方”。本书入选2022年向全国青少年推荐百种优秀出版物。它精选100组与中国地理有关的古典诗词，紧扣中小学语文课程标准与教学大纲，并结合手绘地图，从地理的独特视角切入，对古典诗词和传统文化进行现代阐释。全书按黄河、长江、大地、大海、名山、名城和名楼7个主题编排，让地理知识与诗词赏析融会贯通。' },
+    ],
+  },
+  {
+    id: 'utility-tunnel',
+    name: '雅州路综合管廊',
+    introduction: `你脚下3米深的地方，藏着一座“智慧地下城”。雅州路综合管廊全长3公里，是成都目前唯一可通行车辆的管廊，一辆小型巡检车辆可以自由通过。
+
+管廊内的智能巡检机器人头顶两只“大眼睛”、脚踏四个轮子，24小时自动巡逻。它会对配电系统、消防系统进行巡检，发现的问题自动进行图像分析，结果实时推送到控制中心。管廊内安装的设施设备实时监测氧气、温度、湿度、硫化氢、甲烷等环境参数，出现异常自动报警。截至目前，智能巡检机器人已替代人工完成日常巡检项目70%以上，巡检效率提升4倍。
+
+以前人工巡检每天5公里需要配备多个巡检工人，效率较低还容易出错。现在发现问题立刻上报，巡检数据自动记录、分析、应用，后期还可以进行自动派单。在这里，你可以亲眼看到城市地下的“生命线”是怎么被一群机器人守护的。`,
+    books: [
+      { title: '《成为科学家》', reason: '中国全民阅读网推荐好书、入选向青少年推荐百种优秀出版物名单。行走在雅州路综合管廊这座“智慧地下城”里，每公里500多个监测设备如同城市的“眼睛”和“耳朵”，时刻守护氧气、温度、湿度、硫化氢、甲烷、液位等环境参数；智能巡检机器人自动采集、分析病害并报警——这些让城市安全运转的科技背后，正是一代代科学家的探索与坚守。《成为科学家》讲述屠呦呦、钟南山、张益唐、王贻芳、常进、鲍哲南、颜宁、许晨阳、莉丽莎·兰道尔、马克·麦考林十位国际知名科学家的“人物故事”，并介绍数学、物理学、生命科学、天文学等基础科学领域的前沿知识。' },
+    ],
+  },
+  {
+    id: 'guanghui-art-museum',
+    name: '广汇美术馆',
+    introduction: '广汇美术馆位于天府新区天府总部商务区，毗邻天府公园，是一座集展览展示、学术研究、公共教育和收藏为一体的大型国际化美术馆。它犹如一个漂浮的立方，给人以强烈的视觉冲击力。其拥有71840平方米的总建筑面积和43685平方米的主楼建筑面积，内设8个专业展厅。此外，美术馆还配备了恒温恒湿典藏库、同声传译学术报告厅、艺术文献中心、实验空间、观影剧场等多功能空间，为观众提供了全方位的服务和体验。',
+    books: [
+      { title: '《名画在左，科学在右2》', reason: '当观众走进广汇美术馆8个专业展厅，面对一幅幅名画时，或许会好奇：达·芬奇笔下的光线为何如此真实？印象派的色彩背后藏着怎样的光学原理？《名画在左，科学在右2》（中国全民阅读网推荐好书）正是这样一场艺术与科学的“跨界展”：全书围绕100余幅脍炙人口的世界名画，以科学视角解读其中蕴含的科学元素、科学道理与人生智慧，探讨名画揭示的科学文明史——让美术馆的每一面墙，都成为连接审美与求知的窗口。' },
+      { title: '《敦煌小画师》', reason: '中国全民阅读网推荐好书、入选向青少年推荐百种优秀出版物名单。《敦煌小画师》是一部原创现实主义题材的长篇儿童文学作品，由我省青年作家赵剑云女士创作。该书以20世纪40年代敦煌艺术研究所初创期为时代背景，讲述小主人公欣洁，一个11岁的小女孩跟随父亲来到敦煌莫高窟工作生活，在敦煌成长学习的动人故事。作品从儿童的视角，通过几个平凡的小故事，表现了敦煌莫高窟守护者们在面对艰苦的生活环境、变化莫测的时代格局中，坚守理想和信念，为保护敦煌默默付出，弘扬了一群致力于传承、发扬敦煌文化的艺术家和研究者甘守清贫、坚守大漠的无私奉献精神。' },
+    ],
+  },
+]
+
 const PAGES = [
   [
     layer(0, 0, 750, 1624, '5bc9a404d437eedc06fae329a77e4908_154473_750_1624.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(38, 103, 522, 125, '76f7806ab140036f786b40abaeb79d31_21731_522_125.png'), layer(658, 117, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(21, 283, 727, 347, '1c9e523743adb330ed510ce65fcb2554_314008_727_347.png'), layer(21, 657, 727, 331, '3b603cd853e4d82ffa66259c006e99bc_345886_727_331.png'), layer(21, 1038, 727, 341, '0aa3ecc6630ef8a990e1564db4665879_355213_727_341.png'),
@@ -67,15 +121,15 @@ function Canvas({ layers, masks = [], actions = [], children }) {
   </div></main>
 }
 
-function DetailLayout() {
+function DetailLayout({ point }) {
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
     <div className="tianfu-detail-media"><div className="tianfu-detail-media-inner" /></div>
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
-    <div className="tianfu-detail-copy">{TIANFU_PARK.introduction}</div>
-    <div className="tianfu-detail-title">{TIANFU_PARK.name}</div>
-    <div className="tianfu-detail-recommendation" style={{ height: `${TIANFU_PARK.books.length * 100 / 16.24}%` }}>
-      {TIANFU_PARK.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / TIANFU_PARK.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{book.title}</div></div>)}
+    <div className="tianfu-detail-copy">{point.introduction}</div>
+    <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
+    <div className="tianfu-detail-recommendation" style={{ height: `${point.books.length * 100 / 16.24}%` }}>
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{book.title}</div></div>)}
     </div>
   </>
 }
@@ -90,9 +144,23 @@ function BookReasonLayout({ book }) {
 export default function TianfuNewDistrictReadingProject() {
   const [stage, setStage] = useState('home')
   const [selectedBook, setSelectedBook] = useState(TIANFU_PARK.books[0])
+  const [selectedPoint, setSelectedPoint] = useState(TIANFU_PARK)
+  const openPoint = (point) => {
+    setSelectedPoint(point)
+    setSelectedBook(point.books[0])
+    setStage('detail')
+  }
   if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
   if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[644, 1024].map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[{ label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') }, { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') }]} />
-  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[{ label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看点位详情', left: 482, top: 236, width: 208, height: 55, onClick: () => setStage('detail') }]} />
-  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage('map') }, ...TIANFU_PARK.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout /></Canvas>
+  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[
+    { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
+    { label: '查看广汇美术馆详情', left: 482, top: 236, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[4]) },
+    { label: '查看天府公园详情', left: 470, top: 484, width: 177, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[0]) },
+    { label: '查看四川名人馆详情', left: 81, top: 441, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[2]) },
+    { label: '查看雅州路综合管廊详情', left: 162, top: 716, width: 245, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[3]) },
+    { label: '查看天府新区国际会议中心详情', left: 165, top: 1040, width: 316, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
+    { label: '查看西博城详情', left: 433, top: 1222, width: 151, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
+  ]} />
+  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage('map') }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
   return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }
