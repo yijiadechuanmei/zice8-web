@@ -22,8 +22,18 @@ const TIANFU_PARK = {
 
 50种乔木加60种彩叶树，一年四季轮番换装，逛一次根本不够。脚下踩的透水砖也不是普通砖。这是“海绵城市”的巧思——雨水落下来直接被“喝掉”，经过滤净化后还能再利用。公园的道路和广场全部采用透水铺装，下沉式绿地和雨水花园负责收集、净化地表径流，让整座公园像一块巨大的海绵，会呼吸、会蓄水。逛一次天府公园，你等于同时上了一堂鸟类观察课、植物认知课和生态工程课。`,
   books: [
-    { title: '《小亮老师的博物课》' },
-    { title: '《虫子旁》' },
+    {
+      title: '《小亮老师的博物课》',
+      reason: `天府公园本身就是一本翻不完的“自然之书”：300多种鸟类在此栖居，鸳鸯、雀鹰、白肩雕等国家二级保护鸟类常驻其间，近50种乔木与近60种落叶、常绿、彩叶树种让四季皆有风景。公园里随处可见的花草树木、飞鸟昆虫、水生动物，正是孩子身边最生动的“博物课”——《小亮老师的博物课》就是带他们读懂这片天地的向导。
+
+中国全民阅读网推荐好书——《小亮老师的博物课》是“博物君”张辰亮专为5~12岁的小读者们创作的一套科普读物。这套小书共包含6个分册——《不可思议的花草树木》《叹为观止的自然现象》《深不可测的水生动物》《无奇不有的昆虫世界》《大开眼界的陆地动物》《奇趣无穷的飞鸟乐园》。本书选取了孩子们日常身边能见到并感知到的花草树木、自然现象、水生动物、陆生动物、昆虫和鸟，通过提问的方式导入阅读，让孩子们跟着内心的好奇，对千变万化、五彩纷呈的大自然一探究竟。作者科普图书被教育部列入中小学生阅读指导目录。`,
+    },
+    {
+      title: '《虫子旁》',
+      reason: `漫步天府公园，高大乔木与珍稀飞鸟固然引人注目，但低头细看，落叶堆、草坪边、石板缝里还藏着一个常被忽略的微观世界。中国全民阅读网推荐好书、“湘版好书榜”、首都图书馆公布30册年度“请读书目”。
+
+《虫子旁》是设计师朱赢椿的一本观虫日志，收录了80余篇散文与200余张摄影作品，图文并茂，兼备知识性、审美性、趣味性。这个世界很小，小到足以被我们忽略、遗忘，但跟我们一样，虫子也有着惊心动魄的生活。蚂蚁被一根落下的枯枝砸断了腰肢；烟管蜗牛想在夏日的午后睡上一个美美的午觉，却未能如愿；而千足虫卡在路缝里，即使有一千条腿也无济于事……在虫子的世界，一个水洼就是一片海洋，一片叶子就是一顶阳伞，一朵花就是一座岛屿，它们从容认真，生生不息，与自然融洽相处。“在你忽略的地方，还有一个精彩的世界。”《虫子旁》是对虫的观察，也是对自然和生命的思索。`,
+    },
   ],
 }
 
@@ -70,10 +80,19 @@ function DetailLayout() {
   </>
 }
 
+function BookReasonLayout({ book }) {
+  return <>
+    <div className="tianfu-book-reason-title">{book.title}</div>
+    <div className="tianfu-book-reason-copy">{book.reason}</div>
+  </>
+}
+
 export default function TianfuNewDistrictReadingProject() {
   const [stage, setStage] = useState('home')
+  const [selectedBook, setSelectedBook] = useState(TIANFU_PARK.books[0])
   if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
-  if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[644, 1024].map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[{ label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') }]} />
-  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[{ label: '查看点位详情', left: 482, top: 236, width: 208, height: 55, onClick: () => setStage('detail') }]} />
-  return <Canvas layers={[]}><DetailLayout /></Canvas>
+  if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[644, 1024].map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[{ label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') }, { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') }]} />
+  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[{ label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看点位详情', left: 482, top: 236, width: 208, height: 55, onClick: () => setStage('detail') }]} />
+  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage('map') }, ...TIANFU_PARK.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout /></Canvas>
+  return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }
