@@ -232,12 +232,14 @@ export default function TianfuNewDistrictReadingProject() {
     districtReadingStage < 3 ? 1024 : null,
   ].filter((top) => top !== null).map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[
     { label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') },
+    { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') },
     { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') },
     ...(districtReadingStage >= 2 ? [{ label: '进入兴隆湖', left: 21, top: 657, width: 727, height: 331, onClick: () => setStage('xinglong-lake') }] : []),
     ...(districtReadingStage >= 3 ? [{ label: '进入海创园', left: 21, top: 1038, width: 727, height: 341, onClick: () => setStage('haichuang-park') }] : []),
   ]} />
   if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[
     { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
+    { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') },
     { label: '查看广汇美术馆详情', left: 482, top: 236, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[4]) },
     { label: '查看天府公园详情', left: 470, top: 484, width: 177, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[0]) },
     { label: '查看四川名人馆详情', left: 81, top: 441, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[2]) },
@@ -247,13 +249,14 @@ export default function TianfuNewDistrictReadingProject() {
   ]} />
   if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[
     { label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') },
+    { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') },
     { label: '查看清华四川能源互联网研究院详情', left: 404, top: 401, width: 316, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[1], 'xinglong-lake') },
     { label: '查看天齐锂业详情', left: 149, top: 635, width: 177, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[4], 'xinglong-lake') },
     { label: '查看东方电气集团数字科技有限公司详情', left: 475, top: 849, width: 262, height: 87, onClick: () => openPoint(XINGLONG_LAKE_POINTS[2], 'xinglong-lake') },
     { label: '查看兴隆湖详情', left: 61, top: 920, width: 151, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[0], 'xinglong-lake') },
     { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
   ]} />
-  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }]} />
+  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }]} />
   if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
   return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }
