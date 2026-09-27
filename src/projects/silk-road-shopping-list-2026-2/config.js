@@ -11,7 +11,7 @@ const posterProductImages = import.meta.glob('../silk-road-shopping-list/assets/
 export const silkRoadAssets = {
   homeBackground: `${ASSET_ROOT}/b4d5cd34fa18bdfc0bab69b4e6b26998_2446173_750_1624.png`,
   homeTitle: `${ASSET_ROOT}/f3640a16647220d683c0fb52d231ac65_55490_440_53.png`,
-  homeStart: `${ASSET_ROOT}/36192a094e9f264fcd5f851d0aa5bd56_155777_523_145.png`,
+  homeStart: `${ASSET_ROOT}/kq.png`,
   homeIllustration: `${ASSET_ROOT}/6466c61f0e15e2dd5cbd15f3f43619bf_178314_295_595.png`,
   homeRibbon: `${ASSET_ROOT}/0714c782d30d3b9ac865b6410c677092_52548_595_87.png`,
   orientationHint: `${ASSET_ROOT}/bc3e53572dc55c0b4b4427b8c297ec49_44732_333_78.png`,
