@@ -30,6 +30,7 @@ const RiderSafetySurveyProject = lazy(() => import('./rider-safety-survey/index.
 const QualityMonthProject = lazy(() => import('./quality-month/index.jsx'))
 const LvyuanFruitfulGamesProject = lazy(() => import('./lvyuan-fruitful-games/index.jsx'))
 const SilkRoadShoppingListProject = lazy(() => import('./silk-road-shopping-list/index.jsx'))
+const SilkRoadShoppingListCopyProject = lazy(() => import('./silk-road-shopping-list-2026-2/index.jsx'))
 const XiangyuGlobalTreasureProject = lazy(() => import('./xiangyu-global-treasure/index.jsx'))
 const FifteenthFiveICanProject = lazy(() => import('./fifteenth-five-i-can/index.jsx'))
 const LuckyDrawProject = lazy(() => import('./lucky-draw/index.jsx'))
@@ -61,7 +62,11 @@ const activityTypeProjects = {
 
 function ActivityTypeProject({ routeParams }) {
   const activityType = String(routeParams?.activityType || '').toLowerCase()
-  const ProjectComponent = activityTypeProjects[activityType]
+  const activityKey = String(routeParams?.activityKey || '').toLowerCase()
+  const ProjectComponent = activityType === 'silk_road_shopping_list'
+    && activityKey === 'millennium_silk_road_shopping_list_2026_2'
+    ? SilkRoadShoppingListCopyProject
+    : activityTypeProjects[activityType]
   if (!ProjectComponent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-white">

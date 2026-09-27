@@ -1,27 +1,34 @@
+import posterCheck from '../silk-road-shopping-list/assets/poster/final/check.svg'
+
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE = 'silk_road_shopping_list'
 export const SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY = 'millennium_silk_road_shopping_list_2026'
 
 // All Silk Road shopping-list activity copies intentionally share this source
 // directory. The current route's activity key is used for API/auth/analytics.
 export const ASSET_ROOT = `https://assets.zice8.com/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE}/${SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY}`
+const posterProductImages = import.meta.glob('../silk-road-shopping-list/assets/poster/products/*.png', { eager: true, query: '?url', import: 'default' })
+
 export const silkRoadAssets = {
   homeBackground: `${ASSET_ROOT}/b4d5cd34fa18bdfc0bab69b4e6b26998_2446173_750_1624.png`,
-  homeTitle: `${ASSET_ROOT}/c36ab2c94454ea0c9e071e01df951e3b_187245_193_567.png`,
+  homeTitle: `${ASSET_ROOT}/f3640a16647220d683c0fb52d231ac65_55490_440_53.png`,
   homeStart: `${ASSET_ROOT}/36192a094e9f264fcd5f851d0aa5bd56_155777_523_145.png`,
+  homeIllustration: `${ASSET_ROOT}/6466c61f0e15e2dd5cbd15f3f43619bf_178314_295_595.png`,
   homeRibbon: `${ASSET_ROOT}/0714c782d30d3b9ac865b6410c677092_52548_595_87.png`,
-  orientationHint: `${ASSET_ROOT}/a5e362983f5c39c254091aaa60bb04f5_38541_333_78.png`,
+  orientationHint: `${ASSET_ROOT}/bc3e53572dc55c0b4b4427b8c297ec49_44732_333_78.png`,
   video: `${ASSET_ROOT}/dd0988b6dee21c51137eaa48acc42725_25528934.mp4`,
-  cartHeader: `${ASSET_ROOT}/aefcddac0381854a76e5b5bb9a29860b_683544_750_546.png`,
+  cartHeader: `${ASSET_ROOT}/c6aa920653948018b7fb8f06f79b5940_716640_750_551.png`,
+  cartSectionTitle: `${ASSET_ROOT}/d05b8931f97085256970f8da8f7cbab0_27033_319_35.png`,
   cartDock: `${ASSET_ROOT}/2905f485d039d22456b539e1e54a1a94_165057_694_110.png`,
   productCard: `${ASSET_ROOT}/bb79dd2df956fdc0d91c34c988514a9b_142014_337_230.png`,
+  plusIcon: `${ASSET_ROOT}/3b194b81654d42cf1fad7fc8eda29524_203.svg`,
   minusIcon: `${ASSET_ROOT}/1b16aadeba1e9b4e0b5f33dcadd456f4_633.svg`,
   detailTitle: `${ASSET_ROOT}/3d7685eaa9e31059a8bc4458a5713a8f_10412_115_58.png`,
   detailIcon: `${ASSET_ROOT}/4f985035441e52a947de6e19dcbc057b_425.svg`,
-  posterHeader: `${ASSET_ROOT}/2694d248cb901da63ec7a2c426d8bf94_1063352_750_769.png`,
-  posterCollection: `${ASSET_ROOT}/fe565f6402942f780b1ca87c08a9ad98_683579_750_672.png`,
-  posterLabel: `${ASSET_ROOT}/070e0f9228c2fdf53133433a69f280e3_36375_349_49.png`,
-  posterItem: `${ASSET_ROOT}/3777992feb211c8d365700c002d2bc58_49065_171_213.png`,
-  posterFooter: `${ASSET_ROOT}/4c033e8a6cb48f5f7351dc862492ca86_527857_750_403.png`,
+  posterNovice: `${ASSET_ROOT}/f2f20ea0fcefa00825ef35a6f93a255c_759257_750_1624.png`,
+  posterApprentice: `${ASSET_ROOT}/e6316f6997866910ea82ec8f8274e1c8_767683_750_1624.png`,
+  posterExpert: `${ASSET_ROOT}/148d2b2c2e9685ab17589e255eff9faa_923172_750_1900.png`,
+  posterMasterOverlay: `${ASSET_ROOT}/0490edb206703dddc1e25a05ea31803b_1058644_750_2098.png`,
+  posterCheck,
 }
 
 const productImage = (name) => `${ASSET_ROOT}/${name}`
@@ -63,5 +70,5 @@ export const SILK_ROAD_PRODUCTS = [
   record,
   description: `原产地：${origin}\n传入时间：${transferTime}\n记载：${record}`,
   image: productImage(image),
-  posterImage: productImage(image),
+  posterImage: posterProductImages[`./assets/poster/products/${image}`],
 }))
