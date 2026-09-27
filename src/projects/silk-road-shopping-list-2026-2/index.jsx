@@ -13,7 +13,7 @@ import './styles.css'
 
 const DESIGN_WIDTH = 750
 const PRODUCT_LIST_BOTTOM_GUTTER = 150
-const PRODUCT_CARD_HEIGHT = 340
+const PRODUCT_CARD_HEIGHT = 420
 
 function getShoppingScore(quantity) {
   const count = Math.min(Math.max(quantity, 0), 28)
@@ -428,7 +428,7 @@ function ProductCard({ product, selected, onToggle }) {
       {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
       </button>}
-      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 22 }} />
+      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 156, height: 221, left: 90, top: 24 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
     <div className="srsl-product-face srsl-product-detail">
@@ -466,7 +466,7 @@ function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 551, left: 0, top: 0 }} />
     <span className="srsl-progress" style={{ left: 410, top: 464, width: 60, height: 43 }}>{selectedIds.length}</span>
     <img alt="" src={silkRoadAssets.cartSectionTitle} style={{ position: 'absolute', width: 255, height: 28, left: 247.5, top: 612 }} />
-    <span className="srsl-card-detail-hint">点击卡片查看详情</span>
+    <span className="srsl-card-detail-hint">点击图片查看详情</span>
     <div className="srsl-product-grid" style={{ top: 646, height: rows * PRODUCT_CARD_HEIGHT + 20 }}>{products.map((product) => <ProductCard key={product.id} product={product} selected={selectedIds.includes(product.id)} onToggle={handleToggle} />)}</div>
   </Stage>
   {createPortal(dock, document.body)}

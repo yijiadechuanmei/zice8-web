@@ -73,12 +73,14 @@
 .srsl-poster-preview > img { display: block; width: min(750px, 100%); height: auto; margin: auto; }
 .srsl-poster-preview > button { position: fixed; z-index: 1; right: 20px; top: calc(20px + env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .55); font-size: 36px; line-height: 40px; }
 .srsl-poster-save-hint { position: fixed; z-index: 2; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); margin: 0; padding: 10px 18px; transform: translateX(-50%); border: 1px solid rgba(235, 205, 163, .62); border-radius: 999px; color: #fff8eb; background: rgba(60, 39, 24, .76); font: 16px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 1px; white-space: nowrap; pointer-events: none; animation: srsl-poster-save-hint-pulse 1.35s ease-in-out infinite; }
-.srsl-product-grid { grid-auto-rows: 340px; }
-.srsl-product-card { height: 340px; }
-.srsl-product-name { top: 250px; }
-.srsl-product-face > .srsl-add { top: 262px; }
-.srsl-detail-name { top: 22px; left: 31px; width: 273px; white-space: nowrap; }
-.srsl-detail-description { top: 92px; height: 230px; overflow: hidden; padding: 0 4px; color: #3b4b42; font: 17px/1.42 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: left; }
+.srsl-card-detail-hint { height: 46px; color: #7f6249; font: 700 34px/46px "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 3px; text-shadow: 0 1px 0 rgba(255, 247, 232, .78); }
+.srsl-product-grid { grid-auto-rows: 420px; }
+.srsl-product-card { height: 420px; }
+.srsl-product-name { left: 38px; top: 310px; width: 220px; height: 54px; font: 700 32px/54px "PingFang SC", "Microsoft YaHei", sans-serif; }
+.srsl-product-face > .srsl-add { left: 255px; top: 338px; width: 72px; height: 72px; }
+.srsl-product-face > .srsl-add img { left: 18px; top: 18px; width: 36px; height: 36px; }
+.srsl-detail-name { top: 29px; left: 31px; width: 273px; height: 48px; font: 700 32px/48px "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+.srsl-detail-description { top: 96px; height: 220px; overflow: hidden; padding: 0 4px; color: #3b4b42; font: 24px/1.48 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: left; }
 .srsl-detail-description p { margin: 0 0 8px; }
 .srsl-detail-description p:last-child { margin-bottom: 0; }
 .srsl-detail-description b { color: #9e7650; font-weight: 600; }
