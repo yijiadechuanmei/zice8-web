@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { DeleteOutlined, DownloadOutlined, SyncOutlined } from '@ant-design/icons'
+import { DeleteOutlined, DownloadOutlined, SwapOutlined, SyncOutlined } from '@ant-design/icons'
 import { createPortal } from 'react-dom'
 import { QRCodeCanvas } from 'qrcode.react'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
@@ -287,7 +287,6 @@ function Home({ onStart }) {
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
       <img className="srsl-home-background" alt="" src={silkRoadAssets.homeBackground} style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }} />
       <img className="srsl-home-title" alt="" src={silkRoadAssets.homeTitle} style={{ position: 'absolute', width: 193, height: 567, left: 277, top: 114 }} />
-      <img className="srsl-home-illustration" alt="" src={silkRoadAssets.homeIllustration} style={{ position: 'absolute', width: 295, height: 595, left: 204, top: 87 }} />
       <img className="srsl-home-ribbon" alt="" src={silkRoadAssets.homeRibbon} style={{ position: 'absolute', width: 595, height: 25, left: 78, top: 1289 }} />
       <button className="srsl-image-button srsl-home-start" type="button" aria-label="开始集宝" onClick={onStart} style={{ position: 'absolute', width: 523, height: 145, left: 113, top: 1121 }}><img alt="开始集宝" src={silkRoadAssets.homeStart} /></button>
     </div>
@@ -348,7 +347,7 @@ function ProductCard({ product, selected, onToggle }) {
     <div className="srsl-product-face">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
       {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
-        <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
+        {selected ? <img alt="" src={silkRoadAssets.minusIcon} /> : <SwapOutlined className="srsl-flip-icon" aria-hidden="true" />}
       </button>}
       <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 22 }} />
       <span className="srsl-product-name">{product.name}</span>
@@ -364,7 +363,7 @@ function ProductCard({ product, selected, onToggle }) {
         <p><b>记载：</b>{product.record}</p>
       </div>
       {flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
-        <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
+        {selected ? <img alt="" src={silkRoadAssets.minusIcon} /> : <SwapOutlined className="srsl-flip-icon" aria-hidden="true" />}
       </button>}
     </div>
   </div>
