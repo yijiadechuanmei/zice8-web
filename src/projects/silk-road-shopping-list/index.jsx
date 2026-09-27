@@ -14,7 +14,7 @@ import './styles.css'
 const DESIGN_WIDTH = 750
 const PRODUCT_LIST_BOTTOM_GUTTER = 150
 const PRODUCT_CARD_HEIGHT = 340
-const POSTER_FIELD_OFFSET = { x: -10, y: -10 }
+const POSTER_FIELD_OFFSET = { x: -4, y: -21 }
 
 function getShoppingScore(quantity) {
   const count = Math.min(Math.max(quantity, 0), 28)
