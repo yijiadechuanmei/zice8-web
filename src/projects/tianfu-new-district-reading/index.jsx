@@ -21,6 +21,10 @@ const TIANFU_PARK = {
 但天府公园的精彩远不止于此。这里是300多种鸟类的秘密基地。鸳鸯在湖面悠闲地秀恩爱，雀鹰在头顶盘旋巡视，白肩雕偶尔来串门。观鸟爱好者在这里记录到的鸟种多达46种，从赤膀鸭到红嘴蓝鹊，从翠鸟到八哥，每一种都有自己独特的“性格”。
 
 50种乔木加60种彩叶树，一年四季轮番换装，逛一次根本不够。脚下踩的透水砖也不是普通砖。这是“海绵城市”的巧思——雨水落下来直接被“喝掉”，经过滤净化后还能再利用。公园的道路和广场全部采用透水铺装，下沉式绿地和雨水花园负责收集、净化地表径流，让整座公园像一块巨大的海绵，会呼吸、会蓄水。逛一次天府公园，你等于同时上了一堂鸟类观察课、植物认知课和生态工程课。`,
+  books: [
+    { title: '《小亮老师的博物课》' },
+    { title: '《虫子旁》' },
+  ],
 }
 
 const PAGES = [
@@ -60,7 +64,9 @@ function DetailLayout() {
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{TIANFU_PARK.introduction}</div>
     <div className="tianfu-detail-title">{TIANFU_PARK.name}</div>
-    <div className="tianfu-detail-recommendation"><div className="tianfu-detail-recommendation-row"><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{TIANFU_PARK.name}</div></div></div>
+    <div className="tianfu-detail-recommendation" style={{ height: `${TIANFU_PARK.books.length * 100 / 16.24}%` }}>
+      {TIANFU_PARK.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / TIANFU_PARK.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{book.title}</div></div>)}
+    </div>
   </>
 }
 
