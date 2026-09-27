@@ -76,12 +76,12 @@
 .srsl-card-detail-hint { height: 46px; color: #7f6249; font: 700 34px/46px "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 3px; text-shadow: 0 1px 0 rgba(255, 247, 232, .78); }
 .srsl-product-grid { grid-auto-rows: 420px; }
 .srsl-product-card { height: 420px; }
-.srsl-product-name { left: 38px; top: 310px; width: 220px; height: 54px; font: 700 32px/54px "PingFang SC", "Microsoft YaHei", sans-serif; }
+.srsl-product-name { left: 15px; top: 282px; width: 307px; height: 44px; overflow: hidden; font: 700 28px/44px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 .srsl-product-face > .srsl-add { left: 255px; top: 338px; width: 72px; height: 72px; }
 .srsl-product-face > .srsl-add img { left: 18px; top: 18px; width: 36px; height: 36px; }
-.srsl-detail-name { top: 29px; left: 31px; width: 273px; height: 48px; font: 700 32px/48px "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
-.srsl-detail-description { top: 96px; height: 220px; overflow: hidden; padding: 0 4px; color: #3b4b42; font: 24px/1.48 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: left; }
-.srsl-detail-description p { margin: 0 0 8px; }
+.srsl-detail-name { top: 29px; left: 16px; width: 305px; height: 44px; overflow: hidden; font: 700 28px/44px "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.srsl-detail-description { top: 90px; left: 26px; width: 285px; height: 238px; overflow: hidden; padding: 0; color: #3b4b42; font: 18px/1.35 "PingFang SC", "Microsoft YaHei", sans-serif; text-align: left; }
+.srsl-detail-description p { margin: 0 0 4px; }
 .srsl-detail-description p:last-child { margin-bottom: 0; }
 .srsl-detail-description b { color: #9e7650; font-weight: 600; }
 .srsl-video-progress { pointer-events: auto; touch-action: none; cursor: grab; }
