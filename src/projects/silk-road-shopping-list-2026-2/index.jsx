@@ -13,7 +13,7 @@ import './styles.css'
 
 const DESIGN_WIDTH = 750
 const PRODUCT_LIST_BOTTOM_GUTTER = 150
-const PRODUCT_CARD_HEIGHT = 420
+const PRODUCT_CARD_HEIGHT = 530
 
 function getShoppingScore(quantity) {
   const count = Math.min(Math.max(quantity, 0), 28)
@@ -428,7 +428,7 @@ function ProductCard({ product, selected, onToggle }) {
       {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
         <img alt="" src={selected ? silkRoadAssets.minusIcon : silkRoadAssets.plusIcon} />
       </button>}
-      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 156, height: 221, left: 90, top: 24 }} />
+      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 180, height: 255, left: 78, top: 28 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
     <div className="srsl-product-face srsl-product-detail">
