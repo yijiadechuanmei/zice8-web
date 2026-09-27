@@ -34,6 +34,15 @@ function fitPosterText(context, text, maxWidth) {
   return `${value}…`
 }
 
+function drawPosterText(context, text, box, { font, color, align = 'left', weight = '' } = {}) {
+  context.font = `${weight ? `${weight} ` : ''}${font}`
+  context.fillStyle = color
+  context.textAlign = align
+  context.textBaseline = 'middle'
+  const x = align === 'center' ? box.left + box.width / 2 : align === 'right' ? box.left + box.width : box.left
+  context.fillText(fitPosterText(context, text, box.width), x, box.top + box.height / 2)
+}
+
 function drawPosterLayer(context, image, left, top, width, height, options = {}) {
   const { sourceTop = 0, sourceHeight = image.height, fadeTop = 0 } = options
   if (!fadeTop) {
@@ -448,19 +457,22 @@ function Poster({ products, profile, onBack, onReselect }) {
       context.drawImage(avatar, 74, 517, 106, 106)
       context.restore()
     }
-    context.fillStyle = '#3b4b42'
-    context.font = 'bold 24px PingFang SC, Microsoft YaHei, sans-serif'
-    context.textAlign = 'left'
-    context.textBaseline = 'middle'
-    context.fillText(fitPosterText(context, profile.nickname || '丝路旅人', 203), 206, 543)
-    context.fillStyle = '#f3e2d3'
-    context.font = '22px PingFang SC, Microsoft YaHei, sans-serif'
-    context.textAlign = 'center'
-    context.fillText(String(products.length), 563, 494)
-    context.fillStyle = '#000'
-    context.font = 'bold 53px Arial, sans-serif'
-    context.textAlign = 'right'
-    context.fillText(String(score), 583, 553)
+    drawPosterText(context, profile.nickname || '丝路旅人', { left: 206, top: 520, width: 203, height: 46 }, {
+      font: '24px PingFang SC, Microsoft YaHei, sans-serif',
+      color: '#3b4b42',
+      weight: 'bold',
+    })
+    drawPosterText(context, String(products.length), { left: 536, top: 475, width: 55, height: 38 }, {
+      font: '22px PingFang SC, Microsoft YaHei, sans-serif',
+      color: '#f3e2d3',
+      align: 'center',
+    })
+    drawPosterText(context, String(score), { left: 464, top: 521, width: 119, height: 64 }, {
+      font: '53px Arial, sans-serif',
+      color: '#000',
+      align: 'right',
+      weight: 'bold',
+    })
     context.save()
     context.shadowColor = 'transparent'
     context.shadowBlur = 0
@@ -484,18 +496,20 @@ function Poster({ products, profile, onBack, onReselect }) {
       const top = 760 + row * 213
       context.drawImage(item, left, top, 171, 213)
       context.drawImage(productImages[index], left + 14, top - 4, 127, 180)
-      context.fillStyle = '#3b4b42'
-      context.font = '26px PingFang SC, Microsoft YaHei, sans-serif'
-      context.textAlign = 'center'
-      context.textBaseline = 'middle'
-      context.fillText(fitPosterText(context, product.name, 171), left + 85.5, top + 173)
       context.fillStyle = '#866548'
       context.beginPath()
       context.arc(left + 20, top + 20, 20, 0, Math.PI * 2)
       context.fill()
-      context.fillStyle = '#f3e2d3'
-      context.font = '24px PingFang SC, Microsoft YaHei, sans-serif'
-      context.fillText(String(index + 1), left + 20, top + 20)
+      drawPosterText(context, product.name, { left, top: top + 150, width: 171, height: 46 }, {
+        font: '26px PingFang SC, Microsoft YaHei, sans-serif',
+        color: '#3b4b42',
+        align: 'center',
+      })
+      drawPosterText(context, String(index + 1), { left, top, width: 40, height: 40 }, {
+        font: '24px PingFang SC, Microsoft YaHei, sans-serif',
+        color: '#f3e2d3',
+        align: 'center',
+      })
     })
     context.drawImage(label, 200.5, 699, 349, 49)
     drawPosterLayer(context, footer, 0, footerTop, 750, 403, { fadeTop: 70 })
