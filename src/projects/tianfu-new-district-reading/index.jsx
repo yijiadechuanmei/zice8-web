@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { request } from '../../shared/api/request'
 import './style.css'
 
 const ACTIVITY_TYPE = 'tianfu_new_district_reading_20260927'
@@ -143,15 +144,41 @@ function BookReasonLayout({ book }) {
 
 export default function TianfuNewDistrictReadingProject() {
   const [stage, setStage] = useState('home')
+  const [districtReadingStage, setDistrictReadingStage] = useState(1)
   const [selectedBook, setSelectedBook] = useState(TIANFU_PARK.books[0])
   const [selectedPoint, setSelectedPoint] = useState(TIANFU_PARK)
+
+  useEffect(() => {
+    let active = true
+    request(`/activities/${ACTIVITY_KEY}/public-config`, { skipAuth: true })
+      .then((config) => {
+        if (!active) return
+        const value = Number(config?.mobileConfig?.districtReadingStage)
+        setDistrictReadingStage(Number.isInteger(value) && value >= 1 && value <= 3 ? value : 1)
+      })
+      .catch(() => {
+        // Keep the first phase closed by default when public config cannot be read.
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
   const openPoint = (point) => {
     setSelectedPoint(point)
     setSelectedBook(point.books[0])
     setStage('detail')
   }
   if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
-  if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[644, 1024].map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[{ label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') }, { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') }]} />
+  if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[
+    districtReadingStage < 2 ? 644 : null,
+    districtReadingStage < 3 ? 1024 : null,
+  ].filter((top) => top !== null).map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[
+    { label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') },
+    { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') },
+    ...(districtReadingStage >= 2 ? [{ label: '进入兴隆湖', left: 21, top: 657, width: 727, height: 331, onClick: () => setStage('xinglong-lake') }] : []),
+    ...(districtReadingStage >= 3 ? [{ label: '进入海创园', left: 21, top: 1038, width: 727, height: 341, onClick: () => setStage('haichuang-park') }] : []),
+  ]} />
   if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[
     { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '查看广汇美术馆详情', left: 482, top: 236, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[4]) },
@@ -161,6 +188,8 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看天府新区国际会议中心详情', left: 165, top: 1040, width: 316, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
     { label: '查看西博城详情', left: 433, top: 1222, width: 151, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
   ]} />
+  if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[{ label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') }]} />
+  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }]} />
   if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage('map') }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
   return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }

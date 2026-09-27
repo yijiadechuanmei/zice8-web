@@ -70,6 +70,17 @@ export function updateActivityBgmConfig(activityKey, payload) {
   })
 }
 
+export function getTianfuNewDistrictReadingStage(activityKey) {
+  return adminRequest(`/admin/activities/${activityKey}/tianfu-new-district-reading/stage`)
+}
+
+export function updateTianfuNewDistrictReadingStage(activityKey, currentStage) {
+  return adminRequest(`/admin/activities/${activityKey}/tianfu-new-district-reading/stage`, {
+    method: 'PUT',
+    body: JSON.stringify({ currentStage }),
+  })
+}
+
 export function getNanhaiChallengePrizes(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/nanhai-inspection-challenge/prizes`)
 }

@@ -15,6 +15,7 @@ import {
   getRiderSafetySurveySettings,
   getNanhaiChallengeRegionAccessExemptions,
   getNanshaOpenMicConfig,
+  getTianfuNewDistrictReadingStage,
   getSongWishLotteryResultConfig,
   manualDrawSongWishLottery,
   revokeSongWishLotteryDraw,
@@ -31,6 +32,7 @@ import {
   updateNanhaiChallengeDrawManualControl,
   updateNanhaiChallengeRegionAccessExemption,
   updateNanshaOpenMicConfig,
+  updateTianfuNewDistrictReadingStage,
   updateRiderSafetySurveyMode,
 } from '../api'
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
@@ -98,6 +100,8 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaResetting, setNanshaResetting] = useState(false)
   const [nanshaDeleteEntryId, setNanshaDeleteEntryId] = useState('')
   const [nanshaDeletingEntry, setNanshaDeletingEntry] = useState(false)
+  const [tianfuReadingStage, setTianfuReadingStage] = useState(1)
+  const [tianfuReadingStageSaving, setTianfuReadingStageSaving] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
   const [xiangyuClearScope, setXiangyuClearScope] = useState('user')
   const [xiangyuUserId, setXiangyuUserId] = useState('')
@@ -236,6 +240,16 @@ export default function ActivityConfigPage({ activity }) {
         .catch((err) => { if (alive) setError(err.message || '南沙活动阶段配置加载失败') })
     }
 
+    if (activity.type === 'tianfu_new_district_reading_20260927') {
+      getTianfuNewDistrictReadingStage(activity.activityKey)
+        .then((data) => {
+          if (alive) setTianfuReadingStage(Number(data?.currentStage) || 1)
+        })
+        .catch((err) => { if (alive) setError(err.message || '趣阅天府阶段配置加载失败') })
+    } else {
+      setTianfuReadingStage(1)
+    }
+
     return () => {
       alive = false
     }
@@ -286,6 +300,22 @@ export default function ActivityConfigPage({ activity }) {
       setError(err.message || '南沙活动配置保存失败')
     } finally {
       setNanshaConfigSaving(false)
+    }
+  }
+
+  async function handleSaveTianfuReadingStage() {
+    setTianfuReadingStageSaving(true)
+    setError('')
+    try {
+      const data = await updateTianfuNewDistrictReadingStage(activity.activityKey, tianfuReadingStage)
+      setTianfuReadingStage(Number(data?.currentStage) || 1)
+      message.success('趣阅天府开放阶段已保存')
+    } catch (err) {
+      const text = err.message || '趣阅天府阶段配置保存失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setTianfuReadingStageSaving(false)
     }
   }
 
@@ -941,6 +971,38 @@ export default function ActivityConfigPage({ activity }) {
 
         {activity.type === 'lvyuan_consumer_game_collection' ? (
           <LvyuanDataClearPanel activityKey={activity.activityKey} />
+        ) : null}
+
+        {activity.type === 'tianfu_new_district_reading_20260927' ? (
+          <Card
+            size="small"
+            title="阶段设置"
+            extra={<Button type="primary" loading={tianfuReadingStageSaving} onClick={handleSaveTianfuReadingStage}>保存阶段设置</Button>}
+          >
+            <Space direction="vertical" size={14} style={{ width: '100%' }}>
+              <Alert
+                type="info"
+                showIcon
+                message="阶段按顺序开放区域"
+                description="第一阶段开放天府公园；第二阶段在保留天府公园的基础上解锁兴隆湖；第三阶段开放天府公园、兴隆湖和海创园。"
+              />
+              <label>
+                <Text strong>当前开放阶段</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Select
+                    style={{ width: 310 }}
+                    value={tianfuReadingStage}
+                    options={[
+                      { label: '第一阶段：开放天府公园', value: 1 },
+                      { label: '第二阶段：解锁兴隆湖', value: 2 },
+                      { label: '第三阶段：解锁海创园', value: 3 },
+                    ]}
+                    onChange={(value) => setTianfuReadingStage(Number(value))}
+                  />
+                </div>
+              </label>
+            </Space>
+          </Card>
         ) : null}
 
         {activity.type === 'nansha_open_mic' ? (
