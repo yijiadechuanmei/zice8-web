@@ -129,7 +129,7 @@ function DetailLayout({ point }) {
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
     <div className="tianfu-detail-recommendation" style={{ height: `${point.books.length * 100 / 16.24}%` }}>
-      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div>{book.title}</div></div>)}
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className={`tianfu-detail-recommendation-title${book.title.length > 12 ? ' tianfu-detail-recommendation-title-long' : ''}`}>{book.title}</div></div>)}
     </div>
   </>
 }
