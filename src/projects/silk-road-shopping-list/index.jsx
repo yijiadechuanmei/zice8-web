@@ -463,12 +463,12 @@ function Poster({ products, profile, onBack, onReselect }) {
       color: '#3b4b42',
       weight: 'bold',
     })
-    drawPosterText(context, String(products.length), { left: 536 + POSTER_FIELD_OFFSET.x, top: 475 + POSTER_FIELD_OFFSET.y, width: 55, height: 38 }, {
+    drawPosterText(context, String(products.length), { left: 520, top: 457, width: 55, height: 38 }, {
       font: '22px PingFang SC, Microsoft YaHei, sans-serif',
       color: '#f3e2d3',
       align: 'center',
     })
-    drawPosterText(context, String(score), { left: 464 + POSTER_FIELD_OFFSET.x, top: 521 + POSTER_FIELD_OFFSET.y, width: 119, height: 64 }, {
+    drawPosterText(context, String(score), { left: 450, top: 500, width: 119, height: 64 }, {
       font: '53px Arial, sans-serif',
       color: '#000',
       align: 'right',
@@ -550,8 +550,8 @@ function Poster({ products, profile, onBack, onReselect }) {
     <button className="srsl-back-hitbox" type="button" aria-label="返回购物车" onClick={onBack} />
     <img className="srsl-avatar" alt="" src={profile.avatar || undefined} referrerPolicy="no-referrer" style={{ position: 'absolute', width: 106, height: 106, left: 74 + POSTER_FIELD_OFFSET.x, top: 517 + POSTER_FIELD_OFFSET.y }} />
     <span className="srsl-nickname" style={{ left: 206 + POSTER_FIELD_OFFSET.x, top: 520 + POSTER_FIELD_OFFSET.y, width: 203, height: 46 }}><span className="srsl-text-inner">{profile.nickname || '丝路旅人'}</span></span>
-    <span className="srsl-poster-selected" style={{ left: 536 + POSTER_FIELD_OFFSET.x, top: 475 + POSTER_FIELD_OFFSET.y, width: 55, height: 38 }}><span className="srsl-text-inner">{products.length}</span></span>
-    <span className="srsl-poster-score" style={{ left: 464 + POSTER_FIELD_OFFSET.x, top: 521 + POSTER_FIELD_OFFSET.y, width: 119, height: 64 }}><span className="srsl-text-inner">{score}</span></span>
+    <span className="srsl-poster-selected" style={{ left: 520, top: 457, width: 55, height: 38 }}><span className="srsl-text-inner">{products.length}</span></span>
+    <span className="srsl-poster-score" style={{ left: 450, top: 500, width: 119, height: 64 }}><span className="srsl-text-inner">{score}</span></span>
     <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
       <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
       <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
