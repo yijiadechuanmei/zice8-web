@@ -1,9 +1,11 @@
 import posterCheck from './assets/poster/final/check.svg'
 
 export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE = 'silk_road_shopping_list'
-export const SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY = 'millennium_silk_road_shopping_list_2026'
+export const SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY = 'millennium_silk_road_shopping_list_2026'
 
-export const ASSET_ROOT = `https://assets.zice8.com/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE}/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY}`
+// All Silk Road shopping-list activity copies intentionally share this source
+// directory. The current route's activity key is used for API/auth/analytics.
+export const ASSET_ROOT = `https://assets.zice8.com/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE}/${SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY}`
 const posterProductImages = import.meta.glob('./assets/poster/products/*.png', { eager: true, query: '?url', import: 'default' })
 
 export const silkRoadAssets = {

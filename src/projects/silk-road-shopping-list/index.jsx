@@ -8,7 +8,7 @@ import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
 import { getCurrentUser, getPublicConfig } from './api'
-import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, silkRoadAssets } from './config'
+import { SILK_ROAD_PRODUCTS, SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY, silkRoadAssets } from './config'
 import './styles.css'
 
 const DESIGN_WIDTH = 750
@@ -648,7 +648,8 @@ function Poster({ products, profile, onBack, onReselect }) {
   </Stage>
 }
 
-export default function SilkRoadShoppingList() {
+export default function SilkRoadShoppingList({ routeParams }) {
+  const activityKey = routeParams?.activityKey || SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY
   const [publicConfig, setPublicConfig] = useState(null)
   const [page, setPage] = useState('home')
   const [selectedIds, setSelectedIds] = useState([])
@@ -659,25 +660,25 @@ export default function SilkRoadShoppingList() {
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
   const bgmConfig = useMemo(() => publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {}, [publicConfig])
-  const { authReady, reauth } = useWechatAuth(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, authConfig)
-  useWechatShare(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, publicConfig)
+  const { authReady, reauth } = useWechatAuth(activityKey, authConfig)
+  useWechatShare(activityKey, publicConfig)
 
   useEffect(() => {
-    trackPageView(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY, '/silk-road-shopping-list', {
+    trackPageView(activityKey, '/silk-road-shopping-list', {
       activityType: 'silk_road_shopping_list',
     })
-  }, [])
+  }, [activityKey])
 
   useEffect(() => { localStorage.removeItem('silk-road-shopping-list-cart') }, [])
   useEffect(() => {
     let active = true
-    getPublicConfig(SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY).then((config) => {
+    getPublicConfig(activityKey).then((config) => {
       if (active) setPublicConfig(config || {})
     }).catch(() => {
       if (active) setPublicConfig({})
     })
     return () => { active = false }
-  }, [])
+  }, [activityKey])
   useEffect(() => {
     if (!authReady) return undefined
     let active = true
@@ -720,7 +721,7 @@ export default function SilkRoadShoppingList() {
     setCartOpen(false)
     setPage('poster')
   }
-  const renderPage = (content) => <>{content}<ActivityBgmPlayer bgm={bgmConfig} activityKey={SILK_ROAD_SHOPPING_LIST_ACTIVITY_KEY} /></>
+  const renderPage = (content) => <>{content}<ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /></>
   if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return renderPage(<main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
     {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} />}
     {page === 'orientation' && <OrientationPrompt />}
