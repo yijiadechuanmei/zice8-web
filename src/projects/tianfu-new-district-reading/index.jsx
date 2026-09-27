@@ -92,6 +92,55 @@ const FIRST_PHASE_POINTS = [
   },
 ]
 
+const XINGLONG_LAKE_POINTS = [
+  {
+    id: 'xinglong-lake',
+    name: '兴隆湖',
+    introduction: '兴隆湖作为“天府绿肺”，不仅为市民提供了一个休闲娱乐的好去处，更是展示天府新区生态文明建设成果的重要窗口。2025年，天府新区兴隆湖湖滨场馆中心迎来成都世运会皮划艇马拉松、龙舟、跑酷、铁人两项比赛项目，场馆与公园城市自然环境交融，形成“近观竞技激情，远眺山水城景”的独特体验。兴隆湖的建设，不仅充分利用了原生自然地貌，雍水成湖，更是天府新区治水用水格局的典范。湖体工程、驳岸建设、岛屿湿地工程等生态环境建设的实施，使得兴隆湖的水质得到了显著改善，达到了地表水Ⅳ类标准，未来天府新区将努力打造更多人与自然和谐共生的生态空间。',
+    books: [
+      { title: '手绘水世界——关于水的博物课', reason: '2022年度“中国好书”（科普生活类）。人类跟水打了几十万年的交道。我们知其然：水是生命之源；但我们也不知其所以然：为什么万物不离水？该书把与水相关的自然、生态、资源、能源、利害、应用、文化等诸多离散的知识点像江河汇流一样融合在一起，并通过手绘图用透视的手法来剖解各种水工程构筑物的三维场景。全书分为34个知识单元、350个知识点，按照水与万物的关系、水之兴利的成就、水对文明的贡献三个层次，依序编排。旨在让大众，特别是青少年观察水世界、了解水文化、学习水知识、掌握水应用、探索水开发、加强水保护。水世界，美得只缺发现。\n\n兴隆湖的湖体工程、驳岸设计、水质净化，正是这本书里“水之兴利”的活教材——读完它，你再站在兴隆湖边，看到的就不只是水面，而是整个水循环与水利工程的奥秘。' },
+      { title: '认识中国湖', reason: '2023年度“中国好书”。该书系统解析中国湖泊的地质、生态与文化，将兴隆湖纳入“城市湖泊生态治理”框架，可帮助读者理解其作为“天府绿肺”的水质改善工程（如湖体工程、湿地生态修复）和生物多样性价值，凸显其在区域生态系统中的典范意义。兴隆湖作为“城市湖泊生态治理”的样本，正好能在这本书的框架里找到位置——从“滞洪洼地”到“草型清水态”的蜕变，就是书中所讲的人与湖泊关系的当代实践。读完它，你就能理解“天府绿肺”四个字背后的科学含义。' },
+    ],
+  },
+  {
+    id: 'tsinghua-sichuan-energy-internet-institute',
+    name: '清华四川能源互联网研究院',
+    introduction: '四川有一个特别“绿色”的秘密武器，那就是清华四川能源互联网研究院，是清洁低碳能源研究的“大本营”。它的技术项目入选了国际技术交易创新项目榜单，获得许多荣誉称号，推动着社会向更加环保、可持续的方向发展。',
+    books: [
+      { title: '范式变更：碳中和的长潮与大浪', reason: '清华四川能源互联网研究院作为“清洁低碳能源研究大本营”，其智能电网、储能技术、能源互联网等方向的科研布局，正是书中“能源互联网推动低碳技术商业化”论述的实践样本。\n\n《范式变更：碳中和的长潮与大浪》由2023中国全民阅读网“科普生活类好书推荐”：\n\n碳中和是人类历史上最伟大的自我革命，它有着人类理想旗帜巨大的感召力，也被国家、民族和市场间的竞争所驱动，以排山倒海的巨浪之姿，从历史的长河中走来，呼啸着奔向未来。面对碳中和的长潮与大浪，亟待重塑面向未来的思维范式。这是一个发展目标确定、但过程充满不确定性的宏观环境，给身处其间的人们带来了全新的挑战。\n\n《范式变更：碳中和的长潮与大浪》旨在解构碳中和为中国带来的范式变更，从政策动向、科技进展和市场趋势等三大维度，剖析能源、交通、城建、工业、农业和土地等影响中国实现碳中和目标的核心产业，再深入解析零碳金融、双碳科创和绿色消费等三大实现碳中和目标的驱动力，最后洞悉碳中和的国际合作与竞争是面向未来不可回避的重要变量。望通过阅读本书，读者能从中汲取营养以重塑面向碳中和未来的思维范式。' },
+      { title: '《像院士一样思考：100 位院士思维故事 100 例》', reason: '书中院士在天文、物理等领域的科研思维案例（如系统思维、实验设计），可对标点位“多单元协同观测”“科研平台搭建”的方法论，为科研人员提供跨学科思维借鉴，同时传递科学家精神。' },
+    ],
+  },
+  {
+    id: 'dongfang-electric-digital-technology',
+    name: '东方电气集团数字科技有限公司',
+    introduction: '“东方数科”在四川天府新区正式揭牌成立，标志着东方电气集团在“数字产业化、产业数字化”道路上迈出了关键一步。\n\n东方数科的核心业务是智能制造、数字化转型咨询、工业互联网、网络及信息安全。它的定位很独特——不是做产品，而是做“工业医生”，用大数据、云计算、AI赋能智能制造的每个环节，为离散型制造企业提供精准的“智改数转”个性化解决方案。\n\n东方数科已经为10多家企业打造了30余个数字化车间，其中2个获评国家级智能制造示范工厂。首条高端能源装备螺栓数字化生产线，实现从下料到入库全流程无人化，生产效率提升2倍，良品率接近100%，被央视《焦点访谈》报道。东方数科还作为主要编制单位，参与了中国电子技术标准化研究院牵头的《面向智能制造的工业大模型标准化研究报告》编制工作。',
+    books: [
+      { title: '给孩子讲大数据', reason: '东方数科的“工业医生”角色，本质上是用数据给工厂“看病”——从设备运行数据中发现隐患，从生产流程数据中优化效率。\n\n大数据究竟是什么？它和我们熟知的数字、数学又有着什么样的联系？《给孩子讲大数据》入选向全国青少年推荐百种优秀出版物、文津图书奖推荐图书，本书回溯数的发展、数据在中外历史重大事件的全方位应用，为孩子打开大数据之门，培养孩子们的“数商”和数据思维能力。\n\n这本书用故事和漫画讲大数据思维，帮你理解东方数科如何用数据“看见”工厂里看不见的问题。' },
+      { title: '给孩子讲人工智能', reason: '东方数科的核心业务包含“人工智能基础软件开发”和“工业互联网数据服务”，他们做的“智改数转”本质上就是让AI走进工厂。\n\n人工智能正在撬动中国的创新，成为全领域、各行业关注的热点。《给孩子讲人工智能》入选向全国青少年推荐百种优秀出版物、文津图书奖推荐图书，用故事和漫画把人工智能的“前世今生”讲得通俗易懂，堪称“人工智能的启蒙入门读物”。\n\n这本书帮青少年理解东方数科的技术人员每天在“折腾”的到底是什么——从图灵测试到深度学习，从人脸识别到工业智能，AI的底层逻辑就藏在这些故事里。' },
+    ],
+  },
+  {
+    id: 'innovation-ecology-island',
+    name: '科创生态岛',
+    introduction: '成都科创生态岛是一座综合性的创新转化聚集区和科技成果转化生态基地。2024年，中西部地区首个人形机器人新型研发机构——成都人形机器人创新中心有限公司在这里正式落地。与此同时，新一代人造太阳“中国环流三号”的科研突破、成都“大脑”助力高海拔宇宙线观测站等，都展现了成都科技创新的强劲实力。这里就像一个“未来科技试验田”，你永远不知道下一个转角会遇到什么黑科技。',
+    books: [
+      { title: '元宇宙', reason: '探讨虚拟世界与现实科技的融合趋势，生态岛在“数字孪生城市”“智能建造”等领域的实践可与此书形成场景联动，其“科创 + 生态”的复合定位与书中“技术重塑空间”的理念相通，适合作为理解生态岛“未来科技试验田”角色的前瞻读物。中宣全民阅读科普生活类好书推荐。' },
+      { title: '孩子看得懂的前沿科学漫画', reason: '入选中宣部出版局联合全国少工委办公室，会同中国出版协会少年儿童读物工作委员会、中国编辑学会少年儿童读物专业委员会、中国新闻出版广电报社、中国少年报社评选“向全国青少年推荐百种优秀出版物”名单。\n\n本系列用漫画的形式，将目前正在初步应用及未来10年将有巨大应用价值的尖端技术，包括量子物理、生物工程、通讯、宇航、新材料、神经科学、能源、娱乐、制造业、深空探测等，将其拟人为漫画人物，用孩子们喜欢的画风和简单的语言形式，科普10种尖端科学技术，让孩子们对尖端科技看得懂，有兴趣，感受尖端科技给生活带来的便利和无限可能。\n\n科创生态岛的“人形机器人创新中心”正在攻关的机器人运动原理、算法逻辑，正好是这本书里用漫画讲清楚的东西——机器人怎么动、算法怎么决策，看完漫画你就能理解科创生态岛上那些机器人在“想”什么。' },
+      { title: '触手可及的未来科技：科学家与科幻作家的跨时空碰撞', reason: '入围2024年度“中国好书”，邀请11位一线科学家围绕“科幻作品中的十大未来科技”进行解读。太空电梯、脑机接口等科幻作品中出现的科技想象，由从事相关研究的科学家介绍科学背景、实现的可能性、目前存在的问题和困难等，探讨了这些未来科技从虚构走向现实的发展路径——这些科幻里的场景，正是科创生态岛正在攻关的方向。科创生态岛的存在本身，就是“科幻照进现实”的最佳注脚。' },
+    ],
+  },
+  {
+    id: 'tianqi-lithium',
+    name: '天齐锂业',
+    introduction: '天齐锂业是全球领先的以锂为核心的新能源材料企业，2023年正式入驻成都科学城兴隆湖畔。它的业务覆盖锂产业链的关键阶段——从硬岩型锂矿资源的开发，到锂精矿加工销售，再到锂化工产品的生产销售，为电动汽车和储能产业的锂离子电池技术提供材料支撑。换句话说，你手机里的电池、电动车里的电池，很可能就有天齐锂业的一份贡献。兴隆湖新总部大楼旁，还开了一座全球首个关于锂的科学馆，从锂的起源到发现，再到应用，全流程展示锂如何走进我们的生活。',
+    books: [
+      { title: '《院士解锁中国科技·藏起来的“能源之王”》', reason: '“院士解锁中国科技”丛书入选2023年度“中国好书”（科普生活类）。这套丛书由相关领域院士主笔，围绕信息、环境、化学、农业、矿产、医药卫生等16个领域，以青少年感兴趣的问题导入，生动讲述了新时代科技发展成就的故事，阐释了科技对于国家未来发展的贡献和意义。\n\n该书为丛书分册，由中国科学院院士金之钧主笔。这本书用17个科学专题讲解石油、天然气的基本知识，也涉及能源转型的思考。天齐锂业所在的锂电产业，正是“能源之王”从化石能源向新能源过渡的关键一环——读懂能源的过去，才能理解锂的未来，也才能理解天齐锂业为什么要在兴隆湖畔建一座锂的科学馆。' },
+      { title: '《换道赛车：新能源汽车的中国道路》', reason: '天齐锂业是这条产业链上最上游的材料供应商——没有锂，就没有新能源汽车的“心脏”。读完这本书，你就能理解：为什么一块来自矿石的锂，能驱动整个汽车产业的“换道”，能更理解兴隆湖畔的天齐锂业在全球锂产业链中的位置。\n\n聚焦新能源汽车与能源供给体系的协同发展，研究院在智能电网、储能技术等领域的成果（如车网互动、分布式能源）可为此书提供技术注解，书中“能源—交通一体化”理念与研究院推动“绿色能源 + 可持续交通”的应用场景形成呼应，展现科技赋能产业升级的路径。' },
+    ],
+  },
+]
+
 const PAGES = [
   [
     layer(0, 0, 750, 1624, '5bc9a404d437eedc06fae329a77e4908_154473_750_1624.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(38, 103, 522, 125, '76f7806ab140036f786b40abaeb79d31_21731_522_125.png'), layer(658, 117, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(21, 283, 727, 347, '1c9e523743adb330ed510ce65fcb2554_314008_727_347.png'), layer(21, 657, 727, 331, '3b603cd853e4d82ffa66259c006e99bc_345886_727_331.png'), layer(21, 1038, 727, 341, '0aa3ecc6630ef8a990e1564db4665879_355213_727_341.png'),
@@ -100,7 +149,7 @@ const PAGES = [
     layer(0, 0, 750, 1624, 'c7fd46c0385aeb0c1e2c2b36894a7b31_559897_750_1624.png'), layer(97, 1097, 460, 222, '4c5347d5245a379bf7fc5a9c17544cdd_163657_460_222.png'), layer(81, 1186, 684, 344, 'e943c9a372c8c50386bc2da2dbdfbc5b_141303_684_344.png'), layer(393, 549, 322, 211, '3e396b89dc526f1776ee2c0e2b2a78b7_104251_322_211.png'), layer(46, 829, 309, 192, '4af2415287a33b12a7f48e466c9ee4cd_166574_309_192.png'), layer(315, 280, 424, 194, '5d839151737647875317445f6bc219b3_121632_424_194.png'), layer(482, 236, 208, 55, '5afa29c218816d64f78f4581a9833024_19225_208_55.png'), layer(162, 716, 245, 55, 'f8d3ebbf5c47dd4c7ae9aad2f071de57_23006_245_55.png'), layer(470, 484, 177, 55, 'a007faa6a727abaf2f1a67ab603c169a_17350_177_55.png'), layer(165, 1040, 316, 55, 'dcb97b1e9570c982d5dd8737ebbf2627_27821_316_55.png'), layer(433, 1222, 151, 55, '80bf77a7220bb1f618a0217c02829b10_15353_151_55.png'), layer(415, 470, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(433, 246, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(87, 725, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(593, 1205, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(117, 1013, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(34, 101, 611, 125, '85d549673ca39a3822ff551d043ac4d6_39591_611_125.png'), layer(658, 103, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(10, 504, 356, 160, '7635102ea5a3f71170e1ff561bd6d5e6_103517_356_160.png'), layer(81, 441, 208, 55, 'c1189bff2047246c067fcbd440c79688_16561_208_55.png'), layer(310, 468, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'),
   ],
   [
-    layer(0, 0, 750, 1624, 'bd6f8cf6b018119c581a33e2ddfa405e_480165_750_1624.png'), layer(490, 1211, 208, 55, '65525d3ddb01829b60950ec48ab5b6d1_19512_208_55.png'), layer(462, 845, 262, 87, 'dcee4dc4637c8a06027231ea9f4f6829_35366_262_87.png'), layer(404, 401, 316, 55, '559198fa328b24b32a13ec80159c8861_28896_316_55.png'), layer(41, 609, 368, 55, '78df47829ce0116ad6e35b21c7477e81_31215_368_55.png'), layer(61, 920, 151, 55, 'ea88b2a6854e54f5d1d55239c97b1d20_15860_151_55.png'), layer(179, 687, 430, 188, 'ac316f8f2bec35681bdc16d27bd32c3f_151024_430_188.png'), layer(84, 983, 545, 208, '681b18ed81a3b288457b96272fff06ee_253828_545_208.png'), layer(370, 142, 380, 243, '7e8322482a81f54c5d5cd48e78450395_202997_380_243.png'), layer(52, 462, 481, 128, '834fd170fa84f72cb51ff12cd2b49dcb_125274_481_128.png'), layer(58, 1194, 558, 297, 'df715a3bba1247fbf572537953363195_239631_558_297.png'), layer(276, 352, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(643, 777, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(552, 539, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(627, 1278, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(31, 1006, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(46, 101, 643, 129, '58da27f455702a97011d3fb45fb44065_42099_643_129.png'), layer(658, 163, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'),
+    layer(0, 0, 750, 1624, 'bd6f8cf6b018119c581a33e2ddfa405e_480165_750_1624.png'), layer(490, 1211, 208, 55, '65525d3ddb01829b60950ec48ab5b6d1_19512_208_55.png'), layer(404, 401, 316, 55, '559198fa328b24b32a13ec80159c8861_28896_316_55.png'), layer(61, 920, 151, 55, 'ea88b2a6854e54f5d1d55239c97b1d20_15860_151_55.png'), layer(84, 983, 545, 208, '681b18ed81a3b288457b96272fff06ee_253828_545_208.png'), layer(370, 142, 380, 243, '7e8322482a81f54c5d5cd48e78450395_202997_380_243.png'), layer(58, 1194, 558, 297, 'df715a3bba1247fbf572537953363195_239631_558_297.png'), layer(276, 352, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(643, 777, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(405, 532, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(627, 1278, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(31, 1006, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(46, 101, 643, 129, '58da27f455702a97011d3fb45fb44065_42099_643_129.png'), layer(658, 163, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(69, 427, 329, 197, '1b92140f5edb847c21ab6fbbbbd4306c_122134_329_197.png'), layer(475, 849, 262, 87, '69a622798c8b88be6975959874797982_29383_262_87.png'), layer(149, 635, 177, 55, 'c830a1974f8e9f00887c307f787cba84_15768_177_55.png'), layer(273, 650, 336, 188, '240f446e2d74f40823248f03ffebbf54_111985_336_188.png'),
   ],
   [
     layer(0, 0, 750, 1624, '8260eebc4870c55ff557286c7a24d6ab_545650_750_1624.png'), layer(384, 277, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(691, 827, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(148, 515, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(236, 1237, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(317, 1190, 509, 252, '81859d280394e5c9356b0faf13e8c52b_174873_509_252.png'), layer(13, 225, 380, 275, '42cc9916311d21fcebfa01113922b74a_161364_408_295.png'), layer(224, 717, 456, 226, '81b7d8b04df32d92f5e82fc02ca675aa_212440_456_226.png'), layer(208, 481, 479, 202, '2bad3e0bf6d853e2b6338f5ee908e918_179910_479_202.png'), layer(39, 1038, 467, 160, '59f3e30ace317bafc73c0961e18354b1_154445_467_160.png'), layer(83, 970, 208, 55, 'd005a8ee85521165efc5dcdc8f4df0dd_20393_208_55.png'), layer(515, 925, 204, 55, '9911d31db3e63d5de9dc39295abcc061_21002_204_55.png'), layer(98, 611, 254, 55, '1e59b9bf0a5b8661e3fb6729a5722b3b_23580_254_55.png'), layer(82, 1314, 282, 55, '13fe9d50d511cf74622460664113609e_25694_282_55.png'), layer(361, 381, 151, 55, '0b9d94728e17d21d9fdd8f4dd4af6214_15196_151_55.png'), layer(26, 101, 689, 130, '39e48ee8ed646f4316db23745ff61dbd_34049_689_130.png'), layer(658, 162, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'),
@@ -122,6 +171,12 @@ function Canvas({ layers, masks = [], actions = [], children }) {
   </div></main>
 }
 
+function recommendationTitleClass(title) {
+  if (title.length > 24) return 'tianfu-detail-recommendation-title tianfu-detail-recommendation-title-extra-long'
+  if (title.length > 12) return 'tianfu-detail-recommendation-title tianfu-detail-recommendation-title-long'
+  return 'tianfu-detail-recommendation-title'
+}
+
 function DetailLayout({ point }) {
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
@@ -130,7 +185,7 @@ function DetailLayout({ point }) {
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
     <div className="tianfu-detail-recommendation" style={{ height: `${point.books.length * 100 / 16.24}%` }}>
-      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className={`tianfu-detail-recommendation-title${book.title.length > 12 ? ' tianfu-detail-recommendation-title-long' : ''}`}>{book.title}</div></div>)}
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className={recommendationTitleClass(book.title)}>{book.title}</div></div>)}
     </div>
   </>
 }
@@ -147,6 +202,7 @@ export default function TianfuNewDistrictReadingProject() {
   const [districtReadingStage, setDistrictReadingStage] = useState(1)
   const [selectedBook, setSelectedBook] = useState(TIANFU_PARK.books[0])
   const [selectedPoint, setSelectedPoint] = useState(TIANFU_PARK)
+  const [pointMapStage, setPointMapStage] = useState('map')
 
   useEffect(() => {
     let active = true
@@ -164,9 +220,10 @@ export default function TianfuNewDistrictReadingProject() {
     }
   }, [])
 
-  const openPoint = (point) => {
+  const openPoint = (point, mapStage = 'map') => {
     setSelectedPoint(point)
     setSelectedBook(point.books[0])
+    setPointMapStage(mapStage)
     setStage('detail')
   }
   if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
@@ -188,8 +245,15 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看天府新区国际会议中心详情', left: 165, top: 1040, width: 316, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
     { label: '查看西博城详情', left: 433, top: 1222, width: 151, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
   ]} />
-  if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[{ label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') }]} />
+  if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[
+    { label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') },
+    { label: '查看清华四川能源互联网研究院详情', left: 404, top: 401, width: 316, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[1], 'xinglong-lake') },
+    { label: '查看天齐锂业详情', left: 149, top: 635, width: 177, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[4], 'xinglong-lake') },
+    { label: '查看东方电气集团数字科技有限公司详情', left: 475, top: 849, width: 262, height: 87, onClick: () => openPoint(XINGLONG_LAKE_POINTS[2], 'xinglong-lake') },
+    { label: '查看兴隆湖详情', left: 61, top: 920, width: 151, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[0], 'xinglong-lake') },
+    { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
+  ]} />
   if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }]} />
-  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage('map') }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
+  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
   return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }
