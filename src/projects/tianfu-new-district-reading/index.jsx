@@ -162,10 +162,14 @@ const PAGES = [
   ],
 ]
 
-function Canvas({ layers, masks = [], actions = [], children }) {
-  return <main className="tianfu-stage"><div className="tianfu-canvas">
-    {layers.map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
-    {masks.map((item) => <div className="tianfu-mask" key={item.top} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }}><img className="tianfu-mask-image" src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.imageLeft / item.width * 100}%`, top: `${item.imageTop / item.height * 100}%`, width: `${item.imageWidth / item.width * 100}%`, height: `${item.imageHeight / item.height * 100}%` }} /></div>)}
+function Canvas({ sceneKey, layers, masks = [], actions = [], children }) {
+  const animationKey = sceneKey || layers[0]?.name || 'detail'
+  return <main className="tianfu-stage"><div className="tianfu-canvas" key={animationKey}>
+    {layers.map((item, index) => {
+      const isMarker = item.name === '82374099863f590a3e891a161d45ac9d_7390_41_64.png'
+      return <img className={`tianfu-layer${isMarker ? ' tianfu-marker' : index > 0 ? ' tianfu-layer-enter' : ''}`} key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, ...(isMarker ? { '--tianfu-marker-delay': `${(index % 5) * 110}ms` } : { '--tianfu-enter-delay': `${Math.min(index, 8) * 45}ms` }) }} />
+    })}
+    {masks.map((item) => <div className="tianfu-mask tianfu-layer-enter" key={item.top} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, '--tianfu-enter-delay': '180ms' }}><img className="tianfu-mask-image" src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.imageLeft / item.width * 100}%`, top: `${item.imageTop / item.height * 100}%`, width: `${item.imageWidth / item.width * 100}%`, height: `${item.imageHeight / item.height * 100}%` }} /></div>)}
     {children}
     {actions.map((item) => <button className="tianfu-hit" key={item.label} type="button" onClick={item.onClick} aria-label={item.label} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
   </div></main>
@@ -257,6 +261,6 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
   ]} />
   if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }]} />
-  if (stage === 'detail') return <Canvas layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
-  return <Canvas layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
+  if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
+  return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }

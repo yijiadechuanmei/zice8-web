@@ -1,9 +1,12 @@
 .tianfu-stage { width: 100%; height: 100svh; overflow: hidden auto; }
-.tianfu-canvas { position: relative; width: min(750px, 100vw); height: auto; aspect-ratio: 750 / 1624; margin: 0 auto; }
+.tianfu-canvas { position: relative; width: min(750px, 100vw); height: auto; aspect-ratio: 750 / 1624; margin: 0 auto; transform-origin: 50% 50%; animation: tianfu-page-turn 440ms cubic-bezier(.2, .75, .2, 1) both; }
 .tianfu-layer { position: absolute; display: block; max-width: none; pointer-events: none; user-select: none; }
+.tianfu-layer-enter { opacity: 0; animation: tianfu-layer-enter 440ms cubic-bezier(.18, .8, .24, 1) var(--tianfu-enter-delay, 0ms) both; }
+.tianfu-marker { transform-origin: 50% 100%; opacity: 0; animation: tianfu-marker-enter 360ms cubic-bezier(.18, .9, .3, 1) var(--tianfu-marker-delay, 0ms) both, tianfu-marker-bounce 1500ms ease-in-out calc(var(--tianfu-marker-delay, 0ms) + 420ms) infinite; }
 .tianfu-mask { position: absolute; z-index: 1; overflow: visible; background-color: rgba(255, 255, 255, 0.8); }
 .tianfu-mask-image { position: absolute; display: block; max-width: none; pointer-events: none; user-select: none; }
-.tianfu-hit { position: absolute; z-index: 2; display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; }
+.tianfu-hit { position: absolute; z-index: 2; display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; transition: transform 150ms ease; }
+.tianfu-hit:active { transform: scale(.96); }
 .tianfu-hit:focus-visible { outline: 2px solid transparent; }
 .tianfu-detail-media { position: absolute; left: 10.133333%; top: 5.850985%; width: 103.6%; height: 28.509852%; border-radius: 4%; background-color: rgba(255, 255, 255, 0.57); overflow: visible; }
 .tianfu-detail-media-inner { position: absolute; left: 4.633204%; top: 4.967603%; width: 93.951094%; height: 91.792657%; border-radius: 4.11%; overflow: hidden; }
@@ -18,3 +21,8 @@
 .tianfu-detail-recommendation-title-extra-long { font-size: min(16px, 2.133333vw); letter-spacing: 0; }
 .tianfu-book-reason-title { position: absolute; left: 47.333333%; top: 5.850985%; width: 51.066667%; height: 5.049261%; display: flex; align-items: center; justify-content: center; color: rgb(96, 57, 42); font-size: min(34px, 4.533333vw); font-weight: 700; line-height: min(35px, 4.666667vw); text-align: center; white-space: pre-wrap; word-break: normal; filter: drop-shadow(rgb(255, 255, 255) 2px 2px 0); }
 .tianfu-book-reason-copy { position: absolute; left: 7.6%; top: 36.761084%; width: 85.066667%; height: 48.830049%; overflow: hidden auto; color: rgb(125, 65, 0); font-size: min(26px, 3.466667vw); line-height: normal; text-align: left; text-indent: 2em; white-space: pre-wrap; word-break: normal; }
+@keyframes tianfu-page-turn { from { opacity: 0; transform: perspective(1200px) rotateY(-4deg) scale(.985); } to { opacity: 1; transform: perspective(1200px) rotateY(0) scale(1); } }
+@keyframes tianfu-layer-enter { from { opacity: 0; transform: translateY(min(16px, 2.133333vw)) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes tianfu-marker-enter { from { opacity: 0; transform: translateY(min(18px, 2.4vw)) scale(.75); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes tianfu-marker-bounce { 0%, 100% { transform: translateY(0) scale(1); } 45% { transform: translateY(min(-12px, -1.6vw)) scale(1.05); } 65% { transform: translateY(0) scale(.96); } }
+@media (prefers-reduced-motion: reduce) { .tianfu-canvas, .tianfu-layer-enter, .tianfu-marker, .tianfu-hit { animation: none; transition: none; opacity: 1; transform: none; } }
