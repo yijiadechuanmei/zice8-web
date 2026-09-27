@@ -547,17 +547,17 @@ function Poster({ products, profile, onBack, onReselect }) {
   return <Stage height={height}>
     <img alt="" src={silkRoadAssets.posterHeader} style={{ position: 'absolute', width: 750, height: 769, left: 0, top: 0 }} />
     <button className="srsl-back-hitbox" type="button" aria-label="返回购物车" onClick={onBack} />
-    {profile.avatar && <img className="srsl-avatar" alt="" src={profile.avatar} referrerPolicy="no-referrer" style={{ position: 'absolute', width: 106, height: 106, left: 74, top: 517 }} />}
-    <span className="srsl-nickname" style={{ left: 206, top: 520, width: 203, height: 46 }}>{profile.nickname || '丝路旅人'}</span>
-    <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}>{products.length}</span>
-    <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}>{score}</span>
+    <img className="srsl-avatar" alt="" src={profile.avatar || undefined} referrerPolicy="no-referrer" style={{ position: 'absolute', width: 106, height: 106, left: 74, top: 517 }} />
+    <span className="srsl-nickname" style={{ left: 206, top: 520, width: 203, height: 46 }}><span className="srsl-text-inner">{profile.nickname || '丝路旅人'}</span></span>
+    <span className="srsl-poster-selected" style={{ left: 536, top: 475, width: 55, height: 38 }}><span className="srsl-text-inner">{products.length}</span></span>
+    <span className="srsl-poster-score" style={{ left: 464, top: 521, width: 119, height: 64 }}><span className="srsl-text-inner">{score}</span></span>
     <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
       <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
       <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
         <img alt="" src={silkRoadAssets.posterItem} />
         <img alt={product.name} src={product.image} />
-        <span className="srsl-poster-product-name">{product.name}</span>
-        <span className="srsl-poster-order">{index + 1}</span>
+        <span className="srsl-poster-product-name"><span className="srsl-text-inner">{product.name}</span></span>
+        <span className="srsl-poster-order"><span className="srsl-text-inner">{index + 1}</span></span>
       </div>)}</div>
     </div>
     <div className="srsl-footer" style={{ top: footerTop }}><img alt="" src={silkRoadAssets.posterFooter} /><div ref={qrRef} className="srsl-qr"><QRCodeCanvas value={window.location.href} size={106} includeMargin={false} /></div></div>
