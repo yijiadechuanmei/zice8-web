@@ -10,7 +10,7 @@ export const silkRoadAssets = {
   homeStart: `${ASSET_ROOT}/36192a094e9f264fcd5f851d0aa5bd56_155777_523_145.png`,
   homeRibbon: `${ASSET_ROOT}/0714c782d30d3b9ac865b6410c677092_52548_595_87.png`,
   orientationHint: `${ASSET_ROOT}/a5e362983f5c39c254091aaa60bb04f5_38541_333_78.png`,
-  video: `${ASSET_ROOT}/dd0988b6dee21c51137eaa48acc42725_25528934.mp4`,
+  video: `${ASSET_ROOT}/cb4ac0c98f0f40a73a272cec4803c20a_15396588.mp4`,
   cartHeader: `${ASSET_ROOT}/aefcddac0381854a76e5b5bb9a29860b_683544_750_546.png`,
   cartFloat: `${ASSET_ROOT}/260928-2.png`,
   productCard: `${ASSET_ROOT}/bb79dd2df956fdc0d91c34c988514a9b_142014_337_230.png`,
