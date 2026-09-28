@@ -229,7 +229,7 @@ function DetailLayout({ point, onSelectBook }) {
   const isScrollableBookList = point.books.length > visibleBookRows
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
-    {point.video && <div className="tianfu-detail-media"><video controls playsInline preload="metadata" src={asset(point.video)} /></div>}
+    {point.video && <div className="tianfu-detail-media"><div className="tianfu-detail-media-inner"><video controls playsInline preload="metadata" src={asset(point.video)} /></div></div>}
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
