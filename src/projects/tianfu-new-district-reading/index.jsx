@@ -13,6 +13,12 @@ const POINT_MAP_FOOTER = [
   layer(519, 1431, 177, 55, '70f171753e6a3aae7b57120228443265_17525_177_55.png'),
 ]
 
+const REVIEW_PAGE = [
+  layer(0, 0, 750, 1624, '5e6597570241374d6614ba5b63e7ea8e_87994_750_1624.png'),
+  layer(27, 115, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'),
+  layer(247, 105, 464, 151, 'f37931029340439d7a35fa3c95c48e40_16272_464_151.png'),
+]
+
 const HOME = [
   layer(0, 0, 750, 1624, '9e0698d039f852dcb71a782eba2609f4_1518088_750_1624.png'),
   layer(101, 237, 572, 257, '7035fb18d008055ad2b19625c9d44b11_71999_572_257.png'),
@@ -244,6 +250,10 @@ function DetailLayout({ point, onSelectBook }) {
   </>
 }
 
+function ReviewLayout() {
+  return <div style={{ position: 'absolute', left: `${25 / 7.5}%`, top: `${259 / 16.24}%`, width: `${698 / 7.5}%`, minWidth: `${698 / 7.5}%`, maxWidth: `${698 / 7.5}%`, height: `${1240 / 16.24}%`, minHeight: `${1240 / 16.24}%`, maxHeight: `${1240 / 16.24}%`, display: 'flex', flexDirection: 'column', flex: '1 0 0%', overflow: 'visible', backgroundColor: 'rgba(255, 255, 255, 0.8)', transformOrigin: '0% 0% 0px' }} />
+}
+
 function formatBookTitle(title) {
   const trimmedTitle = title.trim()
   return trimmedTitle.startsWith('《') && trimmedTitle.endsWith('》') ? trimmedTitle : `《${trimmedTitle}》`
@@ -324,6 +334,10 @@ export default function TianfuNewDistrictReadingProject() {
     setPointMapStage(mapStage)
     setStage('detail')
   }
+  const openReview = (mapStage) => {
+    setPointMapStage(mapStage)
+    setStage('review')
+  }
   if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
   if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[
     districtReadingStage < 2 ? 644 : null,
@@ -338,6 +352,7 @@ export default function TianfuNewDistrictReadingProject() {
   if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[
     { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') },
+    { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('map') },
     { label: '查看广汇美术馆详情', left: 482, top: 236, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[4]) },
     { label: '查看天府公园详情', left: 470, top: 484, width: 177, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[0]) },
     { label: '查看四川名人馆详情', left: 81, top: 441, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[2]) },
@@ -347,13 +362,15 @@ export default function TianfuNewDistrictReadingProject() {
   if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[
     { label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') },
+    { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('xinglong-lake') },
     { label: '查看清华四川能源互联网研究院详情', left: 404, top: 401, width: 316, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[1], 'xinglong-lake') },
     { label: '查看天齐锂业详情', left: 149, top: 635, width: 177, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[4], 'xinglong-lake') },
     { label: '查看东方电气集团数字科技有限公司详情', left: 475, top: 849, width: 262, height: 87, onClick: () => openPoint(XINGLONG_LAKE_POINTS[2], 'xinglong-lake') },
     { label: '查看兴隆湖详情', left: 61, top: 920, width: 151, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[0], 'xinglong-lake') },
     { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
   ]} />
-  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') }]} />
+  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') }, { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('haichuang-park') }]} />
+  if (stage === 'review') return <Canvas sceneKey={`review-${pointMapStage}`} layers={REVIEW_PAGE} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><ReviewLayout /></Canvas>
   if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
   return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} point={selectedPoint} /></Canvas>
 }
