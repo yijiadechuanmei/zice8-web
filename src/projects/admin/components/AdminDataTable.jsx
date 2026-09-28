@@ -162,8 +162,8 @@ export function renderAdminFieldValue(field, value) {
   if (key === 'isCorrect') return value ? <Tag color="green">正确</Tag> : <Tag color="red">错误</Tag>
   if (key === 'isTimeout') return value ? <Tag color="orange">是</Tag> : <Tag>否</Tag>
   if (type === 'boolean') return value ? <Tag color="green">是</Tag> : <Tag>否</Tag>
+  if (key === 'totalTimeMs' || key === 'timeMs' || key === 'averageTimeMs' || key === 'total_time') return formatAdminDuration(value)
   if (type === 'datetime' || /time|date|at$/i.test(key)) return formatAdminDate(value)
-  if (key === 'totalTimeMs' || key === 'timeMs' || key === 'averageTimeMs') return formatAdminDuration(value)
   if (type === 'json') return renderJsonValue(value)
   if (Array.isArray(value)) return value.length ? renderLongText(value.join(' / ')) : <Text type="secondary">-</Text>
   if (typeof value === 'string') return renderLongText(value)
@@ -213,8 +213,8 @@ function formatJsonValue(value) {
 
 function formatAdminDuration(value) {
   const ms = Number(value || 0)
-  if (!ms) return '0.0s'
-  return `${(ms / 1000).toFixed(1)}s`
+  if (!ms) return '0.00 秒'
+  return `${(ms / 1000).toFixed(2)} 秒`
 }
 
 function renderStatusTag(value) {
