@@ -465,12 +465,25 @@ export function clearQuizQuestions(activityKey, confirm = 'CLEAR_QUIZ_QUESTIONS'
   })
 }
 
-export function getQuizAdminOverview(activityKey) {
-  return adminRequest(`/quiz/admin/activities/${activityKey}/overview`)
+export function getQuizAdminOverview(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/overview?${search.toString()}`)
 }
 
-export function getQuizAdminCategories(activityKey) {
-  return adminRequest(`/quiz/admin/activities/${activityKey}/categories`)
+export function getFengchengQuizPhaseSettings(activityKey) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/fengcheng-phase`)
+}
+
+export function updateFengchengQuizActivePhase(activityKey, activePhaseNo) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/fengcheng-phase`, {
+    method: 'PUT',
+    body: JSON.stringify({ activePhaseNo }),
+  })
+}
+
+export function getQuizAdminCategories(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/quiz/admin/activities/${activityKey}/categories?${search.toString()}`)
 }
 
 export function getQuizAdminQuestions(activityKey, params = {}) {

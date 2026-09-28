@@ -5,24 +5,33 @@ import {
   exportDataRows,
   getDataSchema,
   getDataRows,
+  getFengchengQuizPhaseSettings,
   getQuizAdminAttemptAnswers,
   getQuizAdminAttempts,
   getQuizAdminCategories,
   getQuizAdminOverview,
   getQuizAdminQuestions,
   getQuizAdminRank,
+  updateFengchengQuizActivePhase,
 } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 
 const { Text } = Typography
 const pageSize = 20
 const QUIZ_RANK_VIEW_KEY = 'quiz_rank'
+const FENGCHENG_QUIZ_ACTIVITY_KEY = 'fengcheng_wx_coin_partner_quiz_20260701'
 
 export default function QuizAdminDataPage({ activity }) {
   const [activeKey, setActiveKey] = useState('')
   const [views, setViews] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [phaseNo, setPhaseNo] = useState(2)
+  const isFengchengQuiz = activity.activityKey === FENGCHENG_QUIZ_ACTIVITY_KEY
+
+  useEffect(() => {
+    setPhaseNo(2)
+  }, [activity.activityKey])
 
   useEffect(() => {
     let alive = true
@@ -51,25 +60,25 @@ export default function QuizAdminDataPage({ activity }) {
   const tabs = useMemo(() => {
     const items = []
     if (viewMap.has('participants')) {
-      items.push({ key: 'participants', label: viewMap.get('participants')?.label || '参与用户', children: <QuizParticipantsTable activity={activity} view={viewMap.get('participants')} active={activeKey === 'participants'} /> })
+      items.push({ key: 'participants', label: viewMap.get('participants')?.label || '参与用户', children: <QuizParticipantsTable activity={activity} view={viewMap.get('participants')} active={activeKey === 'participants'} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     if (viewMap.has('quiz_overview')) {
-      items.push({ key: 'quiz_overview', label: viewMap.get('quiz_overview')?.label || '基础统计', children: <QuizOverviewPanel activity={activity} view={viewMap.get('quiz_overview')} active={activeKey === 'quiz_overview'} /> })
+      items.push({ key: 'quiz_overview', label: viewMap.get('quiz_overview')?.label || '基础统计', children: <QuizOverviewPanel activity={activity} view={viewMap.get('quiz_overview')} active={activeKey === 'quiz_overview'} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     if (viewMap.has('quiz_questions')) {
-      items.push({ key: 'quiz_questions', label: viewMap.get('quiz_questions')?.label || '题目列表', children: <QuizQuestionTable activity={activity} view={viewMap.get('quiz_questions')} active={activeKey === 'quiz_questions'} /> })
+      items.push({ key: 'quiz_questions', label: viewMap.get('quiz_questions')?.label || '题目列表', children: <QuizQuestionTable activity={activity} view={viewMap.get('quiz_questions')} active={activeKey === 'quiz_questions'} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     if (viewMap.has('quiz_categories')) {
-      items.push({ key: 'quiz_categories', label: viewMap.get('quiz_categories')?.label || '分类板块', children: <QuizCategoryTable activity={activity} view={viewMap.get('quiz_categories')} active={activeKey === 'quiz_categories'} /> })
+      items.push({ key: 'quiz_categories', label: viewMap.get('quiz_categories')?.label || '分类板块', children: <QuizCategoryTable activity={activity} view={viewMap.get('quiz_categories')} active={activeKey === 'quiz_categories'} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     if (viewMap.has('quiz_attempts')) {
-      items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} view={viewMap.get('quiz_attempts')} answerView={viewMap.get('quiz_attempt_answers') || null} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} /> })
+      items.push({ key: 'quiz_attempts', label: viewMap.get('quiz_attempts')?.label || '答题记录', children: <QuizAttemptTable activity={activity} view={viewMap.get('quiz_attempts')} answerView={viewMap.get('quiz_attempt_answers') || null} active={activeKey === 'quiz_attempts'} canViewAnswers={canViewAnswers} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     if (viewMap.has(QUIZ_RANK_VIEW_KEY)) {
-      items.push({ key: QUIZ_RANK_VIEW_KEY, label: viewMap.get(QUIZ_RANK_VIEW_KEY)?.label || '排行榜', children: <QuizRankTable activity={activity} view={viewMap.get(QUIZ_RANK_VIEW_KEY)} active={activeKey === QUIZ_RANK_VIEW_KEY} /> })
+      items.push({ key: QUIZ_RANK_VIEW_KEY, label: viewMap.get(QUIZ_RANK_VIEW_KEY)?.label || '排行榜', children: <QuizRankTable activity={activity} view={viewMap.get(QUIZ_RANK_VIEW_KEY)} active={activeKey === QUIZ_RANK_VIEW_KEY} phaseNo={isFengchengQuiz ? phaseNo : undefined} /> })
     }
     return items
-  }, [activity, activeKey, canViewAnswers, viewMap])
+  }, [activity, activeKey, canViewAnswers, isFengchengQuiz, phaseNo, viewMap])
 
   useEffect(() => {
     if (!tabs.length) {
@@ -84,19 +93,89 @@ export default function QuizAdminDataPage({ activity }) {
   return (
     <AdminDataViewShell
       title="Quiz 数据表"
-      description="当前活动的参与用户、题库、答题记录和成绩数据。题库导入请使用上方独立「题库导入」页签。"
+      description={isFengchengQuiz ? `当前查看第 ${phaseNo} 期的参与用户、题库、答题记录和成绩数据。题库导入请使用上方独立「题库导入」页签。` : '当前活动的参与用户、题库、答题记录和成绩数据。题库导入请使用上方独立「题库导入」页签。'}
       views={tabs.map((item) => ({ viewKey: item.key, label: item.label }))}
       activeViewKey={activeKey}
       onChangeView={setActiveKey}
       error={error}
       loading={loading}
     >
+      {isFengchengQuiz ? <FengchengPhasePanel activity={activity} phaseNo={phaseNo} onChangePhase={setPhaseNo} /> : null}
       {tabs.find((item) => item.key === activeKey)?.children || null}
     </AdminDataViewShell>
   )
 }
 
-function QuizOverviewPanel({ activity, view, active }) {
+function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
+  const [settings, setSettings] = useState(null)
+  const [activePhaseNo, setActivePhaseNo] = useState(2)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  async function loadSettings() {
+    setLoading(true)
+    try {
+      const result = await getFengchengQuizPhaseSettings(activity.activityKey)
+      setSettings(result)
+      setActivePhaseNo(result.activePhaseNo)
+      onChangePhase(result.activePhaseNo)
+    } catch (err) {
+      message.error(err.message || '期次配置加载失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadSettings()
+  }, [activity.activityKey])
+
+  async function saveActivePhase() {
+    setSaving(true)
+    try {
+      const result = await updateFengchengQuizActivePhase(activity.activityKey, activePhaseNo)
+      setSettings((current) => current ? { ...current, activePhaseNo: result.activePhaseNo } : current)
+      onChangePhase(result.activePhaseNo)
+      message.success(`已切换为第 ${result.activePhaseNo} 期，用户端刷新后生效`)
+    } catch (err) {
+      message.error(err.message || '活动期次切换失败')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const phaseCount = settings?.phaseCount || 6
+  const options = Array.from({ length: phaseCount }, (_, index) => ({ value: index + 1, label: `第 ${index + 1} 期` }))
+  const currentPhase = settings?.phases?.find((item) => item.phaseNo === phaseNo)
+  const pendingActivePhase = settings?.phases?.find((item) => item.phaseNo === activePhaseNo)
+
+  return (
+    <Card size="small" loading={loading} style={{ marginBottom: 16 }}>
+      <Space direction="vertical" size={12} style={{ width: '100%' }}>
+        <Space wrap align="center">
+          <Text strong>凤城亲子时政挑战 · 期次管理</Text>
+          <Tag color="blue">当前活动：第 {settings?.activePhaseNo || 2} 期</Tag>
+          <Text type="secondary">活动期次决定用户端题库与每人本期答题资格。</Text>
+        </Space>
+        <Space wrap align="center">
+          <Text>当前活动期次</Text>
+          <Select value={activePhaseNo} options={options} onChange={setActivePhaseNo} style={{ width: 128 }} />
+          <Button type="primary" disabled={Boolean(settings && !pendingActivePhase?.questionCount)} loading={saving} onClick={saveActivePhase}>保存并切换</Button>
+          <Text type="secondary">{settings && !pendingActivePhase?.questionCount ? `第 ${activePhaseNo} 期尚未配置题库，不能开启。` : '第 3–6 期需先配置对应题库后再开启。'}</Text>
+        </Space>
+        <Space wrap align="center">
+          <Text>数据查看期次</Text>
+          <Select value={phaseNo} options={options} onChange={onChangePhase} style={{ width: 128 }} />
+          <Text type="secondary">
+            当前第 {phaseNo} 期：{currentPhase?.questionCount || 0} 题，{currentPhase?.attemptCount || 0} 次答题，{currentPhase?.finishedAttemptCount || 0} 次完成。
+          </Text>
+        </Space>
+      </Space>
+    </Card>
+  )
+}
+
+function QuizOverviewPanel({ activity, view, active, phaseNo }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -106,7 +185,7 @@ function QuizOverviewPanel({ activity, view, active }) {
     let alive = true
     setLoading(true)
     setError('')
-    getQuizAdminOverview(activity.activityKey)
+    getQuizAdminOverview(activity.activityKey, phaseNo ? { phaseNo: String(phaseNo) } : {})
       .then((result) => {
         if (alive) setData(result)
       })
@@ -119,7 +198,7 @@ function QuizOverviewPanel({ activity, view, active }) {
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey])
+  }, [active, activity.activityKey, phaseNo])
 
   if (error) return <div className="admin-inline-error">{error}</div>
 
@@ -142,7 +221,7 @@ function QuizOverviewPanel({ activity, view, active }) {
   )
 }
 
-function QuizParticipantsTable({ activity, view, active }) {
+function QuizParticipantsTable({ activity, view, active, phaseNo }) {
   const [keyword, setKeyword] = useState('')
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } })
@@ -155,7 +234,7 @@ function QuizParticipantsTable({ activity, view, active }) {
     let alive = true
     setLoading(true)
     setError('')
-    getDataRows(activity.activityKey, 'participants', { page: String(page), pageSize: String(pageSize), keyword })
+    getDataRows(activity.activityKey, 'participants', { page: String(page), pageSize: String(pageSize), keyword, phaseNo: phaseNo ? String(phaseNo) : undefined })
       .then((result) => {
         if (alive) setData(result)
       })
@@ -168,7 +247,7 @@ function QuizParticipantsTable({ activity, view, active }) {
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey, keyword, page])
+  }, [active, activity.activityKey, keyword, page, phaseNo])
 
   return (
     <AdminTableBlock
@@ -198,7 +277,7 @@ function QuizParticipantsTable({ activity, view, active }) {
   )
 }
 
-function QuizCategoryTable({ activity, view, active }) {
+function QuizCategoryTable({ activity, view, active, phaseNo }) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -209,7 +288,7 @@ function QuizCategoryTable({ activity, view, active }) {
     let alive = true
     setLoading(true)
     setError('')
-    getQuizAdminCategories(activity.activityKey)
+    getQuizAdminCategories(activity.activityKey, phaseNo ? { phaseNo: String(phaseNo) } : {})
       .then((result) => {
         if (alive) setData(result.list || [])
       })
@@ -222,7 +301,7 @@ function QuizCategoryTable({ activity, view, active }) {
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey])
+  }, [active, activity.activityKey, phaseNo])
 
   return (
     <AdminTableBlock
@@ -251,7 +330,7 @@ function QuizCategoryTable({ activity, view, active }) {
   )
 }
 
-function QuizQuestionTable({ activity, view, active }) {
+function QuizQuestionTable({ activity, view, active, phaseNo }) {
   const [categories, setCategories] = useState([])
   const [keyword, setKeyword] = useState('')
   const [type, setType] = useState('')
@@ -264,15 +343,15 @@ function QuizQuestionTable({ activity, view, active }) {
 
   useEffect(() => {
     if (!active) return
-    getQuizAdminCategories(activity.activityKey).then((result) => setCategories(result.list || [])).catch(() => setCategories([]))
-  }, [active, activity.activityKey])
+    getQuizAdminCategories(activity.activityKey, phaseNo ? { phaseNo: String(phaseNo) } : {}).then((result) => setCategories(result.list || [])).catch(() => setCategories([]))
+  }, [active, activity.activityKey, phaseNo])
 
   useEffect(() => {
     if (!active) return
     let alive = true
     setLoading(true)
     setError('')
-    getQuizAdminQuestions(activity.activityKey, { page: String(page), pageSize: String(pageSize), keyword, type, categoryId })
+    getQuizAdminQuestions(activity.activityKey, { page: String(page), pageSize: String(pageSize), keyword, type, categoryId, phaseNo: phaseNo ? String(phaseNo) : undefined })
       .then((result) => {
         if (alive) setData(result)
       })
@@ -285,7 +364,7 @@ function QuizQuestionTable({ activity, view, active }) {
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey, categoryId, keyword, page, type])
+  }, [active, activity.activityKey, categoryId, keyword, page, phaseNo, type])
 
   return (
     <AdminTableBlock
@@ -333,7 +412,7 @@ function QuizQuestionTable({ activity, view, active }) {
   )
 }
 
-function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers }) {
+function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers, phaseNo }) {
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
@@ -348,7 +427,7 @@ function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers }
     let alive = true
     setLoading(true)
     setError('')
-    getQuizAdminAttempts(activity.activityKey, { page: String(page), pageSize: String(pageSize), keyword, status })
+    getQuizAdminAttempts(activity.activityKey, { page: String(page), pageSize: String(pageSize), keyword, status, phaseNo: phaseNo ? String(phaseNo) : undefined })
       .then((result) => {
         if (alive) setData(result)
       })
@@ -361,7 +440,7 @@ function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers }
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey, keyword, page, status])
+  }, [active, activity.activityKey, keyword, page, phaseNo, status])
 
   async function openAnswers(attemptId) {
     setDrawer({ open: true, attemptId, loading: true, list: [] })
@@ -426,7 +505,7 @@ function QuizAttemptTable({ activity, view, answerView, active, canViewAnswers }
   )
 }
 
-function QuizRankTable({ activity, view, active }) {
+function QuizRankTable({ activity, view, active, phaseNo }) {
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ list: [], total: 0, page, pageSize })
   const [loading, setLoading] = useState(false)
@@ -472,7 +551,7 @@ function QuizRankTable({ activity, view, active }) {
     let alive = true
     setLoading(true)
     setError('')
-    getQuizAdminRank(activity.activityKey, { page: String(page), pageSize: String(pageSize) })
+    getQuizAdminRank(activity.activityKey, { page: String(page), pageSize: String(pageSize), phaseNo: phaseNo ? String(phaseNo) : undefined })
       .then((result) => {
         if (alive) setData(result)
       })
@@ -485,7 +564,7 @@ function QuizRankTable({ activity, view, active }) {
     return () => {
       alive = false
     }
-  }, [active, activity.activityKey, page])
+  }, [active, activity.activityKey, page, phaseNo])
 
   async function handleExport() {
     if (exportDisabled) return
@@ -494,6 +573,7 @@ function QuizRankTable({ activity, view, active }) {
     try {
       const payload = {
         fields: exportableFieldKeys.length ? exportableFieldKeys : undefined,
+        phaseNo: phaseNo ? String(phaseNo) : undefined,
       }
       const result = await exportDataRows(activity.activityKey, QUIZ_RANK_VIEW_KEY, payload)
       downloadCsv(result.filename || `${activity.activityKey}-${QUIZ_RANK_VIEW_KEY}.csv`, result.csv || '')
