@@ -13,6 +13,7 @@ import {
   getQuizAdminQuestions,
   getQuizAdminRank,
   updateFengchengQuizActivePhase,
+  updateFengchengQuizPhaseSchedule,
 } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 
@@ -111,6 +112,8 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
   const [activePhaseNo, setActivePhaseNo] = useState(2)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [scheduleSaving, setScheduleSaving] = useState(false)
+  const [scheduleDraft, setScheduleDraft] = useState({ startTime: '', endTime: '' })
 
   async function loadSettings() {
     setLoading(true)
@@ -130,6 +133,14 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
     loadSettings()
   }, [activity.activityKey])
 
+  useEffect(() => {
+    const current = settings?.phases?.find((item) => item.phaseNo === phaseNo)
+    setScheduleDraft({
+      startTime: toDateTimeLocalValue(current?.startTime),
+      endTime: toDateTimeLocalValue(current?.endTime),
+    })
+  }, [phaseNo, settings])
+
   async function saveActivePhase() {
     setSaving(true)
     try {
@@ -141,6 +152,25 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
       message.error(err.message || '活动期次切换失败')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function saveSchedule() {
+    setScheduleSaving(true)
+    try {
+      const result = await updateFengchengQuizPhaseSchedule(activity.activityKey, phaseNo, {
+        startTime: toScheduleIso(scheduleDraft.startTime),
+        endTime: toScheduleIso(scheduleDraft.endTime),
+      })
+      setSettings((current) => current ? {
+        ...current,
+        phases: current.phases.map((item) => item.phaseNo === phaseNo ? { ...item, startTime: result.startTime, endTime: result.endTime } : item),
+      } : current)
+      message.success(`第 ${phaseNo} 期时间已保存`)
+    } catch (err) {
+      message.error(err.message || '期次时间保存失败')
+    } finally {
+      setScheduleSaving(false)
     }
   }
 
@@ -170,9 +200,31 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
             当前第 {phaseNo} 期：{currentPhase?.questionCount || 0} 题，{currentPhase?.attemptCount || 0} 次答题，{currentPhase?.finishedAttemptCount || 0} 次完成。
           </Text>
         </Space>
+        <Space wrap align="center">
+          <Text>本期开始时间</Text>
+          <Input type="datetime-local" value={scheduleDraft.startTime} onChange={(event) => setScheduleDraft((current) => ({ ...current, startTime: event.target.value }))} style={{ width: 210 }} />
+          <Text>结束时间</Text>
+          <Input type="datetime-local" value={scheduleDraft.endTime} onChange={(event) => setScheduleDraft((current) => ({ ...current, endTime: event.target.value }))} style={{ width: 210 }} />
+          <Button loading={scheduleSaving} onClick={saveSchedule}>保存本期时间</Button>
+          <Text type="secondary">留空表示不限制该期时间；时间到后不可开始新答题。</Text>
+        </Space>
       </Space>
     </Card>
   )
+}
+
+function toDateTimeLocalValue(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function toScheduleIso(value) {
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toISOString()
 }
 
 function QuizOverviewPanel({ activity, view, active, phaseNo }) {

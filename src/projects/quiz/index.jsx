@@ -339,11 +339,30 @@ function QuizMain({ routeParams }) {
     }, 1500)
   }
 
+  function handleFengchengPhaseUnavailable() {
+    const status = bootstrap?.fengchengPhase?.status
+    if (status === 'not_started') {
+      showToast('本期活动尚未开始', 1500)
+      setFengchengProfileOpen(false)
+      return true
+    }
+    if (status === 'ended') {
+      showToast('本期活动已结束', 1500)
+      setFengchengProfileOpen(false)
+      window.setTimeout(() => {
+        openRank().catch(showError)
+      }, 1500)
+      return true
+    }
+    return false
+  }
+
   async function handleStart() {
     if (fengchengSkin && resolveActivityWindowStatus(bootstrap?.activity || publicConfig) === 'ended') {
       showActivityEndedAndOpenRank()
       return
     }
+    if (fengchengSkin && handleFengchengPhaseUnavailable()) return
     if (!getToken()) return startAuthorize()
     if (!bootstrap?.profileCompleted) {
       if (fengchengSkin) {
@@ -393,12 +412,14 @@ function QuizMain({ routeParams }) {
       showActivityEndedAndOpenRank()
       return
     }
+    if (fengchengSkin && handleFengchengPhaseUnavailable()) return
     setSubmitting(true)
     try {
       const profileResult = await submitProfile(activityKey, profile)
       setBootstrap((value) => ({ ...(value || {}), participant: profileResult.participant, profileCompleted: true }))
       setFengchengProfileOpen(false)
       if (fengchengSkin && profileResult?.canStart === false) {
+        if (handleFengchengPhaseUnavailable()) return
         showAttemptUsedAndOpenRank()
         return
       }
