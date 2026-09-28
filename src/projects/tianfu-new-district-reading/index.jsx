@@ -43,6 +43,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'west-china-expo-city',
     name: '西部国际博览城及天府国际会议中心',
+    video: '66d67cddab033f2e84a9b55672f9087b_23321142.mp4.mp4',
     introduction: `远看像一艘来自未来的飞船，近看是一个巨大的“V”字——这就是西博城。用钢量16万吨，超过“鸟巢”，直接拿下中国钢结构金奖。这座建筑充分利用自然光线，雨水被收集起来循环利用，壮观的背后藏着细腻的环保心思。
 
 让人挪不开眼的，还有隔壁的“天府之檐”。2025年世运会开幕式就在这里上演。这是亚洲最大的单体木结构建筑，由国际知名设计大师汤桦领衔设计，以中国古建筑“佛光寺大殿”的抬梁式木结构为原型，建构了一条长达430米、高32米的超尺度木结构空间。430米也是全国最长的连续瓦屋面建筑，犹如成都平原延绵伸展的地平线。
@@ -59,6 +60,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'sichuan-celebrity-hall',
     name: '四川名人馆',
+    video: '3ba26b0aae98eb44eb9f539cceb2dd38_4312419.mp4.mp4',
     introduction: `想和李白、苏轼、诸葛亮“面对面”聊天吗？来这里就对了。四川名人馆坐落于天府新区雅州路，紧邻天府公园，集中展示先秦至辛亥革命前的70位四川历史名人——司马相如、李白、苏轼生于巴蜀，诸葛亮、杜甫客居蜀地造福一方。
 
 但这70位先贤不是挂在墙上的画像。场馆用大数据、人工智能、体感交互打造数字展项。走进1250平方米的数字沉浸式体验展厅，你化身“寻梦者”，穿过四重沉浸式梦境场景，与先贤跨越时空“对话”。场馆的设计中藏着“蜀山、蜀水、蜀道”的传统意象，内部连通各层展厅的动线灵感取自千古诗篇里的蜀道。
@@ -72,6 +74,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'utility-tunnel',
     name: '雅州路综合管廊',
+    video: 'ece24f3fdf0b6739f66f46c5a7417bd6_9399741.mp4.mp4',
     introduction: `你脚下3米深的地方，藏着一座“智慧地下城”。雅州路综合管廊全长3公里，是成都目前唯一可通行车辆的管廊，一辆小型巡检车辆可以自由通过。
 
 管廊内的智能巡检机器人头顶两只“大眼睛”、脚踏四个轮子，24小时自动巡逻。它会对配电系统、消防系统进行巡检，发现的问题自动进行图像分析，结果实时推送到控制中心。管廊内安装的设施设备实时监测氧气、温度、湿度、硫化氢、甲烷等环境参数，出现异常自动报警。截至目前，智能巡检机器人已替代人工完成日常巡检项目70%以上，巡检效率提升4倍。
@@ -84,6 +87,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'guanghui-art-museum',
     name: '广汇美术馆',
+    video: 'f5f5c5cf8b2d0c57fa0f76039c6bf8f1_33253818.mp4.mp4',
     introduction: '广汇美术馆位于天府新区天府总部商务区，毗邻天府公园，是一座集展览展示、学术研究、公共教育和收藏为一体的大型国际化美术馆。它犹如一个漂浮的立方，给人以强烈的视觉冲击力。其拥有71840平方米的总建筑面积和43685平方米的主楼建筑面积，内设8个专业展厅。此外，美术馆还配备了恒温恒湿典藏库、同声传译学术报告厅、艺术文献中心、实验空间、观影剧场等多功能空间，为观众提供了全方位的服务和体验。',
     books: [
       { title: '《名画在左，科学在右2》', reason: '当观众走进广汇美术馆8个专业展厅，面对一幅幅名画时，或许会好奇：达·芬奇笔下的光线为何如此真实？印象派的色彩背后藏着怎样的光学原理？《名画在左，科学在右2》（中国全民阅读网推荐好书）正是这样一场艺术与科学的“跨界展”：全书围绕100余幅脍炙人口的世界名画，以科学视角解读其中蕴含的科学元素、科学道理与人生智慧，探讨名画揭示的科学文明史——让美术馆的每一面墙，都成为连接审美与求知的窗口。' },
@@ -225,7 +229,7 @@ function DetailLayout({ point, onSelectBook }) {
   const isScrollableBookList = point.books.length > visibleBookRows
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
-    <div className="tianfu-detail-media"><div className="tianfu-detail-media-inner" /></div>
+    {point.video && <div className="tianfu-detail-media"><video controls playsInline preload="metadata" src={asset(point.video)} /></div>}
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
