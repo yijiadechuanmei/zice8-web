@@ -161,11 +161,13 @@ export function FengchengHomePage({
 
 function FengchengProfileModal({ assets, profile, submitting, onClose, onSubmit }) {
   const [name, setName] = useState(profile?.name || '')
-  const [department, setDepartment] = useState(profile?.department || '')
+  const initialClass = /^(初一|初二|初三)([1-9]|1\d|2[0-5])班$/.exec(profile?.department || '')
+  const [grade, setGrade] = useState(initialClass?.[1] || '')
+  const [classNo, setClassNo] = useState(initialClass?.[2] || '')
 
   function submit() {
     const normalizedName = name.trim()
-    const normalizedDepartment = department.trim()
+    const normalizedDepartment = grade && classNo ? `${grade}${classNo}班` : ''
     if (!normalizedName || !normalizedDepartment) return
     onSubmit({ name: normalizedName, department: normalizedDepartment })
   }
@@ -180,15 +182,29 @@ function FengchengProfileModal({ assets, profile, submitting, onClose, onSubmit 
           <span className="sr-only">姓名</span>
           <input value={name} maxLength={100} placeholder="请输入姓名" onChange={(event) => setName(event.target.value)} />
         </label>
-        <label className="fengcheng-profile-input fengcheng-profile-input-class">
+        <label className="fengcheng-profile-input fengcheng-profile-input-class fengcheng-profile-input-grade">
+          <span className="sr-only">年级</span>
+          <select value={grade} onChange={(event) => setGrade(event.target.value)} aria-label="选择年级">
+            <option value="" disabled>请选择年级</option>
+            <option value="初一">初一</option>
+            <option value="初二">初二</option>
+            <option value="初三">初三</option>
+          </select>
+        </label>
+        <label className="fengcheng-profile-input fengcheng-profile-input-class-no">
           <span className="sr-only">班级</span>
-          <input value={department} maxLength={100} placeholder="请输入班级" onChange={(event) => setDepartment(event.target.value)} />
+          <select value={classNo} onChange={(event) => setClassNo(event.target.value)} aria-label="选择班级">
+            <option value="" disabled>请选择班级</option>
+            {Array.from({ length: 25 }, (_, index) => index + 1).map((item) => (
+              <option key={item} value={String(item)}>{item}班</option>
+            ))}
+          </select>
         </label>
         <button
           className="fengcheng-profile-submit"
           type="button"
           onClick={submit}
-          disabled={submitting || !name.trim() || !department.trim()}
+          disabled={submitting || !name.trim() || !grade || !classNo}
           aria-label="提交并开始答题"
         />
       </section>
