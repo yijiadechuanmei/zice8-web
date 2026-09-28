@@ -241,8 +241,9 @@ function formatBookTitle(title) {
 }
 
 function BookReasonLayout({ book }) {
+  const title = formatBookTitle(book.title)
   return <>
-    <div className="tianfu-book-reason-title"><span className="tianfu-book-reason-title-text">{formatBookTitle(book.title)}</span></div>
+    <div className={`tianfu-book-reason-title${Array.from(title).length > 30 ? ' tianfu-book-reason-title-compact' : ''}`}><span className="tianfu-book-reason-title-text">{title}</span></div>
     <div className="tianfu-book-reason-copy">{book.reason}</div>
   </>
 }
