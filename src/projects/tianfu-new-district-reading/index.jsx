@@ -240,7 +240,8 @@ function formatBookTitle(title) {
   return trimmedTitle.startsWith('《') && trimmedTitle.endsWith('》') ? trimmedTitle : `《${trimmedTitle}》`
 }
 
-function bookCoverName(title) {
+function bookCoverName(title, pointId) {
+  if (pointId === 'national-supercomputing-center-chengdu' && title.includes('孩子看得懂的前沿科学漫画')) return 'h11.png'
   if (title.includes('小亮老师')) return 't1.png'
   if (title.includes('虫子旁')) return 't2.png'
   if (title.includes('藏在建筑里的世界史')) return 't3.png'
@@ -262,12 +263,22 @@ function bookCoverName(title) {
   if (title.includes('触手可及的未来科技')) return 'x9.png'
   if (title.includes('院士解锁中国科技')) return 'x10.png'
   if (title.includes('换道赛车')) return 'x11.png'
+  if (title.includes('星海求知')) return 'h1.png'
+  if (title.includes('月背征途')) return 'h2.png'
+  if (title.includes('征程：人类探索太空')) return 'h3.png'
+  if (title.includes('古诗词里的科学现象')) return 'h4.png'
+  if (title.includes('大山里的长尾龙')) return 'h5.png'
+  if (title.includes('科学巨人')) return 'h6.png'
+  if (title.includes('地球不能没有动物')) return 'h7.png'
+  if (title.includes('熊猫七仔')) return 'h8.png'
+  if (title.includes('好样的昆虫笔记')) return 'h9.png'
+  if (title.includes('算法之问')) return 'h10.png'
   return null
 }
 
-function BookReasonLayout({ book }) {
+function BookReasonLayout({ book, point }) {
   const title = formatBookTitle(book.title)
-  const coverName = bookCoverName(book.title)
+  const coverName = bookCoverName(book.title, point.id)
   return <>
     {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '9.79064%', width: '37.733333%', height: '20.628079%' }} />}
     <div className={`tianfu-book-reason-title${Array.from(title).length > 30 ? ' tianfu-book-reason-title-compact' : ''}`}><span className="tianfu-book-reason-title-text">{title}</span></div>
@@ -336,5 +347,5 @@ export default function TianfuNewDistrictReadingProject() {
   ]} />
   if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }]} />
   if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
-  return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
+  return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} point={selectedPoint} /></Canvas>
 }
