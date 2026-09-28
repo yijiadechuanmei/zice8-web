@@ -203,7 +203,7 @@ const PAGES = [
     layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(25, 467, 708, 561, '56a79cf1a92141737709d512e6ce5c7e_52678_708_571.png'), layer(27, 115, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(502, 1320, 194, 244, '27102cb248a54e06c3593993531c7fdf_70874_194_244.png'), layer(-20, 1017, 548, 99, '8551a4e442f8a94f85985c1e79fd77e7_38836_548_99.png'),
   ],
   [
-    layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(27, 86, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(31, 159, 283, 335, '64d485ccb2d65ed29809201f3d0c070e_169525_283_335.png'), layer(205, 92, 548, 99, 'ecd6e654adc5b85a2ea1e3064008986b_14501_548_99.png'), layer(23, 523, 710, 929, 'ee328ace81f6a8ef5f9f5600d92aac97_67164_710_929.png'),
+    layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(27, 86, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(205, 92, 548, 99, 'ecd6e654adc5b85a2ea1e3064008986b_14501_548_99.png'), layer(23, 523, 710, 929, 'ee328ace81f6a8ef5f9f5600d92aac97_67164_710_929.png'),
   ],
 ]
 
@@ -240,9 +240,25 @@ function formatBookTitle(title) {
   return trimmedTitle.startsWith('《') && trimmedTitle.endsWith('》') ? trimmedTitle : `《${trimmedTitle}》`
 }
 
+function bookCoverName(title) {
+  if (title.includes('小亮老师')) return 't1.png'
+  if (title.includes('虫子旁')) return 't2.png'
+  if (title.includes('藏在建筑里的世界史')) return 't3.png'
+  if (title.includes('重拾瑰宝圆明园')) return 't4.png'
+  if (title.includes('天工开物')) return 't5.png'
+  if (title.includes('中华人物故事汇')) return 't6.png'
+  if (title.includes('古诗词遇见中国地理')) return 't7.png'
+  if (title.includes('成为科学家')) return 't8.png'
+  if (title.includes('名画在左')) return 't9.png'
+  if (title.includes('敦煌小画师')) return 't10.png'
+  return null
+}
+
 function BookReasonLayout({ book }) {
   const title = formatBookTitle(book.title)
+  const coverName = bookCoverName(book.title)
   return <>
+    {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '9.79064%', width: '37.733333%', height: '20.628079%' }} />}
     <div className={`tianfu-book-reason-title${Array.from(title).length > 30 ? ' tianfu-book-reason-title-compact' : ''}`}><span className="tianfu-book-reason-title-text">{title}</span></div>
     <div className="tianfu-book-reason-copy">{book.reason}</div>
   </>
