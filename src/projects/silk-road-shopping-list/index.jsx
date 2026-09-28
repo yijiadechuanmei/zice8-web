@@ -273,13 +273,6 @@ function Sandstorm() {
   return <div className="srsl-sandstorm" aria-hidden="true"><canvas ref={canvasRef} /></div>
 }
 
-function OrientationPrompt() {
-  return <div className="srsl-orientation-prompt" role="status" aria-live="polite">
-    <div className="srsl-orientation-phone" aria-hidden="true"><span /></div>
-    <div className="srsl-orientation-copy">请竖置手机锁定方向后<br />再横屏观看视频</div>
-  </div>
-}
-
 function Home({ onStart }) {
   return <Stage height={1624} className="srsl-home-stage">
     <div style={{ position: 'absolute', width: 750, height: 1448, left: 0, top: 88 }}>
@@ -328,14 +321,15 @@ function VideoPanel({ mode, videoRef, onEnd, onShop }) {
     video.currentTime = nextProgress * duration
     setProgress(nextProgress)
   }
-  return <div className={`srsl-video-panel${mode === 'orientation' ? ' is-preparing' : ''}`}>
+  const progressControl = mode === 'video' && <div ref={progressRef} className="srsl-video-progress" role="slider" tabIndex={0} aria-label="视频播放进度，可拖动调整" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)} aria-valuetext={`${Math.round(progress * 100)}%`} style={{ '--srsl-video-progress': `${progress * 100}%` }} onPointerDown={(event) => { event.preventDefault(); draggingProgressRef.current = true; event.currentTarget.setPointerCapture?.(event.pointerId); seekToPointer(event) }} onPointerMove={(event) => { if (draggingProgressRef.current) seekToPointer(event) }} onPointerUp={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onPointerCancel={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onKeyDown={handleProgressKeyDown} />
+  return <div className="srsl-video-panel">
     <Stage height={1448}>
       <div style={{ position: 'absolute', width: 750, height: 1624, left: 0, top: -88 }}>
         <video ref={videoRef} src={silkRoadAssets.video} playsInline webkit-playsinline="true" x5-video-player-fullscreen="true" x5-video-player-type="h5" x-webkit-airplay="allow" airplay="allow" preload="auto" onDurationChange={updateProgress} onTimeUpdate={updateProgress} onEnded={onEnd} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       </div>
-      {mode === 'video' && <div ref={progressRef} className="srsl-video-progress" role="slider" tabIndex={0} aria-label="视频播放进度，可拖动调整" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(progress * 100)} aria-valuetext={`${Math.round(progress * 100)}%`} style={{ '--srsl-video-progress': `${progress * 100}%` }} onPointerDown={(event) => { event.preventDefault(); draggingProgressRef.current = true; event.currentTarget.setPointerCapture?.(event.pointerId); seekToPointer(event) }} onPointerMove={(event) => { if (draggingProgressRef.current) seekToPointer(event) }} onPointerUp={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onPointerCancel={(event) => { draggingProgressRef.current = false; event.currentTarget.releasePointerCapture?.(event.pointerId) }} onKeyDown={handleProgressKeyDown} />}
       {mode === 'video' ? <button type="button" className="srsl-skip" onClick={onEnd}>跳过</button> : mode === 'video-end' ? <button className="srsl-image-button srsl-shop-entry" type="button" aria-label="进入选购" onClick={onShop} style={{ position: 'absolute', width: 333, height: 78, left: 207, top: 687 }}><img alt="" src={silkRoadAssets.orientationHint} /></button> : null}
     </Stage>
+    {progressControl}
   </div>
 }
 
@@ -590,11 +584,6 @@ export default function SilkRoadShoppingList({ routeParams }) {
     return () => { active = false }
   }, [authReady, reauth])
   useEffect(() => {
-    if (page !== 'orientation') return undefined
-    const timer = window.setTimeout(() => setPage('video'), 3000)
-    return () => window.clearTimeout(timer)
-  }, [page])
-  useEffect(() => {
     if (page !== 'video') return
     bgmWasPlayingBeforeVideoRef.current = activityAudioService.getState().playing
     activityAudioService.pause('video')
@@ -616,15 +605,14 @@ export default function SilkRoadShoppingList({ routeParams }) {
 
   const toggle = (id) => setSelectedIds((ids) => ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id])
   const videoEnd = () => { videoRef.current?.pause(); setPage('video-end') }
-  const startVideo = () => setPage('orientation')
+  const startVideo = () => setPage('video')
   const checkout = () => {
     setCartOpen(false)
     setPage('poster')
   }
   const renderPage = (content) => <>{content}<ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /></>
-  if (page === 'home' || page === 'orientation' || page === 'video' || page === 'video-end') return renderPage(<main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
-    {(page === 'home' || page === 'orientation') && <Home onStart={startVideo} />}
-    {page === 'orientation' && <OrientationPrompt />}
+  if (page === 'home' || page === 'video' || page === 'video-end') return renderPage(<main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
+    {page === 'home' && <Home onStart={startVideo} />}
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
   </main>)
   if (page === 'poster') return renderPage(<main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>)
