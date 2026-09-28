@@ -16,18 +16,6 @@ const PRODUCT_LIST_BOTTOM_GUTTER = 150
 const PRODUCT_CARD_HEIGHT = 340
 const POSTER_FIELD_OFFSET = { x: -4, y: -21 }
 
-function getShoppingScore(quantity) {
-  const count = Math.min(Math.max(quantity, 0), 28)
-  const bands = [
-    [0, 7, 0, 30],
-    [8, 14, 30, 60],
-    [15, 21, 60, 80],
-    [22, 28, 80, 100],
-  ]
-  const [minCount, maxCount, minScore, maxScore] = bands.find(([, maxCount]) => count <= maxCount)
-  return Math.round(minScore + ((count - minCount) / (maxCount - minCount)) * (maxScore - minScore))
-}
-
 function fitPosterText(context, text, maxWidth) {
   if (context.measureText(text).width <= maxWidth) return text
   let value = text
@@ -382,14 +370,14 @@ function ProductCard({ product, selected, onToggle }) {
   </div>
 }
 
-function ProductList({ products, selectedIds, onToggle, onOpenCart }) {
+function ProductList({ products, selectedIds, onToggle, onCheckout }) {
   const rows = Math.ceil(products.length / 2)
   const handleToggle = (product, sourceElement) => {
     if (!selectedIds.includes(product.id)) flyProductToCart(product.image, sourceElement)
     onToggle(product.id)
   }
-  const dock = <button type="button" className="srsl-cart-float" aria-label={`查看购物车，已选${selectedIds.length}件`} onClick={onOpenCart}>
-    <img alt="查看购物车" src={silkRoadAssets.cartFloat} />
+  const dock = <button type="button" className="srsl-cart-float" aria-label="去结算生成海报" onClick={onCheckout}>
+    <img alt="去结算生成海报" src={silkRoadAssets.cartFloat} />
   </button>
   return <>
   <Stage height={646 + rows * PRODUCT_CARD_HEIGHT + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
@@ -425,7 +413,6 @@ function Poster({ products, profile, onBack, onReselect }) {
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
   const rows = Math.max(1, Math.ceil(products.length / 4))
-  const score = getShoppingScore(products.length)
   const collectionHeight = Math.max(592, 29 + 42 + rows * 213)
   const footerTop = 699 + collectionHeight - 70
   const height = footerTop + 403
@@ -460,17 +447,6 @@ function Poster({ products, profile, onBack, onReselect }) {
     drawPosterText(context, profile.nickname || '丝路旅人', { left: 206 + POSTER_FIELD_OFFSET.x, top: 520 + POSTER_FIELD_OFFSET.y, width: 203, height: 46 }, {
       font: '24px PingFang SC, Microsoft YaHei, sans-serif',
       color: '#3b4b42',
-      weight: 'bold',
-    })
-    drawPosterText(context, String(products.length), { left: 520, top: 457, width: 55, height: 38 }, {
-      font: '22px PingFang SC, Microsoft YaHei, sans-serif',
-      color: '#f3e2d3',
-      align: 'center',
-    })
-    drawPosterText(context, String(score), { left: 450, top: 500, width: 119, height: 64 }, {
-      font: '53px Arial, sans-serif',
-      color: '#000',
-      align: 'right',
       weight: 'bold',
     })
     context.save()
@@ -523,7 +499,7 @@ function Poster({ products, profile, onBack, onReselect }) {
     })()
     if (!dataUrl.startsWith('data:image/png')) throw new Error('海报转成图片失败：未生成 PNG 数据')
     return dataUrl
-  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows, score])
+  }, [collectionHeight, footerTop, height, products, profile.avatar, profile.nickname, rows])
 
   const savePoster = useCallback(async () => {
     try {
@@ -549,8 +525,6 @@ function Poster({ products, profile, onBack, onReselect }) {
     <button className="srsl-back-hitbox" type="button" aria-label="返回购物车" onClick={onBack} />
     <img className="srsl-avatar" alt="" src={profile.avatar || undefined} referrerPolicy="no-referrer" style={{ position: 'absolute', width: 106, height: 106, left: 74 + POSTER_FIELD_OFFSET.x, top: 517 + POSTER_FIELD_OFFSET.y }} />
     <span className="srsl-nickname" style={{ left: 206 + POSTER_FIELD_OFFSET.x, top: 520 + POSTER_FIELD_OFFSET.y, width: 203, height: 46 }}><span className="srsl-text-inner">{profile.nickname || '丝路旅人'}</span></span>
-    <span className="srsl-poster-selected" style={{ left: 520, top: 457, width: 55, height: 38 }}><span className="srsl-text-inner">{products.length}</span></span>
-    <span className="srsl-poster-score" style={{ left: 450, top: 500, width: 119, height: 64 }}><span className="srsl-text-inner">{score}</span></span>
     <div className="srsl-collection" style={{ height: collectionHeight, backgroundImage: `url(${silkRoadAssets.posterCollection})` }}>
       <img className="srsl-poster-label" alt="" src={silkRoadAssets.posterLabel} style={{ position: 'absolute', width: 349, height: 49, left: 200.5, top: 0 }} />
       <div className="srsl-poster-grid" style={{ height: 42 + rows * 213 }}>{products.map((product, index) => <div className="srsl-poster-product" key={product.id}>
@@ -654,5 +628,5 @@ export default function SilkRoadShoppingList({ routeParams }) {
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
   </main>)
   if (page === 'poster') return renderPage(<main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>)
-  return renderPage(<main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>)
+  return renderPage(<main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>)
 }

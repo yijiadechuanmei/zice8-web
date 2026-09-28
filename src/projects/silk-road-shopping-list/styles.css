@@ -51,10 +51,8 @@
 .srsl-back-hitbox { position: absolute; z-index: 5; left: 0; top: 0; width: 70px; height: 70px; padding: 0; border: 0; background: transparent; }
 .srsl-avatar { border-radius: 50%; object-fit: cover; }
 .srsl-text-inner { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; visibility: inherit; }
-.srsl-nickname, .srsl-poster-selected, .srsl-poster-score { position: absolute; z-index: 3; display: flex; align-items: center; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: normal; }
+.srsl-nickname { position: absolute; z-index: 3; display: flex; align-items: center; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: normal; }
 .srsl-nickname { justify-content: flex-start; color: #3b4b42; font-size: 24px; font-weight: bold; text-align: left; white-space: pre; word-break: normal; text-overflow: ellipsis; }
-.srsl-poster-selected { justify-content: center; color: #f3e2d3; font-size: 22px; text-align: center; white-space: pre-wrap; word-break: normal; text-overflow: ellipsis; }
-.srsl-poster-score { justify-content: flex-end; color: #000; font: bold 53px Arial, sans-serif; text-align: right; white-space: pre-wrap; word-break: normal; text-overflow: ellipsis; }
 .srsl-final-avatar { position: absolute; z-index: 3; overflow: hidden; border: 2px solid #fff; border-radius: 50%; background: transparent; }
 .srsl-final-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .srsl-final-nickname, .srsl-final-number, .srsl-final-title { position: absolute; z-index: 3; display: flex; align-items: center; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
