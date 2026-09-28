@@ -251,6 +251,17 @@ function bookCoverName(title) {
   if (title.includes('成为科学家')) return 't8.png'
   if (title.includes('名画在左')) return 't9.png'
   if (title.includes('敦煌小画师')) return 't10.png'
+  if (title.includes('手绘水世界')) return 'x1.png'
+  if (title.includes('认识中国湖')) return 'x2.png'
+  if (title.includes('范式变更')) return 'x3.png'
+  if (title.includes('像院士一样思考')) return 'x4.png'
+  if (title.includes('给孩子讲大数据')) return 'x5.png'
+  if (title.includes('给孩子讲人工智能')) return 'x6.png'
+  if (title.includes('元宇宙')) return 'x7.png'
+  if (title.includes('孩子看得懂的前沿科学漫画')) return 'x8.png'
+  if (title.includes('触手可及的未来科技')) return 'x9.png'
+  if (title.includes('院士解锁中国科技')) return 'x10.png'
+  if (title.includes('换道赛车')) return 'x11.png'
   return null
 }
 
