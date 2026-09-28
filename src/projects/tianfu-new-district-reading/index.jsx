@@ -175,12 +175,6 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children }) {
   </div></main>
 }
 
-function recommendationTitleClass(title) {
-  if (title.length > 24) return 'tianfu-detail-recommendation-title tianfu-detail-recommendation-title-extra-long'
-  if (title.length > 12) return 'tianfu-detail-recommendation-title tianfu-detail-recommendation-title-long'
-  return 'tianfu-detail-recommendation-title'
-}
-
 function DetailLayout({ point }) {
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
@@ -189,14 +183,19 @@ function DetailLayout({ point }) {
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
     <div className="tianfu-detail-recommendation" style={{ height: `${point.books.length * 100 / 16.24}%` }}>
-      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className={recommendationTitleClass(book.title)}>{book.title}</div></div>)}
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className="tianfu-detail-recommendation-title"><span className="tianfu-detail-recommendation-title-text">{book.title}</span></div></div>)}
     </div>
   </>
 }
 
+function formatBookTitle(title) {
+  const trimmedTitle = title.trim()
+  return trimmedTitle.startsWith('《') && trimmedTitle.endsWith('》') ? trimmedTitle : `《${trimmedTitle}》`
+}
+
 function BookReasonLayout({ book }) {
   return <>
-    <div className="tianfu-book-reason-title">{book.title}</div>
+    <div className="tianfu-book-reason-title"><span className="tianfu-book-reason-title-text">{formatBookTitle(book.title)}</span></div>
     <div className="tianfu-book-reason-copy">{book.reason}</div>
   </>
 }
