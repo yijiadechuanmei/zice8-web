@@ -6,7 +6,10 @@ export const SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY = 'millennium_silk_road_
 // All Silk Road shopping-list activity copies intentionally share this source
 // directory. The current route's activity key is used for API/auth/analytics.
 export const ASSET_ROOT = `https://assets.zice8.com/${SILK_ROAD_SHOPPING_LIST_ACTIVITY_TYPE}/${SILK_ROAD_SHOPPING_LIST_ASSET_ACTIVITY_KEY}`
-const posterProductImages = import.meta.glob('../silk-road-shopping-list/assets/poster/products/*.png', { eager: true, query: '?url', import: 'default' })
+const posterProductImages = Object.fromEntries(
+  Object.entries(import.meta.glob('../silk-road-shopping-list/assets/poster/products/*.png', { eager: true, query: '?url', import: 'default' }))
+    .map(([path, url]) => [path.split('/').pop(), url]),
+)
 
 export const silkRoadAssets = {
   homeBackground: `${ASSET_ROOT}/b4d5cd34fa18bdfc0bab69b4e6b26998_2446173_750_1624.png`,
@@ -70,5 +73,5 @@ export const SILK_ROAD_PRODUCTS = [
   record,
   description: `原产地：${origin}\n传入时间：${transferTime}\n记载：${record}`,
   image: productImage(image),
-  posterImage: posterProductImages[`./assets/poster/products/${image}`],
+  posterImage: posterProductImages[image],
 }))
