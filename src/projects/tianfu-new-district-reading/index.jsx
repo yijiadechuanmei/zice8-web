@@ -284,7 +284,7 @@ function BookReasonLayout({ book, point }) {
   const title = formatBookTitle(book.title)
   const coverName = bookCoverName(book.title, point.id)
   return <>
-    {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '9.79064%', width: '37.733333%', height: '20.628079%' }} />}
+    {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '12.315271%', width: '37.733333%', height: '20.628079%' }} />}
     <div className={`tianfu-book-reason-title${Array.from(title).length > 30 ? ' tianfu-book-reason-title-compact' : ''}`}><span className="tianfu-book-reason-title-text">{title}</span></div>
     <div className="tianfu-book-reason-copy">{book.reason}</div>
   </>
