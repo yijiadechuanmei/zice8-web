@@ -141,6 +141,51 @@ const XINGLONG_LAKE_POINTS = [
   },
 ]
 
+const HAICHUANG_PARK_POINTS = [
+  {
+    id: 'tianfu-cosmic-ray-research-center',
+    name: '天府宇宙线研究中心',
+    introduction: `“拉索”有一张巨大的“网”——1.36平方公里，由5216个电磁粒子探测器和1188个缪子探测器组成。它昼夜不停地“接住”从宇宙深处砸向地球的粒子“阵雨”。
+
+而在成都兴隆湖畔，天府宇宙线研究中心解读着这些来自这就是高海拔宇宙线观测站“拉索”的“密码”。
+
+这里的科学家做的事，有点像宇宙级的“侦破”。宇宙线粒子本身带电，在星际磁场里拐来拐去，到达地球时早已不指向最初的源头。科学家只能通过它们撞出的次级粒子——高能伽马光子，来反推“肇事者”是谁。2022年10月9日，他们“接住”了一场穿越24亿光年而来的“宇宙烟花”——人类迄今记录到的最亮伽马射线暴GRB 221009A，6万多个伽马光子被拉索完整捕获，相关成果登上了《科学》杂志。2026年，他们又锁定了天鹅座方向一个每4.8小时“闪烁”一次的宇宙加速器——天鹅座X-3，它能将粒子加速到至少30拍电子伏特，远超人类最强大的对撞机数千倍。用“拉索”首席科学家曹臻的话说，这就像“宇宙中有人打开了一支手电筒，恰好就照在我们身上”。`,
+    books: [
+      { title: '《星海求知：天文学的奥秘》', reason: '中国全民阅读网科普生活好书推荐《星海求知：天文学的奥秘》。本书以图文并茂的方式，由浅入深地介绍了地球、月球、太阳系、银河系、黑洞、星团、星云、星系等一系列天体和天文研究对象，回顾了人类探索宇宙的艰辛历程，展望了天文学的发展前景。天府宇宙线研究中心“拉索”捕捉伽马射线暴、探索宇宙线起源的科研方向，正是这本书所讲述的“人类探索宇宙历程”的当代延续。读完它，你会理解“拉索”为什么要在海拔4410米的高原上张开那张1.36平方公里的“大网”。' },
+      { title: '《月背征途：中国探月国家队记录》', reason: '2021年度“中国好书”、第十七届文津图书奖获奖图书、中国全民阅读网科普生活好书推荐。\n\n受地球与月球之间引力“潮汐锁定”的影响，人类在地球上只能看到月球正面。因此，神秘的月球背面曾长期挑动着人们的好奇心。2019年1月3日10时26分，“嫦娥四号”携“玉兔二号”成功着陆月球背面，中国成为世界上第一个成功在月球背面软着陆的国家。\n\n《月背征途》的编写历时近两年，记录了人类首次登陆月球背面全程，并首次公开大量珍贵图片。月球车的“身体结构”是怎样的、“玉兔”在月背如何“睡觉”“行走”“吃饭”、月球坑中隐藏着哪些神秘物质……这些问题都可在书中找到答案。\n\n《月背征途》还是一部通俗易懂的航天科普读本，详实介绍了从“嫦娥一号”到“嫦娥四号”，从月球车工作原理、地外天体遥操作技术到驾驶员的修炼过程，从“鹊桥”中继星的发射定点到月球背面着陆点选择，从一波三折的降落过程到“南征北战”一次次月面涉险探测历程。作者以专业的水准讲解大量技术细节，以满足人们对月球、对探月技术的浓厚兴趣，同时也彰显了中国航天人的智慧与勇气。\n\n“拉索”与探月工程同属国家重大科技基础设施，书中“国家队”的科研协作模式——北京航天飞行控制中心团队用精准操控让“玉兔二号”在月背生存了3年多——与“拉索”团队“把全国做宇宙线的力量拢到一起”的建制化攻关思路如出一辙。想理解中国大科学工程怎么运转，这本书是最好的样本。' },
+      { title: '《征程：人类探索太空的故事》', reason: '“拉索”研究的是来自宇宙深处的粒子，这本书讲的正是人类如何一步步走向深空——从地球到月球，从月球到火星，下一个目标就是宇宙线的源头。\n\n宇宙是广袤空间和其中存在的各种天体以及弥漫物质的总称。自古以来，人类就对宇宙充满了好奇，并对宇宙的奥秘孜孜以求。人类探索宇宙的历史，是一幅波澜壮阔的画卷。在探索宇宙的过程中，随着科学技术不断进步，人类对宇宙的认知不断加深，人类社会自身的发展进步也深深受益于天文和宇宙学及航天科技的带动。人类作为高级智慧生物，对宇宙、地球与生命的起源、演化和未来的求知是必然的本能。\n\n本书以生动浅显的语言，讲述了地球、太阳系、宇宙空间的相关科学知识，介绍了人类探索太空的历史变迁、探索手段和工具的发展、探索所获得的重要发现，介绍了当前在探索太空中面临的科学和技术难题，探讨了地外生命存在的可能性以及人类与地球的未来。\n\n本书入选中宣部“向全国青少年推荐百种优秀出版物”、科技部2023年全国优秀科普作品。由“人民科学家”叶培建院士带领航天五院团队创作，系统梳理人类探索太空的历程。' },
+    ],
+  },
+  {
+    id: 'cas-chengdu-branch',
+    name: '中科院成都分院',
+    introduction: `中科院成都山地灾害与环境研究所：
+
+在四川，有一座研究所专门“盯着”大山里的危险——滑坡、泥石流、山洪，都是它的研究对象。中国科学院成都山地所扎根西南山区数十年，做的是一件很具体的事：搞清楚山洪泥石流到底怎么发生、怎么运动、怎么成灾，然后提前发出预警。他们研发的“山地灾害风险精细监测预报预警平台”，构建了从降雨、入渗到汇流演进的全过程物理模型，实现了从“区域等级预报”到“精细化险情预报”的跨越，已经在四川凉山等地投入业务化运行，还计划落地巴基斯坦，让中国防灾技术走出国门。通俗地说，他们做的事就是：在大山发脾气之前，先替住在山脚下的人“听见”它的动静。
+
+中科院成都生物研究所：
+
+在成都，有一个地方藏着12万余号两栖爬行动物标本，馆藏量全国第一、亚洲第二，覆盖了我国已知两栖爬行类物种的80%以上。这就是中国科学院成都生物研究所的两栖爬行动物标本馆。四代学者用了80余年时间，一锄头一锄头地挖、一只蛙一条蛇地攒，才有了今天的规模。生物所的科研人员至今仍在四川的山林里跑野外，2025年刚发表了两栖爬行动物新种“成都滑蜥”，此前它一直藏在标本馆里，被误认为另一种滑蜥。这里的研究不止于“认识物种”，还涉及蛇类四肢缺失的演化机制、水栖蛇类如何适应水下生活等前沿问题，相关成果登上了Cell封面。对青少年来说，走进这个标本馆，看到的不只是浸在药水里的标本，而是一部四代人用脚底板走出来的中国两栖爬行动物“家底”。`,
+    books: [
+      { title: '古诗词里的科学现象', reason: '入选2022年向全国青少年推荐百种优秀出版物。《古诗词里的科学现象》巧妙地将科学与传统文化相结合，精选从先秦到清代的经典古诗词，从物理（光学、力学、微观物理）、化学、生物、自然地理、天文、气象等各个角度解读经典古诗词中的科学现象，以风趣幽默的文笔揭示科学知识和原理的历史内涵，是一本知识性与可读性俱佳的趣味科普读物。\n\n成都山地所的研究对象——山地、土壤、植被、水文、气象是这本书反复触及的主题。书中有专门篇章解读“山上的花为何如此‘害羞’”（山地垂直气候带对植物物候的影响）、“山脉，大地的皱纹”（山地地质构造）、“每一粒沙子都曾是岩石”（山地风化侵蚀过程）、“地球上的水确实是‘活着’的”（水循环与水文过程），以及“落红不是无情物，化作春泥更护花”（土壤有机质循环与植被恢复）。' },
+      { title: '大山里的长尾龙', reason: '2025年度灾害防御科学技术普及奖一等奖，国内首部地质灾害主题科普绘本。以拟人化“长尾龙”为核心形象，把泥石流形成机理、发育特征和避险方法融入童话故事。成都山地所的核心工作就是研究滑坡、泥石流——这套书正是山地科研人员把“硬核知识”变成“孩子看得懂的故事”的典范。' },
+      { title: '《科学巨人：中国科学家的榜样故事》', reason: '入选2022年向全国青少年推荐百种优秀出版物。收录袁隆平、钱学森、邓稼先、竺可桢、李四光等10位科学家。成都山地所首任所长竺可桢是中国现代气象学和地理学的奠基人，他坚持物候观测几十年，从一天不落的日记里“熬”出了中国气候变迁的规律——这正是成都山地所科研精神的源头。\n\n对青少年来说，这本书讲的不只是科学家的成就，更是他们“把一件事做一辈子”的耐心。\n\n科学研究不是一蹴而就，是从竺可桢那一代人就开始的“把论文写在祖国大地上”，一代一代接着干。' },
+      { title: '《地球不能没有动物》', reason: '2022年向全国青少年推荐百种优秀出版物。这套书入选2022年向全国青少年推荐百种优秀出版物，作者林育真是山东师范大学教授，长期从事动物生态学及动物地理学教学与研究。丛书共10册，每册重点介绍一种动物，涵盖大熊猫、大象、老虎、狮子、孔雀、长颈鹿、长臂猿、大袋鼠、天鹅和企鹅，含百余张高清动物图片，系统展现动物的形态、生理、生态及其与人类的关系。书中关于动物生态、物种多样性的内容，能帮助青少年建立对动物学的基础认知。' },
+      { title: '《熊猫七仔》', reason: '入选2026年“中国好书”青少年专榜，以全球唯一圈养棕白色大熊猫为主角，讲述一个关于生命救助与物种保护的真实故事。\n\n七仔因一身棕白色毛发区别于所有黑白相间的大熊猫，被人们称为“可以拍彩色照片的大熊猫”。这本书以生活在秦岭四宝科学公园的七仔为主角，讲述它接受人工救助并健康成长的故事，同时从七仔的“熊际圈”入手，介绍其他秦岭亚种大熊猫，普及大熊猫相关知识和珍稀动物保护理念。对于成都生物所而言，这本书的价值在于它用一只大熊猫的个体命运，串起了物种保护、栖息地生态、人工繁育等生物多样性保育的核心议题——而这些议题，正是生物所“生态恢复与生物多样性保育”重点实验室长期关注的方向。青少年读完七仔的故事再走进生物所展厅，看到的不再只是标本和术语，而是一个个有温度的生命故事。' },
+      { title: '好样的昆虫笔记', reason: '全民阅读网少儿阅读推荐，该书是少年科普博主好样以自己观察、饲养昆虫的经历为素材，为小小“虫友”们精心打造的自然之书。全书有别于传统昆虫科普的说教模式，将文字与诙谐的昆虫漫画结合起来，以同龄人视角向小读者介绍蝴蝶、蜜蜂、螳螂等各种昆虫的形态特征、生活习性，以及与之相关的趣味“冷知识”，让小读者在掌握知识的同时，学习观察自然的方法，并逐步培养起对自然万物的敬畏之心、发掘自然奥秘的探索精神，以及保护生态环境的自觉意识。' },
+    ],
+  },
+  {
+    id: 'national-supercomputing-center-chengdu',
+    name: '国家超算成都中心',
+    introduction: '在西部（成都）科学城兴隆湖畔，隐藏着一个“超级大脑”——国家超级计算成都中心。它有着多重身份，是超级“算命先生”，能预测未来的气候变化趋势；是一位“神医”，与四川大学华西医院合作，运用强大的算力支持罕见病研究；是一位“农业大师”，与中国农业科学院合作，成功预测了蛋白质结构及相互作用；也是一位“天文学家”，与成都理工大学合作开展行星尺度的超高速碰撞模拟；还是一位“设计师”，为建筑、汽车等领域提供精确的设计方案。无论是宇宙的奥秘还是城市的脉搏，它都能一一算出。',
+    books: [
+      { title: '算法之问：看透数字世界的底层逻辑', reason: '入选2026年“中国好书”青少年专榜，作者熊辉、廖方宇等，书名直接指向“算法”与“数字世界的底层逻辑”。超算中心做气候模拟、行星碰撞模拟、蛋白质结构分析，底层全是算法在驱动。这本书帮青少年理解：超算不是一台“大电脑”，而是算法和算力结合后，对复杂世界进行模拟和预测的工具。' },
+      { title: '孩子看得懂的前沿科学漫画', reason: '入选2022年向全国青少年推荐百种优秀出版物，用漫画形式直观呈现AI、机器人、量子物理等尖端技术原理。超算中心的人形机器人、人工智能等应用场景，正好是这本书里用漫画讲清楚的东西——机器人怎么动、算法怎么决策，看完漫画就能理解超算在背后“算”的是什么。' },
+    ],
+  },
+]
+
 const PAGES = [
   [
     layer(0, 0, 750, 1624, '5bc9a404d437eedc06fae329a77e4908_154473_750_1624.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(38, 103, 522, 125, '76f7806ab140036f786b40abaeb79d31_21731_522_125.png'), layer(658, 117, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(21, 283, 727, 347, '1c9e523743adb330ed510ce65fcb2554_314008_727_347.png'), layer(21, 657, 727, 331, '3b603cd853e4d82ffa66259c006e99bc_345886_727_331.png'), layer(21, 1038, 727, 341, '0aa3ecc6630ef8a990e1564db4665879_355213_727_341.png'),
@@ -152,7 +197,7 @@ const PAGES = [
     layer(0, 0, 750, 1624, 'bd6f8cf6b018119c581a33e2ddfa405e_480165_750_1624.png'), layer(490, 1211, 208, 55, '65525d3ddb01829b60950ec48ab5b6d1_19512_208_55.png'), layer(404, 401, 316, 55, '559198fa328b24b32a13ec80159c8861_28896_316_55.png'), layer(61, 920, 151, 55, 'ea88b2a6854e54f5d1d55239c97b1d20_15860_151_55.png'), layer(84, 983, 545, 208, '681b18ed81a3b288457b96272fff06ee_253828_545_208.png'), layer(370, 142, 380, 243, '7e8322482a81f54c5d5cd48e78450395_202997_380_243.png'), layer(58, 1194, 558, 297, 'df715a3bba1247fbf572537953363195_239631_558_297.png'), layer(276, 352, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(643, 777, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(405, 532, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(627, 1278, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(31, 1006, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(46, 101, 643, 129, '58da27f455702a97011d3fb45fb44065_42099_643_129.png'), layer(658, 163, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'), layer(69, 427, 329, 197, '1b92140f5edb847c21ab6fbbbbd4306c_122134_329_197.png'), layer(475, 849, 262, 87, '69a622798c8b88be6975959874797982_29383_262_87.png'), layer(149, 635, 177, 55, 'c830a1974f8e9f00887c307f787cba84_15768_177_55.png'), layer(273, 650, 336, 188, '240f446e2d74f40823248f03ffebbf54_111985_336_188.png'),
   ],
   [
-    layer(0, 0, 750, 1624, '8260eebc4870c55ff557286c7a24d6ab_545650_750_1624.png'), layer(384, 277, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(691, 827, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(148, 515, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(236, 1237, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(317, 1190, 509, 252, '81859d280394e5c9356b0faf13e8c52b_174873_509_252.png'), layer(13, 225, 380, 275, '42cc9916311d21fcebfa01113922b74a_161364_408_295.png'), layer(224, 717, 456, 226, '81b7d8b04df32d92f5e82fc02ca675aa_212440_456_226.png'), layer(208, 481, 479, 202, '2bad3e0bf6d853e2b6338f5ee908e918_179910_479_202.png'), layer(39, 1038, 467, 160, '59f3e30ace317bafc73c0961e18354b1_154445_467_160.png'), layer(83, 970, 208, 55, 'd005a8ee85521165efc5dcdc8f4df0dd_20393_208_55.png'), layer(515, 925, 204, 55, '9911d31db3e63d5de9dc39295abcc061_21002_204_55.png'), layer(98, 611, 254, 55, '1e59b9bf0a5b8661e3fb6729a5722b3b_23580_254_55.png'), layer(82, 1314, 282, 55, '13fe9d50d511cf74622460664113609e_25694_282_55.png'), layer(361, 381, 151, 55, '0b9d94728e17d21d9fdd8f4dd4af6214_15196_151_55.png'), layer(26, 101, 689, 130, '39e48ee8ed646f4316db23745ff61dbd_34049_689_130.png'), layer(658, 162, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'),
+    layer(0, 0, 750, 1624, '8260eebc4870c55ff557286c7a24d6ab_545650_750_1624.png'), layer(384, 277, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(691, 827, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(148, 515, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(236, 1237, 41, 64, '82374099863f590a3e891a161d45ac9d_7390_41_64.png'), layer(317, 1190, 509, 252, '81859d280394e5c9356b0faf13e8c52b_174873_509_252.png'), layer(13, 225, 380, 275, '42cc9916311d21fcebfa01113922b74a_161364_408_295.png'), layer(224, 717, 456, 226, '81b7d8b04df32d92f5e82fc02ca675aa_212440_456_226.png'), layer(208, 481, 479, 202, '2bad3e0bf6d853e2b6338f5ee908e918_179910_479_202.png'), layer(39, 1038, 467, 160, '59f3e30ace317bafc73c0961e18354b1_154445_467_160.png'), layer(83, 970, 208, 55, 'd005a8ee85521165efc5dcdc8f4df0dd_20393_208_55.png'), layer(515, 925, 204, 55, '9911d31db3e63d5de9dc39295abcc061_21002_204_55.png'), layer(98, 611, 254, 55, '1e59b9bf0a5b8661e3fb6729a5722b3b_23580_254_55.png'), layer(82, 1314, 282, 55, '13fe9d50d511cf74622460664113609e_25694_282_55.png'), layer(317, 378, 221, 55, '26e9e1ce2635e36b8d15d4fbcbcb6685_19004_221_55.png'), layer(26, 101, 689, 130, '39e48ee8ed646f4316db23745ff61dbd_34049_689_130.png'), layer(658, 162, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(401, 1433, 177, 55, '69d33e844ce34d5310ebc6bb655f24ed_18292_177_55.png'), layer(161, 1433, 177, 55, 'e5d460c695047ec781b3acd2bd299e0c_16214_177_55.png'),
   ],
   [
     layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(25, 467, 708, 561, '56a79cf1a92141737709d512e6ce5c7e_52678_708_571.png'), layer(27, 115, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(502, 1320, 194, 244, '27102cb248a54e06c3593993531c7fdf_70874_194_244.png'), layer(-20, 1017, 548, 99, '8551a4e442f8a94f85985c1e79fd77e7_38836_548_99.png'),
@@ -175,15 +220,17 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children }) {
   </div></main>
 }
 
-function DetailLayout({ point }) {
+function DetailLayout({ point, onSelectBook }) {
+  const visibleBookRows = Math.min(point.books.length, 4)
+  const isScrollableBookList = point.books.length > visibleBookRows
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
     <div className="tianfu-detail-media"><div className="tianfu-detail-media-inner" /></div>
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
-    <div className="tianfu-detail-recommendation" style={{ height: `${point.books.length * 100 / 16.24}%` }}>
-      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} style={{ height: `${100 / point.books.length}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className="tianfu-detail-recommendation-title"><span className="tianfu-detail-recommendation-title-text">{book.title}</span></div></div>)}
+    <div className={`tianfu-detail-recommendation${isScrollableBookList ? ' tianfu-detail-recommendation-scrollable' : ''}`} style={{ height: `${visibleBookRows * 100 / 16.24}%` }}>
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} role="button" tabIndex={0} onClick={() => onSelectBook(book)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelectBook(book) }} style={{ height: `${100 / visibleBookRows}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className="tianfu-detail-recommendation-title"><span className="tianfu-detail-recommendation-title-text">{book.title}</span></div></div>)}
     </div>
   </>
 }
@@ -259,7 +306,7 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看兴隆湖详情', left: 61, top: 920, width: 151, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[0], 'xinglong-lake') },
     { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
   ]} />
-  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }]} />
-  if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }, ...selectedPoint.books.map((book, index) => ({ label: `查看${book.title}推荐理由`, left: 57, top: 1119 + index * 100, width: 577, height: 100, onClick: () => { setSelectedBook(book); setStage('book-reason') } }))]}><DetailLayout point={selectedPoint} /></Canvas>
+  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }]} />
+  if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
   return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} /></Canvas>
 }
