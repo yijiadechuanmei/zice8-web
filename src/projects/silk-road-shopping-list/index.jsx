@@ -125,8 +125,8 @@ function Stage({ height, children, className = '', fitViewport = false }) {
 }
 
 function flyProductToCart(image, sourceElement) {
-  const sourceImage = sourceElement.closest('.srsl-product-card')?.querySelector('.srsl-product-image')
-  const dock = document.querySelector('.srsl-dock')
+  const sourceImage = sourceElement?.closest('.srsl-product-card')?.querySelector('.srsl-product-image')
+  const dock = document.querySelector('.srsl-cart-float')
   if (!sourceImage || !dock || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
   const sourceRect = sourceImage.getBoundingClientRect()
   const dockRect = dock.getBoundingClientRect()
@@ -159,9 +159,9 @@ function flyProductToCart(image, sourceElement) {
   animation.onfinish = () => {
     removeFlyer()
     dock.animate?.([
-      { transform: 'translate3d(-50%, -100%, 0) scale(1)' },
-      { transform: 'translate3d(-50%, -100%, 0) scale(1.055)', offset: .42 },
-      { transform: 'translate3d(-50%, -100%, 0) scale(1)' },
+      { transform: 'translateX(-50%) scale(1)' },
+      { transform: 'translateX(-50%) scale(1.055)', offset: .42 },
+      { transform: 'translateX(-50%) scale(1)' },
     ], { duration: 360, easing: 'ease-out' })
   }
 }
@@ -352,13 +352,18 @@ function VideoPanel({ mode, videoRef, onEnd, onShop }) {
 }
 
 function ProductCard({ product, selected, onToggle }) {
-  const [flipped, setFlipped] = useState(false)
-  return <div className={`srsl-product-card${flipped ? ' is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)} onKeyDown={(event) => event.key === 'Enter' && setFlipped(!flipped)}>
+  const [flipped, setFlipped] = useState(selected)
+  const cardRef = useRef(null)
+  const flipAndSelect = () => {
+    if (flipped) return
+    setFlipped(true)
+    onToggle(product, cardRef.current)
+  }
+  const swapIcon = <span className="srsl-add srsl-add--decorative" aria-hidden="true"><SwapOutlined className="srsl-flip-icon" /></span>
+  return <div ref={cardRef} className={`srsl-product-card${flipped ? ' is-flipped' : ''}`} role="button" tabIndex={0} onClick={flipAndSelect} onKeyDown={(event) => event.key === 'Enter' && flipAndSelect()}>
     <div className="srsl-product-face">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
-      {!flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
-        {selected ? <img alt="" src={silkRoadAssets.minusIcon} /> : <SwapOutlined className="srsl-flip-icon" aria-hidden="true" />}
-      </button>}
+      {!flipped && swapIcon}
       <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 22 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
@@ -372,26 +377,20 @@ function ProductCard({ product, selected, onToggle }) {
         <p><b>传入时间：</b>{product.transferTime}</p>
         <p><b>记载：</b>{product.record}</p>
       </div>
-      {flipped && <button className="srsl-add" type="button" aria-label={selected ? `移除${product.name}` : `加入${product.name}`} onClick={(event) => { event.stopPropagation(); onToggle(product, event.currentTarget) }}>
-        {selected ? <img alt="" src={silkRoadAssets.minusIcon} /> : <SwapOutlined className="srsl-flip-icon" aria-hidden="true" />}
-      </button>}
+      {flipped && swapIcon}
     </div>
   </div>
 }
 
-function ProductList({ products, selectedIds, onToggle, onOpenCart, onCheckout }) {
+function ProductList({ products, selectedIds, onToggle, onOpenCart }) {
   const rows = Math.ceil(products.length / 2)
   const handleToggle = (product, sourceElement) => {
     if (!selectedIds.includes(product.id)) flyProductToCart(product.image, sourceElement)
     onToggle(product.id)
   }
-  const dock = <div className="srsl-dock">
-    <img alt="" src={silkRoadAssets.cartDock} />
-    <span className="srsl-dock-badge-count">{selectedIds.length}</span>
-    <span className="srsl-dock-selected-count">{selectedIds.length}</span>
-    <button type="button" className="srsl-dock-cart-hitbox" aria-label="查看购物车" onClick={onOpenCart} />
-    <button type="button" className="srsl-dock-checkout-hitbox" aria-label="去结算" onClick={onCheckout} />
-  </div>
+  const dock = <button type="button" className="srsl-cart-float" aria-label={`查看购物车，已选${selectedIds.length}件`} onClick={onOpenCart}>
+    <img alt="查看购物车" src={silkRoadAssets.cartFloat} />
+  </button>
   return <>
   <Stage height={646 + rows * PRODUCT_CARD_HEIGHT + PRODUCT_LIST_BOTTOM_GUTTER} className="srsl-list-stage">
     <img alt="" src={silkRoadAssets.cartHeader} style={{ position: 'absolute', width: 750, height: 546, left: 0, top: 0 }} />
@@ -655,5 +654,5 @@ export default function SilkRoadShoppingList({ routeParams }) {
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
   </main>)
   if (page === 'poster') return renderPage(<main className="srsl-app"><Poster products={selected} profile={profile} onBack={() => { setPage('shop'); setCartOpen(true) }} onReselect={() => { localStorage.removeItem('silk-road-shopping-list-cart'); setSelectedIds([]); setCartOpen(false); setPage('shop') }} /></main>)
-  return renderPage(<main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} onCheckout={checkout} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>)
+  return renderPage(<main className="srsl-app"><ProductList products={SILK_ROAD_PRODUCTS} selectedIds={selectedIds} onToggle={toggle} onOpenCart={() => setCartOpen(true)} />{cartOpen && <CartDrawer products={selected} onClose={() => setCartOpen(false)} onRemove={toggle} onCheckout={checkout} />}</main>)
 }
