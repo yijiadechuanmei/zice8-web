@@ -13,7 +13,7 @@ import './styles.css'
 
 const DESIGN_WIDTH = 750
 const PRODUCT_LIST_BOTTOM_GUTTER = 150
-const PRODUCT_CARD_HEIGHT = 340
+const PRODUCT_CARD_HEIGHT = 420
 const POSTER_FIELD_OFFSET = { x: -4, y: -21 }
 
 function fitPosterText(context, text, maxWidth) {
@@ -346,20 +346,18 @@ function ProductCard({ product, selected, onToggle }) {
     <div className="srsl-product-face">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
       {!flipped && swapIcon}
-      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 127, height: 180, left: 98, top: 22 }} />
+      <img className="srsl-product-image" alt={product.name} src={product.image} style={{ position: 'absolute', width: 156, height: 221, left: 90, top: 24 }} />
       <span className="srsl-product-name">{product.name}</span>
     </div>
     <div className="srsl-product-face srsl-product-detail">
       <img alt="" src={silkRoadAssets.productCard} style={{ position: 'absolute', width: 337, height: PRODUCT_CARD_HEIGHT, left: 0, top: 0 }} />
       <img alt="" src={silkRoadAssets.detailTitle} style={{ position: 'absolute', width: 115, height: 58, left: 109, top: 28 }} />
-      <img alt="" src={silkRoadAssets.detailIcon} style={{ position: 'absolute', width: 35, height: 35, left: 17.5, top: 15.5 }} />
       <span className="srsl-detail-name">{product.name}</span>
       <div className="srsl-detail-description">
         <p><b>原产地：</b>{product.origin}</p>
         <p><b>传入时间：</b>{product.transferTime}</p>
         <p><b>记载：</b>{product.record}</p>
       </div>
-      {flipped && swapIcon}
     </div>
   </div>
 }
