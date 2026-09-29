@@ -27,10 +27,11 @@ export const silkRoadAssets = {
   minusIcon: `${ASSET_ROOT}/1b16aadeba1e9b4e0b5f33dcadd456f4_633.svg`,
   detailTitle: `${ASSET_ROOT}/3d7685eaa9e31059a8bc4458a5713a8f_10412_115_58.png`,
   detailIcon: `${ASSET_ROOT}/4f985035441e52a947de6e19dcbc057b_425.svg`,
-  posterNovice: `${ASSET_ROOT}/f2f20ea0fcefa00825ef35a6f93a255c_759257_750_1624.png`,
-  posterApprentice: `${ASSET_ROOT}/e6316f6997866910ea82ec8f8274e1c8_767683_750_1624.png`,
-  posterExpert: `${ASSET_ROOT}/148d2b2c2e9685ab17589e255eff9faa_923172_750_1900.png`,
-  posterMasterOverlay: `${ASSET_ROOT}/0490edb206703dddc1e25a05ea31803b_1058644_750_2098.png`,
+  posterNovice: `${ASSET_ROOT}/73f7a4a792031e2f7bc7eb7d60ba788b_720086_750_1622.png`,
+  posterApprentice: `${ASSET_ROOT}/4a2c987b17d8d263cb5f31527ab7e1ae_727790_750_1622.png`,
+  posterExpert: `${ASSET_ROOT}/fc0243a2dc2281f6682809a80c9ab738_867433_750_1900.png`,
+  posterMasterBase: `${ASSET_ROOT}/148d2b2c2e9685ab17589e255eff9faa_923172_750_1900.png`,
+  posterMasterOverlay: `${ASSET_ROOT}/be09edfc1995d08d51dda42a7b534463_898384_750_2097.png`,
   posterCheck,
 }
 
