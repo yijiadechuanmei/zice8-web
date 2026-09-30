@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Card, Drawer, Input, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd'
+import { Button, Card, Drawer, Input, Popconfirm, Select, Space, Statistic, Table, Tag, Typography, message } from 'antd'
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import {
   exportDataRows,
+  clearFengchengQuizPhaseData,
   getDataSchema,
   getDataRows,
   getFengchengQuizPhaseSettings,
@@ -113,6 +114,7 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [scheduleSaving, setScheduleSaving] = useState(false)
+  const [clearing, setClearing] = useState(false)
   const [scheduleDraft, setScheduleDraft] = useState({ startTime: '', endTime: '' })
 
   async function loadSettings() {
@@ -174,6 +176,19 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
     }
   }
 
+  async function clearPhaseData() {
+    setClearing(true)
+    try {
+      const result = await clearFengchengQuizPhaseData(activity.activityKey, phaseNo)
+      await loadSettings()
+      message.success(`已清空第 ${phaseNo} 期 ${result.attempts || 0} 条答题记录`)
+    } catch (err) {
+      message.error(err.message || '清空本期数据失败')
+    } finally {
+      setClearing(false)
+    }
+  }
+
   const phaseCount = settings?.phaseCount || 6
   const options = Array.from({ length: phaseCount }, (_, index) => ({ value: index + 1, label: `第 ${index + 1} 期` }))
   const currentPhase = settings?.phases?.find((item) => item.phaseNo === phaseNo)
@@ -207,6 +222,19 @@ function FengchengPhasePanel({ activity, phaseNo, onChangePhase }) {
           <Input type="datetime-local" value={scheduleDraft.endTime} onChange={(event) => setScheduleDraft((current) => ({ ...current, endTime: event.target.value }))} style={{ width: 210 }} />
           <Button loading={scheduleSaving} onClick={saveSchedule}>保存本期时间</Button>
           <Text type="secondary">留空表示不限制该期时间；时间到后不可开始新答题。</Text>
+        </Space>
+        <Space wrap align="center">
+          <Popconfirm
+            title={`确认清空第 ${phaseNo} 期答题数据？`}
+            description="将删除本期答题记录、答题明细和排行榜数据；题库、期次时间和学生资料会保留。"
+            okText="确认清空"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+            onConfirm={clearPhaseData}
+          >
+            <Button danger loading={clearing}>清空本期答题数据</Button>
+          </Popconfirm>
+          <Text type="secondary">此操作不可恢复。</Text>
         </Space>
       </Space>
     </Card>

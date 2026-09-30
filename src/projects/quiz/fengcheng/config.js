@@ -8,7 +8,7 @@ const DEFAULT_ASSET_NAMES = {
   homeForeground: 'b68711009b4f8aa712fd82d976333ad8_1620126_750_1624.png',
   homeTitle: '35f7958af589637e49458aa47f0ca1a5_359111_726_496.png',
   homeStartButton: '1b4701c4fec06cd39a29ddc26265511e_68494_386_113.png',
-  profileModal: 'e7091726064700513663fd9a585e0fda_385367_573_558.png',
+  profileModal: 'profile-modal-20260930.png',
   rankTitle: '30e31861ea200cfbf8c52fe47181ffdd_43202_469_84.png',
   rankHomeButton: 'fe3660b8c8a049409436c35ac7f6a0e0_63984_387_106.png',
   pageBackground: 'a4e5502d7c05d5aea112eceb47cab20e_30184_750_1624.png',

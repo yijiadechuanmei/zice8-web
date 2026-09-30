@@ -488,6 +488,13 @@ export function updateFengchengQuizPhaseSchedule(activityKey, phaseNo, payload) 
   })
 }
 
+export function clearFengchengQuizPhaseData(activityKey, phaseNo) {
+  return adminRequest(`/quiz/admin/activities/${activityKey}/fengcheng-phase/${phaseNo}/data`, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirm: `CLEAR_FENGCHENG_PHASE_${phaseNo}` }),
+  })
+}
+
 export function getQuizAdminCategories(activityKey, params = {}) {
   const search = new URLSearchParams(params)
   return adminRequest(`/quiz/admin/activities/${activityKey}/categories?${search.toString()}`)
