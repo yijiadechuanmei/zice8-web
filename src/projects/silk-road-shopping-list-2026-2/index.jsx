@@ -662,7 +662,7 @@ export default function SilkRoadShoppingList({ routeParams }) {
   const selected = useMemo(() => SILK_ROAD_PRODUCTS.filter((product) => selectedIds.includes(product.id)), [selectedIds])
   const authConfig = useMemo(() => publicConfig ? { ...publicConfig, oauthScope: 'snsapi_userinfo', requireUserinfo: true } : null, [publicConfig])
   const bgmConfig = useMemo(() => publicConfig?.bgmConfig || publicConfig?.mobileConfig?.bgm || {}, [publicConfig])
-  const { authReady, reauth } = useWechatAuth(activityKey, authConfig)
+  const { authReady, reauth } = useWechatAuth(activityKey, authConfig, { compactOAuthRedirect: true })
   useWechatShare(activityKey, publicConfig)
 
   useEffect(() => {

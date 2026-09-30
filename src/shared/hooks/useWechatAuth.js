@@ -80,6 +80,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
   const blockSnapshotUser = Boolean(options.blockSnapshotUser)
   const replaceOAuthCallback = Boolean(options.replaceOAuthCallback)
   const allowNonWechatGuest = Boolean(options.allowNonWechatGuest)
+  const compactOAuthRedirect = Boolean(options.compactOAuthRedirect)
 
   const reauth = useCallback((reason = 'reauth') => {
     if (!activityKey) return false
@@ -115,6 +116,11 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     setAuthStatus('redirecting')
 
     const redirectUrlObject = new URL(sanitizeUrlForWechat(window.location.href))
+    if (compactOAuthRedirect) {
+      // The server encodes this URL into WeChat's state parameter. Activities
+      // that do not require query state can opt into a path-only callback.
+      redirectUrlObject.search = ''
+    }
     if (options.authCallbackParam) {
       redirectUrlObject.searchParams.set(options.authCallbackParam, '1')
     }
@@ -145,7 +151,7 @@ export function useWechatAuth(activityKey, publicConfig, options = {}) {
     })
     window.location.replace(oauthUrl)
     return true
-  }, [activityKey, allowNonWechatGuest, configuredOauthScope, configuredRequireUserinfo, oauthScopeOverride, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
+  }, [activityKey, allowNonWechatGuest, compactOAuthRedirect, configuredOauthScope, configuredRequireUserinfo, oauthScopeOverride, options.authCallbackNonceParam, options.authCallbackParam, requiresWechatBrowser])
 
   useEffect(() => {
     if (!activityKey || !publicConfig) return
