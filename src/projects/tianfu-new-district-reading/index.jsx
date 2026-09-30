@@ -348,6 +348,31 @@ export default function TianfuNewDistrictReadingProject() {
   const [showActivityRules, setShowActivityRules] = useState(false)
 
   useEffect(() => {
+    const existingIcon = document.querySelector('link[rel~="icon"]')
+    const icon = existingIcon || document.createElement('link')
+    const previousHref = existingIcon?.getAttribute('href')
+    const previousType = existingIcon?.getAttribute('type')
+
+    if (!existingIcon) {
+      icon.rel = 'icon'
+      document.head.appendChild(icon)
+    }
+    icon.href = asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')
+    icon.type = 'image/png'
+
+    return () => {
+      if (!existingIcon) {
+        icon.remove()
+        return
+      }
+      if (previousHref === null) icon.removeAttribute('href')
+      else icon.setAttribute('href', previousHref)
+      if (previousType === null) icon.removeAttribute('type')
+      else icon.setAttribute('type', previousType)
+    }
+  }, [])
+
+  useEffect(() => {
     let active = true
     request(`/activities/${ACTIVITY_KEY}/public-config`, { skipAuth: true })
       .then((config) => {
