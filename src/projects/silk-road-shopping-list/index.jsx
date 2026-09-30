@@ -608,7 +608,10 @@ export default function SilkRoadShoppingList({ routeParams }) {
     setCartOpen(false)
     setPage('poster')
   }
-  const renderPage = (content) => <>{content}<ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} /></>
+  const renderPage = (content) => {
+    const videoBgmConfig = page === 'video' ? { ...bgmConfig, autoplay: false, showControl: false } : bgmConfig
+    return <>{content}<ActivityBgmPlayer bgm={videoBgmConfig} activityKey={activityKey} /></>
+  }
   if (page === 'home' || page === 'video' || page === 'video-end') return renderPage(<main className={`srsl-intro-screen${page === 'video' || page === 'video-end' ? ' is-video' : ''}`}>
     {page === 'home' && <Home onStart={startVideo} />}
     {page !== 'home' && <VideoPanel key="video-panel" mode={page} videoRef={videoRef} onEnd={videoEnd} onShop={() => setPage('shop')} />}
