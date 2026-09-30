@@ -277,7 +277,7 @@ function ReviewLayout() {
 function ActivityRulesModal({ onClose }) {
   return <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
     <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
-    <div style={{ position: 'absolute', left: '50.933333%', top: '50%', width: `${637 / 7.5}%`, height: `${763 / 16.24}%`, backgroundColor: '#ccc', transform: 'translate(-50%, -50%)' }}>
+    <div style={{ position: 'absolute', left: '50.933333%', top: '50%', width: `${637 / 7.5}%`, height: `${763 / 16.24}%`, transform: 'translate(-50%, -50%)' }}>
       <img className="tianfu-layer" src={asset('c6b8b95e2974075fb854ea63af8f65ee_13506_637_763.png')} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
       <button type="button" aria-label="关闭活动规则" onClick={onClose} style={{ position: 'absolute', zIndex: 1, left: `${588.5 / 637 * 100}%`, top: `${1.5 / 763 * 100}%`, width: `${68 / 637 * 100}%`, height: `${68 / 763 * 100}%`, margin: 0, padding: 0, border: 0, background: 'transparent', cursor: 'pointer' }}><img className="tianfu-layer" src={asset('135e0fa1725f6f216ce89c87aa91364d_3354_68_68.png')} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} /></button>
       <div style={{ position: 'absolute', left: `${30.5 / 637 * 100}%`, top: `${73.5 / 763 * 100}%`, width: `${570 / 637 * 100}%`, height: `${623 / 763 * 100}%`, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
