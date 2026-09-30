@@ -712,7 +712,9 @@ export default function SilkRoadShoppingList({ routeParams }) {
     return () => {
       if (!bgmWasPlayingBeforeVideoRef.current) return
       bgmWasPlayingBeforeVideoRef.current = false
-      activityAudioService.play('video-resume')
+      // iOS 微信在视频自然结束的回调中会拦截普通 audio.play()；通过桥接恢复，
+      // 跳过和自然播完两种路径都会得到相同的音乐恢复行为。
+      activityAudioService.playWechatAudible('video-resume', { forcePrepare: true })
     }
   }, [page])
 
