@@ -19,6 +19,27 @@ const REVIEW_PAGE = [
   layer(247, 105, 464, 151, 'f37931029340439d7a35fa3c95c48e40_16272_464_151.png'),
 ]
 
+const ACTIVITY_RULES_TEXT = `一、活动时间：线上阅读活动共分三期。每轮活动自“天府发布”微信公众号发布活动文章之日起，持续一周。具体截止时间以每期文章内标注为准。
+二、参与方式
+关注“天府发布”微信公众号，阅读每期活动文章。
+扫描文章中的小程序二维码，进入“趣阅科学·慧读新区”科普地图，打卡对应片区（海创园、兴隆湖、天府公园）的地标点位，查看点位介绍、科普知识点及推荐书籍。
+在“天府发布”微信公众号搜索“趣阅科学·慧读新区”线上读新区文章，在文章评论区留言，撰写推荐书籍或科普知识点相关的书评。
+
+三、评选规则
+每轮活动截止时，由工作人员对评论区留言进行截图统计。
+以留言点赞数量为唯一评选依据，点赞数最高的前10名用户获得奖品。
+工作人员将私信联系获奖人员，赠送奖品。
+
+四、奖品设置
+每期活动设奖品10份，每份为价值100元的购书卡。
+五、奖品发放
+活动截止后，请获奖用户及时回复“天府发布”微信公众号后台私信，确认获奖信息。
+请获奖用户在规定时间内联系小编领奖，逾期未联系者，视为自动放弃获奖资格。
+
+六、其他说明
+本次活动不设参与次数限制，但同一用户在同一轮活动中仅可获奖一次。
+本活动最终解释权归主办方所有。`
+
 const HOME = [
   layer(0, 0, 750, 1624, '9e0698d039f852dcb71a782eba2609f4_1518088_750_1624.png'),
   layer(101, 237, 572, 257, '7035fb18d008055ad2b19625c9d44b11_71999_572_257.png'),
@@ -53,9 +74,9 @@ const FIRST_PHASE_POINTS = [
     id: 'west-china-expo-city',
     name: '西部国际博览城及天府国际会议中心',
     video: '66d67cddab033f2e84a9b55672f9087b_23321142.mp4.mp4',
-    introduction: `远看像一艘来自未来的飞船，近看是一个巨大的“V”字——这就是西博城。用钢量16万吨，超过“鸟巢”，直接拿下中国钢结构金奖。这座建筑充分利用自然光线，雨水被收集起来循环利用，壮观的背后藏着细腻的环保心思。
+    introduction: `远看像一艘来自未来的飞船，近看是一个巨大的“V”字——这就是西博城。用钢量16万吨，超过“鸟巢”，直接拿下中国钢结构金奖。这座建筑充分利用自然光线，雨水被收集起来循环利用，壮观的背后藏着细腻的环保心思。西博城是西博会、全国糖酒会等大型展会的核心场馆，2025年第二十届西博会就在这里举办，吸引了62个国家和地区的3000余家企业参展。
 
-让人挪不开眼的，还有隔壁的“天府之檐”。2025年世运会开幕式就在这里上演。这是亚洲最大的单体木结构建筑，由国际知名设计大师汤桦领衔设计，以中国古建筑“佛光寺大殿”的抬梁式木结构为原型，建构了一条长达430米、高32米的超尺度木结构空间。430米也是全国最长的连续瓦屋面建筑，犹如成都平原延绵伸展的地平线。
+让人挪不开眼的，还有隔壁的“天府之檐”。2025年世运会开幕式就在这里上演。这是亚洲最大的单体木结构建筑，由国际知名设计大师汤桦领衔设计，以中国古建筑“佛光寺大殿”的抬梁式木结构为原型，建构了一条长达430米、高32米的超尺度木结构空间。430米也是全国最长的连续瓦屋面建筑，犹如成都平原延绵伸展的地平线。天府国际会议中心如今也是各类高规格会议的举办地——2025天府碳中和论坛、2026四川省文化和旅游发展大会等都在这里举行。
 
 “天府之檐”的天府有两层意思：一层指天府新区，一层指天府之国。前厅木结构檐廊以唐代斗拱型制为蓝本，完全遵循传统建筑大木作做法，通过瓜柱抬梁形成殿堂式传统形制，端头出挑，展露木结构榫卯构件，再现中国传统建筑精髓。最讲究的是，这条钢木混合结构长廊的胶合木用量超过4300立方米，为了找到最合适的材料，建设团队辗转全国10余个胶合木工厂，考察100余种胶合木，最终远赴黑龙江漠河，在零下25度的天气下寻找到最为合适的胶合木。
 
@@ -220,7 +241,7 @@ const PAGES = [
   ],
 ]
 
-function Canvas({ sceneKey, layers, masks = [], actions = [], children }) {
+function Canvas({ sceneKey, layers, masks = [], actions = [], children, banner }) {
   const animationKey = sceneKey || layers[0]?.name || 'detail'
   return <main className="tianfu-stage"><div className="tianfu-canvas" key={animationKey}>
     {layers.map((item, index) => {
@@ -230,6 +251,7 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children }) {
     {masks.map((item) => <div className="tianfu-mask tianfu-layer-enter" key={item.top} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, '--tianfu-enter-delay': '180ms' }}><img className="tianfu-mask-image" src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.imageLeft / item.width * 100}%`, top: `${item.imageTop / item.height * 100}%`, width: `${item.imageWidth / item.width * 100}%`, height: `${item.imageHeight / item.height * 100}%` }} /></div>)}
     {children}
     {actions.map((item) => <button className="tianfu-hit" key={item.label} type="button" onClick={item.onClick} aria-label={item.label} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
+    {banner}
   </div></main>
 }
 
@@ -250,6 +272,20 @@ function DetailLayout({ point, onSelectBook }) {
 
 function ReviewLayout() {
   return <div style={{ position: 'absolute', left: `${25 / 7.5}%`, top: `${259 / 16.24}%`, width: `${698 / 7.5}%`, minWidth: `${698 / 7.5}%`, maxWidth: `${698 / 7.5}%`, height: `${1240 / 16.24}%`, minHeight: `${1240 / 16.24}%`, maxHeight: `${1240 / 16.24}%`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: '1 0 0%', overflow: 'visible', backgroundColor: 'rgba(255, 255, 255, 0.8)', transformOrigin: '0% 0% 0px' }}><div style={{ color: '#8a653e', fontSize: 'clamp(21px, 5.6vw, 42px)', fontWeight: 700 }}>敬请期待</div></div>
+}
+
+function ActivityRulesModal({ onClose }) {
+  return <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)' }} />
+    <div style={{ position: 'absolute', left: '50.933333%', top: '50%', width: `${637 / 7.5}%`, height: `${763 / 16.24}%`, backgroundColor: '#ccc', transform: 'translate(-50%, -50%)' }}>
+      <img className="tianfu-layer" src={asset('c6b8b95e2974075fb854ea63af8f65ee_13506_637_763.png')} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
+      <button type="button" aria-label="关闭活动规则" onClick={onClose} style={{ position: 'absolute', zIndex: 1, left: `${588.5 / 637 * 100}%`, top: `${1.5 / 763 * 100}%`, width: `${68 / 637 * 100}%`, height: `${68 / 763 * 100}%`, margin: 0, padding: 0, border: 0, background: 'transparent', cursor: 'pointer' }}><img className="tianfu-layer" src={asset('135e0fa1725f6f216ce89c87aa91364d_3354_68_68.png')} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} /></button>
+      <div style={{ position: 'absolute', left: `${30.5 / 637 * 100}%`, top: `${73.5 / 763 * 100}%`, width: `${570 / 637 * 100}%`, height: `${623 / 763 * 100}%`, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
+        <div style={{ alignSelf: 'center', flexShrink: 0, marginBottom: '5.263158%', fontSize: 'min(26px, 3.466667vw)', color: 'rgb(86, 42, 24)', fontWeight: 700, lineHeight: 'normal', whiteSpace: 'pre-wrap' }}>活动规则</div>
+        <div style={{ width: '100%', flexShrink: 0, fontSize: 'min(22px, 2.933333vw)', color: 'rgb(86, 42, 24)', fontWeight: 700, lineHeight: 'normal', textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'normal' }}>{ACTIVITY_RULES_TEXT}</div>
+      </div>
+    </div>
+  </div>
 }
 
 function formatBookTitle(title) {
@@ -309,6 +345,7 @@ export default function TianfuNewDistrictReadingProject() {
   const [selectedBook, setSelectedBook] = useState(TIANFU_PARK.books[0])
   const [selectedPoint, setSelectedPoint] = useState(TIANFU_PARK)
   const [pointMapStage, setPointMapStage] = useState('map')
+  const [showActivityRules, setShowActivityRules] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -336,20 +373,23 @@ export default function TianfuNewDistrictReadingProject() {
     setPointMapStage(mapStage)
     setStage('review')
   }
-  if (stage === 'home') return <Canvas layers={HOME} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }]} />
+  const activityRulesModal = showActivityRules ? <ActivityRulesModal onClose={() => setShowActivityRules(false)} /> : null
+  if (stage === 'home') return <Canvas layers={HOME} banner={activityRulesModal} actions={[{ label: '进入第一期', left: 274, top: 1189, width: 195, height: 194, onClick: () => setStage('catalog') }, { label: '查看活动规则', left: 282, top: 1410, width: 177, height: 55, onClick: () => setShowActivityRules(true) }]} />
   if (stage === 'catalog') return <Canvas layers={PAGES[0]} masks={[
     districtReadingStage < 2 ? 644 : null,
     districtReadingStage < 3 ? 1024 : null,
-  ].filter((top) => top !== null).map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} actions={[
+  ].filter((top) => top !== null).map((top) => ({ left: 0, top, width: 750, height: 380, imageLeft: 248, imageTop: 47, imageWidth: 261, imageHeight: 264, name: 'dec5f1bd5f38a191230e26913a3592dd_35476_261_264.png' }))} banner={activityRulesModal} actions={[
     { label: '返回首页', left: 658, top: 117, width: 66, height: 65, onClick: () => setStage('home') },
     { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') },
+    { label: '查看活动规则', left: 401, top: 1433, width: 177, height: 55, onClick: () => setShowActivityRules(true) },
     { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') },
     ...(districtReadingStage >= 2 ? [{ label: '进入兴隆湖', left: 21, top: 657, width: 727, height: 331, onClick: () => setStage('xinglong-lake') }] : []),
     ...(districtReadingStage >= 3 ? [{ label: '进入海创园', left: 21, top: 1038, width: 727, height: 341, onClick: () => setStage('haichuang-park') }] : []),
   ]} />
-  if (stage === 'map') return <Canvas layers={PAGES[1]} actions={[
+  if (stage === 'map') return <Canvas layers={PAGES[1]} banner={activityRulesModal} actions={[
     { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') },
+    { label: '查看活动规则', left: 282.5, top: 1431, width: 177, height: 55, onClick: () => setShowActivityRules(true) },
     { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('map') },
     { label: '查看广汇美术馆详情', left: 482, top: 236, width: 208, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[4]) },
     { label: '查看天府公园详情', left: 470, top: 484, width: 177, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[0]) },
@@ -357,9 +397,10 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看雅州路综合管廊详情', left: 162, top: 716, width: 245, height: 55, onClick: () => openPoint(FIRST_PHASE_POINTS[3]) },
     { label: '查看天府新区国际会议中心详情', left: 252, top: 1185, width: 282, height: 93, onClick: () => openPoint(FIRST_PHASE_POINTS[1]) },
   ]} />
-  if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} actions={[
+  if (stage === 'xinglong-lake') return <Canvas layers={PAGES[2]} banner={activityRulesModal} actions={[
     { label: '返回阅读地图', left: 658, top: 163, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') },
+    { label: '查看活动规则', left: 282.5, top: 1431, width: 177, height: 55, onClick: () => setShowActivityRules(true) },
     { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('xinglong-lake') },
     { label: '查看清华四川能源互联网研究院详情', left: 404, top: 401, width: 316, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[1], 'xinglong-lake') },
     { label: '查看天齐锂业详情', left: 149, top: 635, width: 177, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[4], 'xinglong-lake') },
@@ -367,7 +408,7 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '查看兴隆湖详情', left: 61, top: 920, width: 151, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[0], 'xinglong-lake') },
     { label: '查看科创生态岛详情', left: 490, top: 1211, width: 208, height: 55, onClick: () => openPoint(XINGLONG_LAKE_POINTS[3], 'xinglong-lake') },
   ]} />
-  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') }, { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('haichuang-park') }]} />
+  if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} banner={activityRulesModal} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 317, top: 378, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 98, top: 611, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 82, top: 1314, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') }, { label: '查看活动规则', left: 282.5, top: 1431, width: 177, height: 55, onClick: () => setShowActivityRules(true) }, { label: '查看精彩评论', left: 519, top: 1431, width: 177, height: 55, onClick: () => openReview('haichuang-park') }]} />
   if (stage === 'review') return <Canvas sceneKey={`review-${pointMapStage}`} layers={REVIEW_PAGE} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><ReviewLayout /></Canvas>
   if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
   return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} point={selectedPoint} /></Canvas>
