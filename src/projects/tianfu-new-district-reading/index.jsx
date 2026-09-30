@@ -237,7 +237,7 @@ const PAGES = [
     layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(25, 467, 708, 561, '56a79cf1a92141737709d512e6ce5c7e_52678_708_571.png'), layer(27, 115, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(502, 1320, 194, 244, '27102cb248a54e06c3593993531c7fdf_70874_194_244.png'), layer(-20, 1017, 548, 99, '8551a4e442f8a94f85985c1e79fd77e7_38836_548_99.png'),
   ],
   [
-    layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(27, 86, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), layer(205, 92, 548, 99, 'ecd6e654adc5b85a2ea1e3064008986b_14501_548_99.png'), layer(23, 523, 710, 929, 'ee328ace81f6a8ef5f9f5600d92aac97_67164_710_929.png'),
+    layer(0, 0, 750, 1624, '49d028d0926c4f74ebe84b0a2c5f8783_447027_750_1624.png'), layer(27, 86, 66, 65, '1346673f4bcb9e86c1d64d995f5d7ac9_9029_66_65.png'), { ...layer(205, 92, 548, 99, 'ecd6e654adc5b85a2ea1e3064008986b_14501_548_99.png'), zIndex: 1 }, layer(23, 523, 710, 929, 'ee328ace81f6a8ef5f9f5600d92aac97_67164_710_929.png'),
   ],
 ]
 
@@ -246,7 +246,7 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children, banner }
   return <main className="tianfu-stage"><div className="tianfu-canvas" key={animationKey}>
     {layers.map((item, index) => {
       const isMarker = item.name === '82374099863f590a3e891a161d45ac9d_7390_41_64.png'
-      return <img className={`tianfu-layer${isMarker ? ' tianfu-marker' : index > 0 ? ' tianfu-layer-enter' : ''}`} key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, ...(isMarker ? { '--tianfu-marker-delay': `${(index % 5) * 110}ms` } : { '--tianfu-enter-delay': `${Math.min(index, 8) * 45}ms` }) }} />
+      return <img className={`tianfu-layer${isMarker ? ' tianfu-marker' : index > 0 ? ' tianfu-layer-enter' : ''}`} key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, ...(item.zIndex !== undefined ? { zIndex: item.zIndex } : {}), ...(isMarker ? { '--tianfu-marker-delay': `${(index % 5) * 110}ms` } : { '--tianfu-enter-delay': `${Math.min(index, 8) * 45}ms` }) }} />
     })}
     {masks.map((item) => <div className="tianfu-mask tianfu-layer-enter" key={item.top} style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%`, '--tianfu-enter-delay': '180ms' }}><img className="tianfu-mask-image" src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.imageLeft / item.width * 100}%`, top: `${item.imageTop / item.height * 100}%`, width: `${item.imageWidth / item.width * 100}%`, height: `${item.imageHeight / item.height * 100}%` }} /></div>)}
     {children}
@@ -333,7 +333,7 @@ function BookReasonLayout({ book, point }) {
   const title = formatBookTitle(book.title)
   const coverName = bookCoverName(book.title, point.id)
   return <>
-    {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '12.315271%', width: '37.733333%', height: '20.628079%' }} />}
+    {coverName && <img className="tianfu-layer" src={asset(coverName)} alt="" draggable="false" style={{ left: '4.133333%', top: '9.79064%', width: '37.733333%', height: '20.628079%', zIndex: 0 }} />}
     <div className={`tianfu-book-reason-title${Array.from(title).length > 30 ? ' tianfu-book-reason-title-compact' : ''}`}><span className="tianfu-book-reason-title-text">{title}</span></div>
     <div className="tianfu-book-reason-copy">{book.reason}</div>
   </>
