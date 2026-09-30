@@ -265,7 +265,7 @@ function DetailLayout({ point, onSelectBook }) {
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
     <div className={`tianfu-detail-recommendation${isScrollableBookList ? ' tianfu-detail-recommendation-scrollable' : ''}`} style={{ height: `${visibleBookRows * 100 / 16.24}%` }}>
-      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} role="button" tabIndex={0} onClick={() => onSelectBook(book)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelectBook(book) }} style={{ height: `${100 / visibleBookRows}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className="tianfu-detail-recommendation-title"><span className="tianfu-detail-recommendation-title-text">{book.title}</span></div></div>)}
+      {point.books.map((book) => <div className="tianfu-detail-recommendation-row" key={book.title} role="button" tabIndex={0} onClick={() => onSelectBook(book)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelectBook(book) }} style={{ height: `${100 / visibleBookRows}%` }}><img src={asset('57143668e9dfe2e2cea46d52d1a57215_12027_108_97.png')} alt="" draggable="false" /><div className={`tianfu-detail-recommendation-title${book.title.length > 14 ? ' tianfu-detail-recommendation-title-long' : ''}`}><span className="tianfu-detail-recommendation-title-text">{book.title}</span></div></div>)}
     </div>
   </>
 }
