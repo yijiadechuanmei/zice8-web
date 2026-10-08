@@ -1,5 +1,6 @@
 .tianfu-stage { width: 100%; height: 100svh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .tianfu-canvas { position: relative; width: min(750px, 100vw); height: auto; aspect-ratio: 750 / 1624; margin: 0; flex: 0 0 auto; transform-origin: 50% 50%; animation: tianfu-page-turn 440ms cubic-bezier(.2, .75, .2, 1) both; }
+@media (min-width: 751px) { .tianfu-stage { align-items: flex-start; overflow-x: hidden; overflow-y: auto; } }
 .tianfu-layer { position: absolute; display: block; max-width: none; pointer-events: none; user-select: none; }
 .tianfu-layer-enter { opacity: 0; animation: tianfu-layer-enter 440ms cubic-bezier(.18, .8, .24, 1) var(--tianfu-enter-delay, 0ms) both; }
 .tianfu-marker { transform-origin: 50% 100%; opacity: 0; animation: tianfu-marker-enter 360ms cubic-bezier(.18, .9, .3, 1) var(--tianfu-marker-delay, 0ms) both, tianfu-marker-bounce 1500ms ease-in-out calc(var(--tianfu-marker-delay, 0ms) + 420ms) infinite; }
