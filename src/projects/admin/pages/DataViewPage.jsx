@@ -496,24 +496,10 @@ function GenericDataViewPage({ activity, phaseScope = 'all' }) {
         </Space>,
       })
       if (activeViewKey === 'nansha_open_mic_rejected_entries') columns.push({
-        title: '操作', key: 'nanshaReviewActions', fixed: 'right', width: 150,
-        render: (_, row) => (
-          <Popconfirm
-            title="确认撤回该不通过作品？"
-            description="撤回后作品将回到初审待审核列表。"
-            okText="撤回到初审"
-            cancelText="取消"
-            onConfirm={() => handleReviewNanshaEntry(row, 'restore_pending')}
-          >
-            <Button
-              size="small"
-              loading={reviewingNanshaEntryId === `${row.id}:restore_pending`}
-              disabled={Boolean(reviewingNanshaEntryId)}
-            >
-              撤回到初审
-            </Button>
-          </Popconfirm>
-        ),
+        title: '初审操作', key: 'nanshaReviewActions', fixed: 'right', width: 180,
+        render: (_, row) => <Space size={6} wrap>
+          <Button size="small" type="primary" loading={reviewingNanshaEntryId === `${row.id}:restore_pending`} disabled={Boolean(reviewingNanshaEntryId)} onClick={() => handleReviewNanshaEntry(row, 'restore_pending')}>撤回到初审</Button>
+        </Space>,
       })
       if (activeViewKey === 'nansha_open_mic_published_entries') columns.push({
         title: '操作', key: 'nanshaReviewActions', fixed: 'right', width: 120,
