@@ -1,0 +1,26 @@
+.ps-mobile { box-sizing: border-box; width: min(100%, 750px); min-height: 100svh; margin: 0 auto; padding: 42px 24px calc(30px + env(safe-area-inset-bottom, 0px)); background: #f5f4ef; color: #202c29; font-family: system-ui, sans-serif; }
+.ps-eyebrow { font-size: 11px; letter-spacing: .24em; font-weight: 700; color: #7d958a; }
+.ps-mobile h1 { margin: 12px 0 8px; font-size: 30px; font-weight: 650; letter-spacing: -.04em; }
+.ps-mobile header p { color: #77807b; margin: 0 0 28px; }
+.ps-preview { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 5; max-height: 55svh; width: 100%; overflow: hidden; border-radius: 12px; background: #e7e9e3; }
+.ps-preview img { width: 100%; height: 100%; position: absolute; object-fit: contain; }
+.ps-placeholder { text-align: center; color: #8b9690; font-size: 14px; }
+.ps-placeholder span { font-size: 42px; font-weight: 200; }
+.ps-uploading { position: absolute; inset: 0; display: grid; place-items: center; background: #152d25b8; color: white; }
+.ps-message { min-height: 40px; margin: 20px 0 12px; font-size: 14px; line-height: 1.5; }
+.ps-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ps-actions button { min-height: 52px; border: 1px solid #becac2; border-radius: 8px; background: transparent; color: #234f3d; font: inherit; font-weight: 600; cursor: pointer; }
+.ps-actions .ps-primary { background: #234f3d; color: white; border-color: #234f3d; }
+.ps-actions button:disabled { opacity: .4; cursor: default; }
+.ps-actions button:active:not(:disabled) { transform: translateY(1px); opacity: .8; }
+.ps-actions button:focus-visible { outline: 3px solid #93b7a0; outline-offset: 3px; }
+.ps-note { margin-top: 20px; color: #909892; font-size: 12px; line-height: 1.8; text-align: center; }
+.ps-screen { position: fixed; inset: 0; width: 100%; height: 100svh; overflow: hidden; display: grid; place-items: center; background: #101614; color: #f3f5ef; font-family: system-ui, sans-serif; }
+.ps-screen-photo { display: block; width: 100%; height: 100%; object-fit: contain; animation: ps-photo-enter .65s cubic-bezier(.16, 1, .3, 1) both; }
+.ps-waiting { text-align: center; padding: 30px; }
+.ps-waiting h1 { margin: 22px 0 12px; font-size: clamp(28px, 4vw, 64px); font-weight: 500; }
+.ps-waiting p { font-size: clamp(14px, 1.5vw, 24px); color: #87988f; }
+.ps-connection { position: absolute; bottom: 20px; left: 20px; padding: 8px 12px; border-radius: 6px; background: #101614c9; color: #d0c5a7; font-size: 13px; }
+@keyframes ps-photo-enter { from { opacity: 0; transform: scale(.72); } to { opacity: 1; transform: scale(1); } }
+@media (hover: hover) and (pointer: fine) { .ps-actions button:hover:not(:disabled) { filter: brightness(1.1); } }
+@media (prefers-reduced-motion: reduce) { .ps-screen-photo { animation: none; } }

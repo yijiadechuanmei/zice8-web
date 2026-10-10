@@ -37,7 +37,10 @@ const LuckyDrawProject = lazy(() => import('./lucky-draw/index.jsx'))
 const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.jsx'))
 const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
 
+const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
+
 const activityTypeProjects = {
+  photo_screen_demo_20261010: PhotoScreenProject,
   cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),
   payment_transfer_test: PaymentTransferTestProject,
   artist_call_lottery: ArtistCallLotteryProject,
@@ -81,6 +84,11 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/photo_screen_demo_20261010/:activityKey/screen',
+    Component: PhotoScreenProject,
+    activityGate: true,
+  },
   {
     path: '/fifteenth_five_i_can/:activityKey',
     Component: FifteenthFiveICanProject,
