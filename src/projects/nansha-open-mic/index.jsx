@@ -22,6 +22,7 @@ import './styles.css'
 const ACTIVITY_TYPE = 'nansha_open_mic'
 const ACTIVITY_KEY = 'nansha_new_voice_2026'
 const ASSET_BASE_URL = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`
+const CANDIDATE_IMAGE_DIRECTORY = 'candidate-images'
 const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260811`
 const REVIEW_MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1-1.png?v=20260811`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
@@ -144,6 +145,12 @@ function buildEntryShareUrl(entryId) {
   url.searchParams.set('entryId', entryId)
   url.searchParams.set('from', 'share')
   return url.toString()
+}
+
+function getCandidateImageUrl(entryId) {
+  const normalizedId = String(entryId || '').trim()
+  if (!normalizedId) return ''
+  return `${ASSET_BASE_URL}/${CANDIDATE_IMAGE_DIRECTORY}/${encodeURIComponent(normalizedId)}.jpg`
 }
 
 export default function NanshaOpenMicProject() {
@@ -686,7 +693,7 @@ function VoteHome({ visualUrl, entries, voteQuota, onRanking, onMy, onWork }) {
         <section className="nansha-vote-work-panel" aria-label="参赛作品">
           {entries.map((work) => (
             <article className="nansha-vote-work-card" key={work.id}>
-              <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.workName}`} onClick={() => onWork(work)} style={work.coverUrl ? { backgroundImage: `url(${work.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}><CaretRightFilled /></button>
+              <button className="nansha-vote-video-placeholder" type="button" aria-label={`查看作品${work.workName}`} onClick={() => onWork(work)} style={{ backgroundImage: `url(${getCandidateImageUrl(work.id)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}><CaretRightFilled /></button>
               <p>
                 <span className="nansha-work-card-title-line"><span className="nansha-work-card-title-label">作品名称：</span><span className="nansha-work-card-title" title={work.workName}>{work.workName}</span></span>
                 <span>作者：{work.authorName}</span>
@@ -893,6 +900,7 @@ function WorkDetailPage({ entry, onBack, onVote, onShare }) {
 
 function VotePosterDialog({ entry, shareUrl, onClose }) {
   const posterUrl = shareUrl || buildEntryShareUrl(entry.id)
+  const candidateImageUrl = getCandidateImageUrl(entry.id)
   const qrSourceRef = useRef(null)
   const [posterImage, setPosterImage] = useState('')
   const [posterError, setPosterError] = useState('')
@@ -913,7 +921,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
         const [background, avatar, cover] = await Promise.all([
           loadCanvasImage(votePosterBackgroundUrl),
           entry.authorAvatar ? loadCanvasImage(entry.authorAvatar).catch(() => null) : Promise.resolve(null),
-          entry.coverUrl ? loadCanvasImage(entry.coverUrl).catch(() => null) : Promise.resolve(null),
+          candidateImageUrl ? loadCanvasImage(candidateImageUrl).catch(() => null) : Promise.resolve(null),
         ])
         if (disposed) return
         const width = 527
@@ -953,7 +961,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
       disposed = true
       if (retryTimer) window.clearTimeout(retryTimer)
     }
-  }, [entry.authorAvatar, entry.authorName, entry.coverUrl, entry.workName, posterUrl])
+  }, [candidateImageUrl, entry.authorAvatar, entry.authorName, entry.workName, posterUrl])
 
   return (
     <section className="nansha-poster-overlay" role="dialog" aria-modal="true" aria-label="拉票海报">
