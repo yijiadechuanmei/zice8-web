@@ -11,7 +11,7 @@ import {
   VideoCameraFilled,
 } from '@ant-design/icons'
 import { QRCodeCanvas } from 'qrcode.react'
-import { castVote, createEntry, createUploadPolicy, getBootstrap, getEntries, getEntry, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
+import { castVote, createEntry, createUploadPolicy, getBootstrap, getCandidatePosterImage, getEntries, getEntry, getMyVotes, getPublicConfig, replaceEntryVideo, uploadFileToOss } from './api'
 import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
@@ -151,6 +151,16 @@ function getCandidateImageUrl(entryId) {
   const normalizedId = String(entryId || '').trim()
   if (!normalizedId) return ''
   return `${ASSET_BASE_URL}/${CANDIDATE_IMAGE_DIRECTORY}/${encodeURIComponent(normalizedId)}.jpg`
+}
+
+async function loadCandidatePosterImage(entryId) {
+  const blob = await getCandidatePosterImage(ACTIVITY_KEY, entryId)
+  const objectUrl = URL.createObjectURL(blob)
+  try {
+    return await loadCanvasImage(objectUrl)
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
 }
 
 export default function NanshaOpenMicProject() {
@@ -921,7 +931,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
         const [background, avatar, cover] = await Promise.all([
           loadCanvasImage(votePosterBackgroundUrl),
           entry.authorAvatar ? loadCanvasImage(entry.authorAvatar).catch(() => null) : Promise.resolve(null),
-          candidateImageUrl ? loadCanvasImage(candidateImageUrl).catch(() => null) : Promise.resolve(null),
+          candidateImageUrl ? loadCandidatePosterImage(entry.id).catch(() => null) : Promise.resolve(null),
         ])
         if (disposed) return
         const width = 527

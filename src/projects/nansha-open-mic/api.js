@@ -1,4 +1,4 @@
-import { request } from '../../shared/api/request'
+import { API_BASE_URL, getToken, request } from '../../shared/api/request'
 
 const base = (activityKey) => `/nansha-open-mic/activities/${encodeURIComponent(activityKey)}`
 
@@ -12,6 +12,16 @@ export const getEntries = (activityKey, page = 1, pageSize = 20) =>
 
 export const getEntry = (activityKey, entryId) =>
   request(`${base(activityKey)}/entries/${encodeURIComponent(entryId)}`)
+
+export async function getCandidatePosterImage(activityKey, entryId) {
+  const token = getToken()
+  const response = await fetch(
+    `${API_BASE_URL}${base(activityKey)}/entries/${encodeURIComponent(entryId)}/candidate-image`,
+    { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+  )
+  if (!response.ok) throw new Error('作品展示图片读取失败')
+  return response.blob()
+}
 
 export const getMyVotes = (activityKey) => request(`${base(activityKey)}/my-votes`)
 
