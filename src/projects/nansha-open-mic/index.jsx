@@ -16,6 +16,7 @@ import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import certificatePosterTemplateUrl from './assets/certificate-poster-template.png'
+import votePosterBackgroundUrl from './assets/vote-poster-background.png'
 import './styles.css'
 
 const ACTIVITY_TYPE = 'nansha_open_mic'
@@ -23,7 +24,6 @@ const ACTIVITY_KEY = 'nansha_new_voice_2026'
 const ASSET_BASE_URL = `https://assets.zice8.com/${ACTIVITY_TYPE}/${ACTIVITY_KEY}`
 const MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1.png?v=20260811`
 const REVIEW_MAIN_VISUAL_URL = `${ASSET_BASE_URL}/1-1.png?v=20260811`
-const POSTER_BACKGROUND_URL = `${ASSET_BASE_URL}/hb.png?v=20260811`
 const MICROPHONE_VISUAL_URL = `${ASSET_BASE_URL}/3.png`
 const RULES_TITLE_VISUAL_URL = `${ASSET_BASE_URL}/4.png?v=20260811-rules`
 const RANKING_THEME_VISUAL_URL = `${ASSET_BASE_URL}/6.png?v=20260810-ranking`
@@ -911,7 +911,7 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
       }
       try {
         const [background, avatar, cover] = await Promise.all([
-          loadCanvasImage(POSTER_BACKGROUND_URL),
+          loadCanvasImage(votePosterBackgroundUrl),
           entry.authorAvatar ? loadCanvasImage(entry.authorAvatar).catch(() => null) : Promise.resolve(null),
           entry.coverUrl ? loadCanvasImage(entry.coverUrl).catch(() => null) : Promise.resolve(null),
         ])
@@ -943,8 +943,8 @@ function VotePosterDialog({ entry, shareUrl, onClose }) {
         context.fillRect(310.9, 757.5, 166, 166)
         context.drawImage(qrCanvas, 310.9, 757.5, 166, 166)
         setPosterImage(canvas.toDataURL('image/png'))
-      } catch (error) {
-        if (!disposed) setPosterError(error instanceof Error ? error.message : '海报合成失败，请稍后重试')
+      } catch {
+        if (!disposed) setPosterError('海报生成失败，请稍后重试')
       }
     }
 
