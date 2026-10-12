@@ -271,6 +271,7 @@ function DetailMediaCarousel({ point }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const videoRef = useRef(null)
+  const mediaInnerRef = useRef(null)
   const current = media[activeIndex]
   const isVideo = current?.toLowerCase().endsWith('.mp4')
   const selectMedia = (index) => {
@@ -287,13 +288,36 @@ function DetailMediaCarousel({ point }) {
       video.pause()
     }
   }
+  const toggleFullscreen = async () => {
+    const video = videoRef.current
+    const mediaInner = mediaInnerRef.current
+    if (!video || !mediaInner) return
+    if (video.webkitDisplayingFullscreen) {
+      video.webkitExitFullscreen?.()
+      return
+    }
+    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+    if (fullscreenElement === mediaInner) {
+      await (document.exitFullscreen?.() || document.webkitExitFullscreen?.())
+      return
+    }
+    if (video.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen()
+      return
+    }
+    try {
+      if (mediaInner.requestFullscreen) await mediaInner.requestFullscreen()
+      else mediaInner.webkitRequestFullscreen?.()
+    } catch { /* Fullscreen is unavailable in some embedded browsers. */ }
+  }
 
   return <div className="tianfu-detail-media">
-    {current && <div className="tianfu-detail-media-inner">
+    {current && <div ref={mediaInnerRef} className="tianfu-detail-media-inner">
       {isVideo
         ? <>
           <video key={current} ref={videoRef} playsInline preload="metadata" src={asset(current)} onClick={togglePlayback} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
           {!isPlaying && <button type="button" className="tianfu-video-playback" aria-label="播放视频" onClick={togglePlayback}>▶</button>}
+          <button type="button" className="tianfu-video-fullscreen" aria-label="全屏播放视频" title="全屏播放" onClick={toggleFullscreen}>⛶</button>
         </>
         : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" />}
     </div>}

@@ -14,6 +14,9 @@
 .tianfu-detail-media-inner > video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tianfu-detail-media-inner > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tianfu-video-playback { position: absolute; z-index: 2; left: 50%; top: 50%; display: flex; width: min(72px, 9.6vw); height: min(72px, 9.6vw); align-items: center; justify-content: center; transform: translate(-50%, -50%); border: 2px solid rgba(255, 255, 255, 0.92); border-radius: 50%; background: rgba(0, 0, 0, 0.52); color: #fff; font-size: min(34px, 4.533333vw); line-height: 1; cursor: pointer; }
+.tianfu-video-fullscreen { position: absolute; z-index: 4; top: 3%; right: 3%; display: flex; width: min(42px, 5.6vw); height: min(42px, 5.6vw); align-items: center; justify-content: center; padding: 0; border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 7px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: min(30px, 4vw); line-height: 1; cursor: pointer; }
+.tianfu-detail-media-inner:fullscreen, .tianfu-detail-media-inner:-webkit-full-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; border-radius: 0; background: #000; }
+.tianfu-detail-media-inner:fullscreen > video, .tianfu-detail-media-inner:-webkit-full-screen > video { object-fit: contain; }
 .tianfu-media-control { position: absolute; z-index: 2; top: 50%; display: flex; width: min(46px, 6.133333vw); height: min(46px, 6.133333vw); align-items: center; justify-content: center; transform: translateY(-50%); border: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.42); color: #fff; font-size: min(42px, 5.6vw); line-height: 1; cursor: pointer; }
 .tianfu-media-previous { left: 2%; }
 .tianfu-media-next { right: 2%; }
