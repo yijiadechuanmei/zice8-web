@@ -12,6 +12,13 @@
 .tianfu-detail-media { position: absolute; left: 10.133333%; top: 5.850985%; width: 103.6%; height: 28.509852%; border-radius: 4%; background-color: rgba(255, 255, 255, 0.57); overflow: visible; }
 .tianfu-detail-media-inner { position: absolute; left: 4.633204%; top: 4.967603%; width: 93.951094%; height: 91.792657%; border-radius: 4.11%; overflow: hidden; }
 .tianfu-detail-media-inner > video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tianfu-detail-media-inner > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tianfu-media-control { position: absolute; z-index: 2; top: 50%; display: flex; width: min(46px, 6.133333vw); height: min(46px, 6.133333vw); align-items: center; justify-content: center; transform: translateY(-50%); border: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.42); color: #fff; font-size: min(42px, 5.6vw); line-height: 1; cursor: pointer; }
+.tianfu-media-previous { left: 2%; }
+.tianfu-media-next { right: 2%; }
+.tianfu-media-pagination { position: absolute; z-index: 2; right: 0; bottom: 5%; left: 0; display: flex; justify-content: center; gap: min(10px, 1.333333vw); }
+.tianfu-media-pagination > button { width: min(10px, 1.333333vw); height: min(10px, 1.333333vw); flex: 0 0 auto; padding: 0; border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 50%; background: rgba(50, 50, 50, 0.42); cursor: pointer; }
+.tianfu-media-pagination > button[aria-current="true"] { background: #fff; }
 .tianfu-detail-copy { position: absolute; left: 7.6%; top: 31.650246%; width: 85.066667%; height: 27.770936%; overflow: hidden auto; color: rgb(125, 65, 0); font-size: min(26px, 3.466667vw); line-height: normal; text-align: left; white-space: pre-wrap; word-break: normal; }
 .tianfu-detail-title { position: absolute; left: 7.333333%; top: 26.847291%; width: 72.666667%; height: 3.756158%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding-bottom: min(7px, 0.933333vw); background: center / cover no-repeat url('https://assets.zice8.com/tianfu_new_district_reading_20260927/tianfu_new_district_reading_20260927/b5031fcafaafcdf7e3d465cda3003d4a_20789_493_61.png'); color: #fff; font-size: min(32px, 4.266667vw); font-weight: 700; letter-spacing: min(4px, 0.533333vw); text-shadow: 2px 2px 2px rgba(74, 43, 20, 0.78); filter: drop-shadow(rgba(0, 0, 0, 0.66) 2px 2px 0); white-space: pre-wrap; }
 .tianfu-detail-title-long { font-size: min(24px, 3.2vw); letter-spacing: min(1px, 0.133333vw); }

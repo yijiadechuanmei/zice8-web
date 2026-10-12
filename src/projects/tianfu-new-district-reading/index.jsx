@@ -50,6 +50,7 @@ const HOME = [
 
 const TIANFU_PARK = {
   name: '天府公园',
+  media: ['tf1.jpg', 'tf2.jpg', 'tf3.jpg', 'tf4.jpg', 'tf5.jpg', 'tf6.jpg', 'tf7.jpg'],
   introduction: `天府公园为市民提供亲近自然、休闲游憩的空间。园内仅乔木就有近50个品种，落叶、常绿、彩叶树种还有近60种。四季景观各有特色，这里五月蓝花楹盛放，金秋彩叶树层叠尽染，一年四季都有不同风采。对观鸟爱好者来说，天府公园更是一座秘密基地：放眼整个天府新区，已记录鸟类248种。就连铺路的透水砖也藏着巧思：作为“海绵城市”的一环，雨水落下来会被直接“喝掉”，过滤净化后还能再次利用。逛一次天府公园，等于同时上了一堂鸟类观察课、植物认知课和生态工程课。
 
 想动起来？Hi-Park运动中心就在园内——室内羽毛球馆、篮球场、网球场一应俱全，室外还有足球场和轮滑冰球场。这个占地约30亩的运动中心集运动体验、赛事活动和专业训练于一体，2021年就被列为天府新区全民健身惠民开放场馆。2025年成都世运会期间，速度攀岩和浮士德球比赛就在这片草坪旁举行`,
@@ -76,7 +77,7 @@ const FIRST_PHASE_POINTS = [
     name: `西部国际博览城
 及
 天府国际会议中心`,
-    video: '66d67cddab033f2e84a9b55672f9087b_23321142.mp4.mp4',
+    media: ['tfgj.mp4'],
     introduction: `远看像一艘来自未来的飞船，近看是一个巨大的“V”字——这就是西博城。用钢量16万吨，超过“鸟巢”的11万吨，直接拿下中国钢结构金奖。这座建筑充分利用自然光线，雨水被收集起来循环利用，壮观的背后藏着细腻的环保心思。西博城是西博会、全国糖酒会等大型展会的核心场馆，2025年第二十届西博会就在这里举办，吸引了62个国家和地区的3000余家企业参展。
 
 让人挪不开眼的，还有隔壁的“天府之檐”。2025年世运会开幕式就在这里上演。由汤桦领衔设计，以中国古建筑“佛光寺大殿”的抬梁式木结构为原型，建构了一条长达430米、高32米的超尺度木结构空间，犹如成都平原延绵伸展的地平线。天府国际会议中心如今也是各类高规格会议的举办地——2025天府碳中和论坛、2026四川省文化和旅游发展大会等都在这里举行。
@@ -93,7 +94,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'sichuan-celebrity-hall',
     name: '四川名人馆',
-    video: '3ba26b0aae98eb44eb9f539cceb2dd38_4312419.mp4.mp4',
+    media: ['mr.mp4'],
     introduction: `想和李白、苏轼、诸葛亮“面对面”聊天吗？来这里就对了。四川名人馆坐落于天府新区雅州路，紧邻天府公园，集中展示先秦至辛亥革命前的70位四川历史名人——司马相如、李白、苏轼生于巴蜀，诸葛亮、杜甫客居蜀地造福一方。
 
 但这70位先贤不是挂在墙上的画像。场馆用大数据、人工智能、体感交互打造数字展项。走进1250平方米的数字沉浸式体验展厅，你化身“寻梦者”，穿过四重沉浸式梦境场景，与先贤跨越时空“对话”。场馆的设计中藏着“蜀山、蜀水、蜀道”的传统意象，内部连通各层展厅的动线灵感取自千古诗篇里的蜀道。
@@ -114,7 +115,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'utility-tunnel',
     name: '综合管廊',
-    video: 'ece24f3fdf0b6739f66f46c5a7417bd6_9399741.mp4.mp4',
+    media: ['yzl.mp4'],
     introduction: `你脚下6米深的地方，藏着一座“智慧地下城”。雅州路综合管廊全长3公里，是成都目前唯一可通行车辆的管廊，一辆小型巡检车辆可以自由通过。
 
 管廊内的智能巡检机器人头顶两只“大眼睛”、脚踏四个轮子自动巡逻。它会对配电系统、消防系统进行巡检，发现的问题自动进行图像分析，结果实时推送到控制中心。管廊内安装的设施设备实时监测氧气、温度、湿度、硫化氢、甲烷等环境参数，出现异常自动报警。截至目前，智能巡检机器人已替代人工完成日常巡检项目70%以上，巡检效率提升4倍。
@@ -129,7 +130,7 @@ const FIRST_PHASE_POINTS = [
   {
     id: 'guanghui-art-museum',
     name: '广汇美术馆',
-    video: 'f5f5c5cf8b2d0c57fa0f76039c6bf8f1_33253818.mp4.mp4',
+    media: ['gh.mp4'],
     introduction: '广汇美术馆，位于天府新区天府总部商务区，毗邻天府公园，是一座集展览展示、学术研究、公共教育和收藏为一体的大型国际化美术馆。它犹如一个漂浮的盒子，给人以强烈的视觉冲击力。其拥有71840平方米的总建筑面积，内设8个专业展厅。此外，美术馆还配备了恒温恒湿典藏库、同声传译学术报告厅、艺术文献中心、实验空间、观影剧场等多功能空间，为观众提供了全方位的服务和体验。',
     books: [
       { title: '《名画在左，科学在右 2》', reason: '当观众走进广汇美术馆 8 个专业展厅，面对一幅幅名画时，或许会好奇：达・芬奇笔下的光线为何如此真实？印象派的色彩背后藏着怎样的光学原理？《名画在左，科学在右 2》（中国全民阅读网推荐好书）正是这样一场艺术与科学的 "跨界展"：全书围绕 100 余幅脍炙人口的世界名画，以科学视角解读其中蕴含的科学元素、科学道理与人生智慧，探讨名画揭示的科学文明史 —— 让美术馆的每一面墙，都成为连接审美与求知的窗口。' },
@@ -267,12 +268,35 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children, banner }
   </div></main>
 }
 
+function DetailMediaCarousel({ point }) {
+  const media = point.media || (point.video ? [point.video] : [])
+  const [activeIndex, setActiveIndex] = useState(0)
+  const current = media[activeIndex]
+  const isVideo = current?.toLowerCase().endsWith('.mp4')
+  const move = (direction) => setActiveIndex((index) => (index + direction + media.length) % media.length)
+
+  return <div className="tianfu-detail-media">
+    {current && <div className="tianfu-detail-media-inner">
+      {isVideo
+        ? <video key={current} controls playsInline preload="metadata" src={asset(current)} />
+        : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" />}
+    </div>}
+    {media.length > 1 && <>
+      <button type="button" className="tianfu-media-control tianfu-media-previous" aria-label="上一张" onClick={() => move(-1)}>‹</button>
+      <button type="button" className="tianfu-media-control tianfu-media-next" aria-label="下一张" onClick={() => move(1)}>›</button>
+      <div className="tianfu-media-pagination" aria-label={`第 ${activeIndex + 1} 张，共 ${media.length} 张`}>
+        {media.map((item, index) => <button type="button" key={item} aria-label={`查看第 ${index + 1} 张`} aria-current={index === activeIndex ? 'true' : undefined} onClick={() => setActiveIndex(index)} />)}
+      </div>
+    </>}
+  </div>
+}
+
 function DetailLayout({ point, onSelectBook }) {
   const visibleBookRows = Math.min(point.books.length, 4)
   const isScrollableBookList = point.books.length > visibleBookRows
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
-    <div className="tianfu-detail-media">{point.video && <div className="tianfu-detail-media-inner"><video controls playsInline preload="metadata" src={asset(point.video)} /></div>}</div>
+    <DetailMediaCarousel key={point.id} point={point} />
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
