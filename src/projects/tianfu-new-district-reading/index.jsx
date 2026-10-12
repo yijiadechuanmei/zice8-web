@@ -294,8 +294,8 @@ function DetailMediaCarousel({ point }) {
     {current && <div className="tianfu-detail-media-inner">
       {isVideo
         ? <>
-          <video key={current} ref={videoRef} playsInline preload="metadata" src={asset(current)} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
-          <button type="button" className="tianfu-video-playback" aria-label={isPlaying ? '暂停视频' : '播放视频'} onClick={togglePlayback}>{isPlaying ? 'Ⅱ' : '▶'}</button>
+          <video key={current} ref={videoRef} playsInline preload="metadata" src={asset(current)} onClick={togglePlayback} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+          {!isPlaying && <button type="button" className="tianfu-video-playback" aria-label="播放视频" onClick={togglePlayback}>▶</button>}
         </>
         : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" />}
     </div>}
