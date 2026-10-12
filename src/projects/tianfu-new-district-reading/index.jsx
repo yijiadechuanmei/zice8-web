@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
 import './style.css'
 
@@ -271,21 +271,39 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children, banner }
 function DetailMediaCarousel({ point }) {
   const media = point.media || (point.video ? [point.video] : [])
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const videoRef = useRef(null)
   const current = media[activeIndex]
   const isVideo = current?.toLowerCase().endsWith('.mp4')
-  const move = (direction) => setActiveIndex((index) => (index + direction + media.length) % media.length)
+  const selectMedia = (index) => {
+    setIsPlaying(false)
+    setActiveIndex(index)
+  }
+  const move = (direction) => selectMedia((activeIndex + direction + media.length) % media.length)
+  const togglePlayback = async () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) {
+      try { await video.play() } catch { setIsPlaying(false) }
+    } else {
+      video.pause()
+    }
+  }
 
   return <div className="tianfu-detail-media">
     {current && <div className="tianfu-detail-media-inner">
       {isVideo
-        ? <video key={current} controls playsInline preload="metadata" src={asset(current)} />
+        ? <>
+          <video key={current} ref={videoRef} playsInline preload="metadata" src={asset(current)} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+          <button type="button" className="tianfu-video-playback" aria-label={isPlaying ? '暂停视频' : '播放视频'} onClick={togglePlayback}>{isPlaying ? 'Ⅱ' : '▶'}</button>
+        </>
         : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" />}
     </div>}
     {media.length > 1 && <>
       <button type="button" className="tianfu-media-control tianfu-media-previous" aria-label="上一张" onClick={() => move(-1)}>‹</button>
       <button type="button" className="tianfu-media-control tianfu-media-next" aria-label="下一张" onClick={() => move(1)}>›</button>
       <div className="tianfu-media-pagination" aria-label={`第 ${activeIndex + 1} 张，共 ${media.length} 张`}>
-        {media.map((item, index) => <button type="button" key={item} aria-label={`查看第 ${index + 1} 张`} aria-current={index === activeIndex ? 'true' : undefined} onClick={() => setActiveIndex(index)} />)}
+        {media.map((item, index) => <button type="button" key={item} aria-label={`查看第 ${index + 1} 张`} aria-current={index === activeIndex ? 'true' : undefined} onClick={() => selectMedia(index)} />)}
       </div>
     </>}
   </div>
