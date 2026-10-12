@@ -204,6 +204,50 @@ export function deleteNanshaOpenMicEntry(activityKey, entryId) {
   })
 }
 
+export function createNanshaOpenMicEntryVideoUploadPolicy(activityKey, entryId, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${encodeURIComponent(entryId)}/video-upload-policy`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateNanshaOpenMicEntryVideo(activityKey, entryId, payload) {
+  return adminRequest(`/admin/activities/${activityKey}/nansha-open-mic/entries/${encodeURIComponent(entryId)}/update-video`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+// Keeps large media bytes off the API process. This mirrors registration's
+// direct signed OSS upload while retaining the Admin bearer token only for
+// policy issuance and the final processing request.
+export function uploadAdminFileToOss(policy, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', policy.uploadUrl, true)
+    Object.entries(policy.headers || { 'Content-Type': file.type }).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value)
+    })
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)))
+      }
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100)
+        resolve(policy.fileUrl)
+        return
+      }
+      const requestId = xhr.getResponseHeader('x-oss-request-id')
+      reject(new Error(`视频上传失败（OSS ${xhr.status || '网络异常'}${requestId ? `，请求号：${requestId}` : ''}）`))
+    }
+    xhr.onerror = () => reject(new Error('视频上传失败，请检查网络或重新选择视频后重试'))
+    xhr.onabort = () => reject(new Error('文件上传已取消'))
+    xhr.send(file)
+  })
+}
+
 export function clearLongwenBeerQuizData(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/longwen-beer-quiz/clear-data`, {
     method: 'POST',

@@ -7,6 +7,7 @@ import {
   clearRiderSafetySurveyData,
   configureRiderSafetySurveyPayoutTest,
   clearSongWishLotteryDraws,
+  createNanshaOpenMicEntryVideoUploadPolicy,
   deleteNanshaOpenMicEntry,
   getActivityConfig,
   getArtistCallLotteryPrizes,
@@ -32,8 +33,10 @@ import {
   updateNanhaiChallengeDrawManualControl,
   updateNanhaiChallengeRegionAccessExemption,
   updateNanshaOpenMicConfig,
+  updateNanshaOpenMicEntryVideo,
   updateTianfuNewDistrictReadingStage,
   updateRiderSafetySurveyMode,
+  uploadAdminFileToOss,
 } from '../api'
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
 import CybersecurityChallengeAdmin from '../components/CybersecurityChallengeAdmin'
@@ -100,6 +103,11 @@ export default function ActivityConfigPage({ activity }) {
   const [nanshaResetting, setNanshaResetting] = useState(false)
   const [nanshaDeleteEntryId, setNanshaDeleteEntryId] = useState('')
   const [nanshaDeletingEntry, setNanshaDeletingEntry] = useState(false)
+  const [nanshaVideoEntryId, setNanshaVideoEntryId] = useState('')
+  const [nanshaVideoFile, setNanshaVideoFile] = useState(null)
+  const [nanshaVideoInputKey, setNanshaVideoInputKey] = useState(0)
+  const [nanshaVideoProgress, setNanshaVideoProgress] = useState(0)
+  const [nanshaVideoUploading, setNanshaVideoUploading] = useState(false)
   const [tianfuReadingStage, setTianfuReadingStage] = useState(1)
   const [tianfuReadingStageSaving, setTianfuReadingStageSaving] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
@@ -354,6 +362,53 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setNanshaDeletingEntry(false)
+    }
+  }
+
+  async function handleUpdateNanshaEntryVideo() {
+    const entryId = nanshaVideoEntryId.trim()
+    if (!/^\d+$/.test(entryId)) {
+      message.warning('请输入正确的作品ID')
+      return
+    }
+    if (!nanshaVideoFile) {
+      message.warning('请选择要更新的视频')
+      return
+    }
+    const contentType = getNanshaVideoContentType(nanshaVideoFile)
+    if (!contentType) {
+      message.warning('仅支持 MP4、MOV 或 WebM 视频')
+      return
+    }
+    if (nanshaVideoFile.size > 2 * 1024 * 1024 * 1024) {
+      message.warning('视频大小不能超过 2GB')
+      return
+    }
+    setNanshaVideoUploading(true)
+    setNanshaVideoProgress(0)
+    setError('')
+    try {
+      const policy = await createNanshaOpenMicEntryVideoUploadPolicy(activity.activityKey, entryId, {
+        kind: 'video',
+        fileName: nanshaVideoFile.name,
+        contentType,
+        size: nanshaVideoFile.size,
+        replace: true,
+      })
+      const videoUrl = await uploadAdminFileToOss(policy, nanshaVideoFile, setNanshaVideoProgress)
+      const result = await updateNanshaOpenMicEntryVideo(activity.activityKey, entryId, { videoUrl })
+      if (result?.entry?.mediaStatus === 'failed') {
+        throw new Error(result.entry.mediaError || '视频转码任务提交失败')
+      }
+      setNanshaVideoFile(null)
+      setNanshaVideoInputKey((value) => value + 1)
+      message.success(`作品 ${entryId} 的视频已上传，正在转码并自动生成封面`)
+    } catch (err) {
+      const text = err.message || '更新作品视频失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setNanshaVideoUploading(false)
     }
   }
 
@@ -1069,6 +1124,46 @@ export default function ActivityConfigPage({ activity }) {
                   </div>
                 </label>
               </Space>
+              <Card size="small" type="inner" title="按作品 ID 更新视频" style={{ marginTop: 18 }}>
+                <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                  <Alert
+                    type="info"
+                    showIcon
+                    message="视频将按报名流程直传 OSS，并自动转码、生成独立封面"
+                    description="仅更新指定作品的视频文件；作品名称、作者、审核状态和票数均保留。转码期间已上架作品会暂不展示，处理完成后自动恢复。支持 MP4、MOV、WebM，最大 2GB。"
+                  />
+                  <Space wrap align="center">
+                    <Input
+                      style={{ width: 180 }}
+                      placeholder="请输入作品ID"
+                      value={nanshaVideoEntryId}
+                      disabled={nanshaVideoUploading}
+                      onChange={(event) => setNanshaVideoEntryId(event.target.value.replace(/\D/g, ''))}
+                    />
+                    <input
+                      key={nanshaVideoInputKey}
+                      type="file"
+                      accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+                      disabled={nanshaVideoUploading}
+                      onChange={(event) => setNanshaVideoFile(event.target.files?.[0] || null)}
+                    />
+                    <Popconfirm
+                      title="确认更新该作品的视频？"
+                      description="上传后将自动转码并重新生成视频封面。"
+                      okText="确认更新"
+                      cancelText="取消"
+                      onConfirm={handleUpdateNanshaEntryVideo}
+                      disabled={nanshaVideoUploading || !/^\d+$/.test(nanshaVideoEntryId.trim()) || !nanshaVideoFile}
+                    >
+                      <Button type="primary" loading={nanshaVideoUploading} disabled={!/^\d+$/.test(nanshaVideoEntryId.trim()) || !nanshaVideoFile}>
+                        更新视频
+                      </Button>
+                    </Popconfirm>
+                  </Space>
+                  {nanshaVideoFile ? <Text type="secondary">已选择：{nanshaVideoFile.name}（{formatNanshaVideoSize(nanshaVideoFile.size)}）</Text> : null}
+                  {nanshaVideoUploading ? <Text strong>上传进度：{nanshaVideoProgress}%</Text> : null}
+                </Space>
+              </Card>
               <Card size="small" type="inner" title="危险操作">
                 <Space direction="vertical" size={10} style={{ width: '100%' }}>
                   <Text strong>删除指定作品上传记录</Text>
@@ -1734,4 +1829,18 @@ function toOptionalDateTimeISOString(value) {
   if (!value) return null
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+function getNanshaVideoContentType(file) {
+  const name = String(file?.name || '').toLowerCase()
+  if (name.endsWith('.mp4')) return 'video/mp4'
+  if (name.endsWith('.mov')) return 'video/quicktime'
+  if (name.endsWith('.webm')) return 'video/webm'
+  return ''
+}
+
+function formatNanshaVideoSize(size) {
+  const value = Number(size) || 0
+  if (value >= 1024 * 1024 * 1024) return `${(value / (1024 * 1024 * 1024)).toFixed(2)} GB`
+  return `${Math.max(value / (1024 * 1024), 0).toFixed(1)} MB`
 }
