@@ -300,9 +300,6 @@ function DetailMediaCarousel({ point }) {
     {media.length > 1 && <>
       <button type="button" className="tianfu-media-control tianfu-media-previous" aria-label="上一张" onClick={() => move(-1)}>‹</button>
       <button type="button" className="tianfu-media-control tianfu-media-next" aria-label="下一张" onClick={() => move(1)}>›</button>
-      <div className="tianfu-media-pagination" aria-label={`第 ${activeIndex + 1} 张，共 ${media.length} 张`}>
-        {media.map((item, index) => <button type="button" key={item} aria-label={`查看第 ${index + 1} 张`} aria-current={index === activeIndex ? 'true' : undefined} onClick={() => selectMedia(index)} />)}
-      </div>
     </>}
   </div>
 }
