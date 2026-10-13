@@ -270,10 +270,32 @@ function DetailMediaCarousel({ point }) {
   const media = point.media || (point.video ? [point.video] : [])
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const videoRef = useRef(null)
   const mediaInnerRef = useRef(null)
   const current = media[activeIndex]
   const isVideo = current?.toLowerCase().endsWith('.mp4')
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return undefined
+    const syncFullscreenState = () => setIsFullscreen(Boolean(
+      video.webkitDisplayingFullscreen
+      || document.fullscreenElement === mediaInnerRef.current
+      || document.webkitFullscreenElement === mediaInnerRef.current,
+    ))
+    document.addEventListener('fullscreenchange', syncFullscreenState)
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState)
+    video.addEventListener('webkitbeginfullscreen', syncFullscreenState)
+    video.addEventListener('webkitendfullscreen', syncFullscreenState)
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreenState)
+      document.removeEventListener('webkitfullscreenchange', syncFullscreenState)
+      video.removeEventListener('webkitbeginfullscreen', syncFullscreenState)
+      video.removeEventListener('webkitendfullscreen', syncFullscreenState)
+    }
+  }, [current])
+
   const selectMedia = (index) => {
     setIsPlaying(false)
     setActiveIndex(index)
@@ -315,7 +337,7 @@ function DetailMediaCarousel({ point }) {
     {current && <div ref={mediaInnerRef} className="tianfu-detail-media-inner">
       {isVideo
         ? <>
-          <video key={current} ref={videoRef} playsInline preload="metadata" src={asset(current)} onClick={togglePlayback} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+          <video key={current} ref={videoRef} controls={isFullscreen} playsInline preload="metadata" src={asset(current)} onClick={isFullscreen ? undefined : togglePlayback} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
           {!isPlaying && <button type="button" className="tianfu-video-playback" aria-label="播放视频" onClick={togglePlayback}>▶</button>}
           <button type="button" className="tianfu-video-fullscreen" aria-label="全屏播放视频" title="全屏播放" onClick={toggleFullscreen}>⛶</button>
         </>
