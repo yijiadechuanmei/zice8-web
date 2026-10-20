@@ -50,4 +50,16 @@
 .liubai-dialog p { font-size: 17px; margin: 0 0 20px; }
 .liubai-dialog button { display: block; width: 100%; min-height: 44px; margin-top: 12px; padding: 10px; background: #181927; color: #fff; border: 0; border-radius: 6px; }
 .liubai-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.liubai-root-result { justify-content: flex-start; }
+.liubai-result { position: absolute; inset: 0; }
+.liubai-result-name { position: absolute; left: 0; top: 928px; width: 750px; height: 93px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.liubai-result-name h1 { margin: 0; font-size: 31px; font-weight: normal; line-height: normal; }
+.liubai-result-name p { margin: 0; font-size: 22px; line-height: normal; }
+.liubai-result-copy { position: absolute; left: 0; top: 1116px; width: 750px; display: flex; flex-direction: column; align-items: center; }
+.liubai-result-copy h2 { margin: 0 0 18px; font-size: 30px; font-weight: normal; line-height: normal; }
+.liubai-result-copy p { margin: 0; font-size: 17px; line-height: 33px; text-align: center; white-space: pre-wrap; }
+.liubai-result-button { position: absolute; padding: 0; border: 0; background: transparent; }
+.liubai-result-button img { display: block; width: 100%; height: 100%; }
+.liubai-result-button::after { content: ""; position: absolute; inset: -5px 0; }
+.liubai-result-button:active { opacity: .8; }
 @media (prefers-reduced-motion: reduce) { .liubai-progress-track > div { transition: none; } }

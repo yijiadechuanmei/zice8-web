@@ -10,8 +10,9 @@ export function loadLiubaiActivity(key) {
 }
 
 export function submitLiubaiAnswers(key, answers, questionVersion, signal) {
-  return request(`${base(key)}/submit`, {
+  return request(`${base(key)}/preview`, {
     method: 'POST',
+    skipAuth: true,
     body: JSON.stringify({ answers, questionVersion }),
     signal,
   })

@@ -24,3 +24,20 @@ export const QUIZ_IMAGES = [
 export const START_IMAGE = 'fea9daa57dd0920dcbf24a0c55007ee3_5466_600_84.png'
 export const PREVIOUS_IMAGE = '4a913024ef6c3c954ace4011e3904a0c_997_198_20.png'
 export const QUIZ_BACKGROUND = '262950d76d26c6cc6c466b66815ab970_440698_751_1624.png'
+
+export const RESULT_IMAGES = [
+  ['76cbbbf099085d0bd89c7e9c625732c6_661373_751_1821.png', 0, 0, 751, 1821],
+  ['6dec370a0175ee4193685a682768e364_2718_292_44.png', 228, 189, 292, 44],
+  ['60805221d8e5d3d26095a7e6d01e4fa0_2297_355_54.png', 197, 113, 355, 54],
+  ['615c50aae07823602d96b8eaf1f5fbfd_2724_521_648.png', 113, 291, 521, 648],
+  ['aa3b81ada354bed7885e40303f88344a_191206_431_556.png', 158, 336, 431, 556],
+  ['6f9b7c5f61aebfb6f100969cee003538_1546_240_25.png', 253, 272, 240, 25],
+  ['b3e127bbf2e0013dd5cf622890ede94b_7665_160_55.png', 294, 1036, 160, 55],
+  ['20b73a5559cd6977a7bfb2a7acabb8b0_1214_616_24.png', 66, 1704, 616, 24],
+]
+export const RESULT_BUTTONS = [
+  ['product', '797388804520605a69830bd2cd0f20ff_2284_472_73.png', '继续了解这只专属矿石水晶杯', 137, 1411, 472, 73],
+  ['follow', 'ef9cba012abc75b6eba708b2a2003ef8_1785_472_73.png', '关注鎏白微信公众号', 137, 1497, 472, 73],
+  ['share', '120996cbbc253dd6041411e98b6f348f_1208_229_72.png', '分享测试结果', 137, 1580, 229, 72],
+  ['restart', '1e8d1e9e7b1ed2cb06b402b9fd134afc_971_229_72.png', '重新测试', 380, 1580, 229, 72],
+]
