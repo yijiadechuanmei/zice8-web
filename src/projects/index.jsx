@@ -38,8 +38,10 @@ const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.j
 const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
 
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
+const LiubaiAssessmentProject = lazy(() => import('./liubai-assessment/index.jsx'))
 
 const activityTypeProjects = {
+  liubai_assessment: LiubaiAssessmentProject,
   photo_screen_demo_20261010: PhotoScreenProject,
   cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),
   payment_transfer_test: PaymentTransferTestProject,
