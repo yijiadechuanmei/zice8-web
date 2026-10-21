@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import DesignStage from '../../shared/components/DesignStage'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { isWechatBrowser } from '../../shared/utils/url'
@@ -6,20 +6,6 @@ import { loadLiubaiActivity, submitLiubaiAnswers } from './api'
 import ResultPage from './ResultPage'
 import { ACTIVITY_KEY, asset, HOME_IMAGES, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, SPLASH_IMAGES, START_IMAGE } from './config'
 import './styles.css'
-
-const storageKey = (key) => `liubai-assessment:v1:${key}`
-
-function readDraft(key) {
-  try {
-    const value = JSON.parse(sessionStorage.getItem(storageKey(key)) || 'null')
-    if (['quiz', 'result'].includes(value?.page) && Array.isArray(value.answers) && value.answers.length <= 16 &&
-      (value.page !== 'result' || value.answers.length === 16) &&
-      value.answers.every((answer) => ['A', 'B', 'C', 'D'].includes(answer))) {
-      return { page: value.page, answers: value.answers, index: Math.min(Math.max(Number(value.index) || 0, 0), value.answers.length, 15) }
-    }
-  } catch { /* A restricted WebView may not allow session storage. */ }
-  return { page: 'splash', answers: [], index: 0 }
-}
 
 function Art({ images }) {
   return images.map(([name, left, top, width, height]) => (
@@ -33,7 +19,7 @@ export default function LiubaiAssessmentProject({ routeParams }) {
 }
 
 function LiubaiAssessment({ activityKey }) {
-  const [draft, setDraft] = useState(() => readDraft(activityKey))
+  const [flow, setFlow] = useState({ page: 'splash', answers: [], index: 0 })
   const [data, setData] = useState(null)
   const [loadError, setLoadError] = useState('')
   const [reload, setReload] = useState(0)
@@ -44,7 +30,9 @@ function LiubaiAssessment({ activityKey }) {
   const locked = useRef(false)
   const advanceTimer = useRef(null)
   const requestAbort = useRef(null)
-  const { page, answers, index } = draft
+  const swipeStart = useRef(null)
+  const viewport = useRef(null)
+  const { page, answers, index } = flow
   const share = useMemo(() => data ? {
     ...data.activity,
     shareTitle: '鎏白 · 矿石人格测试',
@@ -71,20 +59,12 @@ function LiubaiAssessment({ activityKey }) {
   }, [activityKey, reload])
 
   useEffect(() => {
-    if (page !== 'splash') return
-    const timer = window.setTimeout(() => setDraft({ page: 'home', answers: [], index: 0 }), 1800)
-    return () => window.clearTimeout(timer)
-  }, [page])
+    // Remove progress left by earlier versions; this flow stays in memory only.
+    try { sessionStorage.removeItem(`liubai-assessment:v1:${activityKey}`) } catch { /* Storage may be unavailable. */ }
+  }, [activityKey])
 
   useEffect(() => {
-    try {
-      if (page === 'quiz' || page === 'result') sessionStorage.setItem(storageKey(activityKey), JSON.stringify(draft))
-      else sessionStorage.removeItem(storageKey(activityKey))
-    } catch { /* Continue in memory when storage is unavailable. */ }
-  }, [activityKey, draft, page])
-
-  useEffect(() => {
-    window.scrollTo({ top: 0 })
+    viewport.current?.scrollTo({ top: 0 })
   }, [page])
 
   useEffect(() => {
@@ -98,18 +78,13 @@ function LiubaiAssessment({ activityKey }) {
     requestAbort.current?.abort()
   }, [])
 
-  const saveDraft = useCallback((next) => {
-    setDraft(next)
-    try { sessionStorage.setItem(storageKey(activityKey), JSON.stringify(next)) } catch { /* Optional persistence. */ }
-  }, [activityKey])
-
   function start() {
     if (!data) {
       setMessage(loadError || '题目正在加载，请稍候')
       return
     }
     const next = { page: 'quiz', answers: [], index: 0 }
-    saveDraft(next)
+    setFlow(next)
   }
 
   async function submit(finalAnswers) {
@@ -121,7 +96,7 @@ function LiubaiAssessment({ activityKey }) {
     const timeout = window.setTimeout(() => controller.abort(), 15000)
     try {
       await submitLiubaiAnswers(activityKey, finalAnswers, data.questionVersion, controller.signal)
-      saveDraft({ page: 'result', index: 15, answers: finalAnswers })
+      setFlow({ page: 'result', index: 15, answers: finalAnswers })
     } catch (error) {
       setSubmitError(error.name === 'AbortError' ? '提交超时，请重试' : (error.message || '提交失败，请重试'))
     } finally {
@@ -140,10 +115,10 @@ function LiubaiAssessment({ activityKey }) {
     advanceTimer.current = window.setTimeout(() => {
       setSelected('')
       if (index === 15) {
-        saveDraft({ page: 'quiz', index, answers: nextAnswers })
+        setFlow({ page: 'quiz', index, answers: nextAnswers })
         void submit(nextAnswers)
       } else {
-        saveDraft({ page: 'quiz', index: index + 1, answers: nextAnswers })
+        setFlow({ page: 'quiz', index: index + 1, answers: nextAnswers })
         locked.current = false
       }
     }, 260)
@@ -153,13 +128,28 @@ function LiubaiAssessment({ activityKey }) {
     if (!index || locked.current || page !== 'quiz') return
     setSelected('')
     setSubmitError('')
-    saveDraft({ page: 'quiz', index: index - 1, answers: answers.slice(0, index) })
+    setFlow({ page: 'quiz', index: index - 1, answers: answers.slice(0, index) })
   }
 
   function home() {
     setSubmitError('')
     setSelected('')
-    setDraft({ page: 'home', index: 0, answers: [] })
+    setFlow({ page: 'home', index: 0, answers: [] })
+  }
+
+  function beginSwipe(event) {
+    if (!event.isPrimary) return
+    swipeStart.current = { x: event.clientX, y: event.clientY }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  function finishSwipe(event) {
+    const origin = swipeStart.current
+    swipeStart.current = null
+    if (!origin) return
+    const deltaY = origin.y - event.clientY
+    const deltaX = Math.abs(origin.x - event.clientX)
+    if (deltaY >= 40 && deltaY > deltaX) home()
   }
 
   function resultAction(action) {
@@ -171,11 +161,10 @@ function LiubaiAssessment({ activityKey }) {
 
   const question = data?.questions[index]
   return (
-    <main className={`liubai-root ${page === 'quiz' ? 'liubai-root-quiz' : ''} ${page === 'result' ? 'liubai-root-result' : ''}`} style={{ '--liubai-quiz-background': `url("${asset(QUIZ_BACKGROUND)}")` }}>
+    <main ref={viewport} className={`liubai-root ${page === 'quiz' ? 'liubai-root-quiz' : ''} ${page === 'result' ? 'liubai-root-result' : ''}`} style={{ '--liubai-quiz-background': `url("${asset(QUIZ_BACKGROUND)}")` }}>
       <DesignStage className="liubai-stage" height={page === 'result' ? 1821 : 1448}>
         {page === 'splash' && <>
           <Art images={SPLASH_IMAGES} />
-          <button className="liubai-splash-enter" onClick={home} aria-label="进入鎏白矿石人格测试" />
         </>}
         {page === 'home' && <>
           <Art images={HOME_IMAGES} />
@@ -212,6 +201,11 @@ function LiubaiAssessment({ activityKey }) {
         </>}
         {page === 'result' && <ResultPage onAction={resultAction} />}
       </DesignStage>
+      {page === 'splash' && (
+        <button className="liubai-splash-enter" onClick={home} aria-label="进入开始页"
+          onPointerDown={beginSwipe} onPointerUp={finishSwipe} onPointerCancel={() => { swipeStart.current = null }}
+          onWheel={(event) => { if (event.deltaY > 30) home() }} />
+      )}
       {loadError && (
         <div className="liubai-notice" role="alert">
           <span>{loadError}</span>

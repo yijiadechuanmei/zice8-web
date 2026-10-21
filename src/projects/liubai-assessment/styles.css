@@ -1,13 +1,18 @@
 .liubai-root {
-  min-height: 100vh;
-  min-height: 100svh;
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100svh;
   width: 100%;
   background: #181927;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: safe center;
-  overflow-x: clip;
+  justify-content: center;
+  overflow: hidden;
+  overflow: clip;
+  overscroll-behavior: none;
+  touch-action: none;
   font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
   color: #000;
 }
@@ -23,7 +28,7 @@
 .liubai-root button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .liubai-root button:focus-visible { outline: 4px solid #a57443; outline-offset: 5px; }
 .liubai-root button:disabled { cursor: default; }
-.liubai-splash-enter { position: absolute; inset: 0; border: 0; background: transparent; }
+.liubai-splash-enter { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; touch-action: none; }
 .liubai-start { position: absolute; left: 74px; top: 1145px; width: 600px; height: 84px; padding: 0; border: 0; background: transparent; }
 .liubai-start::after { content: ""; position: absolute; inset: -5px 0; }
 .liubai-start img { width: 100%; height: 100%; display: block; }
@@ -50,7 +55,7 @@
 .liubai-dialog p { font-size: 17px; margin: 0 0 20px; }
 .liubai-dialog button { display: block; width: 100%; min-height: 44px; margin-top: 12px; padding: 10px; background: #181927; color: #fff; border: 0; border-radius: 6px; }
 .liubai-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.liubai-root-result { justify-content: flex-start; }
+.liubai-root-result { justify-content: flex-start; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
 .liubai-result { position: absolute; inset: 0; }
 .liubai-result-name { position: absolute; left: 0; top: 928px; width: 750px; height: 93px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .liubai-result-name h1 { margin: 0; font-size: 31px; font-weight: normal; line-height: normal; }
