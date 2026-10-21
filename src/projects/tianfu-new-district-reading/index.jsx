@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
+import { readingSceneEvent, trackReadingEvent, trackReadingVisit } from './analytics'
 import './style.css'
 
 const ACTIVITY_TYPE = 'tianfu_new_district_reading_20260927'
@@ -49,6 +50,7 @@ const HOME = [
 ]
 
 const TIANFU_PARK = {
+  id: 'tianfu-park',
   name: '天府公园',
   media: ['tf1.jpg', 'tf2.jpg', 'tf3.jpg', 'tf4.jpg', 'tf5.jpg', 'tf6.jpg', 'tf7.jpg'],
   introduction: `天府公园为市民提供亲近自然、休闲游憩的空间。园内仅乔木就有近50个品种，落叶、常绿、彩叶树种还有近60种。四季景观各有特色，这里五月蓝花楹盛放，金秋彩叶树层叠尽染，一年四季都有不同风采。对观鸟爱好者来说，天府公园更是一座秘密基地：放眼整个天府新区，已记录鸟类248种。就连铺路的透水砖也藏着巧思：作为“海绵城市”的一环，雨水落下来会被直接“喝掉”，过滤净化后还能再次利用。逛一次天府公园，等于同时上了一堂鸟类观察课、植物认知课和生态工程课。
@@ -263,15 +265,21 @@ function Canvas({ sceneKey, layers, masks = [], actions = [], children, banner }
   </div></main>
 }
 
-function DetailMediaCarousel({ point }) {
+function DetailMediaCarousel({ point, region }) {
   const media = point.media || (point.video ? [point.video] : [])
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const videoRef = useRef(null)
   const mediaInnerRef = useRef(null)
+  const playedMedia = useRef(new Set())
+  const endedMedia = useRef(new Set())
+  const lastImage = useRef(null)
   const current = media[activeIndex]
   const isVideo = current?.toLowerCase().endsWith('.mp4')
+  const trackMedia = (eventType) => trackReadingEvent(eventType, {
+    region, pointId: point.id, pointTitle: point.name, media: current,
+  })
 
   useEffect(() => {
     const video = videoRef.current
@@ -334,11 +342,28 @@ function DetailMediaCarousel({ point }) {
     {current && <div ref={mediaInnerRef} className="tianfu-detail-media-inner">
       {isVideo
         ? <>
-          <video key={current} ref={videoRef} controls={isFullscreen} playsInline preload="metadata" src={asset(current)} onClick={isFullscreen ? undefined : togglePlayback} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+          <video key={current} ref={videoRef} controls={isFullscreen} playsInline preload="metadata" src={asset(current)} onClick={isFullscreen ? undefined : togglePlayback} onPlay={() => {
+            setIsPlaying(true)
+            if (!playedMedia.current.has(current)) {
+              playedMedia.current.add(current)
+              trackMedia('tianfu_video_play')
+            }
+          }} onEnded={() => {
+            setIsPlaying(false)
+            if (playedMedia.current.has(current) && !endedMedia.current.has(current)) {
+              endedMedia.current.add(current)
+              trackMedia('tianfu_video_end')
+            }
+          }} onPause={() => setIsPlaying(false)} />
           {!isPlaying && <button type="button" className="tianfu-video-playback" aria-label="播放视频" onClick={togglePlayback}>▶</button>}
           <button type="button" className="tianfu-video-fullscreen" aria-label="全屏播放视频" title="全屏播放" onClick={toggleFullscreen}>⛶</button>
         </>
-        : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" />}
+        : <img key={current} src={asset(current)} alt={`${point.name}图片 ${activeIndex + 1}`} draggable="false" onLoad={() => {
+          if (lastImage.current !== current) {
+            lastImage.current = current
+            trackMedia('tianfu_image_view')
+          }
+        }} />}
     </div>}
     {media.length > 1 && <>
       <button type="button" className="tianfu-media-control tianfu-media-previous" aria-label="上一张" onClick={() => move(-1)}>‹</button>
@@ -347,12 +372,12 @@ function DetailMediaCarousel({ point }) {
   </div>
 }
 
-function DetailLayout({ point, onSelectBook }) {
+function DetailLayout({ point, region, onSelectBook }) {
   const visibleBookRows = Math.min(point.books.length, 4)
   const isScrollableBookList = point.books.length > visibleBookRows
   return <>
     <img className="tianfu-layer" src={asset(PAGES[4][0].name)} alt="" draggable="false" style={{ left: '0%', top: '0%', width: '100%', height: '100%' }} />
-    <DetailMediaCarousel key={point.id} point={point} />
+    <DetailMediaCarousel key={point.id} point={point} region={region} />
     {PAGES[4].slice(1).map((item, index) => <img className="tianfu-layer" key={`${item.name}-${index}`} src={asset(item.name)} alt="" draggable="false" style={{ left: `${item.left / 7.5}%`, top: `${item.top / 16.24}%`, width: `${item.width / 7.5}%`, height: `${item.height / 16.24}%` }} />)}
     <div className="tianfu-detail-copy">{point.introduction}</div>
     <div className={`tianfu-detail-title${point.name.length > 12 ? ' tianfu-detail-title-long' : ''}`}>{point.name}</div>
@@ -438,6 +463,24 @@ export default function TianfuNewDistrictReadingProject() {
   const [selectedPoint, setSelectedPoint] = useState(TIANFU_PARK)
   const [pointMapStage, setPointMapStage] = useState('map')
   const [showActivityRules, setShowActivityRules] = useState(false)
+  const lastScene = useRef(null)
+  const rulesVisible = useRef(false)
+
+  useEffect(() => { trackReadingVisit() }, [])
+
+  useEffect(() => {
+    const event = readingSceneEvent(stage, selectedPoint, selectedBook, pointMapStage)
+    const scene = JSON.stringify(event)
+    // React StrictMode repeats effects; count each real scene entry only once.
+    if (lastScene.current === scene) return
+    lastScene.current = scene
+    if (event) trackReadingEvent(event.eventType, event.extra)
+  }, [stage, selectedPoint, selectedBook, pointMapStage])
+
+  useEffect(() => {
+    if (showActivityRules && !rulesVisible.current) trackReadingEvent('tianfu_rules_view')
+    rulesVisible.current = showActivityRules
+  }, [showActivityRules])
 
   useEffect(() => {
     const existingIcon = document.querySelector('link[rel~="icon"]')
@@ -527,6 +570,6 @@ export default function TianfuNewDistrictReadingProject() {
   ]} />
   if (stage === 'haichuang-park') return <Canvas layers={PAGES[3]} banner={activityRulesModal} actions={[{ label: '返回阅读地图', left: 658, top: 162, width: 66, height: 65, onClick: () => setStage('catalog') }, { label: '查看中科院成都分院详情', left: 232, top: 595, width: 221, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[1], 'haichuang-park') }, { label: '查看国家超算成都中心详情', left: 445, top: 923, width: 254, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[2], 'haichuang-park') }, { label: '查看天府宇宙线研究中心详情', left: 394, top: 1267, width: 282, height: 55, onClick: () => openPoint(HAICHUANG_PARK_POINTS[0], 'haichuang-park') }, { label: '首页', left: 161, top: 1433, width: 177, height: 55, onClick: () => setStage('home') }, { label: '查看活动规则', left: 401, top: 1433, width: 177, height: 55, onClick: () => setShowActivityRules(true) }]} />
   if (stage === 'review') return <Canvas sceneKey={`review-${pointMapStage}`} layers={REVIEW_PAGE} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><ReviewLayout /></Canvas>
-  if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
+  if (stage === 'detail') return <Canvas sceneKey={`detail-${selectedPoint.id}`} layers={[]} actions={[{ label: '返回点位地图', left: 27, top: 115, width: 66, height: 65, onClick: () => setStage(pointMapStage) }]}><DetailLayout point={selectedPoint} region={pointMapStage} onSelectBook={(book) => { setSelectedBook(book); setStage('book-reason') }} /></Canvas>
   return <Canvas sceneKey={`book-${selectedBook.title}`} layers={PAGES[5]} actions={[{ label: '返回点位详情', left: 27, top: 86, width: 66, height: 65, onClick: () => setStage('detail') }]}><BookReasonLayout book={selectedBook} point={selectedPoint} /></Canvas>
 }

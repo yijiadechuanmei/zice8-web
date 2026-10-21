@@ -4,6 +4,7 @@ import { Button, Card, Col, Empty, Row, Select, Space, Spin, Statistic, Tooltip,
 import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
+import TianfuReadingOverview from '../components/TianfuReadingOverview'
 import { getLvyuanAdminOverview } from '../lvyuanFruitfulApi'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
@@ -42,6 +43,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
   const isLuckyDraw = activity.type === 'lucky_draw_20260920'
   const isMaotaiCCreateFun = activity.type === 'maotai_c_create_fun_20260923'
+  const isTianfuReading = activity.type === 'tianfu_new_district_reading_20260927'
   const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
     : {}
@@ -100,13 +102,29 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   }, [activity.activityKey, activity.type, isFifteenthFiveICan, isXiwuqiRoadNight, phaseScope, refreshNonce])
 
   useEffect(() => {
-    if (!compact || !autoRefreshMs) return undefined
+    if ((!compact && !isTianfuReading) || !autoRefreshMs) return undefined
     const timerId = window.setInterval(refreshOverview, autoRefreshMs)
     return () => window.clearInterval(timerId)
-  }, [autoRefreshMs, compact, refreshOverview])
+  }, [autoRefreshMs, compact, isTianfuReading, refreshOverview])
 
   const metrics = useMemo(() => {
     const sourceOverview = sourceAccess?.overview || {}
+    if (isTianfuReading) {
+      const reading = overview?.tianfuReading
+      const eventCount = (type) => reading?.events?.[type]?.views ?? 0
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: '活动入口访问次数；内部页面切换不重复增加 PV。同一访客 30 秒内重复访问只统计一次。' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+        { label: '今日 PV', value: overview?.todayPv ?? 0 },
+        { label: '今日 UV', value: overview?.todayUv ?? 0 },
+        { label: '阅读访客', value: reading?.readers ?? 0, tooltip: '查看过点位介绍或书籍推荐理由的匿名去重访客，不等于阅读完成。' },
+        { label: '今日阅读访客', value: reading?.todayReaders ?? 0 },
+        { label: '点位浏览', value: eventCount('tianfu_point_view') },
+        { label: '书籍浏览', value: eventCount('tianfu_book_view') },
+        { label: '视频播放', value: eventCount('tianfu_video_play') },
+        { label: '图片浏览', value: eventCount('tianfu_image_view') },
+      ]
+    }
     const xiwuqiAmapMetrics = isXiwuqiRoadNight ? [
       { label: '高德 PV', value: sourceOverview.pv ?? 0, tooltip: '仅统计带 utm_source=amap 且 utm_campaign=xiwuqi_20260624 的投放链接访问。' },
       { label: '高德 UV', value: sourceOverview.uv ?? 0, tooltip: uvHint },
@@ -473,7 +491,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isMaotaiCCreateFun, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isMaotaiCCreateFun, isTianfuReading, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const luckyDrawTrend = (charts?.luckyDraw?.drawTrend || []).map((item, index) => ({
@@ -554,8 +572,8 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   }
 
   return (
-    <div className="admin-stack">
-      {compact ? (
+    <div className={`admin-stack${isTianfuReading ? ' admin-tianfu-dashboard' : ''}`}>
+      {compact || isTianfuReading ? (
         <div className="admin-overview-refresh">
           <Text type="secondary">
             {updatedAt ? `更新于 ${updatedAt.toLocaleTimeString('zh-CN', { hour12: false })}` : '等待首次加载'}
@@ -604,7 +622,9 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         PV：{pvHint} UV：{uvHint}
       </Paragraph>
 
-      {compact ? null : (
+      {isTianfuReading ? <TianfuReadingOverview overview={overview} charts={charts} /> : null}
+
+      {compact || isTianfuReading ? null : (
         <>
           {isTjrcbPensionManual ? (
             <Row gutter={[16, 16]}>

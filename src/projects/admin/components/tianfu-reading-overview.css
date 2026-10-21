@@ -1,0 +1,14 @@
+.admin-tianfu-dashboard,
+.admin-tianfu-reading {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-tianfu-dashboard > *,
+.admin-tianfu-reading > * {
+  min-width: 0;
+}
+
+.admin-tianfu-dashboard .admin-overview-refresh {
+  flex-wrap: wrap;
+}
