@@ -16,7 +16,6 @@ export const HOME_IMAGES = [
   ['011bb072d7e6822c220adaf0d427724f_1628_296_16.png', 90, 1402, 296, 16],
 ]
 export const QUIZ_IMAGES = [
-  ['3be63c0b14dd44e673c92ddfcbf7bd20_2807_666_822.png', 42, 320, 666, 822],
   ['7bf51af63bd7b04fbd1428b66f399fc3_1603_751_174.png', 0, 1280, 751, 174],
   ['7fd3decf43997f5dad4b6f77f9b1318c_3841_665_118.png', 38, 98, 665, 118],
   ['2f410cfd87aac1f3b6d4578148185b9b_3400_188_79.png', 279, 1322, 188, 79],
