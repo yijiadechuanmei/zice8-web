@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import DesignStage from '../../shared/components/DesignStage'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { isWechatBrowser } from '../../shared/utils/url'
@@ -28,6 +29,7 @@ function LiubaiAssessment({ activityKey }) {
   const [message, setMessage] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
+  const [shareVisible, setShareVisible] = useState(false)
   const locked = useRef(false)
   const advanceTimer = useRef(null)
   const requestAbort = useRef(null)
@@ -163,50 +165,50 @@ function LiubaiAssessment({ activityKey }) {
     if (action === 'restart') return home()
     if (action === 'product') return setMessage('商品入口暂未开放')
     if (action === 'follow') return setQrcodeVisible(true)
-    setMessage(isWechatBrowser() ? '点击右上角菜单分享测试' : '复制当前页面链接，即可邀请好友测试')
+    setShareVisible(true)
   }
 
   const question = data?.questions[index]
   return (
     <main ref={viewport} className={`liubai-root ${page === 'quiz' ? 'liubai-root-quiz' : ''} ${page === 'result' ? 'liubai-root-result' : ''}`} style={{ '--liubai-quiz-background': `url("${asset(QUIZ_BACKGROUND)}")` }}>
       <DesignStage className="liubai-stage" height={page === 'result' ? 1821 : 1448}>
-        {page === 'splash' && <>
-          <Art images={SPLASH_IMAGES} />
-        </>}
-        {page === 'home' && <>
-          <Art images={HOME_IMAGES} />
-          <h1 className="liubai-sr-only">鎏白 · 矿石人格测试</h1>
-          <button className="liubai-start" onClick={start} aria-label="开始测试">
-            <img src={asset(START_IMAGE)} alt="" />
-          </button>
-        </>}
-        {page === 'quiz' && <>
-          <Art images={QUIZ_IMAGES} />
-          <div className="liubai-progress" aria-label={`第${index + 1}题，共16题`}>
-            <span>{String(index + 1).padStart(2, '0')}/16</span>
-            <div className="liubai-progress-track" role="progressbar" aria-label="答题进度" aria-valuemin={0} aria-valuemax={16} aria-valuenow={index + 1}>
-              <div style={{ width: `${(index + 1) / 16 * 100}%` }} />
+        <div key={page} className={`liubai-page liubai-page-${page}`}>
+          {page === 'splash' && <Art images={SPLASH_IMAGES} />}
+          {page === 'home' && <>
+            <Art images={HOME_IMAGES} />
+            <h1 className="liubai-sr-only">鎏白 · 矿石人格测试</h1>
+            <button className="liubai-start" onClick={start} aria-label="开始测试">
+              <img src={asset(START_IMAGE)} alt="" />
+            </button>
+          </>}
+          {page === 'quiz' && <>
+            <Art images={QUIZ_IMAGES} />
+            <div className="liubai-progress" aria-label={`第${index + 1}题，共16题`}>
+              <span>{String(index + 1).padStart(2, '0')}/16</span>
+              <div className="liubai-progress-track" role="progressbar" aria-label="答题进度" aria-valuemin={0} aria-valuemax={16} aria-valuenow={index + 1}>
+                <div style={{ width: `${(index + 1) / 16 * 100}%` }} />
+              </div>
             </div>
-          </div>
-          <section className="liubai-question-card" aria-busy={busy}>
-            <h1 className="liubai-question-title" aria-live="polite">{question?.t || '正在加载题目…'}</h1>
-            <div className="liubai-options">
-              {question?.o.map(([key, text]) => (
-                <button key={key} type="button" className={`liubai-option ${selected === key || (!selected && answers[index] === key) ? 'liubai-option-selected' : ''}`}
-                  disabled={busy || Boolean(selected)} onClick={() => choose(key)} aria-pressed={selected === key || (!selected && answers[index] === key)}>
-                  <span className="liubai-option-letter">{key}</span>
-                  <span className="liubai-option-text">{text}</span>
+            <section key={index} className="liubai-question-card" aria-busy={busy}>
+              <h1 className="liubai-question-title" aria-live="polite">{question?.t || '正在加载题目…'}</h1>
+              <div className="liubai-options">
+                {question?.o.map(([key, text]) => (
+                  <button key={key} type="button" className={`liubai-option ${selected === key || (!selected && answers[index] === key) ? 'liubai-option-selected' : ''}`}
+                    disabled={busy || Boolean(selected)} onClick={() => choose(key)} aria-pressed={selected === key || (!selected && answers[index] === key)}>
+                    <span className="liubai-option-letter">{key}</span>
+                    <span className="liubai-option-text">{text}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="liubai-previous-row">
+                <button className="liubai-previous" disabled={index === 0 || busy || Boolean(selected)} onClick={previous} aria-label="上一题">
+                  <img src={asset(PREVIOUS_IMAGE)} alt="" />
                 </button>
-              ))}
-            </div>
-            <div className="liubai-previous-row">
-              <button className="liubai-previous" disabled={index === 0 || busy || Boolean(selected)} onClick={previous} aria-label="上一题">
-                <img src={asset(PREVIOUS_IMAGE)} alt="" />
-              </button>
-            </div>
-          </section>
-        </>}
-        {page === 'result' && <ResultPage resultId={flow.resultId} onAction={resultAction} />}
+              </div>
+            </section>
+          </>}
+          {page === 'result' && <ResultPage resultId={flow.resultId} onAction={resultAction} />}
+        </div>
       </DesignStage>
       {page === 'splash' && (
         <button className="liubai-splash-enter" onClick={home} aria-label="进入开始页"
@@ -229,6 +231,14 @@ function LiubaiAssessment({ activityKey }) {
           </div>
         </div>
       )}
+      {shareVisible && createPortal(
+        <div className="liubai-share-mask" role="button" tabIndex={0} aria-label="关闭分享提示" onClick={() => setShareVisible(false)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setShareVisible(false) }}>
+          <span className="liubai-share-guide" onClick={(event) => event.stopPropagation()}>
+            <span className="liubai-share-dots" aria-hidden="true"><i /><i /><i /></span>
+            <span>点击右上角三个点<br />分享给你的好友</span>
+          </span>
+        </div>
+      , document.body)}
       {(busy || submitError) && (
         <div className="liubai-dialog-mask">
           <div className="liubai-dialog" role="dialog" aria-modal="true" aria-label="提交答卷">
