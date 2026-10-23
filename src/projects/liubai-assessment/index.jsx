@@ -8,6 +8,27 @@ import ResultPage from './ResultPage'
 import { ACTIVITY_KEY, asset, HOME_IMAGES, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, SPLASH_IMAGES, START_IMAGE } from './config'
 import './styles.css'
 
+const RESULT_PARAM = 'result'
+const RESULT_COUNT = 14
+
+function resultIdFromUrl() {
+  const value = Number(new URLSearchParams(window.location.search).get(RESULT_PARAM))
+  return Number.isInteger(value) && value >= 1 && value <= RESULT_COUNT ? value : null
+}
+
+function resultShareUrl(resultId) {
+  const url = new URL(window.location.href)
+  url.searchParams.set(RESULT_PARAM, String(resultId))
+  return url.toString()
+}
+
+function removeResultFromUrl() {
+  const url = new URL(window.location.href)
+  if (!url.searchParams.has(RESULT_PARAM)) return
+  url.searchParams.delete(RESULT_PARAM)
+  window.history.replaceState(null, '', url.toString())
+}
+
 function Art({ images }) {
   return images.map(([name, left, top, width, height]) => (
     <img key={name} className="liubai-art" src={asset(name)} alt="" draggable="false" style={{ left, top, width, height }} />
@@ -20,7 +41,12 @@ export default function LiubaiAssessmentProject({ routeParams }) {
 }
 
 function LiubaiAssessment({ activityKey }) {
-  const [flow, setFlow] = useState({ page: 'splash', answers: [], index: 0, resultId: null })
+  const [flow, setFlow] = useState(() => {
+    const sharedResultId = resultIdFromUrl()
+    return sharedResultId
+      ? { page: 'result', answers: [], index: 15, resultId: sharedResultId }
+      : { page: 'splash', answers: [], index: 0, resultId: null }
+  })
   const [data, setData] = useState(null)
   const [loadError, setLoadError] = useState('')
   const [reload, setReload] = useState(0)
@@ -35,13 +61,14 @@ function LiubaiAssessment({ activityKey }) {
   const requestAbort = useRef(null)
   const swipeStart = useRef(null)
   const viewport = useRef(null)
-  const { page, answers, index } = flow
+  const { page, answers, index, resultId } = flow
   const share = useMemo(() => data ? {
     ...data.activity,
+    shareLink: resultId ? resultShareUrl(resultId) : data.activity.shareLink,
     shareTitle: '鎏白 · 矿石人格测试',
     shareDesc: '独一无二的你匹配哪一颗专属矿石水晶杯？',
     shareImage: asset(SPLASH_IMAGES[0][0]),
-  } : null, [data])
+  } : null, [data, resultId])
   useWechatShare(isWechatBrowser() ? activityKey : '', share)
 
   useEffect(() => {
@@ -92,7 +119,7 @@ function LiubaiAssessment({ activityKey }) {
       setMessage(loadError || '题目正在加载，请稍候')
       return
     }
-    const next = { page: 'quiz', answers: [], index: 0 }
+    const next = { page: 'quiz', answers: [], index: 0, resultId: null }
     setFlow(next)
   }
 
@@ -141,9 +168,10 @@ function LiubaiAssessment({ activityKey }) {
   }
 
   function home() {
+    removeResultFromUrl()
     setSubmitError('')
     setSelected('')
-    setFlow({ page: 'home', index: 0, answers: [] })
+    setFlow({ page: 'home', index: 0, answers: [], resultId: null })
   }
 
   function beginSwipe(event) {
@@ -207,7 +235,7 @@ function LiubaiAssessment({ activityKey }) {
               </div>
             </section>
           </>}
-          {page === 'result' && <ResultPage resultId={flow.resultId} onAction={resultAction} />}
+          {page === 'result' && <ResultPage resultId={resultId} onAction={resultAction} />}
         </div>
       </DesignStage>
       {page === 'splash' && (
