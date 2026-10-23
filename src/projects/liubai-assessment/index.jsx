@@ -19,7 +19,7 @@ export default function LiubaiAssessmentProject({ routeParams }) {
 }
 
 function LiubaiAssessment({ activityKey }) {
-  const [flow, setFlow] = useState({ page: 'splash', answers: [], index: 0 })
+  const [flow, setFlow] = useState({ page: 'splash', answers: [], index: 0, resultId: null })
   const [data, setData] = useState(null)
   const [loadError, setLoadError] = useState('')
   const [reload, setReload] = useState(0)
@@ -27,6 +27,7 @@ function LiubaiAssessment({ activityKey }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [submitError, setSubmitError] = useState('')
+  const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const locked = useRef(false)
   const advanceTimer = useRef(null)
   const requestAbort = useRef(null)
@@ -68,6 +69,12 @@ function LiubaiAssessment({ activityKey }) {
   }, [page])
 
   useEffect(() => {
+    if (page !== 'splash') return undefined
+    const timer = window.setTimeout(() => setFlow({ page: 'home', index: 0, answers: [], resultId: null }), 1500)
+    return () => window.clearTimeout(timer)
+  }, [page])
+
+  useEffect(() => {
     if (!message) return
     const timer = window.setTimeout(() => setMessage(''), 3000)
     return () => window.clearTimeout(timer)
@@ -95,8 +102,8 @@ function LiubaiAssessment({ activityKey }) {
     requestAbort.current = controller
     const timeout = window.setTimeout(() => controller.abort(), 15000)
     try {
-      await submitLiubaiAnswers(activityKey, finalAnswers, data.questionVersion, controller.signal)
-      setFlow({ page: 'result', index: 15, answers: finalAnswers })
+      const response = await submitLiubaiAnswers(activityKey, finalAnswers, data.questionVersion, controller.signal)
+      setFlow({ page: 'result', index: 15, answers: finalAnswers, resultId: response.result.id })
     } catch (error) {
       setSubmitError(error.name === 'AbortError' ? '提交超时，请重试' : (error.message || '提交失败，请重试'))
     } finally {
@@ -155,7 +162,7 @@ function LiubaiAssessment({ activityKey }) {
   function resultAction(action) {
     if (action === 'restart') return home()
     if (action === 'product') return setMessage('商品入口暂未开放')
-    if (action === 'follow') return setMessage('公众号入口暂未开放')
+    if (action === 'follow') return setQrcodeVisible(true)
     setMessage(isWechatBrowser() ? '点击右上角菜单分享测试' : '复制当前页面链接，即可邀请好友测试')
   }
 
@@ -199,7 +206,7 @@ function LiubaiAssessment({ activityKey }) {
             </div>
           </section>
         </>}
-        {page === 'result' && <ResultPage onAction={resultAction} />}
+        {page === 'result' && <ResultPage resultId={flow.resultId} onAction={resultAction} />}
       </DesignStage>
       {page === 'splash' && (
         <button className="liubai-splash-enter" onClick={home} aria-label="进入开始页"
@@ -213,6 +220,15 @@ function LiubaiAssessment({ activityKey }) {
         </div>
       )}
       {message && <div className="liubai-toast" role="status">{message}</div>}
+      {qrcodeVisible && (
+        <div className="liubai-qr-mask" role="dialog" aria-modal="true" aria-label="鎏白微信公众号二维码" onClick={() => setQrcodeVisible(false)}>
+          <div className="liubai-qr-dialog" onClick={(event) => event.stopPropagation()}>
+            <img src={asset('gzh.jpg')} alt="鎏白微信公众号二维码" />
+            <p>长按识别二维码，关注鎏白微信公众号</p>
+            <button type="button" onClick={() => setQrcodeVisible(false)}>关闭</button>
+          </div>
+        </div>
+      )}
       {(busy || submitError) && (
         <div className="liubai-dialog-mask">
           <div className="liubai-dialog" role="dialog" aria-modal="true" aria-label="提交答卷">

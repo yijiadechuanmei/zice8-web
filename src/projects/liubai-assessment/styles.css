@@ -57,14 +57,14 @@
 .liubai-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .liubai-root-result { justify-content: flex-start; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
 .liubai-result { position: absolute; inset: 0; }
-.liubai-result-name { position: absolute; left: 0; top: 928px; width: 750px; height: 93px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-.liubai-result-name h1 { margin: 0; font-size: 31px; font-weight: normal; line-height: normal; }
-.liubai-result-name p { margin: 0; font-size: 22px; line-height: normal; }
-.liubai-result-copy { position: absolute; left: 0; top: 1116px; width: 750px; display: flex; flex-direction: column; align-items: center; }
-.liubai-result-copy h2 { margin: 0 0 18px; font-size: 30px; font-weight: normal; line-height: normal; }
-.liubai-result-copy p { margin: 0; font-size: 17px; line-height: 33px; text-align: center; white-space: pre-wrap; }
+.liubai-result-card { position: absolute; left: 83px; top: 334px; width: 587px; height: 997px; max-width: none; user-select: none; }
 .liubai-result-button { position: absolute; padding: 0; border: 0; background: transparent; }
 .liubai-result-button img { display: block; width: 100%; height: 100%; }
 .liubai-result-button::after { content: ""; position: absolute; inset: -5px 0; }
 .liubai-result-button:active { opacity: .8; }
+.liubai-qr-mask { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgb(0 0 0 / 68%); }
+.liubai-qr-dialog { width: min(100%, 320px); padding: 20px; border-radius: 12px; background: #fff; text-align: center; }
+.liubai-qr-dialog img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+.liubai-qr-dialog p { margin: 16px 0; color: #181927; font-size: 15px; line-height: 1.5; }
+.liubai-qr-dialog button { width: 100%; min-height: 42px; border: 0; border-radius: 6px; background: #181927; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .liubai-progress-track > div { transition: none; } }
