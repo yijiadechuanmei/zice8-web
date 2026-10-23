@@ -64,10 +64,7 @@ function LiubaiAssessment({ activityKey }) {
   const { page, answers, index, resultId } = flow
   const share = useMemo(() => data ? {
     ...data.activity,
-    shareLink: resultId ? resultShareUrl(resultId) : data.activity.shareLink,
-    shareTitle: '鎏白 · 矿石人格测试',
-    shareDesc: '独一无二的你匹配哪一颗专属矿石水晶杯？',
-    shareImage: asset(SPLASH_IMAGES[0][0]),
+    shareLink: resultId ? resultShareUrl(resultId) : undefined,
   } : null, [data, resultId])
   useWechatShare(isWechatBrowser() ? activityKey : '', share)
 
