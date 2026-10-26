@@ -1,7 +1,8 @@
 export const ACTIVITY_KEY = 'liubai_test_20261020'
 export const ASSETS_BASE = 'https://assets.zice8.com/liubai_assessment/liubai_test_20261020'
 export const asset = (name) => `${ASSETS_BASE}/${name}`
-export const OFFICIAL_ACCOUNT_URL = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzNTkyOTI5MQ&scene=110#wechat_redirect'
+// gzh.jpg embeds this native official-account destination.
+export const OFFICIAL_ACCOUNT_URL = 'weixin://qr/mp/HSM8JG3EhzD4rSlH93YP'
 
 // All dimensions and positions are transcribed from the supplied IH5 markup.
 export const SPLASH_IMAGES = [
