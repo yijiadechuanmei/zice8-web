@@ -5,7 +5,7 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { isWechatBrowser } from '../../shared/utils/url'
 import { loadLiubaiActivity, submitLiubaiAnswers } from './api'
 import ResultPage from './ResultPage'
-import { ACTIVITY_KEY, asset, HOME_IMAGES, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, SPLASH_IMAGES, START_IMAGE } from './config'
+import { ACTIVITY_KEY, asset, HOME_IMAGES, OFFICIAL_ACCOUNT_URL, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, SPLASH_IMAGES, START_IMAGE } from './config'
 import './styles.css'
 
 const RESULT_PARAM = 'result'
@@ -54,7 +54,6 @@ function LiubaiAssessment({ activityKey }) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [submitError, setSubmitError] = useState('')
-  const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const [shareVisible, setShareVisible] = useState(false)
   const locked = useRef(false)
   const advanceTimer = useRef(null)
@@ -189,7 +188,7 @@ function LiubaiAssessment({ activityKey }) {
   function resultAction(action) {
     if (action === 'restart') return home()
     if (action === 'product') return setMessage('商品入口暂未开放')
-    if (action === 'follow') return setQrcodeVisible(true)
+    if (action === 'follow') return window.location.assign(OFFICIAL_ACCOUNT_URL)
     setShareVisible(true)
   }
 
@@ -247,15 +246,6 @@ function LiubaiAssessment({ activityKey }) {
         </div>
       )}
       {message && <div className="liubai-toast" role="status">{message}</div>}
-      {qrcodeVisible && (
-        <div className="liubai-qr-mask" role="dialog" aria-modal="true" aria-label="鎏白微信公众号二维码" onClick={() => setQrcodeVisible(false)}>
-          <div className="liubai-qr-dialog" onClick={(event) => event.stopPropagation()}>
-            <img src={asset('gzh.jpg')} alt="鎏白微信公众号二维码" />
-            <p>长按识别二维码，关注鎏白微信公众号</p>
-            <button type="button" onClick={() => setQrcodeVisible(false)}>关闭</button>
-          </div>
-        </div>
-      )}
       {shareVisible && createPortal(
         <div className="liubai-share-mask" role="button" tabIndex={0} aria-label="关闭分享提示" onClick={() => setShareVisible(false)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setShareVisible(false) }}>
           <span className="liubai-share-guide" onClick={(event) => event.stopPropagation()}>

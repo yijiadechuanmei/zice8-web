@@ -72,11 +72,6 @@
 .liubai-result-button img { display: block; width: 100%; height: 100%; }
 .liubai-result-button::after { content: ""; position: absolute; inset: -5px 0; }
 .liubai-result-button:active { opacity: .8; transform: scale(.97); }
-.liubai-qr-mask { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgb(0 0 0 / 68%); }
-.liubai-qr-dialog { width: min(100%, 320px); padding: 20px; border-radius: 12px; background: #fff; text-align: center; animation: liubai-modal-in .28s ease-out both; }
-.liubai-qr-dialog img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
-.liubai-qr-dialog p { margin: 16px 0; color: #181927; font-size: 15px; line-height: 1.5; }
-.liubai-qr-dialog button { width: 100%; min-height: 42px; border: 0; border-radius: 6px; background: #181927; color: #fff; }
 .liubai-share-mask { position: fixed; inset: 0; z-index: 50; padding: calc(16px + env(safe-area-inset-top, 0px)) 18px 0; border: 0; background: rgb(0 0 0 / 72%); color: #fff; font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif; text-align: right; }
 .liubai-share-guide { display: inline-flex; align-items: flex-start; gap: 10px; font-size: 16px; line-height: 1.55; font-weight: bold; text-align: left; animation: liubai-share-guide-in .3s ease-out both; }
 .liubai-share-dots { display: inline-flex; gap: 4px; padding: 8px 7px; border: 1px solid #fff; border-radius: 16px; }
@@ -87,6 +82,5 @@
 @keyframes liubai-option-in { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes liubai-result-card-in { from { opacity: 0; transform: translateX(-50%) translateY(24px) scale(.97); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
 @keyframes liubai-button-glow { 0%, 100% { opacity: 1; } 50% { opacity: .76; } }
-@keyframes liubai-modal-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes liubai-share-guide-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .liubai-page, .liubai-art, .liubai-start, .liubai-question-card, .liubai-option, .liubai-result-card, .liubai-result-button, .liubai-qr-dialog, .liubai-share-guide { animation: none; } .liubai-progress-track > div, .liubai-option, .liubai-result-button { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .liubai-page, .liubai-art, .liubai-start, .liubai-question-card, .liubai-option, .liubai-result-card, .liubai-result-button, .liubai-share-guide { animation: none; } .liubai-progress-track > div, .liubai-option, .liubai-result-button { transition: none; } }

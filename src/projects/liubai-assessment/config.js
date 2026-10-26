@@ -1,6 +1,7 @@
 export const ACTIVITY_KEY = 'liubai_test_20261020'
 export const ASSETS_BASE = 'https://assets.zice8.com/liubai_assessment/liubai_test_20261020'
 export const asset = (name) => `${ASSETS_BASE}/${name}`
+export const OFFICIAL_ACCOUNT_URL = 'http://weixin.qq.com/r/mp/HSM8JG3EhzD4rSlH93YP'
 
 // All dimensions and positions are transcribed from the supplied IH5 markup.
 export const SPLASH_IMAGES = [
