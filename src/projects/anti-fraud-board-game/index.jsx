@@ -328,7 +328,10 @@ function BoardScene({
           style={{ left: currentPoint.x, top: currentPoint.y }}
           aria-label="随机前进"
         >
-          <LayerImage src={antiFraudBoardAssets.game.character} />
+          <div className="afbg-character-frames" aria-hidden="true">
+            <LayerImage className="afbg-character-frame afbg-character-frame-one" src={antiFraudBoardAssets.game.characterFrameOne} />
+            <LayerImage className="afbg-character-frame afbg-character-frame-two" src={antiFraudBoardAssets.game.characterFrameTwo} />
+          </div>
           {!moving && !question && !feedback && !success ? (
             <div className={`afbg-roll-hint ${position >= 4 && position <= 6 ? 'is-lowered' : ''}`}>
               <LayerImage src={antiFraudBoardAssets.game.prompt} />

@@ -121,8 +121,7 @@
   animation: afbg-pulse 1s infinite;
 }
 
-.afbg-start-button .afbg-layer-image,
-.afbg-character .afbg-layer-image {
+.afbg-start-button .afbg-layer-image {
   inset: 0;
 }
 
@@ -156,11 +155,22 @@
   cursor: default;
 }
 
-.afbg-character > .afbg-layer-image:first-child {
+.afbg-character-frames {
+  position: absolute;
   left: -8px;
   top: -9px;
   width: 116px;
   height: 129px;
+  pointer-events: none;
+}
+
+.afbg-character-frame {
+  inset: 0;
+  animation: afbg-character-frames 1s steps(1, end) infinite;
+}
+
+.afbg-character-frame-two {
+  animation-delay: -0.5s;
 }
 
 .afbg-roll-hint {
@@ -920,6 +930,17 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes afbg-character-frames {
+  0%,
+  49.999% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 
