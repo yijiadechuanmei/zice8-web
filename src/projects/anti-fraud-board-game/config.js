@@ -1,8 +1,4 @@
 import posterBackground from './assets/poster-background.png'
-import posterCard from './assets/poster-card.png'
-import posterTitle from './assets/poster-title.png'
-import posterFooter from './assets/poster-footer.png'
-import posterBadge from './assets/poster-badge.png'
 
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_TYPE = 'anti_fraud_board_game'
 export const ANTI_FRAUD_BOARD_GAME_ACTIVITY_KEY = 'anti_fraud_board_game_20260623'
@@ -52,10 +48,11 @@ export const antiFraudBoardAssets = {
   },
   poster: {
     background: posterBackground,
-    card: posterCard,
-    title: posterTitle,
-    footer: posterFooter,
-    badge: posterBadge,
+    card: `${CDN_BASE}/poster-card-DK98CA_7.png`,
+    trophyHigh: `${CDN_BASE}/j.png`,
+    trophyMedium: `${CDN_BASE}/y.png`,
+    footer: `${CDN_BASE}/poster-footer-CuznF6tF.png`,
+    badge: `${CDN_BASE}/poster-badge-BcEtZ5Dt.png`,
   },
 }
 

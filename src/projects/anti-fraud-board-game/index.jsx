@@ -24,6 +24,8 @@ const DESIGN_HEIGHT = 812
 const GAME_STAGE_HEIGHT = 1124
 const POSTER_RENDER_SCALE = 2
 const POSTER_CONTENT_OFFSET_Y = 52
+const POSTER_TROPHY_TOP = 24
+const POSTER_TROPHY_HEIGHT = 170
 const POSTER_QR_LEFT = 280
 const POSTER_QR_TOP = 580
 // 海报导出宽度为 750px，设计稿 63.5px 对应最终二维码外框 127px。
@@ -144,14 +146,14 @@ function getPosterActivityUrl(activityKey) {
   return `https://web.zice8.com/anti_fraud_board_game/${encodeURIComponent(activityKey)}`
 }
 
-async function renderPosterImage({ leftLabel, rightLabel, qrCanvas }) {
+async function renderPosterImage({ leftLabel, rightLabel, trophySrc, qrCanvas }) {
   if (!qrCanvas) throw new Error('二维码尚未生成')
 
   const posterAssets = antiFraudBoardAssets.poster
-  const [background, card, title, footer, badge] = await Promise.all([
+  const [background, card, trophy, footer, badge] = await Promise.all([
     loadPosterImage(posterAssets.background),
     loadPosterImage(posterAssets.card),
-    loadPosterImage(posterAssets.title),
+    loadPosterImage(trophySrc),
     loadPosterImage(posterAssets.footer),
     loadPosterImage(posterAssets.badge),
   ])
@@ -165,11 +167,14 @@ async function renderPosterImage({ leftLabel, rightLabel, qrCanvas }) {
   context.imageSmoothingEnabled = true
   context.imageSmoothingQuality = 'high'
   const posterY = (value) => value + POSTER_CONTENT_OFFSET_Y
+  const trophyWidth = trophy.naturalWidth / trophy.naturalHeight * POSTER_TROPHY_HEIGHT
+  const badgeHeight = 40
+  const badgeWidth = badge.naturalWidth / badge.naturalHeight * badgeHeight
   context.drawImage(background, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT)
   context.drawImage(card, 11, posterY(74), 351, 530)
-  context.drawImage(title, 45, posterY(5), 282, 170)
+  context.drawImage(trophy, (DESIGN_WIDTH - trophyWidth) / 2, POSTER_TROPHY_TOP, trophyWidth, POSTER_TROPHY_HEIGHT)
   context.drawImage(footer, 6, posterY(618), 361, 85)
-  context.drawImage(badge, 61, posterY(469), 256, 40)
+  context.drawImage(badge, (DESIGN_WIDTH - badgeWidth) / 2, posterY(469), badgeWidth, badgeHeight)
 
   context.font = '900 20px "PingFang SC", "Microsoft YaHei", sans-serif'
   context.textAlign = 'center'
@@ -497,17 +502,21 @@ function SuccessOverlay({ onGoPoster }) {
   )
 }
 
-function PosterPage({ activityKey, allCorrect, onReplay }) {
+function PosterPage({ activityKey, correctAnswerCount, questionCount, onReplay }) {
   const [posterUrl, setPosterUrl] = useState('')
   const [posterError, setPosterError] = useState('')
   const [composeVersion, setComposeVersion] = useState(0)
   const qrSourceRef = useRef(null)
   const activityUrl = useMemo(() => getPosterActivityUrl(activityKey), [activityKey])
+  const isHighVigilance = correctAnswerCount >= Math.ceil(questionCount / 2)
   const labels = useMemo(() => (
-    allCorrect
+    isHighVigilance
       ? { left: '所向披靡', right: '高' }
       : { left: '火眼金睛', right: '中' }
-  ), [allCorrect])
+  ), [isHighVigilance])
+  const trophySrc = isHighVigilance
+    ? antiFraudBoardAssets.poster.trophyHigh
+    : antiFraudBoardAssets.poster.trophyMedium
 
   useEffect(() => {
     let cancelled = false
@@ -528,6 +537,7 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
       renderPosterImage({
         leftLabel: labels.left,
         rightLabel: labels.right,
+        trophySrc,
         qrCanvas,
       })
         .then((url) => {
@@ -548,17 +558,17 @@ function PosterPage({ activityKey, allCorrect, onReplay }) {
       cancelled = true
       if (retryTimer) window.clearTimeout(retryTimer)
     }
-  }, [composeVersion, labels])
+  }, [composeVersion, labels, trophySrc])
 
   return (
     <>
       <DesignStage className="afbg-poster" shellClassName="afbg-poster-shell" fit="width">
         <LayerImage src={antiFraudBoardAssets.poster.card} style={{ left: 11, top: 74 + POSTER_CONTENT_OFFSET_Y, width: 351, height: 530 }} />
-        <LayerImage src={antiFraudBoardAssets.poster.title} style={{ left: 45, top: 5 + POSTER_CONTENT_OFFSET_Y, width: 282, height: 170 }} />
+        <LayerImage src={trophySrc} style={{ left: '50%', top: POSTER_TROPHY_TOP, width: 'auto', height: POSTER_TROPHY_HEIGHT, transform: 'translateX(-50%)' }} />
         <LayerImage src={antiFraudBoardAssets.poster.footer} style={{ left: 6, top: 618 + POSTER_CONTENT_OFFSET_Y, width: 361, height: 85 }} />
         <div className="afbg-poster-label" style={{ left: 56, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.left}</div>
         <div className="afbg-poster-label" style={{ left: 224, top: 396 + POSTER_CONTENT_OFFSET_Y }}>{labels.right}</div>
-        <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: 61, top: 469 + POSTER_CONTENT_OFFSET_Y, width: 256, height: 40 }} />
+        <LayerImage src={antiFraudBoardAssets.poster.badge} style={{ left: '50%', top: 469 + POSTER_CONTENT_OFFSET_Y, width: 'auto', height: 40, transform: 'translateX(-50%)' }} />
         <div
           ref={qrSourceRef}
           className="afbg-poster-qrcode"
@@ -618,7 +628,8 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
   const [feedback, setFeedback] = useState(null)
   const [success, setSuccess] = useState(false)
   const [rollCount, setRollCount] = useState(0)
-  const [hasWrongAnswer, setHasWrongAnswer] = useState(false)
+  const [correctAnswerCount, setCorrectAnswerCount] = useState(0)
+  const [questionTarget, setQuestionTarget] = useState(MIN_QUESTION_COUNT)
   const [showHomeOrientationPrompt, setShowHomeOrientationPrompt] = useState(false)
   const isLandscape = useIsLandscape()
   const questionDeckRef = useRef([])
@@ -697,9 +708,11 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     setFeedback(null)
     setSuccess(false)
     setRollCount(0)
-    setHasWrongAnswer(false)
+    setCorrectAnswerCount(0)
     questionDeckRef.current = []
-    questionTargetRef.current = getQuestionTarget()
+    const nextQuestionTarget = getQuestionTarget()
+    questionTargetRef.current = nextQuestionTarget
+    setQuestionTarget(nextQuestionTarget)
   }, [])
 
   const playAnswerSound = useCallback((correct) => {
@@ -773,7 +786,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
     const expected = Array.isArray(question.answerIndex) ? question.answerIndex : [question.answerIndex]
     const correct = answerIndexes.length === expected.length && answerIndexes.every((index) => expected.includes(index))
     playAnswerSound(correct)
-    if (!correct) setHasWrongAnswer(true)
+    if (correct) setCorrectAnswerCount((count) => count + 1)
     setFeedback({
       correct,
       analysis: question.analysis,
@@ -841,7 +854,7 @@ export default function AntiFraudBoardGameApp({ routeParams }) {
           showLandscapePrompt={isLandscape}
         />
       ) : null}
-      {page === PAGE.POSTER ? <PosterPage activityKey={activityKey} allCorrect={!hasWrongAnswer} onReplay={handleReplay} /> : null}
+      {page === PAGE.POSTER ? <PosterPage activityKey={activityKey} correctAnswerCount={correctAnswerCount} questionCount={questionTarget} onReplay={handleReplay} /> : null}
       <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
       <audio ref={correctSoundRef} src={antiFraudBoardAssets.game.correctSound} preload="auto" aria-hidden="true" />
       <audio ref={wrongSoundRef} src={antiFraudBoardAssets.game.wrongSound} preload="auto" aria-hidden="true" />
