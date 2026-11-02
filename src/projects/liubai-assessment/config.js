@@ -4,6 +4,23 @@ export const asset = (name) => `${ASSETS_BASE}/${name}`
 // Use the supplied official-account Biz value in the profile page URL.
 export const OFFICIAL_ACCOUNT_URL = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzNTkyOTI5MQ==&scene=110#wechat_redirect'
 
+// Product links follow the 1-14 result order. Results 8 and 10 have no
+// matching product URL in the supplied list, so they intentionally stay empty.
+export const RESULT_PRODUCT_LINKS = {
+  1: 'https://shop183508373.m.youzan.com/wscgoods/detail/274pbt61phh592a?scan=1&activity=none&from=kdt&qr=directgoods_5384501479&shopAutoEnter=1',
+  2: 'https://shop183508373.m.youzan.com/wscgoods/detail/3eos2kecph8jhmw?scan=1&activity=none&from=kdt&qr=directgoods_5384501480&shopAutoEnter=1',
+  3: 'https://shop183508373.m.youzan.com/wscgoods/detail/3614gjmjpcs71v1?scan=1&activity=none&from=kdt&qr=directgoods_5384502738&shopAutoEnter=1',
+  4: 'https://shop183508373.m.youzan.com/wscgoods/detail/2x8jzm2zar6bhsq?scan=1&activity=none&from=kdt&qr=directgoods_6564475303&shopAutoEnter=1',
+  5: 'https://shop183508373.m.youzan.com/wscgoods/detail/3f3kpxtpsq8m56c?scan=1&activity=none&from=kdt&qr=directgoods_5384501357&shopAutoEnter=1',
+  6: 'https://shop183508373.m.youzan.com/wscgoods/detail/3nhcd6tlk9ovxyk?scan=1&activity=none&from=kdt&qr=directgoods_6564475702&shopAutoEnter=1',
+  7: 'https://shop183508373.m.youzan.com/wscgoods/detail/2g26nmqhxfy0tvs?scan=1&activity=none&from=kdt&qr=directgoods_6564383376&shopAutoEnter=1',
+  9: 'https://shop183508373.m.youzan.com/wscgoods/detail/368i6ge9rvfelyq?scan=1&activity=none&from=kdt&qr=directgoods_6564383377&shopAutoEnter=1',
+  11: 'https://shop183508373.m.youzan.com/wscgoods/detail/3f2c18ud319odig?scan=1&activity=none&from=kdt&qr=directgoods_5384501763&shopAutoEnter=1',
+  12: 'https://shop183508373.m.youzan.com/wscgoods/detail/3nhcjcpqn8ov16n?scan=1&activity=none&from=kdt&qr=directgoods_5384501761&shopAutoEnter=1',
+  13: 'https://shop183508373.m.youzan.com/wscgoods/detail/3ntnt553ld2el3l?scan=1&activity=none&from=kdt&qr=directgoods_6564397405&shopAutoEnter=1',
+  14: 'https://shop183508373.m.youzan.com/wscgoods/detail/1yeko7s4egi99t5?scan=1&activity=none&from=kdt&qr=directgoods_6564393835&shopAutoEnter=1',
+}
+
 // All dimensions and positions are transcribed from the supplied IH5 markup.
 export const SPLASH_IMAGES = [
   ['e43ae6d64d60df417f9fffc3a0d78dbc_4736_208_224.png', 275, 425, 208, 224],

@@ -5,7 +5,7 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { isWechatBrowser } from '../../shared/utils/url'
 import { loadLiubaiActivity, submitLiubaiAnswers } from './api'
 import ResultPage from './ResultPage'
-import { ACTIVITY_KEY, asset, HOME_IMAGES, OFFICIAL_ACCOUNT_URL, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, SPLASH_IMAGES, START_IMAGE } from './config'
+import { ACTIVITY_KEY, asset, HOME_IMAGES, OFFICIAL_ACCOUNT_URL, PREVIOUS_IMAGE, QUIZ_BACKGROUND, QUIZ_IMAGES, RESULT_PRODUCT_LINKS, SPLASH_IMAGES, START_IMAGE } from './config'
 import './styles.css'
 
 const RESULT_PARAM = 'result'
@@ -187,7 +187,11 @@ function LiubaiAssessment({ activityKey }) {
 
   function resultAction(action) {
     if (action === 'restart') return home()
-    if (action === 'product') return setMessage('商品入口暂未开放')
+    if (action === 'product') {
+      const productUrl = RESULT_PRODUCT_LINKS[resultId]
+      if (productUrl) return window.location.assign(productUrl)
+      return setMessage('该测试结果对应商品暂未提供链接')
+    }
     if (action === 'follow') return window.location.assign(OFFICIAL_ACCOUNT_URL)
     setShareVisible(true)
   }
