@@ -4,8 +4,7 @@ export const asset = (name) => `${ASSETS_BASE}/${name}`
 // Use the supplied official-account Biz value in the profile page URL.
 export const OFFICIAL_ACCOUNT_URL = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzYzNTkyOTI5MQ==&scene=110#wechat_redirect'
 
-// Product links follow the 1-14 result order. Results 8 and 10 have no
-// matching product URL in the supplied list, so they intentionally stay empty.
+// Product links follow the 1-14 mineral result order.
 export const RESULT_PRODUCT_LINKS = {
   1: 'https://shop183508373.m.youzan.com/wscgoods/detail/274pbt61phh592a?scan=1&activity=none&from=kdt&qr=directgoods_5384501479&shopAutoEnter=1',
   2: 'https://shop183508373.m.youzan.com/wscgoods/detail/3eos2kecph8jhmw?scan=1&activity=none&from=kdt&qr=directgoods_5384501480&shopAutoEnter=1',
@@ -14,7 +13,9 @@ export const RESULT_PRODUCT_LINKS = {
   5: 'https://shop183508373.m.youzan.com/wscgoods/detail/3f3kpxtpsq8m56c?scan=1&activity=none&from=kdt&qr=directgoods_5384501357&shopAutoEnter=1',
   6: 'https://shop183508373.m.youzan.com/wscgoods/detail/3nhcd6tlk9ovxyk?scan=1&activity=none&from=kdt&qr=directgoods_6564475702&shopAutoEnter=1',
   7: 'https://shop183508373.m.youzan.com/wscgoods/detail/2g26nmqhxfy0tvs?scan=1&activity=none&from=kdt&qr=directgoods_6564383376&shopAutoEnter=1',
+  8: 'https://shop183508373.m.youzan.com/wscgoods/detail/3ng3i1hqrd23x8p?scan=1&activity=none&from=kdt&qr=directgoods_6567492910&shopAutoEnter=1',
   9: 'https://shop183508373.m.youzan.com/wscgoods/detail/368i6ge9rvfelyq?scan=1&activity=none&from=kdt&qr=directgoods_6564383377&shopAutoEnter=1',
+  10: 'https://shop183508373.m.youzan.com/wscgoods/detail/3f2b5uftmadqlim?scan=1&activity=none&from=kdt&qr=directgoods_6567484449&shopAutoEnter=1',
   11: 'https://shop183508373.m.youzan.com/wscgoods/detail/3f2c18ud319odig?scan=1&activity=none&from=kdt&qr=directgoods_5384501763&shopAutoEnter=1',
   12: 'https://shop183508373.m.youzan.com/wscgoods/detail/3nhcjcpqn8ov16n?scan=1&activity=none&from=kdt&qr=directgoods_5384501761&shopAutoEnter=1',
   13: 'https://shop183508373.m.youzan.com/wscgoods/detail/3ntnt553ld2el3l?scan=1&activity=none&from=kdt&qr=directgoods_6564397405&shopAutoEnter=1',
