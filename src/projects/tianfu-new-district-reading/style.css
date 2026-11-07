@@ -6,7 +6,7 @@
 .tianfu-marker { transform-origin: 50% 100%; opacity: 0; animation: tianfu-marker-enter 360ms cubic-bezier(.18, .9, .3, 1) var(--tianfu-marker-delay, 0ms) both, tianfu-marker-bounce 1500ms ease-in-out calc(var(--tianfu-marker-delay, 0ms) + 420ms) infinite; }
 .tianfu-mask { position: absolute; z-index: 1; overflow: visible; background-color: rgba(255, 255, 255, 0.8); }
 .tianfu-mask-image { position: absolute; display: block; max-width: none; pointer-events: none; user-select: none; }
-.tianfu-ended-stage-mask { position: absolute; z-index: 1; left: 0.266667%; top: 16.256158%; width: 100%; height: 23.399015%; background-color: rgba(255, 255, 255, 0.8); }
+.tianfu-ended-stage-notice { position: absolute; z-index: 1; left: 0.266667%; top: 16.256158%; width: 100%; height: 23.399015%; pointer-events: none; }
 .tianfu-ended-stage-label { position: absolute; left: 25.2%; top: 61.842105%; width: 49.066667%; height: 12.368421%; display: flex; align-items: center; justify-content: center; color: rgb(255, 0, 0); font-size: min(28px, 3.733333vw); font-weight: 700; line-height: normal; text-align: center; white-space: pre-wrap; }
 .tianfu-hit { position: absolute; z-index: 2; display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; transition: transform 150ms ease; }
 .tianfu-hit:active { transform: scale(.96); }
