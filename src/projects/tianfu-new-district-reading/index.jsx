@@ -205,6 +205,7 @@ const HAICHUANG_PARK_POINTS = [
   {
     id: 'tianfu-cosmic-ray-research-center',
     name: '天府宇宙线研究中心',
+    media: ['tianfuyuzhouxian.mp4'],
     introduction: `“拉索”有一张巨大的“网”——它占地约1.36平方公里，其中1平方公里地面簇射粒子探测器阵列（KM2A）由5216个电磁粒子探测器和1188个缪子探测器构成，昼夜不停地“接住”从宇宙深处砸向地球的粒子“阵雨”。
 
 而在成都兴隆湖畔，天府宇宙线研究中心解读着这些来自高海拔宇宙线观测站“拉索”的“密码”。
@@ -219,6 +220,7 @@ const HAICHUANG_PARK_POINTS = [
   {
     id: 'cas-chengdu-branch',
     name: '中国科学院成都分院',
+    media: ['zhongkeyuanchengdufenyuan.mp4'],
     introduction: `中国科学院、水利部成都山地灾害与环境研究所：
 
 中国科学院、水利部成都山地灾害与环境研究所是以“认知山地科学规律，服务国家持续发展”为战略目标，以山地灾害、山地环境和山区可持续发展为主要研究领域的国立科研机构。
