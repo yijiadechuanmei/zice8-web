@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import './styles.css'
 
-const ASSETS_BASE_URL = 'https://zice8-assets.oss-cn-shanghai.aliyuncs.com/safe_driver_quiz_lottery/pingan_good_driver_2026'
+const ASSETS_BASE_URL = 'https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026'
 
 export default function PinganGoodDriverProject() {
   useEffect(() => {
