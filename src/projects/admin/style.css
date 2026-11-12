@@ -247,6 +247,140 @@
   min-height: 28px;
 }
 
+.fifteenth-dashboard {
+  display: grid;
+  gap: 20px;
+}
+
+.fifteenth-dashboard__intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 86% 16%, rgba(96, 165, 250, 0.24), transparent 32%),
+    linear-gradient(118deg, #eff6ff 0%, #f8fbff 54%, #ffffff 100%);
+}
+
+.fifteenth-dashboard__intro h5 {
+  margin: 4px 0 5px;
+  color: #173b79;
+  font-size: 18px;
+}
+
+.fifteenth-dashboard__eyebrow {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.fifteenth-dashboard__repeat {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+
+.fifteenth-dashboard__metric-section {
+  display: grid;
+  gap: 10px;
+}
+
+.fifteenth-dashboard__section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fifteenth-dashboard__section-head h5 {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 15px;
+}
+
+.fifteenth-dashboard__section-head .ant-typography {
+  font-size: 12px;
+  text-align: right;
+}
+
+.fifteenth-kpi-card {
+  min-height: 110px;
+  border-color: #e2e8f0;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.fifteenth-kpi-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 10px 24px rgba(30, 64, 175, 0.1);
+}
+
+.fifteenth-kpi-card--emphasis {
+  border-color: #bfdbfe;
+  background: linear-gradient(145deg, #ffffff, #f0f7ff);
+}
+
+.fifteenth-kpi-card .ant-statistic-content {
+  color: #1e40af;
+}
+
+.fifteenth-channel-card {
+  min-height: 138px;
+  border-color: #dbeafe;
+  background: linear-gradient(145deg, #ffffff, #f8fbff);
+}
+
+.fifteenth-channel-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.fifteenth-channel-card__head .ant-typography-secondary {
+  font-size: 12px;
+}
+
+.fifteenth-channel-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fifteenth-channel-card__metrics .ant-statistic-title {
+  margin-bottom: 2px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.fifteenth-channel-card__metrics .ant-statistic-content {
+  color: #1e3a8a;
+  font-size: 20px;
+}
+
+.fifteenth-dashboard__note {
+  margin: -4px 0 0;
+}
+
+@media (max-width: 640px) {
+  .fifteenth-dashboard__intro,
+  .fifteenth-dashboard__section-head,
+  .fifteenth-channel-card__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fifteenth-dashboard__section-head .ant-typography {
+    text-align: left;
+  }
+}
+
 .admin-page-head {
   display: flex;
   align-items: flex-start;
