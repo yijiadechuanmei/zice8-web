@@ -36,6 +36,7 @@ const FifteenthFiveICanProject = lazy(() => import('./fifteenth-five-i-can/index
 const LuckyDrawProject = lazy(() => import('./lucky-draw/index.jsx'))
 const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.jsx'))
 const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
+const PinganGoodDriverProject = lazy(() => import('./pingan-good-driver/index.jsx'))
 
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
 const LiubaiAssessmentProject = lazy(() => import('./liubai-assessment/index.jsx'))
@@ -63,6 +64,7 @@ const activityTypeProjects = {
   lucky_draw_20260920: LuckyDrawProject,
   maotai_c_create_fun_20260923: MaotaiCCreateFunProject,
   tianfu_new_district_reading_20260927: TianfuNewDistrictReadingProject,
+  safe_driver_quiz_lottery: PinganGoodDriverProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
