@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { Component, Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Col, Empty, Row, Select, Space, Spin, Statistic, Tooltip, Typography } from 'antd'
+import { Button, Card, Col, Empty, Progress, Row, Select, Space, Spin, Statistic, Tooltip, Typography } from 'antd'
 import { InfoCircleOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
@@ -14,6 +14,10 @@ const pvHint = '页面访问次数，同一访客同一页面 30 秒内重复访
 const uvHint = '按浏览器匿名访客 ID 去重统计。'
 const XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY = 'xiwuqi_99_road_night_20260624'
 const TJRCB_PENSION_MANUAL_ACTIVITY_KEY = 'tjrcb_pension_manual_20260622'
+const LIUBAI_RESULT_NAMES = [
+  '黑曜石', '红水晶', '黄龙玉', '樱花玛瑙', '虎眼石', '孔雀石', '天山翠（青）',
+  '蔷薇石', '凝脂玛瑙', '蓝玉髓', '蓝水晶', '青金石', '白松石', '天山翠（白）',
+]
 const XIWUQI_AMAP_SOURCE_FILTER = {
   source: 'amap',
   campaign: 'xiwuqi_20260624',
@@ -39,6 +43,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const [error, setError] = useState('')
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
+  const isLiubaiAssessment = activity.type === 'liubai_assessment'
   const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
   const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
   const isLuckyDraw = activity.type === 'lucky_draw_20260920'
@@ -123,6 +128,17 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         { label: '书籍浏览', value: eventCount('tianfu_book_view') },
         { label: '视频播放', value: eventCount('tianfu_video_play') },
         { label: '图片浏览', value: eventCount('tianfu_image_view') },
+      ]
+    }
+    if (isLiubaiAssessment) {
+      const liubai = overview?.liubaiAssessment || {}
+      return [
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+        { label: '累计测试次数', value: liubai.attemptCount ?? 0 },
+        { label: '累计测试人数', value: liubai.testerCount ?? 0, tooltip: '按匿名访客标识去重；不保存答题答案。' },
+        { label: '今日测试次数', value: liubai.todayAttemptCount ?? 0 },
+        { label: '今日测试人数', value: liubai.todayTesterCount ?? 0, tooltip: '按匿名访客标识去重；不保存答题答案。' },
       ]
     }
     const xiwuqiAmapMetrics = isXiwuqiRoadNight ? [
@@ -491,7 +507,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isAntiFraudBoardGame, isLuckyDraw, isMaotaiCCreateFun, isTianfuReading, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isLiubaiAssessment, isLuckyDraw, isMaotaiCCreateFun, isTianfuReading, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const luckyDrawTrend = (charts?.luckyDraw?.drawTrend || []).map((item, index) => ({
@@ -623,6 +639,22 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       </Paragraph>
 
       {isTianfuReading ? <TianfuReadingOverview overview={overview} charts={charts} /> : null}
+
+      {isLiubaiAssessment ? <Card className="admin-chart-card" title="测试结果分布" extra={<Text type="secondary">共 {overview?.liubaiAssessment?.attemptCount ?? 0} 次完成</Text>}>
+        <Row gutter={[16, 8]}>
+          {LIUBAI_RESULT_NAMES.map((name, index) => {
+            const resultId = index + 1
+            const count = Number((overview?.liubaiAssessment?.resultDistribution || []).find((item) => item.resultId === resultId)?.count || 0)
+            const total = Number(overview?.liubaiAssessment?.attemptCount || 0)
+            return <Col xs={24} sm={12} lg={8} key={resultId}>
+              <div className="admin-liubai-result-stat">
+                <Text>{String(resultId).padStart(2, '0')} · {name}</Text>
+                <Progress percent={total ? Math.round(count / total * 100) : 0} size="small" format={() => count.toLocaleString('zh-CN')} />
+              </div>
+            </Col>
+          })}
+        </Row>
+      </Card> : null}
 
       {compact || isTianfuReading ? null : (
         <>

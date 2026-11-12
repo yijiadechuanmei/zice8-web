@@ -247,6 +247,14 @@
   min-height: 28px;
 }
 
+.admin-liubai-result-stat {
+  padding: 4px 0;
+}
+
+.admin-liubai-result-stat .ant-progress {
+  margin: 2px 0 0;
+}
+
 .admin-page-head {
   display: flex;
   align-items: flex-start;

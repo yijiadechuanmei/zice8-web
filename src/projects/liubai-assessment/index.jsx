@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import DesignStage from '../../shared/components/DesignStage'
+import { trackEvent, trackPageView } from '../../shared/analytics'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { isWechatBrowser } from '../../shared/utils/url'
 import { loadLiubaiActivity, submitLiubaiAnswers } from './api'
@@ -69,6 +70,7 @@ function LiubaiAssessment({ activityKey }) {
 
   useEffect(() => {
     document.title = '鎏白 · 矿石人格测试'
+    trackPageView(activityKey, '/liubai-assessment')
     let cancelled = false
     loadLiubaiActivity(activityKey).then((value) => {
       if (cancelled) return
@@ -128,6 +130,12 @@ function LiubaiAssessment({ activityKey }) {
     const timeout = window.setTimeout(() => controller.abort(), 15000)
     try {
       const response = await submitLiubaiAnswers(activityKey, finalAnswers, data.questionVersion, controller.signal)
+      trackEvent({
+        activityKey,
+        eventType: 'liubai_result',
+        page: '/liubai-assessment',
+        extra: { resultId: response.result.id },
+      })
       setFlow({ page: 'result', index: 15, answers: finalAnswers, resultId: response.result.id })
     } catch (error) {
       setSubmitError(error.name === 'AbortError' ? '提交超时，请重试' : (error.message || '提交失败，请重试'))
