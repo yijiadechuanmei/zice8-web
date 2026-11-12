@@ -593,40 +593,34 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
           </Space>
         </div>
       ) : null}
-      {isFifteenthFiveICan ? (
-        <FifteenthFiveOverview overview={overview} />
-      ) : (
-        <>
-          <Row gutter={[16, 16]}>
-            {metrics.map((card) => (
-              <Col xs={24} sm={12} lg={compact ? 6 : 6} xl={compact ? 6 : 4} key={card.label}>
-                <Card className="admin-kpi-card" size="small">
-                  <Statistic
-                    title={(
-                      <span>
-                        {card.label}
-                        {card.tooltip ? (
-                          <Tooltip title={card.tooltip}>
-                            <InfoCircleOutlined className="admin-stat-help" />
-                          </Tooltip>
-                        ) : null}
-                      </span>
-                    )}
-                    value={card.value}
-                    suffix={card.suffix}
-                    formatter={formatMetric}
-                  />
-                  {card.hint ? <Text type="secondary" className="admin-kpi-hint">{card.hint}</Text> : null}
-                </Card>
-              </Col>
-            ))}
-          </Row>
+      <Row gutter={[16, 16]}>
+        {metrics.map((card) => (
+          <Col xs={24} sm={12} lg={compact ? 6 : 6} xl={compact ? 6 : 4} key={card.label}>
+            <Card className="admin-kpi-card" size="small">
+              <Statistic
+                title={(
+                  <span>
+                    {card.label}
+                    {card.tooltip ? (
+                      <Tooltip title={card.tooltip}>
+                        <InfoCircleOutlined className="admin-stat-help" />
+                      </Tooltip>
+                    ) : null}
+                  </span>
+                )}
+                value={card.value}
+                suffix={card.suffix}
+                formatter={formatMetric}
+              />
+              {card.hint ? <Text type="secondary" className="admin-kpi-hint">{card.hint}</Text> : null}
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
-          <Paragraph className="admin-muted">
-            PV：{pvHint} UV：{uvHint}
-          </Paragraph>
-        </>
-      )}
+      <Paragraph className="admin-muted">
+        PV：{pvHint} UV：{uvHint}
+      </Paragraph>
 
       {isTianfuReading ? <TianfuReadingOverview overview={overview} charts={charts} /> : null}
 
@@ -1055,144 +1049,6 @@ function ChartPanel({ title, description, children }) {
     <Card className="admin-chart-card" title={title} extra={description ? <Text type="secondary">{description}</Text> : null}>
       {children}
     </Card>
-  )
-}
-
-function FifteenthFiveOverview({ overview }) {
-  const stats = overview?.fifteenthFiveICan || {}
-  const channelAccess = overview?.fifteenthFiveChannelAccess || {}
-  const onsite = channelAccess.onsite || {}
-  const group = channelAccess.group || {}
-  const primaryMetrics = [
-    { label: '完成用户', value: stats.completedUserCount ?? 0, hint: '按微信用户去重' },
-    { label: '证书生成', value: stats.certificateCount ?? 0, hint: '每次生成均保留一条记录' },
-    { label: '今日完成用户', value: stats.todayCompletedUserCount ?? 0, hint: '按微信用户去重' },
-    { label: '今日生成证书', value: stats.todayCertificateCount ?? 0, hint: '按证书生成时间统计' },
-  ]
-  const accessMetrics = [
-    { label: '累计 PV', value: overview?.pv ?? 0, tooltip: pvHint },
-    { label: '累计 UV', value: overview?.uv ?? 0, tooltip: uvHint },
-    { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
-    { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
-  ]
-  const contentMetrics = [
-    { label: '关键词选择总数', value: stats.keywordSelectionTotal ?? 0, hint: `平均每张证书 ${stats.averageKeywordCount ?? 0} 个` },
-    { label: '2030 留言', value: stats.futureMessageCount ?? 0, hint: '“给2030年的一句话”为必填项' },
-    { label: '填写青春期盼', value: stats.wishCount ?? 0, hint: '“青春期盼”为可选填写项' },
-    { label: '期盼填写率', value: stats.wishRate ?? 0, suffix: '%' },
-  ]
-  const channels = [
-    { label: '现场宣讲', access: onsite, certificates: stats.onsiteCertificateCount ?? 0, description: '现场宣讲二维码' },
-    { label: '集团扫码', access: group, certificates: stats.groupCertificateCount ?? 0, description: '集团二维码' },
-    { label: '未知渠道', access: null, certificates: stats.unknownCertificateCount ?? 0, description: '未携带渠道参数' },
-  ]
-
-  return (
-    <section className="fifteenth-dashboard" aria-label="十五五我看行活动数据概览">
-      <div className="fifteenth-dashboard__intro">
-        <div>
-          <Text className="fifteenth-dashboard__eyebrow">十五五，我看行！</Text>
-          <Title level={5}>学习证书数据概览</Title>
-          <Text type="secondary">完成用户、证书生成、扫码渠道与内容填写数据实时汇总。</Text>
-        </div>
-        <Text type="secondary" className="fifteenth-dashboard__repeat">重复生成证书 {formatMetric(stats.repeatCertificateCount ?? 0)} 次</Text>
-      </div>
-
-      <OverviewMetricSection title="完成情况" metrics={primaryMetrics} emphasis />
-      <OverviewMetricSection title="访问数据" metrics={accessMetrics} />
-
-      <div className="fifteenth-dashboard__section-head">
-        <Title level={5}>扫码渠道</Title>
-        <Text type="secondary">PV / UV 为页面访问数据；证书为该渠道完成生成记录。</Text>
-      </div>
-      <Row gutter={[16, 16]}>
-        {channels.map((channel) => (
-          <Col xs={24} md={8} key={channel.label}>
-            <Card className="fifteenth-channel-card" size="small">
-              <div className="fifteenth-channel-card__head">
-                <Text strong>{channel.label}</Text>
-                <Text type="secondary">{channel.description}</Text>
-              </div>
-              <div className="fifteenth-channel-card__metrics">
-                <Statistic title="PV" value={channel.access?.pv ?? 0} formatter={formatMetric} />
-                <Statistic title="UV" value={channel.access?.uv ?? 0} formatter={formatMetric} />
-                <Statistic title="证书" value={channel.certificates} formatter={formatMetric} />
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      <OverviewMetricSection title="内容填写" metrics={contentMetrics} />
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} xl={12}>
-          <ChartPanel title="近 7 天完成趋势" description="按证书生成时间统计">
-            <LazyChart
-              type="line"
-              data={stats.dailyCertificateTrend || []}
-              series={[{ key: 'users', name: '完成用户' }, { key: 'certificates', name: '证书生成' }]}
-              emptyText="暂无证书生成记录"
-            />
-          </ChartPanel>
-        </Col>
-        <Col xs={24} xl={12}>
-          <ChartPanel title="证书渠道分布" description="按最终生成证书时携带的扫码渠道统计">
-            <LazyChart
-              type="donut"
-              data={stats.channelDistribution || []}
-              series={[{ key: 'value', name: '证书生成' }]}
-              emptyText="暂无证书生成记录"
-            />
-          </ChartPanel>
-        </Col>
-        <Col xs={24}>
-          <ChartPanel title="青春关键词 Top 10" description="按所有已生成证书中的关键词选择次数统计">
-            <LazyChart
-              type="horizontalBar"
-              data={stats.topKeywords || []}
-              series={[{ key: 'value', name: '选择次数' }]}
-              height={Math.max(260, Math.min((stats.topKeywords || []).length * 36 + 80, 440))}
-              emptyText="暂无关键词选择记录"
-            />
-          </ChartPanel>
-        </Col>
-      </Row>
-
-      <Paragraph className="admin-muted fifteenth-dashboard__note">
-        PV：{pvHint} UV：{uvHint} “完成用户”按微信用户去重；“证书生成”按每次提交保留记录统计。
-      </Paragraph>
-    </section>
-  )
-}
-
-function OverviewMetricSection({ title, metrics, emphasis = false }) {
-  return (
-    <section className="fifteenth-dashboard__metric-section" aria-label={title}>
-      <div className="fifteenth-dashboard__section-head">
-        <Title level={5}>{title}</Title>
-      </div>
-      <Row gutter={[16, 16]}>
-        {metrics.map((metric) => (
-          <Col xs={24} sm={12} xl={6} key={metric.label}>
-            <Card className={`admin-kpi-card fifteenth-kpi-card${emphasis ? ' fifteenth-kpi-card--emphasis' : ''}`} size="small">
-              <Statistic
-                title={(
-                  <span>
-                    {metric.label}
-                    {metric.tooltip ? <Tooltip title={metric.tooltip}><InfoCircleOutlined className="admin-stat-help" /></Tooltip> : null}
-                  </span>
-                )}
-                value={metric.value}
-                suffix={metric.suffix}
-                formatter={formatMetric}
-              />
-              {metric.hint ? <Text type="secondary" className="admin-kpi-hint">{metric.hint}</Text> : null}
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </section>
   )
 }
 
