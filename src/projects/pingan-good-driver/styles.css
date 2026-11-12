@@ -1,0 +1,80 @@
+.pgd-page {
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #10151b;
+}
+
+.pgd-home-canvas {
+  position: relative;
+  width: min(100vw, calc(100svh * 750 / 1624));
+  aspect-ratio: 750 / 1624;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.pgd-home-background {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pgd-start-button {
+  position: absolute;
+  left: 16.133333%;
+  top: 70.504926%;
+  z-index: 2;
+  width: 67.066667%;
+  height: 5.972906%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url('https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026/start-button.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  animation: pgd-button-heartbeat 1.6s ease-in-out infinite;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pgd-start-button:disabled {
+  opacity: 1;
+}
+
+@keyframes pgd-button-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgb(255 218 112 / 0%));
+  }
+
+  35% {
+    transform: scale(1.045);
+    filter: drop-shadow(0 0 12px rgb(255 218 112 / 42%));
+  }
+
+  55% {
+    transform: scale(1.015);
+  }
+
+  75% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 10px rgb(255 218 112 / 35%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgd-start-button {
+    animation: none;
+  }
+}
