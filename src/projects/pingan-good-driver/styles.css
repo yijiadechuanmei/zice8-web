@@ -43,12 +43,32 @@
   background-repeat: no-repeat;
   background-size: 100% 100%;
   animation: pgd-button-heartbeat 1.6s ease-in-out infinite;
-  cursor: default;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.pgd-start-button:disabled {
-  opacity: 1;
+.pgd-start-button:active {
+  filter: brightness(1.08);
+}
+
+.pgd-toast {
+  position: absolute;
+  top: 61%;
+  left: 50%;
+  z-index: 3;
+  padding: 18px 42px;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  background: rgb(10 33 77 / 88%);
+  box-shadow: 0 10px 32px rgb(0 24 77 / 28%);
+  color: #fff;
+  font-size: min(28px, 3.733333vw);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 @keyframes pgd-button-heartbeat {
