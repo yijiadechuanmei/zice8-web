@@ -568,7 +568,7 @@ export default function TianfuNewDistrictReadingProject() {
     { label: '进入天府公园', left: 21, top: 283, width: 727, height: 347, onClick: () => setStage('map') },
     ...(availableReadingStage >= 2 ? [{ label: '进入兴隆湖', left: 21, top: 657, width: 727, height: 331, onClick: () => setStage('xinglong-lake') }] : []),
     ...(availableReadingStage >= 3 ? [{ label: '进入海创园', left: 21, top: 1038, width: 727, height: 341, onClick: () => setStage('haichuang-park') }] : []),
-  ]}>{availableReadingStage >= 2 && <div className="tianfu-ended-stage-notice" role="status"><div className="tianfu-ended-stage-label">留言征集已结束</div></div>}</Canvas>
+  ]}>{availableReadingStage >= 2 && <div className="tianfu-ended-stage-notice" role="status"><div className="tianfu-ended-stage-label">留言征集已结束</div></div>}{availableReadingStage >= 3 && <div className="tianfu-ended-stage-notice tianfu-ended-stage-notice-second" role="status"><div className="tianfu-ended-stage-label">留言征集已结束</div></div>}</Canvas>
   if (stage === 'map') return <Canvas layers={PAGES[1]} banner={activityRulesModal} actions={[
     { label: '返回阅读地图', left: 658, top: 103, width: 66, height: 65, onClick: () => setStage('catalog') },
     { label: '首页', left: 46, top: 1431, width: 177, height: 55, onClick: () => setStage('home') },
