@@ -12,16 +12,10 @@
 
 .pgd-canvas {
   position: relative;
-  width: min(100vw, 750px, calc(100vh * 750 / 1624));
+  width: min(100vw, 750px);
   aspect-ratio: 750 / 1624;
   flex: 0 0 auto;
   overflow: hidden;
-}
-
-@supports (height: 100dvh) {
-  .pgd-canvas {
-    width: min(100vw, 750px, calc(100dvh * 750 / 1624));
-  }
 }
 
 .pgd-background {
