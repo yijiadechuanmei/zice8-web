@@ -1,21 +1,23 @@
 .pgd-page {
+  position: fixed;
+  inset: 0;
   display: flex;
-  min-height: 100svh;
-  align-items: center;
+  height: 100svh;
+  align-items: flex-start;
   justify-content: center;
   overflow: hidden;
   background: #10151b;
 }
 
-.pgd-home-canvas {
+.pgd-canvas {
   position: relative;
-  width: min(100vw, calc(100svh * 750 / 1624));
+  width: min(100vw, 750px);
   aspect-ratio: 750 / 1624;
   flex: 0 0 auto;
   overflow: hidden;
 }
 
-.pgd-home-background {
+.pgd-background {
   position: absolute;
   inset: 0;
   display: block;
@@ -50,6 +52,35 @@
 .pgd-start-button:active {
   filter: brightness(1.08);
 }
+
+.pgd-rules-start-button {
+  position: absolute;
+  left: 7.866667%;
+  top: 78.633005%;
+  z-index: 7;
+  width: 84.266667%;
+  height: 5.91133%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  font-size: clamp(16px, 4.2vw, 30px);
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pgd-rules-start-button img { display: block; width: 100%; height: 100%; }
+.pgd-rules-start-button span { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+.pgd-rules-start-button--fallback { border-radius: 999px; background: #f28b10; }
+.pgd-rules-pending { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding-bottom: 30%; background: #153765; color: #fff; font-size: clamp(18px, 4.8vw, 36px); }
+.pgd-rules-pending strong { font-size: 1.4em; }
+.pgd-rules-back-button { position: absolute; z-index: 8; left: 0; top: 6.896552%; width: 14.933333%; height: 6.896552%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pgd-rules-back-button:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
+
+.pgd-rules-start-button:active { filter: brightness(1.08); }
+.pgd-start-button:focus-visible, .pgd-rules-start-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 
 .pgd-toast {
   position: absolute;
