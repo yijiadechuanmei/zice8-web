@@ -2,8 +2,9 @@
   position: fixed;
   inset: 0;
   display: flex;
-  height: 100svh;
-  align-items: flex-start;
+  height: 100vh;
+  height: 100dvh;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
   background: #10151b;
@@ -11,10 +12,16 @@
 
 .pgd-canvas {
   position: relative;
-  width: min(100vw, 750px);
+  width: min(100vw, 750px, calc(100vh * 750 / 1624));
   aspect-ratio: 750 / 1624;
   flex: 0 0 auto;
   overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  .pgd-canvas {
+    width: min(100vw, 750px, calc(100dvh * 750 / 1624));
+  }
 }
 
 .pgd-background {
