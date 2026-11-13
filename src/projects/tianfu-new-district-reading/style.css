@@ -9,6 +9,7 @@
 .tianfu-ended-stage-notice { position: absolute; z-index: 1; left: 0.266667%; top: 16.256158%; width: 100%; height: 23.399015%; pointer-events: none; }
 .tianfu-ended-stage-notice-second { top: 39.655172%; }
 .tianfu-ended-stage-label { position: absolute; left: 25.2%; top: 61.842105%; width: 49.066667%; height: 12.368421%; display: flex; align-items: center; justify-content: center; color: rgb(255, 0, 0); font-size: min(28px, 3.733333vw); font-weight: 700; line-height: normal; text-align: center; white-space: pre-wrap; }
+.tianfu-ended-stage-notice-second .tianfu-ended-stage-label { top: 53.5%; }
 .tianfu-hit { position: absolute; z-index: 2; display: block; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; transition: transform 150ms ease; }
 .tianfu-hit:active { transform: scale(.96); }
 .tianfu-hit:focus-visible { outline: 2px solid transparent; }
