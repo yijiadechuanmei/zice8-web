@@ -168,7 +168,19 @@
   max-width: none;
   pointer-events: none;
   user-select: none;
+  transition: transform 4.5s cubic-bezier(0.15, 0.75, 0.15, 1);
 }
+
+.pgd-attempt-count { position: absolute; left: 0; top: 80%; width: 100%; margin: 0; color: #fff; font-size: min(22px, 2.933vw); text-align: center; text-shadow: 0 2px 6px #073d96; }
+.pgd-claim-mask { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 5%; background: rgb(0 30 89 / 72%); }
+.pgd-claim-card { box-sizing: border-box; width: 100%; max-width: 570px; padding: 7%; border: 4px solid #ffd25a; border-radius: 28px; background: linear-gradient(#fff, #e8f8ff); box-shadow: 0 14px 35px rgb(0 29 98 / 35%); color: #153d80; }
+.pgd-claim-card h2 { margin: 0; color: #ec6710; font-size: clamp(25px, 7vw, 48px); text-align: center; }
+.pgd-claim-card p { margin: 2% 0 7%; font-size: clamp(14px, 3.5vw, 24px); text-align: center; }
+.pgd-claim-card label { display: block; margin-bottom: 5%; font-size: clamp(14px, 3.5vw, 22px); font-weight: 700; }
+.pgd-claim-card input, .pgd-claim-card textarea { box-sizing: border-box; display: block; width: 100%; min-height: 44px; margin-top: 2%; padding: 2% 3%; border: 2px solid #69b9e8; border-radius: 12px; background: #fff; color: #123b83; font: inherit; }
+.pgd-claim-card textarea { min-height: 80px; resize: vertical; }
+.pgd-claim-card button { display: block; width: 100%; min-height: 50px; border: 2px solid #ffcf56; border-radius: 999px; background: linear-gradient(#ffa31a, #f36a09); color: #fff; font-size: clamp(18px, 4vw, 28px); font-weight: 800; cursor: pointer; }
+.pgd-claim-card button:disabled { opacity: .65; }
 
 .pgd-lottery-center-button {
   position: absolute;

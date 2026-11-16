@@ -1,27 +1,150 @@
 import { useEffect, useRef, useState } from 'react'
+import { API_BASE_URL, getToken } from '../../shared/api/request'
+import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
 import './styles.css'
 
 const ASSETS_BASE_URL = 'https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026'
 
-export default function PinganGoodDriverProject() {
+export default function PinganGoodDriverProject({ routeParams }) {
+  const activityKey = routeParams?.activityKey || 'pingan_good_driver_2026'
   const [page, setPage] = useState('home')
   const [selectedOption, setSelectedOption] = useState(null)
+  const [question, setQuestion] = useState(null)
+  const [questionNo, setQuestionNo] = useState(1)
+  const [publicConfig, setPublicConfig] = useState(null)
+  const [remainingToday, setRemainingToday] = useState(3)
+  const [won, setWon] = useState(false)
+  const [claimOpen, setClaimOpen] = useState(false)
+  const [claimSubmitted, setClaimSubmitted] = useState(false)
+  const [drawFinished, setDrawFinished] = useState(false)
+  const [missOpen, setMissOpen] = useState(false)
+  const [claim, setClaim] = useState({ name: '', phone: '', address: '' })
+  const [wheelRotation, setWheelRotation] = useState(0)
+  const [busy, setBusy] = useState(false)
   const [toastVisible, setToastVisible] = useState(false)
   const [toastText, setToastText] = useState('敬请期待')
   const [rulesBackgroundFailed, setRulesBackgroundFailed] = useState(false)
   const [rulesButtonFailed, setRulesButtonFailed] = useState(false)
   const toastTimer = useRef(null)
+  const drawTimer = useRef(null)
+  const eligibleRef = useRef(false)
+  const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
     document.title = '“平安好司机”零违法挑战赛'
-    return () => window.clearTimeout(toastTimer.current)
+    return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current) }
   }, [])
+
+  useEffect(() => {
+    let active = true
+    getActivityConfig(activityKey).then((config) => { if (active) setPublicConfig(config) }).catch(() => {})
+    return () => { active = false }
+  }, [activityKey])
+
+  useEffect(() => {
+    if (!authReady) return undefined
+    let active = true
+    getState(activityKey).then((state) => {
+      if (!active) return
+      setRemainingToday(state.remainingToday)
+      setWon(state.won)
+      setClaimSubmitted(state.claimSubmitted)
+      if (state.won) { setPage('result'); setClaimOpen(!state.claimSubmitted) }
+      else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
+    }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
+    return () => { active = false }
+  }, [activityKey, authReady])
+
+  useEffect(() => {
+    const abandonOnExit = () => {
+      if (!eligibleRef.current) return
+      const token = getToken()
+      if (!token) return
+      fetch(`${API_BASE_URL}/safe-driver-quiz/activities/${encodeURIComponent(activityKey)}/abandon`, {
+        method: 'POST', keepalive: true, headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {})
+    }
+    window.addEventListener('pagehide', abandonOnExit)
+    return () => { window.removeEventListener('pagehide', abandonOnExit); abandonOnExit() }
+  }, [activityKey])
 
   function showComingSoonToast(message = '敬请期待') {
     window.clearTimeout(toastTimer.current)
     setToastText(message)
     setToastVisible(true)
     toastTimer.current = window.setTimeout(() => setToastVisible(false), 1800)
+  }
+
+  async function beginQuiz() {
+    if (busy) return
+    if (won) { setPage('result'); setClaimOpen(!claimSubmitted); return }
+    if (!authReady) { showComingSoonToast(blockedMessage || '请在微信中打开活动'); return }
+    setBusy(true)
+    try {
+      const state = await startQuiz(activityKey)
+      setQuestion(state.question)
+      setQuestionNo(state.questionNo)
+      setRemainingToday(state.remainingToday)
+      setSelectedOption(null)
+      setDrawFinished(false)
+      setWheelRotation(0)
+      setPage('quiz')
+    } catch (error) { showComingSoonToast(error.message || '开始答题失败') }
+    finally { setBusy(false) }
+  }
+
+  async function submitAnswer() {
+    if (busy) return
+    if (!selectedOption) { showComingSoonToast('请先选择答案'); return }
+    setBusy(true)
+    try {
+      const result = await answerQuestion(activityKey, question.id, selectedOption)
+      if (!result.correct) {
+        showComingSoonToast('回答错误')
+        setSelectedOption(null)
+        setQuestion(null)
+        setPage('home')
+      } else if (result.status === 'eligible') {
+        eligibleRef.current = true
+        setPage('result')
+      } else {
+        setQuestion(result.question)
+        setQuestionNo(result.questionNo)
+        setSelectedOption(null)
+      }
+    } catch (error) { showComingSoonToast(error.message || '提交失败，请重试') }
+    finally { setBusy(false) }
+  }
+
+  async function draw() {
+    if (busy || won) return
+    setBusy(true)
+    try {
+      const result = await drawPrize(activityKey)
+      eligibleRef.current = false
+      setWheelRotation(360 * 5 + 360 - result.wheelIndex * 60)
+      drawTimer.current = window.setTimeout(() => {
+        setDrawFinished(true)
+        setWon(result.won)
+        if (result.won) setClaimOpen(true)
+        else setMissOpen(true)
+        setBusy(false)
+      }, 4500)
+    } catch (error) { setBusy(false); showComingSoonToast(error.message || '抽奖失败，请重试') }
+  }
+
+  async function saveClaim(event) {
+    event.preventDefault()
+    if (busy) return
+    setBusy(true)
+    try {
+      await submitClaim(activityKey, claim)
+      setClaimSubmitted(true)
+      setClaimOpen(false)
+      showComingSoonToast('邮寄信息提交成功')
+    } catch (error) { showComingSoonToast(error.message || '提交失败，请重试') }
+    finally { setBusy(false) }
   }
 
   return (
@@ -58,7 +181,7 @@ export default function PinganGoodDriverProject() {
             className={`pgd-rules-start-button${rulesButtonFailed ? ' pgd-rules-start-button--fallback' : ''}`}
             type="button"
             aria-label="我已了解，开始游戏"
-            onClick={() => { setSelectedOption(null); setPage('quiz') }}
+            onClick={beginQuiz}
           >
             {rulesButtonFailed ? <span>我已了解，开始游戏</span> : (
               <img src={`${ASSETS_BASE_URL}/rules-start-button.png`} alt="" onError={() => setRulesButtonFailed(true)} />
@@ -69,21 +192,21 @@ export default function PinganGoodDriverProject() {
           <>
             <section className="pgd-question-panel" aria-label="答题区">
               <div className="pgd-question-copy">
-                <p className="pgd-question-count">第 1 题 <span>/ 共 5 题</span></p>
-                <h1>题目内容待配置</h1>
+                <p className="pgd-question-count">第 {questionNo} 题 <span>/ 共 5 题</span></p>
+                <h1>{question?.text || '正在加载题目'}</h1>
               </div>
               <div className="pgd-answer-list" role="radiogroup" aria-label="选择答案">
-                {['A', 'B', 'C', 'D'].map((option) => (
+                {(question?.options || []).map((option) => (
                   <button
-                    key={option}
-                    className={`pgd-answer-option${selectedOption === option ? ' is-selected' : ''}`}
+                    key={option.key}
+                    className={`pgd-answer-option${selectedOption === option.key ? ' is-selected' : ''}`}
                     type="button"
                     role="radio"
-                    aria-checked={selectedOption === option}
-                    onClick={() => setSelectedOption(option)}
+                    aria-checked={selectedOption === option.key}
+                    onClick={() => setSelectedOption(option.key)}
                   >
-                    <span className="pgd-answer-letter">{option}</span>
-                    <span className="pgd-answer-text">选项内容待配置</span>
+                    <span className="pgd-answer-letter">{option.key}</span>
+                    <span className="pgd-answer-text">{option.text}</span>
                     <span className="pgd-answer-radio" aria-hidden="true" />
                   </button>
                 ))}
@@ -93,10 +216,7 @@ export default function PinganGoodDriverProject() {
               className="pgd-submit-button"
               type="button"
               aria-label="提交答案"
-              onClick={() => {
-                if (selectedOption) setPage('result')
-                else showComingSoonToast('请先选择答案')
-              }}
+              onClick={submitAnswer}
             />
           </>
         ) : null}
@@ -106,16 +226,40 @@ export default function PinganGoodDriverProject() {
               className="pgd-lottery-wheel"
               src={`${ASSETS_BASE_URL}/lottery-wheel.png`}
               alt="抽奖转盘"
+              style={{ transform: `rotate(${wheelRotation}deg)` }}
             />
             <button
               className="pgd-lottery-center-button"
               type="button"
               aria-label="立即抽奖"
-              onClick={() => showComingSoonToast('抽奖功能即将开放')}
+              onClick={draw}
+              disabled={busy || won || drawFinished}
             >
               <img src={`${ASSETS_BASE_URL}/lottery-center-button.png`} alt="" />
             </button>
           </>
+        ) : null}
+        {page === 'home' && authReady ? <p className="pgd-attempt-count">今日剩余答题次数：{remainingToday}</p> : null}
+        {claimOpen ? (
+          <div className="pgd-claim-mask">
+            <form className="pgd-claim-card" onSubmit={saveClaim}>
+              <h2>恭喜中奖</h2>
+              <p>请填写油卡邮寄信息</p>
+              <label>姓名<input value={claim.name} onChange={(event) => setClaim({ ...claim, name: event.target.value })} maxLength={60} required /></label>
+              <label>电话<input value={claim.phone} onChange={(event) => setClaim({ ...claim, phone: event.target.value })} inputMode="tel" maxLength={11} required /></label>
+              <label>收货地址<textarea value={claim.address} onChange={(event) => setClaim({ ...claim, address: event.target.value })} maxLength={500} required /></label>
+              <button type="submit" disabled={busy}>提交邮寄信息</button>
+            </form>
+          </div>
+        ) : null}
+        {missOpen ? (
+          <div className="pgd-claim-mask">
+            <div className="pgd-claim-card pgd-miss-card" role="dialog" aria-modal="true" aria-label="抽奖结果">
+              <h2>感谢参与</h2>
+              <p>本次未中奖，欢迎再次挑战</p>
+              <button type="button" onClick={() => { setMissOpen(false); setPage('home') }}>返回首页</button>
+            </div>
+          </div>
         ) : null}
         {toastVisible ? <div className="pgd-toast" role="status">{toastText}</div> : null}
       </div>
