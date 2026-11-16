@@ -20,6 +20,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [drawFinished, setDrawFinished] = useState(false)
   const [missOpen, setMissOpen] = useState(false)
   const [claim, setClaim] = useState({ name: '', phone: '', address: '' })
+  const [claimError, setClaimError] = useState('')
   const [wheelRotation, setWheelRotation] = useState(0)
   const [busy, setBusy] = useState(false)
   const [toastVisible, setToastVisible] = useState(false)
@@ -137,13 +138,20 @@ export default function PinganGoodDriverProject({ routeParams }) {
   async function saveClaim(event) {
     event.preventDefault()
     if (busy) return
+    const normalizedClaim = {
+      name: claim.name.trim(), phone: claim.phone.trim(), address: claim.address.trim(),
+    }
+    if (normalizedClaim.name.length < 2) { setClaimError('请填写至少 2 个字的姓名'); return }
+    if (!/^1[3-9]\d{9}$/.test(normalizedClaim.phone)) { setClaimError('请填写有效的 11 位手机号'); return }
+    if (normalizedClaim.address.length < 6) { setClaimError('请填写完整的收货地址'); return }
+    setClaimError('')
     setBusy(true)
     try {
-      await submitClaim(activityKey, claim)
+      await submitClaim(activityKey, normalizedClaim)
       setClaimSubmitted(true)
       setClaimOpen(false)
       showComingSoonToast('邮寄信息提交成功')
-    } catch (error) { showComingSoonToast(error.message || '提交失败，请重试') }
+    } catch (error) { setClaimError(error.message || '提交失败，请重试') }
     finally { setBusy(false) }
   }
 
@@ -242,13 +250,14 @@ export default function PinganGoodDriverProject({ routeParams }) {
         {page === 'home' && authReady ? <p className="pgd-attempt-count">今日剩余答题次数：{remainingToday}</p> : null}
         {claimOpen ? (
           <div className="pgd-claim-mask">
-            <form className="pgd-claim-card" onSubmit={saveClaim}>
+            <form className="pgd-claim-card" onSubmit={saveClaim} noValidate>
               <h2>恭喜中奖</h2>
               <p>请填写油卡邮寄信息</p>
-              <label>姓名<input value={claim.name} onChange={(event) => setClaim({ ...claim, name: event.target.value })} maxLength={60} required /></label>
-              <label>电话<input value={claim.phone} onChange={(event) => setClaim({ ...claim, phone: event.target.value })} inputMode="tel" maxLength={11} required /></label>
-              <label>收货地址<textarea value={claim.address} onChange={(event) => setClaim({ ...claim, address: event.target.value })} maxLength={500} required /></label>
-              <button type="submit" disabled={busy}>提交邮寄信息</button>
+              <label>姓名<input value={claim.name} onChange={(event) => { setClaim({ ...claim, name: event.target.value }); setClaimError('') }} maxLength={60} autoComplete="name" /></label>
+              <label>电话<input value={claim.phone} onChange={(event) => { setClaim({ ...claim, phone: event.target.value }); setClaimError('') }} inputMode="tel" type="tel" maxLength={11} autoComplete="tel" /></label>
+              <label>收货地址<textarea value={claim.address} onChange={(event) => { setClaim({ ...claim, address: event.target.value }); setClaimError('') }} maxLength={500} autoComplete="street-address" /></label>
+              {claimError ? <div className="pgd-claim-error" role="alert">{claimError}</div> : null}
+              <button type="submit" disabled={busy}>{busy ? '提交中…' : '提交邮寄信息'}</button>
             </form>
           </div>
         ) : null}

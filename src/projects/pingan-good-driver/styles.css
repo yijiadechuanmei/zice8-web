@@ -179,6 +179,7 @@
 .pgd-claim-card label { display: block; margin-bottom: 5%; font-size: clamp(14px, 3.5vw, 22px); font-weight: 700; }
 .pgd-claim-card input, .pgd-claim-card textarea { box-sizing: border-box; display: block; width: 100%; min-height: 44px; margin-top: 2%; padding: 2% 3%; border: 2px solid #69b9e8; border-radius: 12px; background: #fff; color: #123b83; font: inherit; }
 .pgd-claim-card textarea { min-height: 80px; resize: vertical; }
+.pgd-claim-error { margin: -1% 0 4%; color: #c43220; font-size: clamp(13px, 3.2vw, 21px); font-weight: 700; line-height: 1.4; text-align: center; }
 .pgd-claim-card button { display: block; width: 100%; min-height: 50px; border: 2px solid #ffcf56; border-radius: 999px; background: linear-gradient(#ffa31a, #f36a09); color: #fff; font-size: clamp(18px, 4vw, 28px); font-weight: 800; cursor: pointer; }
 .pgd-claim-card button:disabled { opacity: .65; }
 
@@ -269,7 +270,7 @@
   position: absolute;
   top: 61%;
   left: 50%;
-  z-index: 9;
+  z-index: 30;
   padding: 18px 42px;
   border: 1px solid rgb(255 255 255 / 28%);
   border-radius: 999px;
