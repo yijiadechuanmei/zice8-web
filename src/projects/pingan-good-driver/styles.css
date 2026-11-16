@@ -30,6 +30,49 @@
   user-select: none;
 }
 
+.pgd-lottery-wheel {
+  position: absolute;
+  left: 6.666667%;
+  top: 34.421182%;
+  z-index: 5;
+  display: block;
+  width: 85.6%;
+  height: 39.532020%;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pgd-lottery-center-button {
+  position: absolute;
+  left: 36.533333%;
+  top: 45.874384%;
+  z-index: 6;
+  width: 25.733333%;
+  height: 14.532020%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pgd-lottery-center-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.pgd-lottery-center-button:active {
+  filter: brightness(1.08);
+}
+
+.pgd-lottery-center-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+
 .pgd-start-button {
   position: absolute;
   left: 16.133333%;
@@ -87,7 +130,7 @@
   position: absolute;
   top: 61%;
   left: 50%;
-  z-index: 3;
+  z-index: 9;
   padding: 18px 42px;
   border: 1px solid rgb(255 255 255 / 28%);
   border-radius: 999px;

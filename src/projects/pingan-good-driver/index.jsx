@@ -6,6 +6,7 @@ const ASSETS_BASE_URL = 'https://assets.zice8.com/safe_driver_quiz_lottery/pinga
 export default function PinganGoodDriverProject() {
   const [page, setPage] = useState('home')
   const [toastVisible, setToastVisible] = useState(false)
+  const [toastText, setToastText] = useState('敬请期待')
   const [rulesBackgroundFailed, setRulesBackgroundFailed] = useState(false)
   const [rulesButtonFailed, setRulesButtonFailed] = useState(false)
   const toastTimer = useRef(null)
@@ -15,8 +16,9 @@ export default function PinganGoodDriverProject() {
     return () => window.clearTimeout(toastTimer.current)
   }, [])
 
-  function showComingSoonToast() {
+  function showComingSoonToast(message = '敬请期待') {
     window.clearTimeout(toastTimer.current)
+    setToastText(message)
     setToastVisible(true)
     toastTimer.current = window.setTimeout(() => setToastVisible(false), 1800)
   }
@@ -26,6 +28,8 @@ export default function PinganGoodDriverProject() {
       <div className="pgd-canvas">
         {page === 'home' ? (
           <img className="pgd-background" src={`${ASSETS_BASE_URL}/home-background.png`} alt="" />
+        ) : page === 'result' ? (
+          <img className="pgd-background" src={`${ASSETS_BASE_URL}/result-wheel-background.png`} alt="" />
         ) : rulesBackgroundFailed ? (
           <div className="pgd-rules-pending" role="status"><strong>活动规则</strong><span>活动详情即将公布</span></div>
         ) : (
@@ -46,19 +50,36 @@ export default function PinganGoodDriverProject() {
             aria-label="查看游戏规则"
             onClick={() => setPage('rules')}
           />
-        ) : (
+        ) : page === 'rules' ? (
           <button
             className={`pgd-rules-start-button${rulesButtonFailed ? ' pgd-rules-start-button--fallback' : ''}`}
             type="button"
             aria-label="我已了解，开始游戏"
-            onClick={showComingSoonToast}
+            onClick={() => setPage('result')}
           >
             {rulesButtonFailed ? <span>我已了解，开始游戏</span> : (
               <img src={`${ASSETS_BASE_URL}/rules-start-button.png`} alt="" onError={() => setRulesButtonFailed(true)} />
             )}
           </button>
-        )}
-        {toastVisible ? <div className="pgd-toast" role="status">敬请期待</div> : null}
+        ) : null}
+        {page === 'result' ? (
+          <>
+            <img
+              className="pgd-lottery-wheel"
+              src={`${ASSETS_BASE_URL}/lottery-wheel.png`}
+              alt="抽奖转盘"
+            />
+            <button
+              className="pgd-lottery-center-button"
+              type="button"
+              aria-label="立即抽奖"
+              onClick={() => showComingSoonToast('抽奖功能即将开放')}
+            >
+              <img src={`${ASSETS_BASE_URL}/lottery-center-button.png`} alt="" />
+            </button>
+          </>
+        ) : null}
+        {toastVisible ? <div className="pgd-toast" role="status">{toastText}</div> : null}
       </div>
     </main>
   )
