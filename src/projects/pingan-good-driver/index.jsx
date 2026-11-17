@@ -51,7 +51,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       setRemainingToday(state.remainingToday)
       setWon(state.won)
       setClaimSubmitted(state.claimSubmitted)
-      if (state.won) { setPage('result'); setClaimOpen(!state.claimSubmitted) }
+      if (state.won && !state.claimSubmitted) { setPage('result'); setClaimOpen(true) }
       else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
     }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
     return () => { active = false }
@@ -79,7 +79,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
 
   async function beginQuiz() {
     if (busy) return
-    if (won) { setPage('result'); setClaimOpen(!claimSubmitted); return }
+    if (won) { showComingSoonToast('您已中奖，不能再次答题'); return }
     if (!authReady) { showComingSoonToast(blockedMessage || '请在微信中打开活动'); return }
     setBusy(true)
     try {
@@ -150,6 +150,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       await submitClaim(activityKey, normalizedClaim)
       setClaimSubmitted(true)
       setClaimOpen(false)
+      setPage('home')
       showComingSoonToast('邮寄信息提交成功')
     } catch (error) { setClaimError(error.message || '提交失败，请重试') }
     finally { setBusy(false) }
