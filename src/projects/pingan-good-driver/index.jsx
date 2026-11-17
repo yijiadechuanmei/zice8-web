@@ -104,21 +104,28 @@ export default function PinganGoodDriverProject({ routeParams }) {
       const result = await answerQuestion(activityKey, question.id, selectedOption)
       if (!result.correct) {
         setSelectedOption(null)
-        if (result.wrongCount >= 3) {
-          showComingSoonToast('累计答错3次，答题结束')
+        if (result.status === 'in_progress') {
+          setQuestion(result.question)
+          setQuestionNo(result.questionNo)
+          showComingSoonToast('回答错误，进入下一题')
+        } else {
+          showComingSoonToast(result.wrongCount >= 3 ? '累计答错3次，答题结束' : '本轮答题结束，未能全部答对')
           window.clearTimeout(wrongAnswerTimer.current)
           wrongAnswerTimer.current = window.setTimeout(() => {
             setQuestion(null)
             setPage('home')
           }, 1800)
-        } else {
-          setQuestion(result.question)
-          setQuestionNo(result.questionNo)
-          showComingSoonToast(`回答错误，请重试，还可错${3 - result.wrongCount}次`)
         }
       } else if (result.status === 'eligible') {
         eligibleRef.current = true
         setPage('result')
+      } else if (result.status === 'failed') {
+        showComingSoonToast('本轮答题结束，未能全部答对')
+        window.clearTimeout(wrongAnswerTimer.current)
+        wrongAnswerTimer.current = window.setTimeout(() => {
+          setQuestion(null)
+          setPage('home')
+        }, 1800)
       } else {
         setQuestion(result.question)
         setQuestionNo(result.questionNo)
@@ -281,7 +288,10 @@ export default function PinganGoodDriverProject({ routeParams }) {
             </div>
           </div>
         ) : null}
-        {toastVisible ? <div className="pgd-toast" role="status">{toastText}</div> : null}
+        {toastVisible ? <>
+          <div className="pgd-toast-mask" aria-hidden="true" />
+          <div className="pgd-toast" role="status">{toastText}</div>
+        </> : null}
       </div>
     </main>
   )
