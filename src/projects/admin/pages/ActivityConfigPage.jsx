@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Switch, Table, Tag, Typography, message } from 'antd'
 import {
   clearLongwenBeerQuizData,
+  clearSafeDriverQuizUserData,
   clearXiangyuGlobalTreasureData,
   clearRiderSafetySurveyData,
   configureRiderSafetySurveyPayoutTest,
@@ -111,6 +112,8 @@ export default function ActivityConfigPage({ activity }) {
   const [tianfuReadingStage, setTianfuReadingStage] = useState(1)
   const [tianfuReadingStageSaving, setTianfuReadingStageSaving] = useState(false)
   const [longwenClearing, setLongwenClearing] = useState(false)
+  const [safeDriverUserId, setSafeDriverUserId] = useState('')
+  const [safeDriverClearing, setSafeDriverClearing] = useState(false)
   const [xiangyuClearScope, setXiangyuClearScope] = useState('user')
   const [xiangyuUserId, setXiangyuUserId] = useState('')
   const [xiangyuClearing, setXiangyuClearing] = useState(false)
@@ -425,6 +428,26 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setLongwenClearing(false)
+    }
+  }
+
+  async function handleClearSafeDriverQuizUserData() {
+    const userId = safeDriverUserId.trim()
+    if (!/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要清除的正整数用户ID')
+      return
+    }
+    setSafeDriverClearing(true)
+    try {
+      const result = await clearSafeDriverQuizUserData(activity.activityKey, userId)
+      message.success(`已清除用户 ${userId} 的 ${result?.cleared?.attempts || 0} 条答题及抽奖记录`)
+      setSafeDriverUserId('')
+    } catch (err) {
+      const text = err.message || '清空平安好司机用户数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setSafeDriverClearing(false)
     }
   }
 
@@ -1007,6 +1030,32 @@ export default function ActivityConfigPage({ activity }) {
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         {activity.type === 'cybersecurity_knowledge_challenge' && <CybersecurityChallengeAdmin key={activity.activityKey} activityKey={activity.activityKey} />}
+        {activity.type === 'safe_driver_quiz_lottery' ? (
+          <Card size="small" title="清空平安好司机测试用户数据" style={{ borderColor: '#ffccc7' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Text type="secondary">仅删除该用户在当前活动的答题、抽奖和邮寄记录，不会删除微信账号或修改活动配置。删除中奖记录后会释放对应油卡名额。</Text>
+              <Space wrap>
+                <Input
+                  value={safeDriverUserId}
+                  onChange={(event) => setSafeDriverUserId(event.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric"
+                  placeholder="输入微信用户 ID"
+                  style={{ width: 240 }}
+                />
+                <Popconfirm
+                  title={`确认清除用户 ${safeDriverUserId || '-'} 在当前活动的全部数据？`}
+                  description="该用户的答题、抽奖和中奖邮寄信息将被删除。"
+                  okText="确认清除"
+                  cancelText="取消"
+                  onConfirm={handleClearSafeDriverQuizUserData}
+                  disabled={!/^[1-9]\d*$/.test(safeDriverUserId)}
+                >
+                  <Button danger loading={safeDriverClearing} disabled={!/^[1-9]\d*$/.test(safeDriverUserId)}>清空该用户数据</Button>
+                </Popconfirm>
+              </Space>
+            </Space>
+          </Card>
+        ) : null}
         {error ? <Alert type="error" showIcon message={error} /> : null}
 
         <Card size="small" title="活动状态">

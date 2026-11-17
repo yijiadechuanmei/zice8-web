@@ -255,6 +255,13 @@ export function clearLongwenBeerQuizData(activityKey) {
   })
 }
 
+export function clearSafeDriverQuizUserData(activityKey, userId) {
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/clear-user-data`, {
+    method: 'POST',
+    body: JSON.stringify({ userId, confirm: 'CLEAR_SAFE_DRIVER_QUIZ_USER_DATA' }),
+  })
+}
+
 export function clearXiangyuGlobalTreasureData(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/xiangyu-global-treasure/clear-data`, {
     method: 'POST',
