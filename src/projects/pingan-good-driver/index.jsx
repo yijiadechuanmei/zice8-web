@@ -103,13 +103,19 @@ export default function PinganGoodDriverProject({ routeParams }) {
     try {
       const result = await answerQuestion(activityKey, question.id, selectedOption)
       if (!result.correct) {
-        showComingSoonToast(result.wrongCountToday >= 3 ? '累计答错3次，答题结束' : '回答错误')
         setSelectedOption(null)
-        window.clearTimeout(wrongAnswerTimer.current)
-        wrongAnswerTimer.current = window.setTimeout(() => {
-          setQuestion(null)
-          setPage('home')
-        }, 1800)
+        if (result.wrongCount >= 3) {
+          showComingSoonToast('累计答错3次，答题结束')
+          window.clearTimeout(wrongAnswerTimer.current)
+          wrongAnswerTimer.current = window.setTimeout(() => {
+            setQuestion(null)
+            setPage('home')
+          }, 1800)
+        } else {
+          setQuestion(result.question)
+          setQuestionNo(result.questionNo)
+          showComingSoonToast(`回答错误，请重试，还可错${3 - result.wrongCount}次`)
+        }
       } else if (result.status === 'eligible') {
         eligibleRef.current = true
         setPage('result')
