@@ -16,7 +16,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [remainingToday, setRemainingToday] = useState(3)
   const [won, setWon] = useState(false)
   const [claimOpen, setClaimOpen] = useState(false)
-  const [claimSubmitted, setClaimSubmitted] = useState(false)
   const [drawFinished, setDrawFinished] = useState(false)
   const [missOpen, setMissOpen] = useState(false)
   const [claim, setClaim] = useState({ name: '', phone: '', address: '' })
@@ -24,18 +23,19 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [wheelRotation, setWheelRotation] = useState(0)
   const [busy, setBusy] = useState(false)
   const [toastVisible, setToastVisible] = useState(false)
+  const [toastBlocking, setToastBlocking] = useState(false)
   const [toastText, setToastText] = useState('敬请期待')
   const [rulesBackgroundFailed, setRulesBackgroundFailed] = useState(false)
   const [rulesButtonFailed, setRulesButtonFailed] = useState(false)
   const toastTimer = useRef(null)
   const drawTimer = useRef(null)
-  const wrongAnswerTimer = useRef(null)
+  const afterToastTimer = useRef(null)
   const eligibleRef = useRef(false)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
     document.title = '“平安好司机”零违法挑战赛'
-    return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current); window.clearTimeout(wrongAnswerTimer.current) }
+    return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current); window.clearTimeout(afterToastTimer.current) }
   }, [])
 
   useEffect(() => {
@@ -51,7 +51,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
       if (!active) return
       setRemainingToday(state.remainingToday)
       setWon(state.won)
-      setClaimSubmitted(state.claimSubmitted)
       if (state.won && !state.claimSubmitted) { setPage('result'); setClaimOpen(true) }
       else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
     }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
@@ -71,11 +70,21 @@ export default function PinganGoodDriverProject({ routeParams }) {
     return () => { window.removeEventListener('pagehide', abandonOnExit); abandonOnExit() }
   }, [activityKey])
 
-  function showComingSoonToast(message = '敬请期待') {
+  function showComingSoonToast(message = '敬请期待', onHidden) {
     window.clearTimeout(toastTimer.current)
+    window.clearTimeout(afterToastTimer.current)
     setToastText(message)
     setToastVisible(true)
-    toastTimer.current = window.setTimeout(() => setToastVisible(false), 1800)
+    setToastBlocking(true)
+    toastTimer.current = window.setTimeout(() => {
+      setToastVisible(false)
+      if (onHidden) {
+        afterToastTimer.current = window.setTimeout(() => {
+          onHidden()
+          setToastBlocking(false)
+        }, 20)
+      } else setToastBlocking(false)
+    }, 1800)
   }
 
   async function beginQuiz() {
@@ -103,29 +112,28 @@ export default function PinganGoodDriverProject({ routeParams }) {
     try {
       const result = await answerQuestion(activityKey, question.id, selectedOption)
       if (!result.correct) {
-        setSelectedOption(null)
         if (result.status === 'in_progress') {
-          setQuestion(result.question)
-          setQuestionNo(result.questionNo)
-          showComingSoonToast('回答错误，进入下一题')
+          showComingSoonToast('回答错误，进入下一题', () => {
+            setQuestion(result.question)
+            setQuestionNo(result.questionNo)
+            setSelectedOption(null)
+          })
         } else {
-          showComingSoonToast(result.wrongCount >= 3 ? '累计答错3次，答题结束' : '本轮答题结束，未能全部答对')
-          window.clearTimeout(wrongAnswerTimer.current)
-          wrongAnswerTimer.current = window.setTimeout(() => {
+          showComingSoonToast(result.wrongCount >= 3 ? '累计答错3次，答题结束' : '本轮答题结束，未能全部答对', () => {
+            setSelectedOption(null)
             setQuestion(null)
             setPage('home')
-          }, 1800)
+          })
         }
       } else if (result.status === 'eligible') {
         eligibleRef.current = true
         setPage('result')
       } else if (result.status === 'failed') {
-        showComingSoonToast('本轮答题结束，未能全部答对')
-        window.clearTimeout(wrongAnswerTimer.current)
-        wrongAnswerTimer.current = window.setTimeout(() => {
+        showComingSoonToast('本轮答题结束，未能全部答对', () => {
+          setSelectedOption(null)
           setQuestion(null)
           setPage('home')
-        }, 1800)
+        })
       } else {
         setQuestion(result.question)
         setQuestionNo(result.questionNo)
@@ -165,7 +173,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
     setBusy(true)
     try {
       await submitClaim(activityKey, normalizedClaim)
-      setClaimSubmitted(true)
       setClaimOpen(false)
       setPage('home')
       showComingSoonToast('邮寄信息提交成功')
@@ -288,10 +295,8 @@ export default function PinganGoodDriverProject({ routeParams }) {
             </div>
           </div>
         ) : null}
-        {toastVisible ? <>
-          <div className="pgd-toast-mask" aria-hidden="true" />
-          <div className="pgd-toast" role="status">{toastText}</div>
-        </> : null}
+        {toastBlocking ? <div className="pgd-toast-mask" aria-hidden="true" /> : null}
+        {toastVisible ? <div className="pgd-toast" role="status">{toastText}</div> : null}
       </div>
     </main>
   )
