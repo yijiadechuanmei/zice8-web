@@ -29,12 +29,13 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [rulesButtonFailed, setRulesButtonFailed] = useState(false)
   const toastTimer = useRef(null)
   const drawTimer = useRef(null)
+  const wrongAnswerTimer = useRef(null)
   const eligibleRef = useRef(false)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
     document.title = '“平安好司机”零违法挑战赛'
-    return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current) }
+    return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current); window.clearTimeout(wrongAnswerTimer.current) }
   }, [])
 
   useEffect(() => {
@@ -102,10 +103,13 @@ export default function PinganGoodDriverProject({ routeParams }) {
     try {
       const result = await answerQuestion(activityKey, question.id, selectedOption)
       if (!result.correct) {
-        showComingSoonToast('回答错误')
+        showComingSoonToast(result.wrongCountToday >= 3 ? '累计答错3次，答题结束' : '回答错误')
         setSelectedOption(null)
-        setQuestion(null)
-        setPage('home')
+        window.clearTimeout(wrongAnswerTimer.current)
+        wrongAnswerTimer.current = window.setTimeout(() => {
+          setQuestion(null)
+          setPage('home')
+        }, 1800)
       } else if (result.status === 'eligible') {
         eligibleRef.current = true
         setPage('result')
