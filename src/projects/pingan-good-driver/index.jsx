@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { API_BASE_URL, getToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
-import { answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
+import { abandonQuiz, answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
 import './styles.css'
 
 const ASSETS_BASE_URL = 'https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026'
@@ -31,6 +31,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const drawTimer = useRef(null)
   const afterToastTimer = useRef(null)
   const eligibleRef = useRef(false)
+  const quizInProgressRef = useRef(false)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
 
   useEffect(() => {
@@ -59,15 +60,17 @@ export default function PinganGoodDriverProject({ routeParams }) {
 
   useEffect(() => {
     const abandonOnExit = () => {
-      if (!eligibleRef.current) return
+      if (!eligibleRef.current && !quizInProgressRef.current) return
       const token = getToken()
       if (!token) return
       fetch(`${API_BASE_URL}/safe-driver-quiz/activities/${encodeURIComponent(activityKey)}/abandon`, {
         method: 'POST', keepalive: true, headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {})
     }
+    const reloadAfterRestore = (event) => { if (event.persisted) window.location.reload() }
     window.addEventListener('pagehide', abandonOnExit)
-    return () => { window.removeEventListener('pagehide', abandonOnExit); abandonOnExit() }
+    window.addEventListener('pageshow', reloadAfterRestore)
+    return () => { window.removeEventListener('pagehide', abandonOnExit); window.removeEventListener('pageshow', reloadAfterRestore); abandonOnExit() }
   }, [activityKey])
 
   function showComingSoonToast(message = '敬请期待', onHidden) {
@@ -94,6 +97,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
     setBusy(true)
     try {
       const state = await startQuiz(activityKey)
+      quizInProgressRef.current = true
       setQuestion(state.question)
       setQuestionNo(state.questionNo)
       setRemainingToday(state.remainingToday)
@@ -102,6 +106,19 @@ export default function PinganGoodDriverProject({ routeParams }) {
       setWheelRotation(0)
       setPage('quiz')
     } catch (error) { showComingSoonToast(error.message || '开始答题失败') }
+    finally { setBusy(false) }
+  }
+
+  async function leaveQuiz() {
+    if (busy || toastBlocking) return
+    setBusy(true)
+    try {
+      await abandonQuiz(activityKey)
+      quizInProgressRef.current = false
+      setSelectedOption(null)
+      setQuestion(null)
+      setPage('home')
+    } catch (error) { showComingSoonToast(error.message || '退出答题失败，请重试') }
     finally { setBusy(false) }
   }
 
@@ -119,6 +136,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
             setSelectedOption(null)
           })
         } else {
+          quizInProgressRef.current = false
           showComingSoonToast(result.wrongCount >= 3 ? '累计答错3次，答题结束' : '本轮答题结束，未能全部答对', () => {
             setSelectedOption(null)
             setQuestion(null)
@@ -126,9 +144,11 @@ export default function PinganGoodDriverProject({ routeParams }) {
           })
         }
       } else if (result.status === 'eligible') {
+        quizInProgressRef.current = false
         eligibleRef.current = true
         setPage('result')
       } else if (result.status === 'failed') {
+        quizInProgressRef.current = false
         showComingSoonToast('本轮答题结束，未能全部答对', () => {
           setSelectedOption(null)
           setQuestion(null)
@@ -199,7 +219,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
             className="pgd-rules-back-button"
             type="button"
             aria-label="返回首页"
-            onClick={() => { setToastVisible(false); setPage(page === 'quiz' ? 'rules' : 'home') }}
+            onClick={page === 'quiz' ? leaveQuiz : () => setPage('home')}
           />
         ) : null}
         {page === 'home' ? (
