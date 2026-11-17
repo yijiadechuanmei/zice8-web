@@ -6,6 +6,7 @@ import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 import TianfuReadingOverview from '../components/TianfuReadingOverview'
 import { getLvyuanAdminOverview } from '../lvyuanFruitfulApi'
+import SafeDriverQuizAdmin from '../components/SafeDriverQuizAdmin'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
 const { Paragraph, Text, Title } = Typography
@@ -589,6 +590,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
   return (
     <div className={`admin-stack${isTianfuReading ? ' admin-tianfu-dashboard' : ''}`}>
+      {activity.type === 'safe_driver_quiz_lottery' ? <SafeDriverQuizAdmin activity={activity} overviewOnly /> : null}
       {compact || isTianfuReading ? (
         <div className="admin-overview-refresh">
           <Text type="secondary">

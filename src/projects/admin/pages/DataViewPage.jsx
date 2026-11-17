@@ -6,12 +6,14 @@ import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, get
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
 import QuizAdminDataPage from './QuizAdminDataPage'
 import { LvyuanParticipantsPage } from '../components/LvyuanFruitfulAdmin'
+import SafeDriverQuizAdmin from '../components/SafeDriverQuizAdmin'
 
 const pageSize = 20
 const emptyData = { columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } }
 
 export default function DataViewPage({ activity, phaseScope = 'all' }) {
   if (activity.type === 'lvyuan_consumer_game_collection') return <LvyuanParticipantsPage activity={activity} />
+  if (activity.type === 'safe_driver_quiz_lottery') return <SafeDriverQuizAdmin activity={activity} />
   return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} phaseScope={phaseScope} />
 }
 

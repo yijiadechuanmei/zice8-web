@@ -262,6 +262,15 @@ export function clearSafeDriverQuizUserData(activityKey, userId) {
   })
 }
 
+export function getSafeDriverQuizOverview(activityKey) {
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/overview`)
+}
+
+export function getSafeDriverQuizAttempts(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/attempts?${search}`)
+}
+
 export function clearXiangyuGlobalTreasureData(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/xiangyu-global-treasure/clear-data`, {
     method: 'POST',
