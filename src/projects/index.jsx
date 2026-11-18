@@ -37,6 +37,7 @@ const LuckyDrawProject = lazy(() => import('./lucky-draw/index.jsx'))
 const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.jsx'))
 const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
 const PinganGoodDriverProject = lazy(() => import('./pingan-good-driver/index.jsx'))
+const TrafficQuizProject = lazy(() => import('./traffic-quiz/index.jsx'))
 
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
 const LiubaiAssessmentProject = lazy(() => import('./liubai-assessment/index.jsx'))
@@ -65,6 +66,7 @@ const activityTypeProjects = {
   maotai_c_create_fun_20260923: MaotaiCCreateFunProject,
   tianfu_new_district_reading_20260927: TianfuNewDistrictReadingProject,
   safe_driver_quiz_lottery: PinganGoodDriverProject,
+  jtqa: TrafficQuizProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
@@ -326,6 +328,10 @@ export const projectRoutes = [
     path: '/quiz',
     Component: QuizProject,
     activityGate: true,
+  },
+  {
+    path: '/jtqa/:activityKey/redeem',
+    Component: lazy(() => import('./traffic-quiz/RedeemAdmin.jsx')),
   },
   {
     path: '/:activityType/:activityKey',
