@@ -28,12 +28,27 @@
   padding: 16px 20px calc(48px + env(safe-area-inset-bottom, 0px));
 }
 .jtqa-home {
-  max-width: 750px;
-  margin: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+.jtqa-app-home {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
 }
 .jtqa-home-art {
   position: relative;
   width: 100%;
+  flex: none;
   line-height: 0;
 }
 .jtqa-home-art img {
@@ -55,21 +70,23 @@
 .jtqa-home-start:active {
   background: #fff7;
 }
-.jtqa-home-actions {
-  padding: 22px 20px 34px;
-  background: #2d5632;
-  text-align: center;
-  color: #fff;
+.jtqa-home-menu {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #fffdf1db;
+  color: #316f42;
+  box-shadow: 0 2px 8px #244d382b;
+  font-size: 21px;
+  line-height: 1;
 }
-.jtqa-home-actions p {
-  margin: 0 0 16px;
-}
-.jtqa-home-actions > div {
-  display: flex;
+.jtqa-menu-actions {
+  display: grid;
   gap: 12px;
-}
-.jtqa-home-actions .jtqa-button {
-  flex: 1;
 }
 .jtqa-text-link {
   border: 0;

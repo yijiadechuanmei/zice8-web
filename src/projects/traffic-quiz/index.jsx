@@ -69,7 +69,7 @@ function Image({ name, className = "", alt = "" }) {
   return <img src={trafficAssets[name]} className={className} alt={alt} />;
 }
 
-function Home({ state, onStart, onRules, onRank, onAward }) {
+function Home({ onStart, onMenu }) {
   return (
     <section className="jtqa-home">
       <div className="jtqa-home-art">
@@ -84,24 +84,14 @@ function Home({ state, onStart, onRules, onRank, onAward }) {
           aria-label="开始答题"
         />
       </div>
-      <div className="jtqa-home-actions">
-        <p>
-          {state
-            ? `今日剩余 ${state.remainingToday} 次机会`
-            : "安全“答”人 · 2026 全国交通安全日"}
-        </p>
-        <div>
-          <Button onClick={onRules} secondary>
-            活动规则
-          </Button>
-          <Button onClick={onRank} secondary>
-            查看排行榜
-          </Button>
-        </div>
-        <button type="button" className="jtqa-text-link" onClick={onAward}>
-          查看领奖信息 →
-        </button>
-      </div>
+      <button
+        className="jtqa-home-menu"
+        type="button"
+        onClick={onMenu}
+        aria-label="活动规则、排行榜和领奖信息"
+      >
+        ☰
+      </button>
     </section>
   );
 }
@@ -483,6 +473,9 @@ export default function TrafficQuizProject({ routeParams }) {
       .catch((err) => setError(err.message || "活动加载失败"));
   }, [key]);
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+  useEffect(() => {
     if (!authReady) return;
     let alive = true;
     getState(key)
@@ -651,16 +644,13 @@ export default function TrafficQuizProject({ routeParams }) {
   };
   return (
     <main
-      className="jtqa-app"
+      className={`jtqa-app ${page === "home" ? "jtqa-app-home" : ""}`}
       style={{ "--jtqa-road-scene": `url("${trafficAssets.roadScene}")` }}
     >
       {page === "home" && (
         <Home
-          state={state}
           onStart={start}
-          onRules={() => setModal("rules")}
-          onRank={() => openRank()}
-          onAward={openAward}
+          onMenu={() => setModal("menu")}
         />
       )}
       {page === "quiz" && (
@@ -727,7 +717,13 @@ export default function TrafficQuizProject({ routeParams }) {
       )}
       {modal && (
         <Modal
-          title={modal === "rules" ? "活动规则" : "温馨提示"}
+          title={
+            modal === "rules"
+              ? "活动规则"
+              : modal === "menu"
+                ? "活动导航"
+                : "温馨提示"
+          }
           onClose={() => setModal("")}
         >
           {modal === "rules" ? (
@@ -736,10 +732,34 @@ export default function TrafficQuizProject({ routeParams }) {
                 <li key={rule}>{rule}</li>
               ))}
             </ol>
+          ) : modal === "menu" ? (
+            <div className="jtqa-menu-actions">
+              <Button onClick={() => setModal("rules")}>活动规则</Button>
+              <Button
+                secondary
+                onClick={() => {
+                  setModal("");
+                  openRank();
+                }}
+              >
+                查看排行榜
+              </Button>
+              <Button
+                secondary
+                onClick={() => {
+                  setModal("");
+                  openAward();
+                }}
+              >
+                领奖信息
+              </Button>
+            </div>
           ) : (
             <p>{modal}</p>
           )}
-          <Button onClick={() => setModal("")}>知道了</Button>
+          {modal !== "menu" && (
+            <Button onClick={() => setModal("")}>知道了</Button>
+          )}
         </Modal>
       )}
       {showPosterImage && (
