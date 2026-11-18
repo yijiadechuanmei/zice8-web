@@ -125,6 +125,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background-image:
+    linear-gradient(#fbf8e8 45%, #fbf8e8e8 72%, #fbf8e8aa),
+    var(--jtqa-road-scene);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 100% 100%, 100% auto;
 }
 .jtqa-quiz-head {
   display: flex;
