@@ -33,7 +33,7 @@ function roundRect(ctx, x, y, w, h, r) {
 export async function createPoster(slogan) {
   const canvas = document.createElement("canvas");
   canvas.width = 750;
-  canvas.height = 1334;
+  canvas.height = 1000;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("当前浏览器无法生成海报");
   const load = (source) => new Promise((resolve, reject) => {
@@ -48,17 +48,17 @@ export async function createPoster(slogan) {
     load(trafficAssets.resultScene),
   ]);
   // The two existing illustrations are layered into one richer campaign scene.
-  ctx.drawImage(quizScene, 0, 0, 750, 1334);
+  ctx.drawImage(quizScene, 0, 0, 750, 1000);
   ctx.drawImage(
     resultScene,
     0,
-    resultScene.height * 0.45,
+    resultScene.height * 0.63,
     resultScene.width,
-    resultScene.height * 0.55,
+    resultScene.height * 0.37,
     0,
     490,
     750,
-    844,
+    510,
   );
   ctx.fillStyle = "#285b38";
   ctx.fillRect(0, 0, 750, 64);
@@ -105,10 +105,10 @@ export async function createPoster(slogan) {
   ctx.fillStyle = "#278fc1";
   roundRect(ctx, 278, 462, 72, 8, 4);
   ctx.fillStyle = "#fff7dc";
-  roundRect(ctx, 493, 1113, 190, 46, 23);
+  roundRect(ctx, 493, 910, 190, 46, 23);
   ctx.fillStyle = "#285b38";
   ctx.font = "bold 17px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("文明守法 · 平安回家", 588, 1143);
+  ctx.fillText("文明守法 · 平安回家", 588, 940);
   return canvas.toDataURL("image/png");
 }

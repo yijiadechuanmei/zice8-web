@@ -156,13 +156,11 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   const [displayPage, setDisplayPage] = useState(1);
   const rowsPerPage = 5;
   const list = data?.list || [];
-  const topThree = list.filter((item) => item.rank <= 3);
-  const rest = list.filter((item) => item.rank > 3);
   const totalPages = Math.max(
     1,
-    Math.ceil(Math.max(0, (data?.total || 0) - 3) / rowsPerPage),
+    Math.ceil((data?.total || 0) / rowsPerPage),
   );
-  const visibleRows = rest.slice(
+  const visibleRows = list.slice(
     (displayPage - 1) * rowsPerPage,
     displayPage * rowsPerPage,
   );
@@ -170,25 +168,13 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
     if (loading || displayPage >= totalPages) return;
     const next = displayPage + 1;
     setDisplayPage(next);
-    if (next * rowsPerPage + 3 > list.length && data.total > list.length)
+    if (next * rowsPerPage > list.length && data.total > list.length)
       onMore();
   };
   return (
     <section className="jtqa-inner jtqa-stage jtqa-rank">
       <button className="jtqa-rank-back" type="button" onClick={onBack} aria-label="返回">‹</button>
-      <div className="jtqa-rank-top-three">
-        {topThree.map((item) => (
-          <div className="jtqa-rank-top-person" key={item.rank}>
-            <b>{item.rank === 1 ? "🥇" : item.rank === 2 ? "🥈" : "🥉"}</b>
-            <div className="jtqa-avatar">
-              {item.avatar ? <img src={item.avatar} alt="" /> : "🚦"}
-            </div>
-            <strong>{item.nickname}</strong>
-            <small>{item.score} 分</small>
-          </div>
-        ))}
-      </div>
-      <div className="jtqa-rank-divider" aria-hidden="true" />
+      <div className="jtqa-rank-heading"><span>排行榜</span></div>
       <div className="jtqa-rank-list">
         {visibleRows.map((item) => (
           <div className="jtqa-rank-row" key={item.rank}>
