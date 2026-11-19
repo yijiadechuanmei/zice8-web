@@ -7,6 +7,7 @@ import {
   getPublicConfig,
   getRank,
   getState,
+  resetMyTrafficQuizData,
   startChallenge,
   submitAnswer,
 } from "./api";
@@ -350,6 +351,7 @@ export default function TrafficQuizProject({ routeParams }) {
   const [modal, setModal] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
   const [tick, setTick] = useState(() => Date.now());
   const [offset, setOffset] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -552,6 +554,21 @@ export default function TrafficQuizProject({ routeParams }) {
       setAwardLoading(false);
     }
   };
+  const resetCurrentUser = async () => {
+    if (resetBusy) return;
+    if (!authReady) {
+      setModal(blockedMessage || "请先完成微信授权");
+      return;
+    }
+    setResetBusy(true);
+    try {
+      await resetMyTrafficQuizData(key);
+      window.location.reload();
+    } catch (err) {
+      setModal(err.message || "重置失败，请重试");
+      setResetBusy(false);
+    }
+  };
   return (
     <main
       className={`jtqa-app ${page === "home" ? "jtqa-app-home" : ""}`}
@@ -602,6 +619,15 @@ export default function TrafficQuizProject({ routeParams }) {
           onBack={() => setPage("home")}
         />
       )}
+      <button
+        className="jtqa-reset"
+        type="button"
+        disabled={resetBusy}
+        onClick={resetCurrentUser}
+        aria-label="清除本人在当前活动的答题数据并刷新页面"
+      >
+        {resetBusy ? "重置中…" : "重置"}
+      </button>
       {error && (
         <div className="jtqa-error" role="alert">
           {error}{" "}

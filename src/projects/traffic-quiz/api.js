@@ -15,3 +15,5 @@ export const submitAnswer = (key, body) =>
 export const getRank = (key, page = 1) =>
   request(`${base(key)}/rank?page=${page}`);
 export const getAward = (key) => request(`${base(key)}/award`);
+export const resetMyTrafficQuizData = (key) =>
+  request(`${base(key)}/reset-me`, { method: "POST" });
