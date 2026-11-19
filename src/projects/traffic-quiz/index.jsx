@@ -22,7 +22,6 @@ const RULES = [
   "活动当天现场还有更多精美礼品，欢迎前往参与。",
 ];
 const formatTime = (ms = 0) => `${(ms / 1000).toFixed(1)} 秒`;
-const isWechat = () => /MicroMessenger/i.test(navigator.userAgent);
 
 function Modal({ title, children, onClose }) {
   return (
@@ -313,11 +312,6 @@ export function Result({
 }) {
   return (
     <section className="jtqa-inner jtqa-stage jtqa-result">
-      <header className="jtqa-top">
-        <button type="button" onClick={onHome}>‹ 首页</button>
-        <span>答题完成</span>
-        <span>第 {state.attempt.attemptNo} 次</span>
-      </header>
       <div className="jtqa-result-main">
         <p className="jtqa-result-kicker">本次得分</p>
         <h1><strong>{state.attempt.score}</strong><span>分</span></h1>
@@ -549,26 +543,6 @@ export default function TrafficQuizProject({ routeParams }) {
       setAwardLoading(false);
     }
   };
-  const savePoster = async () => {
-    if (!poster) return;
-    if (isWechat()) {
-      setShowPosterModal(true);
-      return;
-    }
-    try {
-      const blob = await (await fetch(poster)).blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "文明交通知识问答-成绩海报.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } catch {
-      setModal("保存失败，请长按海报图片保存");
-    }
-  };
   return (
     <main
       className={`jtqa-app ${page === "home" ? "jtqa-app-home" : ""}`}
@@ -694,8 +668,6 @@ export default function TrafficQuizProject({ routeParams }) {
           <div className="jtqa-poster-dialog" role="dialog" aria-modal="true" aria-label="成绩海报" onClick={(event) => event.stopPropagation()}>
             <button className="jtqa-poster-close" type="button" aria-label="关闭成绩海报" onClick={() => setShowPosterModal(false)}>×</button>
             <img src={poster} alt="文明交通知识问答成绩海报" />
-            <p>{isWechat() ? "长按海报保存到手机" : "保存海报，分享文明出行"}</p>
-            {!isWechat() && <Button onClick={savePoster}>保存海报</Button>}
           </div>
         </div>
       )}

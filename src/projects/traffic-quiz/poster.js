@@ -52,13 +52,13 @@ export async function createPoster(slogan) {
   ctx.drawImage(
     resultScene,
     0,
-    resultScene.height * 0.42,
+    resultScene.height * 0.45,
     resultScene.width,
-    resultScene.height * 0.58,
+    resultScene.height * 0.55,
     0,
-    640,
+    490,
     750,
-    694,
+    844,
   );
   ctx.fillStyle = "#285b38";
   ctx.fillRect(0, 0, 750, 64);

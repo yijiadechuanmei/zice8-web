@@ -73,7 +73,7 @@
 .jtqa-rank-state{position:absolute;left:10%;right:10%;top:65%;margin:0;padding:8px;background:#fff9e6d9;text-align:center;color:#58816a;font-size:12px}
 /* Result: the score is the focal point; the illustrated road stays visible below. */
 .jtqa-result{text-align:center}
-.jtqa-result-main{position:relative;width:min(100%,390px);margin:clamp(50px,12svh,125px) auto 0;padding:clamp(24px,6vw,36px) 18px 20px;border-radius:30px;background:#fffdf0d9;box-shadow:0 12px 28px #345c291c}
+.jtqa-result-main{position:relative;width:min(100%,390px);margin:clamp(48px,11svh,112px) auto 0;padding:clamp(24px,6vw,36px) 18px 20px;border-radius:30px;background:#fffdf0d9;box-shadow:0 12px 28px #345c291c}
 .jtqa-result-main:before{content:"";position:absolute;left:50%;top:10px;width:46px;height:5px;border-radius:8px;background:#d9e8c9;transform:translateX(-50%)}
 .jtqa-result-kicker{margin:0;color:#408951;font-size:14px;font-weight:800;letter-spacing:.08em}
 .jtqa-result-main h1{display:flex;justify-content:center;align-items:baseline;gap:7px;margin:4px 0 14px;color:#258fc3;line-height:1}
@@ -113,11 +113,9 @@
 .jtqa-rules{padding-left:24px;line-height:1.6;font-size:14px}
 .jtqa-rules li{margin-bottom:8px}
 .jtqa-poster-shade{z-index:50}
-.jtqa-poster-dialog{position:relative;display:flex;flex-direction:column;align-items:center;max-width:min(100%,420px);max-height:94svh;overflow:hidden;padding:8px;border-radius:22px;background:#fff9e9;box-shadow:0 16px 50px #102b1855}
-.jtqa-poster-dialog img{display:block;min-height:0;max-width:100%;max-height:calc(94svh - 54px);object-fit:contain;border-radius:14px}
-.jtqa-poster-dialog p{position:absolute;left:0;right:0;bottom:13px;margin:0;color:#3d8050;font-size:10px;font-weight:800;text-align:center;text-shadow:0 1px #fff}
-.jtqa-poster-dialog .jtqa-button{margin-top:8px;min-height:36px}
-.jtqa-poster-close{position:absolute;z-index:1;right:18px;top:18px;width:34px;height:34px;border:0;border-radius:50%;background:#173823bc;color:#fff;font-size:26px;line-height:1}
+.jtqa-poster-dialog{position:relative;display:flex;flex-direction:column;align-items:center;width:min(82vw,300px);max-height:76svh;overflow:hidden;padding:5px;border-radius:16px;background:#fff9e9;box-shadow:0 16px 50px #102b1855}
+.jtqa-poster-dialog img{display:block;min-height:0;max-width:100%;max-height:calc(76svh - 10px);object-fit:contain;border-radius:12px}
+.jtqa-poster-close{position:absolute;z-index:1;right:12px;top:12px;width:29px;height:29px;border:0;border-radius:50%;background:#173823bc;color:#fff;font-size:22px;line-height:1}
 .jtqa-feedback{position:fixed;z-index:40;top:37%;left:50%;transform:translateX(-50%);width:min(80vw,320px);padding:20px;text-align:center;border-radius:20px;background:#d8483c;color:#fff;font-size:21px;font-weight:800;box-shadow:0 10px 30px #0003}
 .jtqa-feedback-right{background:#3e9f61}
 .jtqa-feedback small{display:block;font-size:14px;margin-top:8px}
