@@ -378,9 +378,11 @@ export default function TrafficQuizProject({ routeParams }) {
   const actionBusy = useRef(false);
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
   useWechatShare(key, publicConfig);
-  const applyState = useCallback((next, move = true) => {
+  const applyState = useCallback((next, move = true, receivedAt = Date.now()) => {
+    const now = Date.now();
     setState(next);
-    setOffset(Date.now() - Date.parse(next.serverNow));
+    setOffset(receivedAt - Date.parse(next.serverNow));
+    setTick(now);
     if (move)
       setPage(
         next.attempt?.status === "in_progress"
@@ -428,10 +430,13 @@ export default function TrafficQuizProject({ routeParams }) {
     const id = window.setInterval(() => setTick(Date.now()), 250);
     return () => window.clearInterval(id);
   }, []);
-  const seconds = Math.max(
-    0,
-    Math.ceil(
-      (Date.parse(state?.attempt?.deadlineAt || 0) - (tick - offset)) / 1000,
+  const seconds = Math.min(
+    30,
+    Math.max(
+      0,
+      Math.ceil(
+        (Date.parse(state?.attempt?.deadlineAt || 0) - (tick - offset)) / 1000,
+      ),
     ),
   );
   useEffect(() => {
@@ -521,9 +526,10 @@ export default function TrafficQuizProject({ routeParams }) {
         questionId: state.attempt.question.id,
         option,
       });
+      const receivedAt = Date.now();
       setFeedback(next.feedback);
       window.setTimeout(() => {
-        applyState(next);
+        applyState(next, true, receivedAt);
         setFeedback(null);
         actionBusy.current = false;
         setBusy(false);
