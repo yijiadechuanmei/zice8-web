@@ -4,6 +4,7 @@ import { Alert, Button, Card, Input, InputNumber, Popconfirm, Select, Space, Swi
 import {
   clearLongwenBeerQuizData,
   clearSafeDriverQuizUserData,
+  clearTrafficQuizUserData,
   clearXiangyuGlobalTreasureData,
   clearRiderSafetySurveyData,
   configureRiderSafetySurveyPayoutTest,
@@ -114,6 +115,8 @@ export default function ActivityConfigPage({ activity }) {
   const [longwenClearing, setLongwenClearing] = useState(false)
   const [safeDriverUserId, setSafeDriverUserId] = useState('')
   const [safeDriverClearing, setSafeDriverClearing] = useState(false)
+  const [trafficQuizUserId, setTrafficQuizUserId] = useState('')
+  const [trafficQuizClearing, setTrafficQuizClearing] = useState(false)
   const [xiangyuClearScope, setXiangyuClearScope] = useState('user')
   const [xiangyuUserId, setXiangyuUserId] = useState('')
   const [xiangyuClearing, setXiangyuClearing] = useState(false)
@@ -448,6 +451,28 @@ export default function ActivityConfigPage({ activity }) {
       message.error(text)
     } finally {
       setSafeDriverClearing(false)
+    }
+  }
+
+  async function handleClearTrafficQuizUserData() {
+    const userId = trafficQuizUserId.trim()
+    if (!/^[1-9]\d*$/.test(userId)) {
+      message.warning('请输入要清除的正整数用户ID')
+      return
+    }
+    setTrafficQuizClearing(true)
+    setError('')
+    try {
+      const result = await clearTrafficQuizUserData(activity.activityKey, userId)
+      const cleared = result?.cleared || {}
+      message.success(`已清除用户 ${userId} 的 ${cleared.attempts || 0} 次挑战、${cleared.answers || 0} 条答案及积分记录`)
+      setTrafficQuizUserId('')
+    } catch (err) {
+      const text = err.message || '清除文明交通用户数据失败'
+      setError(text)
+      message.error(text)
+    } finally {
+      setTrafficQuizClearing(false)
     }
   }
 
@@ -1051,6 +1076,33 @@ export default function ActivityConfigPage({ activity }) {
                   disabled={!/^[1-9]\d*$/.test(safeDriverUserId)}
                 >
                   <Button danger loading={safeDriverClearing} disabled={!/^[1-9]\d*$/.test(safeDriverUserId)}>清空该用户数据</Button>
+                </Popconfirm>
+              </Space>
+            </Space>
+          </Card>
+        ) : null}
+        {activity.type === 'jtqa' ? (
+          <Card size="small" title="清除文明交通活动用户数据" style={{ borderColor: '#ffccc7' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Text type="secondary">按微信用户 ID 清除该用户在当前活动的挑战、逐题答案、累计积分和参与记录，使其可重新答题。微信账号、其他活动数据及题库保留；最终排名锁定后不可清除。</Text>
+              <Space wrap>
+                <Input
+                  value={trafficQuizUserId}
+                  onChange={(event) => setTrafficQuizUserId(event.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric"
+                  maxLength={19}
+                  placeholder="输入微信用户 ID"
+                  style={{ width: 240 }}
+                />
+                <Popconfirm
+                  title={`确认清除用户 ${trafficQuizUserId || '-'} 在文明交通活动的全部数据？`}
+                  description="清除后，该用户的挑战次数和积分将重置，排行榜会重新计算。此操作不可恢复。"
+                  okText="确认清除"
+                  cancelText="取消"
+                  onConfirm={handleClearTrafficQuizUserData}
+                  disabled={!/^[1-9]\d*$/.test(trafficQuizUserId)}
+                >
+                  <Button danger loading={trafficQuizClearing} disabled={!/^[1-9]\d*$/.test(trafficQuizUserId)}>清除该用户数据</Button>
                 </Popconfirm>
               </Space>
             </Space>

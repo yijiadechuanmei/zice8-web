@@ -281,6 +281,15 @@
   border-radius: 0 0 42px 42px;
   overflow: hidden;
 }
+.jtqa-preview-banner {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff1c9;
+  color: #765220;
+  font-size: 13px;
+  line-height: 1.5;
+}
 .jtqa-rank-hero p {
   font-size: 13px;
   margin: 0;

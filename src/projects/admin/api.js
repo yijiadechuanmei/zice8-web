@@ -262,6 +262,13 @@ export function clearSafeDriverQuizUserData(activityKey, userId) {
   })
 }
 
+export function clearTrafficQuizUserData(activityKey, userId) {
+  return adminRequest(`/admin/traffic-quiz/activities/${encodeURIComponent(activityKey)}/clear-user-data`, {
+    method: 'POST',
+    body: JSON.stringify({ userId, confirm: 'CLEAR_TRAFFIC_QUIZ_USER_DATA' }),
+  })
+}
+
 export function getSafeDriverQuizOverview(activityKey) {
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/overview`)
 }

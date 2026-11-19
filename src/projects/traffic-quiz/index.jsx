@@ -159,7 +159,7 @@ function Quiz({ state, seconds, busy, onAnswer, onExit }) {
     </section>
   );
 }
-function Rank({ data, loading, error, onMore, onRetry, onBack }) {
+export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   const list = data?.list || [];
   const top = list.filter((item) => item.rank <= 3);
   const rest = list.filter((item) => item.rank > 3);
@@ -170,8 +170,15 @@ function Rank({ data, loading, error, onMore, onRetry, onBack }) {
           ‹ 返回
         </button>
         <span>积分排行榜</span>
-        <span>{data?.locked ? "最终排名" : "实时更新"}</span>
+        <span>
+          {data?.preview ? "50 人演示" : data?.locked ? "最终排名" : "实时更新"}
+        </span>
       </header>
+      {data?.preview && (
+        <p className="jtqa-preview-banner">
+          预览模式：50 位虚拟用户，仅用于查看布局，不计入正式排名或兑奖。
+        </p>
+      )}
       <div className="jtqa-rank-hero">
         <p>文明交通知识问答</p>
         <h1>安全“答”人榜</h1>
@@ -199,7 +206,8 @@ function Rank({ data, loading, error, onMore, onRetry, onBack }) {
         </div>
       </div>
       <div className="jtqa-mine">
-        我的排名 <b>{data?.mine?.rank || "暂未上榜"}</b>
+        {data?.preview ? "模拟用户排名" : "我的排名"}{" "}
+        <b>{data?.mine?.rank || "暂未上榜"}</b>
         <span>
           累计 {data?.mine?.score || 0} 分 · {formatTime(data?.mine?.timeMs)}
         </span>
