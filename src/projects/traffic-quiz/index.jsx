@@ -96,7 +96,6 @@ function Home({ onStart, onMenu }) {
         aria-label="活动规则、排行榜和领奖信息"
       >
         <span className="jtqa-home-menu-icon" aria-hidden="true"><i /><i /><i /></span>
-        <span>菜单</span>
       </button>
     </section>
   );
