@@ -34,7 +34,7 @@ export default function ScreenPreview() {
   const [posterOpen, setPosterOpen] = useState(false);
   useEffect(() => {
     if (screen !== "result") return;
-    createPoster(state).then(setPoster);
+    createPoster("头盔戴稳，平安随行").then(setPoster);
   }, []);
   const home = () => window.location.assign("?screen=quiz");
   return (

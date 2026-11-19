@@ -334,9 +334,6 @@ export function Award({ data, loading, error, onRetry, onBack }) {
 }
 export function Result({
   state,
-  poster,
-  posterError,
-  onPoster,
   onRank,
   onAgain,
   onHome,
@@ -359,18 +356,11 @@ export function Result({
         <p className="jtqa-result-rank">累计积分 <b>{state.rank?.score || 0}</b></p>
       </div>
       <div className="jtqa-result-actions">
-        <Button disabled={!poster} onClick={onPoster}>
-          {posterError ? "海报暂不可用" : poster ? "生成我的成绩海报" : "成绩海报生成中…"}
+        <Button onClick={onRank}>查看排行榜</Button>
+        <Button secondary onClick={onAgain}>
+          {state.remainingToday > 0 && state.phase === "active" ? "再次挑战" : "明日再来"}
         </Button>
-        <div>
-          <button type="button" onClick={onRank}>排行榜</button>
-          <button type="button" onClick={onAgain}>
-            {state.remainingToday > 0 && state.phase === "active"
-              ? "再次挑战"
-              : "明日再来"}
-          </button>
-          <button type="button" onClick={onHome}>活动首页</button>
-        </div>
+        <Button secondary onClick={onHome}>活动首页</Button>
       </div>
     </section>
   );
@@ -394,9 +384,9 @@ export default function TrafficQuizProject({ routeParams }) {
   const [awardLoading, setAwardLoading] = useState(false);
   const [awardError, setAwardError] = useState("");
   const [poster, setPoster] = useState("");
-  const [posterError, setPosterError] = useState("");
   const [showPosterModal, setShowPosterModal] = useState(false);
   const posterOpenedFor = useRef(null);
+  const lastSlogan = useRef("");
   const timeoutBusy = useRef(false);
   const actionBusy = useRef(false);
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
@@ -487,19 +477,29 @@ export default function TrafficQuizProject({ routeParams }) {
     )
       return;
     let active = true;
-    createPoster(state)
+    const slogans = [
+      "头盔戴稳，平安随行",
+      "红灯停一步，安全一大步",
+      "礼让斑马线，文明在身边",
+      "不闯灯、不逆行，平安一路行",
+      "骑行守规则，归家每一程",
+      "车让人，人快走，文明交通一起守",
+      "路口多观察，安全有保障",
+      "文明出行，从戴好头盔开始",
+    ];
+    const choices = slogans.filter((slogan) => slogan !== lastSlogan.current);
+    const slogan = choices[Math.floor(Math.random() * choices.length)];
+    lastSlogan.current = slogan;
+    createPoster(slogan)
       .then((value) => {
         if (!active) return;
         setPoster(value);
-        setPosterError("");
         if (posterOpenedFor.current !== state.attempt.id) {
           posterOpenedFor.current = state.attempt.id;
           setShowPosterModal(true);
         }
       })
-      .catch((err) => {
-        if (active) setPosterError(err.message || "海报生成失败");
-      });
+      .catch(() => { if (active) setShowPosterModal(false); });
     return () => { active = false; };
   }, [page, state]);
   const start = async () => {
@@ -635,9 +635,6 @@ export default function TrafficQuizProject({ routeParams }) {
       {page === "result" && state?.attempt && (
         <Result
           state={state}
-          poster={poster}
-          posterError={posterError}
-          onPoster={() => setShowPosterModal(true)}
           onRank={() => openRank()}
           onAgain={start}
           onHome={() => setPage("home")}
