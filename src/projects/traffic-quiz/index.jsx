@@ -17,12 +17,15 @@ import { rankDemoUsers } from "./rankDemoData";
 import "./styles.css";
 
 const RULES = [
-  "活动时间：2026 年 11 月 27 日—12 月 1 日；活动地点：蕉城夜市。",
-  "每人每日仅 1 次答题机会，每次最多答 5 题；一旦开启挑战即消耗机会，北京时间每日 00:00 更新机会。",
-  "每题限时 30 秒，答对 +1 分，答错或超时不得分；一轮答错满 3 题直接结束当日挑战。",
-  "按五天答题总分排名；总分相同时，五天答题总用时较少者排名靠前。",
-  "最终排名前 50 名各获蜀黍家骑行熊一个。2026 年 12 月 2 日 19:00—20:30，凭兑奖凭证领取。",
+  "1.每人每日仅1次答题机会，每次最多答 5 题；一旦开启挑战即消耗机会，每日00:00更新机会。",
+  "2.每题限时 30 秒，答对 +1 分，答错/超时不得分；一轮答错满 3 题直接当日结束挑战。",
+  "3.排名方式为:四天答题总分及四天答题总用时（用时少排名则靠前）",
+  "领奖信息：",
+  "1.前 50 名赢蜀黍家骑行熊一个",
+  "2.奖品兑换：2026 年 12 月 2 日 19:00–20:30，凭兑奖凭证领取",
   "现场还有超多精美礼品，欢迎来玩！",
+  "活动开始时间：2026年11月27日-2026年12月1日",
+  "活动地点：蕉城夜市",
 ];
 const formatTime = (ms = 0) => `${(ms / 1000).toFixed(1)} 秒`;
 const rankPageSize = () => {
@@ -667,11 +670,11 @@ export default function TrafficQuizProject({ routeParams }) {
           onClose={() => setModal("")}
         >
           {modal === "rules" ? (
-            <ol className="jtqa-rules">
+            <div className="jtqa-rules">
               {RULES.map((rule) => (
-                <li key={rule}>{rule}</li>
+                <p key={rule}>{rule}</p>
               ))}
-            </ol>
+            </div>
           ) : modal === "menu" ? (
             <div className="jtqa-menu-actions">
               <Button onClick={() => setModal("rules")}>活动规则</Button>
