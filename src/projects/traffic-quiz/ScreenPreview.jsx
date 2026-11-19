@@ -31,7 +31,7 @@ const state = {
 
 export default function ScreenPreview() {
   const [poster, setPoster] = useState("");
-  const [posterOpen, setPosterOpen] = useState(false);
+  const [posterOpen, setPosterOpen] = useState(screen === "result");
   useEffect(() => {
     if (screen !== "result") return;
     createPoster("头盔戴稳，平安随行").then(setPoster);

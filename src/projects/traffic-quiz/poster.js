@@ -36,49 +36,63 @@ export async function createPoster(slogan) {
   canvas.height = 1334;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("当前浏览器无法生成海报");
-  const scene = new window.Image();
-  scene.crossOrigin = "anonymous";
-  scene.src = trafficAssets.roadScene;
-  await new Promise((resolve, reject) => {
-    scene.onload = resolve;
-    scene.onerror = reject;
+  const load = (source) => new Promise((resolve, reject) => {
+    const image = new window.Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = source;
   });
-  ctx.fillStyle = "#f8f0d5";
-  ctx.fillRect(0, 0, 750, 1334);
-  // A full-width illustrated road becomes the destination of the poster.
-  ctx.drawImage(scene, 0, 700, 750, 422);
+  const [quizScene, resultScene] = await Promise.all([
+    load(trafficAssets.quizScene),
+    load(trafficAssets.resultScene),
+  ]);
+  // The two existing illustrations are layered into one richer campaign scene.
+  ctx.drawImage(quizScene, 0, 0, 750, 1334);
+  ctx.drawImage(
+    resultScene,
+    0,
+    resultScene.height * 0.42,
+    resultScene.width,
+    resultScene.height * 0.58,
+    0,
+    640,
+    750,
+    694,
+  );
   ctx.fillStyle = "#285b38";
-  ctx.fillRect(0, 0, 750, 70);
-  ctx.fillStyle = "#d3e8b4";
-  ctx.fillRect(0, 70, 750, 6);
+  ctx.fillRect(0, 0, 750, 64);
   ctx.fillStyle = "#f2cf42";
-  ctx.beginPath(); ctx.arc(666, 226, 156, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#f8f0d5";
-  ctx.beginPath(); ctx.arc(666, 226, 124, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#b9dd99";
-  ctx.beginPath(); ctx.arc(87, 284, 100, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#f8f0d5";
-  ctx.beginPath(); ctx.arc(87, 284, 72, 0, Math.PI * 2); ctx.fill();
-
+  roundRect(ctx, 58, 94, 162, 44, 22);
   ctx.fillStyle = "#285b38";
-  roundRect(ctx, 74, 108, 58, 170, 28);
-  [140, 193, 246].forEach((y, index) => {
-    ctx.fillStyle = ["#e74b3e", "#f2cf42", "#50a965"][index];
-    ctx.beginPath(); ctx.arc(103, y, 15, 0, Math.PI * 2); ctx.fill();
-  });
+  ctx.textAlign = "center";
+  ctx.font = "bold 22px sans-serif";
+  ctx.fillText("文明交通", 139, 123);
+
+  // A road-sign composition lets the slogan sit inside the illustration.
+  ctx.fillStyle = "#2a3130";
+  roundRect(ctx, 72, 208, 606, 324, 18);
+  ctx.fillStyle = "#f4c92f";
+  roundRect(ctx, 84, 220, 582, 300, 11);
+  ctx.fillStyle = "#fff3ad";
+  roundRect(ctx, 105, 241, 540, 258, 7);
+  ctx.fillStyle = "#2a3130";
+  ctx.fillRect(360, 532, 30, 166);
+  ctx.fillStyle = "#2a3130";
+  ctx.fillRect(306, 688, 138, 22);
 
   const parts = slogan.split(/[，、]/).filter(Boolean);
   const lines = parts.length > 1 ? parts.slice(0, 3) : [slogan];
   const fontSize = lines.length === 1 ? 76 : lines.length === 2 ? 67 : 56;
   const lineGap = fontSize * 1.28;
-  const startY = 452 - ((lines.length - 1) * lineGap) / 2;
+  const startY = 374 - ((lines.length - 1) * lineGap) / 2;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `900 ${fontSize}px sans-serif`;
   lines.forEach((line, index) => {
     const y = startY + index * lineGap;
     ctx.fillStyle = index === 0 ? "#285b38" : "#208bbd";
-    ctx.shadowColor = "#fff9e8";
+    ctx.shadowColor = "#fff4a9";
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 4;
     ctx.shadowOffsetY = 5;
@@ -87,23 +101,14 @@ export async function createPoster(slogan) {
   ctx.shadowColor = "transparent";
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#e54b3e";
-  roundRect(ctx, 80, 650, 160, 9, 5);
+  roundRect(ctx, 127, 462, 132, 8, 4);
   ctx.fillStyle = "#278fc1";
-  roundRect(ctx, 258, 650, 94, 9, 5);
-  ctx.save();
-  ctx.strokeStyle = "#fff9e8";
-  ctx.lineWidth = 8;
-  ctx.setLineDash([18, 18]);
-  ctx.beginPath();
-  ctx.bezierCurveTo(414, 679, 530, 676, 612, 711);
-  ctx.stroke();
-  ctx.restore();
-
-  ctx.fillStyle = "#285b38";
-  ctx.fillRect(0, 1122, 750, 212);
-  ctx.textAlign = "center";
+  roundRect(ctx, 278, 462, 72, 8, 4);
   ctx.fillStyle = "#fff7dc";
-  ctx.font = "bold 22px sans-serif";
-  ctx.fillText("文明守法 · 平安回家", 375, 1274);
+  roundRect(ctx, 493, 1113, 190, 46, 23);
+  ctx.fillStyle = "#285b38";
+  ctx.font = "bold 17px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("文明守法 · 平安回家", 588, 1143);
   return canvas.toDataURL("image/png");
 }
