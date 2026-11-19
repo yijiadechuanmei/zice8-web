@@ -30,7 +30,10 @@ export default function RankPreview({ routeParams }) {
   return (
     <main
       className="jtqa-app"
-      style={{ "--jtqa-road-scene": `url("${trafficAssets.roadScene}")` }}
+      style={{
+        "--jtqa-quiz-scene": `url("${trafficAssets.quizScene}")`,
+        "--jtqa-result-scene": `url("${trafficAssets.resultScene}")`,
+      }}
     >
       <Rank
         data={{

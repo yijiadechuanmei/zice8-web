@@ -1,728 +1,141 @@
-.jtqa-app {
-  min-height: 100svh;
-  background: #fbf8e8;
-  color: #294332;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
-    sans-serif;
-}
-.jtqa-app * {
-  box-sizing: border-box;
-}
-.jtqa-app button {
-  font: inherit;
-  cursor: pointer;
-}
-.jtqa-app button:disabled {
-  opacity: 0.52;
-  cursor: not-allowed;
-}
-.jtqa-app button:focus-visible {
-  outline: 3px solid #2095c7;
-  outline-offset: 3px;
-}
-.jtqa-inner {
-  width: min(100%, 750px);
-  margin: auto;
-  min-height: 100svh;
-  padding: 16px 20px calc(48px + env(safe-area-inset-bottom, 0px));
-}
-.jtqa-home {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
-}
-.jtqa-app-home {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
-}
-.jtqa-home-art {
-  position: relative;
-  width: 100%;
-  flex: none;
-  line-height: 0;
-}
-.jtqa-home-art img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.jtqa-home-start {
-  position: absolute;
-  left: 24%;
-  top: 59.4%;
-  width: 52%;
-  height: 7%;
-  border: 0;
-  background: transparent;
-  border-radius: 100px;
-  touch-action: manipulation;
-}
-.jtqa-home-start:active {
-  background: #fff7;
-}
-.jtqa-home-menu {
-  position: absolute;
-  top: max(14px, env(safe-area-inset-top, 0px));
-  right: 14px;
-  width: 38px;
-  height: 38px;
-  border: 0;
-  border-radius: 50%;
-  background: #fffdf1db;
-  color: #316f42;
-  box-shadow: 0 2px 8px #244d382b;
-  font-size: 21px;
-  line-height: 1;
-}
-.jtqa-menu-actions {
-  display: grid;
-  gap: 12px;
-}
-.jtqa-text-link {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: 15px;
-}
-.jtqa-button {
-  min-height: 48px;
-  width: 100%;
-  padding: 10px 18px;
-  border: 2px solid #4b965d;
-  border-radius: 30px;
-  background: #59a66c;
-  color: white;
-  font-weight: 800;
-  box-shadow: 0 4px 0 #2f6f41;
-  touch-action: manipulation;
-}
-.jtqa-button:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 #2f6f41;
-}
-.jtqa-button-secondary {
-  background: #fffdf1;
-  color: #3d844d;
-  box-shadow: 0 4px 0 #d6d8bd;
-}
-.jtqa-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 44px;
-  color: #437a51;
-  font-size: 13px;
-  font-weight: 700;
-}
-.jtqa-top > span:nth-child(2) {
-  font-size: 18px;
-  color: #285e3b;
-}
-.jtqa-top button {
-  padding: 8px 0;
-  border: 0;
-  background: transparent;
-  color: #437a51;
-}
-.jtqa-quiz {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background-image:
-    linear-gradient(#fbf8e8 45%, #fbf8e8e8 72%, #fbf8e8aa),
-    var(--jtqa-road-scene);
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: 100% 100%, 100% auto;
-}
-.jtqa-quiz-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  margin-top: 20px;
-}
-.jtqa-quiz-head > div {
-  display: flex;
-  flex-direction: column;
-}
-.jtqa-quiz-head small,
-.jtqa-timer small {
-  color: #699072;
-  font-size: 12px;
-}
-.jtqa-quiz-head strong {
-  font-size: 36px;
-  line-height: 1.15;
-  color: #258d56;
-}
-.jtqa-quiz-head em {
-  font-size: 16px;
-  font-style: normal;
-}
-.jtqa-timer {
-  text-align: right;
-}
-.jtqa-timer strong {
-  color: #238fc2;
-}
-.jtqa-timer-warning strong {
-  color: #e6a514;
-}
-.jtqa-timer-danger strong {
-  color: #d64135;
-  animation: jtqa-pulse 0.65s infinite alternate;
-}
-.jtqa-track {
-  height: 8px;
-  border-radius: 8px;
-  background: #dcead6;
-  margin: 14px 0 24px;
-  overflow: hidden;
-}
-.jtqa-track span {
-  display: block;
-  height: 100%;
-  background: #69af71;
-  transition: width 0.25s;
-}
-.jtqa-question {
-  min-height: 130px;
-}
-.jtqa-kicker {
-  font-size: 12px;
-  color: #4a9c66;
-  letter-spacing: 0.1em;
-  font-weight: 800;
-  margin: 0 0 14px;
-}
-.jtqa-question h1 {
-  font-size: clamp(21px, 5.4vw, 29px);
-  line-height: 1.45;
-  margin: 0;
-  font-weight: 850;
-  color: #294c39;
-}
-.jtqa-options {
-  display: grid;
-  gap: 10px;
-  margin-top: 15px;
-}
-.jtqa-options button {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-align: left;
-  width: 100%;
-  min-height: 58px;
-  border: 2px solid #bddac0;
-  border-radius: 18px;
-  background: #fffefa;
-  padding: 10px 14px;
-  color: #31513c;
-  font-size: 16px;
-  line-height: 1.35;
-  font-weight: 650;
-}
-.jtqa-options button:active {
-  background: #e1f4dd;
-  transform: scale(0.99);
-}
-.jtqa-options span {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #e9f1db;
-  color: #42824d;
-  font-weight: 900;
-}
-.jtqa-quiz-foot {
-  display: flex;
-  justify-content: space-between;
-  margin: 25px 2px 0;
-  padding-bottom: 20px;
-  color: #67816b;
-}
-.jtqa-quiz-foot b {
-  color: #287e4b;
-}
-.jtqa-road {
-  height: 20px;
-  background: linear-gradient(#5b7860, #5b7860);
-  border-top: 3px dashed white;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-.jtqa-rank-hero {
-  margin: 18px -20px 0;
-  padding: 34px 20px 12px;
-  background:
-    linear-gradient(#40925cc9, #32794edc), var(--jtqa-road-scene) center bottom / cover;
-  color: #fff;
-  text-align: center;
-  border-radius: 0 0 42px 42px;
-  overflow: hidden;
-}
-.jtqa-preview-banner {
-  margin: 12px 0 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #fff1c9;
-  color: #765220;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.jtqa-rank-hero p {
-  font-size: 13px;
-  margin: 0;
-}
-.jtqa-rank-hero h1 {
-  font-size: 32px;
-  margin: 6px 0 28px;
-}
-.jtqa-podium {
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  gap: 5px;
-  min-height: 150px;
-}
-.jtqa-podium-person {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  width: 33%;
-  padding: 12px 3px;
-  background: #fff9e8;
-  color: #315b3a;
-  border-radius: 22px 22px 0 0;
-  font-size: 12px;
-}
-.jtqa-podium-person strong {
-  max-width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.jtqa-place-1 {
-  min-height: 158px;
-}
-.jtqa-place-2 {
-  min-height: 125px;
-}
-.jtqa-place-3 {
-  min-height: 110px;
-}
-.jtqa-podium-person span {
-  font-size: 18px;
-  font-weight: 900;
-}
-.jtqa-podium-person small {
-  color: #66866c;
-}
-.jtqa-avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #d7ead5;
-  overflow: hidden;
-}
-.jtqa-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.jtqa-mine {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 20px 0;
-  border-bottom: 2px solid #d9e8d6;
-  color: #488b57;
-  font-weight: 800;
-}
-.jtqa-mine b {
-  font-size: 22px;
-}
-.jtqa-mine span {
-  margin-left: auto;
-  font-size: 12px;
-  color: #698171;
-}
-.jtqa-rank-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 74px;
-  border-bottom: 1px solid #e3e8d9;
-}
-.jtqa-rank-row > b {
-  width: 24px;
-  color: #589964;
-}
-.jtqa-rank-row > div:last-child {
-  text-align: right;
-  margin-left: auto;
-  white-space: nowrap;
-}
-.jtqa-rank-row small {
-  display: block;
-  color: #80917e;
-  font-size: 11px;
-  margin-top: 4px;
-}
-.jtqa-rank-name {
-  min-width: 0;
-}
-.jtqa-rank-name strong {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 130px;
-}
-.jtqa-rank-list {
-  margin-bottom: 20px;
-}
-.jtqa-status {
-  text-align: center;
-  padding: 32px 0;
-  color: #66806a;
-}
-.jtqa-status button {
-  border: 0;
-  background: transparent;
-  color: #278ec2;
-  text-decoration: underline;
-}
-.jtqa-footnote {
-  text-align: center;
-  color: #779079;
-  font-size: 12px;
-  margin: 20px 0;
-}
-.jtqa-award-hero {
-  height: 235px;
-  position: relative;
-  overflow: hidden;
-  padding: 32px 20px;
-  background:
-    linear-gradient(#44965bc9, #32794edc), var(--jtqa-road-scene) center bottom / cover;
-  border-radius: 28px;
-  color: #fff;
-  margin-top: 20px;
-}
-.jtqa-award-hero h1 {
-  font-size: 27px;
-  max-width: 66%;
-  margin: 0 0 10px;
-}
-.jtqa-award-hero p {
-  margin: 0;
-}
-.jtqa-award-hero img {
-  position: absolute;
-  width: 200px;
-  height: 260px;
-  object-fit: contain;
-  right: -10px;
-  bottom: -48px;
-}
-.jtqa-award-content {
-  text-align: center;
-  padding: 28px 12px;
-}
-.jtqa-award-content h2 {
-  font-size: 23px;
-  color: #32744a;
-}
-.jtqa-award-content p {
-  line-height: 1.7;
-}
-.jtqa-award-content img {
-  display: block;
-  max-width: 210px;
-  max-height: 180px;
-  object-fit: contain;
-  margin: 10px auto;
-}
-.jtqa-award-content small {
-  display: block;
-  color: #708b74;
-}
-.jtqa-award-content code {
-  display: block;
-  word-break: break-all;
-  margin: 12px auto;
-  padding: 12px;
-  background: #fff;
-  border: 1px dashed #8bbd8c;
-  border-radius: 10px;
-  font-size: 15px;
-  color: #225738;
-}
-.jtqa-redeemed {
-  color: #a65a38;
-}
-.jtqa-claim-info {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 12px;
-  padding: 20px;
-  border-top: 2px solid #d9e7d2;
-  font-size: 14px;
-}
-.jtqa-claim-info strong {
-  color: #367d4b;
-}
-.jtqa-result {
-  text-align: center;
-}
-.jtqa-result h1 {
-  font-size: 26px;
-  color: #327947;
-}
-.jtqa-result > p {
-  color: #6d8c6c;
-}
-.jtqa-poster {
-  display: block;
-  width: min(100%, 350px);
-  height: auto;
-  margin: 20px auto;
-  box-shadow: 0 12px 32px #153c2428;
-}
-.jtqa-poster-loading {
-  min-height: 380px;
-  display: grid;
-  place-items: center;
-  color: #648168;
-}
-.jtqa-result-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  max-width: 420px;
-  margin: 20px auto;
-}
-.jtqa-result-actions .jtqa-text-link {
-  grid-column: span 2;
-  color: #347d4b;
-}
-.jtqa-shade {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  background: #173522a8;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-}
-.jtqa-modal {
-  position: relative;
-  max-height: 85svh;
-  overflow: auto;
-  width: min(100%, 500px);
-  padding: 30px 22px;
-  background: #fffcef;
-  border: 4px solid #8dbf7e;
-  border-radius: 28px;
-  box-shadow: 0 15px 40px #102b1855;
-}
-.jtqa-modal h2 {
-  text-align: center;
-  color: #357f49;
-  margin: 0 0 18px;
-}
-.jtqa-modal p {
-  line-height: 1.7;
-}
-.jtqa-modal .jtqa-button {
-  margin-top: 18px;
-}
-.jtqa-close {
-  position: absolute;
-  right: 16px;
-  top: 10px;
-  border: 0;
-  background: transparent;
-  font-size: 30px;
-  color: #6c8e71;
-}
-.jtqa-rules {
-  padding-left: 24px;
-  line-height: 1.6;
-  font-size: 14px;
-}
-.jtqa-rules li {
-  margin-bottom: 9px;
-}
-.jtqa-feedback {
-  position: fixed;
-  z-index: 40;
-  top: 37%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(80vw, 320px);
-  padding: 20px;
-  text-align: center;
-  border-radius: 20px;
-  background: #d8483c;
-  color: #fff;
-  font-size: 21px;
-  font-weight: 800;
-  box-shadow: 0 10px 30px #0003;
-}
-.jtqa-feedback-right {
-  background: #3e9f61;
-}
-.jtqa-feedback small {
-  display: block;
-  font-size: 14px;
-  margin-top: 8px;
-}
-.jtqa-error {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
-  background: #fff4dc;
-  color: #8a4235;
-  text-align: center;
-}
-.jtqa-error button {
-  border: 0;
-  background: transparent;
-  text-decoration: underline;
-  color: #266d9c;
-}
-.jtqa-image-view {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  overflow: auto;
-  background: #111e;
-  color: #fff;
-  text-align: center;
-  padding: 16px;
-}
-.jtqa-image-view img {
-  display: block;
-  width: min(100%, 500px);
-  height: auto;
-  margin: 10px auto;
-}
-.jtqa-image-view p {
-  font-size: 14px;
-}
-@keyframes jtqa-pulse {
-  to {
-    transform: scale(1.13);
-  }
-}
-@media (max-height: 680px) {
-  .jtqa-inner {
-    padding-top: 8px;
-  }
-  .jtqa-quiz-head {
-    margin-top: 8px;
-  }
-  .jtqa-track {
-    margin: 9px 0 14px;
-  }
-  .jtqa-question {
-    min-height: 92px;
-  }
-  .jtqa-options {
-    gap: 7px;
-    margin-top: 9px;
-  }
-  .jtqa-options button {
-    min-height: 48px;
-  }
-  .jtqa-quiz-foot {
-    margin-top: 10px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .jtqa-app * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-.jtqa-admin-redeem {
-  max-width: 560px;
-}
-.jtqa-admin-redeem .jtqa-top a {
-  color: #437a51;
-  text-decoration: none;
-}
-.jtqa-admin-redeem h1 {
-  font-size: 27px;
-  color: #327947;
-  margin-top: 35px;
-}
-.jtqa-admin-redeem > p {
-  line-height: 1.7;
-  color: #6a836d;
-}
-.jtqa-admin-redeem label {
-  display: block;
-  font-weight: 800;
-  margin: 32px 0 10px;
-}
-.jtqa-admin-redeem input {
-  width: 100%;
-  height: 54px;
-  padding: 12px;
-  border: 2px solid #a4c9a6;
-  border-radius: 14px;
-  background: white;
-  color: #294332;
-  font-size: 16px;
-  letter-spacing: 0.06em;
-}
-.jtqa-admin-redeem > .jtqa-button {
-  margin-top: 18px;
-}
-.jtqa-redeem-preview {
-  margin-top: 28px;
-  padding: 24px;
-  border: 2px solid #b9d6b4;
-  background: #fffdf2;
-  border-radius: 22px;
-  text-align: center;
-}
-.jtqa-redeem-preview h2 {
-  color: #327947;
-}
-.jtqa-redeem-preview .jtqa-button {
-  margin-top: 20px;
-}
+.jtqa-app{min-height:100svh;background:#fbf8e8;color:#294332;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.jtqa-app *{box-sizing:border-box}
+.jtqa-app button{font:inherit;cursor:pointer;touch-action:manipulation}
+.jtqa-app button:disabled{opacity:.5;cursor:not-allowed}
+.jtqa-app button:focus-visible{outline:3px solid #2095c7;outline-offset:3px}
+.jtqa-inner{width:min(100%,750px);min-height:100svh;margin:auto;padding:16px 20px calc(48px + env(safe-area-inset-bottom,0px))}
+/* The original home artwork and its hit areas are intentionally preserved. */
+.jtqa-home{position:relative;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;height:100svh;overflow:hidden}
+.jtqa-app-home{position:fixed;inset:0;width:100vw;height:100vh;height:100svh;overflow:hidden}
+.jtqa-home-art{position:relative;width:100%;flex:none;line-height:0}
+.jtqa-home-art img{display:block;width:100%;height:auto}
+.jtqa-home-start{position:absolute;left:24%;top:59.4%;width:52%;height:7%;border:0;background:transparent;border-radius:100px}
+.jtqa-home-start:active{background:#fff7}
+.jtqa-home-menu{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:14px;width:38px;height:38px;border:0;border-radius:50%;background:#fffdf1db;color:#316f42;box-shadow:0 2px 8px #244d382b;font-size:21px;line-height:1}
+/* Scenic art frames every activity screen; live text stays selectable and accessible. */
+.jtqa-stage{height:100vh;height:100svh;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:calc(13px + env(safe-area-inset-top,0px)) clamp(16px,5vw,28px) calc(15px + env(safe-area-inset-bottom,0px));background-color:#fffdf0;background-repeat:no-repeat;background-size:cover;background-position:center center}
+.jtqa-quiz,.jtqa-rank{background-image:var(--jtqa-quiz-scene)}
+.jtqa-result,.jtqa-award{background-image:var(--jtqa-result-scene)}
+.jtqa-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;min-height:34px;color:#408753;font-size:11px;font-weight:700;white-space:nowrap}
+.jtqa-top>span:nth-child(2){font-size:15px;color:#326f43;font-weight:900}
+.jtqa-top>span:last-child{text-align:right}
+.jtqa-top button{justify-self:start;border:0;background:none;color:#408753;padding:6px 0;font-weight:800}
+.jtqa-button{width:100%;min-height:46px;padding:9px 18px;border:0;border-radius:100px;background:#68ac65;color:#fff;font-weight:900;box-shadow:0 4px 0 #367d4b,0 7px 18px #1e5a3130;letter-spacing:.04em}
+.jtqa-button:active{transform:translateY(3px);box-shadow:0 1px 0 #367d4b}
+.jtqa-button-secondary{background:#fffdf0;color:#378049;box-shadow:0 4px 0 #d4dfc2,0 7px 18px #1e5a3120}
+/* Quiz: content occupies the clear center of the illustrated canvas. */
+.jtqa-quiz-head{display:flex;justify-content:space-between;align-items:end;margin-top:clamp(28px,7svh,76px)}
+.jtqa-quiz-head>div{display:flex;flex-direction:column}
+.jtqa-quiz-head small,.jtqa-timer small{font-size:11px;color:#669976;font-weight:700}
+.jtqa-quiz-head strong{color:#388a51;font-size:clamp(28px,8vw,42px);line-height:1.05}
+.jtqa-quiz-head em{font-style:normal;font-size:14px}
+.jtqa-timer{text-align:right}
+.jtqa-timer strong{color:#238fc2}
+.jtqa-timer-warning strong{color:#d99a13}
+.jtqa-timer-danger strong{color:#d64135;animation:jtqa-pulse .65s infinite alternate}
+.jtqa-track{height:6px;flex:none;margin:11px 0 clamp(14px,2.5svh,24px);border-radius:8px;overflow:hidden;background:#dfebd5}
+.jtqa-track span{display:block;height:100%;background:#5fa865;border-radius:8px;transition:width .25s}
+.jtqa-question{min-height:clamp(84px,14svh,142px)}
+.jtqa-kicker{margin:0 0 8px;font-size:11px;letter-spacing:.12em;font-weight:900;color:#499b61}
+.jtqa-question h1{margin:0;color:#2b573c;font-size:clamp(19px,5.3vw,27px);line-height:1.42;font-weight:900}
+.jtqa-options{display:grid;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
+.jtqa-options::-webkit-scrollbar{display:none}
+.jtqa-options button{display:flex;align-items:center;gap:12px;width:100%;min-height:clamp(43px,7svh,58px);text-align:left;border:1.5px solid #b9d4b4;border-radius:15px;padding:7px 12px;background:#fffcf1ed;color:#31513c;font-size:clamp(13px,3.8vw,16px);font-weight:700;line-height:1.28;box-shadow:0 2px 0 #a9c8a0}
+.jtqa-options button:active{background:#e5f2dc;transform:scale(.99)}
+.jtqa-options span{display:grid;place-items:center;flex:none;width:29px;height:29px;border-radius:50%;background:#e5f0d7;color:#408450;font-weight:900}
+.jtqa-quiz-foot{display:flex;justify-content:space-between;flex:none;margin-top:clamp(12px,3svh,30px);padding:0 2px;color:#4f7859;font-size:12px;font-weight:700}
+.jtqa-quiz-foot b{font-size:15px;color:#258057}
+/* Leaderboard: compact podium and five visible rows allow 50 entries via paging. */
+.jtqa-rank-hero{text-align:center;flex:none;margin-top:clamp(17px,3svh,30px)}
+.jtqa-rank-hero>p{margin:0;color:#438d59;font-size:10px;font-weight:800;letter-spacing:.08em}
+.jtqa-rank-hero h1{margin:3px 0 10px;color:#2595c6;font-size:clamp(24px,7vw,35px);line-height:1.1;font-weight:950}
+.jtqa-podium{display:flex;align-items:end;justify-content:center;gap:4px;height:clamp(100px,17svh,145px)}
+.jtqa-podium-person{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:32%;height:76%;padding:5px 2px;background:#fff6d9e8;border:1px solid #e8d7aa;border-radius:15px 15px 4px 4px;color:#346848;font-size:10px;box-shadow:0 3px 0 #dbc893}
+.jtqa-place-1{height:100%;background:#fff0c5}
+.jtqa-place-2{height:84%}
+.jtqa-place-3{height:72%}
+.jtqa-podium-person .jtqa-avatar{width:clamp(29px,5svh,42px);height:clamp(29px,5svh,42px)}
+.jtqa-podium-person strong{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px}
+.jtqa-podium-person span{font-size:13px;font-weight:900;color:#258257}
+.jtqa-podium-person small{font-size:9px;color:#6f8b71}
+.jtqa-avatar{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#d6e9d0;overflow:hidden}
+.jtqa-avatar img{width:100%;height:100%;object-fit:cover}
+.jtqa-mine{display:flex;align-items:center;gap:5px;flex:none;min-height:38px;margin-top:8px;padding:4px 8px;border-radius:10px;background:#e4f1d9e8;color:#377c4a;font-size:11px;font-weight:800}
+.jtqa-mine b{font-size:17px}
+.jtqa-mine span{margin-left:auto;color:#608368;font-size:10px}
+.jtqa-rank-list{display:flex;flex-direction:column;min-height:0;flex:none;margin-top:5px;overflow:hidden}
+.jtqa-rank-row{display:flex;align-items:center;gap:7px;height:clamp(37px,6.7svh,48px);flex:none;padding:2px 4px;border-bottom:1px solid #d9e5cf;font-size:11px}
+.jtqa-rank-row>b{width:22px;color:#4b985d;font-size:13px}
+.jtqa-rank-row>div:last-child{margin-left:auto;text-align:right;white-space:nowrap}
+.jtqa-rank-row small{display:block;color:#759078;font-size:9px;margin-top:2px}
+.jtqa-rank-name{min-width:0}
+.jtqa-rank-name strong{display:block;max-width:clamp(95px,34vw,180px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.jtqa-rank-pager{display:flex;justify-content:space-between;align-items:center;min-height:30px;flex:none;margin-top:5px;color:#438854;font-size:11px;font-weight:800}
+.jtqa-rank-pager button,.jtqa-rank-state button{border:0;background:none;color:#2b91bb;font-weight:800;padding:4px}
+.jtqa-rank-state{position:absolute;left:10%;right:10%;top:65%;margin:0;padding:8px;background:#fff9e6d9;text-align:center;color:#58816a;font-size:12px}
+/* Result: the score is the focal point; the illustrated road stays visible below. */
+.jtqa-result{text-align:center}
+.jtqa-result-main{margin-top:clamp(47px,10svh,115px)}
+.jtqa-result-kicker{margin:0;color:#438f56;font-size:14px;font-weight:900;letter-spacing:.14em}
+.jtqa-result-main h1{display:flex;justify-content:center;align-items:baseline;gap:5px;margin:5px 0;color:#258fc3;line-height:1}
+.jtqa-result-main h1 strong{font-size:clamp(92px,23vw,150px);font-weight:950;letter-spacing:-.06em}
+.jtqa-result-main h1 span{font-size:22px;font-weight:900}
+.jtqa-result-encouragement{margin:5px 0 17px;color:#328550;font-size:clamp(14px,4vw,19px);font-weight:900}
+.jtqa-result-stats{display:flex;justify-content:center;gap:25px;color:#4b7458;font-size:13px}
+.jtqa-result-stats b{color:#2e8fbd;font-size:20px}
+.jtqa-result-rank{margin:14px 0;color:#3d6e4d;font-size:13px}
+.jtqa-result-rank b{color:#328752}
+.jtqa-result-actions{width:min(100%,370px);margin:clamp(18px,4svh,46px) auto 0}
+.jtqa-result-actions>div{display:flex;justify-content:space-between;gap:5px;margin-top:15px}
+.jtqa-result-actions>div button{border:0;background:#fff9e7bd;color:#367c4b;padding:7px 8px;border-radius:100px;font-size:12px;font-weight:800}
+/* Award uses the same result illustration, with prize imagery inside its clear area. */
+.jtqa-award-hero{text-align:center;margin-top:clamp(36px,8svh,95px)}
+.jtqa-award-hero h1{margin:0;color:#389658;font-size:clamp(25px,7vw,36px);font-weight:950}
+.jtqa-award-hero p{margin:6px 0 0;color:#3192be;font-size:14px;font-weight:800}
+.jtqa-award-content{text-align:center;min-height:0;margin:clamp(24px,6svh,65px) auto 0;width:min(100%,430px)}
+.jtqa-award-content h2{margin:6px 0;color:#338553;font-size:clamp(19px,5vw,26px)}
+.jtqa-award-content p{margin:8px 0;color:#4e7558;font-size:13px;line-height:1.5}
+.jtqa-award-content img{display:block;width:auto;max-width:60%;height:clamp(90px,17svh,155px);object-fit:contain;margin:5px auto}
+.jtqa-award-content small{display:block;color:#679273;font-size:11px}
+.jtqa-award-content code{display:block;word-break:break-all;padding:8px 10px;margin:6px auto;border:1px dashed #8fbe8c;border-radius:8px;background:#fffdefd9;color:#286843;font-size:13px}
+.jtqa-award-content .jtqa-redeemed{color:#a65a38}
+.jtqa-claim-info{display:grid;grid-template-columns:65px 1fr;gap:6px 9px;flex:none;align-self:center;width:min(100%,390px);margin-top:auto;padding:10px 12px;border-radius:12px;background:#fffbe8d9;color:#497050;font-size:11px;text-align:left}
+.jtqa-claim-info strong{color:#2d8050}
+.jtqa-status{text-align:center;padding:25px 0;color:#60816a}
+.jtqa-status button{border:0;background:none;color:#278ec2;text-decoration:underline}
+/* Dialogs and feedback. */
+.jtqa-shade,.jtqa-poster-shade{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px;background:#153623b8}
+.jtqa-modal{position:relative;width:min(100%,500px);max-height:85svh;overflow:auto;padding:25px 20px;background:#fffcef;border:3px solid #8dbf7e;border-radius:23px;box-shadow:0 15px 40px #102b1855}
+.jtqa-modal h2{text-align:center;color:#357f49;margin:0 0 14px}
+.jtqa-modal p{line-height:1.6}
+.jtqa-modal .jtqa-button{margin-top:15px}
+.jtqa-close{position:absolute;right:13px;top:7px;border:0;background:none;font-size:30px;color:#6c8e71}
+.jtqa-menu-actions{display:grid;gap:12px}
+.jtqa-rules{padding-left:24px;line-height:1.6;font-size:14px}
+.jtqa-rules li{margin-bottom:8px}
+.jtqa-poster-shade{z-index:50}
+.jtqa-poster-dialog{position:relative;display:flex;flex-direction:column;align-items:center;max-width:min(100%,420px);max-height:94svh;overflow:hidden;padding:12px 12px 14px;border-radius:22px;background:#fff9e9;box-shadow:0 16px 50px #102b1855}
+.jtqa-poster-dialog img{display:block;min-height:0;max-width:100%;max-height:calc(94svh - 100px);object-fit:contain;border-radius:12px}
+.jtqa-poster-dialog p{margin:8px 0 0;color:#3d8050;font-size:12px;font-weight:800}
+.jtqa-poster-dialog .jtqa-button{margin-top:8px;min-height:36px}
+.jtqa-poster-close{position:absolute;z-index:1;right:18px;top:18px;width:34px;height:34px;border:0;border-radius:50%;background:#173823bc;color:#fff;font-size:26px;line-height:1}
+.jtqa-feedback{position:fixed;z-index:40;top:37%;left:50%;transform:translateX(-50%);width:min(80vw,320px);padding:20px;text-align:center;border-radius:20px;background:#d8483c;color:#fff;font-size:21px;font-weight:800;box-shadow:0 10px 30px #0003}
+.jtqa-feedback-right{background:#3e9f61}
+.jtqa-feedback small{display:block;font-size:14px;margin-top:8px}
+.jtqa-error{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#fff4dc;color:#8a4235;text-align:center}
+.jtqa-error button{border:0;background:none;text-decoration:underline;color:#266d9c}
+@keyframes jtqa-pulse{to{transform:scale(1.13)}}
+@media(max-height:700px){.jtqa-stage{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}.jtqa-quiz-head{margin-top:25px}.jtqa-track{margin-bottom:10px}.jtqa-question{min-height:82px}.jtqa-result-main{margin-top:7svh}.jtqa-result-actions{margin-top:18px}.jtqa-rank-hero{margin-top:18px}.jtqa-rank-hero h1{margin-bottom:5px}.jtqa-podium{height:100px}.jtqa-award-hero{margin-top:24px}.jtqa-award-content{margin-top:20px}}
+@media(max-height:570px){.jtqa-quiz-head{margin-top:12px}.jtqa-question{min-height:68px}.jtqa-options button{min-height:38px}.jtqa-quiz-foot{margin-top:8px}.jtqa-rank-hero{margin-top:5px}.jtqa-podium{height:70px}.jtqa-rank-row .jtqa-avatar{width:24px;height:24px}.jtqa-result-main{margin-top:4svh}.jtqa-result-main h1 strong{font-size:75px}.jtqa-award-content img{height:70px}}
+@media(prefers-reduced-motion:reduce){.jtqa-app *{animation:none!important;transition:none!important}}
+/* Staff redemption remains a scrollable utility view. */
+.jtqa-admin-redeem{max-width:560px}
+.jtqa-admin-redeem .jtqa-top a{color:#437a51;text-decoration:none}
+.jtqa-admin-redeem h1{font-size:27px;color:#327947;margin-top:35px}
+.jtqa-admin-redeem>p{line-height:1.7;color:#6a836d}
+.jtqa-admin-redeem label{display:block;font-weight:800;margin:32px 0 10px}
+.jtqa-admin-redeem input{width:100%;height:54px;padding:12px;border:2px solid #a4c9a6;border-radius:14px;background:white;color:#294332;font-size:16px;letter-spacing:.06em}
+.jtqa-admin-redeem>.jtqa-button{margin-top:18px}
+.jtqa-redeem-preview{margin-top:28px;padding:24px;border:2px solid #b9d6b4;background:#fffdf2;border-radius:22px;text-align:center}
+.jtqa-redeem-preview h2{color:#327947}
+.jtqa-redeem-preview .jtqa-button{margin-top:20px}

@@ -10,6 +10,7 @@ import {
   startChallenge,
   submitAnswer,
 } from "./api";
+import { createPoster, encouragement } from "./poster";
 import "./styles.css";
 
 const RULES = [
@@ -21,12 +22,6 @@ const RULES = [
   "活动当天现场还有更多精美礼品，欢迎前往参与。",
 ];
 const formatTime = (ms = 0) => `${(ms / 1000).toFixed(1)} 秒`;
-const encouragement = (correct) =>
-  correct >= 4
-    ? "文明出行，你是安全“答”人！"
-    : correct >= 2
-      ? "安全知识再加油，继续向前！"
-      : "每一次学习，都是更安全的出发。";
 const isWechat = () => /MicroMessenger/i.test(navigator.userAgent);
 
 function Modal({ title, children, onClose }) {
@@ -95,17 +90,17 @@ function Home({ onStart, onMenu }) {
     </section>
   );
 }
-function Quiz({ state, seconds, busy, onAnswer, onExit }) {
+export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
   const attempt = state?.attempt;
   if (!attempt?.question) return null;
   const danger = seconds <= 5;
   return (
-    <section className="jtqa-quiz jtqa-inner">
+    <section className="jtqa-inner jtqa-stage jtqa-quiz">
       <header className="jtqa-top">
         <button type="button" onClick={onExit}>
           ‹ 返回
         </button>
-        <span>安全“答”人</span>
+        <span>文明交通知识问答</span>
         <span>第 {attempt.attemptNo} 次挑战</span>
       </header>
       <div className="jtqa-quiz-head">
@@ -155,16 +150,32 @@ function Quiz({ state, seconds, busy, onAnswer, onExit }) {
           错误 <b>{attempt.wrong}/3</b>
         </span>
       </div>
-      <div className="jtqa-road" aria-hidden="true" />
     </section>
   );
 }
 export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
+  const [displayPage, setDisplayPage] = useState(1);
+  const rowsPerPage = 5;
   const list = data?.list || [];
   const top = list.filter((item) => item.rank <= 3);
   const rest = list.filter((item) => item.rank > 3);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(Math.max(0, (data?.total || 0) - 3) / rowsPerPage),
+  );
+  const visibleRows = rest.slice(
+    (displayPage - 1) * rowsPerPage,
+    displayPage * rowsPerPage,
+  );
+  const nextPage = () => {
+    if (loading || displayPage >= totalPages) return;
+    const next = displayPage + 1;
+    setDisplayPage(next);
+    if (next * rowsPerPage + 3 > list.length && data.total > list.length)
+      onMore();
+  };
   return (
-    <section className="jtqa-inner jtqa-rank">
+    <section className="jtqa-inner jtqa-stage jtqa-rank">
       <header className="jtqa-top">
         <button type="button" onClick={onBack}>
           ‹ 返回
@@ -174,13 +185,8 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
           {data?.preview ? "50 人演示" : data?.locked ? "最终排名" : "实时更新"}
         </span>
       </header>
-      {data?.preview && (
-        <p className="jtqa-preview-banner">
-          预览模式：50 位虚拟用户，仅用于查看布局，不计入正式排名或兑奖。
-        </p>
-      )}
       <div className="jtqa-rank-hero">
-        <p>文明交通知识问答</p>
+        <p>文明交通知识问答 · 安全“答”人</p>
         <h1>安全“答”人榜</h1>
         <div className="jtqa-podium">
           {top.length ? (
@@ -213,7 +219,7 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
         </span>
       </div>
       <div className="jtqa-rank-list">
-        {rest.map((item) => (
+        {visibleRows.map((item) => (
           <div className="jtqa-rank-row" key={item.rank}>
             <b>{item.rank}</b>
             <div className="jtqa-avatar">
@@ -230,33 +236,39 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
           </div>
         ))}
       </div>
-      {loading && <p className="jtqa-status">加载中…</p>}
+      {loading && <p className="jtqa-rank-state">加载中…</p>}
       {error && (
-        <p className="jtqa-status">
-          {error}
-          <br />
-          <button type="button" onClick={onRetry}>
-            重新加载
-          </button>
+        <p className="jtqa-rank-state">
+          {error}{" "}
+          <button type="button" onClick={() => { setDisplayPage(1); onRetry(); }}>重试</button>
         </p>
       )}
-      {!loading && !error && data?.total > list.length && (
-        <Button onClick={onMore} secondary>
-          加载更多
-        </Button>
-      )}
       {!loading && !error && !data?.total && (
-        <p className="jtqa-status">暂无榜单数据</p>
+        <p className="jtqa-rank-state">暂无榜单数据</p>
       )}
-      <p className="jtqa-footnote">
-        前 10 名：骑行熊 · 第 11—50 名：因公致秃便签纸
-      </p>
+      <div className="jtqa-rank-pager">
+        <button
+          type="button"
+          disabled={displayPage <= 1 || loading}
+          onClick={() => setDisplayPage((current) => current - 1)}
+        >
+          ‹ 上一页
+        </button>
+        <span>{displayPage} / {totalPages}</span>
+        <button
+          type="button"
+          disabled={displayPage >= totalPages || loading}
+          onClick={nextPage}
+        >
+          下一页 ›
+        </button>
+      </div>
     </section>
   );
 }
-function Award({ data, loading, error, onRetry, onBack }) {
+export function Award({ data, loading, error, onRetry, onBack }) {
   return (
-    <section className="jtqa-inner jtqa-award">
+    <section className="jtqa-inner jtqa-stage jtqa-award">
       <header className="jtqa-top">
         <button type="button" onClick={onBack}>
           ‹ 返回
@@ -267,7 +279,6 @@ function Award({ data, loading, error, onRetry, onBack }) {
       <div className="jtqa-award-hero">
         <h1>把安全带到现场</h1>
         <p>蕉城夜市签到兑换区</p>
-        <Image name="officer" alt="卡通交警" />
       </div>
       {loading ? (
         <p className="jtqa-status">加载中…</p>
@@ -321,107 +332,47 @@ function Award({ data, loading, error, onRetry, onBack }) {
     </section>
   );
 }
-async function createPoster(state) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 750;
-  canvas.height = 1334;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("当前浏览器无法生成海报");
-  ctx.fillStyle = "#fbf8e8";
-  ctx.fillRect(0, 0, 750, 1334);
-  const scene = new window.Image();
-  scene.crossOrigin = "anonymous";
-  scene.src = trafficAssets.roadScene;
-  await new Promise((resolve, reject) => {
-    scene.onload = resolve;
-    scene.onerror = reject;
-  });
-  ctx.drawImage(scene, 0, 800, 750, 370);
-  ctx.fillStyle = "#365d37";
-  ctx.fillRect(0, 1170, 750, 164);
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 1140, 750, 32);
-  for (let x = 20; x < 750; x += 95) ctx.fillRect(x, 1153, 52, 5);
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#468d5c";
-  ctx.font = "bold 50px sans-serif";
-  ctx.fillText("文明交通", 375, 130);
-  ctx.fillStyle = "#2194ce";
-  ctx.font = "bold 74px sans-serif";
-  ctx.fillText("知识问答", 375, 218);
-  ctx.fillStyle = "#3c503f";
-  ctx.font = "34px sans-serif";
-  ctx.fillText("安全“答”人 · 成绩海报", 375, 280);
-  const image = new window.Image();
-  image.crossOrigin = "anonymous";
-  image.src = trafficAssets.officer;
-  await new Promise((resolve, reject) => {
-    image.onload = resolve;
-    image.onerror = reject;
-  });
-  ctx.drawImage(image, 252, 315, 246, 369);
-  ctx.fillStyle = "#fffdf2";
-  ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(70, 670, 610, 390, 42);
-  else ctx.rect(70, 670, 610, 390);
-  ctx.fill();
-  ctx.fillStyle = "#2f673e";
-  ctx.font = "bold 46px sans-serif";
-  ctx.fillText(`本次得分 ${state.attempt.score} 分`, 375, 745);
-  ctx.font = "30px sans-serif";
-  ctx.fillText(
-    `回答 ${state.attempt.answered} 题 · 答对 ${state.attempt.correct} 题`,
-    375,
-    812,
-  );
-  ctx.fillText(
-    `累计 ${state.rank?.score || 0} 分 · 排名 ${state.rank?.rank || "—"}`,
-    375,
-    870,
-  );
-  ctx.fillStyle = "#258ec7";
-  ctx.font = "27px sans-serif";
-  ctx.fillText(encouragement(state.attempt.correct), 375, 950);
-  ctx.fillStyle = "#fff";
-  ctx.font = "24px sans-serif";
-  ctx.fillText("2026 全国交通安全日 · 文明出行", 375, 1265);
-  return canvas.toDataURL("image/png");
-}
-function Result({
+export function Result({
   state,
   poster,
   posterError,
-  onSave,
+  onPoster,
   onRank,
   onAgain,
   onHome,
 }) {
   return (
-    <section className="jtqa-inner jtqa-result">
-      <h1>本次挑战完成</h1>
-      <p>{encouragement(state.attempt.correct)}</p>
-      {poster ? (
-        <img className="jtqa-poster" src={poster} alt="本次挑战成绩海报" />
-      ) : (
-        <div className="jtqa-poster-loading">
-          {posterError || "正在生成成绩海报…"}
+    <section className="jtqa-inner jtqa-stage jtqa-result">
+      <header className="jtqa-top">
+        <button type="button" onClick={onHome}>‹ 返回</button>
+        <span>挑战成绩</span>
+        <span>安全“答”人</span>
+      </header>
+      <div className="jtqa-result-main">
+        <p className="jtqa-result-kicker">本次挑战完成</p>
+        <h1><strong>{state.attempt.score}</strong><span>分</span></h1>
+        <p className="jtqa-result-encouragement">{encouragement(state.attempt.correct)}</p>
+        <div className="jtqa-result-stats">
+          <span>回答 <b>{state.attempt.answered}</b> 题</span>
+          <span>答对 <b>{state.attempt.correct}</b> 题</span>
         </div>
-      )}
+        <p className="jtqa-result-rank">
+          累计 <b>{state.rank?.score || 0}</b> 分 · 当前排名 <b>{state.rank?.rank || "—"}</b>
+        </p>
+      </div>
       <div className="jtqa-result-actions">
-        <Button disabled={!poster} onClick={onSave}>
-          保存海报
+        <Button disabled={!poster} onClick={onPoster}>
+          {posterError || (poster ? "查看成绩海报" : "海报生成中…")}
         </Button>
-        <Button secondary onClick={onRank}>
-          查看排行榜
-        </Button>
-        <Button secondary onClick={onAgain}>
-          {state.remainingToday > 0 && state.phase === "active"
-            ? "再次挑战"
-            : "明日再来"}
-        </Button>
-        <button type="button" className="jtqa-text-link" onClick={onHome}>
-          返回首页
-        </button>
+        <div>
+          <button type="button" onClick={onRank}>排行榜</button>
+          <button type="button" onClick={onAgain}>
+            {state.remainingToday > 0 && state.phase === "active"
+              ? "再次挑战"
+              : "明日再来"}
+          </button>
+          <button type="button" onClick={onHome}>返回首页</button>
+        </div>
       </div>
     </section>
   );
@@ -446,7 +397,8 @@ export default function TrafficQuizProject({ routeParams }) {
   const [awardError, setAwardError] = useState("");
   const [poster, setPoster] = useState("");
   const [posterError, setPosterError] = useState("");
-  const [showPosterImage, setShowPosterImage] = useState(false);
+  const [showPosterModal, setShowPosterModal] = useState(false);
+  const posterOpenedFor = useRef(null);
   const timeoutBusy = useRef(false);
   const actionBusy = useRef(false);
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
@@ -536,12 +488,21 @@ export default function TrafficQuizProject({ routeParams }) {
       state.attempt.status !== "completed"
     )
       return;
+    let active = true;
     createPoster(state)
       .then((value) => {
+        if (!active) return;
         setPoster(value);
         setPosterError("");
+        if (posterOpenedFor.current !== state.attempt.id) {
+          posterOpenedFor.current = state.attempt.id;
+          setShowPosterModal(true);
+        }
       })
-      .catch((err) => setPosterError(err.message || "海报生成失败"));
+      .catch((err) => {
+        if (active) setPosterError(err.message || "海报生成失败");
+      });
+    return () => { active = false; };
   }, [page, state]);
   const start = async () => {
     if (actionBusy.current) return;
@@ -633,7 +594,7 @@ export default function TrafficQuizProject({ routeParams }) {
   const savePoster = async () => {
     if (!poster) return;
     if (isWechat()) {
-      setShowPosterImage(true);
+      setShowPosterModal(true);
       return;
     }
     try {
@@ -653,7 +614,10 @@ export default function TrafficQuizProject({ routeParams }) {
   return (
     <main
       className={`jtqa-app ${page === "home" ? "jtqa-app-home" : ""}`}
-      style={{ "--jtqa-road-scene": `url("${trafficAssets.roadScene}")` }}
+      style={{
+        "--jtqa-quiz-scene": `url("${trafficAssets.quizScene}")`,
+        "--jtqa-result-scene": `url("${trafficAssets.resultScene}")`,
+      }}
     >
       {page === "home" && (
         <Home
@@ -675,7 +639,7 @@ export default function TrafficQuizProject({ routeParams }) {
           state={state}
           poster={poster}
           posterError={posterError}
-          onSave={savePoster}
+          onPoster={() => setShowPosterModal(true)}
           onRank={() => openRank()}
           onAgain={start}
           onHome={() => setPage("home")}
@@ -770,15 +734,14 @@ export default function TrafficQuizProject({ routeParams }) {
           )}
         </Modal>
       )}
-      {showPosterImage && (
-        <div
-          className="jtqa-image-view"
-          role="dialog"
-          aria-label="长按保存海报"
-          onClick={() => setShowPosterImage(false)}
-        >
-          <p>长按图片保存到手机 · 点击空白处关闭</p>
-          <img src={poster} alt="可长按保存的成绩海报" />
+      {showPosterModal && poster && (
+        <div className="jtqa-poster-shade" role="presentation" onClick={() => setShowPosterModal(false)}>
+          <div className="jtqa-poster-dialog" role="dialog" aria-modal="true" aria-label="成绩海报" onClick={(event) => event.stopPropagation()}>
+            <button className="jtqa-poster-close" type="button" aria-label="关闭成绩海报" onClick={() => setShowPosterModal(false)}>×</button>
+            <img src={poster} alt="文明交通知识问答成绩海报" />
+            <p>{isWechat() ? "长按海报保存到手机" : "保存海报，分享文明出行"}</p>
+            {!isWechat() && <Button onClick={savePoster}>保存海报</Button>}
+          </div>
         </div>
       )}
     </main>

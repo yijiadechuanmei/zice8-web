@@ -332,6 +332,9 @@ export const projectRoutes = [
   ...(import.meta.env.DEV ? [{
     path: '/jtqa/:activityKey/rank-preview',
     Component: lazy(() => import('./traffic-quiz/RankPreview.jsx')),
+  }, {
+    path: '/jtqa/:activityKey/ui-preview',
+    Component: lazy(() => import('./traffic-quiz/ScreenPreview.jsx')),
   }] : []),
   {
     path: '/jtqa/:activityKey/redeem',
