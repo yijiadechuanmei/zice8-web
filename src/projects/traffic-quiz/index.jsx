@@ -11,6 +11,7 @@ import {
   submitAnswer,
 } from "./api";
 import { createPoster, nextSafetySlogan } from "./poster";
+import { rankDemoUsers } from "./rankDemoData";
 import "./styles.css";
 
 const RULES = [
@@ -152,13 +153,17 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
     </section>
   );
 }
-export function Rank({ data, loading, error, onMore, onRetry, onBack, onPreview }) {
+export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   const [displayPage, setDisplayPage] = useState(1);
   const rowsPerPage = 5;
-  const list = data?.list || [];
+  const realRows = data?.list || [];
+  const realTotal = data?.total || 0;
+  const list = realRows.length < realTotal
+    ? realRows
+    : [...realRows, ...rankDemoUsers.map((user, index) => ({ ...user, rank: realTotal + index + 1 }))];
   const totalPages = Math.max(
     1,
-    Math.ceil((data?.total || 0) / rowsPerPage),
+    Math.ceil((realTotal + rankDemoUsers.length) / rowsPerPage),
   );
   const visibleRows = list.slice(
     (displayPage - 1) * rowsPerPage,
@@ -168,7 +173,7 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack, onPreview 
     if (loading || displayPage >= totalPages) return;
     const next = displayPage + 1;
     setDisplayPage(next);
-    if (next * rowsPerPage > list.length && data.total > list.length)
+    if (next * rowsPerPage > list.length && realTotal > realRows.length)
       onMore();
   };
   return (
@@ -199,12 +204,6 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack, onPreview 
         <p className="jtqa-rank-state">
           {error}{" "}
           <button type="button" onClick={() => { setDisplayPage(1); onRetry(); }}>重试</button>
-        </p>
-      )}
-      {!loading && !error && !data?.total && (
-        <p className="jtqa-rank-state">
-          暂无真实排名
-          {onPreview && <button type="button" onClick={onPreview}>查看 50 人虚拟榜单</button>}
         </p>
       )}
       <div className="jtqa-rank-pager" aria-label="排行榜分页">
@@ -571,7 +570,6 @@ export default function TrafficQuizProject({ routeParams }) {
           onMore={() => openRank((rank?.page || 1) + 1)}
           onRetry={() => openRank()}
           onBack={() => setPage("home")}
-          onPreview={() => window.location.assign(`/jtqa/${encodeURIComponent(key)}/rank-preview`)}
         />
       )}
       {page === "award" && (
@@ -634,12 +632,6 @@ export default function TrafficQuizProject({ routeParams }) {
                 }}
               >
                 查看排行榜
-              </Button>
-              <Button
-                secondary
-                onClick={() => window.location.assign(`/jtqa/${encodeURIComponent(key)}/rank-preview`)}
-              >
-                预览 50 人虚拟榜单
               </Button>
               <Button
                 secondary

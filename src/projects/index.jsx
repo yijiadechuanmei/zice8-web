@@ -329,10 +329,6 @@ export const projectRoutes = [
     Component: QuizProject,
     activityGate: true,
   },
-  {
-    path: '/jtqa/:activityKey/rank-preview',
-    Component: lazy(() => import('./traffic-quiz/RankPreview.jsx')),
-  },
   ...(import.meta.env.DEV ? [{
     path: '/jtqa/:activityKey/ui-preview',
     Component: lazy(() => import('./traffic-quiz/ScreenPreview.jsx')),
