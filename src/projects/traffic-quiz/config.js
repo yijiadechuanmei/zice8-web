@@ -13,5 +13,5 @@ export const trafficActivity = {
   title: "文明交通知识问答",
   claimDate: "2026 年 12 月 2 日",
   claimTime: "19:00—20:30",
-  claimPlace: "蕉城夜市签到兑换区",
+  claimPlace: "蕉城夜市",
 };

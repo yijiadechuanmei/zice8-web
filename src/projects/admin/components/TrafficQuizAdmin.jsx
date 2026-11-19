@@ -39,10 +39,13 @@ export function TrafficQuizOverview({ activity }) {
   }, [activity.activityKey, refreshKey])
 
   const metrics = [
+    ['PV', data?.pv, '活动入口访问次数，同一访客 30 秒内重复访问只统计一次'],
+    ['UV', data?.uv, '按浏览器匿名访客 ID 去重'],
+    ['今日 PV', data?.todayPv],
+    ['今日 UV', data?.todayUv],
     ['参与人数', data?.participants, '按本活动参与用户去重'],
     ['挑战总次数', data?.attempts, '包括进行中与已完成'],
     ['已完成挑战', data?.completed],
-    ['进行中挑战', data?.inProgress],
     ['今日开始', data?.todayAttempts],
     ['今日完成', data?.todayCompleted],
     ['进入排名人数', data?.ranked],
@@ -55,7 +58,6 @@ export function TrafficQuizOverview({ activity }) {
     ['平均每次用时', data?.averageAttemptSeconds, '仅统计已完成挑战', '秒'],
     ['已生成奖品', data?.awards],
     ['已核销奖品', data?.redeemed],
-    ['本人重置次数', data?.resetCount],
   ]
   return <Space direction="vertical" size="middle" className="admin-traffic-quiz" style={{ width: '100%' }}>
     <Card className="admin-card" title="文明交通知识问答 · 统计" extra={<Button icon={<ReloadOutlined />} onClick={() => { setLoading(true); setRefreshKey((value) => value + 1) }}>刷新</Button>} loading={loading}>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWechatAuth } from "../../shared/hooks/useWechatAuth";
 import { useWechatShare } from "../../shared/hooks/useWechatShare";
+import { trackPageView } from "../../shared/analytics";
 import { trafficActivity, trafficAssets } from "./config";
 import {
   getAward,
@@ -16,12 +17,12 @@ import { rankDemoUsers } from "./rankDemoData";
 import "./styles.css";
 
 const RULES = [
-  "每天最多 2 次挑战，每次最多 5 道题；开始挑战即消耗一次机会，北京时间 00:00 重置。",
-  "每题限时 30 秒，答对积 1 分；答错或超时不得分。每次累计错 3 题，挑战立即结束。",
-  "累计积分越高排名越靠前；同分按累计答题用时从少到多排序，再按较早达到当前积分的时间排序。",
-  "最终排名前 1—10 名获蜀黍家骑行熊，第 11—50 名获蜀黍家因公致秃便签纸。",
-  "2026 年 12 月 2 日 19:00—20:30，在蕉城夜市签到兑换区凭兑奖凭证领取。",
-  "活动当天现场还有更多精美礼品，欢迎前往参与。",
+  "活动时间：2026 年 11 月 27 日—12 月 1 日；活动地点：蕉城夜市。",
+  "每人每日仅 1 次答题机会，每次最多答 5 题；一旦开启挑战即消耗机会，北京时间每日 00:00 更新机会。",
+  "每题限时 30 秒，答对 +1 分，答错或超时不得分；一轮答错满 3 题直接结束当日挑战。",
+  "按五天答题总分排名；总分相同时，五天答题总用时较少者排名靠前。",
+  "最终排名前 50 名各获蜀黍家骑行熊一个。2026 年 12 月 2 日 19:00—20:30，凭兑奖凭证领取。",
+  "现场还有超多精美礼品，欢迎来玩！",
 ];
 const formatTime = (ms = 0) => `${(ms / 1000).toFixed(1)} 秒`;
 const rankPageSize = () => {
@@ -94,7 +95,8 @@ function Home({ onStart, onMenu }) {
         onClick={onMenu}
         aria-label="活动规则、排行榜和领奖信息"
       >
-        ☰
+        <span className="jtqa-home-menu-icon" aria-hidden="true"><i /><i /><i /></span>
+        <span>菜单</span>
       </button>
     </section>
   );
@@ -260,7 +262,7 @@ export function Award({ data, loading, error, onRetry, onBack }) {
       </header>
       <div className="jtqa-award-hero">
         <h1>把安全带到现场</h1>
-        <p>蕉城夜市签到兑换区</p>
+        <p>{trafficActivity.claimPlace}</p>
       </div>
       {loading ? (
         <p className="jtqa-status">加载中…</p>
@@ -284,7 +286,7 @@ export function Award({ data, loading, error, onRetry, onBack }) {
           </p>
           <h2>{data.award.prize}</h2>
           <Image
-            name={data.award.rank <= 10 ? "cyclingBear" : "stickyNotes"}
+            name="cyclingBear"
             alt={data.award.prize}
           />
           <small>唯一兑奖凭证</small>
@@ -345,6 +347,9 @@ export function Result({
 
 export default function TrafficQuizProject({ routeParams }) {
   const key = routeParams?.activityKey || trafficActivity.key;
+  useEffect(() => {
+    trackPageView(key, "/traffic-quiz", { activityType: "jtqa" });
+  }, [key]);
   const [publicConfig, setPublicConfig] = useState(null);
   const [state, setState] = useState(null);
   const [page, setPage] = useState("home");
@@ -486,7 +491,7 @@ export default function TrafficQuizProject({ routeParams }) {
       state?.remainingToday <= 0 &&
       state?.attempt?.status !== "in_progress"
     ) {
-      setModal("今日 2 次答题机会已用完，请明日再来");
+      setModal("今日答题机会已用完，请明日再来");
       return;
     }
     actionBusy.current = true;
