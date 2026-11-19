@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { trafficActivity, trafficAssets } from "./config";
 import { Rank } from "./index";
 
@@ -25,7 +24,6 @@ const demoUsers = Array.from({ length: 50 }, (_, index) => {
 });
 
 export default function RankPreview({ routeParams }) {
-  const [page, setPage] = useState(1);
   const activityKey = routeParams?.activityKey || trafficActivity.key;
   return (
     <main
@@ -39,14 +37,14 @@ export default function RankPreview({ routeParams }) {
         data={{
           preview: true,
           locked: false,
-          page,
+          page: 1,
           total: demoUsers.length,
           mine: demoUsers[17],
-          list: demoUsers.slice(0, page * 20),
+          list: demoUsers,
         }}
         loading={false}
         error=""
-        onMore={() => setPage((current) => current + 1)}
+        onMore={() => undefined}
         onRetry={() => undefined}
         onBack={() =>
           window.location.assign(`/jtqa/${encodeURIComponent(activityKey)}`)

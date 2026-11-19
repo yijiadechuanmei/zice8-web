@@ -152,7 +152,7 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
     </section>
   );
 }
-export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
+export function Rank({ data, loading, error, onMore, onRetry, onBack, onPreview }) {
   const [displayPage, setDisplayPage] = useState(1);
   const rowsPerPage = 5;
   const list = data?.list || [];
@@ -202,7 +202,10 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
         </p>
       )}
       {!loading && !error && !data?.total && (
-        <p className="jtqa-rank-state">暂无榜单数据</p>
+        <p className="jtqa-rank-state">
+          暂无真实排名
+          {onPreview && <button type="button" onClick={onPreview}>查看 50 人虚拟榜单</button>}
+        </p>
       )}
       <div className="jtqa-rank-pager" aria-label="排行榜分页">
         <button
@@ -568,6 +571,7 @@ export default function TrafficQuizProject({ routeParams }) {
           onMore={() => openRank((rank?.page || 1) + 1)}
           onRetry={() => openRank()}
           onBack={() => setPage("home")}
+          onPreview={() => window.location.assign(`/jtqa/${encodeURIComponent(key)}/rank-preview`)}
         />
       )}
       {page === "award" && (
@@ -630,6 +634,12 @@ export default function TrafficQuizProject({ routeParams }) {
                 }}
               >
                 查看排行榜
+              </Button>
+              <Button
+                secondary
+                onClick={() => window.location.assign(`/jtqa/${encodeURIComponent(key)}/rank-preview`)}
+              >
+                预览 50 人虚拟榜单
               </Button>
               <Button
                 secondary
