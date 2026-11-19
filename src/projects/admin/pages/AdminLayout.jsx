@@ -38,6 +38,7 @@ import AccountPage from './AccountPage'
 import ActivityConfigPage from './ActivityConfigPage'
 import ActivityDashboard from './ActivityDashboard'
 import DataViewPage from './DataViewPage'
+import { TrafficQuizData, TrafficQuizOverview } from '../components/TrafficQuizAdmin'
 import LoginLogPage from './LoginLogPage'
 import OperationLogPage from './OperationLogPage'
 import PaymentTestPage from './PaymentTestPage'
@@ -303,11 +304,11 @@ export default function AdminLayout({
           />
 
           {!selectedActivity && !['loginLogs', 'paymentTest'].includes(activeTab) ? <Card><Empty description="请选择左侧活动" /></Card> : null}
-          {selectedActivity && activeTab === 'overview' ? <ActivityDashboard activity={selectedActivity} compact phaseScope={selectedPhaseScope} /> : null}
+          {selectedActivity && activeTab === 'overview' ? selectedActivity.type === 'jtqa' ? <TrafficQuizOverview activity={selectedActivity} /> : <ActivityDashboard activity={selectedActivity} compact phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && canManageActivityConfig ? <ActivityConfigPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'activityConfig' && !canManageActivityConfig ? <Card><Empty description="无权修改活动配置" /></Card> : null}
-          {selectedActivity && activeTab === 'dashboard' ? <ActivityDashboard activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
-          {selectedActivity && activeTab === 'data' ? <DataViewPage activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
+          {selectedActivity && activeTab === 'dashboard' ? selectedActivity.type === 'jtqa' ? <TrafficQuizOverview activity={selectedActivity} /> : <ActivityDashboard activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
+          {selectedActivity && activeTab === 'data' ? selectedActivity.type === 'jtqa' ? <TrafficQuizData activity={selectedActivity} /> : <DataViewPage activity={selectedActivity} phaseScope={selectedPhaseScope} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && canAccessQuizImport ? <QuizQuestionImportPage activity={selectedActivity} /> : null}
           {selectedActivity && activeTab === 'quizImport' && selectedActivity.type === 'quiz' && !canAccessQuizImport ? <Card><Empty description="无权访问题库导入，请联系管理员授权。" /></Card> : null}
           {selectedActivity && activeTab === 'qualityMonth' && selectedActivity.type === 'otsuka_quality_month_quiz' ? <QualityMonthAdminPage activity={selectedActivity} /> : null}

@@ -269,6 +269,15 @@ export function clearTrafficQuizUserData(activityKey, userId) {
   })
 }
 
+export function getTrafficQuizAdminOverview(activityKey) {
+  return adminRequest(`/admin/traffic-quiz/activities/${encodeURIComponent(activityKey)}/overview`)
+}
+
+export function getTrafficQuizAdminData(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/traffic-quiz/activities/${encodeURIComponent(activityKey)}/data?${search.toString()}`)
+}
+
 export function getSafeDriverQuizOverview(activityKey) {
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/overview`)
 }
