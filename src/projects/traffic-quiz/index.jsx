@@ -10,7 +10,7 @@ import {
   startChallenge,
   submitAnswer,
 } from "./api";
-import { createPoster, encouragement } from "./poster";
+import { createPoster } from "./poster";
 import "./styles.css";
 
 const RULES = [
@@ -344,25 +344,23 @@ export function Result({
   return (
     <section className="jtqa-inner jtqa-stage jtqa-result">
       <header className="jtqa-top">
-        <button type="button" onClick={onHome}>‹ 返回</button>
-        <span>挑战成绩</span>
-        <span>安全“答”人</span>
+        <button type="button" onClick={onHome}>‹ 首页</button>
+        <span>答题完成</span>
+        <span>第 {state.attempt.attemptNo} 次</span>
       </header>
       <div className="jtqa-result-main">
-        <p className="jtqa-result-kicker">本次挑战完成</p>
+        <p className="jtqa-result-kicker">本次得分</p>
         <h1><strong>{state.attempt.score}</strong><span>分</span></h1>
-        <p className="jtqa-result-encouragement">{encouragement(state.attempt.correct)}</p>
         <div className="jtqa-result-stats">
-          <span>回答 <b>{state.attempt.answered}</b> 题</span>
-          <span>答对 <b>{state.attempt.correct}</b> 题</span>
+          <span><b>{state.attempt.correct}</b><small>答对</small></span>
+          <span><b>{state.attempt.answered}</b><small>答题</small></span>
+          <span><b>{state.rank?.rank || "—"}</b><small>当前排名</small></span>
         </div>
-        <p className="jtqa-result-rank">
-          累计 <b>{state.rank?.score || 0}</b> 分 · 当前排名 <b>{state.rank?.rank || "—"}</b>
-        </p>
+        <p className="jtqa-result-rank">累计积分 <b>{state.rank?.score || 0}</b></p>
       </div>
       <div className="jtqa-result-actions">
         <Button disabled={!poster} onClick={onPoster}>
-          {posterError || (poster ? "查看成绩海报" : "海报生成中…")}
+          {posterError ? "海报暂不可用" : poster ? "生成我的成绩海报" : "成绩海报生成中…"}
         </Button>
         <div>
           <button type="button" onClick={onRank}>排行榜</button>
@@ -371,7 +369,7 @@ export function Result({
               ? "再次挑战"
               : "明日再来"}
           </button>
-          <button type="button" onClick={onHome}>返回首页</button>
+          <button type="button" onClick={onHome}>活动首页</button>
         </div>
       </div>
     </section>
