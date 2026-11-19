@@ -45,32 +45,23 @@
 .jtqa-options span{display:grid;place-items:center;flex:none;width:29px;height:29px;border-radius:50%;background:#e5f0d7;color:#408450;font-weight:900}
 .jtqa-quiz-foot{display:flex;justify-content:space-between;flex:none;margin-top:clamp(12px,3svh,30px);padding:0 2px;color:#4f7859;font-size:12px;font-weight:700}
 .jtqa-quiz-foot b{font-size:15px;color:#258057}
-/* Leaderboard: compact podium and five visible rows allow 50 entries via paging. */
-.jtqa-rank-hero{text-align:center;flex:none;margin-top:clamp(17px,3svh,30px)}
-.jtqa-rank-hero>p{margin:0;color:#438d59;font-size:10px;font-weight:800;letter-spacing:.08em}
-.jtqa-rank-hero h1{margin:3px 0 10px;color:#2595c6;font-size:clamp(24px,7vw,35px);line-height:1.1;font-weight:950}
-.jtqa-podium{display:flex;align-items:end;justify-content:center;gap:4px;height:clamp(100px,17svh,145px)}
-.jtqa-podium-person{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:32%;height:76%;padding:5px 2px;background:#fff6d9e8;border:1px solid #e8d7aa;border-radius:15px 15px 4px 4px;color:#346848;font-size:10px;box-shadow:0 3px 0 #dbc893}
-.jtqa-place-1{height:100%;background:#fff0c5}
-.jtqa-place-2{height:84%}
-.jtqa-place-3{height:72%}
-.jtqa-podium-person .jtqa-avatar{width:clamp(29px,5svh,42px);height:clamp(29px,5svh,42px)}
-.jtqa-podium-person strong{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px}
-.jtqa-podium-person span{font-size:13px;font-weight:900;color:#258257}
-.jtqa-podium-person small{font-size:9px;color:#6f8b71}
+/* Leaderboard: one quiet list, with medals providing the only rank emphasis. */
+.jtqa-rank{position:relative;padding-top:clamp(56px,11svh,85px);background-position:center bottom}
+.jtqa-rank-back{position:absolute;z-index:1;top:calc(12px + env(safe-area-inset-top,0px));left:clamp(16px,5vw,28px);display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:#fffdf0c7;color:#34794a;font-size:29px;line-height:1;box-shadow:0 3px 12px #26512b1c}
 .jtqa-avatar{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#d6e9d0;overflow:hidden}
 .jtqa-avatar img{width:100%;height:100%;object-fit:cover}
-.jtqa-mine{display:flex;align-items:center;gap:5px;flex:none;min-height:38px;margin-top:8px;padding:4px 8px;border-radius:10px;background:#e4f1d9e8;color:#377c4a;font-size:11px;font-weight:800}
-.jtqa-mine b{font-size:17px}
-.jtqa-mine span{margin-left:auto;color:#608368;font-size:10px}
-.jtqa-rank-list{display:flex;flex-direction:column;min-height:0;flex:none;margin-top:5px;overflow:hidden}
-.jtqa-rank-row{display:flex;align-items:center;gap:7px;height:clamp(37px,6.7svh,48px);flex:none;padding:2px 4px;border-bottom:1px solid #d9e5cf;font-size:11px}
-.jtqa-rank-row>b{width:22px;color:#4b985d;font-size:13px}
-.jtqa-rank-row>div:last-child{margin-left:auto;text-align:right;white-space:nowrap}
+.jtqa-rank-list{display:flex;flex-direction:column;min-height:0;flex:none;margin-top:clamp(54px,9svh,75px);overflow:hidden}
+.jtqa-rank-row{display:grid;grid-template-columns:33px 36px minmax(0,1fr) auto;align-items:center;column-gap:10px;min-height:clamp(48px,8svh,62px);padding:4px 6px;border-bottom:1px solid #d9e5cf;font-size:13px}
+.jtqa-rank-row:last-child{border-bottom:0}
+.jtqa-rank-medal{display:grid;place-items:center;width:28px;height:28px;color:#589964;font-size:13px;font-variant-numeric:tabular-nums}
+.jtqa-rank-medal-1,.jtqa-rank-medal-2,.jtqa-rank-medal-3{font-size:20px}
+.jtqa-rank-row .jtqa-avatar{width:34px;height:34px}
+.jtqa-rank-row>div:last-child{text-align:right;white-space:nowrap;color:#307c4a}
+.jtqa-rank-row>div:last-child strong{font-size:13px}
 .jtqa-rank-row small{display:block;color:#759078;font-size:9px;margin-top:2px}
 .jtqa-rank-name{min-width:0}
-.jtqa-rank-name strong{display:block;max-width:clamp(95px,34vw,180px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.jtqa-rank-pager{display:flex;justify-content:space-between;align-items:center;min-height:30px;flex:none;margin-top:5px;color:#438854;font-size:11px;font-weight:800}
+.jtqa-rank-name strong{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#31553b;font-size:13px}
+.jtqa-rank-pager{display:flex;justify-content:space-between;align-items:center;min-height:36px;flex:none;color:#438854;font-size:11px;font-weight:800}
 .jtqa-rank-pager button,.jtqa-rank-state button{border:0;background:none;color:#2b91bb;font-weight:800;padding:4px}
 .jtqa-rank-state{position:absolute;left:10%;right:10%;top:65%;margin:0;padding:8px;background:#fff9e6d9;text-align:center;color:#58816a;font-size:12px}
 /* Result: the score is the focal point; the illustrated road stays visible below. */
@@ -126,8 +117,8 @@
 .jtqa-error{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#fff4dc;color:#8a4235;text-align:center}
 .jtqa-error button{border:0;background:none;text-decoration:underline;color:#266d9c}
 @keyframes jtqa-pulse{to{transform:scale(1.13)}}
-@media(max-height:700px){.jtqa-stage{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}.jtqa-quiz-head{margin-top:25px}.jtqa-track{margin-bottom:10px}.jtqa-question{min-height:82px}.jtqa-result-main{margin-top:7svh;padding-top:18px;padding-bottom:12px}.jtqa-result-actions{margin-top:10px;gap:8px}.jtqa-result-actions .jtqa-button{min-height:48px}.jtqa-rank-hero{margin-top:18px}.jtqa-rank-hero h1{margin-bottom:5px}.jtqa-podium{height:100px}.jtqa-award-hero{margin-top:24px}.jtqa-award-content{margin-top:20px}}
-@media(max-height:570px){.jtqa-quiz-head{margin-top:12px}.jtqa-question{min-height:68px}.jtqa-options button{min-height:38px}.jtqa-quiz-foot{margin-top:8px}.jtqa-rank-hero{margin-top:5px}.jtqa-podium{height:70px}.jtqa-rank-row .jtqa-avatar{width:24px;height:24px}.jtqa-result-main{margin-top:3svh;padding:12px}.jtqa-result-main h1{margin:0 0 8px}.jtqa-result-main h1 strong{font-size:75px}.jtqa-award-content img{height:70px}}
+@media(max-height:700px){.jtqa-stage{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}.jtqa-quiz-head{margin-top:25px}.jtqa-track{margin-bottom:10px}.jtqa-question{min-height:82px}.jtqa-result-main{margin-top:7svh;padding-top:18px;padding-bottom:12px}.jtqa-result-actions{margin-top:10px;gap:8px}.jtqa-result-actions .jtqa-button{min-height:48px}.jtqa-rank{padding-top:50px}.jtqa-award-hero{margin-top:24px}.jtqa-award-content{margin-top:20px}}
+@media(max-height:570px){.jtqa-quiz-head{margin-top:12px}.jtqa-question{min-height:68px}.jtqa-options button{min-height:38px}.jtqa-quiz-foot{margin-top:8px}.jtqa-rank{padding-top:44px}.jtqa-rank-row{min-height:43px}.jtqa-rank-row .jtqa-avatar{width:28px;height:28px}.jtqa-result-main{margin-top:3svh;padding:12px}.jtqa-result-main h1{margin:0 0 8px}.jtqa-result-main h1 strong{font-size:75px}.jtqa-award-content img{height:70px}}
 @media(prefers-reduced-motion:reduce){.jtqa-app *{animation:none!important;transition:none!important}}
 /* Staff redemption remains a scrollable utility view. */
 .jtqa-admin-redeem{max-width:560px}

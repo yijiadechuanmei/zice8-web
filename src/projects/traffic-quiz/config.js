@@ -3,6 +3,7 @@ export const trafficAssets = {
   home: new URL("./assets/home-original.jpg", import.meta.url).href,
   cyclingBear: new URL("./assets/cycling-bear.png", import.meta.url).href,
   stickyNotes: new URL("./assets/sticky-notes.png", import.meta.url).href,
+  roadScene: new URL("./assets/road-scene.png", import.meta.url).href,
   quizScene: new URL("./assets/quiz-scene.png", import.meta.url).href,
   resultScene: new URL("./assets/result-scene.png", import.meta.url).href,
 };

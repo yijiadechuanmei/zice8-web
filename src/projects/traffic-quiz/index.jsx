@@ -157,13 +157,11 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   const [displayPage, setDisplayPage] = useState(1);
   const rowsPerPage = 5;
   const list = data?.list || [];
-  const top = list.filter((item) => item.rank <= 3);
-  const rest = list.filter((item) => item.rank > 3);
   const totalPages = Math.max(
     1,
-    Math.ceil(Math.max(0, (data?.total || 0) - 3) / rowsPerPage),
+    Math.ceil((data?.total || 0) / rowsPerPage),
   );
-  const visibleRows = rest.slice(
+  const visibleRows = list.slice(
     (displayPage - 1) * rowsPerPage,
     displayPage * rowsPerPage,
   );
@@ -171,63 +169,23 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
     if (loading || displayPage >= totalPages) return;
     const next = displayPage + 1;
     setDisplayPage(next);
-    if (next * rowsPerPage + 3 > list.length && data.total > list.length)
+    if (next * rowsPerPage > list.length && data.total > list.length)
       onMore();
   };
   return (
     <section className="jtqa-inner jtqa-stage jtqa-rank">
-      <header className="jtqa-top">
-        <button type="button" onClick={onBack}>
-          ‹ 返回
-        </button>
-        <span>积分排行榜</span>
-        <span>
-          {data?.preview ? "50 人演示" : data?.locked ? "最终排名" : "实时更新"}
-        </span>
-      </header>
-      <div className="jtqa-rank-hero">
-        <p>文明交通知识问答 · 安全“答”人</p>
-        <h1>安全“答”人榜</h1>
-        <div className="jtqa-podium">
-          {top.length ? (
-            [top[1], top[0], top[2]].filter(Boolean).map((item) => (
-              <div
-                className={`jtqa-podium-person jtqa-place-${item.rank}`}
-                key={item.rank}
-              >
-                <div className="jtqa-avatar">
-                  {item.avatar ? <img src={item.avatar} alt="" /> : "🚦"}
-                </div>
-                <strong>
-                  {item.rank === 1 ? "🥇" : item.rank === 2 ? "🥈" : "🥉"}{" "}
-                  {item.nickname}
-                </strong>
-                <span>{item.score} 分</span>
-                <small>{formatTime(item.timeMs)}</small>
-              </div>
-            ))
-          ) : (
-            <p>还没有参与者，快来争取第一名！</p>
-          )}
-        </div>
-      </div>
-      <div className="jtqa-mine">
-        {data?.preview ? "模拟用户排名" : "我的排名"}{" "}
-        <b>{data?.mine?.rank || "暂未上榜"}</b>
-        <span>
-          累计 {data?.mine?.score || 0} 分 · {formatTime(data?.mine?.timeMs)}
-        </span>
-      </div>
+      <button className="jtqa-rank-back" type="button" onClick={onBack} aria-label="返回">‹</button>
       <div className="jtqa-rank-list">
         {visibleRows.map((item) => (
           <div className="jtqa-rank-row" key={item.rank}>
-            <b>{item.rank}</b>
+            <b className={`jtqa-rank-medal jtqa-rank-medal-${item.rank}`}>
+              {item.rank === 1 ? "🥇" : item.rank === 2 ? "🥈" : item.rank === 3 ? "🥉" : item.rank}
+            </b>
             <div className="jtqa-avatar">
               {item.avatar ? <img src={item.avatar} alt="" /> : "🚦"}
             </div>
             <div className="jtqa-rank-name">
               <strong>{item.nickname}</strong>
-              <small>{item.prize || "继续加油"}</small>
             </div>
             <div>
               <strong>{item.score} 分</strong>
@@ -246,7 +204,7 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
       {!loading && !error && !data?.total && (
         <p className="jtqa-rank-state">暂无榜单数据</p>
       )}
-      <div className="jtqa-rank-pager">
+      <div className="jtqa-rank-pager" aria-label="排行榜分页">
         <button
           type="button"
           disabled={displayPage <= 1 || loading}

@@ -38,68 +38,72 @@ export async function createPoster(slogan) {
   if (!ctx) throw new Error("当前浏览器无法生成海报");
   const scene = new window.Image();
   scene.crossOrigin = "anonymous";
-  scene.src = trafficAssets.resultScene;
+  scene.src = trafficAssets.roadScene;
   await new Promise((resolve, reject) => {
     scene.onload = resolve;
     scene.onerror = reject;
   });
-  ctx.drawImage(scene, 0, 0, 750, 1334);
-
-  // Campaign masthead: bold green ribbon tied to the original home palette.
+  ctx.fillStyle = "#f8f0d5";
+  ctx.fillRect(0, 0, 750, 1334);
+  // A full-width illustrated road becomes the destination of the poster.
+  ctx.drawImage(scene, 0, 700, 750, 422);
   ctx.fillStyle = "#285b38";
-  ctx.beginPath();
-  ctx.moveTo(0, 64); ctx.lineTo(750, 64); ctx.lineTo(750, 244);
-  ctx.lineTo(375, 214); ctx.lineTo(0, 244); ctx.closePath(); ctx.fill();
+  ctx.fillRect(0, 0, 750, 70);
+  ctx.fillStyle = "#d3e8b4";
+  ctx.fillRect(0, 70, 750, 6);
   ctx.fillStyle = "#f2cf42";
-  roundRect(ctx, 330, 91, 90, 8, 4);
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#fff9e9";
-  ctx.font = "bold 34px sans-serif";
-  ctx.fillText("文明交通", 375, 157);
-  ctx.fillStyle = "#d9edc5";
-  ctx.font = "22px sans-serif";
-  ctx.fillText("安全出行倡议", 375, 198);
+  ctx.beginPath(); ctx.arc(666, 226, 156, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f8f0d5";
+  ctx.beginPath(); ctx.arc(666, 226, 124, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#b9dd99";
+  ctx.beginPath(); ctx.arc(87, 284, 100, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f8f0d5";
+  ctx.beginPath(); ctx.arc(87, 284, 72, 0, Math.PI * 2); ctx.fill();
 
-  // Oversized paper headline with a hand-cut, editorial silhouette.
-  ctx.save();
-  ctx.shadowColor = "#21492a35";
-  ctx.shadowBlur = 22;
-  ctx.shadowOffsetY = 8;
-  ctx.fillStyle = "#fff9e8f2";
-  roundRect(ctx, 58, 308, 634, 430, 38);
-  ctx.restore();
-  ctx.fillStyle = "#f2cf42";
-  roundRect(ctx, 96, 348, 12, 72, 6);
+  ctx.fillStyle = "#285b38";
+  roundRect(ctx, 74, 108, 58, 170, 28);
+  [140, 193, 246].forEach((y, index) => {
+    ctx.fillStyle = ["#e74b3e", "#f2cf42", "#50a965"][index];
+    ctx.beginPath(); ctx.arc(103, y, 15, 0, Math.PI * 2); ctx.fill();
+  });
 
   const parts = slogan.split(/[，、]/).filter(Boolean);
   const lines = parts.length > 1 ? parts.slice(0, 3) : [slogan];
-  const fontSize = lines.length === 1 ? 66 : lines.length === 2 ? 58 : 49;
-  const lineGap = fontSize * 1.32;
-  const startY = 522 - ((lines.length - 1) * lineGap) / 2;
+  const fontSize = lines.length === 1 ? 76 : lines.length === 2 ? 67 : 56;
+  const lineGap = fontSize * 1.28;
+  const startY = 452 - ((lines.length - 1) * lineGap) / 2;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `900 ${fontSize}px sans-serif`;
   lines.forEach((line, index) => {
     const y = startY + index * lineGap;
-    ctx.fillStyle = index === lines.length - 1 ? "#258fc3" : "#2f7043";
-    ctx.shadowColor = "#d8e7c8";
+    ctx.fillStyle = index === 0 ? "#285b38" : "#208bbd";
+    ctx.shadowColor = "#fff9e8";
     ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 3;
-    ctx.fillText(line, 375, y, 540);
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 5;
+    ctx.fillText(line, 375, y, 600);
   });
   ctx.shadowColor = "transparent";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#f2cf42";
-  ctx.beginPath(); ctx.arc(635, 375, 14, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#3b8651";
-  ctx.beginPath(); ctx.arc(635, 375, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#e54b3e";
+  roundRect(ctx, 80, 650, 160, 9, 5);
+  ctx.fillStyle = "#278fc1";
+  roundRect(ctx, 258, 650, 94, 9, 5);
+  ctx.save();
+  ctx.strokeStyle = "#fff9e8";
+  ctx.lineWidth = 8;
+  ctx.setLineDash([18, 18]);
+  ctx.beginPath();
+  ctx.bezierCurveTo(414, 679, 530, 676, 612, 711);
+  ctx.stroke();
+  ctx.restore();
 
   ctx.fillStyle = "#285b38";
-  roundRect(ctx, 178, 784, 394, 62, 31);
-  ctx.fillStyle = "#fff9e9";
-  ctx.font = "bold 24px sans-serif";
+  ctx.fillRect(0, 1122, 750, 212);
   ctx.textAlign = "center";
-  ctx.fillText("文明守法 · 平安回家", 375, 824);
+  ctx.fillStyle = "#fff7dc";
+  ctx.font = "bold 22px sans-serif";
+  ctx.fillText("文明守法 · 平安回家", 375, 1274);
   return canvas.toDataURL("image/png");
 }
