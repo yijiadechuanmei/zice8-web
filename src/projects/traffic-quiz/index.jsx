@@ -10,7 +10,7 @@ import {
   startChallenge,
   submitAnswer,
 } from "./api";
-import { createPoster } from "./poster";
+import { createPoster, nextSafetySlogan } from "./poster";
 import "./styles.css";
 
 const RULES = [
@@ -386,7 +386,6 @@ export default function TrafficQuizProject({ routeParams }) {
   const [poster, setPoster] = useState("");
   const [showPosterModal, setShowPosterModal] = useState(false);
   const posterOpenedFor = useRef(null);
-  const lastSlogan = useRef("");
   const timeoutBusy = useRef(false);
   const actionBusy = useRef(false);
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
@@ -477,19 +476,7 @@ export default function TrafficQuizProject({ routeParams }) {
     )
       return;
     let active = true;
-    const slogans = [
-      "头盔戴稳，平安随行",
-      "红灯停一步，安全一大步",
-      "礼让斑马线，文明在身边",
-      "不闯灯、不逆行，平安一路行",
-      "骑行守规则，归家每一程",
-      "车让人，人快走，文明交通一起守",
-      "路口多观察，安全有保障",
-      "文明出行，从戴好头盔开始",
-    ];
-    const choices = slogans.filter((slogan) => slogan !== lastSlogan.current);
-    const slogan = choices[Math.floor(Math.random() * choices.length)];
-    lastSlogan.current = slogan;
+    const slogan = nextSafetySlogan();
     createPoster(slogan)
       .then((value) => {
         if (!active) return;
