@@ -216,6 +216,9 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
             </div>
           </div>
         ))}
+        {Array.from({ length: rowsPerPage - visibleRows.length }, (_, index) => (
+          <div className="jtqa-rank-row jtqa-rank-row-placeholder" key={`empty-${index}`} aria-hidden="true" />
+        ))}
       </div>
       {loading && <p className="jtqa-rank-state">加载中…</p>}
       {error && (

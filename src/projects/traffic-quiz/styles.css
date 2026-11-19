@@ -54,6 +54,7 @@
 .jtqa-rank-heading:before,.jtqa-rank-heading:after{content:"";height:1px;flex:1;background:#a9cc9f}
 .jtqa-rank-list{display:flex;flex-direction:column;min-height:0;flex:none;margin-top:10px;overflow:hidden}
 .jtqa-rank-row{display:grid;grid-template-columns:33px 36px minmax(0,1fr) auto;align-items:center;column-gap:10px;min-height:clamp(45px,7svh,55px);padding:4px 6px;border-bottom:1px solid #d9e5cf;font-size:13px}
+.jtqa-rank-row-placeholder{visibility:hidden}
 .jtqa-rank-row:last-child{border-bottom:0}
 .jtqa-rank-medal{display:grid;place-items:center;width:28px;height:28px;color:#589964;font-size:13px;font-variant-numeric:tabular-nums}
 .jtqa-rank-medal-1,.jtqa-rank-medal-2,.jtqa-rank-medal-3{font-size:20px}
