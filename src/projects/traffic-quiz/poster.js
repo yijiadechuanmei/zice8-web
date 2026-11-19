@@ -60,8 +60,6 @@ export async function createPoster(slogan) {
     750,
     510,
   );
-  ctx.fillStyle = "#285b38";
-  ctx.fillRect(0, 0, 750, 64);
   ctx.fillStyle = "#f2cf42";
   roundRect(ctx, 58, 94, 162, 44, 22);
   ctx.fillStyle = "#285b38";
