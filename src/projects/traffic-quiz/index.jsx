@@ -23,6 +23,14 @@ const RULES = [
   "活动当天现场还有更多精美礼品，欢迎前往参与。",
 ];
 const formatTime = (ms = 0) => `${(ms / 1000).toFixed(1)} 秒`;
+const rankPageSize = () => {
+  const height = window.innerHeight;
+  if (height >= 820) return 9;
+  if (height >= 740) return 8;
+  if (height >= 650) return 7;
+  if (height >= 550) return 6;
+  return 5;
+};
 
 function Modal({ title, children, onClose }) {
   return (
@@ -155,7 +163,17 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
 }
 export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   const [displayPage, setDisplayPage] = useState(1);
-  const rowsPerPage = 5;
+  const [rowsPerPage, setRowsPerPage] = useState(rankPageSize);
+  useEffect(() => {
+    const updatePageSize = () => {
+      const next = rankPageSize();
+      if (next === rowsPerPage) return;
+      setRowsPerPage(next);
+      setDisplayPage(1);
+    };
+    window.addEventListener("resize", updatePageSize);
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, [rowsPerPage]);
   const realRows = data?.list || [];
   const realTotal = data?.total || 0;
   const list = realRows.length < realTotal

@@ -46,11 +46,11 @@
 .jtqa-quiz-foot{display:flex;justify-content:space-between;flex:none;margin-top:clamp(12px,3svh,30px);padding:0 2px;color:#4f7859;font-size:12px;font-weight:700}
 .jtqa-quiz-foot b{font-size:15px;color:#258057}
 /* Leaderboard: one quiet list, with medals providing the only rank emphasis. */
-.jtqa-rank{position:relative;padding-top:clamp(56px,11svh,85px);background-position:center bottom}
+.jtqa-rank{position:relative;padding-top:clamp(56px,9svh,72px);background-position:center bottom}
 .jtqa-rank-back{position:absolute;z-index:1;top:calc(12px + env(safe-area-inset-top,0px));left:clamp(16px,5vw,28px);display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:#fffdf0c7;color:#34794a;font-size:29px;line-height:1;box-shadow:0 3px 12px #26512b1c}
 .jtqa-avatar{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#d6e9d0;overflow:hidden}
 .jtqa-avatar img{width:100%;height:100%;object-fit:cover}
-.jtqa-rank-heading{display:flex;align-items:center;gap:14px;flex:none;width:min(100%,420px);margin:clamp(28px,5svh,48px) auto 0;color:#31764a;font-size:19px;font-weight:900;letter-spacing:.12em}
+.jtqa-rank-heading{display:flex;align-items:center;gap:14px;flex:none;width:min(100%,420px);margin:clamp(20px,3svh,30px) auto 0;color:#31764a;font-size:19px;font-weight:900;letter-spacing:.12em}
 .jtqa-rank-heading:before,.jtqa-rank-heading:after{content:"";height:1px;flex:1;background:#a9cc9f}
 .jtqa-rank-list{display:flex;flex-direction:column;min-height:0;flex:none;margin-top:10px;overflow:hidden}
 .jtqa-rank-row{display:grid;grid-template-columns:33px 36px minmax(0,1fr) auto;align-items:center;column-gap:10px;min-height:clamp(45px,7svh,55px);padding:4px 6px;border-bottom:1px solid #d9e5cf;font-size:13px}
