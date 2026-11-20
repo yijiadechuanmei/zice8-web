@@ -43,9 +43,9 @@
 .jtqa-question{position:relative;flex:none;min-height:0}
 .jtqa-kicker{margin:0 0 8px;font-size:11px;letter-spacing:.12em;font-weight:900;color:#499b61}
 .jtqa-question h1{margin:0;color:#2b573c;font-size:clamp(19px,5.3vw,27px);line-height:1.42;font-weight:900}
-.jtqa-answer-layout{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;align-items:stretch;gap:clamp(8px,2vw,14px);margin-top:clamp(10px,1.8svh,14px)}
+.jtqa-answer-layout{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;align-items:center;gap:clamp(8px,2vw,14px);margin-top:clamp(10px,1.8svh,14px)}
 .jtqa-answer-layout-with-image{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.jtqa-options{display:grid;align-content:start;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
+.jtqa-options{display:grid;align-content:start;gap:clamp(7px,1.2svh,11px);min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
 .jtqa-answer-layout .jtqa-options{width:100%}
 .jtqa-question-image-panel{display:flex;justify-content:center;align-self:center;min-width:0;width:100%;height:auto;overflow:hidden}
 .jtqa-question-image-panel img{display:block;width:100%;height:auto;max-height:min(52svh,390px);object-fit:contain}
