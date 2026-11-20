@@ -147,24 +147,26 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
         <h1>{attempt.question.title}</h1>
       </div>
       <div className={`jtqa-answer-layout${imageUrl ? " jtqa-answer-layout-with-image" : ""}`}>
-        <div className="jtqa-options">
-          {attempt.question.options.map((option) => (
-            <button
-              type="button"
-              key={option.key}
-              disabled={busy || seconds <= 0}
-              onClick={() => onAnswer(option.key)}
-            >
-              <span>{option.key}</span>
-              {option.text}
-            </button>
-          ))}
-        </div>
-        {imageUrl && (
-          <div className="jtqa-question-image-panel">
-            <img src={imageUrl} alt="交通安全题目图示" />
+        <div className={`jtqa-answer-row${imageUrl ? " jtqa-answer-row-with-image" : ""}`}>
+          <div className="jtqa-options">
+            {attempt.question.options.map((option) => (
+              <button
+                type="button"
+                key={option.key}
+                disabled={busy || seconds <= 0}
+                onClick={() => onAnswer(option.key)}
+              >
+                <span>{option.key}</span>
+                {option.text}
+              </button>
+            ))}
           </div>
-        )}
+          {imageUrl && (
+            <div className="jtqa-question-image-panel">
+              <img src={imageUrl} alt="交通安全题目图示" />
+            </div>
+          )}
+        </div>
       </div>
       <div className="jtqa-quiz-foot">
         <span>
