@@ -98,10 +98,6 @@ export async function createPoster(slogan) {
   });
   ctx.shadowColor = "transparent";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#e54b3e";
-  roundRect(ctx, 127, 462, 132, 8, 4);
-  ctx.fillStyle = "#278fc1";
-  roundRect(ctx, 278, 462, 72, 8, 4);
   ctx.fillStyle = "#fff7dc";
   roundRect(ctx, 493, 910, 190, 46, 23);
   ctx.fillStyle = "#285b38";
