@@ -531,7 +531,7 @@ export default function TrafficQuizProject({ routeParams }) {
     actionBusy.current = true;
     setBusy(true);
     try {
-      applyState(await startChallenge(key));
+      applyState(await startChallenge(key, new URLSearchParams(window.location.search).has("debug")));
       setPoster("");
     } catch (err) {
       setModal(err.message || "开始失败，请重试");

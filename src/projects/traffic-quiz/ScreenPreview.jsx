@@ -21,7 +21,7 @@ const state = {
     question: {
       id: imagePreview ? "preview-image" : "preview-text",
       title: imagePreview ? "接近图示交通标志时，驾驶人应如何通行？" : "驾驶电动自行车时，以下哪种做法更安全？",
-      imageUrl: imagePreview ? "/traffic-quiz/questions/stop.svg" : undefined,
+      imageUrl: imagePreview ? "/traffic-quiz/questions/stop.webp" : undefined,
       options: imagePreview ? [
         { key: "A", text: "减速后直接通过" },
         { key: "B", text: "停车观察并让行" },
