@@ -1,6 +1,7 @@
 // OSS 替换入口：仅修改下列 URL；业务页面不持有图片路径。
 export const trafficAssets = {
-  home: new URL("./assets/home-original.jpg", import.meta.url).href,
+  home: new URL("./assets/home-updated.png", import.meta.url).href,
+  homeStart: new URL("./assets/home-start-button.png", import.meta.url).href,
   cyclingBear: new URL("./assets/cycling-bear.png", import.meta.url).href,
   stickyNotes: new URL("./assets/sticky-notes.png", import.meta.url).href,
   roadScene: new URL("./assets/road-scene.png", import.meta.url).href,

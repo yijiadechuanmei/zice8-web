@@ -90,7 +90,9 @@ function Home({ onStart, onMenu }) {
           type="button"
           onClick={onStart}
           aria-label="开始答题"
-        />
+        >
+          <Image name="homeStart" alt="" />
+        </button>
       </div>
       <button
         className="jtqa-home-menu"

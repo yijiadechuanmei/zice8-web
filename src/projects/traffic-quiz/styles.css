@@ -9,9 +9,10 @@
 .jtqa-app-home{position:fixed;inset:0;width:100vw;height:100vh;height:100svh;overflow:hidden}
 .jtqa-home-art{position:relative;width:100%;flex:none;line-height:0}
 .jtqa-home-art img{display:block;width:100%;height:auto}
-.jtqa-home-start{position:absolute;left:24%;top:59.4%;width:52%;height:7%;border:0;background:transparent;border-radius:100px}
-.jtqa-home-start:active{background:#fff7}
-.jtqa-home-menu{position:absolute;z-index:5;top:max(14px,env(safe-area-inset-top,0px));right:8px;width:64px;min-width:64px;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:0;border:0;background:transparent;line-height:1}
+.jtqa-home-start{position:absolute;left:23.5%;top:48.03%;width:53%;height:8.25%;padding:0;border:0;background:transparent}
+.jtqa-home-start img{display:block;width:100%;height:100%;object-fit:fill}
+.jtqa-home-start:active{transform:scale(.985)}
+.jtqa-home-menu{display:none;position:absolute;z-index:5;top:max(14px,env(safe-area-inset-top,0px));right:8px;width:64px;min-width:64px;height:auto;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:0;border:0;background:transparent;line-height:1}
 .jtqa-home-menu-symbol{width:46px;height:46px;display:grid;place-items:center;border:2px solid #fff8d9;border-radius:50%;background:#286739;color:#fffdf1;box-shadow:0 3px 0 #174b29,0 6px 16px #173c2a55}
 .jtqa-home-menu-icon{display:flex;flex-direction:column;justify-content:center;gap:3px;width:18px;height:18px}
 .jtqa-home-menu-icon i{display:block;width:100%;height:2.5px;border-radius:2px;background:currentColor}
