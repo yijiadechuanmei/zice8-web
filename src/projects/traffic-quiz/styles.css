@@ -40,12 +40,12 @@
 .jtqa-timer-danger strong{color:#d64135;animation:jtqa-pulse .65s infinite alternate}
 .jtqa-track{height:6px;flex:none;margin:11px 0 clamp(14px,2.5svh,24px);border-radius:8px;overflow:hidden;background:#dfebd5}
 .jtqa-track span{display:block;height:100%;background:#5fa865;border-radius:8px;transition:width .25s}
-.jtqa-question{position:relative;min-height:clamp(84px,14svh,142px)}
-.jtqa-kicker{margin:0 0 8px;padding-right:90px;font-size:11px;letter-spacing:.12em;font-weight:900;color:#499b61}
+.jtqa-question{position:relative;flex:none;min-height:0}
+.jtqa-kicker{margin:0 0 8px;font-size:11px;letter-spacing:.12em;font-weight:900;color:#499b61}
 .jtqa-question h1{margin:0;color:#2b573c;font-size:clamp(19px,5.3vw,27px);line-height:1.42;font-weight:900}
-.jtqa-answer-layout{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;align-items:center;gap:clamp(8px,2vw,14px)}
+.jtqa-answer-layout{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;align-items:stretch;gap:clamp(8px,2vw,14px);margin-top:clamp(10px,1.8svh,14px)}
 .jtqa-answer-layout-with-image{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-.jtqa-options{display:grid;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
+.jtqa-options{display:grid;align-content:start;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
 .jtqa-answer-layout .jtqa-options{width:100%}
 .jtqa-question-image-panel{display:grid;place-items:center;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden}
 .jtqa-question-image-panel img{display:block;width:100%;height:auto;max-height:min(52svh,390px);object-fit:contain}
@@ -128,8 +128,8 @@
 .jtqa-error{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#fff4dc;color:#8a4235;text-align:center}
 .jtqa-error button{border:0;background:none;text-decoration:underline;color:#266d9c}
 @keyframes jtqa-pulse{to{transform:scale(1.13)}}
-@media(max-height:700px){.jtqa-stage{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}.jtqa-quiz-head{margin-top:25px}.jtqa-track{margin-bottom:10px}.jtqa-question{min-height:82px}.jtqa-result-main{margin-top:7svh;padding-top:18px;padding-bottom:12px}.jtqa-result-actions{margin-top:10px;gap:8px}.jtqa-result-actions .jtqa-button{min-height:48px}.jtqa-rank{padding-top:50px}.jtqa-rank-heading{margin-top:20px}.jtqa-award-hero{margin-top:24px}.jtqa-award-content{margin-top:20px}}
-@media(max-height:570px){.jtqa-quiz-head{margin-top:12px}.jtqa-question{min-height:68px}.jtqa-options button{min-height:38px}.jtqa-quiz-foot{margin-top:8px}.jtqa-rank{padding-top:44px}.jtqa-rank-heading{margin-top:10px}.jtqa-rank-row{min-height:40px}.jtqa-rank-row .jtqa-avatar{width:28px;height:28px}.jtqa-result-main{margin-top:3svh;padding:12px}.jtqa-result-main h1{margin:0 0 8px}.jtqa-result-main h1 strong{font-size:75px}.jtqa-award-content img{height:70px}}
+@media(max-height:700px){.jtqa-stage{padding-top:calc(7px + env(safe-area-inset-top,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}.jtqa-quiz-head{margin-top:25px}.jtqa-track{margin-bottom:10px}.jtqa-result-main{margin-top:7svh;padding-top:18px;padding-bottom:12px}.jtqa-result-actions{margin-top:10px;gap:8px}.jtqa-result-actions .jtqa-button{min-height:48px}.jtqa-rank{padding-top:50px}.jtqa-rank-heading{margin-top:20px}.jtqa-award-hero{margin-top:24px}.jtqa-award-content{margin-top:20px}}
+@media(max-height:570px){.jtqa-quiz-head{margin-top:12px}.jtqa-options button{min-height:38px}.jtqa-quiz-foot{margin-top:8px}.jtqa-rank{padding-top:44px}.jtqa-rank-heading{margin-top:10px}.jtqa-rank-row{min-height:40px}.jtqa-rank-row .jtqa-avatar{width:28px;height:28px}.jtqa-result-main{margin-top:3svh;padding:12px}.jtqa-result-main h1{margin:0 0 8px}.jtqa-result-main h1 strong{font-size:75px}.jtqa-award-content img{height:70px}}
 @media(prefers-reduced-motion:reduce){.jtqa-app *{animation:none!important;transition:none!important}}
 /* Staff redemption remains a scrollable utility view. */
 .jtqa-admin-redeem{max-width:560px}
