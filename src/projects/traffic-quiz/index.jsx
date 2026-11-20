@@ -107,16 +107,7 @@ function Home({ onStart, onMenu }) {
   );
 }
 export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
-  const [imageOpen, setImageOpen] = useState(false);
   const attempt = state?.attempt;
-  useEffect(() => {
-    if (!imageOpen) return undefined;
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") setImageOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [imageOpen]);
   if (!attempt?.question) return null;
   const danger = seconds <= 5;
   const imageUrl = attempt.question.imageUrl;
@@ -154,24 +145,26 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
       <div className="jtqa-question">
         <p className="jtqa-kicker">交通安全知识 · 单选题</p>
         <h1>{attempt.question.title}</h1>
-        {imageUrl && (
-          <button className="jtqa-question-image-open" type="button" onClick={() => setImageOpen(true)}>
-            查看图片
-          </button>
-        )}
       </div>
-      <div className="jtqa-options">
-        {attempt.question.options.map((option) => (
-          <button
-            type="button"
-            key={option.key}
-            disabled={busy || seconds <= 0}
-            onClick={() => onAnswer(option.key)}
-          >
-            <span>{option.key}</span>
-            {option.text}
-          </button>
-        ))}
+      <div className={`jtqa-answer-layout${imageUrl ? " jtqa-answer-layout-with-image" : ""}`}>
+        <div className="jtqa-options">
+          {attempt.question.options.map((option) => (
+            <button
+              type="button"
+              key={option.key}
+              disabled={busy || seconds <= 0}
+              onClick={() => onAnswer(option.key)}
+            >
+              <span>{option.key}</span>
+              {option.text}
+            </button>
+          ))}
+        </div>
+        {imageUrl && (
+          <div className="jtqa-question-image-panel">
+            <img src={imageUrl} alt="交通安全题目图示" />
+          </div>
+        )}
       </div>
       <div className="jtqa-quiz-foot">
         <span>
@@ -181,15 +174,6 @@ export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
           错误 <b>{attempt.wrong}/3</b>
         </span>
       </div>
-      {imageOpen && imageUrl && (
-        <div className="jtqa-question-image-shade" role="presentation" onClick={() => setImageOpen(false)}>
-          <div className="jtqa-question-image-dialog" role="dialog" aria-modal="true" aria-label="题目图片" onClick={(event) => event.stopPropagation()}>
-            <button className="jtqa-question-image-close" type="button" onClick={() => setImageOpen(false)} aria-label="关闭图片">×</button>
-            <img src={imageUrl} alt="本题图示" />
-            <span className="jtqa-question-image-timer">剩余 {seconds} 秒</span>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

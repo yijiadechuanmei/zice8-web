@@ -43,13 +43,12 @@
 .jtqa-question{position:relative;min-height:clamp(84px,14svh,142px)}
 .jtqa-kicker{margin:0 0 8px;padding-right:90px;font-size:11px;letter-spacing:.12em;font-weight:900;color:#499b61}
 .jtqa-question h1{margin:0;color:#2b573c;font-size:clamp(19px,5.3vw,27px);line-height:1.42;font-weight:900}
-.jtqa-question-image-open{position:absolute;top:-5px;right:0;min-height:28px;padding:3px 10px;border:1px solid #76b98d;border-radius:20px;background:#fffbe8;color:#28784a;font-size:12px;font-weight:900;box-shadow:0 2px 0 #bdd5af}
-.jtqa-question-image-shade{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:18px;background:#183d2cbd}
-.jtqa-question-image-dialog{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;width:min(88vw,360px);padding:40px 16px 15px;border:3px solid #7dbb83;border-radius:22px;background:#fffbed;box-shadow:0 18px 50px #0f2b1b66}
-.jtqa-question-image-dialog img{display:block;width:min(100%,360px);max-width:100%;height:auto;max-height:min(62svh,420px);object-fit:contain}
-.jtqa-question-image-close{position:absolute;top:7px;right:11px;width:33px;height:33px;border:0;border-radius:50%;background:#e6f1dd;color:#2d7549;font-size:27px;line-height:1}
-.jtqa-question-image-timer{color:#397f52;font-size:12px;font-weight:900}
+.jtqa-answer-layout{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0;align-items:center;gap:clamp(8px,2vw,14px)}
+.jtqa-answer-layout-with-image{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .jtqa-options{display:grid;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
+.jtqa-answer-layout .jtqa-options{width:100%}
+.jtqa-question-image-panel{display:grid;place-items:center;min-width:0;min-height:0;width:100%;height:100%;overflow:hidden}
+.jtqa-question-image-panel img{display:block;width:100%;height:auto;max-height:min(52svh,390px);object-fit:contain}
 .jtqa-options::-webkit-scrollbar{display:none}
 .jtqa-options button{display:flex;align-items:center;gap:12px;width:100%;min-height:clamp(43px,7svh,58px);text-align:left;border:1.5px solid #b9d4b4;border-radius:15px;padding:7px 12px;background:#fffcf1ed;color:#31513c;font-size:clamp(13px,3.8vw,16px);font-weight:700;line-height:1.28;box-shadow:0 2px 0 #a9c8a0}
 .jtqa-options button:active{background:#e5f2dc;transform:scale(.99)}
