@@ -6,3 +6,18 @@
 @keyframes pfh-bloom{0%{opacity:.25;transform:scale(.5) rotate(-30deg)}60%{opacity:1;transform:scale(1.22) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
 .pfh-modal-mark,.pfh-big-icon{animation:pfh-bloom .65s ease-out both}
 @media(prefers-reduced-motion:reduce){.pfh-modal-mark,.pfh-big-icon{animation:none}}
+.pfh-won-banner{background:linear-gradient(120deg,#fff2d2,#fff9ed);border:1px solid #dfab65;border-radius:12px;padding:10px 12px;color:#a52b2d;font-size:13px;line-height:1.5;margin-bottom:13px;font-weight:700}
+.pfh-page-home .pfh-shell{display:flex;flex-direction:column;min-height:100svh;padding-top:20px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+.pfh-page-home .pfh-hero{min-height:0;flex:none;padding-top:clamp(64px,10svh,106px)}
+.pfh-page-home .pfh-hero h1{font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif;font-size:clamp(54px,15.2vw,76px);font-weight:700;line-height:1.1;letter-spacing:.035em;margin:13px 0 14px;color:#b30e1e;-webkit-text-stroke:.2px #8c0b18;text-shadow:0 2px 0 #f7b9a7,0 4px 10px #7f1b2e66}
+.pfh-page-home .pfh-hero h1 span{display:block;white-space:nowrap}
+.pfh-page-home .pfh-hero h1 span+span{margin-top:3px}
+.pfh-page-home .pfh-subtitle{max-width:330px;font-size:clamp(13px,3.5vw,16px);font-weight:700;line-height:1.55;text-shadow:0 1px 8px #fff4e9}
+.pfh-page-home .pfh-home-actions{flex:none;margin-top:clamp(28px,5svh,46px);padding:0 10px;border:0;border-radius:0;background:none;box-shadow:none}
+.pfh-page-home .pfh-count{color:#7f2627;font-size:14px;font-weight:700;text-shadow:0 1px 8px #fff7ec;margin-bottom:10px}
+.pfh-page-home .pfh-home-actions>.pfh-button{max-width:310px;margin:10px auto 0;box-shadow:0 7px 19px #8f1c2d5c,0 1px 0 #ffe3a8 inset}
+.pfh-page-home .pfh-links{margin-top:7px;gap:26px}
+.pfh-page-home .pfh-links button{font-weight:700;text-decoration:none;text-shadow:0 1px 7px #fff6ed}
+.pfh-page-home .pfh-hero-info{flex:none;margin:auto 0 0;padding:22px 0 0;width:100%;border:0;border-radius:0;background:none;box-shadow:none;color:#fff7e8;font-size:12px;line-height:1.5;text-align:center;text-shadow:0 1px 3px #7c1729,0 2px 9px #671420}
+.pfh-page-home .pfh-hero-info p{margin:2px 0}
+@media(max-height:720px){.pfh-page-home .pfh-hero{padding-top:45px}.pfh-page-home .pfh-hero h1{font-size:clamp(50px,14.4vw,68px);margin:9px 0}.pfh-page-home .pfh-home-actions{margin-top:20px}.pfh-page-home .pfh-hero-info{padding-top:13px}}

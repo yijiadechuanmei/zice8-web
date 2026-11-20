@@ -287,6 +287,11 @@ export function getSafeDriverQuizAttempts(activityKey, params = {}) {
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/attempts?${search}`)
 }
 
+export function getPinganFamilyWinners(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/winners?${search}`)
+}
+
 export function clearXiangyuGlobalTreasureData(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/xiangyu-global-treasure/clear-data`, {
     method: 'POST',
