@@ -47,7 +47,7 @@
 .jtqa-answer-layout-with-image{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .jtqa-options{display:grid;align-content:start;gap:clamp(7px,1.2svh,11px);min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px 3px 7px;margin:3px -3px 0;scrollbar-width:none}
 .jtqa-answer-layout .jtqa-options{width:100%}
-.jtqa-question-image-panel{display:flex;justify-content:center;align-self:start;min-width:0;width:100%;height:auto;margin-top:6px;overflow:hidden}
+.jtqa-question-image-panel{display:flex;justify-content:center;align-self:center;min-width:0;width:100%;height:auto;overflow:hidden}
 .jtqa-question-image-panel img{display:block;width:100%;height:auto;max-height:min(52svh,390px);object-fit:contain}
 .jtqa-options::-webkit-scrollbar{display:none}
 .jtqa-options button{display:flex;align-items:center;gap:12px;width:100%;min-height:clamp(43px,7svh,58px);text-align:left;border:1.5px solid #b9d4b4;border-radius:15px;padding:7px 12px;background:#fffcf1ed;color:#31513c;font-size:clamp(13px,3.8vw,16px);font-weight:700;line-height:1.28;box-shadow:0 2px 0 #a9c8a0}
