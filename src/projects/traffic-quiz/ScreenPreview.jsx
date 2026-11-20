@@ -4,6 +4,7 @@ import { Award, Quiz, Rank, Result } from "./index";
 import { createPoster } from "./poster";
 
 const screen = new URLSearchParams(window.location.search).get("screen") || "quiz";
+const imagePreview = screen === "image";
 const state = {
   phase: "active",
   remainingToday: 1,
@@ -18,8 +19,15 @@ const state = {
     wrong: 1,
     score: 4,
     question: {
-      title: "驾驶电动自行车时，以下哪种做法更安全？",
-      options: [
+      id: imagePreview ? "preview-image" : "preview-text",
+      title: imagePreview ? "接近图示交通标志时，驾驶人应如何通行？" : "驾驶电动自行车时，以下哪种做法更安全？",
+      imageUrl: imagePreview ? "/traffic-quiz/questions/stop.svg" : undefined,
+      options: imagePreview ? [
+        { key: "A", text: "减速后直接通过" },
+        { key: "B", text: "停车观察并让行" },
+        { key: "C", text: "禁止任何车辆通行" },
+        { key: "D", text: "可以不观察路况直接通过" },
+      ] : [
         { key: "A", text: "佩戴符合标准的安全头盔" },
         { key: "B", text: "边骑车边查看手机消息" },
         { key: "C", text: "在机动车道内并排行驶" },
@@ -42,7 +50,7 @@ export default function ScreenPreview() {
       "--jtqa-quiz-scene": `url("${trafficAssets.quizScene}")`,
       "--jtqa-result-scene": `url("${trafficAssets.resultScene}")`,
     }}>
-      {screen === "quiz" && <Quiz state={state} seconds={23} busy={false} onAnswer={() => undefined} onExit={home} />}
+      {(screen === "quiz" || screen === "image") && <Quiz state={state} seconds={23} busy={false} onAnswer={() => undefined} onExit={home} />}
       {screen === "result" && <Result state={state} onRank={() => window.location.assign("?screen=rank")} onAgain={home} onHome={home} />}
       {screen === "rank" && <Rank data={{ total: 1, list: [{ rank: 1, nickname: "韩宇（H5&小程序）", score: 9, timeMs: 18200 }] }} loading={false} error="" onMore={() => undefined} onRetry={() => undefined} onBack={home} />}
       {screen === "award" && <Award data={{locked:true,award:{rank:8,prize:"蜀黍家骑行熊",code:"JTQA-2026-EXAMPLE",redeemedAt:null}}} loading={false} error="" onRetry={() => undefined} onBack={home} />}
