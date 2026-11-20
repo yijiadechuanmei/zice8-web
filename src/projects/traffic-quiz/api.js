@@ -12,6 +12,8 @@ export const submitAnswer = (key, body) =>
     method: "POST",
     body: JSON.stringify(body),
   });
+export const abandonChallenge = (key, keepalive = false) =>
+  request(`${base(key)}/abandon`, { method: "POST", keepalive });
 export const getRank = (key, page = 1) =>
   request(`${base(key)}/rank?page=${page}`);
 export const getAward = (key) => request(`${base(key)}/award`);

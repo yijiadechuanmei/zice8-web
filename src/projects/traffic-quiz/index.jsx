@@ -5,6 +5,7 @@ import { trackPageView } from "../../shared/analytics";
 import { trafficActivity, trafficAssets } from "./config";
 import {
   getAward,
+  abandonChallenge,
   getPublicConfig,
   getRank,
   getState,
@@ -362,6 +363,7 @@ export default function TrafficQuizProject({ routeParams }) {
   }, [key]);
   const [publicConfig, setPublicConfig] = useState(null);
   const [state, setState] = useState(null);
+  const [stateReady, setStateReady] = useState(false);
   const [page, setPage] = useState("home");
   const [modal, setModal] = useState("");
   const [error, setError] = useState("");
@@ -395,7 +397,7 @@ export default function TrafficQuizProject({ routeParams }) {
           ? "home"
           : next.attempt?.status === "in_progress"
             ? "quiz"
-            : next.attempt?.status === "completed"
+            : ["completed", "abandoned"].includes(next.attempt?.status)
               ? "result"
               : "home",
       );
@@ -424,17 +426,38 @@ export default function TrafficQuizProject({ routeParams }) {
   useEffect(() => {
     if (!authReady) return;
     let alive = true;
-    getState(key)
+    abandonChallenge(key)
       .then((next) => {
-        if (alive) applyState(next);
+        if (alive) {
+          applyState(next);
+          setStateReady(true);
+        }
       })
       .catch((err) => {
-        if (alive) setError(err.message || "网络异常，请重试");
+        if (alive) {
+          setError(err.message || "网络异常，请重试");
+          setStateReady(true);
+        }
       });
     return () => {
       alive = false;
     };
   }, [authReady, key, applyState]);
+  useEffect(() => {
+    if (page !== "quiz") return undefined;
+    const abandonOnExit = () => {
+      void abandonChallenge(key, true).catch(() => {});
+    };
+    const reloadAfterRestore = (event) => {
+      if (event.persisted) window.location.reload();
+    };
+    window.addEventListener("pagehide", abandonOnExit);
+    window.addEventListener("pageshow", reloadAfterRestore);
+    return () => {
+      window.removeEventListener("pagehide", abandonOnExit);
+      window.removeEventListener("pageshow", reloadAfterRestore);
+    };
+  }, [page, key]);
   useEffect(() => {
     const id = window.setInterval(() => setTick(Date.now()), 250);
     return () => window.clearInterval(id);
@@ -474,7 +497,7 @@ export default function TrafficQuizProject({ routeParams }) {
     if (
       page !== "result" ||
       !state?.attempt ||
-      state.attempt.status !== "completed"
+      !["completed", "abandoned"].includes(state.attempt.status)
     )
       return;
     let active = true;
@@ -495,6 +518,10 @@ export default function TrafficQuizProject({ routeParams }) {
     if (actionBusy.current) return;
     if (!authReady) {
       setModal(blockedMessage || "正在确认微信身份，请稍后重试");
+      return;
+    }
+    if (!stateReady) {
+      setModal("正在确认当日答题状态，请稍候");
       return;
     }
     const resuming = state?.attempt?.status === "in_progress";
