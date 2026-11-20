@@ -108,20 +108,13 @@ function Home({ onStart, onMenu }) {
     </section>
   );
 }
-export function Quiz({ state, seconds, busy, onAnswer, onExit }) {
+export function Quiz({ state, seconds, busy, onAnswer }) {
   const attempt = state?.attempt;
   if (!attempt?.question) return null;
   const danger = seconds <= 5;
   const imageUrl = attempt.question.imageUrl;
   return (
     <section className="jtqa-inner jtqa-stage jtqa-quiz">
-      <header className="jtqa-top">
-        <button type="button" onClick={onExit}>
-          ‹ 返回
-        </button>
-        <span>文明交通知识问答</span>
-        <span>第 {attempt.attemptNo} 次挑战</span>
-      </header>
       <div className="jtqa-quiz-head">
         <div>
           <small>当前进度</small>
@@ -395,14 +388,18 @@ export default function TrafficQuizProject({ routeParams }) {
     setState(next);
     setOffset(receivedAt - Date.parse(next.serverNow));
     setTick(now);
-    if (move)
+    if (move) {
+      const attemptedToday = Number(next.usedToday) > 0;
       setPage(
-        next.attempt?.status === "in_progress"
-          ? "quiz"
-          : next.attempt?.status === "completed"
-            ? "result"
-            : "home",
+        !attemptedToday
+          ? "home"
+          : next.attempt?.status === "in_progress"
+            ? "quiz"
+            : next.attempt?.status === "completed"
+              ? "result"
+              : "home",
       );
+    }
   }, []);
   const refresh = useCallback(
     async (move = true) => {
@@ -618,7 +615,6 @@ export default function TrafficQuizProject({ routeParams }) {
           seconds={seconds}
           busy={busy}
           onAnswer={answer}
-          onExit={() => setPage("home")}
         />
       )}
       {page === "result" && state?.attempt && (
@@ -636,7 +632,7 @@ export default function TrafficQuizProject({ routeParams }) {
           error={rankError}
           onMore={() => openRank((rank?.page || 1) + 1)}
           onRetry={() => openRank()}
-          onBack={() => setPage("home")}
+          onBack={() => setPage("result")}
         />
       )}
       {page === "award" && (
