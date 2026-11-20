@@ -2,7 +2,7 @@
 
 访问路径：`/jtqa/jc122`。现场核销页面：`/jtqa/jc122/redeem`，沿用现有 Admin 登录状态；后台核销接口会再检查活动授权。
 
-首页使用 `assets/home-updated.png`，开始按钮使用独立图片 `assets/home-start-button.png`，资源来自活动提供的新版设计稿。菜单与活动规则入口目前在首页隐藏。其余活动图片位于本目录的 `assets/`。全部图片 URL 在 [`config.js`](./config.js) 的 `trafficAssets` 中集中配置。上传 OSS 后，只需把对象 URL 填入这些字段；保留本地文件便于预览。海报生成会将交警和道路插画画入 Canvas，OSS 必须允许 `https://web.zice8.com` 跨域读取这两张图片，否则保存海报会失败。
+活动图片统一使用 `https://assets.zice8.com/jtqa/jc122/` 下的 OSS 对象。首页背景、开始按钮及其他页面图片在 [`config.js`](./config.js) 集中配置；12 张题目图片由 API 返回 OSS 链接。21 张原始图片已整理到下载文件夹的 `文明交通知识问答-OSS素材`，上传时将该文件夹内的图片文件直接放入 `jtqa/jc122/`，保留文件名。菜单与活动规则入口目前在首页隐藏。海报生成会从 OSS 读取场景图片，OSS 必须允许 `https://web.zice8.com` 跨域读取，否则海报会加载失败。
 
 线上开始、结束时间由后端 `activity.start_time`、`activity.end_time` 管理。未配置时首页可预览，答题入口显示尚未开始。
 

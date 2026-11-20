@@ -1,12 +1,13 @@
-// OSS 替换入口：仅修改下列 URL；业务页面不持有图片路径。
+// 活动图片统一放在 OSS 的 type/key 目录。
+export const trafficImageBase = "https://assets.zice8.com/jtqa/jc122";
 export const trafficAssets = {
-  home: new URL("./assets/home-updated.png", import.meta.url).href,
-  homeStart: new URL("./assets/home-start-button.png", import.meta.url).href,
-  cyclingBear: new URL("./assets/cycling-bear.png", import.meta.url).href,
-  stickyNotes: new URL("./assets/sticky-notes.png", import.meta.url).href,
-  roadScene: new URL("./assets/road-scene.png", import.meta.url).href,
-  quizScene: new URL("./assets/quiz-scene.png", import.meta.url).href,
-  resultScene: new URL("./assets/result-scene.png", import.meta.url).href,
+  home: `${trafficImageBase}/home-updated.png`,
+  homeStart: `${trafficImageBase}/home-start-button.png`,
+  cyclingBear: `${trafficImageBase}/cycling-bear.png`,
+  stickyNotes: `${trafficImageBase}/sticky-notes.png`,
+  roadScene: `${trafficImageBase}/road-scene.png`,
+  quizScene: `${trafficImageBase}/quiz-scene.png`,
+  resultScene: `${trafficImageBase}/result-scene.png`,
 };
 export const trafficActivity = {
   type: "jtqa",

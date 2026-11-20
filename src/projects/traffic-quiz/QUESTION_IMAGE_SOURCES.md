@@ -1,6 +1,6 @@
 # 文明交通图片题素材来源
 
-题目图片在 `public/traffic-quiz/questions/`。原始参考图来自北京市公安局公安交通管理局的[图解交通标志线](https://jtgl.beijing.gov.cn/jgj/lszt/659722/10860935/index.html)和汕头市公安局的[安全提示](https://www.shantou.gov.cn/gaj/zwgk/gzdt/content/post_2271389.html)。因参考文件尺寸过小，本目录中的交通标志及仪表警示图现已重制为高分辨率 WebP 位图，并逐项按参考含义核对；远光灯和转向灯也使用项目生成的图示素材。
+题目图片统一放在 `https://assets.zice8.com/jtqa/jc122/`，上传原件在下载文件夹的 `文明交通知识问答-OSS素材`。原始参考图来自北京市公安局公安交通管理局的[图解交通标志线](https://jtgl.beijing.gov.cn/jgj/lszt/659722/10860935/index.html)和汕头市公安局的[安全提示](https://www.shantou.gov.cn/gaj/zwgk/gzdt/content/post_2271389.html)。因参考文件尺寸过小，交通标志及仪表警示图已重制为高分辨率 WebP 位图，并逐项按参考含义核对；远光灯和转向灯也使用项目生成的图示素材。
 
 | 项目图片 | 含义参考 |
 | --- | --- |
