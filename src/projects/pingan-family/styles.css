@@ -75,7 +75,7 @@
 .pfh-map-trail-base,.pfh-map-trail-dash{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .pfh-map-trail-base{stroke:#fff2d4;stroke-width:14}
 .pfh-map-trail-dash{stroke:#c26853;stroke-width:3;stroke-dasharray:3 10}
-.pfh-map-stop{position:absolute;z-index:1;display:flex;align-items:center;gap:8px;width:min(52%,190px);min-height:94px;border:0;background:none;text-align:left;color:#842d2d;padding:0;cursor:pointer}
+.pfh-map-stop{position:absolute;z-index:1;display:flex;align-items:center;gap:8px;width:max-content;max-width:96%;min-height:94px;border:0;background:none;text-align:left;color:#842d2d;padding:0;cursor:pointer}
 .pfh-map-stop:nth-of-type(1){left:4%;bottom:1%}
 .pfh-map-stop:nth-of-type(2){right:0;top:44%;flex-direction:row-reverse;text-align:right}
 .pfh-map-stop:nth-of-type(3){left:4%;top:0}
@@ -83,11 +83,32 @@
 .pfh-map-stop.is-complete .pfh-map-node{background:linear-gradient(145deg,#db9c51,#b86a38)}
 .pfh-map-stop.is-locked .pfh-map-node{background:#b9a69e;border-color:#e6d4bd;box-shadow:0 0 0 4px #fff5e6,0 6px 12px #5f484733}
 .pfh-map-stop.is-locked{opacity:.76;cursor:not-allowed}
-.pfh-map-label{display:grid;gap:4px;min-width:0;padding:7px 8px;border-radius:10px;background:#fff8ecdf;box-shadow:0 3px 12px #78323225}
-.pfh-map-label strong{font-size:14px;line-height:1.3}
+.pfh-map-label{display:grid;gap:4px;flex:none;padding:7px 8px;border-radius:10px;background:#fff8ecdf;box-shadow:0 3px 12px #78323225}
+.pfh-map-label strong{font-size:14px;line-height:1.3;white-space:nowrap}
 .pfh-map-label small{font-size:12px;font-weight:700;color:#a55042}
 .pfh-map-stop:not(:disabled):active .pfh-map-node{transform:scale(.94)}
 .pfh-map-stop:focus-visible{outline:3px solid #b72b31;outline-offset:3px;border-radius:12px}
 .pfh-stages-footnote{text-align:center;color:#873a35;font-size:12px;line-height:1.5;margin:8px 0 0;text-shadow:0 1px 6px #fffaf1}
-@media(max-width:360px){.pfh-map-stop{width:54%;gap:5px}.pfh-map-node{width:60px;height:60px;font-size:22px}.pfh-map-label strong{font-size:13px}}
-@media(max-height:650px){.pfh-stages-heading h2{font-size:30px}.pfh-stage-map{height:340px}.pfh-map-stop{min-height:78px}.pfh-stages-footnote{margin-top:4px}}
+@media(max-width:360px){.pfh-map-stop{gap:5px}.pfh-map-node{width:60px;height:60px;font-size:22px}.pfh-map-label strong{font-size:13px}.pfh-stages-footnote{font-size:11px}}
+@media(max-height:650px){.pfh-stages-heading h2{font-size:30px}.pfh-stage-map{height:clamp(280px,calc(100svh - 268px),340px)}.pfh-map-stop{min-height:78px}.pfh-stages-footnote{margin-top:4px}}
+.pfh-rules-modal{display:flex;flex-direction:column;height:min(86svh,720px);overflow:hidden;padding:20px 20px 16px}
+.pfh-rules-modal .pfh-modal-mark{flex:none;font-size:25px;line-height:1}
+.pfh-rules-modal h2{flex:none;font-size:26px;margin:3px 0 2px}
+.pfh-rules-hint{flex:none;margin:0 0 11px;text-align:center;color:#a16b59;font-size:12px!important;line-height:1.4!important}
+.pfh-rules-body{position:relative;flex:1;min-height:0}
+.pfh-rules-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain;padding:0 18px 4px 0;scrollbar-width:none}
+.pfh-rules-scroll::-webkit-scrollbar{display:none}
+.pfh-rules-track{position:absolute;right:1px;top:0;bottom:0;width:8px;border-radius:8px;background:#efd4c5;pointer-events:none}
+.pfh-rules-track>span{position:absolute;left:0;right:0;min-height:26px;border-radius:8px;background:#ac3b39;box-shadow:0 1px 4px #71332f55}
+.pfh-rules-modal .pfh-modal-actions{flex:none;margin:10px 0 0;border-top:1px solid #edcbb8;padding-top:9px}
+.pfh-rules-modal .pfh-modal-actions .pfh-button{margin:0}
+.pfh-rule-section{padding:13px 0 14px;border-top:1px solid #edcfbd}
+.pfh-rule-section:first-child{border-top:0;padding-top:0}
+.pfh-rule-section h3{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:#a3282d;font-size:17px;line-height:1.35}
+.pfh-rule-section h3 span{font-family:Georgia,serif;color:#c77850;font-size:15px}
+.pfh-rule-section dl{display:grid;gap:8px;margin:0}
+.pfh-rule-section dl>div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;font-size:13px;line-height:1.55}
+.pfh-rule-section dt{font-weight:700;color:#9c5443}
+.pfh-rule-section dd{margin:0;color:#693a32}
+.pfh-rule-section ol{display:grid;gap:7px;margin:0;padding-left:19px;color:#693a32;font-size:13px;line-height:1.6}
+.pfh-rule-section li{padding-left:1px}

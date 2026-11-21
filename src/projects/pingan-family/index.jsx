@@ -10,7 +10,29 @@ const WHEEL_LABELS = ['背包', '谢谢参与', '防晒帽', '谢谢参与', '�
 
 function PrizeImage({ code }) { return <span className={`pfh-prize-image pfh-prize-${code}`} style={{ backgroundImage: `url(${assets.prizes})` }} aria-hidden="true" /> }
 function Button({ children, onClick, disabled, secondary = false }) { return <button type="button" className={`pfh-button ${secondary ? 'pfh-button-secondary' : ''}`} onClick={onClick} disabled={disabled}>{children}</button> }
-function Modal({ title, children, actions, onClose }) { return <div className="pfh-modal-backdrop" role="presentation"><div className="pfh-modal" role="dialog" aria-modal="true" aria-label={title}><button className="pfh-close" type="button" onClick={onClose} aria-label="关闭">×</button><div className="pfh-modal-mark">✦</div><h2>{title}</h2>{children}<div className="pfh-modal-actions">{actions}</div></div></div> }
+function Modal({ title, children, actions, onClose, className = '' }) { return <div className="pfh-modal-backdrop" role="presentation"><div className={`pfh-modal ${className}`} role="dialog" aria-modal="true" aria-label={title}><button className="pfh-close" type="button" onClick={onClose} aria-label="关闭">×</button><div className="pfh-modal-mark">✦</div><h2>{title}</h2>{children}<div className="pfh-modal-actions">{actions}</div></div></div> }
+function RulesContent({ children }) {
+  const scrollRef = useRef(null)
+  const [progress, setProgress] = useState({ size: 1, offset: 0 })
+  const updateProgress = useCallback(() => {
+    const element = scrollRef.current
+    if (!element) return
+    const size = Math.min(1, element.clientHeight / element.scrollHeight)
+    const offset = element.scrollHeight > element.clientHeight ? (element.scrollTop / (element.scrollHeight - element.clientHeight)) * (1 - size) : 0
+    setProgress({ size, offset })
+  }, [])
+  useEffect(() => {
+    updateProgress()
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateProgress)
+    if (observer) { observer.observe(scrollRef.current); observer.observe(scrollRef.current.firstElementChild) }
+    window.addEventListener('resize', updateProgress)
+    return () => { observer?.disconnect(); window.removeEventListener('resize', updateProgress) }
+  }, [updateProgress])
+  return <div className="pfh-rules-body">
+    <div className="pfh-rules-scroll" ref={scrollRef} onScroll={updateProgress} role="region" aria-label="活动规则详细内容" tabIndex={0}><div className="pfh-rules-sections">{children}</div></div>
+    {progress.size < 1 && <span className="pfh-rules-track" aria-hidden="true"><span style={{ height: `${progress.size * 100}%`, top: `${progress.offset * 100}%` }} /></span>}
+  </div>
+}
 
 export default function PinganFamilyProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || KEY
@@ -164,7 +186,7 @@ export default function PinganFamilyProject({ routeParams }) {
           </button>
           })}
         </div>
-        <p className="pfh-stages-footnote">每日最多成功通关 2 次 · 未中奖者通关可获抽奖机会</p>
+        <p className="pfh-stages-footnote">每日最多成功通关 2 次 · 未中奖通关得抽奖机会</p>
         {error && <p className="pfh-error" role="alert">{error}</p>}
       </section>}
       {page === 'quiz' && <section className="pfh-panel pfh-quiz-panel"><div className="pfh-stage-tag">第 {challenge?.stage} 关 / 共 3 关</div><h2>{STAGES[(challenge?.stage || 1) - 1]}</h2><div className="pfh-progress-label"><span>知识挑战</span><strong>{Math.min((challenge?.questionIndex || 0) + 1, challenge?.questionCount || 1)} / {challenge?.questionCount}</strong></div><div className="pfh-progress"><span style={{ width: `${(((challenge?.questionIndex || 0) + 1) / (challenge?.questionCount || 1)) * 100}%` }} /></div>{challenge?.status === 'stage_failed' ? <><p>本关挑战未通过，已通关关卡保留。</p><Button onClick={retryStage} disabled={busy}>重新挑战本关</Button></> : <><div className="pfh-question">{challenge?.question?.title}</div><div className="pfh-options">{challenge?.question?.options?.map((option) => <button type="button" key={option.key} className={selected === option.key ? 'selected' : ''} onClick={() => !feedback && !toast && setSelected(option.key)} disabled={Boolean(feedback || toast)}><span>{option.key}</span>{option.text}</button>)}</div>{feedback && <div className={`pfh-feedback ${feedback.correct ? 'correct' : 'wrong'}`}>{feedback.correct ? '回答正确' : `回答错误 · 正确答案 ${feedback.correctAnswer}`}{feedback.analysis && <p>{feedback.analysis}</p>}{!feedback.correct && !feedback.analysis && <p>原题库未提供本题解析。</p>}</div>}{!feedback && <Button onClick={submitAnswer} disabled={!selected || busy || Boolean(toast)}>确认答案</Button>}</>}{error && <p className="pfh-error" role="alert">{error}</p>}</section>}
@@ -191,7 +213,15 @@ export default function PinganFamilyProject({ routeParams }) {
         <Button onClick={() => setPage('home')} secondary>返回首页</Button>
       </section>}
     </main>
-    {modal === 'rules' && <Modal title="活动规则" onClose={() => setModal('')} actions={<Button onClick={() => setModal('')}>我知道了</Button>}><p>答题时间：2026年11月23日至11月27日（北京时间）。</p><p>三关分别随机抽取 10 道判断题、4 道单选题、2 道单选题。每关全部答对才可进入下一关；答错可重试当前关，已通过的关卡保留。</p><p>每人每天最多成功通关 2 次。未中奖时，每次完整通关获得 1 次抽奖机会，未使用机会在活动期间保留。每人活动期间最多中奖 1 次，中奖后可继续答题，但不再获得抽奖机会，原有未用资格自动失效。失败不占通关次数。</p><p>抽中奖品后填写姓名与手机号，完成领奖记录。同一手机号只能领取一份奖品；重复登记的奖品不发放。</p><p>实物奖品：背包、防晒帽、抱枕被各 50 份。兑奖日期：2026年11月30日至12月4日；兑奖地点：大浪街道便民服务中心D栋401。请凭中奖记录及登记的姓名、手机号兑奖。</p></Modal>}
+    {modal === 'rules' && <Modal title="活动规则" className="pfh-rules-modal" onClose={() => setModal('')} actions={<Button onClick={() => setModal('')}>我知道了</Button>}>
+      <p className="pfh-rules-hint">上下滑动查看完整规则</p>
+      <RulesContent>
+        <section className="pfh-rule-section"><h3><span>01</span>活动时间</h3><dl><div><dt>答题时间</dt><dd>2026年11月23日至11月27日（北京时间）</dd></div><div><dt>兑奖日期</dt><dd>2026年11月30日至12月4日</dd></div><div><dt>兑奖地点</dt><dd>大浪街道便民服务中心D栋401</dd></div></dl></section>
+        <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 4 道单选题；第三关 2 道单选题。</li><li>每关全部答对才可解锁下一关。答错可重试当前关，已通过的关卡保留。</li><li>每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
+        <section className="pfh-rule-section"><h3><span>03</span>抽奖与中奖</h3><ol><li>未中奖时，每次完整通关获得 1 次抽奖机会；未使用机会在活动期间保留。</li><li>每人活动期间最多中奖 1 次。中奖后仍可答题，但不再获得抽奖机会，原有未用资格自动失效。</li><li>实物奖品为背包、防晒帽、抱枕被，各 50 份。</li></ol></section>
+        <section className="pfh-rule-section"><h3><span>04</span>领奖登记</h3><ol><li>抽中奖品后填写姓名和手机号，完成中奖记录。</li><li>同一手机号只能领取一份奖品；重复登记的奖品不发放。</li><li>兑奖时请出示中奖记录及登记的姓名、手机号。</li></ol></section>
+      </RulesContent>
+    </Modal>}
     {toast && <div className="pfh-toast" role="status" aria-live="polite">{toast}</div>}
     {modal === 'failed' && <Modal title="本关挑战未通过" onClose={() => setModal('')} actions={<Button onClick={retryStage} disabled={busy}>重试当前关</Button>}><p>已通过的前面关卡仍然有效。本次失败不占成功通关次数。</p>{feedback?.correctAnswer && <p>正确答案：{feedback.correctAnswer}{feedback.analysis ? `。${feedback.analysis}` : '。原题库未提供本题解析。'}</p>}</Modal>}
     {modal === 'draw' && <Modal title={drawResult?.won ? '恭喜中奖' : '谢谢参与'} onClose={() => { setModal(''); if (drawResult?.won) setPage('profile') }} actions={<><Button onClick={() => { setModal(''); if (drawResult?.won) setPage('profile'); else showRecords() }}>{drawResult?.won ? '填写领奖信息' : '查看中奖记录'}</Button><Button onClick={() => { setModal(''); setPage('home') }} secondary>返回首页</Button></>}><div className="pfh-draw-result">{drawResult?.won && <PrizeImage code={drawResult.prizeCode} />}<strong>{drawResult?.prizeName}</strong>{drawResult?.won && <p>请填写姓名和手机号，完成中奖记录。</p>}</div></Modal>}
