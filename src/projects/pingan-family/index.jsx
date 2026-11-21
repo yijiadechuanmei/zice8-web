@@ -7,6 +7,7 @@ import './styles.css'
 const KEY = 'dl1125'
 const STAGES = ['初入课堂·基础认知关', '以案学法·情景进阶关', '挑战通关·综合法律关']
 const WHEEL_LABELS = ['背包', '谢谢参与', '防晒帽', '谢谢参与', '抱枕被', '谢谢参与']
+const formatAnswer = (value) => value?.split('').join('、')
 
 function PrizeImage({ code }) { return <span className={`pfh-prize-image pfh-prize-${code}`} style={{ backgroundImage: `url(${assets.prizes})` }} aria-hidden="true" /> }
 function Button({ children, onClick, disabled, secondary = false }) { return <button type="button" className={`pfh-button ${secondary ? 'pfh-button-secondary' : ''}`} onClick={onClick} disabled={disabled}>{children}</button> }
@@ -101,10 +102,17 @@ export default function PinganFamilyProject({ routeParams }) {
       setPage('quiz')
     })
   }
+  function selectOption(key) {
+    if (feedback || toast) return
+    setSelected((current) => challenge?.question?.multiple
+      ? current.includes(key) ? current.replace(key, '') : [...current, key].sort().join('')
+      : key)
+  }
   async function submitAnswer() {
-    if (!selected || !challenge?.question || feedback || toast) return
+    if (!selected || (challenge?.question?.multiple && selected.length < 2) || !challenge?.question || feedback || toast) return
     await execute(async () => {
       const result = await answer(activityKey, challenge.id, challenge.question.id, selected)
+      if (result.bankUpdated) { setChallenge(result.challenge); setSelected(''); setFeedback(null); setError('第三关题库已更新，请重新作答本关'); return }
       if (result.correct) {
         setToast('回答正确')
         answerTimer.current = window.setTimeout(async () => {
@@ -189,7 +197,20 @@ export default function PinganFamilyProject({ routeParams }) {
         <p className="pfh-stages-footnote">每日最多成功通关 2 次 · 未中奖通关得抽奖机会</p>
         {error && <p className="pfh-error" role="alert">{error}</p>}
       </section>}
-      {page === 'quiz' && <section className="pfh-panel pfh-quiz-panel"><div className="pfh-stage-tag">第 {challenge?.stage} 关 / 共 3 关</div><h2>{STAGES[(challenge?.stage || 1) - 1]}</h2><div className="pfh-progress-label"><span>知识挑战</span><strong>{Math.min((challenge?.questionIndex || 0) + 1, challenge?.questionCount || 1)} / {challenge?.questionCount}</strong></div><div className="pfh-progress"><span style={{ width: `${(((challenge?.questionIndex || 0) + 1) / (challenge?.questionCount || 1)) * 100}%` }} /></div>{challenge?.status === 'stage_failed' ? <><p>本关挑战未通过，已通关关卡保留。</p><Button onClick={retryStage} disabled={busy}>重新挑战本关</Button></> : <><div className="pfh-question">{challenge?.question?.title}</div><div className="pfh-options">{challenge?.question?.options?.map((option) => <button type="button" key={option.key} className={selected === option.key ? 'selected' : ''} onClick={() => !feedback && !toast && setSelected(option.key)} disabled={Boolean(feedback || toast)}><span>{option.key}</span>{option.text}</button>)}</div>{feedback && <div className={`pfh-feedback ${feedback.correct ? 'correct' : 'wrong'}`}>{feedback.correct ? '回答正确' : `回答错误 · 正确答案 ${feedback.correctAnswer}`}{feedback.analysis && <p>{feedback.analysis}</p>}{!feedback.correct && !feedback.analysis && <p>原题库未提供本题解析。</p>}</div>}{!feedback && <Button onClick={submitAnswer} disabled={!selected || busy || Boolean(toast)}>确认答案</Button>}</>}{error && <p className="pfh-error" role="alert">{error}</p>}</section>}
+      {page === 'quiz' && <section className="pfh-panel pfh-quiz-panel">
+        <div className="pfh-stage-tag">第 {challenge?.stage} 关 / 共 3 关</div>
+        <h2>{STAGES[(challenge?.stage || 1) - 1]}</h2>
+        <div className="pfh-progress-label"><span>知识挑战</span><strong>{Math.min((challenge?.questionIndex || 0) + 1, challenge?.questionCount || 1)} / {challenge?.questionCount}</strong></div>
+        <div className="pfh-progress"><span style={{ width: `${(((challenge?.questionIndex || 0) + 1) / (challenge?.questionCount || 1)) * 100}%` }} /></div>
+        {challenge?.status === 'stage_failed' ? <><p>本关挑战未通过，已通关关卡保留。</p><Button onClick={retryStage} disabled={busy}>重新挑战本关</Button></> : <>
+          <div className={`pfh-question ${challenge?.question?.multiple ? 'pfh-question-multiple' : ''}`}>{challenge?.question?.title}</div>
+          {challenge?.question?.multiple && <p className="pfh-multiple-hint">多选题 · 请至少选择 2 项</p>}
+          <div className="pfh-options">{challenge?.question?.options?.map((option) => <button type="button" key={option.key} className={(challenge?.question?.multiple ? selected.includes(option.key) : selected === option.key) ? 'selected' : ''} aria-pressed={challenge?.question?.multiple ? selected.includes(option.key) : selected === option.key} onClick={() => selectOption(option.key)} disabled={Boolean(feedback || toast)}><span>{option.key}</span>{option.text}</button>)}</div>
+          {feedback && <div className={`pfh-feedback ${feedback.correct ? 'correct' : 'wrong'}`}>{feedback.correct ? '回答正确' : `回答错误 · 正确答案 ${formatAnswer(feedback.correctAnswer)}`}{feedback.analysis && <p>{feedback.analysis}</p>}{!feedback.correct && !feedback.analysis && <p>原题库未提供本题解析。</p>}</div>}
+          {!feedback && <Button onClick={submitAnswer} disabled={!selected || (challenge?.question?.multiple && selected.length < 2) || busy || Boolean(toast)}>确认答案</Button>}
+        </>}
+        {error && <p className="pfh-error" role="alert">{error}</p>}
+      </section>}
       {page === 'success' && <section className="pfh-panel pfh-result-panel"><div className="pfh-big-icon">✦</div><p className="pfh-kicker">三关全部通过</p><h2>闯关成功</h2><p>{state?.won ? state.wonByPhone ? '该登记手机号已获得活动奖品，本轮不再发放抽奖机会。' : '您已获得活动奖品，本轮不再发放抽奖机会。' : '本轮已获得 1 次幸运转盘抽奖资格'}</p>{state?.won ? <Button onClick={openWheel}>{state.needsPrizeProfile ? '填写领奖信息' : '查看我的中奖记录'}</Button> : <Button onClick={openWheel}>前往幸运转盘</Button>}<Button onClick={() => { window.clearTimeout(answerTimer.current); setPage('home') }} secondary>返回活动首页</Button></section>}
       {page === 'profile' && <section className="pfh-panel"><h2>填写领奖信息</h2><p>请在抽中奖品后填写姓名和手机号，供本活动兑奖记录使用。</p><form onSubmit={submitProfile}><label>姓名<input value={profile.name} maxLength={60} onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))} autoComplete="name" required /></label><label>手机号码<input type="tel" inputMode="numeric" maxLength={11} value={profile.phone} onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value.replace(/\D/g, '') }))} autoComplete="tel" required /></label><button type="submit" className="pfh-button" disabled={busy}>保存中奖记录</button></form>{error && <p className="pfh-error" role="alert">{error}</p>}</section>}
       {page === 'wheel' && <section className="pfh-wheel-page"><p className="pfh-wheel-count">剩余抽奖次数：<strong>{state?.unusedChanceIds?.length ?? 0}</strong></p><div className="pfh-wheel-wrap"><div className="pfh-pointer" /><div className="pfh-wheel" style={{ transform: `rotate(${rotation}deg)` }}>{WHEEL_LABELS.map((label, index) => <span key={index} className="pfh-wheel-label" style={{ transform: `translate(-50%, -50%) rotate(${index * 60}deg) translateY(calc(var(--pfh-wheel-size) * -.35)) rotate(${-index * 60}deg)` }}>{label}</span>)}</div><button type="button" className="pfh-wheel-center" onClick={spin} disabled={!active || !chanceId || state?.won || spinning || busy || !state?.drawEnabled} aria-label="开始抽奖">{spinning ? '转动中' : '抽奖'}</button></div><div className="pfh-links"><button type="button" onClick={showRecords}>我的中奖记录</button></div><p className="pfh-draw-closed" style={{ visibility: state?.won || !active || !state?.drawEnabled ? 'visible' : 'hidden' }}>{state?.won ? '您已获得活动奖品，不能再次抽奖' : !active ? activityStatus === 'ended' ? '活动已结束，不能再抽奖' : '活动尚未开始' : !state?.drawEnabled ? '正式奖品抽奖参数待确认，当前暂未开放' : ''}</p>{error && <p className="pfh-error" role="alert">{error}</p>}</section>}
@@ -217,13 +238,13 @@ export default function PinganFamilyProject({ routeParams }) {
       <p className="pfh-rules-hint">上下滑动查看完整规则</p>
       <RulesContent>
         <section className="pfh-rule-section"><h3><span>01</span>活动时间</h3><dl><div><dt>答题时间</dt><dd>2026年11月23日至11月27日（北京时间）</dd></div><div><dt>兑奖日期</dt><dd>2026年11月30日至12月4日</dd></div><div><dt>兑奖地点</dt><dd>大浪街道便民服务中心D栋401</dd></div></dl></section>
-        <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 4 道单选题；第三关 2 道单选题。</li><li>每关全部答对才可解锁下一关。答错可重试当前关，已通过的关卡保留。</li><li>每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
+        <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 4 道单选题；第三关 2 道多选题。</li><li>每关全部答对才可解锁下一关。答错可重试当前关，已通过的关卡保留。</li><li>每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
         <section className="pfh-rule-section"><h3><span>03</span>抽奖与中奖</h3><ol><li>未中奖时，每次完整通关获得 1 次抽奖机会；未使用机会在活动期间保留。</li><li>每人活动期间最多中奖 1 次。中奖后仍可答题，但不再获得抽奖机会，原有未用资格自动失效。</li><li>实物奖品为背包、防晒帽、抱枕被，各 50 份。</li></ol></section>
         <section className="pfh-rule-section"><h3><span>04</span>领奖登记</h3><ol><li>抽中奖品后填写姓名和手机号，完成中奖记录。</li><li>同一手机号只能领取一份奖品；重复登记的奖品不发放。</li><li>兑奖时请出示中奖记录及登记的姓名、手机号。</li></ol></section>
       </RulesContent>
     </Modal>}
     {toast && <div className="pfh-toast" role="status" aria-live="polite">{toast}</div>}
-    {modal === 'failed' && <Modal title="本关挑战未通过" onClose={() => setModal('')} actions={<Button onClick={retryStage} disabled={busy}>重试当前关</Button>}><p>已通过的前面关卡仍然有效。本次失败不占成功通关次数。</p>{feedback?.correctAnswer && <p>正确答案：{feedback.correctAnswer}{feedback.analysis ? `。${feedback.analysis}` : '。原题库未提供本题解析。'}</p>}</Modal>}
+    {modal === 'failed' && <Modal title="本关挑战未通过" onClose={() => setModal('')} actions={<Button onClick={retryStage} disabled={busy}>重试当前关</Button>}><p>已通过的前面关卡仍然有效。本次失败不占成功通关次数。</p>{feedback?.correctAnswer && <p>正确答案：{formatAnswer(feedback.correctAnswer)}{feedback.analysis ? `。${feedback.analysis}` : '。原题库未提供本题解析。'}</p>}</Modal>}
     {modal === 'draw' && <Modal title={drawResult?.won ? '恭喜中奖' : '谢谢参与'} onClose={() => { setModal(''); if (drawResult?.won) setPage('profile') }} actions={<><Button onClick={() => { setModal(''); if (drawResult?.won) setPage('profile'); else showRecords() }}>{drawResult?.won ? '填写领奖信息' : '查看中奖记录'}</Button><Button onClick={() => { setModal(''); setPage('home') }} secondary>返回首页</Button></>}><div className="pfh-draw-result">{drawResult?.won && <PrizeImage code={drawResult.prizeCode} />}<strong>{drawResult?.prizeName}</strong>{drawResult?.won && <p>请填写姓名和手机号，完成中奖记录。</p>}</div></Modal>}
   </div>
 }

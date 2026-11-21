@@ -41,6 +41,8 @@
 .pfh-page-quiz .pfh-progress-label{margin-top:11px;font-size:13px}
 .pfh-page-quiz .pfh-progress{height:6px;margin:6px 0 16px}
 .pfh-page-quiz .pfh-question{font-size:clamp(16px,4.3vw,18px);line-height:1.48;margin:0 0 15px}
+.pfh-page-quiz .pfh-question-multiple{margin-bottom:4px}
+.pfh-page-quiz .pfh-multiple-hint{margin:0 0 10px;color:#a55042;font-size:12px;font-weight:700;line-height:1.4}
 .pfh-page-quiz .pfh-options{gap:9px}
 .pfh-page-quiz .pfh-options button{gap:10px;min-height:47px;padding:9px 11px;border-radius:12px;font-size:14px;line-height:1.42}
 .pfh-page-quiz .pfh-options button span{flex-basis:27px;height:27px;font-size:13px}
