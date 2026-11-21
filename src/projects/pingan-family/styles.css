@@ -6,7 +6,6 @@
 @keyframes pfh-bloom{0%{opacity:.25;transform:scale(.5) rotate(-30deg)}60%{opacity:1;transform:scale(1.22) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
 .pfh-modal-mark,.pfh-big-icon{animation:pfh-bloom .65s ease-out both}
 @media(prefers-reduced-motion:reduce){.pfh-modal-mark,.pfh-big-icon{animation:none}}
-.pfh-won-banner{background:linear-gradient(120deg,#fff2d2,#fff9ed);border:1px solid #dfab65;border-radius:12px;padding:10px 12px;color:#a52b2d;font-size:13px;line-height:1.5;margin-bottom:13px;font-weight:700}
 .pfh-page-home .pfh-shell{display:flex;flex-direction:column;min-height:100svh;padding-top:20px;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
 .pfh-page-home .pfh-hero{min-height:0;flex:none;padding-top:clamp(58px,10svh,100px)}
 .pfh-page-home .pfh-hero h1{font-family:"Songti SC","STSong","Noto Serif CJK SC","Noto Serif SC","Source Han Serif SC","SimSun",serif;font-size:clamp(56px,17vw,84px);font-weight:600;line-height:1.08;letter-spacing:.025em;margin:17px 0 17px;color:#b30e1e;text-shadow:0 2px 0 #f7b9a7,0 4px 10px #7f1b2e55}
@@ -22,18 +21,20 @@
 .pfh-back-icon{display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid #d8aa7c;box-shadow:0 3px 12px #79212825}
 .pfh-back-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pfh-page-wheel,.pfh-page-quiz{height:100dvh;min-height:0;overflow:hidden}
+.pfh-page-wheel{height:100svh;background-position:center top}
 .pfh-page-wheel .pfh-shell,.pfh-page-quiz .pfh-shell{height:100dvh;min-height:0;overflow:hidden;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+.pfh-page-wheel .pfh-shell{height:100svh}
 .pfh-page-wheel .pfh-back,.pfh-page-quiz .pfh-back{flex:none;margin:0 0 10px}
 .pfh-wheel-page{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 0 8px;overflow:hidden}
 .pfh-wheel-count{flex:none;margin:0 0 35px;padding:5px 16px;border-radius:99px;background:#fff5e8ed;color:#74282a;font-size:14px;line-height:1.3}
 .pfh-wheel-count strong{font-size:20px}
-.pfh-wheel-wrap{--pfh-wheel-size:min(82vw,43dvh,330px);width:var(--pfh-wheel-size);max-height:none;aspect-ratio:1;flex:none;margin:0 auto}
+.pfh-wheel-wrap{--pfh-wheel-size:min(82vw,43svh,330px);width:var(--pfh-wheel-size);max-height:none;aspect-ratio:1;flex:none;margin:0 auto}
 .pfh-wheel-page .pfh-wheel{border-width:8px}
 .pfh-wheel-page .pfh-wheel-label{width:76px;font-size:clamp(11px,3.5vw,14px)}
 .pfh-wheel-page .pfh-wheel-center{width:76px;height:76px}
 .pfh-wheel-page .pfh-links{flex:none;width:100%;margin:22px 0 0;gap:0}
 .pfh-wheel-page .pfh-links button{padding:0 10px;min-height:44px;border:0;border-radius:0;background:none;color:#fff;text-decoration:none;font-weight:700;text-shadow:0 1px 2px #6f1c1f,0 2px 8px #651822,0 0 14px #651822}
-.pfh-wheel-page .pfh-draw-closed{flex:none;margin:13px 0 0;padding:7px 12px;line-height:1.4}
+.pfh-wheel-page .pfh-draw-closed{flex:none;display:grid;place-items:center;height:42px;width:100%;margin:4px 0 0;padding:4px 9px;line-height:1.3}.pfh-wheel-page>.pfh-error{position:fixed;z-index:5;left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin:0}
 .pfh-page-quiz .pfh-quiz-panel{flex:0 1 auto;min-height:0;max-height:calc(100dvh - 86px - env(safe-area-inset-bottom,0px));width:100%;overflow-y:auto;overscroll-behavior:contain;margin:0;padding:18px 17px 20px;border-radius:18px}
 .pfh-page-quiz .pfh-stage-tag{padding:5px 12px;font-size:12px}
 .pfh-page-quiz .pfh-quiz-panel h2{font-size:21px;line-height:1.3;margin:9px 0 4px}
@@ -49,5 +50,5 @@
 .pfh-toast{position:fixed;z-index:40;top:calc(50% - 24px);left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:999px;background:#3d352be8;color:#fff;font-size:15px;font-weight:700;box-shadow:0 8px 24px #36161335;pointer-events:none;animation:pfh-toast-in .18s ease-out both}
 @keyframes pfh-toast-in{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(max-height:720px){.pfh-page-home .pfh-hero{padding-top:45px}.pfh-page-home .pfh-hero h1{font-size:clamp(52px,16vw,72px);margin:12px 0}.pfh-page-home .pfh-home-actions{margin-top:22px}.pfh-page-home .pfh-hero-info{padding-top:10px}}
-@media(max-height:680px){.pfh-wheel-wrap{--pfh-wheel-size:min(78vw,39dvh,290px)}.pfh-wheel-count{margin-bottom:31px}.pfh-wheel-page .pfh-links{margin-top:16px}.pfh-page-quiz .pfh-quiz-panel{padding:14px 14px 16px}.pfh-page-quiz .pfh-question{font-size:16px;line-height:1.4;margin-bottom:10px}.pfh-page-quiz .pfh-options button{min-height:43px;padding:7px 9px}}
+@media(max-height:680px){.pfh-wheel-wrap{--pfh-wheel-size:min(78vw,39svh,290px)}.pfh-wheel-count{margin-bottom:31px}.pfh-wheel-page .pfh-links{margin-top:16px}.pfh-page-quiz .pfh-quiz-panel{padding:14px 14px 16px}.pfh-page-quiz .pfh-question{font-size:16px;line-height:1.4;margin-bottom:10px}.pfh-page-quiz .pfh-options button{min-height:43px;padding:7px 9px}}
 @media(prefers-reduced-motion:reduce){.pfh-toast{animation:none}}
