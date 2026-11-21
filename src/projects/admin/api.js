@@ -292,6 +292,13 @@ export function getPinganFamilyWinners(activityKey, params = {}) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/winners?${search}`)
 }
 
+export function managePinganFamilyTestData(activityKey, userId, payload) {
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/users/${encodeURIComponent(userId)}/test-chances`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export function clearXiangyuGlobalTreasureData(activityKey, payload) {
   return adminRequest(`/admin/activities/${activityKey}/xiangyu-global-treasure/clear-data`, {
     method: 'POST',
