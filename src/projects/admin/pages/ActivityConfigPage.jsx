@@ -43,6 +43,7 @@ import {
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
 import CybersecurityChallengeAdmin from '../components/CybersecurityChallengeAdmin'
 import PinganFamilyTestTools from '../components/PinganFamilyTestTools'
+import PinganFamilyDrawSettings from '../components/PinganFamilyDrawSettings'
 
 const { Text, Title } = Typography
 
@@ -1055,7 +1056,7 @@ export default function ActivityConfigPage({ activity }) {
       </div>
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
-        {activity.type === 'pfh' && <PinganFamilyTestTools key={activity.activityKey} activityKey={activity.activityKey} />}
+        {activity.type === 'pfh' && <><PinganFamilyDrawSettings key={`${activity.activityKey}-draw`} activityKey={activity.activityKey} /><PinganFamilyTestTools key={activity.activityKey} activityKey={activity.activityKey} /></>}
         {activity.type === 'cybersecurity_knowledge_challenge' && <CybersecurityChallengeAdmin key={activity.activityKey} activityKey={activity.activityKey} />}
         {activity.type === 'safe_driver_quiz_lottery' ? (
           <Card size="small" title="清空平安好司机测试用户数据" style={{ borderColor: '#ffccc7' }}>

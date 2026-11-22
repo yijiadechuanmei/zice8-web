@@ -292,6 +292,16 @@ export function getPinganFamilyWinners(activityKey, params = {}) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/winners?${search}`)
 }
 
+export function getPinganFamilyDrawSettings(activityKey) {
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/draw-settings`)
+}
+
+export function savePinganFamilyDrawSettings(activityKey, payload) {
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/draw-settings`, {
+    method: 'PUT', body: JSON.stringify(payload),
+  })
+}
+
 export function managePinganFamilyTestData(activityKey, userId, payload) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/users/${encodeURIComponent(userId)}/test-chances`, {
     method: 'POST',
