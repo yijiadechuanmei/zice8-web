@@ -321,6 +321,11 @@ export function getPinganFamilyChallengeDetail(activityKey, id) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/challenges/${encodeURIComponent(id)}`)
 }
 
+export function getPinganFamilyData(activityKey, params = {}) {
+  const query = new URLSearchParams(params).toString()
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/data?${query}`)
+}
+
 export function savePinganFamilyDrawSettings(activityKey, payload) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/draw-settings`, {
     method: 'PUT', body: JSON.stringify(payload),

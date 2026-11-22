@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Col, Descriptions, Input, Popconfirm, Row, Space, Statistic, Table, Tag, message } from 'antd'
+import { Alert, Button, Card, Col, Descriptions, Input, Popconfirm, Row, Space, Statistic, Table, Tabs, Tag, Typography, message } from 'antd'
 import { getPinganFamilyClaim, getPinganFamilyWinners, redeemPinganFamilyClaim } from '../api'
 import PinganFamilyQuizData from './PinganFamilyQuizData'
+import PinganFamilyRawTable from './PinganFamilyRawTable'
 
 const statusText = { confirmed: '已登记', pending_profile: '待填写领奖信息', duplicate_phone: '手机号重复，未发奖' }
+const tableNames = { winners: '中奖记录（pfh_draw）', challenges: '闯关记录（pfh_challenge）', answers: '逐题答案（pfh_answer_log）', chances: '抽奖资格（pfh_chance）', draws: '抽奖流水（pfh_draw）', prizes: '奖品库存（pfh_prize）' }
 
 export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
   const [data, setData] = useState({ summary: { confirmed: 0, pending: 0 }, rows: [], pagination: { page: 1, pageSize: 20, total: 0 } })
@@ -18,7 +20,9 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
   const [claim, setClaim] = useState(null)
   const [claimBusy, setClaimBusy] = useState(false)
   const [claimError, setClaimError] = useState('')
+  const [view, setView] = useState('winners')
   useEffect(() => {
+    if (!overviewOnly && view !== 'winners') return undefined
     let alive = true
     setLoading(true)
     getPinganFamilyWinners(activity.activityKey, { page: overviewOnly ? 1 : page, pageSize: overviewOnly ? 1 : 20, keyword: overviewOnly ? '' : keyword })
@@ -26,7 +30,7 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       .catch((failure) => { if (alive) setError(failure.message || '中奖记录加载失败') })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [activity.activityKey, keyword, overviewOnly, page, refreshKey])
+  }, [activity.activityKey, keyword, overviewOnly, page, refreshKey, view])
 
   async function lookupClaim() {
     setClaimBusy(true)
@@ -62,13 +66,19 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
     { title: '兑奖状态', dataIndex: 'redeemedAt', width: 100, render: (value, row) => row.status !== 'confirmed' ? '—' : value ? '已兑奖' : '待兑奖' },
   ]
 
-  return <>
+  if (overviewOnly) return <>
     {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
-    <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+    <Row gutter={[12, 12]}>
       <Col xs={12} sm={8}><Card size="small"><Statistic title="已登记中奖" value={data.summary.confirmed} /></Card></Col>
       <Col xs={12} sm={8}><Card size="small"><Statistic title="待填写信息" value={data.summary.pending} /></Card></Col>
     </Row>
-    {!overviewOnly && <Card title="现场兑奖核验" size="small" style={{ marginBottom: 16 }}>
+  </>
+
+  return <Card className="admin-card" title="平安家庭 · 数据表">
+    <Tabs activeKey={view} onChange={setView} items={Object.entries(tableNames).map(([key, label]) => ({ key, label }))} />
+    <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>按实际业务表查看记录。中奖记录是抽奖流水中的有效中奖与取消记录，逐题答案可按闯关 ID 对照。</Typography.Text>
+    {view === 'winners' && error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
+    {view === 'winners' && <Card title="现场兑奖核验" size="small" style={{ marginBottom: 16 }}>
       <Space wrap style={{ marginBottom: 12 }}>
         <Input value={claimName} onChange={(event) => { setClaimName(event.target.value); setClaim(null) }} placeholder="登记姓名" aria-label="登记姓名" style={{ width: 150 }} />
         <Input value={claimPhone} onChange={(event) => { setClaimPhone(event.target.value.replace(/\D/g, '').slice(0, 11)); setClaim(null) }} inputMode="numeric" placeholder="登记手机号" aria-label="登记手机号" style={{ width: 180 }} />
@@ -88,9 +98,10 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
         </Popconfirm>}
       </>}
     </Card>}
-    {!overviewOnly && <Card title="平安家庭中奖记录" extra={<Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} />}>
+    {view === 'winners' && <Card title="中奖记录" size="small" extra={<Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} />}>
       <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1200 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
     </Card>}
-    {!overviewOnly && <div style={{ marginTop: 16 }}><PinganFamilyQuizData activityKey={activity.activityKey} /></div>}
-  </>
+    {view === 'challenges' && <PinganFamilyQuizData activityKey={activity.activityKey} />}
+    {['answers', 'chances', 'draws', 'prizes'].includes(view) && <PinganFamilyRawTable key={view} activityKey={activity.activityKey} view={view} />}
+  </Card>
 }

@@ -262,7 +262,7 @@ export default function PinganFamilyProject({ routeParams }) {
       <RulesContent>
         <section className="pfh-rule-section"><h3><span>01</span>活动时间</h3><dl><div><dt>答题时间</dt><dd>2026年11月23日至11月27日（北京时间）</dd></div><div><dt>兑奖日期</dt><dd>2026年11月30日至12月4日</dd></div><div><dt>兑奖地点</dt><dd>大浪街道便民服务中心D栋401</dd></div></dl></section>
         <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 5 道单选题；第三关 5 道多选题。</li><li>每题限时 1 分钟。超时视为本关挑战失败，可重试当前关；已通过的关卡保留。</li><li>每关全部答对才可解锁下一关。每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
-        <section className="pfh-rule-section"><h3><span>03</span>抽奖与中奖</h3><ol><li>未中奖时，每次完整通关获得 1 次抽奖机会；抽奖时间为 11 月 23–27 日，未使用机会须在此期间使用。</li><li>每次抽奖中奖率为 35%；当日奖品配额或总库存用尽后，实际中奖率可能降低。</li><li>每人活动期间最多中奖 1 次。中奖后仍可答题，但不再获得抽奖机会，原有未用资格自动失效。</li><li>实物奖品为背包、防晒帽、抱枕被，各 50 份。</li></ol></section>
+        <section className="pfh-rule-section"><h3><span>03</span>抽奖与中奖</h3><ol><li>未中奖时，每次完整通关获得 1 次抽奖机会；抽奖时间为 11 月 23–27 日，未使用机会须在此期间使用。</li><li>每人活动期间最多中奖 1 次。中奖后仍可答题，但不再获得抽奖机会，原有未用资格自动失效。</li><li>实物奖品为背包、防晒帽、抱枕被。</li></ol></section>
         <section className="pfh-rule-section"><h3><span>04</span>领奖登记</h3><ol><li>抽中奖品后填写姓名和手机号，完成中奖记录。</li><li>同一手机号只能领取一份奖品；重复登记的奖品不发放。</li><li>兑奖时请报登记姓名和手机号。工作人员核验中奖记录并登记兑奖，已兑奖奖品不能再次领取。</li></ol></section>
       </RulesContent>
     </Modal>}
