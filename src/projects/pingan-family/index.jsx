@@ -112,7 +112,7 @@ export default function PinganFamilyProject({ routeParams }) {
     if (!selected || (challenge?.question?.multiple && selected.length < 2) || !challenge?.question || feedback || toast) return
     await execute(async () => {
       const result = await answer(activityKey, challenge.id, challenge.question.id, selected)
-      if (result.bankUpdated) { setChallenge(result.challenge); setSelected(''); setFeedback(null); setError('第三关题库已更新，请重新作答本关'); return }
+      if (result.bankUpdated) { setChallenge(result.challenge); setSelected(''); setFeedback(null); setError('本关题目已更新，请重新作答'); return }
       if (result.correct) {
         setToast('回答正确')
         answerTimer.current = window.setTimeout(async () => {
@@ -238,7 +238,7 @@ export default function PinganFamilyProject({ routeParams }) {
       <p className="pfh-rules-hint">上下滑动查看完整规则</p>
       <RulesContent>
         <section className="pfh-rule-section"><h3><span>01</span>活动时间</h3><dl><div><dt>答题时间</dt><dd>2026年11月23日至11月27日（北京时间）</dd></div><div><dt>兑奖日期</dt><dd>2026年11月30日至12月4日</dd></div><div><dt>兑奖地点</dt><dd>大浪街道便民服务中心D栋401</dd></div></dl></section>
-        <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 4 道单选题；第三关 2 道多选题。</li><li>每关全部答对才可解锁下一关。答错可重试当前关，已通过的关卡保留。</li><li>每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
+        <section className="pfh-rule-section"><h3><span>02</span>三关答题</h3><ol><li>第一关随机抽取 10 道判断题；第二关 5 道单选题；第三关 5 道多选题。</li><li>每关全部答对才可解锁下一关。答错可重试当前关，已通过的关卡保留。</li><li>每人每天最多成功通关 2 次；失败不占通关次数。</li></ol></section>
         <section className="pfh-rule-section"><h3><span>03</span>抽奖与中奖</h3><ol><li>未中奖时，每次完整通关获得 1 次抽奖机会；未使用机会在活动期间保留。</li><li>每人活动期间最多中奖 1 次。中奖后仍可答题，但不再获得抽奖机会，原有未用资格自动失效。</li><li>实物奖品为背包、防晒帽、抱枕被，各 50 份。</li></ol></section>
         <section className="pfh-rule-section"><h3><span>04</span>领奖登记</h3><ol><li>抽中奖品后填写姓名和手机号，完成中奖记录。</li><li>同一手机号只能领取一份奖品；重复登记的奖品不发放。</li><li>兑奖时请出示中奖记录及登记的姓名、手机号。</li></ol></section>
       </RulesContent>
