@@ -11,3 +11,4 @@ export const saveProfile = (key, profile) => request(`${base(key)}/profile`, { m
 export const draw = (key, id) => request(`${base(key)}/chances/${encodeURIComponent(id)}/draw`, { method: 'POST' })
 export const getDrawResult = (key, id) => request(`${base(key)}/chances/${encodeURIComponent(id)}/result`)
 export const getRecords = (key) => request(`${base(key)}/records`)
+export const getVoucher = (key, drawId) => request(`${base(key)}/claims/${encodeURIComponent(drawId)}/voucher`, { cache: 'no-store' })

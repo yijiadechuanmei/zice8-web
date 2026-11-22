@@ -67,6 +67,13 @@
 .pfh-record-details>div{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:start;font-size:14px;line-height:1.5}
 .pfh-record-details dt{color:#9a7568}
 .pfh-record-details dd{margin:0;color:#65352d;overflow-wrap:anywhere}
+.pfh-voucher{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;margin-top:16px;padding:14px 12px;border:1px solid #e8bc92;border-radius:16px;background:#fff9f1ed;color:#762c2e;text-align:center;box-shadow:0 4px 12px #9f3b3015}
+.pfh-voucher-caption{font-size:12px;font-weight:700;letter-spacing:.08em;color:#9a5d48}
+.pfh-voucher-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(17px,5vw,21px);letter-spacing:.045em;overflow-wrap:anywhere}
+.pfh-voucher small,.pfh-voucher-status{margin:0;font-size:12px;line-height:1.5;color:#84594b}
+.pfh-voucher-time{font-size:12px;font-weight:700;color:#8e3b35;font-variant-numeric:tabular-nums}
+.pfh-voucher .pfh-voucher-error{color:#bd2930}
+.pfh-draw-result .pfh-voucher{margin:12px 0 0}
 .pfh-page-stages .pfh-shell{min-height:100svh;padding:14px 18px calc(28px + env(safe-area-inset-bottom,0px))}
 .pfh-page-stages .pfh-back{margin-bottom:10px}
 .pfh-stages-page{width:100%;max-width:430px;margin:0 auto}
