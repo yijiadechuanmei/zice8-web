@@ -121,5 +121,6 @@
 .pfh-rule-section dl>div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;font-size:13px;line-height:1.55}
 .pfh-rule-section dt{font-weight:700;color:#9c5443}
 .pfh-rule-section dd{margin:0;color:#693a32}
-.pfh-rule-section ol{display:grid;gap:7px;margin:0;padding-left:19px;color:#693a32;font-size:13px;line-height:1.6}
-.pfh-rule-section li{padding-left:1px}
+.pfh-rule-section ol{display:grid;gap:7px;margin:0;padding:0;list-style:none;counter-reset:pfh-rule-item;color:#693a32;font-size:13px;line-height:1.6}
+.pfh-rule-section ol>li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:3px;counter-increment:pfh-rule-item}
+.pfh-rule-section ol>li::before{content:counter(pfh-rule-item) '.';color:#a3282d;font-weight:700}
