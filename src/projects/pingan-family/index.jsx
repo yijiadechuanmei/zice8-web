@@ -195,7 +195,6 @@ export default function PinganFamilyProject({ routeParams }) {
       {page !== 'home' && <button className="pfh-back pfh-back-icon" type="button" aria-label="返回首页" title="返回首页" onClick={() => { window.clearTimeout(answerTimer.current); setToast(''); setModal(''); setPage('home'); refresh().catch(() => {}) }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 4.8 7.6 12l7.2 7.2" /></svg></button>}
       {page === 'home' && <>
         <section className="pfh-hero">
-          <div className="pfh-kicker">11·25 国际消除家庭暴力日</div>
           <h1><span>平安家庭</span><span>法治护航</span></h1>
           <p className="pfh-subtitle">——大浪街道反家庭暴力主题宣传活动</p>
         </section>
