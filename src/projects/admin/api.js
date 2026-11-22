@@ -308,6 +308,19 @@ export function getPinganFamilyDrawSettings(activityKey) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/draw-settings`)
 }
 
+export function getPinganFamilyAnalytics(activityKey) {
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/analytics`)
+}
+
+export function getPinganFamilyChallenges(activityKey, params = {}) {
+  const query = new URLSearchParams(params).toString()
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/challenges?${query}`)
+}
+
+export function getPinganFamilyChallengeDetail(activityKey, id) {
+  return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/challenges/${encodeURIComponent(id)}`)
+}
+
 export function savePinganFamilyDrawSettings(activityKey, payload) {
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/draw-settings`, {
     method: 'PUT', body: JSON.stringify(payload),

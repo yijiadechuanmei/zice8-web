@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Descriptions, Input, Popconfirm, Row, Space, Statistic, Table, Tag, message } from 'antd'
 import { getPinganFamilyClaim, getPinganFamilyWinners, redeemPinganFamilyClaim } from '../api'
+import PinganFamilyQuizData from './PinganFamilyQuizData'
 
 const statusText = { confirmed: '已登记', pending_profile: '待填写领奖信息', duplicate_phone: '手机号重复，未发奖' }
 
@@ -55,6 +56,7 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
     { title: '姓名', dataIndex: 'name', width: 130, render: (value) => value || '待填写' },
     { title: '手机号', dataIndex: 'phone', width: 160, render: (value) => value || '待填写' },
     { title: '奖品', dataIndex: 'prizeName', width: 130, render: (value) => value || '未发奖' },
+    { title: '专属中奖码', dataIndex: 'claimCode', width: 190, render: (value) => value || '—' },
     { title: '状态', dataIndex: 'status', width: 170, render: (value) => <Tag color={value === 'confirmed' ? 'green' : value === 'duplicate_phone' ? 'default' : 'orange'}>{statusText[value] || value}</Tag> },
     { title: '抽奖时间', dataIndex: 'drawnAt', width: 190, render: (value) => new Date(value).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) },
     { title: '兑奖状态', dataIndex: 'redeemedAt', width: 100, render: (value, row) => row.status !== 'confirmed' ? '—' : value ? '已兑奖' : '待兑奖' },
@@ -76,6 +78,7 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       {claim && <>
         <Descriptions size="small" column={{ xs: 1, sm: 2 }} items={[
           { key: 'prize', label: '奖品', children: claim.prizeName },
+          { key: 'code', label: '专属中奖码', children: claim.claimCode },
           { key: 'name', label: '登记姓名', children: claim.name || '待登记' },
           { key: 'phone', label: '登记手机号', children: claim.phone || '待登记' },
           { key: 'status', label: '兑奖状态', children: claim.redeemedAt ? <Tag color="green">已兑奖</Tag> : <Tag color="orange">待兑奖</Tag> },
@@ -86,7 +89,8 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       </>}
     </Card>}
     {!overviewOnly && <Card title="平安家庭中奖记录" extra={<Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} />}>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1000 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
+      <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1200 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
     </Card>}
+    {!overviewOnly && <div style={{ marginTop: 16 }}><PinganFamilyQuizData activityKey={activity.activityKey} /></div>}
   </>
 }
