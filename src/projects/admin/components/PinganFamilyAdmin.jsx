@@ -6,7 +6,7 @@ import PinganFamilyQuizData from './PinganFamilyQuizData'
 import PinganFamilyRawTable from './PinganFamilyRawTable'
 
 const statusText = { confirmed: '已登记', pending_profile: '待填写领奖信息', duplicate_phone: '手机号重复，未发奖' }
-const tableNames = { winners: '中奖记录（pfh_draw）', challenges: '闯关记录（pfh_challenge）', answers: '逐题答案（pfh_answer_log）', chances: '抽奖资格（pfh_chance）', draws: '抽奖流水（pfh_draw）', prizes: '奖品库存（pfh_prize）' }
+const tableNames = { participants: '参与用户', winners: '中奖记录（pfh_draw）', challenges: '闯关记录（pfh_challenge）', answers: '逐题答案（pfh_answer_log）', chances: '抽奖资格（pfh_chance）', draws: '抽奖流水（pfh_draw）', prizes: '奖品库存（pfh_prize）' }
 
 export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
   const [data, setData] = useState({ summary: { confirmed: 0, pending: 0 }, rows: [], pagination: { page: 1, pageSize: 20, total: 0 } })
@@ -102,6 +102,6 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1200 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
     </Card>}
     {view === 'challenges' && <PinganFamilyQuizData activityKey={activity.activityKey} />}
-    {['answers', 'chances', 'draws', 'prizes'].includes(view) && <PinganFamilyRawTable key={view} activityKey={activity.activityKey} view={view} />}
+    {['participants', 'answers', 'chances', 'draws', 'prizes'].includes(view) && <PinganFamilyRawTable key={view} activityKey={activity.activityKey} view={view} />}
   </Card>
 }

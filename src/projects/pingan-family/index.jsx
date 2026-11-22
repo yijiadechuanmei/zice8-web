@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { trackPageView } from '../../shared/analytics'
 import { assets } from './assets'
 import Voucher from './Voucher'
 import { activateStage, answer, draw, getConfig, getDrawResult, getRecords, getState, retry, saveProfile, start } from './api'
@@ -68,6 +69,7 @@ export default function PinganFamilyProject({ routeParams }) {
 
   useEffect(() => {
     document.title = '平安家庭·法治护航'
+    trackPageView(activityKey, '/pfh')
     let mounted = true
     getConfig(activityKey).then((value) => { if (mounted) setConfig(value) }).catch((e) => { if (mounted) setError(e.message) })
     return () => { mounted = false; window.clearTimeout(drawTimer.current); window.clearTimeout(answerTimer.current) }

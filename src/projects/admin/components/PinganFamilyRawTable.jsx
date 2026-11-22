@@ -8,6 +8,12 @@ const dateColumn = (title, key) => column(title, key, 180, time)
 const answerText = (keys, options) => keys ? [...keys].map((key) => `${key}. ${options?.['ABCD'.indexOf(key)] || ''}`).join('；') : '未作答'
 
 const columnsByView = {
+  participants: [
+    column('微信用户 ID', 'userId', 125), column('微信昵称', 'nickname', 160, (value) => value || '—'),
+    column('登记姓名', 'name', 120, (value) => value || '—'), column('登记手机号', 'phone', 145, (value) => value || '—'),
+    column('闯关次数', 'challengeCount', 100), column('成功通关次数', 'completedCount', 120),
+    dateColumn('首次参与', 'firstJoinedAt'), dateColumn('最近参与', 'lastActiveAt'),
+  ],
   answers: [
     column('答案 ID', 'id', 105), column('闯关 ID', 'challengeId', 105), column('微信用户 ID', 'userId', 125),
     column('关卡 / 重试 / 题序', 'stage', 150, (_, row) => `${row.stage} / ${row.attemptNo} / ${row.questionIndex}`),
