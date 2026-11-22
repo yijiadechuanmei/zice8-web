@@ -51,7 +51,6 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
   }
 
   const columns = [
-    { title: '记录编号', dataIndex: 'recordNo', width: 150 },
     { title: '微信用户 ID', dataIndex: 'userId', width: 120 },
     { title: '姓名', dataIndex: 'name', width: 130, render: (value) => value || '待填写' },
     { title: '手机号', dataIndex: 'phone', width: 160, render: (value) => value || '待填写' },
@@ -76,7 +75,6 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       {claimError && <Alert type="error" showIcon message={claimError} style={{ marginBottom: 12 }} />}
       {claim && <>
         <Descriptions size="small" column={{ xs: 1, sm: 2 }} items={[
-          { key: 'record', label: '记录编号', children: claim.recordNo },
           { key: 'prize', label: '奖品', children: claim.prizeName },
           { key: 'name', label: '登记姓名', children: claim.name || '待登记' },
           { key: 'phone', label: '登记手机号', children: claim.phone || '待登记' },
@@ -88,7 +86,7 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       </>}
     </Card>}
     {!overviewOnly && <Card title="平安家庭中奖记录" extra={<Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} />}>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1150 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
+      <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1000 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
     </Card>}
   </>
 }

@@ -245,7 +245,6 @@ export default function PinganFamilyProject({ routeParams }) {
             <span>{item.redemptionStatus === 'registration_pending' ? '待填写领奖信息' : item.redemptionStatus === 'redeemed' ? '已兑奖' : '待兑奖'}</span>
           </div>
           <dl className="pfh-record-details">
-            <div><dt>记录编号</dt><dd>{item.recordNo}</dd></div>
             <div><dt>姓名</dt><dd>{item.name || '待填写'}</dd></div>
             <div><dt>手机号码</dt><dd>{item.phone || '待填写'}</dd></div>
             <div><dt>中奖时间</dt><dd>{new Date(item.drawnAt).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</dd></div>
