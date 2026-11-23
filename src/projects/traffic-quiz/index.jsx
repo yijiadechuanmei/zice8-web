@@ -10,6 +10,7 @@ import {
   getRank,
   getState,
   resetMyTrafficQuizData,
+  saveProfile,
   startChallenge,
   submitAnswer,
 } from "./api";
@@ -383,6 +384,8 @@ export default function TrafficQuizProject({ routeParams }) {
   const posterOpenedFor = useRef(null);
   const timeoutBusy = useRef(false);
   const actionBusy = useRef(false);
+  const [profile, setProfile] = useState({ name: "", phone: "" });
+  const [profileError, setProfileError] = useState("");
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
   useWechatShare(key, publicConfig);
   const applyState = useCallback((next, move = true, receivedAt = Date.now()) => {
@@ -540,6 +543,14 @@ export default function TrafficQuizProject({ routeParams }) {
       setModal("今日答题机会已用完，请明日再来");
       return;
     }
+    if (!state?.profileSubmitted) {
+      setProfileError("");
+      setModal("profile");
+      return;
+    }
+    await beginChallenge();
+  };
+  const beginChallenge = async () => {
     actionBusy.current = true;
     setBusy(true);
     try {
@@ -551,6 +562,32 @@ export default function TrafficQuizProject({ routeParams }) {
       actionBusy.current = false;
       setBusy(false);
     }
+  };
+  const submitProfile = async (event) => {
+    event.preventDefault();
+    if (actionBusy.current) return;
+    const name = profile.name.trim();
+    const phone = profile.phone.trim();
+    if (!name || !/^1[3-9]\d{9}$/.test(phone)) {
+      setProfileError("请填写姓名和有效的11位手机号");
+      return;
+    }
+    actionBusy.current = true;
+    setBusy(true);
+    setProfileError("");
+    let saved = false;
+    try {
+      await saveProfile(key, { name, phone });
+      setState((current) => ({ ...current, profileSubmitted: true }));
+      setModal("");
+      saved = true;
+    } catch (err) {
+      setProfileError(err.message || "提交失败，请重试");
+    } finally {
+      actionBusy.current = false;
+      setBusy(false);
+    }
+    if (saved) await beginChallenge();
   };
   const answer = async (option) => {
     if (actionBusy.current || !state?.attempt?.question) return;
@@ -708,13 +745,23 @@ export default function TrafficQuizProject({ routeParams }) {
           title={
             modal === "rules"
               ? "活动规则"
+              : modal === "profile"
+                ? "填写个人信息"
               : modal === "menu"
                 ? "活动导航"
                 : "温馨提示"
           }
           onClose={() => setModal("")}
         >
-          {modal === "rules" ? (
+          {modal === "profile" ? (
+            <form className="jtqa-profile-form" onSubmit={submitProfile}>
+              <p>首次答题请填写姓名和手机号，提交后即可开始挑战。</p>
+              <label>姓名<input value={profile.name} maxLength={100} autoComplete="name" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} required /></label>
+              <label>手机号<input value={profile.phone} type="tel" inputMode="numeric" maxLength={11} autoComplete="tel" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} required /></label>
+              {profileError && <p className="jtqa-profile-error" role="alert">{profileError}</p>}
+              <button className="jtqa-button" type="submit" disabled={busy}>提交信息</button>
+            </form>
+          ) : modal === "rules" ? (
             <div className="jtqa-rules">
               {RULES.map((rule) => (
                 <p key={rule}>{rule}</p>
@@ -745,7 +792,7 @@ export default function TrafficQuizProject({ routeParams }) {
           ) : (
             <p>{modal}</p>
           )}
-          {modal !== "menu" && (
+          {modal !== "menu" && modal !== "profile" && (
             <Button onClick={() => setModal("")}>知道了</Button>
           )}
         </Modal>

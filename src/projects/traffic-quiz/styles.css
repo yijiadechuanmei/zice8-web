@@ -116,6 +116,12 @@
 .jtqa-modal h2{text-align:center;color:#357f49;margin:0 0 14px}
 .jtqa-modal p{line-height:1.6}
 .jtqa-modal .jtqa-button{margin-top:15px}
+.jtqa-profile-form{display:grid;gap:12px}
+.jtqa-profile-form p{margin:0;color:#466b4b;font-size:14px}
+.jtqa-profile-form label{display:grid;gap:6px;color:#32784a;font-weight:800}
+.jtqa-profile-form input{width:100%;min-height:46px;padding:10px 14px;border:2px solid #b9d6a8;border-radius:12px;background:#fff;color:#294332;font:inherit;font-weight:500}
+.jtqa-profile-form input:focus{outline:2px solid #70aa69;outline-offset:1px}
+.jtqa-profile-form .jtqa-profile-error{color:#b63b30}
 .jtqa-close{position:absolute;right:13px;top:7px;border:0;background:none;font-size:30px;color:#6c8e71}
 .jtqa-menu-actions{display:grid;gap:12px}
 .jtqa-rules{line-height:1.6;font-size:14px}

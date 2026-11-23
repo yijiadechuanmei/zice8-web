@@ -5,6 +5,11 @@ export const getPublicConfig = (key) =>
     skipAuth: true,
   });
 export const getState = (key) => request(`${base(key)}/state`);
+export const saveProfile = (key, profile) =>
+  request(`${base(key)}/profile`, {
+    method: "POST",
+    body: JSON.stringify(profile),
+  });
 export const startChallenge = (key, debug = false) =>
   request(`${base(key)}/start${debug ? "?debug" : ""}`, { method: "POST" });
 export const submitAnswer = (key, body) =>
