@@ -8,6 +8,7 @@ import QuizAdminDataPage from './QuizAdminDataPage'
 import { LvyuanParticipantsPage } from '../components/LvyuanFruitfulAdmin'
 import SafeDriverQuizAdmin from '../components/SafeDriverQuizAdmin'
 import PinganFamilyAdmin from '../components/PinganFamilyAdmin'
+import TreeholeAdmin from '../components/TreeholeAdmin'
 
 const pageSize = 20
 const emptyData = { columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } }
@@ -15,6 +16,7 @@ const emptyData = { columns: [], rows: [], pagination: { page: 1, pageSize, tota
 export default function DataViewPage({ activity, phaseScope = 'all' }) {
   if (activity.type === 'lvyuan_consumer_game_collection') return <LvyuanParticipantsPage activity={activity} />
   if (activity.type === 'safe_driver_quiz_lottery') return <SafeDriverQuizAdmin activity={activity} />
+  if (activity.type === 'treehole') return <TreeholeAdmin activity={activity} />
   if (activity.type === 'pfh') return <PinganFamilyAdmin activity={activity} />
   return activity.type === 'quiz' ? <QuizAdminDataPage activity={activity} /> : <GenericDataViewPage activity={activity} phaseScope={phaseScope} />
 }

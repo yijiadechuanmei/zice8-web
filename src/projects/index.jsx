@@ -38,12 +38,14 @@ const MaotaiCCreateFunProject = lazy(() => import('./maotai-c-create-fun/index.j
 const TianfuNewDistrictReadingProject = lazy(() => import('./tianfu-new-district-reading/index.jsx'))
 const PinganGoodDriverProject = lazy(() => import('./pingan-good-driver/index.jsx'))
 const PinganFamilyProject = lazy(() => import('./pingan-family/index.jsx'))
+const TreeholeProject = lazy(() => import('./treehole/index.jsx'))
 const TrafficQuizProject = lazy(() => import('./traffic-quiz/index.jsx'))
 
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
 const LiubaiAssessmentProject = lazy(() => import('./liubai-assessment/index.jsx'))
 
 const activityTypeProjects = {
+  treehole: TreeholeProject,
   liubai_assessment: LiubaiAssessmentProject,
   photo_screen_demo_20261010: PhotoScreenProject,
   cybersecurity_knowledge_challenge: lazy(() => import('./cybersecurity-knowledge-challenge/index.jsx')),

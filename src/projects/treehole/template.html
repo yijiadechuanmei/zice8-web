@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#fff8e9" />
+  <meta name="description" content="怡宝小树洞——把心里的悄悄话，交给温柔的小树洞。" />
+  <title>怡宝小树洞 · 把心事说给风听</title>
+  <style>
+    :root {
+      --ink: #4c6256;
+      --ink-dark: #355344;
+      --muted: #8a9986;
+      --brown: #8d5b3e;
+      --paper: #fffaf0;
+      --mint: #e5f4de;
+      --orange: #ff9975;
+      --yellow: #f8c66a;
+      --shadow: 0 16px 45px rgba(112, 93, 57, .115);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #ebeee5;
+    }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, textarea:focus-visible { outline: 3px solid #d2ac74; outline-offset: 3px; }
+    [hidden] { display: none !important; }
+    .app {
+      width: 100%; max-width: 480px; min-height: 100svh;
+      margin-inline: auto; position: relative; isolation: isolate; overflow: clip;
+      background:
+        radial-gradient(ellipse at 50% 14%, #f5fcdf 0%, transparent 49%),
+        radial-gradient(ellipse at 100% 52%, #f8eed7 0%, transparent 42%),
+        linear-gradient(180deg, #e9f5e4 0%, #f7f9e8 25%, #fff8e9 57%, #fff8ee 100%);
+      box-shadow: 0 0 64px rgba(59, 71, 54, .08);
+    }
+    .bg-dots { position: absolute; inset: 0; pointer-events: none; opacity: .32; z-index: -1;
+      background-image: radial-gradient(#e4cfa1 1px, transparent 1px); background-size: 29px 29px;
+      mask-image: linear-gradient(180deg, transparent 0%, #000 70%, #000 95%); }
+    .page-top { padding: max(27px, env(safe-area-inset-top)) 24px 0; position: relative; text-align: center; }
+    .top-mark { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border: 1px solid rgba(125,162,121,.29);
+      background: rgba(255,255,255,.62); box-shadow: 0 5px 12px rgba(92,126,82,.05); border-radius: 100px;
+      letter-spacing: 2px; font-size: 10px; font-weight: 750; color: #78a276; }
+    .mark-leaf { display: inline-block; width: 11px; height: 13px; border-radius: 11px 0 11px 0; background: #8fba8b; transform: rotate(-24deg); }
+    .page-top h1 { font-size: clamp(33px, 9.8vw, 44px); margin: 15px 0 3px; color: var(--ink-dark); letter-spacing: 3px;
+      line-height: 1.25; font-weight: 900; text-shadow: 0 3px #ffffffa1; }
+    .title-spark { display: inline-block; font-size: 18px; color: #f8b458; vertical-align: top; margin: 1px -4px 0 -1px; animation: twinkle 2.8s infinite alternate; }
+    .subtitle { color: #819982; font-size: 12px; font-weight: 600; letter-spacing: 1px; margin: 9px auto 0; }
+    .hero { position: relative; width: 100%; padding: 0 5px; margin-top: 4px; z-index: 0; }
+    .hero-art { width: 100%; height: auto; display: block; overflow: visible; filter: drop-shadow(0px 13px 15px rgba(110,81,52,.15)); }
+    .art-sky-cloud { animation: drift 8s ease-in-out infinite alternate; transform-origin: center; }
+    .art-sky-cloud.alt { animation-delay: -3s; animation-duration: 10s; }
+    .art-flower { transform-origin: bottom center; animation: sway 3.3s ease-in-out infinite alternate; }
+    .art-flower.f2 { animation-delay: -1.4s; animation-duration: 4.4s; }
+    .art-flower.f3 { animation-delay: -2.5s; animation-duration: 3.7s; }
+    .art-butterfly { animation: butterfly 5s ease-in-out infinite alternate; transform-origin: center; }
+    .art-bird { animation: bird 3.6s ease-in-out infinite; transform-origin: 351px 270px; }
+    .floating { position: absolute; pointer-events: none; font-size: 21px; color: #f8c56a; filter: drop-shadow(0 3px 3px #dfd7b7); animation: floaty 4.7s ease-in-out infinite; }
+    .float-a { top: 12%; left: 8%; transform: rotate(-20deg); }
+    .float-b { top: 23%; right: 5%; font-size: 14px; animation-delay: -2s; }
+    .float-c { bottom: 20%; right: 10%; font-size: 15px; animation-delay: -1.2s; }
+    .art-footnote { margin: -8px auto 0; text-align: center; position: relative; z-index: 1; }
+    .art-footnote > span { font-weight: 750; font-size: 11px; color: #79967b; background: #eff7e6; border: 1px solid #d8e8cc;
+      border-radius: 99px; padding: 7px 16px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 9px #94b08816; }
+    .little-heart { font-size: 13px; color: #ee9c85; animation: heartbeat 2.4s infinite; }
+    .form-wrap { padding: 18px 20px 28px; position: relative; z-index: 2; }
+    .message-card { background: rgba(255, 255, 250, .92); border-radius: 27px; border: 2px solid #fff; padding: 22px 19px 21px;
+      box-shadow: var(--shadow), inset 0 0 0 1px #f3ebd8; position: relative; }
+    .message-card::before { content: ''; position: absolute; height: 14px; width: 60px; top: -7px; left: calc(50% - 30px);
+      border-radius: 5px; background: repeating-linear-gradient(-45deg,#e8c89b 0 11px,#efdab2 11px 20px); opacity: .6; transform: rotate(-3deg); }
+    .q-heading { display: flex; gap: 11px; align-items: center; margin-bottom: 13px; }
+    .q-number { width: 31px; height: 31px; flex: 0 0 31px; border-radius: 11px; color: #fff; background: #95b995;
+      display: grid; place-items: center; font-size: 13px; font-weight: 850; box-shadow: 0 3px #7ca37e; transform: rotate(-7deg); }
+    .q-number.peach { background: #eca58c; box-shadow: 0 3px #d58f7b; transform: rotate(6deg); }
+    .q-title { font-size: 16px; line-height: 1.5; font-weight: 850; color: #445d4d; letter-spacing: .1px; }
+    .q-title small { display: block; font-size: 10px; color: #90a591; letter-spacing: .8px; font-weight: 650; margin-top: 2px; }
+    .textarea-shell { padding: 15px 15px 8px; background: #fcf9f0; border: 1.5px dashed #e9d8b7; border-radius: 17px;
+      transition: border-color .25s, background .25s, box-shadow .25s; }
+    .textarea-shell:focus-within { border-color: #b3cda5; background: #fffdf5; box-shadow: 0 0 0 4px #e6f2df; }
+    .dear { color: #a68f77; font-size: 12px; font-weight: 750; letter-spacing: 1px; margin-bottom: 7px; }
+    textarea { border: 0; background: none; outline: 0; resize: vertical; width: 100%; min-height: 132px; max-height: 360px;
+      display: block; padding: 0; color: #536657; font-size: 14px; line-height: 2; letter-spacing: .4px; }
+    textarea::placeholder { color: #b7b8a6; }
+    .writing-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed #e7decf; padding-top: 9px; }
+    .writing-tip { font-size: 10px; color: #a8a997; display: flex; align-items: center; gap: 4px; }
+    .char-count { font-size: 11px; color: #b6ac99; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .char-count.warn { color: #df8b70; }
+    .section-divider { position: relative; margin: 27px 0 25px; height: 1px; background: repeating-linear-gradient(90deg,#e6e2cd 0 6px,transparent 6px 12px); }
+    .section-divider::after { content: '✿'; position: absolute; background: #fffefa; padding: 0 11px; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #e4bf91; font-size: 17px; }
+    .q-description { font-size: 11px; color: #a2a797; margin: -4px 0 14px 42px; line-height: 1.7; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .choice { min-height: 93px; border: 1.7px solid #e9eadf; background: #f9fbf4; border-radius: 17px; padding: 12px 8px 10px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+      transition: transform .24s cubic-bezier(.22,1.8,.5,1), box-shadow .24s, background .24s, border .24s; position: relative; user-select: none; }
+    .choice[data-value="no"] { background: #fff8f0; }
+    .choice:hover { transform: translateY(-2px); }
+    .choice.is-selected { transform: translateY(-3px); border-color: #9bc49a; background: #f0f8e9; box-shadow: 0 7px 0 #dcefd6; }
+    .choice[data-value="no"].is-selected { border-color: #efb49b; background: #fff0e4; box-shadow: 0 7px 0 #f9dfd0; }
+    .choice-icon { width: 28px; height: 28px; display: grid; place-items: center; }
+    .choice-icon svg { width: 26px; height: 26px; }
+    .choice-name { color: #627b68; font-size: 14px; font-weight: 850; }
+    .choice[data-value="no"] .choice-name { color: #9f7d6d; }
+    .choice-detail { font-size: 10px; color: #95a28f; letter-spacing: .2px; }
+    .choice[data-value="no"] .choice-detail { color: #b39f90; }
+    .choice-check { display: none; position: absolute; top: -7px; right: -5px; width: 23px; height: 23px; border-radius: 50%;
+      background: #8bbf91; color: #fff; border: 3px solid #fff; font-size: 11px; line-height: 17px; }
+    .choice[data-value="no"] .choice-check { background: #e8a081; }
+    .choice.is-selected .choice-check { display: block; animation: pop .26s both; }
+    .error { margin: 10px 0 0; color: #d87c69; font-size: 12px; min-height: 0; display: none; align-items: center; gap: 5px; }
+    .error.is-visible { display: flex; animation: shake .35s both; }
+    .send-btn { margin: 22px 0 0; width: 100%; border: 0; border-radius: 20px; min-height: 60px; color: #fff; font-weight: 900; font-size: 16px;
+      letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative;
+      background: linear-gradient(110deg,#80b68f,#68aa88); box-shadow: 0 7px 0 #4f9274, 0 13px 16px #55946c2d; transition: transform .15s, box-shadow .15s, filter .2s;
+      overflow: hidden; }
+    .send-btn:before { content:''; position: absolute; inset: 0; transform: translateX(-120%); width: 68%; background: linear-gradient(90deg,transparent,#fff5,transparent); animation: sheen 5s linear infinite; }
+    .send-btn:active { transform: translateY(4px); box-shadow: 0 3px 0 #4f9274, 0 7px 10px #55946c2d; }
+    .send-btn:disabled { opacity: .75; cursor: wait; }
+    .send-btn svg { width: 21px; height: 21px; z-index: 1; }
+    .send-btn span { z-index: 1; }
+    .submit-hint { margin: 17px auto 0; font-size: 10px; line-height: 1.9; text-align: center; color: #a09f8b; }
+    .footer { text-align: center; padding: 0 12px max(26px,env(safe-area-inset-bottom)); color: #9cb198; font-size: 10px; letter-spacing: 1px; }
+    .footer-deco { font-size: 17px; color: #95be99; margin-bottom: 6px; letter-spacing: 10px; }
+    /* result screen */
+    .result { min-height: 100svh; display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: max(48px, env(safe-area-inset-top)) 26px max(32px, env(safe-area-inset-bottom)); position: relative;
+      animation: reveal .65s both; }
+    .result-pill { display: inline-block; padding: 8px 16px; background: #fffdf5a8; color: #7eaa83; border: 1px solid #d9e8d2;
+      border-radius: 100px; font-size: 12px; letter-spacing: 2px; font-weight: 800; }
+    .result-illustration { position: relative; width: min(340px, 90vw); margin: 28px auto 0; }
+    .result-illustration svg { display: block; width: 100%; filter: drop-shadow(0 12px 15px #9baf8a30); }
+    .letter-bob { animation: letterup 3.2s ease-in-out infinite; transform-origin: center; }
+    .orbit-star { animation: twinkle 1.7s alternate infinite; transform-origin: center; }
+    .result h2 { color: #466751; font-size: 25px; letter-spacing: 1px; line-height: 1.5; margin: 10px 0 14px; }
+    .result p { font-size: 14px; color: #809580; line-height: 2.2; margin: 0 auto; max-width: 310px; }
+    .encourage { width: 100%; margin: 27px 0 24px; padding: 18px; background: #fffdf6c9; border-radius: 20px;
+      color: #6e9578; box-shadow: 0 9px 28px #77977517; border: 1px solid white; font-size: 14px; line-height: 1.8; font-weight: 800; }
+    .encourage::before { content: '“'; font-size: 30px; vertical-align: middle; line-height: 0; color: #e6b67b; margin-right: 4px; }
+    .encourage::after { content: '”'; font-size: 30px; vertical-align: middle; line-height: 0; color: #e6b67b; margin-left: 4px; }
+    .again-btn { border: 0; border-radius: 18px; width: 100%; min-height: 53px; background: #fff9f1; border: 2px solid #cbdcbe;
+      color: #709578; font-size: 14px; font-weight: 850; box-shadow: 0 5px 0 #deebd5; }
+    .again-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #deebd5; }
+    .demo-notice { font-size: 11px; color: #b17f67; background: #fff0df; border: 1px solid #f2d8bc;
+      padding: 9px 13px; border-radius: 12px; line-height: 1.7; margin: 18px auto 0; }
+    .confetti { position: absolute; width: 7px; height: 11px; top: 21%; left: 50%; border-radius: 3px; pointer-events: none;
+      background: var(--c); opacity: 0; animation: confetti 2.2s ease-out forwards; transform: rotate(var(--r)); }
+    .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @keyframes drift { to { transform: translateX(9px) translateY(-3px); } }
+    @keyframes floaty { 0%,100% { translate: 0 0; rotate: -9deg; opacity:.75; } 50% { translate: 3px -13px; rotate: 12deg; opacity: 1; } }
+    @keyframes sway { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
+    @keyframes bird { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+    @keyframes butterfly { 0% { transform: translate(0,0) rotate(-10deg) scale(1); } 50% { transform: translate(5px,-9px) rotate(12deg) scale(.9); } 100% { transform: translate(13px,-2px) rotate(-8deg) scale(1); } }
+    @keyframes pop { from { transform: scale(.3) rotate(-20deg); } to { transform: scale(1); } }
+    @keyframes twinkle { from { opacity: .48; transform: scale(.8); } to { opacity: 1; transform: scale(1.13); } }
+    @keyframes heartbeat { 0%,85%,100% { transform: scale(1); } 90% { transform: scale(1.2); } 95% { transform: scale(.94); } }
+    @keyframes sheen { 0%, 65% { transform: translateX(-180%); } 90%,100% { transform: translateX(220%); } }
+    @keyframes shake { 0%,100% {transform:translateX(0);} 25% {transform:translateX(-4px);} 75% {transform:translateX(4px);} }
+    @keyframes reveal { from {opacity:0; transform:translateY(13px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes letterup { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+    @keyframes confetti { 0% {opacity:1; transform: translate(0,0) rotate(var(--r));} 90% {opacity:1;} 100% {opacity:0; transform:translate(var(--x),var(--y)) rotate(calc(var(--r) + 340deg));} }
+
+    /* Submit-success overlay: works immediately without a backend. */
+    .result.success-overlay {
+      position: fixed; inset: 0; z-index: 99999; width: 100%; min-height: 100vh; min-height: 100dvh;
+      padding: 14px; display: flex; align-items: center; justify-content: center;
+      background: rgba(38, 62, 47, .46); backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px); animation: overlayFade .25s ease-out both;
+      overflow-y: auto; overscroll-behavior: contain;
+    }
+    .success-card {
+      width: min(100%, 420px); max-height: calc(100vh - 28px); max-height: calc(100dvh - 28px);
+      position: relative; overflow-y: auto; overscroll-behavior: contain;
+      padding: 26px 22px 22px; border-radius: 30px;
+      border: 3px solid rgba(255,255,255,.96);
+      background: radial-gradient(circle at 50% 20%,#f1fbe3,transparent 51%),
+        linear-gradient(180deg,#fffdfa 0%,#f8f9eb 70%,#fff6e9 100%);
+      box-shadow: 0 22px 65px rgba(28,62,40,.25), inset 0 0 0 1px #d9ead5;
+      animation: successPop .45s cubic-bezier(.18,1.3,.38,1) both;
+      scrollbar-width: thin;
+    }
+    .success-close {
+      position: absolute; top: 11px; right: 12px; z-index: 3;
+      width: 34px; height: 34px; border: 1px solid #e2e9d6;
+      background: #ffffffd9; color: #7d9d81; border-radius: 50%;
+      display: grid; place-items: center; font-size: 24px; line-height: 1;
+    }
+    .success-overlay .result-pill { font-size: 13px; color: #548e71; background: #e7f4e6; }
+    .success-overlay .result-illustration { width: min(230px, 68vw); margin: 8px auto -3px; }
+    .success-overlay h2 { font-size: clamp(21px, 5vw, 25px); margin: 2px 0 7px; }
+    .success-overlay p { font-size: 12px; line-height: 1.8; }
+    .success-overlay .encourage { margin: 16px 0 19px; padding: 13px 11px; font-size: 13px; }
+    .success-overlay .again-btn { min-height: 48px; }
+    .success-overlay .demo-notice { font-size: 10px; margin-top: 13px; padding: 7px 10px; }
+    .success-overlay .confetti { top: 45%; z-index: 4; }
+    @keyframes overlayFade { from {opacity:0;} to {opacity:1;} }
+    @keyframes successPop { from {opacity:0; transform:translateY(24px) scale(.91);} to {opacity:1; transform:translateY(0) scale(1);} }
+    @media (max-height: 670px) {
+      .success-card { padding-top: 19px; padding-bottom: 15px; }
+      .success-overlay .result-illustration { width: min(165px, 45vw); margin: 0 auto -7px; }
+      .success-overlay .encourage { margin: 10px 0; }
+      .success-overlay .demo-notice { margin-top: 8px; }
+    }
+
+    /* 右下角 · 我的纸条浮标（和整页的奶油绿绘本风格统一） */
+    .notes-fab {
+      position: fixed; z-index: 900; right: max(16px, calc(50vw - 224px));
+      bottom: max(17px, env(safe-area-inset-bottom));
+      border: 2px solid #fffef6; color: #54795d; padding: 7px 16px 7px 8px;
+      border-radius: 999px; display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #fff9e9, #e8f6dd);
+      box-shadow: 0 7px 0 #b4d5a6, 0 12px 26px rgba(83, 123, 83, .20);
+      transform: translateZ(0); transition: transform .18s, box-shadow .18s;
+      animation: fabArrive .65s .35s both;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .notes-fab:hover { transform: translateY(-3px); }
+    .notes-fab:active { transform: translateY(4px); box-shadow: 0 2px 0 #b4d5a6,0 7px 16px rgba(83,123,83,.18); }
+    .fab-icon {
+      width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+      background: linear-gradient(145deg,#a8d2a1,#78af88); border: 2px solid #e2f1d8;
+      box-shadow: inset 0 -3px rgba(40,108,71,.11); flex: 0 0 42px;
+    }
+    .fab-icon svg { width: 30px; height: 30px; animation: letterWiggle 4s ease-in-out infinite; }
+    .fab-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.3; white-space: nowrap; }
+    .fab-text strong { font-size: 13px; font-weight: 900; letter-spacing: .4px; }
+    .fab-text small { font-size: 10px; font-weight: 650; color: #8d9f82; padding-top: 3px; }
+    .fab-count { position: absolute; top: -7px; right: 7px; min-width: 23px; height: 23px; padding: 0 5px;
+      line-height: 19px; text-align: center; border-radius: 13px; color: white;
+      background: #eba68f; border: 2px solid white; font-size: 10px; font-weight: 900; box-shadow: 0 2px 4px #a46f581c; }
+
+    /* 私密纸条盒弹窗 */
+    .notes-overlay { position: fixed; inset: 0; z-index: 100002; display: flex; align-items: center; justify-content: center;
+      padding: max(13px, env(safe-area-inset-top)) 13px max(13px, env(safe-area-inset-bottom));
+      background: rgba(45,67,53,.53); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      animation: overlayFade .24s both; }
+    .notes-panel { width: min(100%, 430px); max-height: min(91dvh, 800px); min-height: 300px;
+      display: flex; flex-direction: column; border-radius: 28px; position: relative; overflow: hidden;
+      border: 3px solid #fffefa;
+      background: radial-gradient(circle at 82% 2%, #fdf6d3, transparent 40%),
+        linear-gradient(180deg,#f5faeb 0%,#fff9ee 56%,#fef9ef 100%);
+      box-shadow: 0 26px 70px #1b412f50, inset 0 0 0 1px #d7e9d1;
+      animation: successPop .42s cubic-bezier(.18,1.3,.38,1) both; }
+    .notes-panel:before { content:'✿'; position:absolute; z-index:0; font-size: 88px; line-height:1; color:#e8efc7;
+      top:25px; right:-9px; opacity:.5; transform:rotate(17deg); pointer-events:none; }
+    .notes-top { position: relative; z-index: 1; flex: 0 0 auto; padding: 22px 20px 12px; text-align: center; }
+    .notes-kicker { display:inline-flex; align-items:center; gap:6px; border-radius:50px; background:#e6f3dd;
+      border:1px solid #d1e5c8; padding:6px 12px; font-size:10px; color:#7da47a; font-weight:850; letter-spacing:1.2px; }
+    .notes-top h2 { margin: 10px 0 4px; color:#456a52; font-size:25px; font-weight:900; letter-spacing:1.2px; }
+    .notes-top h2 span { color:#eeaf86; font-size:16px; vertical-align:top; display:inline-block; animation:twinkle 2s alternate infinite; }
+    .notes-top p { margin:0; color:#91a48c; font-size:11px; line-height:1.8; }
+    .notes-close { position:absolute; top:13px; right:13px; border:1px solid #e1ead8; border-radius:50%;
+      background:#ffffffd9; color:#83a087; width:34px; height:34px; font-size:23px; display:grid; place-items:center; }
+    .notes-banner { margin: 0 20px 12px; flex:0 0 auto; padding:10px 13px; display:flex; gap:10px; align-items:center;
+      background:#fffdf6; border:1px dashed #e5d7b2; border-radius:15px; }
+    .notes-banner-icon { display:grid; place-items:center; width:38px; height:38px; flex:0 0 38px;
+      border-radius:12px; background:#f8e9cf; color:#b78c63; font-size:23px; transform:rotate(-5deg); }
+    .notes-banner-desc { min-width:0; flex:1; display:flex; flex-direction:column; gap:3px; }
+    .notes-banner-desc strong { color:#647e68; font-size:12px; }
+    .notes-banner-desc small { color:#a3a393; font-size:10px; line-height:1.6; }
+    .notes-total { white-space:nowrap; color:#77a07d; font-size:21px; font-weight:900; font-variant-numeric:tabular-nums; }
+    .notes-total span { font-size:10px; padding-left:3px; }
+    .notes-scroller { padding: 0 17px 10px; min-height: 40px; overflow-y:auto; overflow-x:hidden;
+      overscroll-behavior:contain; flex:1 1 auto; scrollbar-color:#d5e5c8 transparent; scrollbar-width:thin; }
+    .notes-scroller::-webkit-scrollbar { width:5px; }
+    .notes-scroller::-webkit-scrollbar-thumb { background:#d5e5c8; border-radius:5px; }
+    .notes-list { display:flex; flex-direction:column; gap:10px; padding:5px 3px 10px; }
+    .note-entry { position:relative; background:#fffdf8; border:1.5px solid #e9e9d8; border-radius:17px;
+      box-shadow:0 4px 0 #eceddf,0 7px 14px #64735c0c; overflow:hidden;
+      transition:border .2s,background .2s,box-shadow .2s; }
+    .note-entry.is-open { border-color:#b6d6ad; background:#fffefa; box-shadow:0 4px 0 #deecd7,0 10px 18px #64735c12; }
+    .note-entry.is-mine { border-color:#e7d7bc; background:#fffdf3; }
+    .note-entry.is-mine.is-open { border-color:#ecc08f; }
+    .note-toggle { appearance:none; border:0; background:transparent; width:100%; padding:14px 12px;
+      display:flex; align-items:center; gap:10px; text-align:left; color:inherit; }
+    .note-seal { flex:0 0 34px; width:34px; height:34px; border-radius:12px; display:grid; place-items:center;
+      color:#7da386; background:#e6f3e2; font-size:17px; transform:rotate(-5deg); }
+    .note-entry.is-mine .note-seal { background:#fff0d9; color:#c38d62; }
+    .note-brief { min-width:0; flex:1; display:flex; flex-direction:column; gap:5px; }
+    .note-headline { font-size:12px; line-height:1.4; color:#536f5b; font-weight:850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .note-meta { display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:10px; line-height:1.3; color:#9aab95; }
+    .note-label { border-radius:5px; background:#eef4e6; color:#7fa17d; padding:2px 5px; font-weight:800; }
+    .note-entry.is-mine .note-label { background:#fff0d6; color:#bb8a62; }
+    .note-arrow { color:#89ad88; flex:0 0 21px; width:21px; height:21px; display:grid; place-items:center;
+      background:#f0f7e9; border-radius:50%; font-size:14px; font-weight:900; transition:transform .25s; }
+    .note-entry.is-open .note-arrow { transform:rotate(180deg); }
+    /* 图标居中修复：用对称 SVG 取代字体符号 ×/⌄，避免不同手机字体的基线偏移。 */
+    .notes-close, .success-close {
+      box-sizing: border-box; padding: 0; margin: 0;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 0;
+    }
+    .notes-close svg, .success-close svg {
+      display: block; flex: 0 0 16px; width: 16px; height: 16px;
+    }
+    .note-arrow { padding: 0; line-height: 0; }
+    .note-arrow svg { display: block; width: 14px; height: 14px; }
+
+    .note-detail { padding:0 15px 15px 15px; animation:noteUnfold .23s ease-out; }
+    .note-paper { border-top:1px dashed #e5dfca; padding:12px 9px 1px; font-size:12px; line-height:2.0; color:#637465;
+      white-space:pre-wrap; overflow-wrap:anywhere; }
+    .note-detail-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:8px 4px 0;
+      font-size:10px; color:#a6a797; }
+    .note-detail-footer .privacy { color:#a38e79; }
+    .notes-bottom { flex:0 0 auto; padding:12px 18px 17px; text-align:center;
+      background:linear-gradient(180deg,transparent,#fff8ed 26%); }
+    .notes-privacy { font-size:10px; line-height:1.8; color:#9a9c8e; margin-bottom:12px; }
+    .notes-done { width:100%; min-height:45px; border:1.5px solid #cfdfc6; background:#e8f2df;
+      box-shadow:0 4px 0 #d3e4c8; color:#668a6b; border-radius:15px; font-size:13px; font-weight:850; }
+    .notes-done:active { transform:translateY(3px); box-shadow:0 1px 0 #d3e4c8; }
+    .success-view-notes { margin-top:12px; width:100%; min-height:45px; border-radius:15px; border:1px solid #d5e2c9;
+      color:#648a6b; background:#f2f7e9; font-size:13px; font-weight:800; }
+    @keyframes fabArrive { from {opacity:0; translate:0 18px;} to {opacity:1; translate:0 0;} }
+    @keyframes letterWiggle { 0%,76%,100% {transform:rotate(0);} 82% {transform:rotate(-11deg);} 88% {transform:rotate(8deg);} 94% {transform:rotate(-3deg);} }
+    @keyframes noteUnfold { from {opacity:0; transform:translateY(-5px);} to {opacity:1; transform:translateY(0);} }
+    @media (max-width: 360px) { .notes-fab {padding-right:12px;} .fab-text strong {font-size:12px;}
+      .notes-panel {max-height:94dvh;} .notes-top {padding-top:17px;} .notes-top h2 {font-size:23px;}
+      .notes-banner { margin-inline:13px; } .notes-scroller { padding-inline:10px; } }
+
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+    @media (max-width: 360px) {
+      .page-top { padding-top: 22px; } .page-top h1 { font-size: 33px; } .form-wrap { padding-inline: 14px; }
+      .message-card { padding-inline: 15px; } .q-title { font-size: 15px; }
+    }
+    @media (min-width: 600px) { body {padding: 22px 0;} .app {border-radius: 30px; overflow: hidden; min-height: calc(100svh - 44px);} }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="bg-dots" aria-hidden="true"></div>
+
+  <main id="formScreen">
+    <header class="page-top">
+      <div class="top-mark"><i class="mark-leaf" aria-hidden="true"></i> 一片属于你的秘密花园 <i class="mark-leaf" aria-hidden="true"></i></div>
+      <h1>怡宝小树洞<span class="title-spark" aria-hidden="true">✦</span></h1>
+      <p class="subtitle">这里有树，有花，也有认真听你说话的耳朵</p>
+    </header>
+
+    <div class="hero" aria-label="温暖的卡通树洞，透过圆圆的树洞，可以看到蓝天白云和鲜花草地">
+      <span class="floating float-a" aria-hidden="true">✿</span>
+      <span class="floating float-b" aria-hidden="true">✦</span>
+      <span class="floating float-c" aria-hidden="true">✧</span>
+      <svg class="hero-art" viewBox="0 0 430 369" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="树洞里开满了鲜花，还有一只可爱的小鸟">
+        <defs>
+          <linearGradient id="treeGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9c6747"/><stop offset=".54" stop-color="#805033"/><stop offset="1" stop-color="#b28256"/></linearGradient>
+          <linearGradient id="barkGradient" x1="0" y1="0" x2="1" y2=".8"><stop offset="0" stop-color="#ca9663"/><stop offset=".52" stop-color="#845137"/><stop offset="1" stop-color="#d5a36a"/></linearGradient>
+          <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9bdbed"/><stop offset=".8" stop-color="#d3f0ea"/><stop offset="1" stop-color="#f8efc5"/></linearGradient>
+          <linearGradient id="meadowGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b4d990"/><stop offset="1" stop-color="#7cb97f"/></linearGradient>
+          <radialGradient id="sunGlow"><stop stop-color="#ffe99f"/><stop offset="1" stop-color="#ffe99f" stop-opacity="0"/></radialGradient>
+          <clipPath id="openingClip"><path d="M 88 245 C 73 208 88 148 114 118 C 139 87 182 76 214 78 C 277 75 329 107 344 158 C 362 204 354 261 327 286 C 292 319 244 308 210 315 C 168 317 110 293 88 245 Z"/></clipPath>
+          <filter id="softShadow"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#69452c" flood-opacity=".18"/></filter>
+        </defs>
+        <!-- irregular bark silhouette: the circular opening follows the reference photo -->
+        <path d="M 0 360 L 0 124 Q -3 62 35 51 L 63 34 Q 93 -3 130 23 Q 156 0 192 10 Q 239 -9 270 17 Q 313 2 338 31 Q 371 20 393 65 Q 435 79 430 133 L 430 369 Z" fill="url(#treeGradient)"/>
+        <path d="M 0 177 Q 21 147 21 100 M 19 205 Q 45 140 50 69 M 404 101 Q 391 140 424 224 M 375 40 Q 392 97 377 156" fill="none" stroke="#d2a273" stroke-width="9" opacity=".46" stroke-linecap="round"/>
+        <!-- sky and flower garden within opening -->
+        <g clip-path="url(#openingClip)">
+          <rect x="54" y="64" width="318" height="264" fill="url(#skyGradient)"/>
+          <circle cx="276" cy="142" r="61" fill="url(#sunGlow)"/><circle cx="282" cy="144" r="21" fill="#fff3b2" opacity=".75"/>
+          <g class="art-sky-cloud" fill="#fffaf0" opacity=".86"><ellipse cx="153" cy="155" rx="41" ry="14"/><circle cx="135" cy="148" r="18"/><circle cx="164" cy="140" r="21"/><ellipse cx="184" cy="156" rx="21" ry="10"/></g>
+          <g class="art-sky-cloud alt" fill="#fffdf6" opacity=".83"><ellipse cx="265" cy="192" rx="38" ry="12"/><circle cx="247" cy="187" r="14"/><circle cx="278" cy="177" r="19"/></g>
+          <path d="M 50 263 C 106 226 144 243 196 253 C 253 215 307 230 385 251 L 385 345 L 50 345 Z" fill="#b9ddaa"/>
+          <path d="M 52 282 C 113 253 173 271 222 266 C 280 254 322 268 380 247 L 380 340 L 52 340 Z" fill="url(#meadowGradient)"/>
+          <path d="M 47 296 Q 113 274 177 284 T 378 278 L 390 337 L 40 338Z" fill="#78b77f" opacity=".54"/>
+          <g fill="none" stroke="#559e6a" stroke-width="2.2" stroke-linecap="round">
+            <path d="M111 316 L105 257 M145 322 L150 268 M174 327 L167 254 M214 328 L214 274 M253 330 L262 260 M291 326 L288 274 M319 321 L326 268"/>
+            <path d="M105 285 q-14 -7 -16 -19 M105 281 q13 -9 16 -17 M149 294 q-15 -6 -17 -14 M167 285 q14 -10 17 -17 M260 294 q-14 -10 -17 -12 M286 305 q11 -12 20 -15"/>
+          </g>
+          <g class="art-flower" transform="translate(106 256)"><g fill="#f8a0a0"><ellipse cy="-11" rx="8" ry="13"/><ellipse transform="rotate(72)" cy="-11" rx="8" ry="13"/><ellipse transform="rotate(144)" cy="-11" rx="8" ry="13"/><ellipse transform="rotate(216)" cy="-11" rx="8" ry="13"/><ellipse transform="rotate(288)" cy="-11" rx="8" ry="13"/></g><circle r="7" fill="#ffe48c"/></g>
+          <g class="art-flower f2" transform="translate(151 270) scale(.8)"><g fill="#fff4e0"><ellipse cy="-12" rx="7" ry="12"/><ellipse transform="rotate(60)" cy="-12" rx="7" ry="12"/><ellipse transform="rotate(120)" cy="-12" rx="7" ry="12"/><ellipse transform="rotate(180)" cy="-12" rx="7" ry="12"/><ellipse transform="rotate(240)" cy="-12" rx="7" ry="12"/><ellipse transform="rotate(300)" cy="-12" rx="7" ry="12"/></g><circle r="7" fill="#f9c66c"/></g>
+          <g class="art-flower f3" transform="translate(260 261) scale(1.1)"><g fill="#ffc469"><ellipse cy="-12" rx="7.5" ry="13"/><ellipse transform="rotate(72)" cy="-12" rx="7.5" ry="13"/><ellipse transform="rotate(144)" cy="-12" rx="7.5" ry="13"/><ellipse transform="rotate(216)" cy="-12" rx="7.5" ry="13"/><ellipse transform="rotate(288)" cy="-12" rx="7.5" ry="13"/></g><circle r="6" fill="#9d774f"/></g>
+          <g class="art-flower f2" transform="translate(327 270) scale(.8)"><g fill="#e2b4da"><ellipse cy="-11" rx="7" ry="12"/><ellipse transform="rotate(72)" cy="-11" rx="7" ry="12"/><ellipse transform="rotate(144)" cy="-11" rx="7" ry="12"/><ellipse transform="rotate(216)" cy="-11" rx="7" ry="12"/><ellipse transform="rotate(288)" cy="-11" rx="7" ry="12"/></g><circle r="6" fill="#ffdf8a"/></g>
+          <g fill="#f3c96f"><circle cx="187" cy="288" r="4"/><circle cx="232" cy="290" r="3"/><circle cx="296" cy="298" r="4"/><circle cx="125" cy="296" r="3"/></g>
+          <g fill="#c5a1df"><circle cx="133" cy="306" r="3"/><circle cx="189" cy="269" r="3"/><circle cx="304" cy="266" r="3"/></g>
+          <g class="art-butterfly" transform="translate(185 207)"><path d="M0 1 Q-12 -19 -22 -6 Q-24 7 -2 8 Q-12 23 -1 20 L4 7 Q16 18 20 7 Q18 -11 4 1 Z" fill="#eabbdd" stroke="#ce9dc6" stroke-width="1.2"/><path d="M0 -4 Q1 6 1 16" fill="none" stroke="#7e8371" stroke-width="2"/></g>
+        </g>
+        <!-- inner tree rim, bark grooves -->
+        <path d="M88 245 C73 208 88 148 114 118 C139 87 182 76 214 78 C277 75 329 107 344 158 C362 204 354 261 327 286 C292 319 244 308 210 315 C168 317 110 293 88 245Z" fill="none" stroke="#603b29" stroke-width="32" stroke-linejoin="round"/>
+        <path d="M88 245 C73 208 88 148 114 118 C139 87 182 76 214 78 C277 75 329 107 344 158 C362 204 354 261 327 286 C292 319 244 308 210 315 C168 317 110 293 88 245Z" fill="none" stroke="url(#barkGradient)" stroke-width="20" stroke-linejoin="round"/>
+        <path d="M96 237 C88 177 118 122 156 109 M181 90 Q267 71 314 118 M340 176 Q356 240 321 279 M294 296 Q230 323 177 299 M117 280 Q99 265 96 243" fill="none" stroke="#ddaf7a" stroke-width="4" stroke-linecap="round" opacity=".77"/>
+        <path d="M75 147 Q83 78 137 67 M127 56 Q182 24 250 50 M272 44 Q329 51 353 112 M376 182 Q399 237 368 304 M45 242 Q27 309 82 352 M143 340 Q207 353 270 337" fill="none" stroke="#d5a371" stroke-width="7" stroke-linecap="round" opacity=".55"/>
+        <path d="M49 110 Q70 93 66 54 M359 109 Q372 81 392 77 M45 286 Q70 304 61 352 M345 310 Q376 319 382 366" fill="none" stroke="#512e22" stroke-width="5" opacity=".36" stroke-linecap="round"/>
+        <g fill="#a8d07f"><ellipse cx="64" cy="106" rx="12" ry="5" transform="rotate(-32 64 106)"/><ellipse cx="82" cy="80" rx="9" ry="5" transform="rotate(18 82 80)"/><ellipse cx="356" cy="112" rx="11" ry="5" transform="rotate(55 356 112)"/></g>
+        <!-- lower roots / foreground greenery -->
+        <path d="M0 319 Q26 309 52 330 Q72 319 94 335 Q140 332 172 345 Q215 337 243 348 Q290 325 315 345 Q349 326 376 325 Q405 316 430 327 L430 369H0Z" fill="#678f67"/>
+        <path d="M0 354 Q25 326 51 345 Q87 321 118 345 Q150 334 183 353 Q227 331 269 350 Q304 331 335 348 Q381 326 430 351L430 369H0Z" fill="#9cc78d"/>
+        <path d="M9 360q14 -16 24 0 M49 359q10 -25 18 0 M75 357q8 -21 20 1 M115 361q9 -28 19 -4 M294 358q9 -22 17 0 M376 358q7 -25 17 1" fill="none" stroke="#568c65" stroke-width="4" stroke-linecap="round"/>
+        <g class="art-flower f3" transform="translate(52 341)"><circle cy="-9" r="8" fill="#bfaee4"/><circle cx="9" r="8" fill="#bfaee4"/><circle cx="-9" r="8" fill="#bfaee4"/><circle cy="9" r="8" fill="#bfaee4"/><circle r="5" fill="#fee493"/></g>
+        <g class="art-flower f2" transform="translate(122 342) scale(.85)"><circle cy="-9" r="8" fill="#fff1e2"/><circle cx="9" r="8" fill="#fff1e2"/><circle cx="-9" r="8" fill="#fff1e2"/><circle cy="9" r="8" fill="#fff1e2"/><circle r="5" fill="#f7c36d"/></g>
+        <g class="art-flower" transform="translate(315 342) scale(.9)"><circle cy="-9" r="8" fill="#eea8a0"/><circle cx="9" r="8" fill="#eea8a0"/><circle cx="-9" r="8" fill="#eea8a0"/><circle cy="9" r="8" fill="#eea8a0"/><circle r="5" fill="#fee493"/></g>
+        <g class="art-bird" filter="url(#softShadow)">
+          <ellipse cx="362" cy="290" rx="21" ry="17" fill="#ffda83"/><circle cx="354" cy="275" r="18" fill="#ffe19a"/>
+          <ellipse cx="375" cy="290" rx="11" ry="7" fill="#edb867" transform="rotate(-20 375 290)"/>
+          <circle cx="349" cy="273" r="2.6" fill="#5b5949"/><circle cx="344" cy="280" r="4" fill="#f4ac99" opacity=".85"/>
+          <path d="M337 276l-10 4 10 3Z" fill="#f6a46d"/>
+          <path d="M356 259 Q350 251 345 252" stroke="#a17c51" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M362 304l-2 8 M371 304l2 8" stroke="#8c6748" stroke-width="2.5" stroke-linecap="round"/>
+        </g>
+        <g fill="#f9e4a3" opacity=".9"><path d="M65 187l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="M380 166l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></g>
+      </svg>
+      <div class="art-footnote"><span><span class="little-heart" aria-hidden="true">♥</span> 小小的心事，也值得被认真听见</span></div>
+    </div>
+
+    <div class="form-wrap">
+      <form id="treeForm" novalidate>
+        <div class="message-card">
+          <div class="q-heading">
+            <span class="q-number" aria-hidden="true">01</span>
+            <label class="q-title" for="story">你想对怡宝老师倾诉什么？<small>把想说的话，写进这张温暖的小纸条吧</small></label>
+          </div>
+          <div class="textarea-shell">
+            <div class="dear">亲爱的怡宝老师：</div>
+            <textarea id="story" name="story" maxlength="500" placeholder="今天发生了什么开心或烦恼的事？&#10;有没有一直想说，却没说出口的话？&#10;&#10;这里可以放心说出你的感受……" aria-describedby="storyHint storyError" required></textarea>
+            <div class="writing-bottom">
+              <span class="writing-tip" id="storyHint">✿ 不想写名字的话，可以不用写名字哦</span>
+              <span class="char-count" id="charCount">0 / 500</span>
+            </div>
+          </div>
+          <p class="error" id="storyError" role="alert"><span aria-hidden="true">✧</span> 先写下一点想说的话吧～</p>
+
+          <div class="section-divider" aria-hidden="true"></div>
+
+          <div class="q-heading">
+            <span class="q-number peach" aria-hidden="true">02</span>
+            <div class="q-title" id="shareQuestion">怡宝老师可以隐藏你的名字，分享你的故事吗？<small>这件事由你自己决定哦</small></div>
+          </div>
+          <div class="q-description">无论选哪个，老师都会尊重你的想法。默认不分享，也可以自己改选。</div>
+          <div class="choices" role="group" aria-labelledby="shareQuestion">
+            <button class="choice" type="button" data-value="yes" aria-pressed="false">
+              <span class="choice-check" aria-hidden="true">✓</span>
+              <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M16 28s-12-7.6-12-16A7 7 0 0 1 16 8a7 7 0 0 1 12 4c0 8.4-12 16-12 16Z" fill="#a8cda8"/><path d="m11 16 3.3 3.2L21 12.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="choice-name">可以呀</span>
+              <span class="choice-detail">可以匿名分享</span>
+            </button>
+            <button class="choice is-selected" type="button" data-value="no" aria-pressed="true">
+              <span class="choice-check" aria-hidden="true">✓</span>
+              <span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="14" width="18" height="14" rx="4" fill="#f2c5ac"/><path d="M11 14V10a5 5 0 0 1 10 0v4" stroke="#d79578" stroke-width="3"/><circle cx="16" cy="20" r="2" fill="white"/><path d="M16 21v3" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span>
+              <span class="choice-name">不可以哦</span>
+              <span class="choice-detail">只想悄悄告诉老师</span>
+            </button>
+          </div>
+          <input type="hidden" name="allowAnonymousShare" id="allowAnonymousShare" value="false" />
+          <p class="error" id="shareError" role="alert"><span aria-hidden="true">✧</span> 还需要选择一个答案哦～</p>
+        </div>
+
+        <button class="send-btn" id="sendBtn" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 10 17-7-6 18-3.2-8-7.8-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m11 13 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="sendText">把悄悄话送进树洞</span>
+        </button>
+        <label class="submit-hint" style="display:block"><input type="checkbox" id="guardianConsent" required /> 我已知情同意；如我是未成年人，已获得监护人同意。</label>
+        <p class="submit-hint">🌱 你的心情很重要，开心、委屈或难过，都可以说。<br>如果遇到让你害怕的事，也请尽快告诉信任的大人。</p>
+      </form>
+    </div>
+    <footer class="footer"><div class="footer-deco" aria-hidden="true">✿ ♡ ✿</div>愿每一颗小小的心，都被温柔以待</footer>
+  </main>
+
+
+</div>
+  <!-- 浮动入口放在 app 外，避免被 app 的 overflow 裁切 -->
+  <button type="button" class="notes-fab" id="openNotesBtn" aria-haspopup="dialog" aria-controls="notesModal" aria-label="打开我的小纸条">
+    <span class="fab-icon" aria-hidden="true">
+      <svg viewBox="0 0 36 36" fill="none"><path d="M8 13.5h20a3 3 0 0 1 3 3v13H5v-13a3 3 0 0 1 3-3Z" fill="#fffaf0" stroke="#e5d1a4" stroke-width="1.6"/><path d="m5.5 17 12.5 8L30.5 17" stroke="#dcae88" stroke-width="1.7" stroke-linejoin="round"/><path d="M11 11V4.5h14V11" fill="#fffdf6" stroke="#fff8ec" stroke-width="1.8"/><path d="M12 8h12M12 11h8" stroke="#bad6aa" stroke-width="1.4" stroke-linecap="round"/><path d="M18 17c-2.2-2.6-5.2-.4-3.1 1.9L18 22l3.1-3.1c2.1-2.3-.9-4.5-3.1-1.9Z" fill="#e9a9a4"/></svg>
+    </span>
+    <span class="fab-text"><strong>我的小纸条</strong><small>点开看看悄悄话</small></span>
+    <span class="fab-count" id="fabNotesCount" aria-hidden="true">10</span>
+  </button>
+
+  <section class="notes-overlay" id="notesModal" hidden role="dialog" aria-modal="true" aria-labelledby="notesTitle" aria-describedby="notesDesc">
+    <div class="notes-panel">
+      <div class="notes-top">
+        <button type="button" class="notes-close" id="closeNotesBtn" aria-label="关闭我的小纸条弹窗"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 6 18 18M18 6 6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+        <span class="notes-kicker">✿ 怡宝的秘密花园 ✿</span>
+        <h2 id="notesTitle">我的小纸条 <span>✦</span></h2>
+        <p id="notesDesc">每一句悄悄话，都值得被好好收藏</p>
+      </div>
+      <div class="notes-banner">
+        <div class="notes-banner-icon" aria-hidden="true">✉</div>
+        <div class="notes-banner-desc"><strong>树洞纸条收纳盒</strong><small>轻轻点开一张纸条，就能读到里面的话</small></div>
+        <strong class="notes-total"><span id="notesTotal">10</span><span>张</span></strong>
+      </div>
+      <div class="notes-scroller" id="notesScroller">
+        <div class="notes-list" id="notesList"></div>
+      </div>
+      <div class="notes-bottom">
+        <div class="notes-privacy">🌱 只有你和获得授权的老师可以查看你的纸条。</div>
+        <button type="button" class="notes-done" id="doneNotesBtn">✿ 收好我的小纸条</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="result success-overlay" id="resultScreen" hidden role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-describedby="resultDescription">
+    <div class="success-card">
+    <button type="button" class="success-close" id="closeSuccessBtn" aria-label="关闭提交成功弹窗"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 6 18 18M18 6 6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+    <span class="result-pill">✿ 提交成功 ✿</span>
+    <div class="result-illustration" aria-hidden="true">
+      <svg viewBox="0 0 340 265" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="resultTree" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#b78a5f"/><stop offset="1" stop-color="#795540"/></linearGradient><linearGradient id="resultLight" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7bf"/><stop offset="1" stop-color="#d4eed5"/></linearGradient></defs>
+        <ellipse cx="171" cy="237" rx="142" ry="18" fill="#d3e8bf" opacity=".7"/>
+        <path d="M71 235L82 112C48 78 69 47 98 48c15-36 54-38 76-17 34-30 72-2 73 23 40-2 64 30 45 59l10 122Z" fill="#82b88d"/>
+        <circle cx="105" cy="77" r="47" fill="#8ec59b"/><circle cx="175" cy="60" r="59" fill="#97cda2"/><circle cx="241" cy="87" r="52" fill="#8bc497"/><circle cx="286" cy="110" r="36" fill="#8bc497"/>
+        <g fill="#b4dcaf"><circle cx="113" cy="50" r="15"/><circle cx="193" cy="24" r="16"/><circle cx="259" cy="55" r="15"/></g>
+        <path d="M130 236q-3-64-18-105l33-17 27 17 25-21 28 16-16 110Z" fill="url(#resultTree)"/>
+        <ellipse cx="173" cy="188" rx="36" ry="46" fill="#5f5140"/>
+        <ellipse cx="174" cy="190" rx="29" ry="38" fill="url(#resultLight)"/>
+        <path d="M148 223q19-27 52 0" stroke="#b1d2a0" stroke-width="8" stroke-linecap="round" fill="none"/>
+        <path d="M150 135q-7-30-20-37 M205 134q11-18 14-36" stroke="#d5ae77" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g class="letter-bob"><rect x="148" y="145" width="54" height="38" rx="5" fill="#fff7df" stroke="#eacfa2" stroke-width="2" transform="rotate(-7 175 164)"/><path d="m147 149 29 18 26-22" fill="none" stroke="#e5b9a0" stroke-width="2"/><path d="M171 162c-6-6-9 3 0 7 9-4 6-13 0-7" fill="#e89e95"/></g>
+        <g fill="#fff7a4"><path class="orbit-star" d="m72 146 4 9 9 4-9 4-4 9-4-9-9-4 9-4Z"/><path class="orbit-star" d="m267 154 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><circle cx="124" cy="112" r="3"/><circle cx="240" cy="127" r="3"/></g>
+        <g fill="#efb4b5"><circle cx="96" cy="221" r="8"/><circle cx="84" cy="226" r="8"/><circle cx="106" cy="227" r="8"/><circle cx="96" cy="233" r="8"/></g><circle cx="96" cy="227" r="5" fill="#f5db8e"/>
+        <g fill="#f1d4aa"><circle cx="247" cy="222" r="7"/><circle cx="237" cy="227" r="7"/><circle cx="257" cy="227" r="7"/><circle cx="247" cy="234" r="7"/></g><circle cx="247" cy="227" r="5" fill="#f6e6a9"/>
+        <path d="M24 232 Q46 217 72 234 M279 235q22-25 43 0" fill="none" stroke="#7db48b" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h2 id="resultTitle">谢谢你，勇敢地说出来！</h2>
+    <p id="resultDescription">你的每一种心情，都像花园里的小花，<br>有自己的颜色，也有被珍惜的理由。</p>
+    <div class="encourage" id="encourageText">你愿意说出来，就是很棒的一步。</div>
+    <button type="button" class="again-btn" id="againBtn">✿ 再写一张小纸条</button>
+    <button type="button" class="success-view-notes" id="successViewNotesBtn">✉ 查看我的小纸条</button>
+    <div class="demo-notice" id="demoNotice" hidden></div>
+    </div>
+  </section>
+<script>
+  'use strict';
+  var treeForm = document.getElementById('treeForm');
+  var storyField = document.getElementById('story');
+  var successModal = document.getElementById('resultScreen');
+  var shareInput = document.getElementById('allowAnonymousShare');
+  var shareButtons = document.querySelectorAll('.choice');
+  var encouragements = [
+    '你愿意说出来，就是很棒的一步。',
+    '你值得被理解，也值得被温柔对待。',
+    '每一份心情都很重要，你也是。',
+    '今天的你，已经很勇敢啦！',
+    '有些事情可以慢慢说，我们会认真听。'
+  ];
+
+  // 保留两个问题的选择交互，默认不授权分享。
+  Array.prototype.forEach.call(shareButtons, function (btn) {
+    btn.addEventListener('click', function () {
+      var answer = btn.getAttribute('data-value');
+      shareInput.value = String(answer === 'yes');
+      Array.prototype.forEach.call(shareButtons, function (other) {
+        var selected = other === btn;
+        other.classList.toggle('is-selected', selected);
+        other.setAttribute('aria-pressed', String(selected));
+      });
+    });
+  });
+  storyField.addEventListener('input', function () {
+    document.getElementById('charCount').textContent =
+      Array.from(storyField.value).length + ' / 500';
+    document.getElementById('storyError').classList.remove('is-visible');
+  });
+
+  function confettiBurst() {
+    var old = successModal.querySelectorAll('.confetti');
+    Array.prototype.forEach.call(old, function (el) { el.remove(); });
+    var colors = ['#d6abdf', '#f8b38e', '#f7d579', '#b4d6a3', '#a7d5de'];
+    for (var i = 0; i < 28; i++) {
+      var piece = document.createElement('i');
+      piece.className = 'confetti';
+      piece.style.setProperty('--c', colors[i % colors.length]);
+      piece.style.setProperty('--x', ((Math.random() - 0.5) * 340) + 'px');
+      piece.style.setProperty('--y', ((Math.random() - 0.3) * 310) + 'px');
+      piece.style.setProperty('--r', (Math.random() * 240) + 'deg');
+      piece.style.animationDelay = (Math.random() * .4) + 's';
+      successModal.appendChild(piece);
+      piece.addEventListener('animationend', function () { this.remove(); }, { once: true });
+    }
+  }
+
+
+  var notes = [];
+  var latestNoteId = null;
+  var expandedNoteId = null;
+  var notesModal = document.getElementById('notesModal');
+  var notesList = document.getElementById('notesList');
+  var notesScroller = document.getElementById('notesScroller');
+  var notesButton = document.getElementById('openNotesBtn');
+  var previouslyFocused = null;
+
+  function renderNotes() {
+    notesList.textContent = '';
+    document.getElementById('notesTotal').textContent = String(notes.length);
+    document.getElementById('fabNotesCount').textContent = String(notes.length);
+    notesButton.setAttribute('aria-label', '打开我的小纸条，共' + notes.length + '张');
+    notes.forEach(function (note, index) {
+      var open = expandedNoteId === note.id;
+      var card = document.createElement('article');
+      card.className = 'note-entry' + (open ? ' is-open' : '') + (note.mine ? ' is-mine' : '');
+      var btn = document.createElement('button');
+      btn.className = 'note-toggle'; btn.type = 'button';
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-controls', 'note-detail-' + note.id);
+      var seal = document.createElement('span'); seal.className = 'note-seal';
+      seal.setAttribute('aria-hidden', 'true'); seal.textContent = note.mine ? '♡' : '✉';
+      var brief = document.createElement('span'); brief.className = 'note-brief';
+      var headline = document.createElement('span'); headline.className = 'note-headline';
+      headline.textContent = note.text.length > 23 ? note.text.slice(0, 23) + '…' : note.text;
+      var meta = document.createElement('span'); meta.className = 'note-meta';
+      var badge = document.createElement('span'); badge.className = 'note-label';
+      badge.textContent = '我的小纸条';
+      var metaText = document.createElement('span'); metaText.textContent = note.date;
+      meta.appendChild(badge); meta.appendChild(metaText);
+      brief.appendChild(headline); brief.appendChild(meta);
+      var arrow = document.createElement('span'); arrow.className = 'note-arrow'; arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" focusable="false"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'; arrow.setAttribute('aria-hidden','true');
+      btn.appendChild(seal); btn.appendChild(brief); btn.appendChild(arrow);
+      var detail = document.createElement('div'); detail.className = 'note-detail';
+      detail.id = 'note-detail-' + note.id; detail.hidden = !open;
+      var paper = document.createElement('div'); paper.className = 'note-paper'; paper.textContent = note.text;
+      var detailFooter = document.createElement('div'); detailFooter.className = 'note-detail-footer';
+      var tinyFlower = document.createElement('span'); tinyFlower.textContent = '✿ 愿你今天也有好心情';
+      var privacy = document.createElement('span'); privacy.className = 'privacy';
+      privacy.textContent = note.share ? '✓ 同意匿名分享' : '♡ 不同意分享';
+      detailFooter.appendChild(tinyFlower); detailFooter.appendChild(privacy);
+      detail.appendChild(paper); detail.appendChild(detailFooter);
+      btn.addEventListener('click', function () {
+        expandedNoteId = (expandedNoteId === note.id) ? null : note.id;
+        renderNotes();
+        var fresh = document.querySelector('[aria-controls="note-detail-' + note.id + '"]');
+        if (fresh) fresh.focus({preventScroll:true});
+      });
+      card.appendChild(btn); card.appendChild(detail); notesList.appendChild(card);
+    });
+  }
+  function openYibaoNotes(expandLatest) {
+    if (!successModal.hidden) closeYibaoSuccess();
+    previouslyFocused = document.activeElement;
+    expandedNoteId = expandLatest && latestNoteId ? latestNoteId : null;
+    renderNotes();
+    notesModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    notesScroller.scrollTop = 0;
+    document.getElementById('closeNotesBtn').focus({preventScroll:true});
+  }
+  function closeYibaoNotes() {
+    notesModal.hidden = true;
+    document.body.style.overflow = successModal.hidden ? '' : 'hidden';
+    (previouslyFocused && previouslyFocused.isConnected ? previouslyFocused : notesButton).focus({preventScroll:true});
+  }
+  notesButton.addEventListener('click', function () { send('list'); openYibaoNotes(false); });
+  document.getElementById('closeNotesBtn').addEventListener('click', closeYibaoNotes);
+  document.getElementById('doneNotesBtn').addEventListener('click', closeYibaoNotes);
+  document.getElementById('successViewNotesBtn').addEventListener('click', function () {
+    closeYibaoSuccess();
+    openYibaoNotes(true);
+  });
+  notesModal.addEventListener('click', function (event) {
+    if (event.target === notesModal) closeYibaoNotes();
+  });
+  function send(action, payload) { parent.postMessage({ source:'yibao-treehole', action:action, payload:payload }, location.origin); }
+  window.addEventListener('message', function(event) {
+    if (event.origin !== location.origin || !event.data || event.data.source !== 'yibao-parent') return;
+    if (event.data.action === 'notes') {
+      notes = (event.data.notes || []).map(function(n) { return { id:n.id, text:n.content, share:n.allowAnonymousShare, mine:true, date:new Date(n.createdAt).toLocaleString('zh-CN') }; });
+      renderNotes();
+    }
+    if (event.data.action === 'saved') {
+      sendBtn.disabled = false;
+      latestNoteId = event.data.note.id;
+      send('list');
+      document.getElementById('encourageText').textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+      successModal.hidden = false; successModal.style.display = 'flex'; document.body.style.overflow = 'hidden'; confettiBurst();
+    }
+    if (event.data.action === 'error') { sendBtn.disabled = false; alert(event.data.message || '提交失败，请重试'); }
+  });
+  renderNotes(); send('list');
+  function openYibaoSuccess(event) {
+    if (event && event.preventDefault) event.preventDefault();
+    var content = storyField.value.trim();
+    if (!content) { document.getElementById('storyError').classList.add('is-visible'); storyField.focus(); return false; }
+    if (!document.getElementById('guardianConsent').checked) { alert('请确认本人或监护人已知情同意'); return false; }
+    sendBtn.disabled = true;
+    send('submit', { content:content, allowAnonymousShare:shareInput.value === 'true', guardianConsent:true });
+    return false;
+  }
+  treeForm.addEventListener('submit', openYibaoSuccess);
+
+  function closeYibaoSuccess() {
+    successModal.hidden = true;
+    successModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('closeSuccessBtn').addEventListener('click', closeYibaoSuccess);
+  document.getElementById('againBtn').addEventListener('click', function () {
+    closeYibaoSuccess();
+    treeForm.reset();
+    storyField.value = '';
+    document.getElementById('charCount').textContent = '0 / 500';
+    shareInput.value = 'false';
+    Array.prototype.forEach.call(shareButtons, function (btn) {
+      var selected = btn.getAttribute('data-value') === 'no';
+      btn.classList.toggle('is-selected', selected);
+      btn.setAttribute('aria-pressed', String(selected));
+    });
+    window.scrollTo(0, 0);
+  });
+  successModal.addEventListener('click', function (event) {
+    if (event.target === successModal) closeYibaoSuccess();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !notesModal.hidden) closeYibaoNotes();
+    else if (event.key === 'Escape' && !successModal.hidden) closeYibaoSuccess();
+  });
+</script>
+</body>
+</html>
