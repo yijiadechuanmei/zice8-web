@@ -3,6 +3,12 @@ import { Alert, Button, Card, Col, Row, Statistic, Table, Typography } from 'ant
 import { getPinganFamilyAnalytics } from '../api'
 
 const prizeNames = { backpack: '背包', pillow_blanket: '抱枕被', sun_hat: '防晒帽' }
+const periodNames = {
+  '2026-11-25-am': '11月25日 上午',
+  '2026-11-25-pm': '11月25日 下午',
+  '2026-11-26': '11月26日 全天',
+  '2026-11-27': '11月27日 全天',
+}
 
 export default function PinganFamilyAnalytics({ activityKey, refreshKey = 0 }) {
   const [data, setData] = useState(null)
@@ -19,13 +25,15 @@ export default function PinganFamilyAnalytics({ activityKey, refreshKey = 0 }) {
     return () => { alive = false }
   }, [activityKey, refreshKey, manualRefresh])
 
-  const dailyRows = data ? Object.entries(data.dailyQuotas).map(([day, quota]) => ({
-    day,
+  const periodRows = data?.drawPeriods ? Object.entries(data.drawPeriods).map(([periodKey, period]) => ({
+    periodKey,
+    winRate: period.winRate,
     ...Object.fromEntries(Object.keys(prizeNames).map((code) => [code, {
-      quota: quota[code] || 0,
-      issued: data.issued?.[day]?.[code] || 0,
+      quota: period.quotas[code] || 0,
+      issued: data.issued?.[periodKey]?.[code] || 0,
     }])),
   })) : []
+  const plannedPrizes = data?.drawPeriods ? Object.values(data.drawPeriods).reduce((sum, period) => sum + Object.values(period.quotas).reduce((count, quota) => count + quota, 0), 0) : 0
 
   const metrics = data ? [
     ['答题用户', data.quiz.users], ['发起闯关', data.quiz.challenges],
@@ -41,12 +49,12 @@ export default function PinganFamilyAnalytics({ activityKey, refreshKey = 0 }) {
     {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
     {data && <>
       <Row gutter={[12, 12]} style={{ marginBottom: 18 }}>
-        <Col xs={12} md={6}><Statistic title="已保存中奖概率" value={data.configuredWinRate} precision={2} suffix="%" /></Col>
+        <Col xs={12} md={6}><Statistic title="计划奖品总数" value={plannedPrizes} /></Col>
         <Col xs={12} md={6}><Statistic title="实际中奖比例" value={data.actualWinRate} precision={2} suffix="%" /></Col>
         <Col xs={12} md={6}><Statistic title="抽奖次数" value={data.lottery.draws} /></Col>
         <Col xs={12} md={6}><Statistic title="有效中奖" value={data.lottery.wins} /></Col>
       </Row>
-      <Typography.Text type="secondary">实际中奖比例为有效中奖数除以抽奖次数；奖品或当日配额耗尽后，实际比例可能低于设定概率。</Typography.Text>
+      <Typography.Text type="secondary">各时段设定概率见下表。实际中奖比例为有效中奖数除以抽奖次数；时段奖品发完后暂停抽奖，不消耗未用资格。</Typography.Text>
       <Row gutter={[12, 12]} style={{ marginTop: 18, marginBottom: 18 }}>
         {metrics.map(([title, value]) => <Col xs={12} md={8} xl={6} key={title}><Card size="small"><Statistic title={title} value={value} /></Card></Col>)}
       </Row>
@@ -56,8 +64,9 @@ export default function PinganFamilyAnalytics({ activityKey, refreshKey = 0 }) {
         { title: '已发放', dataIndex: 'issuedCount' },
         { title: '剩余库存', render: (_, row) => row.totalStock - row.issuedCount },
       ]} />
-      <Table style={{ marginTop: 12 }} rowKey="day" size="small" pagination={false} scroll={{ x: 680 }} dataSource={dailyRows} columns={[
-        { title: '日期', dataIndex: 'day', width: 145 },
+      <Table style={{ marginTop: 12 }} rowKey="periodKey" size="small" pagination={false} scroll={{ x: 780 }} dataSource={periodRows} columns={[
+        { title: '抽奖时段', dataIndex: 'periodKey', width: 145, render: (value) => periodNames[value] || value },
+        { title: '设定概率', dataIndex: 'winRate', width: 100, render: (value) => `${value}%` },
         ...Object.entries(prizeNames).map(([code, name]) => ({ title: name, dataIndex: code, render: (value) => `${value.issued} / ${value.quota}（余 ${Math.max(0, value.quota - value.issued)}）` })),
       ]} />
     </>}

@@ -6,6 +6,12 @@ import PinganFamilyAnalytics from './PinganFamilyAnalytics'
 const { Text } = Typography
 const names = { backpack: '背包', pillow_blanket: '抱枕被', sun_hat: '防晒帽' }
 const codes = Object.keys(names)
+const periodLabels = {
+  '2026-11-25-am': '11月25日 上午（00:00–11:59）',
+  '2026-11-25-pm': '11月25日 下午（12:00–23:59）',
+  '2026-11-26': '11月26日 全天',
+  '2026-11-27': '11月27日 全天',
+}
 
 export default function PinganFamilyDrawSettings({ activityKey }) {
   const [settings, setSettings] = useState(null)
@@ -23,12 +29,25 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
     return () => { active = false }
   }, [activityKey])
 
-  function updateQuota(day, code, value) {
+  function updatePeriod(periodKey, patch) {
     setSettings((current) => ({
       ...current,
-      dailyQuotas: {
-        ...current.dailyQuotas,
-        [day]: { ...current.dailyQuotas[day], [code]: value ?? 0 },
+      drawPeriods: {
+        ...current.drawPeriods,
+        [periodKey]: { ...current.drawPeriods[periodKey], ...patch },
+      },
+    }))
+  }
+
+  function updateQuota(periodKey, code, value) {
+    setSettings((current) => ({
+      ...current,
+      drawPeriods: {
+        ...current.drawPeriods,
+        [periodKey]: {
+          ...current.drawPeriods[periodKey],
+          quotas: { ...current.drawPeriods[periodKey].quotas, [code]: value ?? 0 },
+        },
       },
     }))
   }
@@ -39,8 +58,7 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
     try {
       const result = await savePinganFamilyDrawSettings(activityKey, {
         enabled: settings.enabled,
-        winRate: settings.winRate,
-        dailyQuotas: settings.dailyQuotas,
+        drawPeriods: settings.drawPeriods,
       })
       setSettings(result)
       setStatsRefreshKey((value) => value + 1)
@@ -49,30 +67,36 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
     finally { setSaving(false) }
   }
 
-  const rows = settings ? Object.entries(settings.dailyQuotas).map(([day, quota]) => ({ day, ...quota })) : []
+  const rows = settings?.drawPeriods ? Object.entries(settings.drawPeriods).map(([periodKey, period]) => ({ periodKey, ...period.quotas, winRate: period.winRate })) : []
+  const otherIssued = settings?.drawPeriods ? (settings.prizes || []).map((prize) => ({
+    name: names[prize.code] || prize.code,
+    count: prize.issuedCount - Object.keys(settings.drawPeriods).reduce((sum, periodKey) => sum + (settings.issued?.[periodKey]?.[prize.code] || 0), 0),
+  })).filter((prize) => prize.count > 0) : []
   const columns = [
-    { title: '日期（北京时间）', dataIndex: 'day', width: 160 },
+    { title: '抽奖时段（北京时间）', dataIndex: 'periodKey', width: 230, render: (value) => periodLabels[value] || value },
+    { title: '中奖概率', dataIndex: 'winRate', width: 140, render: (value, row) => <InputNumber min={0} max={100} precision={2} step={0.1} addonAfter="%" value={value} onChange={(next) => updatePeriod(row.periodKey, { winRate: next ?? 0 })} /> },
     ...codes.map((code) => ({
       title: names[code], dataIndex: code, width: 150,
       render: (value, row) => <Space direction="vertical" size={0}>
-        <InputNumber min={settings?.issued?.[row.day]?.[code] || 0} max={settings?.prizes?.find((item) => item.code === code)?.totalStock || 50} precision={0} value={value} onChange={(next) => updateQuota(row.day, code, next)} />
-        <Text type="secondary">已中 {settings?.issued?.[row.day]?.[code] || 0}</Text>
+        <InputNumber min={settings?.issued?.[row.periodKey]?.[code] || 0} max={settings?.prizes?.find((item) => item.code === code)?.totalStock || 50} precision={0} value={value} onChange={(next) => updateQuota(row.periodKey, code, next)} />
+        <Text type="secondary">已中 {settings?.issued?.[row.periodKey]?.[code] || 0}</Text>
       </Space>,
     })),
-    { title: '当日合计', width: 110, render: (_, row) => codes.reduce((sum, code) => sum + Number(row[code] || 0), 0) },
+    { title: '时段合计', width: 110, render: (_, row) => codes.reduce((sum, code) => sum + Number(row[code] || 0), 0) },
   ]
 
   return <Space direction="vertical" size={16} style={{ width: '100%' }}>
     <Card size="small" title="平安家庭抽奖设置" loading={loading}>
       {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
+      {settings && !settings.drawPeriods && <Alert type="warning" showIcon message="抽奖时段配置尚不可用，请先更新 API" style={{ marginBottom: 12 }} />}
       {settings && <>
         <Space wrap style={{ marginBottom: 16 }}>
           <span>启用抽奖 <Switch checked={settings.enabled} onChange={(enabled) => setSettings((current) => ({ ...current, enabled }))} /></span>
-          <span>中奖率 <InputNumber min={0} max={100} precision={2} step={0.1} addonAfter="%" value={settings.winRate} onChange={(winRate) => setSettings((current) => ({ ...current, winRate: winRate ?? 0 }))} /></span>
-          <Button type="primary" loading={saving} onClick={save}>保存抽奖设置</Button>
+          <Button type="primary" loading={saving} disabled={!settings.drawPeriods} onClick={save}>保存抽奖设置</Button>
         </Space>
-        <Table rowKey="day" size="small" dataSource={rows} columns={columns} pagination={false} scroll={{ x: 850 }} />
-        <Text type="secondary">每日配额是单项奖品的发放上限，未中数量不会自动结转。五天总配额不得超过各奖品总库存；修改时不能低于当天已中数量。奖品售罄时实际中奖率会降低。</Text>
+        <Table rowKey="periodKey" size="small" dataSource={rows} columns={columns} pagination={false} scroll={{ x: 1000 }} />
+        <Text type="secondary">每个时段的概率和奖品配额可单独调整；未发出的配额不会自动结转。四个时段的总配额加上其他时段已发数量不能超过库存，修改配额不能低于本时段已中数量。时段奖品发完后暂停抽奖，未用资格保留。</Text>
+        {otherIssued.length > 0 && <div><Text type="warning">正式时段外已发：{otherIssued.map((prize) => `${prize.name}${prize.count}件`).join('、')}，计入总库存，不占本次时段配额。</Text></div>}
       </>}
     </Card>
     <PinganFamilyAnalytics activityKey={activityKey} refreshKey={statsRefreshKey} />
