@@ -1,11 +1,12 @@
 # 活动图片资源
 
-图片统一由 `assets.js` 导出。后续上传 OSS 后，只替换该文件中的三个 URL，不改页面结构或交互。所有资源位于本活动 `assets/` 下，已压缩为 WebP。
+图片统一由 `assets.js` 指向 `https://assets.zice8.com/pfh/dl1125/`。上传原图位于下载文件夹的 `平安家庭·法治护航-OSS图片`。将该文件夹内的图片直接上传至 OSS 的 `pfh/dl1125/` 目录，保留文件名，不要再嵌套一层文件夹。所有资源均为 WebP。
 
 | 文件 | 用途 | 配置字段 |
 | --- | --- | --- |
-| `assets/home.webp` | 首页竖屏背景、盾牌与家庭插画 | `assets.home` |
-| `assets/quiz.webp` | 答题、转盘、成功页、登记页与记录页背景 | `assets.quiz` |
-| `assets/prizes.webp` | 背包、防晒帽、抱枕被三件奖品图 | `assets.prizes` |
+| `home.webp` | 首页竖屏背景、盾牌与家庭插画 | `assets.home` |
+| `quiz.webp` | 答题、转盘、成功页、登记页与记录页背景 | `assets.quiz` |
+| `prizes.webp` | 背包、防晒帽、抱枕被三件奖品图 | `assets.prizes` |
+| `wheel.webp` | 旧转盘背景，当前页面未使用 | 无 |
 
 通过内置图片生成工具生成，参考了所提供横版主视觉的浅粉、红金丝带、盾牌、家庭和天平元素，重新构图为竖屏；奖品图为三件产品单独展示。转盘页沿用答题页背景，避免背景圆环与实际转盘错位。转盘扇区与按钮由 HTML/CSS 绘制，实际结果来自服务端。

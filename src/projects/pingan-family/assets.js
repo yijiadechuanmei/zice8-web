@@ -1,6 +1,7 @@
-import home from './assets/home.webp'
-import quiz from './assets/quiz.webp'
-import prizes from './assets/prizes.webp'
+const OSS_ASSET_BASE = 'https://assets.zice8.com/pfh/dl1125'
 
-// Replace only these values with OSS URLs when the hosted images are ready.
-export const assets = { home, quiz, prizes }
+export const assets = {
+  home: `${OSS_ASSET_BASE}/home.webp`,
+  quiz: `${OSS_ASSET_BASE}/quiz.webp`,
+  prizes: `${OSS_ASSET_BASE}/prizes.webp`,
+}
