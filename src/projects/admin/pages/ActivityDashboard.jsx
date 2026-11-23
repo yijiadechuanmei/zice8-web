@@ -77,7 +77,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         getSourceAccess(activity.activityKey, { source: 'group' }).catch(() => null),
       ])
       : Promise.resolve(null)
-    Promise.all([getOverview(activity.activityKey, phaseParams), getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest, fifteenthChannelAccessRequest])
+    Promise.all([getOverview(activity.activityKey, phaseParams), activity.type === 'treehole' ? Promise.resolve(null) : getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest, fifteenthChannelAccessRequest])
       .then(([overviewData, chartData, sourceAccessData, lvyuanOverview, fifteenthChannelAccess]) => {
         if (!alive) return
         setOverview({
@@ -116,6 +116,20 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
   const metrics = useMemo(() => {
     const sourceOverview = sourceAccess?.overview || {}
+    if (activity.type === 'treehole') {
+      const treehole = overview?.treehole || {}
+      return [
+        { label: '累计投稿', value: treehole.noteCount ?? 0, tooltip: '每次成功提交计一条，同一用户可以多次投稿。' },
+        { label: '投稿人数', value: treehole.authorCount ?? 0, tooltip: '按微信用户标识去重。' },
+        { label: '今日投稿', value: treehole.todayNoteCount ?? 0, tooltip: '按北京时间自然日统计。' },
+        { label: '今日投稿人数', value: treehole.todayAuthorCount ?? 0, tooltip: '按北京时间自然日和微信用户标识去重。' },
+        { label: '精选投稿', value: treehole.featuredCount ?? 0, tooltip: '仅供后台筛选，不代表公开展示或审核发布。' },
+        { label: '未精选投稿', value: treehole.unfeaturedCount ?? 0 },
+        { label: '允许匿名分享', value: treehole.shareAllowedCount ?? 0, tooltip: '用户选择允许匿名分享的投稿数量；不会自动公开。' },
+        { label: '不允许分享', value: treehole.shareDeniedCount ?? 0 },
+        { label: '精选且允许匿名分享', value: treehole.featuredShareAllowedCount ?? 0 },
+      ]
+    }
     if (isTianfuReading) {
       const reading = overview?.tianfuReading
       const eventCount = (type) => reading?.events?.[type]?.views ?? 0
@@ -638,9 +652,13 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         ))}
       </Row>
 
-      <Paragraph className="admin-muted">
+      {activity.type === 'treehole' ? null : <Paragraph className="admin-muted">
         PV：{pvHint} UV：{uvHint}
-      </Paragraph>
+      </Paragraph>}
+
+      {activity.type === 'treehole' ? <ChartPanel title="近 7 天投稿趋势" description="按北京时间提交日期统计成功投稿次数">
+        <LazyChart type="bar" data={overview?.treehole?.dailySubmissions || []} series={[{ key: 'submissions', name: '投稿次数' }]} emptyText="暂无投稿" />
+      </ChartPanel> : null}
 
       {isTianfuReading ? <TianfuReadingOverview overview={overview} charts={charts} /> : null}
 
@@ -980,7 +998,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
+          {activity.type === 'treehole' || activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -1058,7 +1076,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isAntiFraudBoardGame ? null : (
+          ) : activity.type === 'treehole' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isAntiFraudBoardGame ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>
