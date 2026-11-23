@@ -124,6 +124,19 @@
     .send-btn svg { width: 21px; height: 21px; z-index: 1; }
     .send-btn span { z-index: 1; }
     .submit-hint { margin: 17px auto 0; font-size: 10px; line-height: 1.9; text-align: center; color: #a09f8b; }
+    .consent-label { display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+    .consent-label input { flex: none; margin: 0; accent-color: #78af88; }
+    .consent-label span { line-height: 1.5; text-align: left; }
+    .consent-overlay { position: fixed; inset: 0; z-index: 100001; display: grid; place-items: center; padding: 20px;
+      background: rgba(38, 62, 47, .46); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+    .consent-card { width: min(100%, 380px); padding: 28px 24px 24px; border: 2px solid #fff; border-radius: 26px;
+      background: linear-gradient(180deg, #fffdf6, #f3f9e9); box-shadow: 0 22px 65px rgba(28,62,40,.25); text-align: center; }
+    .consent-card h2 { margin: 0 0 12px; color: var(--ink-dark); font-size: 20px; }
+    .consent-card p { margin: 0; color: #718a75; font-size: 13px; line-height: 1.8; }
+    .consent-actions { display: flex; gap: 10px; margin-top: 22px; }
+    .consent-actions button { flex: 1; min-height: 44px; border-radius: 14px; font-weight: 800; }
+    .consent-cancel { border: 1px solid #d5e1cd; background: #fffdf7; color: #718a75; }
+    .consent-confirm { border: 0; background: #79b08b; color: white; }
     .footer { text-align: center; padding: 0 12px max(26px,env(safe-area-inset-bottom)); color: #9cb198; font-size: 10px; letter-spacing: 1px; }
     .footer-deco { font-size: 17px; color: #95be99; margin-bottom: 6px; letter-spacing: 10px; }
     /* result screen */
@@ -451,7 +464,7 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 10 17-7-6 18-3.2-8-7.8-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m11 13 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span id="sendText">把悄悄话送进树洞</span>
         </button>
-        <label class="submit-hint" style="display:block"><input type="checkbox" id="guardianConsent" required /> 我已知情同意；如我是未成年人，已获得监护人同意。</label>
+        <label class="submit-hint consent-label"><input type="checkbox" id="guardianConsent" required /><span>我已知情同意；如我是未成年人，已获得监护人同意。</span></label>
         <p class="submit-hint">🌱 你的心情很重要，开心、委屈或难过，都可以说。<br>如果遇到让你害怕的事，也请尽快告诉信任的大人。</p>
       </form>
     </div>
@@ -460,6 +473,16 @@
 
 
 </div>
+  <section class="consent-overlay" id="consentModal" hidden role="dialog" aria-modal="true" aria-labelledby="consentTitle" aria-describedby="consentDescription">
+    <div class="consent-card">
+      <h2 id="consentTitle">提交前请确认知情</h2>
+      <p id="consentDescription">我已知情同意；如我是未成年人，已获得监护人同意。</p>
+      <div class="consent-actions">
+        <button type="button" class="consent-cancel" id="cancelConsentBtn">取消</button>
+        <button type="button" class="consent-confirm" id="confirmConsentBtn">确认知情</button>
+      </div>
+    </div>
+  </section>
   <!-- 浮动入口放在 app 外，避免被 app 的 overflow 裁切 -->
   <button type="button" class="notes-fab" id="openNotesBtn" aria-haspopup="dialog" aria-controls="notesModal" aria-label="打开我的小纸条">
     <span class="fab-icon" aria-hidden="true">
@@ -528,6 +551,8 @@
   var treeForm = document.getElementById('treeForm');
   var storyField = document.getElementById('story');
   var sendBtn = document.getElementById('sendBtn');
+  var guardianConsent = document.getElementById('guardianConsent');
+  var consentModal = document.getElementById('consentModal');
   var successModal = document.getElementById('resultScreen');
   var shareInput = document.getElementById('allowAnonymousShare');
   var shareButtons = document.querySelectorAll('.choice');
@@ -672,11 +697,29 @@
     if (event.data.action === 'error') { sendBtn.disabled = false; alert(event.data.message || '提交失败，请重试'); }
   });
   renderNotes(); send('list');
+  function closeConsentModal() {
+    consentModal.hidden = true;
+    document.body.style.overflow = '';
+    sendBtn.focus({ preventScroll: true });
+  }
+  document.getElementById('cancelConsentBtn').addEventListener('click', closeConsentModal);
+  document.getElementById('confirmConsentBtn').addEventListener('click', function () {
+    guardianConsent.checked = true;
+    closeConsentModal();
+  });
+  consentModal.addEventListener('click', function (event) {
+    if (event.target === consentModal) closeConsentModal();
+  });
   function openYibaoSuccess(event) {
     if (event && event.preventDefault) event.preventDefault();
     var content = storyField.value.trim();
     if (!content) { document.getElementById('storyError').classList.add('is-visible'); storyField.focus(); return false; }
-    if (!document.getElementById('guardianConsent').checked) { alert('请确认本人或监护人已知情同意'); return false; }
+    if (!guardianConsent.checked) {
+      consentModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.getElementById('confirmConsentBtn').focus({ preventScroll: true });
+      return false;
+    }
     sendBtn.disabled = true;
     send('submit', { content:content, allowAnonymousShare:shareInput.value === 'true', guardianConsent:true });
     return false;
@@ -706,7 +749,8 @@
     if (event.target === successModal) closeYibaoSuccess();
   });
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !notesModal.hidden) closeYibaoNotes();
+    if (event.key === 'Escape' && !consentModal.hidden) closeConsentModal();
+    else if (event.key === 'Escape' && !notesModal.hidden) closeYibaoNotes();
     else if (event.key === 'Escape' && !successModal.hidden) closeYibaoSuccess();
   });
 </script>
