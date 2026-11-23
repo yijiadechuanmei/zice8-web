@@ -79,6 +79,25 @@ function Image({ name, className = "", alt = "" }) {
   return <img src={trafficAssets[name]} className={className} alt={alt} />;
 }
 
+function ProfilePage({ profile, setProfile, error, busy, onSubmit, onBack }) {
+  return (
+    <section
+      className="jtqa-profile-page"
+      style={{ "--jtqa-profile-background": `url("${trafficAssets.profileBackground}")` }}
+    >
+      <button className="jtqa-profile-back" type="button" onClick={onBack} aria-label="返回活动首页">‹</button>
+      <form className="jtqa-profile-card" onSubmit={onSubmit}>
+        <label>姓名<input value={profile.name} maxLength={100} autoComplete="name" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} required /></label>
+        <label>手机号<input value={profile.phone} type="tel" inputMode="numeric" maxLength={11} autoComplete="tel" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} required /></label>
+        {error && <p className="jtqa-profile-error" role="alert">{error}</p>}
+        <button className="jtqa-profile-submit" type="submit" disabled={busy} aria-label="提交中奖信息">
+          <img src={trafficAssets.profileSubmit} alt="提交信息" />
+        </button>
+      </form>
+    </section>
+  );
+}
+
 function Home({ onStart, onMenu }) {
   return (
     <section className="jtqa-home">
@@ -545,7 +564,7 @@ export default function TrafficQuizProject({ routeParams }) {
     }
     if (!state?.profileSubmitted) {
       setProfileError("");
-      setModal("profile");
+      setPage("profile");
       return;
     }
     await beginChallenge();
@@ -579,7 +598,6 @@ export default function TrafficQuizProject({ routeParams }) {
     try {
       await saveProfile(key, { name, phone });
       setState((current) => ({ ...current, profileSubmitted: true }));
-      setModal("");
       saved = true;
     } catch (err) {
       setProfileError(err.message || "提交失败，请重试");
@@ -672,6 +690,16 @@ export default function TrafficQuizProject({ routeParams }) {
           onMenu={() => setModal("menu")}
         />
       )}
+      {page === "profile" && (
+        <ProfilePage
+          profile={profile}
+          setProfile={setProfile}
+          error={profileError}
+          busy={busy}
+          onSubmit={submitProfile}
+          onBack={() => setPage("home")}
+        />
+      )}
       {page === "quiz" && (
         <Quiz
           key={state?.attempt?.question?.id || "quiz"}
@@ -745,23 +773,13 @@ export default function TrafficQuizProject({ routeParams }) {
           title={
             modal === "rules"
               ? "活动规则"
-              : modal === "profile"
-                ? "填写个人信息"
               : modal === "menu"
                 ? "活动导航"
                 : "温馨提示"
           }
           onClose={() => setModal("")}
         >
-          {modal === "profile" ? (
-            <form className="jtqa-profile-form" onSubmit={submitProfile}>
-              <p>首次答题请填写姓名和手机号，提交后即可开始挑战。</p>
-              <label>姓名<input value={profile.name} maxLength={100} autoComplete="name" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} required /></label>
-              <label>手机号<input value={profile.phone} type="tel" inputMode="numeric" maxLength={11} autoComplete="tel" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} required /></label>
-              {profileError && <p className="jtqa-profile-error" role="alert">{profileError}</p>}
-              <button className="jtqa-button" type="submit" disabled={busy}>提交信息</button>
-            </form>
-          ) : modal === "rules" ? (
+          {modal === "rules" ? (
             <div className="jtqa-rules">
               {RULES.map((rule) => (
                 <p key={rule}>{rule}</p>
@@ -792,7 +810,7 @@ export default function TrafficQuizProject({ routeParams }) {
           ) : (
             <p>{modal}</p>
           )}
-          {modal !== "menu" && modal !== "profile" && (
+          {modal !== "menu" && (
             <Button onClick={() => setModal("")}>知道了</Button>
           )}
         </Modal>
