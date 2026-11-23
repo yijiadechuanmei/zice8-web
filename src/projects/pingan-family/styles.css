@@ -74,6 +74,9 @@
 .pfh-voucher-time{font-size:12px;font-weight:700;color:#8e3b35;font-variant-numeric:tabular-nums}
 .pfh-voucher .pfh-voucher-error{color:#bd2930}
 .pfh-draw-result .pfh-voucher{margin:12px 0 0}
+.pfh-prize-disclaimer{display:block;margin:4px 0 8px;color:#8f6a60;font-size:11px;line-height:1.4;font-weight:400}
+.pfh-draw-result>p{max-width:100%;margin:12px 0 0;text-align:center;overflow-wrap:anywhere}
+.pfh-draw-result .pfh-voucher-time{max-width:100%;text-align:center;overflow-wrap:anywhere}
 .pfh-page-stages .pfh-shell{min-height:100svh;padding:14px 18px calc(28px + env(safe-area-inset-bottom,0px))}
 .pfh-page-stages .pfh-back{margin-bottom:10px}
 .pfh-stages-page{width:100%;max-width:430px;margin:0 auto}
