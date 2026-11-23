@@ -527,6 +527,7 @@
   'use strict';
   var treeForm = document.getElementById('treeForm');
   var storyField = document.getElementById('story');
+  var sendBtn = document.getElementById('sendBtn');
   var successModal = document.getElementById('resultScreen');
   var shareInput = document.getElementById('allowAnonymousShare');
   var shareButtons = document.querySelectorAll('.choice');
@@ -652,9 +653,11 @@
   notesModal.addEventListener('click', function (event) {
     if (event.target === notesModal) closeYibaoNotes();
   });
-  function send(action, payload) { parent.postMessage({ source:'yibao-treehole', action:action, payload:payload }, location.origin); }
+  // about:srcdoc has a "null" URL origin even when its document inherits the parent origin.
+  var parentOrigin = new URL(document.baseURI).origin;
+  function send(action, payload) { parent.postMessage({ source:'yibao-treehole', action:action, payload:payload }, parentOrigin); }
   window.addEventListener('message', function(event) {
-    if (event.origin !== location.origin || !event.data || event.data.source !== 'yibao-parent') return;
+    if (event.origin !== parentOrigin || !event.data || event.data.source !== 'yibao-parent') return;
     if (event.data.action === 'notes') {
       notes = (event.data.notes || []).map(function(n) { return { id:n.id, text:n.content, share:n.allowAnonymousShare, mine:true, date:new Date(n.createdAt).toLocaleString('zh-CN') }; });
       renderNotes();
