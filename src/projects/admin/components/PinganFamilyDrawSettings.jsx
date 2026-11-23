@@ -51,6 +51,13 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
     }))
   }
 
+  function updateStock(code, value) {
+    setSettings((current) => ({
+      ...current,
+      prizes: current.prizes.map((prize) => prize.code === code ? { ...prize, totalStock: value ?? 0 } : prize),
+    }))
+  }
+
   async function save() {
     setSaving(true)
     setError('')
@@ -58,6 +65,7 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
       const result = await savePinganFamilyDrawSettings(activityKey, {
         enabled: settings.enabled,
         drawPeriods: settings.drawPeriods,
+        prizeStocks: Object.fromEntries(settings.prizes.map(({ code, totalStock }) => [code, totalStock])),
       })
       setSettings(result)
       setStatsRefreshKey((value) => value + 1)
@@ -77,7 +85,7 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
     ...codes.map((code) => ({
       title: names[code], dataIndex: code, width: 150,
       render: (value, row) => <Space direction="vertical" size={0}>
-        <InputNumber min={settings?.issued?.[row.periodKey]?.[code] || 0} max={settings?.prizes?.find((item) => item.code === code)?.totalStock || 50} precision={0} value={value} onChange={(next) => updateQuota(row.periodKey, code, next)} />
+        <InputNumber min={settings?.issued?.[row.periodKey]?.[code] || 0} precision={0} value={value} onChange={(next) => updateQuota(row.periodKey, code, next)} />
         <Text type="secondary">当日已中 {settings?.issued?.[row.periodKey]?.[code] || 0}</Text>
       </Space>,
     })),
@@ -94,7 +102,13 @@ export default function PinganFamilyDrawSettings({ activityKey }) {
           <Button type="primary" loading={saving} disabled={!settings.drawPeriods} onClick={save}>保存抽奖设置</Button>
         </Space>
         <Table rowKey="periodKey" size="small" dataSource={rows} columns={columns} pagination={false} scroll={{ x: 1000 }} />
-        <Text type="secondary">每天的概率和奖品配额可单独调整；未发出的配额不会自动结转。三天总配额加上其他日期已发数量不能超过库存，修改配额不能低于当日已中数量。当日奖品发完后暂停抽奖，未用资格不扣除。</Text>
+        <Table rowKey="code" size="small" pagination={false} dataSource={settings.prizes || []} columns={[
+          { title: '奖品', dataIndex: 'code', render: (code) => names[code] || code },
+          { title: '三日配额合计', render: (_, prize) => Object.values(settings.drawPeriods || {}).reduce((sum, period) => sum + (period.quotas[prize.code] || 0), 0) },
+          { title: '总库存', dataIndex: 'totalStock', render: (value, prize) => <InputNumber min={prize.issuedCount} precision={0} value={value} onChange={(next) => updateStock(prize.code, next)} /> },
+          { title: '已发 / 剩余', render: (_, prize) => `${prize.issuedCount} / ${Math.max(0, prize.totalStock - prize.issuedCount)}` },
+        ]} />
+        <Text type="secondary">每日概率、配额及总库存可调整；未发出的配额不会自动结转。三日配额加其他日期已发数量不能超过总库存，配额和库存都不能低于已中奖数量。当日奖品发完后暂停抽奖，未用资格不扣除。</Text>
         {otherIssued.length > 0 && <div><Text type="warning">正式抽奖日期外已发：{otherIssued.map((prize) => `${prize.name}${prize.count}件`).join('、')}，计入总库存，不占本次每日配额。</Text></div>}
       </>}
     </Card>
