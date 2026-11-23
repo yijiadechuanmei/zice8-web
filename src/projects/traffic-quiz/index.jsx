@@ -80,20 +80,26 @@ function Image({ name, className = "", alt = "" }) {
 }
 
 function ProfilePage({ profile, setProfile, error, busy, onSubmit, onBack }) {
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const [submitImageLoaded, setSubmitImageLoaded] = useState(false);
   return (
-    <section
-      className="jtqa-profile-page"
-      style={{ "--jtqa-profile-background": `url("${trafficAssets.profileBackground}")` }}
-    >
-      <button className="jtqa-profile-back" type="button" onClick={onBack} aria-label="返回活动首页">‹</button>
-      <form className="jtqa-profile-card" onSubmit={onSubmit}>
-        <label>姓名<input value={profile.name} maxLength={100} autoComplete="name" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} required /></label>
-        <label>手机号<input value={profile.phone} type="tel" inputMode="numeric" maxLength={11} autoComplete="tel" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} required /></label>
-        {error && <p className="jtqa-profile-error" role="alert">{error}</p>}
-        <button className="jtqa-profile-submit" type="submit" disabled={busy} aria-label="提交中奖信息">
-          <img src={trafficAssets.profileSubmit} alt="提交信息" />
-        </button>
-      </form>
+    <section className={`jtqa-profile-page${backgroundLoaded ? " jtqa-profile-art-ready" : ""}`}>
+      <div className="jtqa-profile-art">
+        <img className="jtqa-profile-background" src={trafficAssets.profileBackground} alt="" onLoad={() => setBackgroundLoaded(true)} onError={() => setBackgroundLoaded(false)} style={{ display: backgroundLoaded ? "block" : "none" }} />
+        {!backgroundLoaded && <div className="jtqa-profile-fallback-title">奖品登记</div>}
+        <button className="jtqa-profile-back" type="button" onClick={onBack} aria-label="返回活动首页">‹</button>
+        <form className="jtqa-profile-form" onSubmit={onSubmit}>
+          <label className="jtqa-profile-field jtqa-profile-field-1"><span>姓名</span><input value={profile.name} maxLength={100} autoComplete="name" placeholder="请输入您的姓名" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} required /></label>
+          <label className="jtqa-profile-field jtqa-profile-field-2"><span>电话</span><input value={profile.phone} type="tel" inputMode="numeric" maxLength={11} autoComplete="tel" placeholder="请输入手机号码" onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} required /></label>
+          <label className="jtqa-profile-field jtqa-profile-field-3"><span>车辆号牌种类</span><select value={profile.vehiclePlateType} onChange={(event) => setProfile((current) => ({ ...current, vehiclePlateType: event.target.value }))} required><option value="">请选择号牌种类</option><option value="油车">油车</option><option value="电车">电车</option></select></label>
+          <label className="jtqa-profile-field jtqa-profile-field-4"><span>车牌号码</span><input value={profile.vehicleNumber} maxLength={20} placeholder="请输入车牌号码，如闽D·12345" onChange={(event) => setProfile((current) => ({ ...current, vehicleNumber: event.target.value.toUpperCase() }))} required /></label>
+          {error && <p className="jtqa-profile-error" role="alert">{error}</p>}
+          <button className={`jtqa-profile-submit${submitImageLoaded ? " jtqa-profile-submit-ready" : ""}`} type="submit" disabled={busy} aria-label="确认提交">
+            <span className={submitImageLoaded ? "jtqa-profile-submit-hidden-text" : ""}>{busy ? "提交中…" : "确认提交"}</span>
+            <img src={trafficAssets.profileSubmit} alt="" onLoad={() => setSubmitImageLoaded(true)} onError={() => setSubmitImageLoaded(false)} style={{ display: submitImageLoaded ? "block" : "none" }} />
+          </button>
+        </form>
+      </div>
     </section>
   );
 }
@@ -403,13 +409,14 @@ export default function TrafficQuizProject({ routeParams }) {
   const posterOpenedFor = useRef(null);
   const timeoutBusy = useRef(false);
   const actionBusy = useRef(false);
-  const [profile, setProfile] = useState({ name: "", phone: "" });
+  const [profile, setProfile] = useState({ name: "", phone: "", vehiclePlateType: "", vehicleNumber: "" });
   const [profileError, setProfileError] = useState("");
   const { authReady, blockedMessage } = useWechatAuth(key, publicConfig);
   useWechatShare(key, publicConfig);
   const applyState = useCallback((next, move = true, receivedAt = Date.now()) => {
     const now = Date.now();
     setState(next);
+    if (next.profile) setProfile(next.profile);
     setOffset(receivedAt - Date.parse(next.serverNow));
     setTick(now);
     if (move) {
@@ -587,8 +594,10 @@ export default function TrafficQuizProject({ routeParams }) {
     if (actionBusy.current) return;
     const name = profile.name.trim();
     const phone = profile.phone.trim();
-    if (!name || !/^1[3-9]\d{9}$/.test(phone)) {
-      setProfileError("请填写姓名和有效的11位手机号");
+    const vehiclePlateType = profile.vehiclePlateType;
+    const vehicleNumber = profile.vehicleNumber.trim().toUpperCase();
+    if (!name || !/^1[3-9]\d{9}$/.test(phone) || !["油车", "电车"].includes(vehiclePlateType) || !/^[\u4e00-\u9fffA-Z0-9·•-]{4,20}$/.test(vehicleNumber)) {
+      setProfileError("请填写完整的姓名、手机号、号牌种类和车辆号码");
       return;
     }
     actionBusy.current = true;
@@ -596,7 +605,7 @@ export default function TrafficQuizProject({ routeParams }) {
     setProfileError("");
     let saved = false;
     try {
-      await saveProfile(key, { name, phone });
+      await saveProfile(key, { name, phone, vehiclePlateType, vehicleNumber });
       setState((current) => ({ ...current, profileSubmitted: true }));
       saved = true;
     } catch (err) {

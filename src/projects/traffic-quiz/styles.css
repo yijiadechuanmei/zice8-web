@@ -116,15 +116,26 @@
 .jtqa-modal h2{text-align:center;color:#357f49;margin:0 0 14px}
 .jtqa-modal p{line-height:1.6}
 .jtqa-modal .jtqa-button{margin-top:15px}
-.jtqa-profile-page{position:fixed;inset:0;z-index:15;display:grid;place-items:center;overflow:hidden;padding:24px;background:#fbf8e8 var(--jtqa-profile-background) center/cover no-repeat}
-.jtqa-profile-back{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:16px;width:44px;height:44px;border:0;border-radius:50%;background:#fff7d9;color:#347d4b;font-size:32px;line-height:1}
-.jtqa-profile-card{display:grid;gap:16px;width:min(86vw,390px);padding:clamp(20px,6vw,34px);border:2px solid #d2e0b1;border-radius:24px;background:#fffcefef;box-shadow:0 12px 36px #1e512a30}
-.jtqa-profile-card label{display:grid;gap:7px;color:#32784a;font-weight:800}
-.jtqa-profile-card input{width:100%;min-height:48px;padding:10px 14px;border:2px solid #b9d6a8;border-radius:12px;background:#fff;color:#294332;font:inherit;font-weight:500}
-.jtqa-profile-card input:focus{outline:2px solid #70aa69;outline-offset:1px}
-.jtqa-profile-error{margin:0;color:#b63b30;font-size:14px}
-.jtqa-profile-submit{display:block;width:100%;height:62px;padding:0;border:0;background:transparent}
-.jtqa-profile-submit img{display:block;width:100%;height:100%;object-fit:contain}
+.jtqa-profile-page{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(155deg,#0042db 0%,#0689f2 45%,#00c2ed 100%)}
+.jtqa-profile-art{position:relative;flex:none;width:100vw;max-width:750px;aspect-ratio:750/1624;overflow:hidden}
+.jtqa-profile-background{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+.jtqa-profile-fallback-title{position:absolute;top:32%;left:5%;width:90%;padding:8% 0 42%;border:2px solid #c9f3ff;border-radius:5%;background:linear-gradient(120deg,#e9f8ffe8,#8fe1f9c9);text-align:center;color:#fff;font-size:clamp(27px,7.5vw,55px);font-weight:900;text-shadow:0 3px 4px #315f9a}
+.jtqa-profile-back{position:absolute;z-index:11;top:3%;left:4%;width:7%;aspect-ratio:1;border:0;border-radius:50%;background:#e8f6ffb5;color:#1264af;font-size:clamp(20px,6vw,38px);line-height:1}
+.jtqa-profile-form{position:absolute;inset:0}
+.jtqa-profile-field{position:absolute;left:10.9%;width:77.8%;display:grid;grid-template-columns:31.75% 68.25%;align-items:center;color:#07141a;font-size:clamp(13px,3.4vw,26px)}
+.jtqa-profile-field-1{top:39.96%;height:3.51%}.jtqa-profile-field-2{top:44.70%;height:3.45%}.jtqa-profile-field-3{top:49.51%;height:3.51%}.jtqa-profile-field-4{top:54.19%;height:3.63%}
+.jtqa-profile-field>span{white-space:nowrap}
+.jtqa-profile-art-ready .jtqa-profile-field>span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.jtqa-profile-field input,.jtqa-profile-field select{grid-column:2;width:100%;height:100%;min-width:0;padding:0 5%;border:1px solid #b5cfda;border-radius:14px;background:linear-gradient(105deg,#f5f8fa,#fff 52%,#eaf4f8);box-shadow:inset 0 2px 4px #95b7c33b,0 1px 1px #fff;color:#263844;font:inherit;font-size:clamp(12px,3.1vw,23px);outline:none}
+.jtqa-profile-field input::placeholder{color:#9fa7a7;opacity:1}
+.jtqa-profile-field select{appearance:none;color:#697c83;background-image:linear-gradient(45deg,transparent 50%,#506875 50%),linear-gradient(135deg,#506875 50%,transparent 50%),linear-gradient(105deg,#f5f8fa,#fff 52%,#eaf4f8);background-position:calc(100% - 21px) 52%,calc(100% - 14px) 52%,center;background-size:7px 7px,7px 7px,100% 100%;background-repeat:no-repeat;padding-right:27px}
+.jtqa-profile-field select:valid{color:#263844}
+.jtqa-profile-field input:focus,.jtqa-profile-field select:focus{border-color:#3d9fe2;box-shadow:0 0 0 2px #d5f5ff}
+.jtqa-profile-error{position:absolute;top:58.5%;left:12%;width:76%;margin:0;color:#fff;text-align:center;font-size:clamp(12px,2.7vw,17px);text-shadow:0 1px 3px #b52020}
+.jtqa-profile-submit{position:absolute;left:30.8%;top:60.10%;width:39.6%;height:4.25%;display:grid;place-items:center;padding:0;border:1px solid #ffe96e;border-radius:100px;background:linear-gradient(#ffac4b,#ef3928 55%,#d51924);box-shadow:0 3px 4px #1745908c;color:#fff;font-size:clamp(16px,4.2vw,31px);font-weight:900;white-space:nowrap;text-shadow:0 2px 2px #9b2725}
+.jtqa-profile-submit-ready{border:0;background:transparent;box-shadow:none}
+.jtqa-profile-submit img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+.jtqa-profile-submit-hidden-text{visibility:hidden}
 .jtqa-close{position:absolute;right:13px;top:7px;border:0;background:none;font-size:30px;color:#6c8e71}
 .jtqa-menu-actions{display:grid;gap:12px}
 .jtqa-rules{line-height:1.6;font-size:14px}
