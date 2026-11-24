@@ -8,8 +8,6 @@ export const trafficAssets = {
   roadScene: `${trafficImageBase}/road-scene.png`,
   quizScene: `${trafficImageBase}/quiz-scene.png`,
   resultScene: `${trafficImageBase}/result-scene.png`,
-  profileBackground: `${trafficImageBase}/claim-profile-background.png`,
-  profileSubmit: `${trafficImageBase}/claim-profile-submit.png`,
 };
 export const trafficActivity = {
   type: "jtqa",
