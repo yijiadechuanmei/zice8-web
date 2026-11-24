@@ -316,6 +316,13 @@
     .note-detail { padding:0 15px 15px 15px; animation:noteUnfold .23s ease-out; }
     .note-paper { border-top:1px dashed #e5dfca; padding:12px 9px 1px; font-size:12px; line-height:2.0; color:#637465;
       white-space:pre-wrap; overflow-wrap:anywhere; }
+    .note-reply { margin:13px 4px 3px; padding:13px 14px; border:1px solid #d8e9d3; border-radius:14px;
+      background:linear-gradient(145deg,#f1f9ea,#fffdf4); box-shadow:0 4px 12px #78966b13; }
+    .note-reply-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px;
+      color:#62896a; font-size:11px; font-weight:850; }
+    .note-reply-heading time { color:#9aa995; font-size:9px; font-weight:600; white-space:nowrap; }
+    .note-reply-body { color:#536f5a; font-size:12px; line-height:1.9; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .note-replied-label { border-radius:5px; background:#e8f3df; color:#6e9b70; padding:2px 5px; font-weight:800; }
     .note-detail-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:8px 4px 0;
       font-size:10px; color:#a6a797; }
     .note-detail-footer .privacy { color:#a38e79; }
@@ -632,6 +639,10 @@
       badge.textContent = '我的小纸条';
       var metaText = document.createElement('span'); metaText.textContent = note.date;
       meta.appendChild(badge); meta.appendChild(metaText);
+      if (note.reply) {
+        var repliedBadge = document.createElement('span'); repliedBadge.className = 'note-replied-label'; repliedBadge.textContent = '已收到回复';
+        meta.appendChild(repliedBadge);
+      }
       brief.appendChild(headline); brief.appendChild(meta);
       var arrow = document.createElement('span'); arrow.className = 'note-arrow'; arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" focusable="false"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'; arrow.setAttribute('aria-hidden','true');
       btn.appendChild(seal); btn.appendChild(brief); btn.appendChild(arrow);
@@ -643,7 +654,20 @@
       var privacy = document.createElement('span'); privacy.className = 'privacy';
       privacy.textContent = note.share ? '✓ 同意匿名分享' : '♡ 不同意分享';
       detailFooter.appendChild(tinyFlower); detailFooter.appendChild(privacy);
-      detail.appendChild(paper); detail.appendChild(detailFooter);
+      detail.appendChild(paper);
+      if (note.reply) {
+        var replyBox = document.createElement('div'); replyBox.className = 'note-reply';
+        var replyHeading = document.createElement('div'); replyHeading.className = 'note-reply-heading';
+        var replyTitle = document.createElement('span'); replyTitle.textContent = '✿ 怡宝老师的回复';
+        replyHeading.appendChild(replyTitle);
+        if (note.repliedAt) {
+          var replyTime = document.createElement('time'); replyTime.dateTime = note.repliedAt;
+          replyTime.textContent = new Date(note.repliedAt).toLocaleString('zh-CN'); replyHeading.appendChild(replyTime);
+        }
+        var replyBody = document.createElement('div'); replyBody.className = 'note-reply-body'; replyBody.textContent = note.reply;
+        replyBox.appendChild(replyHeading); replyBox.appendChild(replyBody); detail.appendChild(replyBox);
+      }
+      detail.appendChild(detailFooter);
       btn.addEventListener('click', function () {
         expandedNoteId = (expandedNoteId === note.id) ? null : note.id;
         renderNotes();
@@ -684,7 +708,7 @@
   window.addEventListener('message', function(event) {
     if (event.origin !== parentOrigin || !event.data || event.data.source !== 'yibao-parent') return;
     if (event.data.action === 'notes') {
-      notes = (event.data.notes || []).map(function(n) { return { id:n.id, text:n.content, share:n.allowAnonymousShare, mine:true, date:new Date(n.createdAt).toLocaleString('zh-CN') }; });
+      notes = (event.data.notes || []).map(function(n) { return { id:n.id, text:n.content, share:n.allowAnonymousShare, reply:n.replyContent, repliedAt:n.repliedAt, mine:true, date:new Date(n.createdAt).toLocaleString('zh-CN') }; });
       renderNotes();
     }
     if (event.data.action === 'saved') {
