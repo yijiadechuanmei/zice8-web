@@ -87,6 +87,7 @@ export default function PinganFamilyProject({ routeParams }) {
   useEffect(() => {
     if (!authReady || (page !== 'home' && page !== 'wheel')) return undefined
     const boundaries = [
+      '2026-11-22T00:00:00+08:00',
       '2026-11-25T00:00:00+08:00',
       '2026-11-26T00:00:00+08:00',
       '2026-11-27T00:00:00+08:00',
@@ -130,7 +131,7 @@ export default function PinganFamilyProject({ routeParams }) {
   async function begin() {
     if (!ready) { setError(blockedMessage || '请在微信中打开活动'); return }
     if (!active) { setError(activityStatus === 'ended' ? '活动已结束' : '活动尚未开始'); return }
-    if (!quizOpen) { setError(state?.quizNotStarted ? '答题将于11月25日开始' : '答题时间已结束'); return }
+    if (!quizOpen) { setError(state?.quizNotStarted ? '答题将于11月22日开始' : '答题时间已结束'); return }
     setError('')
     setPage('stages')
   }
@@ -220,7 +221,7 @@ export default function PinganFamilyProject({ routeParams }) {
           <h1><span>平安家庭</span><span>法治护航</span></h1>
           <p className="pfh-subtitle">——大浪街道反家庭暴力主题宣传活动</p>
         </section>
-        <section className="pfh-home-actions"><div className="pfh-count">今日剩余成功通关次数 <strong>{state?.remainingToday ?? '—'}</strong> / 2</div><Button onClick={begin} disabled={!quizOpen || state?.remainingToday === 0 || busy}>{!quizOpen ? activityStatus === 'ended' ? '活动已结束' : state?.quizNotStarted ? '答题将于11月25日开始' : !active ? '活动即将开始' : '答题已结束' : state?.remainingToday === 0 ? '今日已完成' : challenge?.status === 'active' ? '进入关卡' : '开始答题'}</Button>{state?.needsPrizeProfile && <Button onClick={() => setPage('profile')} secondary>填写领奖信息</Button>}{chanceId && state?.drawOpen && <Button onClick={openWheel} secondary>使用抽奖机会（{state.unusedChanceIds.length}次）</Button>}{chanceId && state?.drawExhausted && <Button secondary disabled>今日奖品已发完 · 剩余资格{state.unusedChanceIds.length}次</Button>}<div className="pfh-links"><button type="button" onClick={() => setModal('rules')}>活动规则</button><button type="button" onClick={showRecords} disabled={!ready}>我的中奖记录</button></div>{error && <p className="pfh-error" role="alert">{error}</p>}</section>
+        <section className="pfh-home-actions"><div className="pfh-count">今日剩余成功通关次数 <strong>{state?.remainingToday ?? '—'}</strong> / 2</div><Button onClick={begin} disabled={!quizOpen || state?.remainingToday === 0 || busy}>{!quizOpen ? activityStatus === 'ended' ? '活动已结束' : state?.quizNotStarted ? '答题将于11月22日开始' : !active ? '活动即将开始' : '答题已结束' : state?.remainingToday === 0 ? '今日已完成' : challenge?.status === 'active' ? '进入关卡' : '开始答题'}</Button>{state?.needsPrizeProfile && <Button onClick={() => setPage('profile')} secondary>填写领奖信息</Button>}{chanceId && state?.drawOpen && <Button onClick={openWheel} secondary>使用抽奖机会（{state.unusedChanceIds.length}次）</Button>}{chanceId && state?.drawExhausted && <Button secondary disabled>今日奖品已发完 · 剩余资格{state.unusedChanceIds.length}次</Button>}<div className="pfh-links"><button type="button" onClick={() => setModal('rules')}>活动规则</button><button type="button" onClick={showRecords} disabled={!ready}>我的中奖记录</button></div>{error && <p className="pfh-error" role="alert">{error}</p>}</section>
         <footer className="pfh-hero-info"><p>主办单位：大浪街道党工委、办事处</p><p>承办单位：大浪街道妇女联合会</p></footer>
       </>}
       {page === 'stages' && <section className="pfh-stages-page">
