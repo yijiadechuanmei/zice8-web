@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { trackPageView } from '../../shared/analytics'
 import { assets } from './assets'
 import Voucher from './Voucher'
@@ -60,6 +61,14 @@ export default function PinganFamilyProject({ routeParams }) {
   const drawTimer = useRef(null)
   const answerTimer = useRef(null)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, config)
+  const shareActivity = useMemo(() => config ? {
+    ...config,
+    shareImage: config.shareImage?.replaceAll('&amp;', '&') || assets.home,
+  } : null, [config])
+  const handleShareStatus = useCallback((status) => {
+    if (status?.wxConfigStatus === 'failed') console.warn('[pingan-family-share] setup failed', status)
+  }, [])
+  useWechatShare(activityKey, shareActivity, handleShareStatus)
   const refresh = useCallback(async () => {
     const next = await getState(activityKey)
     setState(next)
