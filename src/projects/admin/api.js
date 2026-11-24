@@ -282,6 +282,14 @@ export function getSafeDriverQuizOverview(activityKey) {
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/overview`)
 }
 
+export function getSafeDriverQuizConfig(activityKey) {
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/config`)
+}
+
+export function saveSafeDriverQuizConfig(activityKey, data) {
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/config`, { method: 'POST', body: JSON.stringify(data) })
+}
+
 export function getSafeDriverQuizAttempts(activityKey, params = {}) {
   const search = new URLSearchParams(params)
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/attempts?${search}`)

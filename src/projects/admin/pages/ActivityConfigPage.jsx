@@ -42,6 +42,7 @@ import {
 } from '../api'
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
 import CybersecurityChallengeAdmin from '../components/CybersecurityChallengeAdmin'
+import SafeDriverQuizSettings from '../components/SafeDriverQuizSettings'
 import PinganFamilyTestTools from '../components/PinganFamilyTestTools'
 import PinganFamilyDrawSettings from '../components/PinganFamilyDrawSettings'
 
@@ -1059,9 +1060,9 @@ export default function ActivityConfigPage({ activity }) {
         {activity.type === 'pfh' && <><PinganFamilyDrawSettings key={`${activity.activityKey}-draw`} activityKey={activity.activityKey} /><PinganFamilyTestTools key={activity.activityKey} activityKey={activity.activityKey} /></>}
         {activity.type === 'cybersecurity_knowledge_challenge' && <CybersecurityChallengeAdmin key={activity.activityKey} activityKey={activity.activityKey} />}
         {activity.type === 'safe_driver_quiz_lottery' ? (
-          <Card size="small" title="清空平安好司机测试用户数据" style={{ borderColor: '#ffccc7' }}>
+          <><SafeDriverQuizSettings activityKey={activity.activityKey} /><Card size="small" title="清空平安好司机测试用户数据" style={{ borderColor: '#ffccc7' }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Text type="secondary">仅删除该用户在当前活动的答题、抽奖和邮寄记录，不会删除微信账号或修改活动配置。删除中奖记录后会释放对应油卡名额。</Text>
+              <Text type="secondary">仅删除该用户在当前活动的答题、抽奖和登记记录，不会删除微信账号或修改活动配置。删除中奖记录后会释放对应奖品名额。</Text>
               <Space wrap>
                 <Input
                   value={safeDriverUserId}
@@ -1082,7 +1083,7 @@ export default function ActivityConfigPage({ activity }) {
                 </Popconfirm>
               </Space>
             </Space>
-          </Card>
+          </Card></>
         ) : null}
         {activity.type === 'jtqa' ? (
           <Card size="small" title="清除文明交通活动用户数据" style={{ borderColor: '#ffccc7' }}>
