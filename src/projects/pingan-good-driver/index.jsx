@@ -134,7 +134,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
           })
         } else {
           quizInProgressRef.current = false
-          showComingSoonToast(result.wrongCount >= 3 ? '累计答错3次，答题结束' : '本轮答题结束，未能全部答对', () => {
+          showComingSoonToast('本轮答题结束，未能全部答对', () => {
             setSelectedOption(null)
             setQuestion(null)
             setPage('home')
