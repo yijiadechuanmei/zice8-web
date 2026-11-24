@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { PhoneOutlined, UserOutlined } from '@ant-design/icons'
 import { API_BASE_URL, getToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { abandonQuiz, answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
 import './styles.css'
 
 const ASSETS_BASE_URL = 'https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026'
+const PLATE_TYPES = ['小型汽车号牌（蓝牌）', '大型汽车号牌（黄牌）', '小型新能源汽车号牌（绿牌）', '大型新能源汽车号牌（黄绿牌）']
 
 export default function PinganGoodDriverProject({ routeParams }) {
   const activityKey = routeParams?.activityKey || 'pingan_good_driver_2026'
@@ -15,10 +17,9 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [publicConfig, setPublicConfig] = useState(null)
   const [remainingToday, setRemainingToday] = useState(3)
   const [won, setWon] = useState(false)
-  const [claimOpen, setClaimOpen] = useState(false)
   const [drawFinished, setDrawFinished] = useState(false)
   const [missOpen, setMissOpen] = useState(false)
-  const [claim, setClaim] = useState({ name: '', phone: '', address: '' })
+  const [claim, setClaim] = useState({ name: '', phone: '', plateType: '', plateNumber: '' })
   const [claimError, setClaimError] = useState('')
   const [wheelRotation, setWheelRotation] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -52,7 +53,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       if (!active) return
       setRemainingToday(state.remainingToday)
       setWon(state.won)
-      if (state.won && !state.claimSubmitted) { setPage('result'); setClaimOpen(true) }
+      if (state.won && !state.claimSubmitted) setPage('claim')
       else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
     }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
     return () => { active = false }
@@ -173,7 +174,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       drawTimer.current = window.setTimeout(() => {
         setDrawFinished(true)
         setWon(result.won)
-        if (result.won) setClaimOpen(true)
+        if (result.won) setPage('claim')
         else setMissOpen(true)
         setBusy(false)
       }, 4500)
@@ -184,18 +185,19 @@ export default function PinganGoodDriverProject({ routeParams }) {
     event.preventDefault()
     if (busy) return
     const normalizedClaim = {
-      name: claim.name.trim(), phone: claim.phone.trim(), address: claim.address.trim(),
+      name: claim.name.trim(), phone: claim.phone.trim(), plateType: claim.plateType,
+      plateNumber: claim.plateNumber.trim().toUpperCase().replace(/[·•\s]/g, ''),
     }
     if (normalizedClaim.name.length < 2) { setClaimError('请填写至少 2 个字的姓名'); return }
     if (!/^1[3-9]\d{9}$/.test(normalizedClaim.phone)) { setClaimError('请填写有效的 11 位手机号'); return }
-    if (normalizedClaim.address.length < 6) { setClaimError('请填写完整的收货地址'); return }
+    if (!PLATE_TYPES.includes(normalizedClaim.plateType)) { setClaimError('请选择车辆号牌种类'); return }
+    if (!/^[\u4e00-\u9fa5][A-Z][A-Z0-9\u4e00-\u9fa5]{5,6}$/.test(normalizedClaim.plateNumber)) { setClaimError('请填写有效的车牌号码，如赣D·12345'); return }
     setClaimError('')
     setBusy(true)
     try {
       await submitClaim(activityKey, normalizedClaim)
-      setClaimOpen(false)
       setPage('home')
-      showComingSoonToast('邮寄信息提交成功')
+      showComingSoonToast('奖品信息登记成功')
     } catch (error) { setClaimError(error.message || '提交失败，请重试') }
     finally { setBusy(false) }
   }
@@ -209,6 +211,8 @@ export default function PinganGoodDriverProject({ routeParams }) {
           <img className="pgd-background" src={`${ASSETS_BASE_URL}/quiz-background.png`} alt="" />
         ) : page === 'result' ? (
           <img className="pgd-background" src={`${ASSETS_BASE_URL}/result-wheel-background.png`} alt="" />
+        ) : page === 'claim' ? (
+          <img className="pgd-background" src={`${ASSETS_BASE_URL}/claim-profile-background.png`} alt="" />
         ) : rulesBackgroundFailed ? (
           <div className="pgd-rules-pending" role="status"><strong>活动规则</strong><span>活动详情即将公布</span></div>
         ) : (
@@ -293,18 +297,20 @@ export default function PinganGoodDriverProject({ routeParams }) {
           </>
         ) : null}
         {page === 'home' && authReady ? <p className="pgd-attempt-count">今日剩余答题次数：{remainingToday}</p> : null}
-        {claimOpen ? (
-          <div className="pgd-claim-mask">
-            <form className="pgd-claim-card" onSubmit={saveClaim} noValidate>
-              <h2>恭喜中奖</h2>
-              <p>请填写油卡邮寄信息</p>
-              <label>姓名<input value={claim.name} onChange={(event) => { setClaim({ ...claim, name: event.target.value }); setClaimError('') }} maxLength={60} autoComplete="name" /></label>
-              <label>电话<input value={claim.phone} onChange={(event) => { setClaim({ ...claim, phone: event.target.value }); setClaimError('') }} inputMode="tel" type="tel" maxLength={11} autoComplete="tel" /></label>
-              <label>收货地址<textarea value={claim.address} onChange={(event) => { setClaim({ ...claim, address: event.target.value }); setClaimError('') }} maxLength={500} autoComplete="street-address" /></label>
-              {claimError ? <div className="pgd-claim-error" role="alert">{claimError}</div> : null}
-              <button type="submit" disabled={busy}>{busy ? '提交中…' : '提交邮寄信息'}</button>
-            </form>
-          </div>
+        {page === 'claim' ? (
+          <form className="pgd-profile-form" onSubmit={saveClaim} noValidate>
+            <input className="pgd-profile-field pgd-profile-name" aria-label="姓名" placeholder="请输入您的姓名" value={claim.name} onChange={(event) => { setClaim({ ...claim, name: event.target.value }); setClaimError('') }} maxLength={60} autoComplete="name" />
+            <UserOutlined className="pgd-profile-icon pgd-profile-name-icon" aria-hidden="true" />
+            <input className="pgd-profile-field pgd-profile-phone" aria-label="手机号码" placeholder="请输入手机号码" type="tel" inputMode="tel" value={claim.phone} onChange={(event) => { setClaim({ ...claim, phone: event.target.value }); setClaimError('') }} maxLength={11} autoComplete="tel" />
+            <PhoneOutlined className="pgd-profile-icon pgd-profile-phone-icon" aria-hidden="true" />
+            <select className={`pgd-profile-field pgd-profile-plate-type${claim.plateType ? '' : ' is-placeholder'}`} aria-label="车辆号牌种类" value={claim.plateType} onChange={(event) => { setClaim({ ...claim, plateType: event.target.value }); setClaimError('') }}>
+              <option value="" disabled>请选择号牌种类</option>
+              {PLATE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+            <input className="pgd-profile-field pgd-profile-plate-number" aria-label="车辆号码" placeholder="请输入车牌号码，如赣D·12345" value={claim.plateNumber} onChange={(event) => { setClaim({ ...claim, plateNumber: event.target.value.toUpperCase() }); setClaimError('') }} maxLength={9} autoCapitalize="characters" />
+            {claimError ? <div className="pgd-profile-error" role="alert">{claimError}</div> : null}
+            <button className="pgd-profile-submit" type="submit" disabled={busy} aria-label={busy ? '提交中' : '确认提交'} />
+          </form>
         ) : null}
         {missOpen ? (
           <div className="pgd-claim-mask">

@@ -28,7 +28,9 @@ export default function SafeDriverQuizAdmin({ activity, overviewOnly = false }) 
     { title: '状态', dataIndex: 'status', width: 100, render: (v) => <Tag color={v === 'won' ? 'green' : v === 'miss' || v === 'failed' ? 'default' : 'blue'}>{statusLabel[v] || v}</Tag> },
     { title: '姓名', dataIndex: 'claimName', width: 100, render: (v) => v || '-' },
     { title: '电话', dataIndex: 'claimPhone', width: 130, render: (v) => v || '-' },
-    { title: '收货地址', dataIndex: 'claimAddress', width: 240, render: (v) => v || '-' },
+    { title: '奖品', dataIndex: 'prizeCode', width: 180, render: (v) => ({ traffic_bear: '交警小熊', traffic_rabbit: '交警小兔', pingan_helmet: '平安产险&吉安交管联名头盔' })[v] || v || '-' },
+    { title: '号牌种类', dataIndex: 'plateType', width: 220, render: (v) => v || '-' },
+    { title: '车辆号码', dataIndex: 'plateNumber', width: 140, render: (v) => v || '-' },
     { title: '参与时间', dataIndex: 'createdAt', width: 180, render: (v) => v ? new Date(v).toLocaleString('zh-CN') : '-' },
   ]
   return <>
@@ -36,7 +38,7 @@ export default function SafeDriverQuizAdmin({ activity, overviewOnly = false }) 
     <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
       {[
         ['参与用户', summary?.participantCount], ['答题次数', summary?.attemptCount], ['全对次数', summary?.fullScoreCount],
-        ['抽奖次数', summary?.drawCount], ['中奖数量', summary?.winCount], ['已登记邮寄', summary?.claimCount], ['油卡剩余', summary?.stockRemaining],
+        ['抽奖次数', summary?.drawCount], ['中奖数量', summary?.winCount], ['已登记资料', summary?.claimCount], ['奖品剩余', summary?.stockRemaining],
       ].map(([title, value]) => <Col xs={12} sm={8} lg={4} key={title}><Card size="small"><Statistic title={title} value={value ?? 0} /></Card></Col>)}
     </Row>
     {!overviewOnly && <Card title="答题与中奖记录" extra={<Input.Search allowClear placeholder="输入用户ID筛选" value={keyword} onChange={(e) => { setKeyword(e.target.value); setPage(1) }} onSearch={() => setPage(1)} style={{ width: 220 }} />}>
