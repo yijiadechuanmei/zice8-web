@@ -42,6 +42,7 @@ import {
 } from '../api'
 import { LvyuanDataClearPanel } from '../components/LvyuanFruitfulAdmin'
 import CybersecurityChallengeAdmin from '../components/CybersecurityChallengeAdmin'
+import TrafficQuizTestUsers from '../components/TrafficQuizTestUsers'
 import SafeDriverQuizSettings from '../components/SafeDriverQuizSettings'
 import PinganFamilyTestTools from '../components/PinganFamilyTestTools'
 import PinganFamilyDrawSettings from '../components/PinganFamilyDrawSettings'
@@ -1086,6 +1087,7 @@ export default function ActivityConfigPage({ activity }) {
           </Card></>
         ) : null}
         {activity.type === 'jtqa' ? (
+          <><TrafficQuizTestUsers activityKey={activity.activityKey} />
           <Card size="small" title="清除文明交通活动用户数据" style={{ borderColor: '#ffccc7' }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
               <Text type="secondary">按微信用户 ID 清除该用户在当前活动的挑战、逐题答案、累计积分和参与记录，使其可重新答题。微信账号、其他活动数据及题库保留；最终排名锁定后不可清除。</Text>
@@ -1110,7 +1112,7 @@ export default function ActivityConfigPage({ activity }) {
                 </Popconfirm>
               </Space>
             </Space>
-          </Card>
+          </Card></>
         ) : null}
         {error ? <Alert type="error" showIcon message={error} /> : null}
 

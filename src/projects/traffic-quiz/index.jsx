@@ -9,13 +9,11 @@ import {
   getPublicConfig,
   getRank,
   getState,
-  resetMyTrafficQuizData,
   saveProfile,
   startChallenge,
   submitAnswer,
 } from "./api";
 import { createPoster, nextSafetySlogan } from "./poster";
-import { rankDemoUsers } from "./rankDemoData";
 import "./styles.css";
 
 const RULES = [
@@ -194,12 +192,10 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
   }, [rowsPerPage]);
   const realRows = data?.list || [];
   const realTotal = data?.total || 0;
-  const list = realRows.length < realTotal
-    ? realRows
-    : [...realRows, ...rankDemoUsers.map((user, index) => ({ ...user, rank: realTotal + index + 1 }))];
+  const list = realRows;
   const totalPages = Math.max(
     1,
-    Math.ceil((realTotal + rankDemoUsers.length) / rowsPerPage),
+    Math.ceil(realTotal / rowsPerPage),
   );
   const visibleRows = list.slice(
     (displayPage - 1) * rowsPerPage,
@@ -217,6 +213,7 @@ export function Rank({ data, loading, error, onMore, onRetry, onBack }) {
       <button className="jtqa-rank-back" type="button" onClick={onBack} aria-label="返回">‹</button>
       <div className="jtqa-rank-heading"><span>排行榜</span></div>
       <div className="jtqa-rank-list">
+        {!loading && !error && realTotal === 0 && <p className="jtqa-rank-state">暂无排名数据</p>}
         {visibleRows.map((item) => (
           <div className="jtqa-rank-row" key={item.rank}>
             <b className={`jtqa-rank-medal jtqa-rank-medal-${item.rank}`}>
@@ -372,7 +369,6 @@ export default function TrafficQuizProject({ routeParams }) {
   const [modal, setModal] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [resetBusy, setResetBusy] = useState(false);
   const [tick, setTick] = useState(() => Date.now());
   const [offset, setOffset] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -648,21 +644,6 @@ export default function TrafficQuizProject({ routeParams }) {
       setAwardLoading(false);
     }
   };
-  const resetCurrentUser = async () => {
-    if (resetBusy) return;
-    if (!authReady) {
-      setModal(blockedMessage || "请先完成微信授权");
-      return;
-    }
-    setResetBusy(true);
-    try {
-      await resetMyTrafficQuizData(key);
-      window.location.reload();
-    } catch (err) {
-      setModal(err.message || "重置失败，请重试");
-      setResetBusy(false);
-    }
-  };
   return (
     <main
       className={`jtqa-app ${page === "home" ? "jtqa-app-home" : ""}`}
@@ -713,15 +694,6 @@ export default function TrafficQuizProject({ routeParams }) {
           onBack={() => setPage("home")}
         />
       )}
-      <button
-        className="jtqa-reset"
-        type="button"
-        disabled={resetBusy}
-        onClick={resetCurrentUser}
-        aria-label="清除本人在当前活动的答题数据并刷新页面"
-      >
-        {resetBusy ? "重置中…" : "重置"}
-      </button>
       {error && (
         <div className="jtqa-error" role="alert">
           {error}{" "}
