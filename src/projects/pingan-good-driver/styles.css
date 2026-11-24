@@ -199,8 +199,30 @@
 .pgd-profile-phone-icon { top: 45.45%; }
 .pgd-profile-name { left: 35.6%; top: 39.963054%; width: 52.933333%; height: 3.509852%; }
 .pgd-profile-phone { left: 35.6%; top: 44.704433%; width: 52.933333%; height: 3.448276%; }
-.pgd-profile-plate-type { left: 35.466667%; top: 49.507389%; width: 53.066667%; height: 3.509852%; padding-right: 8%; }
-.pgd-profile-plate-number { left: 35.466667%; top: 54.187192%; width: 53.2%; height: 3.633005%; }
+.pgd-profile-plate-type { left: 35.466667%; top: 49.507389%; width: 53.066667%; height: 3.509852%; display: flex; align-items: center; justify-content: space-between; padding-right: 4%; text-align: left; cursor: pointer; }
+.pgd-profile-plate-type span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pgd-profile-plate-type .anticon { flex: 0 0 auto; margin-left: 4px; color: #414141; }
+.pgd-profile-plate-number { left: 35.466667%; top: 54.187192%; width: 53.2%; height: 3.633005%; display: flex; align-items: center; gap: 3%; text-align: left; white-space: nowrap; cursor: pointer; }
+.pgd-plate-prefix { flex: 0 0 auto; color: #063ba2; font-weight: 800; letter-spacing: .03em; }
+.pgd-plate-suffix { color: #20262f; font-weight: 750; letter-spacing: .08em; }
+.pgd-plate-placeholder { overflow: hidden; color: #999; font-size: min(21px, 2.8vw); text-overflow: ellipsis; }
+.pgd-profile-picker-mask { position: absolute; inset: 0; z-index: 30; background: rgb(4 34 92 / 48%); }
+.pgd-plate-type-list, .pgd-plate-keyboard { position: absolute; z-index: 31; box-sizing: border-box; left: 5%; width: 90%; border: 2px solid #e5c56e; border-radius: 22px; background: linear-gradient(155deg, #faffff, #d6f0ff); box-shadow: 0 16px 35px rgb(0 39 104 / 35%); color: #123b83; }
+.pgd-plate-type-list { top: 44%; padding: 3.2%; }
+.pgd-plate-type-list h2 { margin: 0 0 2%; font-size: min(28px, 3.733333vw); text-align: center; }
+.pgd-plate-type-option { display: flex; align-items: center; gap: 3%; width: 100%; min-height: 62px; padding: 1.5% 2%; border: 0; border-bottom: 1px solid #b9dbea; background: transparent; color: #153d80; font-size: min(25px, 3.333333vw); text-align: left; cursor: pointer; }
+.pgd-plate-color { width: 9%; aspect-ratio: 1.6; flex: 0 0 auto; border: 1px solid #888; border-radius: 4px; }
+.pgd-plate-color-0 { background: #1851bb; }.pgd-plate-color-1 { background: #ffda2a; }.pgd-plate-color-2 { background: #36b859; }.pgd-plate-color-3 { background: linear-gradient(90deg, #ffdc25 50%, #49be52 50%); }
+.pgd-plate-radio { width: 5%; aspect-ratio: 1; flex: 0 0 auto; margin-left: auto; border: 2px solid #4287bf; border-radius: 50%; background: white; }
+.pgd-plate-radio.is-selected { box-shadow: inset 0 0 0 4px white; background: #1579c8; }
+.pgd-picker-cancel { display: block; width: 100%; margin-top: 2%; padding: 2%; border: 0; background: transparent; color: #547296; font-size: min(23px, 3.066667vw); }
+.pgd-plate-keyboard { top: 64%; padding: 2%; }
+.pgd-plate-keyboard-head { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 0 3%; font-size: min(30px, 4vw); }
+.pgd-plate-keyboard-head button { border: 0; border-radius: 8px; padding: 1% 4%; background: #0b77c6; color: white; font-size: min(25px, 3.333333vw); }
+.pgd-plate-cursor { color: #1587d7; }
+.pgd-plate-key-row { display: flex; justify-content: center; gap: .7%; margin: 1.2% 0; }
+.pgd-plate-key-row button { flex: 1 1 0; min-width: 0; height: min(62px, 8.266667vw); padding: 0; border: 1px solid #aac7d9; border-radius: 8px; background: white; box-shadow: 0 2px 0 #a5bed0; color: #163c77; font-size: min(26px, 3.466667vw); font-weight: 800; }
+.pgd-plate-key-row .pgd-plate-key-delete { flex: 1.5 1 0; background: #c4d9ed; }
 .pgd-profile-submit { position: absolute; left: 30.8%; top: 60.098522%; width: 39.6%; height: 4.248768%; padding: 0; border: 0; background: url('https://assets.zice8.com/safe_driver_quiz_lottery/pingan_good_driver_2026/claim-profile-submit.png') center / 100% 100% no-repeat; cursor: pointer; pointer-events: auto; }
 .pgd-profile-submit:disabled { opacity: .65; }
 .pgd-profile-error { position: absolute; left: 9%; top: 57.9%; width: 82%; color: #ba2121; font-size: min(21px, 2.8vw); font-weight: 700; text-align: center; }
