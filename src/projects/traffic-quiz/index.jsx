@@ -79,7 +79,7 @@ function Image({ name, className = "", alt = "" }) {
   return <img src={trafficAssets[name]} className={className} alt={alt} />;
 }
 
-function Home({ onStart, onMenu }) {
+function Home({ onStart, onRank }) {
   return (
     <section className="jtqa-home">
       <div className="jtqa-home-art">
@@ -99,13 +99,16 @@ function Home({ onStart, onMenu }) {
       <button
         className="jtqa-home-menu"
         type="button"
-        onClick={onMenu}
-        aria-label="活动规则、排行榜和领奖信息"
+        onClick={onRank}
+        aria-label="查看排行榜"
       >
         <span className="jtqa-home-menu-symbol" aria-hidden="true">
-          <span className="jtqa-home-menu-icon"><i /><i /><i /></span>
+          <svg className="jtqa-home-rank-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M4 26h24M6 25v-7h6v7M13 25V9h6v16M20 25V15h6v10" stroke="currentColor" strokeWidth="2.3" strokeLinejoin="round" />
+            <path d="m16 3 1 2.2 2.4.3-1.7 1.7.4 2.4L16 8.4l-2.1 1.2.4-2.4-1.7-1.7 2.4-.3L16 3Z" fill="currentColor" />
+          </svg>
         </span>
-        <span className="jtqa-home-menu-label">活动规则</span>
+        <span className="jtqa-home-menu-label">排行榜</span>
       </button>
     </section>
   );
@@ -374,6 +377,7 @@ export default function TrafficQuizProject({ routeParams }) {
   const [offset, setOffset] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [rank, setRank] = useState(null);
+  const [rankReturnPage, setRankReturnPage] = useState("result");
   const [rankLoading, setRankLoading] = useState(false);
   const [rankError, setRankError] = useState("");
   const [award, setAward] = useState(null);
@@ -615,6 +619,7 @@ export default function TrafficQuizProject({ routeParams }) {
     }
   };
   const openRank = async (pageNo = 1) => {
+    if (page !== "rank") setRankReturnPage(page === "home" ? "home" : "result");
     setPage("rank");
     setRankLoading(true);
     setRankError("");
@@ -669,7 +674,7 @@ export default function TrafficQuizProject({ routeParams }) {
       {page === "home" && (
         <Home
           onStart={start}
-          onMenu={() => setModal("menu")}
+          onRank={() => openRank()}
         />
       )}
       {page === "quiz" && (
@@ -696,7 +701,7 @@ export default function TrafficQuizProject({ routeParams }) {
           error={rankError}
           onMore={() => openRank((rank?.page || 1) + 1)}
           onRetry={() => openRank()}
-          onBack={() => setPage("result")}
+          onBack={() => setPage(rankReturnPage)}
         />
       )}
       {page === "award" && (
