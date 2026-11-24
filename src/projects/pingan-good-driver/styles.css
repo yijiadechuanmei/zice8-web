@@ -306,6 +306,7 @@
 .pgd-rules-pending strong { font-size: 1.4em; }
 .pgd-rules-back-button { position: absolute; z-index: 8; left: 0; top: 6.896552%; width: 14.933333%; height: 6.896552%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .pgd-rules-back-button:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
+.pgd-claim-back-button { color: #fff; font-size: min(56px, 7.466667vw); line-height: 1; text-shadow: 0 2px 5px #003a95; }
 
 .pgd-rules-start-button:active { filter: brightness(1.08); }
 .pgd-start-button:focus-visible, .pgd-rules-start-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }

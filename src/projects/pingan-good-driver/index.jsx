@@ -16,8 +16,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [question, setQuestion] = useState(null)
   const [questionNo, setQuestionNo] = useState(1)
   const [publicConfig, setPublicConfig] = useState(null)
-  const [remainingToday, setRemainingToday] = useState(3)
-  const [won, setWon] = useState(false)
+  const [remainingTotal, setRemainingTotal] = useState(3)
   const [drawFinished, setDrawFinished] = useState(false)
   const [missOpen, setMissOpen] = useState(false)
   const [claim, setClaim] = useState({ name: '', phone: '', plateType: '', plateSuffix: '' })
@@ -53,8 +52,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
     let active = true
     getState(activityKey).then((state) => {
       if (!active) return
-      setRemainingToday(state.remainingToday)
-      setWon(state.won)
+      setRemainingTotal(state.remainingTotal ?? state.remainingToday)
       if (state.won && !state.claimSubmitted) setPage('claim')
       else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
     }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
@@ -95,7 +93,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
 
   async function beginQuiz() {
     if (busy) return
-    if (won) { showComingSoonToast('您已中奖，不能再次答题'); return }
     if (!authReady) { showComingSoonToast(blockedMessage || '请在微信中打开活动'); return }
     setBusy(true)
     try {
@@ -103,7 +100,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       quizInProgressRef.current = true
       setQuestion(state.question)
       setQuestionNo(state.questionNo)
-      setRemainingToday(state.remainingToday)
+      setRemainingTotal(state.remainingTotal ?? state.remainingToday)
       setSelectedOption(null)
       setDrawFinished(false)
       setWheelRotation(0)
@@ -167,7 +164,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
   }
 
   async function draw() {
-    if (busy || won) return
+    if (busy) return
     setBusy(true)
     try {
       const result = await drawPrize(activityKey)
@@ -175,8 +172,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
       setWheelRotation(360 * 5 + 360 - result.wheelIndex * 60)
       drawTimer.current = window.setTimeout(() => {
         setDrawFinished(true)
-        setWon(result.won)
-        if (result.won) setPage('claim')
+        if (result.won) showComingSoonToast(`恭喜获得${result.prizeName}`, () => setPage('claim'))
         else setMissOpen(true)
         setBusy(false)
       }, 4500)
@@ -221,13 +217,13 @@ export default function PinganGoodDriverProject({ routeParams }) {
         ) : (
           <img className="pgd-background" src={`${ASSETS_BASE_URL}/rules-background.png`} alt="" onError={() => setRulesBackgroundFailed(true)} />
         )}
-        {page === 'rules' || page === 'quiz' ? (
+        {page === 'rules' || page === 'quiz' || page === 'claim' ? (
           <button
-            className="pgd-rules-back-button"
+            className={`pgd-rules-back-button${page === 'claim' ? ' pgd-claim-back-button' : ''}`}
             type="button"
             aria-label="返回首页"
             onClick={page === 'quiz' ? leaveQuiz : () => setPage('home')}
-          />
+          >{page === 'claim' ? '‹' : null}</button>
         ) : null}
         {page === 'home' ? (
           <button
@@ -293,13 +289,13 @@ export default function PinganGoodDriverProject({ routeParams }) {
               type="button"
               aria-label="立即抽奖"
               onClick={draw}
-              disabled={busy || won || drawFinished}
+              disabled={busy || drawFinished}
             >
               <img src={`${ASSETS_BASE_URL}/lottery-center-button.png`} alt="" />
             </button>
           </>
         ) : null}
-        {page === 'home' && authReady ? <p className="pgd-attempt-count">今日剩余答题次数：{remainingToday}</p> : null}
+        {page === 'home' && authReady ? <p className="pgd-attempt-count">剩余答题次数：{remainingTotal}</p> : null}
         {page === 'claim' ? (
           <form className="pgd-profile-form" onSubmit={saveClaim} noValidate>
             <input className="pgd-profile-field pgd-profile-name" aria-label="姓名" placeholder="请输入您的姓名" value={claim.name} onChange={(event) => { setClaim({ ...claim, name: event.target.value }); setClaimError('') }} maxLength={60} autoComplete="name" />
