@@ -39,18 +39,18 @@ export default function TreeholeAdmin({ activity }) {
   }
   function openDetail(row) {
     setSelected(row)
-    setReplyDraft(row.replyContent || '')
+    setReplyDraft('')
   }
   async function saveReply() {
     if (!selected) return
     setSavingReply(true)
     try {
-      const updated = await adminRequest(`/treehole/activities/${key}/admin/notes/${selected.id}/reply`, {
-        method: 'PATCH', body: JSON.stringify({ content: replyDraft }),
+      const updated = await adminRequest(`/treehole/activities/${key}/admin/notes/${selected.id}/replies`, {
+        method: 'POST', body: JSON.stringify({ content: replyDraft }),
       })
       setSelected(updated)
-      setReplyDraft(updated.replyContent || '')
-      message.success(updated.replyContent ? '回复已保存，用户可在小纸条中查看' : '回复已清空')
+      setReplyDraft('')
+      message.success('回复已发送，用户可在小纸条中查看')
       load()
     } catch (error) { message.error(error.message) }
     finally { setSavingReply(false) }
@@ -70,7 +70,7 @@ export default function TreeholeAdmin({ activity }) {
     { title: '内容', dataIndex: 'content', ellipsis: true },
     { title: '匿名分享', dataIndex: 'allowAnonymousShare', render: (v) => v ? '允许' : '不允许' },
     { title: '精选', dataIndex: 'featured', render: (v) => v ? <Tag color="green">精选</Tag> : '未精选' },
-    { title: '回复', dataIndex: 'replyContent', render: (v) => v ? <Tag color="blue">已回复</Tag> : '未回复' },
+    { title: '回复', dataIndex: 'replies', render: (replies) => replies?.length ? <Tag color="blue">{replies.length} 条回复</Tag> : '未回复' },
     { title: '操作', render: (_, row) => <Space><Button onClick={() => openDetail(row)}>详情与回复</Button><Button onClick={() => toggle(row)}>{row.featured ? '退回' : '设为精选'}</Button></Space> },
   ]
   return <div style={{ padding: 20 }}>
@@ -81,8 +81,8 @@ export default function TreeholeAdmin({ activity }) {
       <Button onClick={exportExcel}>导出 Excel</Button>
     </Space>
     <Table rowKey="id" columns={columns} dataSource={data.list} loading={loading} pagination={{ current: page, pageSize: 20, total: data.total, onChange: setPage }} />
-    <Modal title="投稿详情与回复" open={!!selected} onCancel={() => setSelected(null)} footer={selected && <Space><Button onClick={() => setSelected(null)}>关闭</Button><Button type="primary" loading={savingReply} disabled={replyDraft === (selected.replyContent || '')} onClick={saveReply}>保存回复</Button></Space>}>
-      {selected && <><p>用户标识：{selected.userId}</p><p>昵称：{selected.nickname}</p><p>提交时间：{new Date(selected.createdAt).toLocaleString('zh-CN')}</p><p>匿名分享：{selected.allowAnonymousShare ? '允许' : '不允许'}</p><div style={{ whiteSpace: 'pre-wrap', padding: '12px 14px', background: '#f7f9f5', borderRadius: 10, marginBottom: 18 }}>{selected.content}</div><label htmlFor="treehole-reply">回复用户</label><Input.TextArea id="treehole-reply" value={replyDraft} onChange={(event) => setReplyDraft(event.target.value)} rows={5} maxLength={1000} showCount placeholder="写给这位用户的回复，保存后会显示在他的小纸条里" style={{ marginTop: 8, marginBottom: 22 }} /><div style={{ color: '#8c8c8c', fontSize: 12 }}>{selected.repliedAt ? `上次回复：${new Date(selected.repliedAt).toLocaleString('zh-CN')}。清空内容并保存可撤回回复。` : '尚未回复'}</div></>}
+    <Modal title="投稿详情与回复" open={!!selected} onCancel={() => setSelected(null)} footer={selected && <Space><Button onClick={() => setSelected(null)}>关闭</Button><Button type="primary" loading={savingReply} disabled={!replyDraft.trim()} onClick={saveReply}>发送回复</Button></Space>}>
+      {selected && <><p>用户标识：{selected.userId}</p><p>昵称：{selected.nickname}</p><p>提交时间：{new Date(selected.createdAt).toLocaleString('zh-CN')}</p><p>匿名分享：{selected.allowAnonymousShare ? '允许' : '不允许'}</p><div style={{ whiteSpace: 'pre-wrap', padding: '12px 14px', background: '#f7f9f5', borderRadius: 10, marginBottom: 18 }}>{selected.content}</div><div style={{ fontWeight: 600, marginBottom: 8 }}>历史回复（{selected.replies?.length || 0}）</div><div style={{ maxHeight: 230, overflowY: 'auto', marginBottom: 18 }}>{selected.replies?.length ? selected.replies.map((reply) => <div key={reply.id} style={{ background: '#f2f8ee', border: '1px solid #dcebd8', borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}><div style={{ color: '#829582', fontSize: 12, marginBottom: 5 }}>{new Date(reply.createdAt).toLocaleString('zh-CN')}</div><div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{reply.content}</div></div>) : <div style={{ color: '#8c8c8c' }}>尚未回复</div>}</div><label htmlFor="treehole-reply">追加回复</label><Input.TextArea id="treehole-reply" value={replyDraft} onChange={(event) => setReplyDraft(event.target.value)} rows={4} maxLength={1000} showCount placeholder="每次发送都会新增一条回复，历史回复将保留" style={{ marginTop: 8, marginBottom: 22 }} /></>}
     </Modal>
   </div>
 }
