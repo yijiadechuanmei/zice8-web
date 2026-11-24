@@ -245,7 +245,7 @@ export default function PinganGoodDriverProject({ routeParams }) {
           <>
             <section className="pgd-question-panel" aria-label="答题区">
               <div className="pgd-question-copy">
-                <p className="pgd-question-count">第 {questionNo} 题 <span>/ 共 5 题</span></p>
+                <p className="pgd-question-count">第 {questionNo} 题 <span>/ 共 {question?.questionCount || 5} 题</span></p>
                 <h1>{question?.text || '正在加载题目'}</h1>
               </div>
               <div className={`pgd-answer-list${question?.type === 'multiple' ? ' pgd-answer-list--multiple' : ''}`} role={question?.type === 'multiple' ? 'group' : 'radiogroup'} aria-label={question?.type === 'multiple' ? '选择答案，可多选' : '选择答案'}>
