@@ -16,7 +16,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const [question, setQuestion] = useState(null)
   const [questionNo, setQuestionNo] = useState(1)
   const [publicConfig, setPublicConfig] = useState(null)
-  const [remainingTotal, setRemainingTotal] = useState(3)
   const [drawFinished, setDrawFinished] = useState(false)
   const [missOpen, setMissOpen] = useState(false)
   const [claim, setClaim] = useState({ name: '', phone: '', plateType: '', plateSuffix: '' })
@@ -52,7 +51,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
     let active = true
     getState(activityKey).then((state) => {
       if (!active) return
-      setRemainingTotal(state.remainingTotal ?? state.remainingToday)
       if (state.won && !state.claimSubmitted) setPage('claim')
       else if (state.status === 'in_progress') { setQuestion(state.question); setQuestionNo(state.questionNo); setPage('quiz') }
     }).catch((error) => { if (active) showComingSoonToast(error.message || '活动状态加载失败') })
@@ -100,7 +98,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
       quizInProgressRef.current = true
       setQuestion(state.question)
       setQuestionNo(state.questionNo)
-      setRemainingTotal(state.remainingTotal ?? state.remainingToday)
       setSelectedOption(null)
       setDrawFinished(false)
       setWheelRotation(0)
@@ -295,7 +292,6 @@ export default function PinganGoodDriverProject({ routeParams }) {
             </button>
           </>
         ) : null}
-        {page === 'home' && authReady ? <p className="pgd-attempt-count">剩余答题次数：{remainingTotal}</p> : null}
         {page === 'claim' ? (
           <form className="pgd-profile-form" onSubmit={saveClaim} noValidate>
             <input className="pgd-profile-field pgd-profile-name" aria-label="姓名" placeholder="请输入您的姓名" value={claim.name} onChange={(event) => { setClaim({ ...claim, name: event.target.value }); setClaimError('') }} maxLength={60} autoComplete="name" />
