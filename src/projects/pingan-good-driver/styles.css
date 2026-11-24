@@ -171,7 +171,6 @@
   transition: transform 4.5s cubic-bezier(0.15, 0.75, 0.15, 1);
 }
 
-.pgd-attempt-count { position: absolute; left: 0; top: 80%; width: 100%; margin: 0; color: #fff; font-size: min(22px, 2.933vw); text-align: center; text-shadow: 0 2px 6px #073d96; }
 .pgd-claim-mask { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 5%; background: rgb(0 30 89 / 72%); }
 .pgd-claim-card { box-sizing: border-box; width: 100%; max-width: 570px; padding: 7%; border: 4px solid #ffd25a; border-radius: 28px; background: linear-gradient(#fff, #e8f8ff); box-shadow: 0 14px 35px rgb(0 29 98 / 35%); color: #153d80; }
 .pgd-claim-card h2 { margin: 0; color: #ec6710; font-size: clamp(25px, 7vw, 48px); text-align: center; }
@@ -260,8 +259,8 @@
 .pgd-start-button {
   position: absolute;
   left: 16.133333%;
-  top: 70.504926%;
-  z-index: 2;
+  top: 72.783251%;
+  z-index: 6;
   width: 67.066667%;
   height: 5.972906%;
   padding: 0;
