@@ -139,6 +139,25 @@
   border: 8px solid #1260c9;
 }
 
+.pgd-answer-list--multiple .pgd-answer-radio {
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+}
+
+.pgd-answer-list--multiple .pgd-answer-option.is-selected .pgd-answer-radio {
+  border: 2px solid #1260c9;
+  background: #1260c9;
+}
+
+.pgd-answer-list--multiple .pgd-answer-option.is-selected .pgd-answer-radio::after {
+  content: '✓';
+  color: #fff;
+  font-size: min(20px, 2.666667vw);
+  font-weight: 800;
+  line-height: 1;
+}
+
 .pgd-submit-button {
   position: absolute;
   left: 13.333333%;

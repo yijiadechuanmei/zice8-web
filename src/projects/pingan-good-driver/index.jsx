@@ -248,15 +248,21 @@ export default function PinganGoodDriverProject({ routeParams }) {
                 <p className="pgd-question-count">第 {questionNo} 题 <span>/ 共 5 题</span></p>
                 <h1>{question?.text || '正在加载题目'}</h1>
               </div>
-              <div className="pgd-answer-list" role="radiogroup" aria-label="选择答案">
+              <div className={`pgd-answer-list${question?.type === 'multiple' ? ' pgd-answer-list--multiple' : ''}`} role={question?.type === 'multiple' ? 'group' : 'radiogroup'} aria-label={question?.type === 'multiple' ? '选择答案，可多选' : '选择答案'}>
                 {(question?.options || []).map((option) => (
                   <button
                     key={option.key}
-                    className={`pgd-answer-option${selectedOption === option.key ? ' is-selected' : ''}`}
+                    className={`pgd-answer-option${selectedOption?.includes(option.key) ? ' is-selected' : ''}`}
                     type="button"
-                    role="radio"
-                    aria-checked={selectedOption === option.key}
-                    onClick={() => setSelectedOption(option.key)}
+                    role={question?.type === 'multiple' ? 'checkbox' : 'radio'}
+                    aria-checked={Boolean(selectedOption?.includes(option.key))}
+                    onClick={() => setSelectedOption((current) => {
+                      if (question?.type !== 'multiple') return option.key
+                      const selected = new Set(current || '')
+                      if (selected.has(option.key)) selected.delete(option.key)
+                      else selected.add(option.key)
+                      return [...selected].sort().join('')
+                    })}
                   >
                     <span className="pgd-answer-letter">{option.key}</span>
                     <span className="pgd-answer-text">{option.text}</span>
