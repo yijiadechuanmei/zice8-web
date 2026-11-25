@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
+import CropDialog from './CropDialog.jsx'
 import './style.css'
 
 const TYPE = 'winter_meet'
 const KEY = 'gyzy26'
+const PHOTO_RATIO = 371 / 287
 const initialForm = { name: '', gender: '', phone: '', company: '', interests: '' }
 const asset = (name) => `https://assets.zice8.com/${TYPE}/${KEY}/${name}.png`
 const fields = [
@@ -18,19 +20,22 @@ function Art({ name, className = '', alt = '' }) {
   return <img className={`wm-art ${className}`} src={asset(name)} alt={alt} draggable="false" />
 }
 
-function GalleryCard({ item, onClick }) {
-  const content = <>
-    <Art name="gallery-photo-card-template" className="wm-card-art" />
-    {item && <>
-      <img className="wm-card-photo" src={item.photoUrl} alt={`${item.name}的生活照`} />
-      <span className="wm-card-value wm-card-name">{item.name}</span>
-      <span className="wm-card-value wm-card-company">{item.company}</span>
-      <span className="wm-card-value wm-card-interests">{item.interests}</span>
-    </>}
-  </>
-  return item
-    ? <button className="wm-card" type="button" onClick={() => onClick(item)} aria-label={`查看${item.name}的照片`}>{content}</button>
-    : <div className="wm-card" aria-hidden="true">{content}</div>
+function GalleryIcons() {
+  return <div className="wm-card-icons" aria-hidden="true">
+    <svg className="wm-heart-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.2 2.8 12.5C-2 7.8 4.9.9 9.7 5.4L12 7.6l2.3-2.2c4.8-4.5 11.7 2.4 6.9 7.1z" /></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 20l1-4.1A8.5 8.5 0 1 1 20 11.5z" /></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinejoin="round"><path d="M2 4 22 3l-8 19-3-8zM11 14 22 3" /></svg>
+  </div>
+}
+
+function GalleryCard({ item, onPhotoClick }) {
+  return <article className="wm-card">
+    {item
+      ? <button className="wm-card-photo-button" type="button" onClick={() => onPhotoClick(item.photoUrl)} aria-label={`放大${item.name}的照片`}><img src={item.photoUrl} alt={`${item.name}的生活照`} /></button>
+      : <div className="wm-card-photo-empty">暂无照片</div>}
+    <GalleryIcons />
+    {[['姓名', item?.name], ['单位', item?.company], ['兴趣爱好', item?.interests]].map(([label, value]) => <div className="wm-card-row" key={label}><strong>{label}：</strong><span className="wm-card-line">{value || ''}</span></div>)}
+  </article>
 }
 
 function CameraIcon() {
@@ -45,16 +50,20 @@ export default function WinterMeet({ routeParams }) {
   const [form, setForm] = useState(initialForm)
   const [upload, setUpload] = useState(null)
   const [gallery, setGallery] = useState([])
-  const [galleryPage, setGalleryPage] = useState(0)
   const [submitted, setSubmitted] = useState(false)
-  const [selected, setSelected] = useState(null)
+  const [selectedPhoto, setSelectedPhoto] = useState('')
+  const [cropSource, setCropSource] = useState(null)
   const [busy, setBusy] = useState('')
   const [message, setMessage] = useState('')
   const [keyboardShift, setKeyboardShift] = useState(0)
   const fileInput = useRef(null)
+  const cropImage = useRef(null)
+  const cropUrl = useRef('')
   const gestureStart = useRef(null)
   const lastWheelAt = useRef(0)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, config)
+
+  useEffect(() => () => { if (cropUrl.current) URL.revokeObjectURL(cropUrl.current) }, [])
 
   useEffect(() => {
     let alive = true
@@ -130,38 +139,75 @@ export default function WinterMeet({ routeParams }) {
   const onTouchEnd = (event) => {
     const start = gestureStart.current
     gestureStart.current = null
-    if (!start || event.target.closest('input, .wm-dialog')) return
+    if (!start || cropSource || selectedPhoto || event.target.closest('input, .wm-gallery-list, .wm-crop-dialog, .wm-photo-preview')) return
     const distanceX = start.x - event.changedTouches[0].clientX
     const distanceY = start.y - event.changedTouches[0].clientY
-    if (page === 3 && Math.abs(distanceX) > 65 && Math.abs(distanceX) > Math.abs(distanceY)) {
-      setGalleryPage((current) => Math.min(Math.max(0, Math.ceil(gallery.length / 4) - 1), Math.max(0, current + (distanceX > 0 ? 1 : -1))))
-      return
-    }
     if (Math.abs(distanceY) < 65 || Math.abs(distanceY) < Math.abs(distanceX)) return
     if (distanceY > 0) next()
     else previous()
   }
   const onWheel = (event) => {
+    if (cropSource || selectedPhoto || event.target.closest('.wm-gallery-list')) return
     if (Math.abs(event.deltaY) < 25 || Date.now() - lastWheelAt.current < 650) return
     lastWheelAt.current = Date.now()
     if (event.deltaY > 0) next()
     else previous()
   }
   const onKeyDown = (event) => {
+    if (cropSource || selectedPhoto) return
     if (event.target.closest('input, button')) return
     if (event.key === 'ArrowUp' || event.key === 'PageDown') { event.preventDefault(); next() }
     if (event.key === 'ArrowDown' || event.key === 'PageUp') { event.preventDefault(); previous() }
   }
   const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
 
-  async function choosePhoto(event) {
+  function closeCrop() {
+    setCropSource(null)
+    cropImage.current = null
+    if (cropUrl.current) URL.revokeObjectURL(cropUrl.current)
+    cropUrl.current = ''
+  }
+
+  function choosePhoto(event) {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024 || !file.size) { setMessage('请选择不超过 10MB 的 JPG、PNG 或 WebP 图片'); return }
+    if ((!file.type.startsWith('image/') && !/\.(heic|heif)$/i.test(file.name)) || file.size > 20 * 1024 * 1024 || !file.size) { setMessage('请选择不超过 20MB 的图片'); return }
     if (!authReady) { setMessage(blockedMessage || '请在微信中打开并完成登录'); return }
+    const url = URL.createObjectURL(file)
+    const image = new Image()
+    image.onload = () => {
+      cropUrl.current = url
+      cropImage.current = image
+      setCropSource({ url, width: image.naturalWidth, height: image.naturalHeight })
+      setMessage('')
+    }
+    image.onerror = () => { URL.revokeObjectURL(url); setMessage('图片无法读取，请换一张') }
+    image.src = url
+  }
+
+  async function confirmCrop(geometry) {
+    if (!cropImage.current || busy) return
     setBusy('upload'); setMessage('正在上传照片…')
-    try { const result = await uploadPhoto(activityKey, file, (progress) => setMessage(`照片上传中 ${progress}%`)); setUpload(result); setMessage('照片已上传') }
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = 742
+      canvas.height = Math.round(canvas.width / PHOTO_RATIO)
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('当前浏览器无法裁切图片')
+      const factor = canvas.width / geometry.frameWidth
+      context.drawImage(cropImage.current,
+        ((geometry.frameWidth - geometry.imageWidth) / 2 + geometry.x) * factor,
+        ((geometry.frameHeight - geometry.imageHeight) / 2 + geometry.y) * factor,
+        geometry.imageWidth * factor, geometry.imageHeight * factor)
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9))
+      if (!blob) throw new Error('照片裁切失败，请重试')
+      const file = new File([blob], 'winter-meet-photo.jpg', { type: 'image/jpeg' })
+      const result = await uploadPhoto(activityKey, file, (progress) => setMessage(`照片上传中 ${progress}%`))
+      setUpload(result)
+      closeCrop()
+      setMessage('照片已上传')
+    }
     catch (error) { if (error.status === 401) reauth('winter-meet-upload'); setMessage(error.message || '上传失败') }
     finally { setBusy('') }
   }
@@ -184,7 +230,6 @@ export default function WinterMeet({ routeParams }) {
   }
 
   if (!config) return <main className="wm-loading" role="status">{message || '加载中…'}</main>
-  const visibleGallery = Array.from({ length: 4 }, (_, index) => gallery[galleryPage * 4 + index])
   return <main className="wm-shell" tabIndex={0} onTouchStart={(event) => { gestureStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY } }} onTouchEnd={onTouchEnd} onWheel={onWheel} onKeyDown={onKeyDown}>
     <div className="wm-stage" style={{ '--wm-keyboard-shift': `${keyboardShift}px` }}>
       <Art name="shared-heart-background" className="wm-background" />
@@ -199,14 +244,15 @@ export default function WinterMeet({ routeParams }) {
           {fields.map(({ name, label, maxLength, type }) => <label className="wm-form-field" key={name}><span>{label}：</span><input name={name} aria-label={label} value={form[name]} onChange={update} maxLength={maxLength} type={type || 'text'} inputMode={type === 'tel' ? 'numeric' : undefined} autoComplete={name === 'phone' ? 'tel' : 'off'} /></label>)}
           <button className="wm-upload-field" type="button" onClick={() => fileInput.current?.click()} aria-label={upload ? '更换生活照' : '上传生活照'}><span>生活照：</span>{upload ? <><img src={upload.fileUrl} alt="已上传的生活照" /><em>点击更换</em></> : <em>点击上传</em>}<CameraIcon /></button>
         </div>
-        <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={choosePhoto} />
+        <input ref={fileInput} type="file" accept="image/*,.heic,.heif" hidden onChange={choosePhoto} />
         <button className="wm-submit" type="submit" disabled={Boolean(busy)}>{busy === 'submit' ? '提交中…' : '提交信息'}</button>
       </form></section>}
-      {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{visibleGallery.map((item, index) => <GalleryCard key={item?.id || `empty-${index}`} item={item} onClick={setSelected} />)}{gallery.length > 4 && <span className="wm-gallery-page">{galleryPage + 1} / {Math.ceil(gallery.length / 4)}</span>}</section>}
+      {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{gallery.length ? gallery.map((item) => <GalleryCard key={item.id} item={item} onPhotoClick={setSelectedPhoto} />) : <GalleryCard item={null} />}</section>}
       {page === 4 && <section key="ending" className={`wm-scene wm-enter-${direction}`} aria-label="结束页"><Art name="ending-invitation-title" className="wm-ending-title" alt="期待您的光临" /></section>}
       {message && <p className="wm-message" role="status">{message}</p>}
       <Art name="shared-up-arrow" className={page === 2 ? "wm-next wm-next-form" : "wm-next"} alt="上滑进入下一页" />
     </div>
-    {selected && <div className="wm-dialog" role="dialog" aria-modal="true" onClick={() => setSelected(null)}><div className="wm-dialog-card" onClick={(event) => event.stopPropagation()}><button onClick={() => setSelected(null)} aria-label="关闭">×</button><img src={selected.photoUrl} alt={`${selected.name}的生活照`} /><p>{selected.name}</p><p>{selected.company}</p><p>{selected.interests}</p></div></div>}
+    {cropSource && <CropDialog source={cropSource} busy={busy === 'upload'} onCancel={closeCrop} onConfirm={confirmCrop} />}
+    {selectedPhoto && <button className="wm-photo-preview" type="button" onClick={() => setSelectedPhoto('')} aria-label="关闭照片预览"><img src={selectedPhoto} alt="放大的生活照" /></button>}
   </main>
 }
