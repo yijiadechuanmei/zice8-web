@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
+import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
 import CropDialog from './CropDialog.jsx'
@@ -32,7 +33,7 @@ function GalleryIcons() {
 function GalleryCard({ item, onPhotoClick }) {
   return <article className="wm-card">
     {item
-      ? <button className="wm-card-photo-button" type="button" onClick={() => onPhotoClick(item.photoUrl)} aria-label={`放大${item.name}的照片`}><img src={item.photoUrl} alt={`${item.name}的生活照`} /></button>
+      ? <button className="wm-card-photo-button" type="button" onClick={() => onPhotoClick(item.photoUrl)} aria-label={`放大${item.name}的照片`}><img src={item.photoUrl} alt={`${item.name}的生活照`} loading="lazy" decoding="async" /></button>
       : <div className="wm-card-photo-empty">暂无照片</div>}
     <GalleryIcons />
     {[['姓名', item?.name], ['单位', item?.company], ['兴趣爱好', item?.interests]].map(([label, value]) => <div className="wm-card-row" key={label}><strong>{label}：</strong><span className="wm-card-line">{value || ''}</span></div>)}
@@ -76,7 +77,7 @@ export default function WinterMeet({ routeParams }) {
   useEffect(() => {
     let alive = true
     request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
-      .then((data) => { if (alive) setConfig(data) })
+      .then((data) => { if (alive) { setConfig(data); trackPageView(activityKey, '/winter-meet', { activityType: TYPE }) } })
       .catch((error) => { if (alive) setMessage(error.message) })
     return () => { alive = false }
   }, [activityKey])

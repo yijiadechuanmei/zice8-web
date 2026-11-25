@@ -52,9 +52,9 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isLuckyDraw = activity.type === 'lucky_draw_20260920'
   const isMaotaiCCreateFun = activity.type === 'maotai_c_create_fun_20260923'
   const isTianfuReading = activity.type === 'tianfu_new_district_reading_20260927'
-  const phaseParams = activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
+  const phaseParams = useMemo(() => activity.type === 'phase_quiz_lottery' && phaseScope !== 'all'
     ? { phaseNo: phaseScope }
-    : {}
+    : {}, [activity.type, phaseScope])
   const phaseScopeLabel = phaseScope === 'all' ? '总览' : `第${phaseScope}期`
 
   const refreshOverview = useCallback(() => {
@@ -78,7 +78,14 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         getSourceAccess(activity.activityKey, { source: 'group' }).catch(() => null),
       ])
       : Promise.resolve(null)
-    Promise.all([getOverview(activity.activityKey, phaseParams), activity.type === 'treehole' ? Promise.resolve(null) : getCharts(activity.activityKey, phaseParams), sourceAccessRequest, lvyuanOverviewRequest, fifteenthChannelAccessRequest])
+    const chartsRequest = activity.type === 'treehole'
+      ? Promise.resolve(null)
+      : getCharts(activity.activityKey, phaseParams)
+    // 冬月活动的基础统计不依赖趋势图，图表失败时仍展示 PV/UV 与作品数。
+    const resilientChartsRequest = activity.type === 'winter_meet'
+      ? chartsRequest.catch(() => null)
+      : chartsRequest
+    Promise.all([getOverview(activity.activityKey, phaseParams), resilientChartsRequest, sourceAccessRequest, lvyuanOverviewRequest, fifteenthChannelAccessRequest])
       .then(([overviewData, chartData, sourceAccessData, lvyuanOverview, fifteenthChannelAccess]) => {
         if (!alive) return
         setOverview({
@@ -107,7 +114,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     return () => {
       alive = false
     }
-  }, [activity.activityKey, activity.type, isFifteenthFiveICan, isXiwuqiRoadNight, phaseScope, refreshNonce])
+  }, [activity.activityKey, activity.type, isFifteenthFiveICan, isXiwuqiRoadNight, phaseParams, refreshNonce])
 
   useEffect(() => {
     if ((!compact && !isTianfuReading) || !autoRefreshMs) return undefined
@@ -120,8 +127,13 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
     if (isWinterMeet) return [
       { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
       { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+      { label: '今日 PV', value: overview?.todayPv ?? 0, tooltip: pvHint },
+      { label: '今日 UV', value: overview?.todayUv ?? 0, tooltip: uvHint },
+      { label: '报名用户', value: overview?.participantCount ?? 0, tooltip: '成功提交报名信息及生活照的用户数。' },
       { label: '已展示作品', value: overview?.winterMeet?.workCount ?? 0, tooltip: '已提交且仍在展示列表中的生活照数量。' },
-      { label: '今日上传或更新', value: overview?.todayParticipantCount ?? 0 },
+      { label: '今日提交或更新', value: overview?.todayParticipantCount ?? 0 },
+      { label: '男性报名', value: overview?.winterMeet?.maleCount ?? 0 },
+      { label: '女性报名', value: overview?.winterMeet?.femaleCount ?? 0 },
     ]
     if (activity.type === 'treehole') {
       const treehole = overview?.treehole || {}
@@ -665,6 +677,14 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
       {activity.type === 'treehole' ? <ChartPanel title="近 7 天投稿趋势" description="按北京时间提交日期统计成功投稿次数">
         <LazyChart type="bar" data={overview?.treehole?.dailySubmissions || []} series={[{ key: 'submissions', name: '投稿次数' }]} emptyText="暂无投稿" />
+      </ChartPanel> : null}
+
+      {isWinterMeet ? <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
+        {charts?.access?.dataAvailable ? (
+          <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+        ) : (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={charts?.access?.message || '暂无访问埋点数据'} />
+        )}
       </ChartPanel> : null}
 
       {isTianfuReading ? <TianfuReadingOverview overview={overview} charts={charts} /> : null}
