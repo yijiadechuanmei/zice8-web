@@ -3,6 +3,7 @@ import { request } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
 import CropDialog from './CropDialog.jsx'
+import { visibleGallery } from './mockGallery.js'
 import './style.css'
 
 const TYPE = 'winter_meet'
@@ -62,8 +63,14 @@ export default function WinterMeet({ routeParams }) {
   const gestureStart = useRef(null)
   const lastWheelAt = useRef(0)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, config)
+  const shownGallery = visibleGallery(gallery, form.gender)
 
   useEffect(() => () => { if (cropUrl.current) URL.revokeObjectURL(cropUrl.current) }, [])
+  useEffect(() => {
+    if (!message) return
+    const timer = window.setTimeout(() => setMessage(''), 1500)
+    return () => window.clearTimeout(timer)
+  }, [message])
 
   useEffect(() => {
     let alive = true
@@ -123,7 +130,7 @@ export default function WinterMeet({ routeParams }) {
     }
   }, [])
 
-  const changePage = (target, motion) => { setDirection(motion); setMessage(''); setPage(target) }
+  const changePage = (target, motion) => { setDirection(motion); setPage(target) }
   const previous = () => {
     if (page === 0) return
     if (page === 3 && submitted) changePage(1, 'down')
@@ -139,7 +146,7 @@ export default function WinterMeet({ routeParams }) {
   const onTouchEnd = (event) => {
     const start = gestureStart.current
     gestureStart.current = null
-    if (!start || cropSource || selectedPhoto || event.target.closest('input, .wm-gallery-list, .wm-crop-dialog, .wm-photo-preview')) return
+    if (!start || message || cropSource || selectedPhoto || event.target.closest('input, .wm-gallery-list, .wm-crop-dialog, .wm-photo-preview')) return
     const distanceX = start.x - event.changedTouches[0].clientX
     const distanceY = start.y - event.changedTouches[0].clientY
     if (Math.abs(distanceY) < 65 || Math.abs(distanceY) < Math.abs(distanceX)) return
@@ -147,14 +154,14 @@ export default function WinterMeet({ routeParams }) {
     else previous()
   }
   const onWheel = (event) => {
-    if (cropSource || selectedPhoto || event.target.closest('.wm-gallery-list')) return
+    if (message || cropSource || selectedPhoto || event.target.closest('.wm-gallery-list')) return
     if (Math.abs(event.deltaY) < 25 || Date.now() - lastWheelAt.current < 650) return
     lastWheelAt.current = Date.now()
     if (event.deltaY > 0) next()
     else previous()
   }
   const onKeyDown = (event) => {
-    if (cropSource || selectedPhoto) return
+    if (message || cropSource || selectedPhoto) return
     if (event.target.closest('input, button')) return
     if (event.key === 'ArrowUp' || event.key === 'PageDown') { event.preventDefault(); next() }
     if (event.key === 'ArrowDown' || event.key === 'PageUp') { event.preventDefault(); previous() }
@@ -215,7 +222,7 @@ export default function WinterMeet({ routeParams }) {
   async function submit() {
     if (busy) return
     const cleaned = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, value.trim()]))
-    if (!cleaned.name || !cleaned.gender || !/^1\d{10}$/.test(cleaned.phone) || !cleaned.company || !cleaned.interests) { setMessage('请填写完整且正确的报名信息'); return }
+    if (!cleaned.name || !['男', '女'].includes(cleaned.gender) || !/^1\d{10}$/.test(cleaned.phone) || !cleaned.company || !cleaned.interests) { setMessage('请填写完整且正确的报名信息'); return }
     if (!upload) { setMessage('请先上传生活照'); return }
     if (!authReady) { setMessage(blockedMessage || '请在微信中打开并完成登录'); return }
     setBusy('submit'); setMessage('')
@@ -240,19 +247,19 @@ export default function WinterMeet({ routeParams }) {
         <Art name="form-panel" className="wm-form-panel" />
         <div className="wm-form-fields">
           <label className="wm-form-field"><span>姓名：</span><input name="name" aria-label="姓名" value={form.name} onChange={update} maxLength={100} autoComplete="name" /></label>
-          <div className="wm-form-field wm-gender-field" role="group" aria-label="性别"><span>性别：</span><div className="wm-gender-options">{['男', '女', '其他'].map((gender) => <button key={gender} type="button" aria-pressed={form.gender === gender} onClick={() => setForm((current) => ({ ...current, gender }))}>{gender}</button>)}</div></div>
+          <div className="wm-form-field wm-gender-field" role="group" aria-label="性别"><span>性别：</span><div className="wm-gender-options">{['男', '女'].map((gender) => <button key={gender} type="button" aria-pressed={form.gender === gender} onClick={() => setForm((current) => ({ ...current, gender }))}>{gender}</button>)}</div></div>
           {fields.map(({ name, label, maxLength, type }) => <label className="wm-form-field" key={name}><span>{label}：</span><input name={name} aria-label={label} value={form[name]} onChange={update} maxLength={maxLength} type={type || 'text'} inputMode={type === 'tel' ? 'numeric' : undefined} autoComplete={name === 'phone' ? 'tel' : 'off'} /></label>)}
           <button className="wm-upload-field" type="button" onClick={() => fileInput.current?.click()} aria-label={upload ? '更换生活照' : '上传生活照'}><span>生活照：</span>{upload ? <><img src={upload.fileUrl} alt="已上传的生活照" /><em>点击更换</em></> : <em>点击上传</em>}<CameraIcon /></button>
         </div>
         <input ref={fileInput} type="file" accept="image/*,.heic,.heif" hidden onChange={choosePhoto} />
-        <button className="wm-submit" type="submit" disabled={Boolean(busy)}>{busy === 'submit' ? '提交中…' : '提交信息'}</button>
+        <button className="wm-submit" type="submit" disabled={Boolean(busy)} aria-label={busy === 'submit' ? '提交中' : '提交信息'}><Art name="form-submit-success-button" alt="" /></button>
       </form></section>}
-      {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{gallery.length ? gallery.map((item) => <GalleryCard key={item.id} item={item} onPhotoClick={setSelectedPhoto} />) : <GalleryCard item={null} />}</section>}
+      {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{shownGallery.map((item) => <GalleryCard key={item.id} item={item} onPhotoClick={setSelectedPhoto} />)}</section>}
       {page === 4 && <section key="ending" className={`wm-scene wm-enter-${direction}`} aria-label="结束页"><Art name="ending-invitation-title" className="wm-ending-title" alt="期待您的光临" /></section>}
-      {message && <p className="wm-message" role="status">{message}</p>}
       <Art name="shared-up-arrow" className={page === 2 ? "wm-next wm-next-form" : "wm-next"} alt="上滑进入下一页" />
     </div>
     {cropSource && <CropDialog source={cropSource} busy={busy === 'upload'} onCancel={closeCrop} onConfirm={confirmCrop} />}
     {selectedPhoto && <button className="wm-photo-preview" type="button" onClick={() => setSelectedPhoto('')} aria-label="关闭照片预览"><img src={selectedPhoto} alt="放大的生活照" /></button>}
+    {message && <div className="wm-toast-mask" role="alertdialog" aria-modal="true" aria-label={message}><p className="wm-toast">{message}</p></div>}
   </main>
 }

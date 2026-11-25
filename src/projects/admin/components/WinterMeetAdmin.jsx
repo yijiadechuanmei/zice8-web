@@ -45,6 +45,7 @@ export default function WinterMeetAdmin({ activity }) {
   const columns = [
     { title: '作品', dataIndex: 'photoUrl', width: 110, render: (url, row) => <Image src={url} alt={`${row.name}的生活照`} width={88} height={68} style={{ objectFit: 'cover', borderRadius: 8 }} /> },
     { title: '姓名', dataIndex: 'name', width: 110 },
+    { title: '性别', dataIndex: 'gender', width: 75, render: (value) => value || '—' },
     { title: '单位', dataIndex: 'company', width: 180, ellipsis: true },
     { title: '兴趣爱好', dataIndex: 'interests', width: 210, ellipsis: true },
     { title: '最近提交', dataIndex: 'submittedAt', width: 180, render: (value) => value ? new Date(value).toLocaleString('zh-CN', { hour12: false }) : '—' },
