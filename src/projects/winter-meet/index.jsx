@@ -6,16 +6,29 @@ import './style.css'
 
 const TYPE = 'winter_meet'
 const KEY = 'gyzy26'
-const steps = ['cover', 'schedule', 'form', 'gallery', 'end']
-const agenda = [
-  ['13:30–13:50', '联学联建'],
-  ['13:50–14:20', '签到入场'],
-  ['14:20–14:30', '中场休息'],
-  ['14:30–16:40', '暖冬相逢，心动赴约'],
-  ['16:40–17:00', '自由交流合影留念'],
-]
+const SCENES = ['cover', 'schedule', 'form', 'gallery', 'ending']
+const FIELDS = ['name', 'gender', 'phone', 'company', 'interests']
 const initialForm = { name: '', gender: '', phone: '', company: '', interests: '' }
 const asset = (name) => `https://assets.zice8.com/${TYPE}/${KEY}/${name}.png`
+
+function Art({ name, className = '', alt = '' }) {
+  return <img className={`wm-art ${className}`} src={asset(name)} alt={alt} draggable="false" />
+}
+
+function GalleryCard({ item, onClick }) {
+  const content = <>
+    <Art name="gallery-photo-card-template" className="wm-card-art" />
+    {item && <>
+      <img className="wm-card-photo" src={item.photoUrl} alt={`${item.name}的生活照`} />
+      <span className="wm-card-value wm-card-name">{item.name}</span>
+      <span className="wm-card-value wm-card-company">{item.company}</span>
+      <span className="wm-card-value wm-card-interests">{item.interests}</span>
+    </>}
+  </>
+  return item
+    ? <button className="wm-card" type="button" onClick={() => onClick(item)} aria-label={`查看${item.name}的照片`}>{content}</button>
+    : <div className="wm-card" aria-hidden="true">{content}</div>
+}
 
 export default function WinterMeet({ routeParams }) {
   const activityKey = routeParams?.activityKey || KEY
@@ -44,7 +57,10 @@ export default function WinterMeet({ routeParams }) {
     catch (error) { setMessage(error.message || '展示加载失败') }
   }, [activityKey])
 
-  useEffect(() => { if (page === 3) { void getGallery(activityKey).then((data) => setGallery(data.list || [])).catch((error) => setMessage(error.message || '展示加载失败')) } }, [page, activityKey])
+  useEffect(() => {
+    if (page !== 3) return
+    void getGallery(activityKey).then((data) => setGallery(data.list || [])).catch((error) => setMessage(error.message || '展示加载失败'))
+  }, [page, activityKey])
   useEffect(() => {
     if (!authReady) return
     getMine(activityKey).then((data) => {
@@ -53,12 +69,13 @@ export default function WinterMeet({ routeParams }) {
     }).catch(() => {})
   }, [activityKey, authReady])
 
-  const next = () => { setMessage(''); setPage((current) => Math.min(steps.length - 1, current + 1)) }
+  const next = () => { setMessage(''); setPage((current) => Math.min(SCENES.length - 1, current + 1)) }
   const previous = () => { setMessage(''); setPage((current) => Math.max(0, current - 1)) }
   const onTouchEnd = (event) => {
-    if (touchStart.current === null || event.target.closest('input, button, select, .wm-gallery-list, .wm-dialog')) return
-    const distance = touchStart.current - event.changedTouches[0].clientY
+    const started = touchStart.current
     touchStart.current = null
+    if (started === null || event.target.closest('input, button, select, .wm-gallery-list, .wm-dialog')) return
+    const distance = started - event.changedTouches[0].clientY
     if (distance > 70 && page !== 2) next()
     if (distance < -70 && page !== 2) previous()
   }
@@ -88,17 +105,28 @@ export default function WinterMeet({ routeParams }) {
 
   if (!config) return <main className="wm-loading" role="status">{message || '加载中…'}</main>
   return <main className="wm-shell" onTouchStart={(event) => { touchStart.current = event.touches[0].clientY }} onTouchEnd={onTouchEnd}>
-    <div className="wm-stage" style={{ backgroundImage: `url(${asset('shared-heart-background')})` }}>
-      <div className="wm-brand"><span>△ 广发银行 CGB</span><i /> <span>◉ 中信银行</span></div>
-      {page === 0 && <section className="wm-cover" aria-label="活动封面"><h1>广遇知己<br /><span>信赴冬月</span></h1><p>广发银行 | 中信银行冬月暖心联谊活动</p></section>}
-      {page === 1 && <section className="wm-schedule"><div className="wm-event-meta">活动时间：12月5日 14:00–17:00<br />活动地点：环球金融中心 1110</div><div className="wm-schedule-panel"><h2>活动流程</h2><div className="wm-rule" />{agenda.map(([time, title]) => <div className="wm-agenda-row" key={time}><time>{time}</time><span className="wm-agenda-dot" /><strong>{title}</strong></div>)}</div></section>}
-      {page === 2 && <section className="wm-form-section"><form className="wm-form-panel" onSubmit={submit}><h2>基本信息</h2><div className="wm-rule" /><label><span>姓名：</span><input name="name" value={form.name} onChange={update} required maxLength={100} /></label><label><span>性别：</span><select name="gender" value={form.gender} onChange={update} required><option value="">请选择</option><option>男</option><option>女</option><option>其他</option></select></label><label><span>手机号：</span><input name="phone" value={form.phone} onChange={update} required type="tel" inputMode="numeric" pattern="1[0-9]{10}" maxLength={11} /></label><label><span>单位：</span><input name="company" value={form.company} onChange={update} required maxLength={100} /></label><label><span>兴趣爱好：</span><input name="interests" value={form.interests} onChange={update} required maxLength={200} /></label><button className="wm-photo-input" type="button" onClick={() => fileInput.current?.click()}><span>{upload ? '生活照已上传，点击更换' : '生活照：点击上传'}</span><span aria-hidden="true">▣</span></button><input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={choosePhoto} /><button className="wm-submit" type="submit" disabled={Boolean(busy)}>{busy === 'submit' ? '提交中…' : '提交信息'}</button></form></section>}
-      {page === 3 && <section className="wm-gallery" aria-label="照片展示"><div className="wm-gallery-list">{gallery.length ? gallery.map((item) => <button className="wm-person-card" key={item.id} onClick={() => setSelected(item)}><img src={item.photoUrl} alt={`${item.name}的生活照`} /><span className="wm-card-icons">♥ ◯ ▽</span><small>姓名：{item.name}</small><small>单位：{item.company}</small><small>兴趣爱好：{item.interests}</small></button>) : <div className="wm-empty">期待第一张相遇的照片</div>}</div></section>}
-      {page === 4 && <section className="wm-ending"><h2>期待<br /><span>您的光临</span></h2></section>}
+    <svg className="wm-svg-filter" aria-hidden="true"><filter id="wm-white-key" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -5 -5 -5 0 15" /><feComposite in2="SourceAlpha" operator="in" /></filter></svg>
+    <div className="wm-stage">
+      <Art name="shared-heart-background" className="wm-background" />
+      <Art name="shared-brand-logo-strip" className="wm-brand" />
+      {page === 0 && <section className="wm-scene" aria-label="活动封面"><Art name="cover-event-title" className="wm-cover-title" alt="广遇知己 信赴冬约" /></section>}
+      {page === 1 && <section className="wm-scene" aria-label="活动流程"><Art name="schedule-panel" className="wm-schedule-panel" alt="活动流程：联学联建、签到入场、中场休息、暖冬相逢、自由交流合影" /></section>}
+      {page === 2 && <section className="wm-scene" aria-label="基本信息"><form onSubmit={submit}>
+        <Art name="form-panel" className="wm-form-panel" />
+        {FIELDS.map((field, index) => <div className="wm-field" style={{ top: `calc(var(--u) * ${470 + index * 116})` }} key={field}>
+          <Art name={`form-field-${field}`} alt={field} />
+          {field === 'gender'
+            ? <select name="gender" aria-label="性别" value={form.gender} onChange={update} required><option value=""> </option><option>男</option><option>女</option><option>其他</option></select>
+            : <input name={field} aria-label={{ name: '姓名', phone: '手机号', company: '单位', interests: '兴趣爱好' }[field]} value={form[field]} onChange={update} required maxLength={field === 'phone' ? 11 : field === 'interests' ? 200 : 100} type={field === 'phone' ? 'tel' : 'text'} inputMode={field === 'phone' ? 'numeric' : undefined} pattern={field === 'phone' ? '1[0-9]{10}' : undefined} />}
+        </div>)}
+        <div className="wm-field wm-photo-field"><Art name="form-field-life-photo" alt="生活照" /><button type="button" aria-label={upload ? '更换生活照' : '上传生活照'} onClick={() => fileInput.current?.click()} /></div>
+        <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={choosePhoto} />
+        <button className="wm-submit" type="submit" disabled={Boolean(busy)} aria-label={busy === 'submit' ? '提交中' : '提交信息'}><Art name="form-submit-success-button" /></button>
+      </form></section>}
+      {page === 3 && <section className="wm-gallery-list" aria-label="照片展示">{Array.from({ length: Math.max(4, gallery.length) }, (_, index) => <GalleryCard key={gallery[index]?.id || `empty-${index}`} item={gallery[index]} onClick={setSelected} />)}</section>}
+      {page === 4 && <section className="wm-scene" aria-label="结束页"><Art name="ending-invitation-title" className="wm-ending-title" alt="期待您的光临" /></section>}
       {message && <p className="wm-message" role="status">{message}</p>}
-      {page < 4 && page !== 2 && <button className="wm-next" type="button" onClick={next} aria-label="下一页"><span /></button>}
-      {page === 4 && <button className="wm-next" type="button" onClick={() => setPage(0)} aria-label="返回首页"><span /></button>}
-      {page > 0 && <button className="wm-back" type="button" onClick={previous}>上一页</button>}
+      {page !== 2 && <button className="wm-next" type="button" onClick={page === 4 ? () => setPage(0) : next} aria-label={page === 4 ? '返回首页' : '下一页'}><Art name="shared-up-arrow" /></button>}
     </div>
     {selected && <div className="wm-dialog" role="dialog" aria-modal="true" onClick={() => setSelected(null)}><div className="wm-dialog-card" onClick={(event) => event.stopPropagation()}><button onClick={() => setSelected(null)} aria-label="关闭">×</button><img src={selected.photoUrl} alt={`${selected.name}的生活照`} /><p>{selected.name}</p><p>{selected.company}</p><p>{selected.interests}</p></div></div>}
   </main>
