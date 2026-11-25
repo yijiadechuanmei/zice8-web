@@ -241,7 +241,7 @@ export default function WinterMeet({ routeParams }) {
   return <main className="wm-shell" tabIndex={0} onTouchStart={(event) => { gestureStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY } }} onTouchEnd={onTouchEnd} onWheel={onWheel} onKeyDown={onKeyDown}>
     <div className="wm-stage" style={{ '--wm-keyboard-shift': `${keyboardShift}px` }}>
       <Art name="shared-heart-background" className="wm-background" />
-      <Art name="shared-brand-logo-strip" className="wm-brand" />
+      <Art key={`brand-${page}`} name="shared-brand-logo-strip" className={`wm-brand wm-brand-enter-${direction}`} />
       {page === 0 && <section key="cover" className={`wm-scene wm-enter-${direction}`} aria-label="活动封面"><Art name="cover-event-title" className="wm-cover-title" alt="广遇知己 信赴冬约" /></section>}
       {page === 1 && <section key="schedule" className={`wm-scene wm-enter-${direction}`} aria-label="活动流程"><Art name="schedule-event-details" className="wm-event-details" alt="活动时间：12月5日14点至17点；活动地点：环球金融中心1110" /><Art name="schedule-panel" className="wm-schedule-panel" alt="活动流程" /></section>}
       {page === 2 && <section key="form" className={`wm-scene wm-enter-${direction}`} aria-label="基本信息"><form onSubmit={(event) => { event.preventDefault(); void submit() }} noValidate>
@@ -258,7 +258,7 @@ export default function WinterMeet({ routeParams }) {
       {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{shownGallery.map((item) => <GalleryCard key={item.id} item={item} onPhotoClick={setSelectedPhoto} />)}</section>}
       {page === 4 && <section key="ending" className={`wm-scene wm-enter-${direction}`} aria-label="结束页"><Art name="ending-invitation-title" className="wm-ending-title" alt="期待您的光临" /></section>}
     </div>
-    <div className="wm-next-anchor"><Art name="shared-up-arrow" className="wm-next" alt="上滑进入下一页" /></div>
+    <div key={`next-${page}`} className="wm-next-anchor"><Art name="shared-up-arrow" className="wm-next" alt="上滑进入下一页" /></div>
     {cropSource && <CropDialog source={cropSource} busy={busy === 'upload'} onCancel={closeCrop} onConfirm={confirmCrop} />}
     {selectedPhoto && <button className="wm-photo-preview" type="button" onClick={() => setSelectedPhoto('')} aria-label="关闭照片预览"><img src={selectedPhoto} alt="放大的生活照" /></button>}
     {message && <div className="wm-toast-mask" role="alertdialog" aria-modal="true" aria-label={message}><p className="wm-toast">{message}</p></div>}
