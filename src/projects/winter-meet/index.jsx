@@ -6,7 +6,6 @@ import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
 import CropDialog from './CropDialog.jsx'
-import { visibleGallery } from './mockGallery.js'
 import './style.css'
 
 const TYPE = 'winter_meet'
@@ -74,7 +73,8 @@ export default function WinterMeet({ routeParams }) {
     shareLink: `${window.location.origin}/winter_meet/${encodeURIComponent(activityKey)}`,
   } : null, [activityKey, config])
   useWechatShare(activityKey, shareConfig)
-  const shownGallery = visibleGallery(gallery, debugMode ? '' : form.gender)
+  const oppositeGender = form.gender === '男' ? '女' : form.gender === '女' ? '男' : ''
+  const shownGallery = gallery.filter((item) => debugMode || !oppositeGender || item.gender === oppositeGender)
 
   useEffect(() => () => { if (cropUrl.current) URL.revokeObjectURL(cropUrl.current) }, [])
   useEffect(() => {
