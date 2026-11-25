@@ -295,6 +295,11 @@ export function getSafeDriverQuizAttempts(activityKey, params = {}) {
   return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/attempts?${search}`)
 }
 
+export function exportSafeDriverQuizData(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/safe-driver-quiz/export?${search}`)
+}
+
 export function getPinganFamilyWinners(activityKey, params = {}) {
   const search = new URLSearchParams(params)
   return adminRequest(`/admin/pingan-family/activities/${encodeURIComponent(activityKey)}/winners?${search}`)
