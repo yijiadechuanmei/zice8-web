@@ -67,7 +67,8 @@
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  clip-path: polygon(25% 7%, 75% 7%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
+  /* The PNG also contains a title, sword and starburst outside the plaque. */
+  clip-path: polygon(23% 24%, 76% 24%, 96% 62%, 76% 99%, 23% 99%, 3% 62%);
 }
 .equipment-visit__badge-sheen::before {
   content: '';
@@ -91,21 +92,25 @@
 }
 .equipment-visit__footer {
   position: absolute;
-  top: 82.7%;
-  left: 2%;
-  width: 96%;
+  top: 83.128%;
+  left: 9.333%;
+  width: 81.333%;
+  height: 5.296%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   color: #fff0bb;
   text-align: center;
   font-size: min(4vw, 30px);
   font-weight: 700;
-  line-height: 1.32;
-  letter-spacing: .02em;
+  line-height: 1.1;
   white-space: nowrap;
   text-shadow: 0 1px 2px rgba(105, 0, 0, .35);
-  z-index: 10;
+  z-index: 8;
   animation: equipment-footer-in .85s 3.5s ease-out both;
 }
 .equipment-visit__footer strong { font-size: min(7vw, 52px); line-height: 1; margin: 0 .1em; }
+.equipment-visit__footer > div:first-child { line-height: 1; }
 .equipment-visit__status { font-size: min(3.5vw, 26px); }
 
 @keyframes equipment-background-in { from { opacity: 0; transform: scale(1.035); } to { opacity: 1; transform: scale(1); } }
