@@ -153,7 +153,7 @@
 .wm-ending-title { position: absolute; left: calc(var(--u) * 116); top: calc(var(--u) * 590); width: calc(var(--u) * 519); height: calc(var(--u) * 286); }
 .wm-next-anchor { position: fixed; left: calc(50% + var(--u) * 7); bottom: var(--wm-arrow-bottom); width: calc(var(--u) * 115); height: calc(var(--u) * 81); transform: translateX(-50%); pointer-events: none; }
 .wm-next { width: 100%; height: 100%; }
-.wm-toast-mask { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; touch-action: none; }
+.wm-toast-mask { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; touch-action: none; }
 .wm-toast { max-width: min(80vw, 450px); margin: 0; padding: 12px 18px; border-radius: 10px; background: #630a06ee; box-shadow: 0 5px 22px #0004; color: #fff; text-align: center; font-size: 15px; }
 .wm-loading { height: 100svh; display: grid; place-items: center; overflow: hidden; background: #a70805; color: #fff; }
 .wm-crop-dialog, .wm-photo-preview { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: #000c; }

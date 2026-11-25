@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
 import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
 import CropDialog from './CropDialog.jsx'
 import { visibleGallery } from './mockGallery.js'
@@ -10,6 +11,7 @@ import './style.css'
 const TYPE = 'winter_meet'
 const KEY = 'gyzy26'
 const PHOTO_RATIO = 371 / 287
+const EMPTY_BGM = {}
 const initialForm = { name: '', gender: '', phone: '', company: '', interests: '' }
 const asset = (name) => `https://assets.zice8.com/${TYPE}/${KEY}/${name}.png`
 const fields = [
@@ -263,5 +265,8 @@ export default function WinterMeet({ routeParams }) {
     {cropSource && <CropDialog source={cropSource} busy={busy === 'upload'} onCancel={closeCrop} onConfirm={confirmCrop} />}
     {selectedPhoto && <button className="wm-photo-preview" type="button" onClick={() => setSelectedPhoto('')} aria-label="关闭照片预览"><img src={selectedPhoto} alt="放大的生活照" /></button>}
     {message && <div className="wm-toast-mask" role="alertdialog" aria-modal="true" aria-label={message}><p className="wm-toast">{message}</p></div>}
+    <div hidden={Boolean(cropSource || selectedPhoto)}>
+      <ActivityBgmPlayer bgm={config.bgmConfig || EMPTY_BGM} activityKey={activityKey} />
+    </div>
   </main>
 }
