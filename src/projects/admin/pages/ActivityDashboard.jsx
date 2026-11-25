@@ -46,6 +46,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
   const isXiwuqiRoadNight = activity.activityKey === XIWUQI_99_ROAD_NIGHT_ACTIVITY_KEY
   const isTjrcbPensionManual = activity.activityKey === TJRCB_PENSION_MANUAL_ACTIVITY_KEY
   const isLiubaiAssessment = activity.type === 'liubai_assessment'
+  const isWinterMeet = activity.type === 'winter_meet'
   const isAntiFraudBoardGame = activity.type === 'anti_fraud_board_game'
   const isFifteenthFiveICan = activity.type === 'fifteenth_five_i_can'
   const isLuckyDraw = activity.type === 'lucky_draw_20260920'
@@ -116,6 +117,12 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
   const metrics = useMemo(() => {
     const sourceOverview = sourceAccess?.overview || {}
+    if (isWinterMeet) return [
+      { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint, hint: overview?.accessStats?.dataAvailable === false ? '暂无访问埋点数据' : '' },
+      { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+      { label: '已展示作品', value: overview?.winterMeet?.workCount ?? 0, tooltip: '已提交且仍在展示列表中的生活照数量。' },
+      { label: '今日上传或更新', value: overview?.todayParticipantCount ?? 0 },
+    ]
     if (activity.type === 'treehole') {
       const treehole = overview?.treehole || {}
       return [
@@ -523,7 +530,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       { label: '完成数', value: overview?.completionCount ?? videoRank.completedCount ?? 0 },
       { label: '完成率', value: Math.round(Number(overview?.completionRate ?? 0)), suffix: '%' },
     ]
-  }, [activity.type, isAntiFraudBoardGame, isLiubaiAssessment, isLuckyDraw, isMaotaiCCreateFun, isTianfuReading, isTjrcbPensionManual, isXiwuqiRoadNight, overview, sourceAccess])
+  }, [activity.type, isAntiFraudBoardGame, isLiubaiAssessment, isLuckyDraw, isMaotaiCCreateFun, isTianfuReading, isTjrcbPensionManual, isWinterMeet, isXiwuqiRoadNight, overview, sourceAccess])
 
   const participantTrend = (charts?.participants?.trend || []).map((item) => ({ ...item, participants: item.value || 0 }))
   const luckyDrawTrend = (charts?.luckyDraw?.drawTrend || []).map((item, index) => ({
@@ -998,7 +1005,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'treehole' || activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
+          {activity.type === 'treehole' || activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isWinterMeet || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -1076,7 +1083,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : activity.type === 'treehole' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isAntiFraudBoardGame ? null : (
+          ) : activity.type === 'treehole' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isWinterMeet || isAntiFraudBoardGame ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>

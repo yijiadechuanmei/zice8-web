@@ -59,6 +59,15 @@ export function getOverview(activityKey, params = {}) {
   return adminRequest(`/admin/activities/${activityKey}/overview${suffix}`)
 }
 
+export function getWinterMeetEntries(activityKey, params = {}) {
+  const search = new URLSearchParams(params)
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/winter-meet/entries?${search}`)
+}
+
+export function deleteWinterMeetEntry(activityKey, entryId) {
+  return adminRequest(`/admin/activities/${encodeURIComponent(activityKey)}/winter-meet/entries/${encodeURIComponent(entryId)}`, { method: 'DELETE' })
+}
+
 export function getActivityConfig(activityKey) {
   return adminRequest(`/admin/activities/${activityKey}/config`)
 }

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Image, Input, Popconfirm, Select, Space, Tag, message } from 'antd'
+import { Button, Image, Input, Popconfirm, Select, Space, Tabs, Tag, message } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { adjustLongMarchProfile, exportDataRows, getDataRows, getDataSchema, getLongMarchRecordingPlayUrl, retractSongWish, retryNanhaiChallengePayout, reviewLongMarchRecording, reviewLongMarchShareScreenshot, reviewNanshaOpenMicEntry, syncNanhaiChallengePayout } from '../api'
 import { AdminDataToolbar, AdminDataViewShell, AdminTableBlock, buildAdminColumnsFromSchema } from '../components/AdminDataTable'
@@ -9,11 +9,16 @@ import { LvyuanParticipantsPage } from '../components/LvyuanFruitfulAdmin'
 import SafeDriverQuizAdmin from '../components/SafeDriverQuizAdmin'
 import PinganFamilyAdmin from '../components/PinganFamilyAdmin'
 import TreeholeAdmin from '../components/TreeholeAdmin'
+import WinterMeetAdmin from '../components/WinterMeetAdmin'
 
 const pageSize = 20
 const emptyData = { columns: [], rows: [], pagination: { page: 1, pageSize, total: 0 } }
 
 export default function DataViewPage({ activity, phaseScope = 'all' }) {
+  if (activity.type === 'winter_meet') return <Tabs defaultActiveKey="works" items={[
+    { key: 'works', label: '作品管理', children: <WinterMeetAdmin activity={activity} /> },
+    { key: 'records', label: '参与数据', children: <GenericDataViewPage activity={activity} phaseScope={phaseScope} /> },
+  ]} />
   if (activity.type === 'lvyuan_consumer_game_collection') return <LvyuanParticipantsPage activity={activity} />
   if (activity.type === 'safe_driver_quiz_lottery') return <SafeDriverQuizAdmin activity={activity} />
   if (activity.type === 'treehole') return <TreeholeAdmin activity={activity} />
