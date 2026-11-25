@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Alert, Input, Space, Table, Tag, Typography } from 'antd'
+import { Alert, Button, Input, Space, Table, Tag, Typography, message } from 'antd'
+import { ExportOutlined } from '@ant-design/icons'
 import { getPinganFamilyData } from '../api'
+import { downloadPinganFamilyData } from './pinganFamilyExport'
 
 const time = (value) => value ? new Date(value).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '—'
 const column = (title, dataIndex, width, render) => ({ title, dataIndex, width, render })
@@ -54,6 +56,7 @@ export default function PinganFamilyRawTable({ activityKey, view }) {
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ rows: [], pagination: { total: 0 } })
   const [error, setError] = useState('')
+  const [exporting, setExporting] = useState(false)
   const queryKey = JSON.stringify([activityKey, view, page, keyword])
 
   useEffect(() => {
@@ -65,10 +68,16 @@ export default function PinganFamilyRawTable({ activityKey, view }) {
   }, [activityKey, view, page, keyword, queryKey])
 
   const placeholder = view === 'prizes' ? '奖品 ID、代码或名称' : view === 'answers' ? '用户、闯关、答案 ID 或题目' : '用户 ID、姓名、手机号或记录 ID'
+  async function exportRows() {
+    setExporting(true)
+    try { await downloadPinganFamilyData(activityKey, { view, keyword }); message.success('CSV 已导出') }
+    catch (failure) { message.error(failure.message || '导出失败') }
+    finally { setExporting(false) }
+  }
   return <>
-    <Space wrap style={{ marginBottom: 16 }}>
+    <div className="admin-data-toolbar"><Space wrap>
       <Input.Search allowClear placeholder={placeholder} style={{ width: 290 }} value={searchText} onChange={(event) => { setSearchText(event.target.value); if (!event.target.value) { setKeyword(''); setPage(1) } }} onSearch={(value) => { setKeyword(value.trim()); setPage(1) }} />
-    </Space>
+    </Space><Button type="primary" icon={<ExportOutlined />} loading={exporting} onClick={exportRows}>导出 CSV</Button></div>
     {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
     <Table
       rowKey="id"

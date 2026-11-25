@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react'
 import { Alert, Button, Card, Col, Descriptions, Input, Popconfirm, Row, Space, Statistic, Table, Tabs, Tag, Typography, message } from 'antd'
+import { ExportOutlined } from '@ant-design/icons'
 import { getPinganFamilyClaim, getPinganFamilyWinners, redeemPinganFamilyClaim } from '../api'
 import PinganFamilyQuizData from './PinganFamilyQuizData'
 import PinganFamilyRawTable from './PinganFamilyRawTable'
+import { downloadPinganFamilyData } from './pinganFamilyExport'
 
 const statusText = { confirmed: '已登记', pending_profile: '待填写领奖信息', duplicate_phone: '手机号重复，未发奖' }
 const tableNames = { participants: '参与用户', winners: '中奖记录（pfh_draw）', challenges: '闯关记录（pfh_challenge）', answers: '逐题答案（pfh_answer_log）', chances: '抽奖资格（pfh_chance）', draws: '抽奖流水（pfh_draw）', prizes: '奖品库存（pfh_prize）' }
@@ -21,6 +23,7 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
   const [claimBusy, setClaimBusy] = useState(false)
   const [claimError, setClaimError] = useState('')
   const [view, setView] = useState('winners')
+  const [exporting, setExporting] = useState(false)
   useEffect(() => {
     if (!overviewOnly && view !== 'winners') return undefined
     let alive = true
@@ -53,6 +56,13 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
       message.success('兑奖核销成功，不能再次领取')
     } catch (failure) { setClaimError(failure.message || '兑奖核销失败') }
     finally { setClaimBusy(false) }
+  }
+
+  async function exportWinners() {
+    setExporting(true)
+    try { await downloadPinganFamilyData(activity.activityKey, { view: 'winners', keyword }); message.success('CSV 已导出') }
+    catch (failure) { message.error(failure.message || '导出失败') }
+    finally { setExporting(false) }
   }
 
   const columns = [
@@ -98,7 +108,8 @@ export default function PinganFamilyAdmin({ activity, overviewOnly = false }) {
         </Popconfirm>}
       </>}
     </Card>}
-    {view === 'winners' && <Card title="中奖记录" size="small" extra={<Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} />}>
+    {view === 'winners' && <Card title="中奖记录" size="small">
+      <div className="admin-data-toolbar"><Input.Search allowClear placeholder="姓名、手机号或用户 ID" value={keyword} onChange={(event) => { setKeyword(event.target.value); setPage(1) }} style={{ width: 240 }} /><Button type="primary" icon={<ExportOutlined />} loading={exporting} onClick={exportWinners}>导出 CSV</Button></div>
       <Table rowKey="id" loading={loading} columns={columns} dataSource={data.rows} scroll={{ x: 1200 }} pagination={{ current: page, pageSize: 20, total: data.pagination.total, showSizeChanger: false, onChange: setPage }} />
     </Card>}
     {view === 'challenges' && <PinganFamilyQuizData activityKey={activity.activityKey} />}

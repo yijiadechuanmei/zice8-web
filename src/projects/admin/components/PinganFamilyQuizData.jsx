@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Card, Descriptions, Drawer, Input, Select, Space, Table, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Descriptions, Drawer, Input, Select, Space, Table, Tag, Typography, message } from 'antd'
+import { ExportOutlined } from '@ant-design/icons'
 import { getPinganFamilyChallengeDetail, getPinganFamilyChallenges } from '../api'
+import { downloadPinganFamilyData } from './pinganFamilyExport'
 
 const statusText = { active: '进行中', stage_failed: '关卡未通过', completed: '闯关成功' }
 const time = (value) => value ? new Date(value).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) : '—'
@@ -16,6 +18,7 @@ export default function PinganFamilyQuizData({ activityKey }) {
   const [detail, setDetail] = useState(null)
   const [detailError, setDetailError] = useState('')
   const [detailLoading, setDetailLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const detailRequest = useRef(0)
   const queryKey = JSON.stringify([activityKey, page, keyword, status, date])
 
@@ -56,12 +59,19 @@ export default function PinganFamilyQuizData({ activityKey }) {
     { title: '逐题详情', width: 100, render: (_, row) => <Button type="link" onClick={() => showDetail(row.id)}>查看</Button> },
   ]
 
+  async function exportRows() {
+    setExporting(true)
+    try { await downloadPinganFamilyData(activityKey, { view: 'challenges', keyword, status, date }); message.success('CSV 已导出') }
+    catch (failure) { message.error(failure.message || '导出失败') }
+    finally { setExporting(false) }
+  }
+
   return <>
-    <Space wrap style={{ marginBottom: 16 }}>
+    <div className="admin-data-toolbar"><Space wrap>
       <Input.Search allowClear placeholder="用户 ID、姓名、手机号" style={{ width: 240 }} value={searchText} onChange={(event) => { setSearchText(event.target.value); if (!event.target.value) { setKeyword(''); setPage(1) } }} onSearch={(value) => { setKeyword(value.trim()); setPage(1) }} />
       <Select style={{ width: 130 }} value={status} options={[{ value: '', label: '全部状态' }, ...Object.entries(statusText).map(([value, label]) => ({ value, label }))]} onChange={(value) => { setStatus(value); setPage(1) }} />
       <input type="date" value={date} onChange={(event) => { setDate(event.target.value); setPage(1) }} aria-label="答题日期" style={{ height: 32, border: '1px solid #d9d9d9', borderRadius: 6, padding: '0 8px' }} />
-    </Space>
+    </Space><Button type="primary" icon={<ExportOutlined />} loading={exporting} onClick={exportRows}>导出 CSV</Button></div>
     {error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
     <Table rowKey="id" size="small" loading={records.queryKey !== queryKey} dataSource={records.rows} columns={columns} scroll={{ x: 'max-content' }} pagination={{ current: page, pageSize: 20, total: records.pagination.total, showSizeChanger: false, showTotal: (total) => `共 ${total} 条`, onChange: setPage }} />
     <Typography.Text type="secondary">逐题明细从日志表上线后开始保存；此前记录无法还原全部答案。</Typography.Text>
