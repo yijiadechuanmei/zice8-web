@@ -1,0 +1,45 @@
+.equipment-visit {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #a60000;
+}
+
+.equipment-visit__canvas {
+  position: relative;
+  flex: none;
+  width: min(100vw, 750px);
+  aspect-ratio: 750 / 1624;
+  overflow: hidden;
+}
+
+.equipment-visit__canvas img { position: absolute; display: block; height: auto; pointer-events: none; }
+.equipment-visit__background { inset: 0; width: 100%; }
+.equipment-visit__orbit { left: 0; top: 16%; width: 100%; opacity: .72; }
+.equipment-visit__logo { left: 5.6%; top: 4.3%; width: 29.33%; }
+.equipment-visit__title { left: 9.2%; top: 12.2%; width: 81.47%; }
+.equipment-visit__badge { left: 21%; top: 37.9%; width: 64.27%; }
+.equipment-visit__left-bird { left: 12%; top: 45.2%; width: 5.87%; }
+.equipment-visit__right-birds { left: 79%; top: 37.7%; width: 10.27%; }
+.equipment-visit__soldier { left: 9.8%; top: 65.1%; width: 24.53%; }
+.equipment-visit__footer {
+  position: absolute;
+  top: 82.7%;
+  left: 2%;
+  width: 96%;
+  color: #fff0bb;
+  text-align: center;
+  font-size: min(4vw, 30px);
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(105, 0, 0, .35);
+}
+.equipment-visit__footer strong { font-size: min(7vw, 52px); line-height: 1; margin: 0 .1em; }
+.equipment-visit__status { font-size: min(3.5vw, 26px); }

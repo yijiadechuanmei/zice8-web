@@ -40,6 +40,7 @@ const PinganGoodDriverProject = lazy(() => import('./pingan-good-driver/index.js
 const PinganFamilyProject = lazy(() => import('./pingan-family/index.jsx'))
 const TreeholeProject = lazy(() => import('./treehole/index.jsx'))
 const TrafficQuizProject = lazy(() => import('./traffic-quiz/index.jsx'))
+const EquipmentVisitProject = lazy(() => import('./equipment-visit/index.jsx'))
 
 const WinterMeetProject = lazy(() => import('./winter-meet/index.jsx'))
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
@@ -73,6 +74,7 @@ const activityTypeProjects = {
   safe_driver_quiz_lottery: PinganGoodDriverProject,
   pfh: PinganFamilyProject,
   jtqa: TrafficQuizProject,
+  equipment_visit: EquipmentVisitProject,
 }
 
 function ActivityTypeProject({ routeParams }) {
