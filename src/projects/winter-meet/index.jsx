@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { request } from '../../shared/api/request'
 import { trackPageView } from '../../shared/analytics'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { getGallery, getMine, submitProfile, uploadPhoto } from './api'
 import CropDialog from './CropDialog.jsx'
@@ -67,6 +68,12 @@ export default function WinterMeet({ routeParams }) {
   const gestureStart = useRef(null)
   const lastWheelAt = useRef(0)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, config)
+  const shareConfig = useMemo(() => config ? {
+    ...config,
+    shareImage: config.shareImage?.replace(/&amp;/g, '&'),
+    shareLink: `${window.location.origin}/winter_meet/${encodeURIComponent(activityKey)}`,
+  } : null, [activityKey, config])
+  useWechatShare(activityKey, shareConfig)
   const shownGallery = visibleGallery(gallery, debugMode ? '' : form.gender)
 
   useEffect(() => () => { if (cropUrl.current) URL.revokeObjectURL(cropUrl.current) }, [])
