@@ -41,10 +41,12 @@ const PinganFamilyProject = lazy(() => import('./pingan-family/index.jsx'))
 const TreeholeProject = lazy(() => import('./treehole/index.jsx'))
 const TrafficQuizProject = lazy(() => import('./traffic-quiz/index.jsx'))
 
+const WinterMeetProject = lazy(() => import('./winter-meet/index.jsx'))
 const PhotoScreenProject = lazy(() => import('./photo-screen/index.jsx'))
 const LiubaiAssessmentProject = lazy(() => import('./liubai-assessment/index.jsx'))
 
 const activityTypeProjects = {
+  winter_meet: WinterMeetProject,
   treehole: TreeholeProject,
   liubai_assessment: LiubaiAssessmentProject,
   photo_screen_demo_20261010: PhotoScreenProject,
@@ -94,6 +96,11 @@ function ActivityTypeProject({ routeParams }) {
 }
 
 export const projectRoutes = [
+  {
+    path: '/winter_meet/:activityKey/gallery',
+    Component: WinterMeetProject,
+    activityGate: true,
+  },
   {
     path: '/photo_screen_demo_20261010/:activityKey/screen',
     Component: PhotoScreenProject,
