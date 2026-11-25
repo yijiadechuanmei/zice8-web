@@ -53,7 +53,12 @@ export default function EquipmentVisit({ routeParams }) {
         <img className="equipment-visit__orbit" src={asset('orbit')} alt="" />
         <img className="equipment-visit__logo" src={asset('logo')} alt="中国电气装备" />
         <img className="equipment-visit__title" src={asset('title')} alt="铸魂强基 装备报国，中国电气装备党委2026年思想政治教育主题日" />
-        <img className="equipment-visit__badge" src={asset('badge')} alt="铸魂强基 装备报国主题徽章" />
+        <div className="equipment-visit__badge">
+          <div className="equipment-visit__badge-float">
+            <img src={asset('badge')} alt="铸魂强基 装备报国主题徽章" />
+            <span className="equipment-visit__badge-sheen" aria-hidden="true" />
+          </div>
+        </div>
         <img className="equipment-visit__left-bird" src={asset('leftBird')} alt="" />
         <img className="equipment-visit__right-birds" src={asset('rightBirds')} alt="" />
         <img className="equipment-visit__soldier" src={asset('soldier')} alt="" />
