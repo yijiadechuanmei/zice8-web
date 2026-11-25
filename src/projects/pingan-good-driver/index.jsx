@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { DownOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons'
 import { API_BASE_URL, getToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
+import { useWechatShare } from '../../shared/hooks/useWechatShare'
+import { setDocumentTitle } from '../../shared/utils/documentTitle'
 import { abandonQuiz, answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
 import './styles.css'
 
@@ -34,11 +36,14 @@ export default function PinganGoodDriverProject({ routeParams }) {
   const eligibleRef = useRef(false)
   const quizInProgressRef = useRef(false)
   const { authReady, blockedMessage } = useWechatAuth(activityKey, publicConfig)
+  const shareConfig = useMemo(() => publicConfig ? { ...publicConfig, shareTitle: publicConfig.title } : null, [publicConfig])
+  useWechatShare(activityKey, shareConfig)
 
   useEffect(() => {
-    document.title = '“平安好司机”零违法挑战赛'
     return () => { window.clearTimeout(toastTimer.current); window.clearTimeout(drawTimer.current); window.clearTimeout(afterToastTimer.current) }
   }, [])
+
+  useEffect(() => { setDocumentTitle(publicConfig?.title) }, [publicConfig?.title])
 
   useEffect(() => {
     let active = true
