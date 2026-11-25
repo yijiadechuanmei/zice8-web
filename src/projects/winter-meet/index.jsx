@@ -105,12 +105,11 @@ export default function WinterMeet({ routeParams }) {
 
   if (!config) return <main className="wm-loading" role="status">{message || '加载中…'}</main>
   return <main className="wm-shell" onTouchStart={(event) => { touchStart.current = event.touches[0].clientY }} onTouchEnd={onTouchEnd}>
-    <svg className="wm-svg-filter" aria-hidden="true"><filter id="wm-white-key" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -5 -5 -5 0 15" /><feComposite in2="SourceAlpha" operator="in" /></filter></svg>
     <div className="wm-stage">
       <Art name="shared-heart-background" className="wm-background" />
       <Art name="shared-brand-logo-strip" className="wm-brand" />
       {page === 0 && <section className="wm-scene" aria-label="活动封面"><Art name="cover-event-title" className="wm-cover-title" alt="广遇知己 信赴冬约" /></section>}
-      {page === 1 && <section className="wm-scene" aria-label="活动流程"><Art name="schedule-panel" className="wm-schedule-panel" alt="活动流程：联学联建、签到入场、中场休息、暖冬相逢、自由交流合影" /></section>}
+      {page === 1 && <section className="wm-scene" aria-label="活动流程"><Art name="schedule-event-details" className="wm-event-details" alt="活动时间：12月5日14点至17点；活动地点：环球金融中心1110" /><Art name="schedule-panel" className="wm-schedule-panel" alt="活动流程：联学联建、签到入场、中场休息、暖冬相逢、自由交流合影" /></section>}
       {page === 2 && <section className="wm-scene" aria-label="基本信息"><form onSubmit={submit}>
         <Art name="form-panel" className="wm-form-panel" />
         {FIELDS.map((field, index) => <div className="wm-field" style={{ top: `calc(var(--u) * ${470 + index * 116})` }} key={field}>
