@@ -1,4 +1,6 @@
 .wm-shell {
+  --u: calc(min(100vw, 750px) / 750);
+  --wm-arrow-bottom: max(28px, calc(env(safe-area-inset-bottom) + 28px));
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -14,7 +16,6 @@
 }
 .wm-shell:focus { outline: none; }
 .wm-stage {
-  --u: calc(min(100vw, 750px) / 750);
   position: relative;
   flex: none;
   width: min(100vw, 750px);
@@ -105,7 +106,7 @@
   left: calc(var(--u) * 80);
   top: calc(var(--u) * 367);
   width: calc(var(--u) * 592);
-  height: calc(var(--u) * 750);
+  height: clamp(0px, calc(50svh + var(--u) * 445.5 - var(--wm-arrow-bottom) - var(--u) * 81 - 16px), calc(var(--u) * 1258));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -150,8 +151,8 @@
 .wm-card-row strong { flex: none; font-weight: 700; white-space: nowrap; }
 .wm-card-line { display: block; flex: 1; min-width: 0; height: calc(var(--u) * 19); padding-bottom: calc(var(--u) * 2); border-bottom: calc(var(--u) * 1) solid #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wm-ending-title { position: absolute; left: calc(var(--u) * 116); top: calc(var(--u) * 590); width: calc(var(--u) * 519); height: calc(var(--u) * 286); }
-.wm-next { position: absolute; left: calc(var(--u) * 317); top: calc(var(--u) * 1170); width: calc(var(--u) * 115); height: calc(var(--u) * 81); }
-.wm-next-form { top: calc(var(--u) * 1320); }
+.wm-next-anchor { position: fixed; left: 50%; bottom: var(--wm-arrow-bottom); width: calc(var(--u) * 115); height: calc(var(--u) * 81); transform: translateX(-50%); pointer-events: none; }
+.wm-next { width: 100%; height: 100%; }
 .wm-toast-mask { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; touch-action: none; }
 .wm-toast { max-width: min(80vw, 450px); margin: 0; padding: 12px 18px; border-radius: 10px; background: #630a06ee; box-shadow: 0 5px 22px #0004; color: #fff; text-align: center; font-size: 15px; }
 .wm-loading { height: 100svh; display: grid; place-items: center; overflow: hidden; background: #a70805; color: #fff; }

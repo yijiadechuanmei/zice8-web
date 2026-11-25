@@ -45,6 +45,7 @@ function CameraIcon() {
 
 export default function WinterMeet({ routeParams }) {
   const activityKey = routeParams?.activityKey || KEY
+  const debugMode = new URLSearchParams(window.location.search).has('debug')
   const [config, setConfig] = useState(null)
   const [page, setPage] = useState(() => window.location.pathname.endsWith('/gallery') ? 3 : 0)
   const [direction, setDirection] = useState('up')
@@ -63,7 +64,7 @@ export default function WinterMeet({ routeParams }) {
   const gestureStart = useRef(null)
   const lastWheelAt = useRef(0)
   const { authReady, blockedMessage, reauth } = useWechatAuth(activityKey, config)
-  const shownGallery = visibleGallery(gallery, form.gender)
+  const shownGallery = visibleGallery(gallery, debugMode ? '' : form.gender)
 
   useEffect(() => () => { if (cropUrl.current) URL.revokeObjectURL(cropUrl.current) }, [])
   useEffect(() => {
@@ -133,12 +134,12 @@ export default function WinterMeet({ routeParams }) {
   const changePage = (target, motion) => { setDirection(motion); setPage(target) }
   const previous = () => {
     if (page === 0) return
-    if (page === 3 && submitted) changePage(1, 'down')
+    if (page === 3 && (submitted || debugMode)) changePage(1, 'down')
     else changePage(page - 1, 'down')
   }
   const next = () => {
     if (page === 0) changePage(1, 'up')
-    else if (page === 1) changePage(submitted ? 3 : 2, 'up')
+    else if (page === 1) changePage(submitted || debugMode ? 3 : 2, 'up')
     else if (page === 2) void submit()
     else if (page === 3) changePage(4, 'up')
     else changePage(0, 'up')
@@ -256,8 +257,8 @@ export default function WinterMeet({ routeParams }) {
       </form></section>}
       {page === 3 && <section key="gallery" className={`wm-gallery-list wm-enter-${direction}`} aria-label="照片展示">{shownGallery.map((item) => <GalleryCard key={item.id} item={item} onPhotoClick={setSelectedPhoto} />)}</section>}
       {page === 4 && <section key="ending" className={`wm-scene wm-enter-${direction}`} aria-label="结束页"><Art name="ending-invitation-title" className="wm-ending-title" alt="期待您的光临" /></section>}
-      <Art name="shared-up-arrow" className={page === 2 ? "wm-next wm-next-form" : "wm-next"} alt="上滑进入下一页" />
     </div>
+    <div className="wm-next-anchor"><Art name="shared-up-arrow" className="wm-next" alt="上滑进入下一页" /></div>
     {cropSource && <CropDialog source={cropSource} busy={busy === 'upload'} onCancel={closeCrop} onConfirm={confirmCrop} />}
     {selectedPhoto && <button className="wm-photo-preview" type="button" onClick={() => setSelectedPhoto('')} aria-label="关闭照片预览"><img src={selectedPhoto} alt="放大的生活照" /></button>}
     {message && <div className="wm-toast-mask" role="alertdialog" aria-modal="true" aria-label={message}><p className="wm-toast">{message}</p></div>}
