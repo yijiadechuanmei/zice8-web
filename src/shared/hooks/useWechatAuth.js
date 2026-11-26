@@ -7,6 +7,7 @@ import { getQueryParam, getTokenFromUrl, isWechatBrowser, removeQueryParam, sani
 const REAUTH_LIMIT = 2
 const AUTH_NONCE_STORAGE_PREFIX = 'wechat_auth_nonce'
 const OAUTH_RETRY_QUERY_PARAM = 'wechat_oauth_retry'
+const fallbackReauthAttempts = new Map()
 
 export function getWechatAuthNonceStorageKey(activityKey, nonceParam) {
   return `${AUTH_NONCE_STORAGE_PREFIX}:${activityKey}:${nonceParam}`
@@ -30,16 +31,20 @@ function getReauthAttemptKey(activityKey) {
 }
 
 function readReauthAttempts(activityKey) {
-  const value = Number(sessionStorage.getItem(getReauthAttemptKey(activityKey)) || 0)
+  let stored = ''
+  try { stored = sessionStorage.getItem(getReauthAttemptKey(activityKey)) || '' } catch { /* Use the in-page count. */ }
+  const value = Number(fallbackReauthAttempts.get(activityKey) ?? stored ?? 0)
   return Number.isFinite(value) ? value : 0
 }
 
 function writeReauthAttempts(activityKey, value) {
-  sessionStorage.setItem(getReauthAttemptKey(activityKey), String(value))
+  fallbackReauthAttempts.set(activityKey, value)
+  try { sessionStorage.setItem(getReauthAttemptKey(activityKey), String(value)) } catch { /* Keep an in-page retry count. */ }
 }
 
 function clearReauthAttempts(activityKey) {
-  sessionStorage.removeItem(getReauthAttemptKey(activityKey))
+  fallbackReauthAttempts.delete(activityKey)
+  try { sessionStorage.removeItem(getReauthAttemptKey(activityKey)) } catch { /* Storage may be blocked. */ }
 }
 
 function getAccessMode(publicConfig) {

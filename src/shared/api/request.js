@@ -2,24 +2,32 @@ import { markActivityUnavailable } from '../activityAvailability'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 const TOKEN_KEY = 'zice8_token'
+let fallbackToken = ''
 const publicConfigRequests = new Map()
 const PUBLIC_CONFIG_PATH = /^\/activities\/[^/]+\/public-config(?:\?|$)/
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || ''
+  try {
+    return localStorage.getItem(TOKEN_KEY) || fallbackToken
+  } catch {
+    return fallbackToken
+  }
 }
 
 export function setToken(token) {
-  if (token) localStorage.setItem(TOKEN_KEY, token)
+  if (!token) return
+  fallbackToken = token
+  try { localStorage.setItem(TOKEN_KEY, token) } catch { /* Keep the token for this page when storage is blocked. */ }
 }
 
 export function removeToken() {
-  localStorage.removeItem(TOKEN_KEY)
+  fallbackToken = ''
+  try { localStorage.removeItem(TOKEN_KEY) } catch { /* Storage may be blocked in embedded browsers. */ }
 }
 
 async function executeRequest(path, options) {
   const { skipAuth, ...fetchOptions } = options
-  const token = getToken()
+  const token = skipAuth ? '' : getToken()
   const headers = {
     'Content-Type': 'application/json',
     ...(fetchOptions.headers || {}),
@@ -45,7 +53,7 @@ async function executeRequest(path, options) {
 
 export function request(path, options = {}) {
   const method = String(options.method || 'GET').toUpperCase()
-  if (method !== 'GET' || !PUBLIC_CONFIG_PATH.test(path)) {
+  if (method !== 'GET' || !PUBLIC_CONFIG_PATH.test(path) || options.signal) {
     return executeRequest(path, options)
   }
 

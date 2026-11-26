@@ -99,9 +99,12 @@ function ActivityTypeProject({ routeParams }) {
 
 export const projectRoutes = [
   {
+    path: '/winter_meet/:activityKey',
+    Component: WinterMeetProject,
+  },
+  {
     path: '/winter_meet/:activityKey/gallery',
     Component: WinterMeetProject,
-    activityGate: true,
   },
   {
     path: '/photo_screen_demo_20261010/:activityKey/screen',

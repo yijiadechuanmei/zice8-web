@@ -1,5 +1,5 @@
 import './App.css'
-import { Suspense, useEffect, useState, useSyncExternalStore } from 'react'
+import { Component, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { projectRoutes } from './projects/index.jsx'
 import QuizLoadingState from './projects/quiz/components/LoadingState.jsx'
 import {
@@ -34,7 +34,25 @@ function matchRoute(pathname, routePath) {
 }
 
 function Loading() {
-  return <div className="min-h-screen bg-white" aria-label="页面加载中" />
+  return <div className="flex min-h-screen items-center justify-center bg-white text-slate-600" role="status">页面加载中…</div>
+}
+
+class ProjectErrorBoundary extends Component {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  render() {
+    if (this.state.failed) {
+      return <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-slate-700" role="alert">
+        <p>页面加载失败，请检查网络后重试</p>
+        <button type="button" className="rounded bg-slate-800 px-5 py-2 text-white" onClick={() => window.location.reload()}>重新加载</button>
+      </div>
+    }
+    return this.props.children
+  }
 }
 
 function NotFound() {
@@ -57,9 +75,11 @@ function getActivityKey(params) {
 function ProjectRoute({ project, params, fallback }) {
   const ProjectComponent = project.Component
   return (
-    <Suspense fallback={fallback}>
-      <ProjectComponent routeParams={params} />
-    </Suspense>
+    <ProjectErrorBoundary>
+      <Suspense fallback={fallback}>
+        <ProjectComponent routeParams={params} />
+      </Suspense>
+    </ProjectErrorBoundary>
   )
 }
 

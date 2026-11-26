@@ -50,6 +50,8 @@ export default function WinterMeet({ routeParams }) {
   const activityKey = routeParams?.activityKey || KEY
   const debugMode = new URLSearchParams(window.location.search).has('debug')
   const [config, setConfig] = useState(null)
+  const [configError, setConfigError] = useState('')
+  const [configAttempt, setConfigAttempt] = useState(0)
   const [page, setPage] = useState(() => window.location.pathname.endsWith('/gallery') ? 3 : 0)
   const [direction, setDirection] = useState('up')
   const [form, setForm] = useState(initialForm)
@@ -85,11 +87,14 @@ export default function WinterMeet({ routeParams }) {
 
   useEffect(() => {
     let alive = true
-    request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true })
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 10000)
+    request(`/activities/${encodeURIComponent(activityKey)}/public-config`, { skipAuth: true, signal: controller.signal })
       .then((data) => { if (alive) { setConfig(data); trackPageView(activityKey, '/winter-meet', { activityType: TYPE }) } })
-      .catch((error) => { if (alive) setMessage(error.message) })
-    return () => { alive = false }
-  }, [activityKey])
+      .catch((error) => { if (alive) setConfigError(error.name === 'AbortError' ? '加载超时，请检查网络后重试' : error.message || '活动加载失败，请重试') })
+      .finally(() => window.clearTimeout(timeout))
+    return () => { alive = false; window.clearTimeout(timeout); controller.abort() }
+  }, [activityKey, configAttempt])
 
   const loadGallery = useCallback(async () => {
     try { const data = await getGallery(activityKey); setGallery(data.list || []) }
@@ -166,8 +171,8 @@ export default function WinterMeet({ routeParams }) {
   }
   const onWheel = (event) => {
     if (message || cropSource || selectedPhoto || event.target.closest('.wm-gallery-list')) return
-    if (Math.abs(event.deltaY) < 25 || Date.now() - lastWheelAt.current < 650) return
-    lastWheelAt.current = Date.now()
+    if (Math.abs(event.deltaY) < 25 || (lastWheelAt.current && event.timeStamp - lastWheelAt.current < 650)) return
+    lastWheelAt.current = event.timeStamp
     if (event.deltaY > 0) next()
     else previous()
   }
@@ -247,7 +252,10 @@ export default function WinterMeet({ routeParams }) {
     finally { setBusy('') }
   }
 
-  if (!config) return <main className="wm-loading" role="status">{message || '加载中…'}</main>
+  if (!config) return <main className={`wm-loading${configError ? ' wm-loading-error' : ''}`} role="status">
+    <p>{configError || '加载中…'}</p>
+    {configError && <button type="button" onClick={() => { setConfigError(''); setConfigAttempt((attempt) => attempt + 1) }}>重新加载</button>}
+  </main>
   return <main className="wm-shell" tabIndex={0} onTouchStart={(event) => { gestureStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY } }} onTouchEnd={onTouchEnd} onWheel={onWheel} onKeyDown={onKeyDown}>
     <div className="wm-stage" style={{ '--wm-keyboard-shift': `${keyboardShift}px` }}>
       <Art name="shared-heart-background" className="wm-background" />
