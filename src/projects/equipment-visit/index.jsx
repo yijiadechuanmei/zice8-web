@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { request } from '../../shared/api/request'
+import ActivityBgmPlayer from '../../shared/components/ActivityBgmPlayer'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import './style.css'
@@ -22,6 +23,7 @@ export default function EquipmentVisit({ routeParams }) {
   const [config, setConfig] = useState(null)
   const [visitNumber, setVisitNumber] = useState(null)
   const [error, setError] = useState('')
+  const bgmConfig = config?.bgmConfig || config?.mobileConfig?.bgm || {}
   const { authReady, blockedMessage } = useWechatAuth(activityKey, config)
   const assetsBase = config?.mobileConfig?.assetsBaseUrl
     || `https://assets.zice8.com/${TYPE}/${activityKey}`
@@ -47,6 +49,7 @@ export default function EquipmentVisit({ routeParams }) {
   }, [activityKey, authReady, config])
 
   return (
+    <>
     <main className="equipment-visit" aria-label="铸魂强基 装备报国">
       <div className="equipment-visit__canvas">
         <img className="equipment-visit__background" src={asset('background')} alt="" />
@@ -74,5 +77,7 @@ export default function EquipmentVisit({ routeParams }) {
         </div>
       </div>
     </main>
+    <ActivityBgmPlayer bgm={bgmConfig} activityKey={activityKey} />
+    </>
   )
 }
