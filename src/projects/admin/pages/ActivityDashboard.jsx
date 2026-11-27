@@ -6,7 +6,6 @@ import { getCharts, getOverview, getSourceAccess } from '../api'
 import AppointmentBookingMatrix from '../components/AppointmentBookingMatrix'
 import TianfuReadingOverview from '../components/TianfuReadingOverview'
 import { getLvyuanAdminOverview } from '../lvyuanFruitfulApi'
-import SafeDriverQuizAdmin from '../components/SafeDriverQuizAdmin'
 import PinganFamilyAdmin from '../components/PinganFamilyAdmin'
 
 const AdminChart = lazy(() => import('../components/charts/AdminChart'))
@@ -357,6 +356,35 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
       ]
     }
 
+    if (activity.type === 'safe_driver_quiz_lottery') {
+      const quiz = overview?.safeDriverQuiz || {}
+      const estimate = overview?.estimatedAccess || {}
+      return [
+        { label: 'PV（高位估算）', value: estimate.pv ?? 0, tooltip: estimate.method, hint: '估算值，非实测' },
+        { label: 'UV（高位估算）', value: estimate.uv ?? 0, tooltip: estimate.method, hint: '估算值，非实测' },
+        { label: '已记录 PV', value: overview?.pv ?? 0, tooltip: '访问埋点上线后的实测次数；历史访问未记录。' },
+        { label: '已记录 UV', value: overview?.uv ?? 0, tooltip: '访问埋点上线后的实测去重访客数；历史访问未记录。' },
+        { label: '参与用户', value: quiz.participantCount ?? 0, tooltip: '至少开始一次答题的去重微信用户数。' },
+        { label: '今日参与用户', value: quiz.todayParticipantCount ?? 0 },
+        { label: '答题次数', value: quiz.attemptCount ?? 0 },
+        { label: '今日答题次数', value: quiz.todayAttemptCount ?? 0 },
+        { label: '完成答题', value: quiz.completedCount ?? 0 },
+        { label: '完成率', value: quiz.completionRate ?? 0, suffix: '%' },
+        { label: '答题失败', value: quiz.failedCount ?? 0 },
+        { label: '答题中', value: quiz.inProgressCount ?? 0 },
+        { label: '中途放弃', value: quiz.abandonedCount ?? 0 },
+        { label: '全对次数', value: quiz.fullScoreCount ?? 0 },
+        { label: '全对率', value: quiz.fullScoreRate ?? 0, suffix: '%', tooltip: '全对次数占完成答题次数的比例。' },
+        { label: '待抽奖', value: quiz.eligibleCount ?? 0 },
+        { label: '抽奖次数', value: quiz.drawCount ?? 0 },
+        { label: '中奖数量', value: quiz.winCount ?? 0 },
+        { label: '未中奖', value: quiz.missCount ?? 0 },
+        { label: '已登记资料', value: quiz.claimCount ?? 0 },
+        { label: '中奖登记率', value: quiz.claimRate ?? 0, suffix: '%' },
+        { label: '奖品剩余', value: quiz.stockRemaining ?? 0 },
+      ]
+    }
+
     if (activity.type === 'phase_quiz_lottery') {
       const pql = overview?.phaseQuizLottery || {}
       return [
@@ -624,7 +652,6 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
   return (
     <div className={`admin-stack${isTianfuReading ? ' admin-tianfu-dashboard' : ''}`}>
-      {activity.type === 'safe_driver_quiz_lottery' ? <SafeDriverQuizAdmin activity={activity} overviewOnly /> : null}
       {activity.type === 'pfh' ? <PinganFamilyAdmin activity={activity} overviewOnly /> : null}
       {compact || isTianfuReading ? (
         <div className="admin-overview-refresh">
@@ -671,9 +698,40 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         ))}
       </Row>
 
-      {activity.type === 'treehole' ? null : <Paragraph className="admin-muted">
+      {activity.type === 'safe_driver_quiz_lottery' ? <Paragraph className="admin-muted">
+        PV/UV 高位估算依据实际答题人数推算，不能用于核对真实访问量；已记录 PV/UV 仅包含埋点上线后的访问。
+      </Paragraph> : activity.type === 'treehole' ? null : <Paragraph className="admin-muted">
         PV：{pvHint} UV：{uvHint}
       </Paragraph>}
+
+      {activity.type === 'safe_driver_quiz_lottery' ? <Row gutter={[16, 16]}>
+        <Col xs={24} xl={12}>
+          <ChartPanel title="近 7 天答题与抽奖趋势" description="按答题日期归档当前状态，历史记录状态变化会更新对应日期">
+            <LazyChart type="line" data={charts?.safeDriverQuiz?.trend || []} series={[
+              { key: 'attempts', name: '答题' }, { key: 'completed', name: '完成' },
+              { key: 'fullScore', name: '全对' }, { key: 'draws', name: '抽奖' }, { key: 'wins', name: '中奖' },
+            ]} />
+          </ChartPanel>
+        </Col>
+        <Col xs={24} xl={12}>
+          <ChartPanel title="近 7 天实测 PV/UV" description={charts?.access?.message}>
+            {charts?.access?.dataAvailable ? <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
+              : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="访问埋点上线后开始累计" />}
+          </ChartPanel>
+        </Col>
+        <Col xs={24}>
+          <Card className="admin-chart-card" title="奖品库存" extra={<Text type="secondary">已发出 {overview?.safeDriverQuiz?.stockIssued ?? 0} / {overview?.safeDriverQuiz?.stockTotal ?? 0}</Text>}>
+            <Row gutter={[16, 8]}>
+              {(overview?.safeDriverQuiz?.prizeStock || []).map((prize) => <Col xs={24} sm={12} lg={8} key={prize.code}>
+                <div className="admin-liubai-result-stat">
+                  <Text>{prize.name} · 剩余 {prize.remainingCount}</Text>
+                  <Progress percent={prize.totalStock ? Math.round(prize.issuedCount / prize.totalStock * 100) : 0} size="small" format={() => `${prize.issuedCount} / ${prize.totalStock}`} />
+                </div>
+              </Col>)}
+            </Row>
+          </Card>
+        </Col>
+      </Row> : null}
 
       {activity.type === 'treehole' ? <ChartPanel title="近 7 天投稿趋势" description="按北京时间提交日期统计成功投稿次数">
         <LazyChart type="bar" data={overview?.treehole?.dailySubmissions || []} series={[{ key: 'submissions', name: '投稿次数' }]} emptyText="暂无投稿" />
@@ -1025,7 +1083,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
             </Row>
           ) : null}
 
-          {activity.type === 'treehole' || activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isWinterMeet || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
+          {activity.type === 'treehole' || activity.type === 'safe_driver_quiz_lottery' || activity.type === 'appointment' || activity.type === 'phase_quiz_lottery' || activity.type === 'otsuka_quality_month_quiz' || activity.type === 'material_review_registration' || activity.type === 'artist_call_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isTjrcbPensionManual || isWinterMeet || isAntiFraudBoardGame || isLuckyDraw || isMaotaiCCreateFun ? null : (
             <Row gutter={[16, 16]}>
               <Col xs={24} xl={8}>
                 <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
@@ -1103,7 +1161,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
                 </ChartPanel>
               </Col>
             </Row>
-          ) : activity.type === 'treehole' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isWinterMeet || isAntiFraudBoardGame ? null : (
+          ) : activity.type === 'treehole' || activity.type === 'safe_driver_quiz_lottery' || activity.type === 'nansha_open_mic' || activity.type === 'rider_safety_survey' || isWinterMeet || isAntiFraudBoardGame ? null : (
             <Card className="admin-card">
               <Title level={5}>专项统计</Title>
               <Text type="secondary">当前活动类型暂未接入专项图表，已展示通用统计。</Text>

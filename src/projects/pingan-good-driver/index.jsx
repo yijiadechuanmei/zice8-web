@@ -4,6 +4,7 @@ import { API_BASE_URL, getToken } from '../../shared/api/request'
 import { useWechatAuth } from '../../shared/hooks/useWechatAuth'
 import { useWechatShare } from '../../shared/hooks/useWechatShare'
 import { setDocumentTitle } from '../../shared/utils/documentTitle'
+import { trackPageView } from '../../shared/analytics'
 import { abandonQuiz, answerQuestion, drawPrize, getActivityConfig, getState, startQuiz, submitClaim } from './api'
 import './styles.css'
 
@@ -44,6 +45,10 @@ export default function PinganGoodDriverProject({ routeParams }) {
   }, [])
 
   useEffect(() => { setDocumentTitle(publicConfig?.title) }, [publicConfig?.title])
+
+  useEffect(() => {
+    trackPageView(activityKey, '/pingan-good-driver', { activityType: 'safe_driver_quiz_lottery' })
+  }, [activityKey])
 
   useEffect(() => {
     let active = true
