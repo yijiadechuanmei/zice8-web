@@ -358,12 +358,11 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
 
     if (activity.type === 'safe_driver_quiz_lottery') {
       const quiz = overview?.safeDriverQuiz || {}
-      const estimate = overview?.estimatedAccess || {}
       return [
-        { label: 'PV（高位估算）', value: estimate.pv ?? 0, tooltip: estimate.method, hint: '估算值，非实测' },
-        { label: 'UV（高位估算）', value: estimate.uv ?? 0, tooltip: estimate.method, hint: '估算值，非实测' },
-        { label: '已记录 PV', value: overview?.pv ?? 0, tooltip: '访问埋点上线后的实测次数；历史访问未记录。' },
-        { label: '已记录 UV', value: overview?.uv ?? 0, tooltip: '访问埋点上线后的实测去重访客数；历史访问未记录。' },
+        { label: 'PV', value: overview?.pv ?? 0, tooltip: pvHint },
+        { label: 'UV', value: overview?.uv ?? 0, tooltip: uvHint },
+        { label: '今日 PV', value: overview?.todayPv ?? 0 },
+        { label: '今日 UV', value: overview?.todayUv ?? 0 },
         { label: '参与用户', value: quiz.participantCount ?? 0, tooltip: '至少开始一次答题的去重微信用户数。' },
         { label: '今日参与用户', value: quiz.todayParticipantCount ?? 0 },
         { label: '答题次数', value: quiz.attemptCount ?? 0 },
@@ -698,9 +697,7 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
         ))}
       </Row>
 
-      {activity.type === 'safe_driver_quiz_lottery' ? <Paragraph className="admin-muted">
-        PV/UV 高位估算依据实际答题人数推算，不能用于核对真实访问量；已记录 PV/UV 仅包含埋点上线后的访问。
-      </Paragraph> : activity.type === 'treehole' ? null : <Paragraph className="admin-muted">
+      {activity.type === 'treehole' ? null : <Paragraph className="admin-muted">
         PV：{pvHint} UV：{uvHint}
       </Paragraph>}
 
@@ -714,9 +711,9 @@ export default function ActivityDashboard({ activity, compact = false, phaseScop
           </ChartPanel>
         </Col>
         <Col xs={24} xl={12}>
-          <ChartPanel title="近 7 天实测 PV/UV" description={charts?.access?.message}>
+          <ChartPanel title="近 7 天 PV/UV 趋势" description={charts?.access?.message}>
             {charts?.access?.dataAvailable ? <LazyChart type="line" data={charts.access.pvUvTrend || []} series={[{ key: 'pv', name: 'PV' }, { key: 'uv', name: 'UV' }]} />
-              : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="访问埋点上线后开始累计" />}
+              : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无访问数据" />}
           </ChartPanel>
         </Col>
         <Col xs={24}>
